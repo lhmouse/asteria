@@ -1,0 +1,119 @@
+document ::=
+	statement-list-opt
+
+identifier ::=
+	PCRE([A-Za-z_][0-9A-Za-z_]*)
+literal ::=
+	null-literal | boolean-literal | string-literal | numeric-literal
+null-literal ::=
+	"null"
+boolean-litearl ::=
+	"false" | "true"
+numeric-literal ::=
+	binary-literal | octal-literal | decimal-literal | hexadecimal-literal
+binary-literal ::=
+	PCRE(0b[01]+)
+octal-literal ::=
+	PCRE(0[0-7]*)
+decimal-literal ::=
+	PCRE([1-9][0-9]*([eE][+-]?[0-9]+)?)
+hexadecimal-literal ::=
+	PCRE(0[xX][0-9A-Fa-f]+([pP][0-9]+)?)
+string-literal ::=
+	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+
+identifier-list-opt ::=
+	identifier-list | ""
+identifier-list ::=
+	identifier ( "," identifier-list-opt | "" )
+expression-list-opt ::=
+	expression-list | ""
+expression-list ::=
+	expression ( "," expression-list-opt | "" )
+key-value-list-opt ::=
+	key-value-list | ""
+key-value-list ::=
+	( string-literal | numeric-literal | identifier ) "=" expression ( "," key-value-list-opt | "" )
+
+initializer ::=
+	"[" expression-list-opt "]" | "{" key-value-list-opt "}" | expression
+
+statement-list-opt ::=
+	statement-list | ""
+statement-list ::=
+	statement statement-list-opt
+
+statement ::=
+	variable-definition | constant-definition | function-definition | using-declaration |
+	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
+	try-statement | deferred-function-statement |
+	label-statement | case-label-statement | goto-statement | break-statement | continue-statement | throw-statement | return-statement |
+	block-statement | empty-statement | expression-statement
+
+variable-definition ::=
+	"var" identifier ( "=" initializer | ";" )
+constant-definition ::=
+	"const" identifier ( "=" initializer | ";" )
+function-definition ::=
+	"function" identifier "(" identifier-list-opt ")" block-statement
+using-declaration ::=
+	"using" identifier ";"
+
+if-statement ::=
+	"if" "(" expression ")" block-statement
+else-statement ::=
+	"else" ( if-statement | block-statement )
+do-while-statement ::=
+	"do" block-statement "while" "(" expression ")" ";"
+while-statement ::=
+	"while" "(" expression ")" block-statement
+for-statement ::=
+	"for" "(" statement expression ";" expression ")" block-statement
+foreach-statement ::=
+	"foreach" "(" identifier "," identifier "in" expression ")" block-statement
+switch-statement ::=
+	"switch" "(" expression ")" block-statement
+
+try-statement ::=
+	"try" block-statement "catch" "(" identifier ")" block-statement
+deferred-functio-statement ::=
+	"deferred" "function" "(" ")" block-statement
+
+label-statement ::=
+	"label" identifier ":"
+case-label-statement ::=
+	"case" identifier ":"
+goto-statement ::=
+	"goto" identifier ";"
+break-statement ::=
+	"break" ";"
+continue-statement ::=
+	"continue" ";"
+throw-statement ::=
+	"throw" ( expression-statement | empty-statement )
+return-statement ::=
+	"return" ( expression-statement | empty-statement )
+
+block-statement ::=
+	"{" statement-list-opt "}"
+empty-statement ::=
+	";"
+expression-statement ::=
+	expression ";"
+
+expression ::=
+	subexpression | prefix-expression | infix-or-postfix-expression
+subexpression ::=
+	"(" expression ")"
+prefix-expression ::=
+	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
+infix-or-postfix-expression ::=
+	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer )
+infix-trailer ::=
+	( "+"  | "-"  | "*"  | "/"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
+	  "+=" | "-=" | "*=" | "/=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
+	  "==" | "!=" | "<"  | ">"  | "<="  | ">="  ) expression
+postifix-trailer ::=
+	"++" | "--" | "(" expression-list-opt ")" | "[" expression "]" | "." identifier
+ternary-trailer ::=
+	"?" expression ":" expression
