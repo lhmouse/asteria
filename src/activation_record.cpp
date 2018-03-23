@@ -17,47 +17,45 @@ ActivationRecord::~ActivationRecord(){
 }
 
 bool ActivationRecord::has_object(const std::string &id) const noexcept {
+	bool result = false;
 	const auto it = m_objects.find(id);
-	if(it == m_objects.end()){
-		return false;
+	if(it != m_objects.end()){
+		result = true;
 	}
-	return true;
+	return result;
 }
 std::shared_ptr<const Object> ActivationRecord::get_object(const std::string &id) const noexcept {
+	std::shared_ptr<const Object> object_old;
 	const auto it = m_objects.find(id);
-	if(it == m_objects.end()){
-		return nullptr;
+	if(it != m_objects.end()){
+		object_old = it->second;
 	}
-	return it->second;
+	return object_old;
 }
 std::shared_ptr<Object> ActivationRecord::get_object(const std::string &id) noexcept {
+	std::shared_ptr<Object> object_old;
 	const auto it = m_objects.find(id);
-	if(it == m_objects.end()){
-		return nullptr;
+	if(it != m_objects.end()){
+		object_old = it->second;
 	}
-	return it->second;
+	return object_old;
 }
-std::shared_ptr<Object> ActivationRecord::set_object(const std::string &id, const std::shared_ptr<Object> &object){
-	std::shared_ptr<Object> old_object;
+std::shared_ptr<Object> ActivationRecord::set_object(const std::string &id, const std::shared_ptr<Object> &object_new){
+	std::shared_ptr<Object> object_old;
 	const auto it = m_objects.find(id);
-	if(it == m_objects.end()){
-		if(object){
-			// Inserts the new object.
-			m_objects.emplace(id, object);
-		} else {
-			// No old object found. Nothing to erase.
-		}
-		return old_object;
-	}
-	old_object = std::move(it->second);
-	if(object){
+	if(object_new && (it != m_objects.end())){
 		// Replace the old object with the new one.
-		it->second = object;
-	} else {
+		object_old = std::move(it->second);
+		it->second = object_new;
+	} else if(object_new){
+		// Insert the new object.
+		m_objects.emplace(id, object_new);
+	} else if(it != m_objects.end()){
 		// Erase the old object.
+		object_old = std::move(it->second);
 		m_objects.erase(it);
 	}
-	return old_object;
+	return object_old;
 }
 
 }

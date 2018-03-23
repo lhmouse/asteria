@@ -37,7 +37,7 @@ public:
 	bool has_object(const std::string &id) const noexcept;
 	std::shared_ptr<const Object> get_object(const std::string &id) const noexcept;
 	std::shared_ptr<Object> get_object(const std::string &id) noexcept;
-	std::shared_ptr<Object> set_object(const std::string &id, const std::shared_ptr<Object> &object);
+	std::shared_ptr<Object> set_object(const std::string &id, const std::shared_ptr<Object> &object_new);
 };
 
 }
