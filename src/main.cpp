@@ -3,6 +3,12 @@
 
 #include <iostream>
 
+namespace Asteria {
+void hello();
+}
+
+using namespace Asteria;
+
 int main(){
-	std::cerr <<"hello world!" <<std::endl;
+	hello();
 }

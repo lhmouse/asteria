@@ -2,8 +2,17 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wno-error=unused-parameter	\
 	-Winvalid-pch -Wno-missing-field-initializers -Wwrite-strings -Wsuggest-attribute=noreturn	\
 	-Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas	\
-	-pipe -fPIC -DPIC -std=c++11
-AM_CXXFLAGS = -Wnon-virtual-dtor
+	-pipe -fPIC -DPIC
+AM_CXXFLAGS = -Wnon-virtual-dtor -pedantic -pedantic-errors -std=c++11
+
+%.hpp.gch: %.hpp
+	${CXX} -x c++-header ${DEFS} -I. ${AM_CPPFLAGS} ${CPPFLAGS} ${AM_CXXFLAGS} ${CXXFLAGS} -Wno-error $< -o $@
+
+BUILT_SOURCES =	\
+	asteria/src/precompiled.hpp.gch
+
+CLEANFILES =	\
+	asteria/src/precompiled.hpp.gch
 
 pkginclude_HEADERS =	\
 	asteria/src/parser.hpp
