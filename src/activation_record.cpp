@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "activation_record.hpp"
+#include "misc.hpp"
 
 namespace Asteria {
 

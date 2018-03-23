@@ -25,12 +25,6 @@
 #include <cstdio>
 #include <cctype>
 
-#ifdef ENABLE_DEBUG_LOGS
-#  define DEBUG_PRINTF(...)   (::std::fprintf(stderr, __VA_ARGS__))
-#else
-#  define DEBUG_PRINTF(...)   (-1)
-#endif
-
 namespace Asteria {
 	//
 }
