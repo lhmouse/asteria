@@ -3,12 +3,7 @@
 
 #include <iostream>
 
-namespace Asteria {
-void hello();
-}
-
-using namespace Asteria;
+//using namespace Asteria;
 
 int main(){
-	hello();
 }

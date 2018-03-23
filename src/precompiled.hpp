@@ -15,6 +15,7 @@
 #include <functional>
 #include <iomanip>
 #include <ostream>
+#include <exception>
 #include <memory>
 
 #include <cassert>
@@ -27,7 +28,7 @@
 #ifdef ENABLE_DEBUG_LOGS
 #  define DEBUG_PRINTF(...)   (::std::fprintf(stderr, __VA_ARGS__))
 #else
-#  define DEBUG_PRINTF(...)   ((int)-1)
+#  define DEBUG_PRINTF(...)   (-1)
 #endif
 
 namespace Asteria {

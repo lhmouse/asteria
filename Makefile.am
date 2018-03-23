@@ -15,7 +15,22 @@ CLEANFILES =	\
 	asteria/src/precompiled.hpp.gch
 
 pkginclude_HEADERS =	\
-	asteria/src/parser.hpp
+	asteria/src/fwd.hpp	\
+	asteria/src/activation_record.hpp	\
+	asteria/src/misc.hpp
+
+lib_LTLIBRARIES =	\
+	lib/libasteria.la
+
+lib_libasteria_la_SOURCES =	\
+	asteria/src/activation_record.cpp	\
+	asteria/src/misc.cpp
+
+lib_libasteria_la_LDFLAGS =	\
+	-Wl,--no-undefined -version-info 0:0:0
+
+lib_libasteria_la_LIBADD =	\
+	${AM_LIBS}
 
 bin_PROGRAMS =	\
 	bin/asteria
@@ -25,15 +40,3 @@ bin_asteria_SOURCES =	\
 
 bin_asteria_LDADD =	\
 	lib/libasteria.la
-
-lib_LTLIBRARIES =	\
-	lib/libasteria.la
-
-lib_libasteria_la_SOURCES =	\
-	asteria/src/parser.cpp
-
-lib_libasteria_la_LDFLAGS =	\
-	-Wl,--no-undefined -version-info 0:0:0
-
-lib_libasteria_la_LIBADD =	\
-	${AM_LIBS}
