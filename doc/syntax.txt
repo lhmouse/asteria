@@ -102,11 +102,13 @@ expression-statement ::=
 	expression ";"
 
 expression ::=
-	subexpression | prefix-expression | infix-or-postfix-expression
+	subexpression | prefix-expression | lambda-expression | infix-or-postfix-expression
 subexpression ::=
 	"(" expression ")"
 prefix-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
+lambda-expression ::=
+	"lambda" "(" identifier-list-opt ")" block-statement expression
 infix-or-postfix-expression ::=
 	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer )
 infix-trailer ::=
