@@ -10,14 +10,14 @@
 
 namespace Asteria {
 
-class Object;
+class Variable;
 
 class ActivationRecord {
 private:
 	const std::string m_name;
 	const std::shared_ptr<ActivationRecord> m_parent;
 
-	boost::container::flat_map<std::string, std::shared_ptr<Object>> m_objects;
+	boost::container::flat_map<std::string, std::shared_ptr<Variable>> m_variables;
 
 public:
 	ActivationRecord(std::string name, std::shared_ptr<ActivationRecord> parent);
@@ -34,11 +34,11 @@ public:
 		return m_parent;
 	}
 
-	bool has_object(const std::string &id) const noexcept;
-	std::shared_ptr<const Object> get_object(const std::string &id) const noexcept;
-	std::shared_ptr<Object> get_object(const std::string &id) noexcept;
-	std::shared_ptr<Object> set_object(const std::string &id, const std::shared_ptr<Object> &object_new);
-	void clear_objects() noexcept;
+	bool has_variable(const std::string &id) const noexcept;
+	std::shared_ptr<const Variable> get_variable(const std::string &id) const noexcept;
+	std::shared_ptr<Variable> get_variable(const std::string &id) noexcept;
+	std::shared_ptr<Variable> set_variable(const std::string &id, const std::shared_ptr<Variable> &variable_new);
+	void clear_variables() noexcept;
 };
 
 }

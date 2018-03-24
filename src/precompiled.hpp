@@ -12,17 +12,16 @@
 #include <iterator>
 #include <algorithm>
 #include <utility>
+#include <stdexcept>
 #include <functional>
 #include <iomanip>
-#include <ostream>
-#include <exception>
+#include <sstream>
 #include <memory>
 
 #include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <cstddef>
-#include <cstdio>
 #include <cctype>
 
 namespace Asteria {

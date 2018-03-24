@@ -10,55 +10,55 @@ namespace Asteria {
 ActivationRecord::ActivationRecord(std::string name, std::shared_ptr<ActivationRecord> parent)
 	: m_name(std::move(name)), m_parent(std::move(parent))
 {
-	DEBUG_PRINTF("ActivationRecord constructor: name = %s\n", m_name.c_str());
+	ASTERIA_DEBUG_LOG("ActivationRecord constructor: this = ", this, ", name = ", get_name());
 }
 ActivationRecord::~ActivationRecord(){
-	DEBUG_PRINTF("ActivationRecord destructor: name = %s\n", m_name.c_str());
+	ASTERIA_DEBUG_LOG("ActivationRecord destructor: this = ", this, ", name = ", get_name());
 }
 
-bool ActivationRecord::has_object(const std::string &id) const noexcept {
+bool ActivationRecord::has_variable(const std::string &id) const noexcept {
 	bool result = false;
-	const auto it = m_objects.find(id);
-	if(it != m_objects.end()){
+	const auto it = m_variables.find(id);
+	if(it != m_variables.end()){
 		result = true;
 	}
 	return result;
 }
-std::shared_ptr<const Object> ActivationRecord::get_object(const std::string &id) const noexcept {
-	std::shared_ptr<const Object> object_old;
-	const auto it = m_objects.find(id);
-	if(it != m_objects.end()){
-		object_old = it->second;
+std::shared_ptr<const Variable> ActivationRecord::get_variable(const std::string &id) const noexcept {
+	std::shared_ptr<const Variable> variable_old;
+	const auto it = m_variables.find(id);
+	if(it != m_variables.end()){
+		variable_old = it->second;
 	}
-	return object_old;
+	return variable_old;
 }
-std::shared_ptr<Object> ActivationRecord::get_object(const std::string &id) noexcept {
-	std::shared_ptr<Object> object_old;
-	const auto it = m_objects.find(id);
-	if(it != m_objects.end()){
-		object_old = it->second;
+std::shared_ptr<Variable> ActivationRecord::get_variable(const std::string &id) noexcept {
+	std::shared_ptr<Variable> variable_old;
+	const auto it = m_variables.find(id);
+	if(it != m_variables.end()){
+		variable_old = it->second;
 	}
-	return object_old;
+	return variable_old;
 }
-std::shared_ptr<Object> ActivationRecord::set_object(const std::string &id, const std::shared_ptr<Object> &object_new){
-	std::shared_ptr<Object> object_old;
-	const auto it = m_objects.find(id);
-	if(object_new && (it != m_objects.end())){
-		// Replace the old object with the new one.
-		object_old = std::move(it->second);
-		it->second = object_new;
-	} else if(object_new){
-		// Insert the new object.
-		m_objects.emplace(id, object_new);
-	} else if(it != m_objects.end()){
-		// Erase the old object.
-		object_old = std::move(it->second);
-		m_objects.erase(it);
+std::shared_ptr<Variable> ActivationRecord::set_variable(const std::string &id, const std::shared_ptr<Variable> &variable_new){
+	std::shared_ptr<Variable> variable_old;
+	const auto it = m_variables.find(id);
+	if(variable_new && (it != m_variables.end())){
+		// Replace the old variable with the new one.
+		variable_old = std::move(it->second);
+		it->second = variable_new;
+	} else if(variable_new){
+		// Insert the new variable.
+		m_variables.emplace(id, variable_new);
+	} else if(it != m_variables.end()){
+		// Erase the old variable.
+		variable_old = std::move(it->second);
+		m_variables.erase(it);
 	}
-	return object_old;
+	return variable_old;
 }
-void ActivationRecord::clear_objects() noexcept {
-	m_objects.clear();
+void ActivationRecord::clear_variables() noexcept {
+	m_variables.clear();
 }
 
 }

@@ -9,7 +9,7 @@ _file="$(readlink -e "$1")"
 shift
 
 _cxx="g++"
-_cxxflags="-std=c++11 -O0 -g3 -fPIC"
+_cxxflags="-std=c++11 -O0 -g3 -fPIC -Wall -Wextra -Werror -pedantic -pedantic-errors"
 _ldflags="-L../lib -L../lib/.libs"
 _runpath="../lib/.libs"
 _libs="-lasteria"
