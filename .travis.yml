@@ -11,6 +11,7 @@ addons:
       - checkinstall
 
 install:
+  - "mkdir -p m4"
   - "autoreconf -ifv"
   - "./configure --enable-debug-logs"
   - "make -j$(nproc)"
