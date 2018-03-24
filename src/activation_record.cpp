@@ -57,5 +57,8 @@ std::shared_ptr<Object> ActivationRecord::set_object(const std::string &id, cons
 	}
 	return object_old;
 }
+void ActivationRecord::clear_objects() noexcept {
+	m_objects.clear();
+}
 
 }

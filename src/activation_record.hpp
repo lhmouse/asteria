@@ -14,7 +14,7 @@ class Object;
 
 class ActivationRecord {
 private:
-	const std::string &m_name;
+	const std::string m_name;
 	const std::shared_ptr<ActivationRecord> m_parent;
 
 	boost::container::flat_map<std::string, std::shared_ptr<Object>> m_objects;
@@ -38,6 +38,7 @@ public:
 	std::shared_ptr<const Object> get_object(const std::string &id) const noexcept;
 	std::shared_ptr<Object> get_object(const std::string &id) noexcept;
 	std::shared_ptr<Object> set_object(const std::string &id, const std::shared_ptr<Object> &object_new);
+	void clear_objects() noexcept;
 };
 
 }
