@@ -18,7 +18,8 @@ Logger::~Logger(){
 	//
 }
 
-void write_log_to_stderr(Logger &&logger) noexcept {
+void write_log_to_stderr(Logger &&logger) noexcept
+try {
 	// Prepend the timestamp and write the result to stderr.
 	std::ostringstream oss;
 	::time_t now;
@@ -31,6 +32,8 @@ void write_log_to_stderr(Logger &&logger) noexcept {
 	}
 	oss <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ### " <<logger.get_stream().str() <<'\n';
 	std::cerr <<oss.str() <<std::flush;
+} catch(...){
+	// Swallow any exceptions thrown.
 }
 void throw_runtime_error(Logger &&logger){
 	// Prepend the function name and throw an `std::runtime_error`.
