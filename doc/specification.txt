@@ -15,5 +15,3 @@
 2. Runtime Environments
 
 2.1. Types
-
-2.2. Activation Records

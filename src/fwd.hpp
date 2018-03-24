@@ -6,12 +6,8 @@
 
 namespace Asteria {
 
-class ActivationRecord;
 class Variable;
-
-class Document;
 class Statement;
-
 class Interpreter;
 
 }

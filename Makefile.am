@@ -17,7 +17,6 @@ CLEANFILES =	\
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
 	asteria/src/misc.hpp	\
-	asteria/src/activation_record.hpp	\
 	asteria/src/variable.hpp
 
 lib_LTLIBRARIES =	\
@@ -25,7 +24,6 @@ lib_LTLIBRARIES =	\
 
 lib_libasteria_la_SOURCES =	\
 	asteria/src/misc.cpp	\
-	asteria/src/activation_record.cpp	\
 	asteria/src/variable.cpp
 
 lib_libasteria_la_LDFLAGS =	\
