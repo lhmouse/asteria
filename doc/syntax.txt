@@ -44,45 +44,51 @@ statement-list ::=
 	statement statement-list-opt
 
 statement ::=
-	variable-definition | constant-definition | function-definition | using-declaration |
+	empty-statement |
+	variable-definition | constant-definition | using-declaration | function-definition |
 	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
-	try-statement | deferred-function-statement |
-	label-statement | case-label-statement | goto-statement | break-statement | continue-statement | throw-statement | return-statement |
-	block-statement | empty-statement | expression-statement
+	try-statement | defer-statement |
+	label-statement | case-statement |
+	goto-statement | break-statement | continue-statement | throw-statement | return-statement |
+	compound-statement | expression-statement
+
+empty-statement ::=
+	";"
 
 variable-definition ::=
 	"var" identifier ( "=" initializer | ";" )
 constant-definition ::=
 	"const" identifier ( "=" initializer | ";" )
-function-definition ::=
-	"function" identifier "(" identifier-list-opt ")" block-statement
 using-declaration ::=
-	"using" identifier ";"
+	"using" identifier "as" expression ";"
+function-definition ::=
+	"function" identifier "(" identifier-list-opt ")" compound-statement
 
 if-statement ::=
-	"if" "(" expression ")" block-statement
+	"if" "(" expression ")" compound-statement
 else-statement ::=
-	"else" ( if-statement | block-statement )
+	"else" ( if-statement | compound-statement )
 do-while-statement ::=
-	"do" block-statement "while" "(" expression ")" ";"
+	"do" compound-statement "while" "(" expression ")" ";"
 while-statement ::=
-	"while" "(" expression ")" block-statement
+	"while" "(" expression ")" compound-statement
 for-statement ::=
-	"for" "(" statement expression ";" expression ")" block-statement
+	"for" "(" statement expression ";" expression ")" compound-statement
 foreach-statement ::=
-	"foreach" "(" identifier "," identifier "in" expression ")" block-statement
+	"foreach" "(" identifier "," identifier "in" expression ")" compound-statement
 switch-statement ::=
-	"switch" "(" expression ")" block-statement
+	"switch" "(" expression ")" compound-statement
 
 try-statement ::=
-	"try" block-statement "catch" "(" identifier ")" block-statement
-deferred-functio-statement ::=
-	"deferred" "function" "(" ")" block-statement
+	"try" compound-statement "catch" "(" identifier ")" compound-statement
+defer-statement ::=
+	"defer" compound-statement
 
 label-statement ::=
 	"label" identifier ":"
-case-label-statement ::=
-	"case" identifier ":"
+case-statement ::=
+	"case" ( string-literal | numeric-literal ) ":"
+
 goto-statement ::=
 	"goto" identifier ";"
 break-statement ::=
@@ -94,10 +100,8 @@ throw-statement ::=
 return-statement ::=
 	"return" ( expression-statement | empty-statement )
 
-block-statement ::=
+compound-statement ::=
 	"{" statement-list-opt "}"
-empty-statement ::=
-	";"
 expression-statement ::=
 	expression ";"
 
@@ -108,7 +112,7 @@ subexpression ::=
 prefix-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
 lambda-expression ::=
-	"lambda" "(" identifier-list-opt ")" block-statement expression
+	"lambda" "(" identifier-list-opt ")" compound-statement expression
 infix-or-postfix-expression ::=
 	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer )
 infix-trailer ::=
