@@ -1,0 +1,27 @@
+language: cpp
+
+os: linux
+dist: trusty
+sudo: required
+
+addons:
+  apt:
+    packages:
+      - libboost-dev
+      - checkinstall
+
+install:
+  - "autoreconf -ifv"
+  - "./configure --enable-debug-logs"
+  - "make -j$(nproc)"
+
+script:
+  - "./run_tests.sh"
+
+notifications:
+  irc:
+    channels:
+      - "ircs://chat.freenode.net:6697/#mcfproj"
+    template:
+      - "[ lh_mouse %{repository_slug}#%{commit}] %{result} on %{branch} by %{author} (%{build_url})"
+  email: false
