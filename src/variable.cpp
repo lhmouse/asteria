@@ -96,7 +96,13 @@ void Variable::do_throw_immutable() const {
 }
 void Variable::do_dump_recursive(std::ostream &os, unsigned indent_next, unsigned indent_increment) const {
 	const auto type = get_type();
+	// Dump the type.
 	os <<get_name_of_type(type) <<" ";
+	// Dump attributes. At the moment the only attribute is immutability.
+	if(is_immutable()){
+		os <<"<const> ";
+	}
+	// Dump the value.
 	switch(type){
 	case type_null:
 		os <<'(' <<"null" <<')';
