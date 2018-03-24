@@ -3,8 +3,8 @@
 
 #include "precompiled.hpp"
 #include "misc.hpp"
-#include <iostream>
-#include <time.h> // time_t, time(), localtime_r()
+#include <iostream> // std::cerr
+#include <time.h> // time_t, time(), asctime_r()
 
 namespace Asteria {
 
@@ -19,13 +19,17 @@ Logger::~Logger(){
 }
 
 void write_log_to_stderr(Logger &&logger) noexcept {
- 	// Prepend the timestamp and write the result to stderr.
+	// Prepend the timestamp and write the result to stderr.
 	std::ostringstream oss;
- 	::time_t now;
- 	::time(&now);
- 	struct ::tm result;
-	oss <<"[" <<std::put_time(::localtime_r(&now, &result), "%c") <<"] "
-	    <<logger.get_file() <<":" <<logger.get_line() <<" ### " <<logger.get_stream().str() <<'\n';
+	::time_t now;
+	::time(&now);
+	char time_str[64];
+	::ctime_r(&now, time_str);
+	auto pos = std::strchr(time_str, '\n');
+	if(pos){
+		*pos = 0;
+	}
+	oss <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ### " <<logger.get_stream().str() <<'\n';
 	std::cerr <<oss.str() <<std::flush;
 }
 void throw_runtime_error(Logger &&logger){
