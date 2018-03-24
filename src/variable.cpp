@@ -160,21 +160,21 @@ void Variable::do_dump_recursive(std::ostream &os, unsigned indent_next, unsigne
 	}
 }
 
-std::ostream &operator<<(std::ostream &os, const std::shared_ptr<const Variable> &rhs){
-	if(rhs){
-		rhs->dump(os);
-	} else {
-		os <<"(null pointer)";
-	}
+std::ostream &operator<<(std::ostream &os, const Variable &rhs){
+	rhs.dump(os);
 	return os;
 }
+std::ostream &operator<<(std::ostream &os, const Variable *rhs){
+	return rhs ? (os <<*rhs) : (os <<"(null pointer)");
+}
+std::ostream &operator<<(std::ostream &os, Variable *rhs){
+	return rhs ? (os <<*rhs) : (os <<"(null pointer)");
+}
+std::ostream &operator<<(std::ostream &os, const std::shared_ptr<const Variable> &rhs){
+	return os <<rhs.get();
+}
 std::ostream &operator<<(std::ostream &os, const std::shared_ptr<Variable> &rhs){
-	if(rhs){
-		rhs->dump(os);
-	} else {
-		os <<"(null pointer)";
-	}
-	return os;
+	return os <<rhs.get();
 }
 
 }

@@ -117,6 +117,9 @@ public:
 };
 
 // These functions are for debug purposes only.
+extern std::ostream &operator<<(std::ostream &os, const Variable &rhs);
+extern std::ostream &operator<<(std::ostream &os, const Variable *rhs);
+extern std::ostream &operator<<(std::ostream &os, Variable *rhs);
 extern std::ostream &operator<<(std::ostream &os, const std::shared_ptr<const Variable> &rhs);
 extern std::ostream &operator<<(std::ostream &os, const std::shared_ptr<Variable> &rhs);
 
