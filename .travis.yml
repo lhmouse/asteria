@@ -17,7 +17,7 @@ install:
   - "make -j$(nproc)"
 
 script:
-  - "bin/asteria </dev/null"
+  - "./bin/asteria </dev/null"
   - "./run_tests.sh"
 
 notifications:
