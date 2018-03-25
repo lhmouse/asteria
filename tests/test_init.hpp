@@ -6,11 +6,13 @@
 
 #include "../src/precompiled.hpp"
 #include "../src/fwd.hpp"
+#include <iostream>
 
 #define ASTERIA_TEST_CHECK(expr_)	\
-	((void)((expr_) ? 1 :	\
-		(::std::fprintf(stderr, "Test check failed: %s\n  File: %s\n  Line: %lu\n",	\
-			#expr_, __FILE__, (unsigned long)__LINE__), ::std::abort(), 1)	\
-		))
+	((void)((expr_) ? 1 : ((::std::cerr	\
+		<<"ASTERIA_TEST_CHECK() failed: " <<#expr_ <<'\n'	\
+		<<"  File: " <<__FILE__ <<'\n'	\
+		<<"  Line: " <<__LINE__ <<'\n'	\
+		<< ::std::flush), ::std::terminate(), 0)))
 
 #endif
