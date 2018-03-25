@@ -8,7 +8,7 @@ using namespace Asteria;
 
 int main(){
 	Insertable_ostream os;
-	os.exceptions(std::ios_base::failbit | std::ios_base::eofbit);
+	os.exceptions(std::ios_base::failbit | std::ios_base::badbit | std::ios_base::eofbit);
 
 	os <<"hello" <<42 <<"world" <<std::boolalpha <<true;
 	ASTERIA_TEST_CHECK(os.get_string() == "hello42worldtrue");
