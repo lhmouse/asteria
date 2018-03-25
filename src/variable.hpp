@@ -116,7 +116,7 @@ public:
 	}
 };
 
-// These functions are for debug purposes only.
+// These functions are for debugring purposes only.
 extern std::ostream &operator<<(std::ostream &os, const Variable &rhs);
 extern std::ostream &operator<<(std::ostream &os, const Variable *rhs);
 extern std::ostream &operator<<(std::ostream &os, Variable *rhs);

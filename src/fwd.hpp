@@ -8,6 +8,7 @@ namespace Asteria {
 
 class Variable;
 class Statement;
+class Expression;
 class Interpreter;
 
 }
