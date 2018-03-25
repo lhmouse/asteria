@@ -31,6 +31,6 @@ int main(){
 	obj.emplace("third", std::move(third));
 	obj.emplace("world", std::make_shared<Variable>(std::string("world 这里有中文"), true));
 	auto root = std::make_shared<Variable>(std::move(obj), false);
-	std::cerr <<root <<std::endl;
+	std::cerr <<*root <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good byte: ", 43);
 }

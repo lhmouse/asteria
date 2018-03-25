@@ -87,4 +87,11 @@ __attribute__((__noreturn__)) extern void throw_runtime_error(Logger &&logger);
 
 #define ASTERIA_THROW(...)          (::Asteria::throw_runtime_error(::std::move((::Asteria::Logger(__FILE__, __LINE__, __PRETTY_FUNCTION__), __VA_ARGS__))))
 
+namespace Asteria {
+
+extern void apply_indent(std::ostream &os, unsigned indent);
+extern void quote_string(std::ostream &os, const std::string &str);
+
+}
+
 #endif

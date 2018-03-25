@@ -21,9 +21,15 @@ extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::c
 
 namespace Asteria {
 
-using Array    = boost::container::deque<std::shared_ptr<Variable>>;
-using Object   = boost::container::flat_map<std::string, std::shared_ptr<Variable>>;
-using Function = std::function<std::shared_ptr<Variable> (boost::container::deque<std::shared_ptr<Variable>> &&)>;
+using Null      = std::nullptr_t;
+using Boolean   = bool;
+using Integer   = std::int64_t;
+using Double    = double;
+using String    = std::string;
+using Opaque    = std::shared_ptr<void>;
+using Array     = boost::container::deque<std::shared_ptr<Variable>>;
+using Object    = boost::container::flat_map<std::string, std::shared_ptr<Variable>>;
+using Function  = std::function<std::shared_ptr<Variable> (boost::container::deque<std::shared_ptr<Variable>> &&)>;
 
 class Variable {
 public:
@@ -39,30 +45,17 @@ public:
 		type_function  = 8,
 	};
 
-	using Type_null      = std::nullptr_t;
-	using Type_boolean   = bool;
-	using Type_integer   = std::int64_t;
-	using Type_double    = double;
-	using Type_string    = std::string;
-	using Type_opaque    = std::shared_ptr<void>;
-	using Type_array     = Array;
-	using Type_object    = Object;
-	using Type_function  = Function;
-
-public:
-	static const char *get_name_of_type(Type type) noexcept;
-
 private:
 	// There are so many types...
-	boost::variant< Type_null        // 0
-	              , Type_boolean     // 1
-	              , Type_integer     // 2
-	              , Type_double      // 3
-	              , Type_string      // 4
-	              , Type_opaque      // 5
-	              , Type_array       // 6
-	              , Type_object      // 7
-	              , Type_function    // 8
+	boost::variant< Null        // 0
+	              , Boolean     // 1
+	              , Integer     // 2
+	              , Double      // 3
+	              , String      // 4
+	              , Opaque      // 5
+	              , Array       // 6
+	              , Object      // 7
+	              , Function    // 8
 		> m_variant;
 	// Am I constant ?
 	bool m_immutable;
@@ -79,14 +72,10 @@ public:
 
 private:
 	__attribute__((__noreturn__)) void do_throw_immutable() const;
-	void do_dump_recursive(std::ostream &os, unsigned indent_next, unsigned indent_increment) const;
 
 public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
-	}
-	const char *get_type_name() const noexcept {
-		return get_name_of_type(get_type());
 	}
 	template<typename ValueT>
 	const ValueT &get() const {
@@ -110,18 +99,17 @@ public:
 	void set_immutable(bool immutable = true) noexcept {
 		m_immutable = immutable;
 	}
-
-	void dump(std::ostream &os, unsigned indent_increment = 2) const {
-		do_dump_recursive(os, 0, indent_increment);
-	}
 };
 
-// These functions are for debugring purposes only.
+// These functions are for debugging purposes only.
+
+extern void dump_with_indent(std::ostream &os, const Array &array, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Object &object, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Variable &variable, unsigned indent_next, unsigned indent_increment);
+
+extern std::ostream &operator<<(std::ostream &os, const Array &rhs);
+extern std::ostream &operator<<(std::ostream &os, const Object &rhs);
 extern std::ostream &operator<<(std::ostream &os, const Variable &rhs);
-extern std::ostream &operator<<(std::ostream &os, const Variable *rhs);
-extern std::ostream &operator<<(std::ostream &os, Variable *rhs);
-extern std::ostream &operator<<(std::ostream &os, const std::shared_ptr<const Variable> &rhs);
-extern std::ostream &operator<<(std::ostream &os, const std::shared_ptr<Variable> &rhs);
 
 }
 
