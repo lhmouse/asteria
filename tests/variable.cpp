@@ -46,19 +46,17 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_opaque);
 	ASTERIA_TEST_CHECK(var->get<Opaque>() == opaque);
 
-	Array array({
-		std::make_shared<Variable>(true, true),
-		std::make_shared<Variable>(std::string("world"), true),
-	});
+	Array array;
+	array.emplace_back(std::make_shared<Variable>(true, true));
+	array.emplace_back(std::make_shared<Variable>(std::string("world"), true));
 	var->set(std::move(array));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
 
-	Object object({
-		std::make_pair("one", std::make_shared<Variable>(true, true)),
-		std::make_pair("two", std::make_shared<Variable>(std::string("world"), true)),
-	});
+	Object object;
+	object.emplace("one", std::make_shared<Variable>(true, true));
+	object.emplace("two", std::make_shared<Variable>(std::string("world"), true));
 	var->set(std::move(object));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
 	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
@@ -71,9 +69,8 @@ int main(){
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	Array parameters({
-		std::make_shared<Variable>(std::int64_t(12), true),
-		std::make_shared<Variable>(std::int64_t(15), true),
-	});
-	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(parameters))->get<Integer>() == 180);
+	array.clear();
+	array.emplace_back(std::make_shared<Variable>(std::int64_t(12), true));
+	array.emplace_back(std::make_shared<Variable>(std::int64_t(15), true));
+	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(array))->get<Integer>() == 180);
 }
