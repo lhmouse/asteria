@@ -16,10 +16,11 @@ _libs="-lasteria"
 _output="test.out~"
 _errlog="stderr.log~"
 
-printf '\e[33mRunning: \e[0m%s  ' "${_file}" >&2
+printf '\e[33mRunning: \e[0m%s  ' "${_file}"
 if ! ("${_cxx}" ${_cxxflags} ${_ldflags} "$_file" ${_libs} -o "${_output}" $* && LD_LIBRARY_PATH="${_runpath}" "./${_output}") 2>"${_errlog}"; then
-	printf '\e[31;1mFAILED\e[0m\n' >&2
+	printf '\e[31;1mFAILED\e[0m\n'
 	cat "${_errlog}" >&2
 	exit 1
 fi
-printf '\e[32;1mPASSED\e[0m\n' >&2
+printf '\e[32;1mPASSED\e[0m\n'
+cat "${_errlog}" >&2
