@@ -4,48 +4,17 @@
 #ifndef ASTERIA_MISC_HPP_
 #define ASTERIA_MISC_HPP_
 
-#include <string>
-#include <ostream>
-#include <cstddef>
+#include "insertable_ostream.hpp"
 
 namespace Asteria {
 
-class Logger_streambuf : public std::streambuf {
-private:
-	std::string m_str;
-	std::size_t m_ins = 0;
-
-public:
-	Logger_streambuf() noexcept;
-	~Logger_streambuf();
-
-protected:
-	std::streamsize xsputn(const std::streambuf::char_type *s, std::streamsize n) override;
-	std::streambuf::int_type overflow(std::streambuf::int_type c) override;
-
-public:
-	const std::string &get_str() const noexcept {
-		return m_str;
-	}
-	std::size_t get_ins() const noexcept {
-		return m_ins;
-	}
-	void set_string(std::string str) noexcept {
-		m_str = std::move(str);
-		m_ins = m_str.size();
-	}
-	void set_ins(std::size_t ins) noexcept {
-		m_ins = ins;
-	}
-};
-
-class Logger : public std::ostream {
+class Logger {
 private:
 	const char *const m_file;
 	const unsigned long m_line;
 	const char *const m_func;
 
-	Logger_streambuf m_buf;
+	Insertable_ostream m_stream;
 
 public:
 	Logger(const char *file, unsigned long line, const char *func) noexcept;
@@ -53,6 +22,28 @@ public:
 
 	Logger(const Logger &) = delete;
 	Logger &operator=(const Logger &) = delete;
+
+private:
+	template<typename ValueT>
+	void do_put(const ValueT &value){
+	    m_stream <<value;
+	}
+	void do_put(bool value);
+	void do_put(char value);
+	void do_put(signed char value);
+	void do_put(unsigned char value);
+	void do_put(short value);
+	void do_put(unsigned short value);
+	void do_put(int value);
+	void do_put(unsigned value);
+	void do_put(long value);
+	void do_put(unsigned long value);
+	void do_put(long long value);
+	void do_put(unsigned long long value);
+	void do_put(const char *value);
+	void do_put(const signed char *value);
+	void do_put(const unsigned char *value);
+	void do_put(const void *value);
 
 public:
 	const char *get_file() const noexcept {
@@ -65,17 +56,18 @@ public:
 		return m_func;
 	}
 
-	const Logger_streambuf &get_buf() const noexcept {
-		return m_buf;
+	const Insertable_ostream &get_stream() const noexcept {
+		return m_stream;
 	}
-	Logger_streambuf &get_buf() noexcept {
-		return m_buf;
+	Insertable_ostream &get_stream() noexcept {
+		return m_stream;
 	}
 
+public:
 	template<typename ValueT>
 	Logger &operator,(const ValueT &value) noexcept
 	try {
-		*this <<value;
+		do_put(value);
 		return *this;
 	} catch(...){
 		return *this;

@@ -16,6 +16,7 @@ CLEANFILES =	\
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
+	asteria/src/insertable_ostream.hpp	\
 	asteria/src/misc.hpp	\
 	asteria/src/variable.hpp	\
 	asteria/src/statement.hpp
@@ -25,6 +26,7 @@ lib_LTLIBRARIES =	\
 
 lib_libasteria_la_SOURCES =	\
 	asteria/src/misc.cpp	\
+	asteria/src/insertable_ostream.cpp	\
 	asteria/src/variable.cpp	\
 	asteria/src/statement.cpp
 

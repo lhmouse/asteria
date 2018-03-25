@@ -8,42 +8,62 @@
 
 namespace Asteria {
 
-Logger_streambuf::Logger_streambuf() noexcept
-	: std::streambuf()
-{
-	try {
-		m_str.reserve(1023);
-	} catch(...){
-		// Allocation failure doesn't matter here.
-	}
-}
-Logger_streambuf::~Logger_streambuf(){
-	//
-}
-
-std::streamsize Logger_streambuf::xsputn(const std::streambuf::char_type *s, std::streamsize n){
-	const auto n_put = static_cast<std::size_t>(std::min<std::streamsize>(n, PTRDIFF_MAX));
-	m_str.insert(m_ins, s, n_put);
-	m_ins += n_put;
-	return static_cast<std::streamsize>(n_put);
-}
-std::streambuf::int_type Logger_streambuf::overflow(std::streambuf::int_type c){
-	if(traits_type::eq_int_type(c, traits_type::eof())){
-		return traits_type::not_eof(c);
-	}
-	m_str.insert(m_ins, 1, traits_type::to_char_type(c));
-	m_ins += 1;
-	return c;
-}
-
 Logger::Logger(const char *file, unsigned long line, const char *func) noexcept
-	: std::ostream(&m_buf)
-	, m_file(file), m_line(line), m_func(func)
+	: m_file(file), m_line(line), m_func(func)
 {
-	//
+	m_stream <<std::boolalpha;
 }
 Logger::~Logger(){
 	//
+}
+
+void Logger::do_put(bool value){
+	m_stream <<value;
+}
+void Logger::do_put(char value){
+	m_stream <<value;
+}
+void Logger::do_put(signed char value){
+	m_stream <<static_cast<int>(value);
+}
+void Logger::do_put(unsigned char value){
+	m_stream <<static_cast<unsigned>(value);
+}
+void Logger::do_put(short value){
+	m_stream <<static_cast<int>(value);
+}
+void Logger::do_put(unsigned short value){
+	m_stream <<static_cast<unsigned>(value);
+}
+void Logger::do_put(int value){
+	m_stream <<value;
+}
+void Logger::do_put(unsigned value){
+	m_stream <<value;
+}
+void Logger::do_put(long value){
+	m_stream <<value;
+}
+void Logger::do_put(unsigned long value){
+	m_stream <<value;
+}
+void Logger::do_put(long long value){
+	m_stream <<value;
+}
+void Logger::do_put(unsigned long long value){
+	m_stream <<value;
+}
+void Logger::do_put(const char *value){
+	m_stream <<value;
+}
+void Logger::do_put(const signed char *value){
+	m_stream <<static_cast<const void *>(value);
+}
+void Logger::do_put(const unsigned char *value){
+	m_stream <<static_cast<const void *>(value);
+}
+void Logger::do_put(const void *value){
+	m_stream <<value;
 }
 
 void write_log_to_stderr(Logger &&logger) noexcept
@@ -54,20 +74,20 @@ try {
 	char time_str[26];
 	::ctime_r(&now, time_str);
 	time_str[24] = 0;
-	auto &buf = logger.get_buf();
-	logger <<'\n';
-	buf.set_ins(0);
-	logger <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ##: ";
-	std::cerr <<buf.get_str() <<std::flush;
+	auto &stream = logger.get_stream();
+	stream <<'\n';
+	stream.set_caret(0);
+	stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ##: ";
+	std::cerr <<stream.get_string() <<std::flush;
 } catch(...){
 	// Swallow any exceptions thrown.
 }
 void throw_runtime_error(Logger &&logger){
 	// Prepend the function name and throw an `std::runtime_error`.
-	auto &buf = logger.get_buf();
-	buf.set_ins(0);
-	logger <<logger.get_func() <<": ";
-	throw std::runtime_error(buf.get_str());
+	auto &stream = logger.get_stream();
+	stream.set_caret(0);
+	stream <<logger.get_func() <<": ";
+	throw std::runtime_error(stream.get_string());
 }
 
 }

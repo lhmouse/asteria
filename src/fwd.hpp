@@ -6,6 +6,10 @@
 
 namespace Asteria {
 
+class Insertable_streambuf;
+class Insertable_ostream;
+class Logger;
+
 class Variable;
 class Statement;
 class Expression;
