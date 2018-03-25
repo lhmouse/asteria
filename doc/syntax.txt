@@ -44,7 +44,7 @@ statement-list ::=
 	statement statement-list-opt
 
 statement ::=
-	empty-statement |
+	null-statement |
 	variable-definition | constant-definition | using-declaration | function-definition |
 	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
 	try-statement | defer-statement |
@@ -52,7 +52,7 @@ statement ::=
 	goto-statement | break-statement | continue-statement | throw-statement | return-statement |
 	compound-statement | expression-statement
 
-empty-statement ::=
+null-statement ::=
 	";"
 
 variable-definition ::=
@@ -96,9 +96,9 @@ break-statement ::=
 continue-statement ::=
 	"continue" ";"
 throw-statement ::=
-	"throw" ( expression-statement | empty-statement )
+	"throw" ( expression-statement | null-statement )
 return-statement ::=
-	"return" ( expression-statement | empty-statement )
+	"return" ( expression-statement | null-statement )
 
 compound-statement ::=
 	"{" statement-list-opt "}"
