@@ -10,10 +10,15 @@ addons:
       - libboost-dev
       - checkinstall
 
+matrix:
+  include:
+    - env: "_options='--enable-debug-logs'"
+    - env: "_options=''"
+
 install:
   - "mkdir -p m4"
   - "autoreconf -ifv"
-  - "./configure --enable-debug-logs"
+  - "./configure ${_options}"
   - "make -j$(nproc)"
 
 script:
