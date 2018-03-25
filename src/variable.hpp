@@ -33,7 +33,7 @@ using Function  = std::function<std::shared_ptr<Variable> (boost::container::deq
 
 class Variable {
 public:
-	enum Type : unsigned char {
+	enum Type : unsigned {
 		type_null      = 0,
 		type_boolean   = 1,
 		type_integer   = 2,
