@@ -20,12 +20,12 @@ int main(){
 		var->set(std::int64_t(42));
 		ASTERIA_TEST_CHECK(false);
 	} catch(std::runtime_error &e){
-		//
+		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
 	}
 	try {
 		var->get<String>();
 	} catch(std::exception &e){
-		//
+		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
 	}
 	var->set_immutable(false);
 	ASTERIA_TEST_CHECK(var->is_immutable() == false);
