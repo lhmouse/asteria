@@ -16,7 +16,7 @@ Variable::~Variable(){
 }
 
 void Variable::do_throw_immutable() const {
-	ASTERIA_THROW(__FUNCTION__, ": attempting to modify a constant: this = ", this);
+	ASTERIA_THROW("Attempting to modify a constant: ", *this);
 }
 
 // Non-member functions.
