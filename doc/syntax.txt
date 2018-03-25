@@ -116,9 +116,9 @@ lambda-expression ::=
 infix-or-postfix-expression ::=
 	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer )
 infix-trailer ::=
-	( "+"  | "-"  | "*"  | "/"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
-	  "+=" | "-=" | "*=" | "/=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
-	  "==" | "!=" | "<"  | ">"  | "<="  | ">="  ) expression
+	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
+	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
+	  "==" | "!=" | "<" | ">" | "<=" | ">=" ) expression
 postifix-trailer ::=
 	"++" | "--" | "(" expression-list-opt ")" | "[" expression "]" | "." identifier
 ternary-trailer ::=
