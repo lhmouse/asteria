@@ -103,9 +103,9 @@ public:
 
 // These functions are for debugging purposes only.
 
-extern void dump_with_indent(std::ostream &os, const Array &array, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Object &object, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Variable &variable, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Array &array, bool values_only, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Object &object, bool values_only, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Variable &variable, bool values_only, unsigned indent_next, unsigned indent_increment);
 
 extern std::ostream &operator<<(std::ostream &os, const Array &rhs);
 extern std::ostream &operator<<(std::ostream &os, const Object &rhs);
