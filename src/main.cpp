@@ -9,6 +9,7 @@
 using namespace Asteria;
 
 int main(){
+	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	Array arr;
 	arr.emplace_back(std::make_shared<Variable>(nullptr, true));
 	arr.emplace_back(std::make_shared<Variable>(true, false));
@@ -31,4 +32,5 @@ int main(){
 	obj.emplace("world", std::make_shared<Variable>(std::string("world 这里有中文"), true));
 	auto root = std::make_shared<Variable>(std::move(obj), false);
 	std::cerr <<root <<std::endl;
+	ASTERIA_DEBUG_LOG("<--- ", "good byte: ", 43);
 }

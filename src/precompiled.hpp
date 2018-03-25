@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <functional>
 #include <iomanip>
-#include <sstream>
+#include <ostream>
 #include <memory>
 
 #include <cassert>

@@ -4,18 +4,48 @@
 #ifndef ASTERIA_MISC_HPP_
 #define ASTERIA_MISC_HPP_
 
-#include <sstream>
+#include <string>
+#include <ostream>
 #include <cstddef>
 
 namespace Asteria {
 
-class Logger {
+class Logger_streambuf : public std::streambuf {
+private:
+	std::string m_str;
+	std::size_t m_ins = 0;
+
+public:
+	Logger_streambuf() noexcept;
+	~Logger_streambuf();
+
+protected:
+	std::streamsize xsputn(const std::streambuf::char_type *s, std::streamsize n) override;
+	std::streambuf::int_type overflow(std::streambuf::int_type c) override;
+
+public:
+	const std::string &get_str() const noexcept {
+		return m_str;
+	}
+	std::size_t get_ins() const noexcept {
+		return m_ins;
+	}
+	void set_string(std::string str) noexcept {
+		m_str = std::move(str);
+		m_ins = m_str.size();
+	}
+	void set_ins(std::size_t ins) noexcept {
+		m_ins = ins;
+	}
+};
+
+class Logger : public std::ostream {
 private:
 	const char *const m_file;
 	const unsigned long m_line;
 	const char *const m_func;
 
-	std::ostringstream m_stream;
+	Logger_streambuf m_buf;
 
 public:
 	Logger(const char *file, unsigned long line, const char *func) noexcept;
@@ -25,27 +55,27 @@ public:
 	Logger &operator=(const Logger &) = delete;
 
 public:
-	const char *get_file() const {
+	const char *get_file() const noexcept {
 		return m_file;
 	}
-	unsigned long get_line() const {
+	unsigned long get_line() const noexcept {
 		return m_line;
 	}
-	const char *get_func() const {
+	const char *get_func() const noexcept {
 		return m_func;
 	}
 
-	const std::ostringstream &get_stream() const {
-		return m_stream;
+	const Logger_streambuf &get_buf() const noexcept {
+		return m_buf;
 	}
-	std::ostringstream &get_stream(){
-		return m_stream;
+	Logger_streambuf &get_buf() noexcept {
+		return m_buf;
 	}
 
 	template<typename ValueT>
 	Logger &operator,(const ValueT &value) noexcept
 	try {
-		m_stream <<value;
+		*this <<value;
 		return *this;
 	} catch(...){
 		return *this;
