@@ -28,6 +28,7 @@ int main(){
 		//
 	}
 	var->set_immutable(false);
+	ASTERIA_TEST_CHECK(var->is_immutable() == false);
 
 	var->set(std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
