@@ -56,8 +56,8 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
 
 	Object object = {
-		{ "one", std::make_shared<Variable>(true, true) },
-		{ "two", std::make_shared<Variable>(std::string("world"), true) },
+		std::make_pair("one", std::make_shared<Variable>(true, true)),
+		std::make_pair("two", std::make_shared<Variable>(std::string("world"), true)),
 	};
 	var->set(std::move(object));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
