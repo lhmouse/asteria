@@ -28,26 +28,26 @@ using Function = std::function<std::shared_ptr<Variable> (boost::container::dequ
 class Variable {
 public:
 	enum Type : unsigned char {
-		type_null        = 0,
-		type_boolean     = 1,
-		type_integer     = 2,
-		type_double      = 3,
-		type_string      = 4,
-		type_opaque      = 5,
-		type_array       = 6,
-		type_object      = 7,
-		type_function    = 8,
+		type_null      = 0,
+		type_boolean   = 1,
+		type_integer   = 2,
+		type_double    = 3,
+		type_string    = 4,
+		type_opaque    = 5,
+		type_array     = 6,
+		type_object    = 7,
+		type_function  = 8,
 	};
 
-	using Type_null     = std::nullptr_t;
-	using Type_boolean  = bool;
-	using Type_integer  = std::int64_t;
-	using Type_double   = double;
-	using Type_string   = std::string;
-	using Type_opaque   = std::shared_ptr<void>;
-	using Type_array    = Array;
-	using Type_object   = Object;
-	using Type_function = Function;
+	using Type_null      = std::nullptr_t;
+	using Type_boolean   = bool;
+	using Type_integer   = std::int64_t;
+	using Type_double    = double;
+	using Type_string    = std::string;
+	using Type_opaque    = std::shared_ptr<void>;
+	using Type_array     = Array;
+	using Type_object    = Object;
+	using Type_function  = Function;
 
 public:
 	static const char *get_name_of_type(Type type) noexcept;
