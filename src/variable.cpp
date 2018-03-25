@@ -23,13 +23,13 @@ void Variable::do_throw_immutable() const {
 
 void dump_with_indent(std::ostream &os, const Array &array, bool values_only, unsigned indent_next, unsigned indent_increment){
 	os <<'[';
+	for(const auto &ptr : array){
+		os <<std::endl;
+		apply_indent(os, indent_next + indent_increment);
+		dump_with_indent(os, *ptr, values_only, indent_next + indent_increment, indent_increment);
+		os <<',';
+	}
 	if(!array.empty()){
-		for(const auto &ptr : array){
-			os <<std::endl;
-			apply_indent(os, indent_next + indent_increment);
-			dump_with_indent(os, *ptr, values_only, indent_next + indent_increment, indent_increment);
-			os <<',';
-		}
 		os <<std::endl;
 		apply_indent(os, indent_next);
 	}
@@ -37,15 +37,15 @@ void dump_with_indent(std::ostream &os, const Array &array, bool values_only, un
 }
 void dump_with_indent(std::ostream &os, const Object &object, bool values_only, unsigned indent_next, unsigned indent_increment){
 	os <<'{';
+	for(const auto &pair : object){
+		os <<std::endl;
+		apply_indent(os, indent_next + indent_increment);
+		quote_string(os, pair.first);
+		os <<" = ";
+		dump_with_indent(os, *pair.second, values_only, indent_next + indent_increment, indent_increment);
+		os <<',';
+	}
 	if(!object.empty()){
-		for(const auto &pair : object){
-			os <<std::endl;
-			apply_indent(os, indent_next + indent_increment);
-			quote_string(os, pair.first);
-			os <<" = ";
-			dump_with_indent(os, *pair.second, values_only, indent_next + indent_increment, indent_increment);
-			os <<',';
-		}
 		os <<std::endl;
 		apply_indent(os, indent_next);
 	}
