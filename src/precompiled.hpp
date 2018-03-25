@@ -17,11 +17,13 @@
 #include <iomanip>
 #include <ostream>
 #include <memory>
+#include <tuple>
 
 #include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <cstddef>
+#include <climits>
 #include <cctype>
 
 namespace Asteria {
