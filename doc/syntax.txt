@@ -103,10 +103,12 @@ break-statement ::=
 continue-statement ::=
 	"continue" ";"
 throw-statement ::=
-	"throw" ( expression-statement | null-statement )
+	"throw" expression-opt ";"
 return-statement ::=
-	"return" ( expression-statement | null-statement )
+	"return" expression-opt ";"
 
+expression-opt ::=
+	expression | ""
 expression ::=
 	prefix-expression | ( id-expression | lambda-expression | nested-expression ) expression-trailer-opt
 prefix-expression ::=
@@ -124,7 +126,7 @@ infix-trailer ::=
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
 	  "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" ) expression
 ternary-trailer ::=
-	"?" ( expression | "" ) ":" expression
+	"?" expression-opt ":" expression
 postfix-trailer ::=
 	( postifix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer ) expression-trailer-opt
 postifix-operator-trailer ::=
