@@ -35,7 +35,7 @@ using String    = std::string;
 using Opaque    = std::shared_ptr<void>;
 using Array     = boost::container::deque<Asteria::Value_ptr<Variable>>;
 using Object    = boost::container::flat_map<std::string, Asteria::Value_ptr<Variable>>;
-using Function  = std::function<Asteria::Value_ptr<Variable> (boost::container::deque<Asteria::Value_ptr<Variable>> &&)>;
+using Function  = std::function<Asteria::Value_ptr<Variable> (Array &&)>;
 
 using Statement_list  = boost::container::deque<Asteria::Value_ptr<Statement>>;
 using Expression_list = boost::container::deque<Asteria::Value_ptr<Expression>>;
@@ -45,7 +45,7 @@ using Key_value_list  = boost::container::flat_map<std::string, Asteria::Value_p
 
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-extern template class std::function<Asteria::Value_ptr<Asteria::Variable> (boost::container::deque<Asteria::Value_ptr<Asteria::Variable>> &&)>;
+extern template class std::function<Asteria::Value_ptr<Asteria::Variable> (Asteria::Array &&)>;
 
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Statement>>;
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Expression>>;
