@@ -6,42 +6,94 @@
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
-#include <type_traits> // std::enable_if, std::decay, std::is_base_of
 
 namespace Asteria {
 
 class Expression {
 public:
-	enum Category : unsigned {
-		category_subexpression                = 0,
-		category_prefix_expression            = 1,
-		category_lambda_expression            = 2,
-		category_infix_or_postfix_expression  = 3,
+	enum Operator : unsigned {
+		operator_add     =  0,  // +
+		operator_sub     =  1,  // -
+		operator_not     =  2,  // ~
+		operator_not_l   =  3,  // !
+		operator_inc     =  4,  // ++
+		operator_dec     =  5,  // --
+		operator_mul     =  6,  // *
+		operator_div     =  7,  // /
+		operator_mod     =  8,  // %
+		operator_sll     =  9,  // <<
+		operator_srl     = 10,  // >>>
+		operator_sra     = 11,  // >>
+		operator_and     = 12,  // &
+		operator_or      = 13,  // |
+		operator_xor     = 14,  // ^
+		operator_and_l   = 15,  // &&
+		operator_or_l    = 16,  // ||
+		operator_add_a   = 17,  // +=
+		operator_sub_a   = 18,  // -=
+		operator_mul_a   = 19,  // *=
+		operator_div_a   = 20,  // /=
+		operator_mod_a   = 21,  // %=
+		operator_sll_a   = 22,  // <<=
+		operator_srl_a   = 23,  // >>>=
+		operator_sra_a   = 24,  // >>=
+		operator_and_a   = 25,  // &=
+		operator_or_a    = 26,  // |=
+		operator_xor_a   = 27,  // ^=
+		operator_and_la  = 28,  // &&=
+		operator_or_la   = 29,  // ||=
+		operator_assign  = 30,  // =
+		operator_eq      = 31,  // ==
+		operator_ne      = 32,  // !=
+		operator_lt      = 33,  // <
+		operator_gt      = 34,  // >
+		operator_lte     = 35,  // <=
+		operator_gte     = 36,  // >=
 	};
 
-	using Types = Type_tuple< Expression_list        // 0
-	                        , Key_value_list         // 1
-	                        , Value_ptr<Expression>  // 2
+	struct Trailer;
+	class Result;
+
+	enum Category : unsigned {
+		category_prefix_expression              = 0,
+		category_id_expression_with_trailer     = 1,
+		category_lambda_expression_with_trailer = 2,
+		category_nested_expression_with_trailer = 3,
+	};
+	struct Prefix_expression {
+		Operator which;
+		Value_ptr<Expression> next;
+	};
+	struct Id_expression_with_trailer {
+		boost::variant<std::string, Value_ptr<Initializer>> id_or_literal;
+		Value_ptr<Trailer> trailer_opt;
+	};
+	struct Lambda_expression_with_trailer {
+		boost::container::deque<std::string> parameters;
+		Value_ptr_deque<Statement> body;
+		Value_ptr<Trailer> trailer_opt;
+	};
+	struct Nested_expression {
+		Value_ptr<Expression> nested;
+		Value_ptr<Trailer> trailer_opt;
+	};
+	using Categories = Type_tuple< Prefix_expression               // 0
+	                             , Id_expression_with_trailer      // 1
+	                             , Lambda_expression_with_trailer  // 2
+	                             , Nested_expression               // 3
 		>;
 
 private:
-	Types::rebound_variant m_variant;
+	Categories::rebound_variant m_value;
 
 public:
-	Expression()
-		: m_variant()
-	{ }
-	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression, ValueT)>
 	Expression(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+		: m_value(std::forward<ValueT>(value))
 	{ }
 	~Expression();
 
 public:
-	Category get_category() const noexcept {
-		return static_cast<Category>(m_variant.which());
-	}
-
 	Value_ptr<Variable> evaluate() const;
 };
 
