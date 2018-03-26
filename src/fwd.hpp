@@ -6,8 +6,9 @@
 
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
+#include <iosfwd> // std::ostream
 #include <memory> // std::shared_ptr
-#include <string>
+#include <string> // std::string
 #include <functional> // std::function
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t

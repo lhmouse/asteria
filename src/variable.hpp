@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
-#include <iosfwd>
 
 namespace Asteria {
 
