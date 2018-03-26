@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Reference {
 public:
-	enum Category : unsigned {
-		category_direct_reference  = 0,
-		category_array_element     = 1,
-		category_object_member     = 2,
+	enum Type : unsigned {
+		type_direct_reference  = 0,
+		type_array_element     = 1,
+		type_object_member     = 2,
 	};
 
 	using Direct_reference = Value_ptr<Variable>;

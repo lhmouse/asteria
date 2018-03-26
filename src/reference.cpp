@@ -13,12 +13,12 @@ Reference::~Reference(){
 }
 
 Value_ptr<Variable> Reference::load() const {
-	const auto category = static_cast<Category>(m_variant.which());
-	switch(category){
-	case category_direct_reference: {
+	const auto type = static_cast<Type>(m_variant.which());
+	switch(type){
+	case type_direct_reference: {
 		const auto &variable = boost::get<Direct_reference>(m_variant);
 		return variable; }
-	case category_array_element: {
+	case type_array_element: {
 		const auto &pair = boost::get<Array_element>(m_variant);
 		const auto array = pair.first->try_get<Array>();
 		if(!array){
@@ -33,7 +33,7 @@ Value_ptr<Variable> Reference::load() const {
 			return make_value<Variable>(nullptr);
 		}
 		return array->at(index); }
-	case category_object_member: {
+	case type_object_member: {
 		const auto &pair = boost::get<Object_member>(m_variant);
 		const auto object = pair.first->try_get<Object>();
 		if(!object){
@@ -46,19 +46,19 @@ Value_ptr<Variable> Reference::load() const {
 		}
 		return it->second; }
 	default:
-		ASTERIA_DEBUG_LOG("Unknown category enumeration: category = ", category);
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
 	}
 }
 Value_ptr<Variable> Reference::store(Value_ptr<Variable> &&new_value){
-	const auto category = static_cast<Category>(m_variant.which());
-	switch(category){
-	case category_direct_reference: {
+	const auto type = static_cast<Type>(m_variant.which());
+	switch(type){
+	case type_direct_reference: {
 		auto &variable = boost::get<Direct_reference>(m_variant);
 		ASTERIA_THROW("Attempt to write to a temporary variable of type `", variable->get_type_name(), "`");
 		/*variable = std::move(new_value);
 		return variable;*/ }
-	case category_array_element: {
+	case type_array_element: {
 		auto &pair = boost::get<Array_element>(m_variant);
 		const auto array = pair.first->try_get<Array>();
 		if(!array){
@@ -75,7 +75,7 @@ Value_ptr<Variable> Reference::store(Value_ptr<Variable> &&new_value){
 			array->emplace_back(make_value<Variable>(nullptr));
 		}
 		return array->at(index) = std::move(new_value); }
-	case category_object_member: {
+	case type_object_member: {
 		auto &pair = boost::get<Object_member>(m_variant);
 		const auto object = pair.first->try_get<Object>();
 		if(!object){
@@ -83,7 +83,7 @@ Value_ptr<Variable> Reference::store(Value_ptr<Variable> &&new_value){
 		}
 		return (*object)[pair.second] = std::move(new_value); }
 	default:
-		ASTERIA_DEBUG_LOG("Unknown category enumeration: category = ", category);
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
 	}
 }

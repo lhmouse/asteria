@@ -53,11 +53,11 @@ public:
 
 	struct Trailer;
 
-	enum Category : unsigned {
-		category_prefix_expression              = 0,
-		category_id_expression_with_trailer     = 1,
-		category_lambda_expression_with_trailer = 2,
-		category_nested_expression_with_trailer = 3,
+	enum Type : unsigned {
+		type_prefix_expression              = 0,
+		type_id_expression_with_trailer     = 1,
+		type_lambda_expression_with_trailer = 2,
+		type_nested_expression_with_trailer = 3,
 	};
 	struct Prefix_expression {
 		Operator which;
