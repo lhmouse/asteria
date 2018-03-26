@@ -68,23 +68,25 @@ void Logger::do_put(const void *value){
 
 void write_log_to_stderr(Logger &&logger) noexcept
 try {
+	auto &stream = logger.get_stream();
+	stream <<std::endl;
 	// Prepend the timestamp and write the result to stderr.
 	::time_t now;
 	::time(&now);
 	char time_str[26];
 	::ctime_r(&now, time_str);
 	time_str[24] = 0;
-	auto &stream = logger.get_stream();
-	stream <<'\n';
 	stream.set_caret(0);
-	stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ##: ";
+	stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ## ";
 	std::cerr <<stream.get_string() <<std::flush;
 } catch(...){
 	// Swallow any exceptions thrown.
 }
 void throw_runtime_error(Logger &&logger){
-	// Prepend the function name and throw an `std::runtime_error`.
 	auto &stream = logger.get_stream();
+	stream <<std::endl;
+	stream <<"  (thrown from '" <<logger.get_file() <<":" <<logger.get_line() <<"')";
+	// Prepend the function name and throw an `std::runtime_error`.
 	stream.set_caret(0);
 	stream <<logger.get_func() <<": ";
 	throw std::runtime_error(stream.get_string());

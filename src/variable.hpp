@@ -4,7 +4,6 @@
 #ifndef ASTERIA_VARIABLE_HPP_
 #define ASTERIA_VARIABLE_HPP_
 
-#include <boost/variant.hpp>
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
 #include <functional>
@@ -14,6 +13,7 @@
 #include <iosfwd>
 #include <cstdint>
 #include "fwd.hpp"
+#include "type_tuple.hpp"
 
 extern template class boost::container::deque<std::shared_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, std::shared_ptr<Asteria::Variable>>;
@@ -45,19 +45,22 @@ public:
 		type_function  = 8,
 	};
 
+	using Types = Type_tuple< Null        // 0
+	                        , Boolean     // 1
+	                        , Integer     // 2
+	                        , Double      // 3
+	                        , String      // 4
+	                        , Opaque      // 5
+	                        , Array       // 6
+	                        , Object      // 7
+	                        , Function    // 8
+		>;
+
+public:
+	static const char *get_name_of_type(Type type) noexcept;
+
 private:
-	// There are so many types...
-	boost::variant< Null        // 0
-	              , Boolean     // 1
-	              , Integer     // 2
-	              , Double      // 3
-	              , String      // 4
-	              , Opaque      // 5
-	              , Array       // 6
-	              , Object      // 7
-	              , Function    // 8
-		> m_variant;
-	// Am I constant ?
+	Types::rebound_variant m_variant;
 	bool m_immutable;
 
 public:
@@ -71,19 +74,37 @@ public:
 	~Variable();
 
 private:
+	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
 	__attribute__((__noreturn__)) void do_throw_immutable() const;
 
 public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
 	}
-	template<typename ValueT>
-	const ValueT &get() const {
-		return boost::get<ValueT>(m_variant);
+	const char *get_type_name() const noexcept {
+		return get_name_of_type(get_type());
 	}
-	template<typename ValueT>
-	ValueT &get(){
-		return boost::get<ValueT>(m_variant);
+	template<Type expectT>
+	const typename Types::at<expectT>::type &get() const {
+		if(get_type() != expectT){
+			do_throw_type_mismatch(expectT);
+		}
+		return *boost::get<typename Types::at<expectT>::type>(&m_variant);
+	}
+	template<Type expectT>
+	typename Types::at<expectT>::type &get(){
+		if(get_type() != expectT){
+			do_throw_type_mismatch(expectT);
+		}
+		return *boost::get<typename Types::at<expectT>::type>(&m_variant);
+	}
+	template<typename ExpectT>
+	const ExpectT &get() const {
+		return get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+	}
+	template<typename ExpectT>
+	ExpectT &get(){
+		return get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
 	}
 	template<typename ValueT>
 	void set(ValueT &&value){

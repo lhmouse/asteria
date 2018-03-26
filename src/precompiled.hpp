@@ -18,6 +18,7 @@
 #include <ostream>
 #include <memory>
 #include <tuple>
+#include <type_traits>
 
 #include <cassert>
 #include <cstring>
@@ -25,6 +26,13 @@
 #include <cstddef>
 #include <climits>
 #include <cctype>
+
+#include <boost/variant.hpp>
+#include <boost/container/flat_map.hpp>
+#include <boost/container/flat_set.hpp>
+#include <boost/container/vector.hpp>
+#include <boost/container/deque.hpp>
+#include <boost/container/list.hpp>
 
 namespace Asteria {
 	//

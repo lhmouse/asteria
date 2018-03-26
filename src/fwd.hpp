@@ -6,6 +6,9 @@
 
 namespace Asteria {
 
+template<typename ...TypesT>
+struct Type_tuple;
+
 class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;

@@ -11,12 +11,41 @@ template class std::function<std::shared_ptr<Asteria::Variable> (boost::containe
 
 namespace Asteria {
 
+const char *Variable::get_name_of_type(Variable::Type type) noexcept {
+	switch(type){
+	case Variable::type_null:
+		return "null";
+	case Variable::type_boolean:
+		return "boolean";
+	case Variable::type_integer:
+		return "integer";
+	case Variable::type_double:
+		return "double";
+	case Variable::type_string:
+		return "string";
+	case Variable::type_opaque:
+		return "opaque";
+	case Variable::type_array:
+		return "array";
+	case Variable::type_object:
+		return "object";
+	case Variable::type_function:
+		return "function";
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		return "<unknown>";
+	}
+}
+
 Variable::~Variable(){
 	//
 }
 
+void Variable::do_throw_type_mismatch(Type expect) const {
+	ASTERIA_THROW("Runtime type mismatch, expecting type `", get_name_of_type(expect), "` but got value `", *this, "`");
+}
 void Variable::do_throw_immutable() const {
-	ASTERIA_THROW("Attempting to modify a constant: ", *this);
+	ASTERIA_THROW("Attempt to modify a constant having value `", *this, "`");
 }
 
 // Non-member functions.
@@ -56,44 +85,11 @@ void dump_with_indent(std::ostream &os, const Variable &variable, bool values_on
 
 	if(!values_only){
 		// Dump the type.
-		switch(type){
-		case Variable::type_null:
-			os <<"null";
-			break;
-		case Variable::type_boolean:
-			os <<"boolean";
-			break;
-		case Variable::type_integer:
-			os <<"integer";
-			break;
-		case Variable::type_double:
-			os <<"double";
-			break;
-		case Variable::type_string:
-			os <<"string";
-			break;
-		case Variable::type_opaque:
-			os <<"opaque";
-			break;
-		case Variable::type_array:
-			os <<"array";
-			break;
-		case Variable::type_object:
-			os <<"object";
-			break;
-		case Variable::type_function:
-			os <<"function";
-			break;
-		default:
-			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
-			std::terminate();
-		}
-
+		os <<Variable::get_name_of_type(type);
 		// Dump attributes.
 		if(variable.is_immutable()){
 			os <<" const";
 		}
-
 		// Separate the value.
 		os <<": ";
 	}
