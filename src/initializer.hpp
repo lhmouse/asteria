@@ -17,9 +17,13 @@ public:
 		category_expression           = 2,
 	};
 
-	using Categories = Type_tuple< Value_ptr_deque<Initializer>             // category_bracketed_init_list  = 0,
-	                             , Value_ptr_map<std::string, Initializer>  // category_braced_init_list     = 1,
-	                             , Value_ptr<Expression>                    // category_expression           = 2,
+	using Bracketed_init_list = Value_ptr_deque<Initializer>;
+	using Braced_init_list    = Value_ptr_map<std::string, Initializer>;
+	using Expression_ptr      = Value_ptr<Expression>;
+
+	using Categories = Type_tuple< Bracketed_init_list  // category_bracketed_init_list  = 0,
+	                             , Braced_init_list     // category_braced_init_list     = 1,
+	                             , Expression_ptr       // category_expression           = 2,
 		>;
 
 private:
@@ -33,7 +37,7 @@ public:
 	~Initializer();
 
 public:
-	Value_ptr<Variable> evaluate() const;
+	Value_ptr<Variable> create_variable() const;
 };
 
 }

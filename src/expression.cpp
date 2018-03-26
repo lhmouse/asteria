@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "expression.hpp"
 #include "variable.hpp"
+#include "reference.hpp"
 #include "misc.hpp"
 
 namespace Asteria {
@@ -12,9 +13,9 @@ Expression::~Expression(){
 	//
 }
 
-Value_ptr<Variable> Expression::evaluate() const {
+Reference Expression::evaluate() const {
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
-	return make_value<Variable>(std::string("hello"));
+	return Reference(Reference::Direct_reference(make_value<Variable>(std::string("hello"))));
 }
 
 }

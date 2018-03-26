@@ -112,19 +112,6 @@ public:
 	void dump_with_indent_recursive(std::ostream &os, bool include_types, unsigned indent_next, unsigned indent_increment) const;
 };
 
-template<typename ExpectT>
-Value_ptr<const ExpectT> variable_pointer_cast(const Value_ptr<const Variable> &variable){
-	return std::shared_ptr<const ExpectT>(variable.share(), variable->try_get<ExpectT>());
-}
-template<typename ExpectT>
-Value_ptr<ExpectT> variable_pointer_cast(Value_ptr<Variable> &variable){
-	return std::shared_ptr<ExpectT>(variable.share(), variable->try_get<ExpectT>());
-}
-template<typename ExpectT>
-Value_ptr<ExpectT> variable_pointer_cast(Value_ptr<Variable> &&variable){
-	return std::shared_ptr<ExpectT>(variable.share(), variable->try_get<ExpectT>());
-}
-
 // These functions are for debugging purposes only.
 
 extern void dump_with_indent(std::ostream &os, const Array &array, bool include_types, unsigned indent_next, unsigned indent_increment);

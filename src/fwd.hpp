@@ -24,6 +24,7 @@ class Insertable_ostream;
 class Logger;
 
 class Variable;
+class Reference;
 
 class Statement;
 class Expression;

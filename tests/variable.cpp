@@ -26,13 +26,6 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<Integer>() == 42);
 
-	auto nptr = variable_pointer_cast<std::int64_t>(var);
-	ASTERIA_TEST_CHECK(nptr);
-	ASTERIA_TEST_CHECK(*nptr == 42);
-	nptr = nullptr;
-	auto sptr = variable_pointer_cast<std::string>(var);
-	ASTERIA_TEST_CHECK(!sptr);
-
 	var->set(1.5);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_double);
 	ASTERIA_TEST_CHECK(var->get<Double>() == 1.5);

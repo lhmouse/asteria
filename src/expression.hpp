@@ -52,7 +52,6 @@ public:
 	};
 
 	struct Trailer;
-	class Result;
 
 	enum Category : unsigned {
 		category_prefix_expression              = 0,
@@ -94,7 +93,7 @@ public:
 	~Expression();
 
 public:
-	Value_ptr<Variable> evaluate() const;
+	Reference evaluate() const;
 };
 
 }
