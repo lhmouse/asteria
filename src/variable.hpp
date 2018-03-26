@@ -4,28 +4,11 @@
 #ifndef ASTERIA_VARIABLE_HPP_
 #define ASTERIA_VARIABLE_HPP_
 
-#include <boost/container/deque.hpp>
-#include <boost/container/flat_map.hpp>
-#include <functional>
-#include <utility>
-#include <string>
-#include <memory>
-#include <iosfwd>
-#include <cstdint>
 #include "fwd.hpp"
 #include "type_tuple.hpp"
+#include <iosfwd>
 
 namespace Asteria {
-
-using Null      = std::nullptr_t;
-using Boolean   = bool;
-using Integer   = std::int64_t;
-using Double    = double;
-using String    = std::string;
-using Opaque    = std::shared_ptr<void>;
-using Array     = boost::container::deque<std::shared_ptr<Variable>>;
-using Object    = boost::container::flat_map<std::string, std::shared_ptr<Variable>>;
-using Function  = std::function<std::shared_ptr<Variable> (boost::container::deque<std::shared_ptr<Variable>> &&)>;
 
 class Variable {
 public:
