@@ -29,8 +29,8 @@ int main(){
 	obj.clear();
 	obj.emplace("route", std::move(route));
 	obj.emplace("third", std::move(third));
-	obj.emplace("world", std::make_shared<Variable>(std::string("world 这里有中文"), true));
+	obj.emplace("world", std::make_shared<Variable>(std::string("世界"), true));
 	auto root = std::make_shared<Variable>(std::move(obj), false);
 	std::cerr <<*root <<std::endl;
-	ASTERIA_DEBUG_LOG("<--- ", "good byte: ", 43);
+	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
 }

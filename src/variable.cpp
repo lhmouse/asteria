@@ -134,15 +134,15 @@ void dump_with_indent(std::ostream &os, const Variable &variable, bool values_on
 }
 
 std::ostream &operator<<(std::ostream &os, const Array &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
+	dump_with_indent(os, rhs, false, 0, 2);
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const Object &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
+	dump_with_indent(os, rhs, false, 0, 2);
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const Variable &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
+	dump_with_indent(os, rhs, false, 0, 2);
 	return os;
 }
 
