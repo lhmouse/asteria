@@ -43,12 +43,12 @@ private:
 	bool m_immutable;
 
 public:
-	Variable()
-		: m_variant(), m_immutable(false)
-	{ }
 	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
 	Variable(ValueT &&value, bool immutable = false)
 		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
+	{ }
+	Variable()
+		: Variable(nullptr)
 	{ }
 	~Variable();
 
@@ -60,22 +60,43 @@ public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
 	}
+
 	const char *get_type_name() const noexcept {
 		return get_name_of_type(get_type());
 	}
+
+	template<Type expectT>
+	const typename Types::at<expectT>::type *try_get() const noexcept {
+		return boost::get<typename Types::at<expectT>::type>(&m_variant);
+	}
+	template<Type expectT>
+	typename Types::at<expectT>::type *try_get() noexcept {
+		return boost::get<typename Types::at<expectT>::type>(&m_variant);
+	}
+	template<typename ExpectT>
+	const ExpectT *try_get() const noexcept {
+		return try_get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+	}
+	template<typename ExpectT>
+	ExpectT *try_get() noexcept {
+		return try_get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+	}
+
 	template<Type expectT>
 	const typename Types::at<expectT>::type &get() const {
-		if(get_type() != expectT){
+		const auto ptr = try_get<expectT>();
+		if(!ptr){
 			do_throw_type_mismatch(expectT);
 		}
-		return *boost::get<typename Types::at<expectT>::type>(&m_variant);
+		return *ptr;
 	}
 	template<Type expectT>
 	typename Types::at<expectT>::type &get(){
-		if(get_type() != expectT){
+		const auto ptr = try_get<expectT>();
+		if(!ptr){
 			do_throw_type_mismatch(expectT);
 		}
-		return *boost::get<typename Types::at<expectT>::type>(&m_variant);
+		return *ptr;
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
@@ -85,6 +106,7 @@ public:
 	ExpectT &get(){
 		return get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
 	}
+
 	template<typename ValueT>
 	void set(ValueT &&value){
 		if(m_immutable){
@@ -100,6 +122,19 @@ public:
 		m_immutable = immutable;
 	}
 };
+
+template<typename ExpectT>
+Value_ptr<const ExpectT> variable_pointer_cast(const Value_ptr<const Variable> &variable){
+	return std::shared_ptr<const ExpectT>(variable.share(), variable->try_get<ExpectT>());
+}
+template<typename ExpectT>
+Value_ptr<ExpectT> variable_pointer_cast(Value_ptr<Variable> &variable){
+	return std::shared_ptr<ExpectT>(variable.share(), variable->try_get<ExpectT>());
+}
+template<typename ExpectT>
+Value_ptr<ExpectT> variable_pointer_cast(Value_ptr<Variable> &&variable){
+	return std::shared_ptr<ExpectT>(variable.share(), variable->try_get<ExpectT>());
+}
 
 // These functions are for debugging purposes only.
 

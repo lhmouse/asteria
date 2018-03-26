@@ -1,8 +1,8 @@
 // This file is part of asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_EXPRESSION_HPP_
-#define ASTERIA_EXPRESSION_HPP_
+#ifndef ASTERIA_INITIALIZER_HPP_
+#define ASTERIA_INITIALIZER_HPP_
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
@@ -10,32 +10,28 @@
 
 namespace Asteria {
 
-class Expression {
+class Initializer {
 public:
 	enum Category : unsigned {
-		category_subexpression                = 0,
-		category_prefix_expression            = 1,
-		category_lambda_expression            = 2,
-		category_infix_or_postfix_expression  = 3,
+		category_bracketed_init_list  = 0,
+		category_braced_init_list     = 1,
+		category_expression           = 2,
 	};
 
-	using Types = Type_tuple< Expression_list        // 0
-	                        , Key_value_list         // 1
-	                        , Value_ptr<Expression>  // 2
+	using Types = Type_tuple< Expression_list        // category_bracketed_init_list  = 0
+	                        , Key_value_list         // category_braced_init_list     = 1
+	                        , Value_ptr<Expression>  // category_expression           = 2
 		>;
 
 private:
 	Types::rebound_variant m_variant;
 
 public:
-	Expression()
-		: m_variant()
-	{ }
 	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
-	Expression(ValueT &&value)
+	Initializer(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	~Expression();
+	~Initializer();
 
 public:
 	Category get_category() const noexcept {

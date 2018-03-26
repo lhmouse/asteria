@@ -7,11 +7,11 @@
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
 #include <iosfwd> // std::ostream
-#include <memory> // std::shared_ptr
 #include <string> // std::string
 #include <functional> // std::function
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
+#include "value_ptr.hpp"
 
 namespace Asteria {
 
@@ -33,14 +33,22 @@ using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
 using Opaque    = std::shared_ptr<void>;
-using Array     = boost::container::deque<std::shared_ptr<Variable>>;
-using Object    = boost::container::flat_map<std::string, std::shared_ptr<Variable>>;
-using Function  = std::function<std::shared_ptr<Variable> (boost::container::deque<std::shared_ptr<Variable>> &&)>;
+using Array     = boost::container::deque<Asteria::Value_ptr<Variable>>;
+using Object    = boost::container::flat_map<std::string, Asteria::Value_ptr<Variable>>;
+using Function  = std::function<Asteria::Value_ptr<Variable> (boost::container::deque<Asteria::Value_ptr<Variable>> &&)>;
+
+using Statement_list  = boost::container::deque<Asteria::Value_ptr<Statement>>;
+using Expression_list = boost::container::deque<Asteria::Value_ptr<Expression>>;
+using Key_value_list  = boost::container::flat_map<std::string, Asteria::Value_ptr<Initializer>>;
 
 }
 
-extern template class boost::container::deque<std::shared_ptr<Asteria::Variable>>;
-extern template class boost::container::flat_map<std::string, std::shared_ptr<Asteria::Variable>>;
-extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::deque<std::shared_ptr<Asteria::Variable>> &&)>;
+extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
+extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+extern template class std::function<Asteria::Value_ptr<Asteria::Variable> (boost::container::deque<Asteria::Value_ptr<Asteria::Variable>> &&)>;
+
+extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Statement>>;
+extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Expression>>;
+extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Initializer>>;
 
 #endif
