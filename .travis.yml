@@ -12,8 +12,8 @@ addons:
 
 matrix:
   include:
-    - env: "_options='--enable-debug-logs'"
-    - env: "_options=''"
+    - env: "_options=\"--enable-debug-logs --enable-debug-checks\""
+    - env: "_options=\"\""
 
 install:
   - "mkdir -p m4"
