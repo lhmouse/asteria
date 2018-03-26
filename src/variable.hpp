@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
+#include <type_traits> // std::enable_if, std::decay, std::is_base_of
 
 namespace Asteria {
 
@@ -45,8 +46,8 @@ public:
 	Variable()
 		: m_variant(nullptr), m_immutable(false)
 	{ }
-	template<typename ValueT>
-	Variable(ValueT &&value, bool immutable)
+	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
+	Variable(ValueT &&value, bool immutable = false)
 		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
 	{ }
 	~Variable();
