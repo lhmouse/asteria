@@ -10,26 +10,17 @@ int main(){
 	auto var = make_value<Variable>();
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_null);
 	ASTERIA_TEST_CHECK(var->get<Null>() == nullptr);
-	ASTERIA_TEST_CHECK(var->is_immutable() == false);
 
-	var = make_value<Variable>(true, true);
+	var = make_value<Variable>(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<Boolean>() == true);
-	ASTERIA_TEST_CHECK(var->is_immutable() == true);
-	try {
-		var->set(std::int64_t(42));
-		ASTERIA_TEST_CHECK(false);
-	} catch(std::runtime_error &e){
-		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
-	}
 	try {
 		var->get<String>();
 		ASTERIA_TEST_CHECK(false);
 	} catch(std::exception &e){
 		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
 	}
-	var->set_immutable(false);
-	ASTERIA_TEST_CHECK(var->is_immutable() == false);
+	ASTERIA_TEST_CHECK(var->try_get<Double>() == nullptr);
 
 	var->set(std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
@@ -56,16 +47,16 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Opaque>() == opaque);
 
 	Array array;
-	array.emplace_back(make_value<Variable>(true, true));
-	array.emplace_back(make_value<Variable>(std::string("world"), true));
+	array.emplace_back(make_value<Variable>(true));
+	array.emplace_back(make_value<Variable>(std::string("world")));
 	var->set(std::move(array));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
 
 	Object object;
-	object.emplace("one", make_value<Variable>(true, true));
-	object.emplace("two", make_value<Variable>(std::string("world"), true));
+	object.emplace("one", make_value<Variable>(true));
+	object.emplace("two", make_value<Variable>(std::string("world")));
 	var->set(std::move(object));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
 	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
@@ -79,7 +70,7 @@ int main(){
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	array.clear();
-	array.emplace_back(make_value<Variable>(std::int64_t(12), true));
-	array.emplace_back(make_value<Variable>(std::int64_t(15), true));
+	array.emplace_back(make_value<Variable>(std::int64_t(12)));
+	array.emplace_back(make_value<Variable>(std::int64_t(15)));
 	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(array))->get<Integer>() == 180);\
 }

@@ -40,18 +40,15 @@ Variable::~Variable(){
 void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW("Runtime type mismatch, expecting type `", get_name_of_type(expect), "` but got `", get_type_name(), "`");
 }
-void Variable::do_throw_immutable() const {
-	ASTERIA_THROW("Attempt to modify a constant having type `", get_type_name(), "`");
-}
 
 // Non-member functions.
 
-void dump_with_indent(std::ostream &os, const Array &array, bool values_only, unsigned indent_next, unsigned indent_increment){
+void dump_with_indent(std::ostream &os, const Array &array, bool include_types, unsigned indent_next, unsigned indent_increment){
 	os <<'[';
 	for(const auto &ptr : array){
 		os <<std::endl;
 		apply_indent(os, indent_next + indent_increment);
-		dump_with_indent(os, *ptr, values_only, indent_next + indent_increment, indent_increment);
+		dump_with_indent(os, *ptr, include_types, indent_next + indent_increment, indent_increment);
 		os <<',';
 	}
 	if(!array.empty()){
@@ -60,14 +57,14 @@ void dump_with_indent(std::ostream &os, const Array &array, bool values_only, un
 	}
 	os <<']';
 }
-void dump_with_indent(std::ostream &os, const Object &object, bool values_only, unsigned indent_next, unsigned indent_increment){
+void dump_with_indent(std::ostream &os, const Object &object, bool include_types, unsigned indent_next, unsigned indent_increment){
 	os <<'{';
 	for(const auto &pair : object){
 		os <<std::endl;
 		apply_indent(os, indent_next + indent_increment);
 		quote_string(os, pair.first);
 		os <<" = ";
-		dump_with_indent(os, *pair.second, values_only, indent_next + indent_increment, indent_increment);
+		dump_with_indent(os, *pair.second, include_types, indent_next + indent_increment, indent_increment);
 		os <<',';
 	}
 	if(!object.empty()){
@@ -76,21 +73,11 @@ void dump_with_indent(std::ostream &os, const Object &object, bool values_only, 
 	}
 	os <<'}';
 }
-void dump_with_indent(std::ostream &os, const Variable &variable, bool values_only, unsigned indent_next, unsigned indent_increment){
+void dump_with_indent(std::ostream &os, const Variable &variable, bool include_types, unsigned indent_next, unsigned indent_increment){
 	const auto type = variable.get_type();
-
-	if(!values_only){
-		// Dump the type.
-		os <<Variable::get_name_of_type(type);
-		// Dump attributes.
-		if(variable.is_immutable()){
-			os <<" const";
-		}
-		// Separate the value.
-		os <<": ";
+	if(!include_types){
+		os <<Variable::get_name_of_type(type) <<": ";
 	}
-
-	// Dump the value.
 	switch(type){
 	case Variable::type_null:
 		os <<"null";
@@ -111,10 +98,10 @@ void dump_with_indent(std::ostream &os, const Variable &variable, bool values_on
 		os <<"opaque(\"" <<variable.get<Opaque>() <<"\")";
 		break;
 	case Variable::type_array:
-		dump_with_indent(os, variable.get<Array>(), values_only, indent_next, indent_increment);
+		dump_with_indent(os, variable.get<Array>(), include_types, indent_next, indent_increment);
 		break;
 	case Variable::type_object:
-		dump_with_indent(os, variable.get<Object>(), values_only, indent_next, indent_increment);
+		dump_with_indent(os, variable.get<Object>(), include_types, indent_next, indent_increment);
 		break;
 	case Variable::type_function:
 		os <<"function";
@@ -126,15 +113,15 @@ void dump_with_indent(std::ostream &os, const Variable &variable, bool values_on
 }
 
 std::ostream &operator<<(std::ostream &os, const Array &rhs){
-	dump_with_indent(os, rhs, false, 0, 2);
+	dump_with_indent(os, rhs, true, 0, 2);
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const Object &rhs){
-	dump_with_indent(os, rhs, false, 0, 2);
+	dump_with_indent(os, rhs, true, 0, 2);
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const Variable &rhs){
-	dump_with_indent(os, rhs, false, 0, 2);
+	dump_with_indent(os, rhs, true, 0, 2);
 	return os;
 }
 

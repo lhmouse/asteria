@@ -39,12 +39,11 @@ public:
 
 private:
 	Types::rebound_variant m_variant;
-	bool m_immutable;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
-	Variable(ValueT &&value, bool immutable = false)
-		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
+	Variable(ValueT &&value)
+		: m_variant(std::forward<ValueT>(value))
 	{ }
 	Variable()
 		: Variable(nullptr)
@@ -53,7 +52,6 @@ public:
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
-	__attribute__((__noreturn__)) void do_throw_immutable() const;
 
 public:
 	Type get_type() const noexcept {
@@ -108,17 +106,7 @@ public:
 
 	template<typename ValueT>
 	void set(ValueT &&value){
-		if(m_immutable){
-			do_throw_immutable();
-		}
 		m_variant = std::forward<ValueT>(value);
-	}
-
-	bool is_immutable() const noexcept {
-		return m_immutable;
-	}
-	void set_immutable(bool immutable = true) noexcept {
-		m_immutable = immutable;
 	}
 };
 
@@ -137,9 +125,9 @@ Value_ptr<ExpectT> variable_pointer_cast(Value_ptr<Variable> &&variable){
 
 // These functions are for debugging purposes only.
 
-extern void dump_with_indent(std::ostream &os, const Array &array, bool values_only, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Object &object, bool values_only, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Variable &variable, bool values_only, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Array &array, bool include_types, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Object &object, bool include_types, unsigned indent_next, unsigned indent_increment);
+extern void dump_with_indent(std::ostream &os, const Variable &variable, bool include_types, unsigned indent_next, unsigned indent_increment);
 
 extern std::ostream &operator<<(std::ostream &os, const Array &rhs);
 extern std::ostream &operator<<(std::ostream &os, const Object &rhs);
