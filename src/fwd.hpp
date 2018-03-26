@@ -15,8 +15,8 @@ class Logger;
 
 class Variable;
 class Statement;
+class Initializer;
 class Expression;
-class Interpreter;
 
 }
 

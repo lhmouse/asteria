@@ -8,6 +8,7 @@
 #  include <config.h>
 #endif
 
+#include <array>
 #include <string>
 #include <iterator>
 #include <algorithm>
