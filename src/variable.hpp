@@ -108,6 +108,8 @@ public:
 	void set(ValueT &&value){
 		m_variant = std::forward<ValueT>(value);
 	}
+
+	void dump_with_indent_recursive(std::ostream &os, bool include_types, unsigned indent_next, unsigned indent_increment) const;
 };
 
 template<typename ExpectT>
