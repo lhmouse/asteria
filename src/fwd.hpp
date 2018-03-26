@@ -4,6 +4,12 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
+#include <boost/container/deque.hpp>
+#include <boost/container/flat_map.hpp>
+#include <memory> // std::shared_ptr
+#include <string>
+#include <functional> // std::function
+
 namespace Asteria {
 
 template<typename ...TypesT>
@@ -19,5 +25,9 @@ class Initializer;
 class Expression;
 
 }
+
+extern template class boost::container::deque<std::shared_ptr<Asteria::Variable>>;
+extern template class boost::container::flat_map<std::string, std::shared_ptr<Asteria::Variable>>;
+extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::deque<std::shared_ptr<Asteria::Variable>> &&)>;
 
 #endif

@@ -15,10 +15,6 @@
 #include "fwd.hpp"
 #include "type_tuple.hpp"
 
-extern template class boost::container::deque<std::shared_ptr<Asteria::Variable>>;
-extern template class boost::container::flat_map<std::string, std::shared_ptr<Asteria::Variable>>;
-extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::deque<std::shared_ptr<Asteria::Variable>> &&)>;
-
 namespace Asteria {
 
 using Null      = std::nullptr_t;
