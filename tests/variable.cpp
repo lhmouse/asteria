@@ -24,6 +24,7 @@ int main(){
 	}
 	try {
 		var->get<String>();
+		ASTERIA_TEST_CHECK(false);
 	} catch(std::exception &e){
 		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
 	}
