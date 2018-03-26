@@ -14,20 +14,19 @@ Initializer::~Initializer(){
 }
 
 Value_ptr<Variable> Initializer::evaluate() const {
-	const auto category = get_category();
-
+	const auto category = static_cast<Category>(m_variant.which());
 	switch(category){
 	case category_bracketed_init_list: {
-		const auto &list = boost::get<Expression_list>(m_variant);
+		const auto &queue = boost::get<Value_ptr_deque<Initializer>>(m_variant);
 		Array array;
-		for(const auto &ptr : list){
+		for(const auto &ptr : queue){
 			array.emplace_back(ptr->evaluate());
 		}
 		return make_value<Variable>(std::move(array)); }
 	case category_braced_init_list: {
-		const auto &list = boost::get<Key_value_list>(m_variant);
+		const auto &map = boost::get<Value_ptr_map<std::string, Initializer>>(m_variant);
 		Object object;
-		for(const auto &pair : list){
+		for(const auto &pair : map){
 			object.emplace(pair.first, pair.second->evaluate());
 		}
 		return make_value<Variable>(std::move(object)); }

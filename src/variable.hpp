@@ -6,33 +6,32 @@
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
-#include <type_traits> // std::enable_if, std::decay, std::is_base_of
 
 namespace Asteria {
 
 class Variable {
 public:
 	enum Type : unsigned {
-		type_null      = 0,
-		type_boolean   = 1,
-		type_integer   = 2,
-		type_double    = 3,
-		type_string    = 4,
-		type_opaque    = 5,
-		type_array     = 6,
-		type_object    = 7,
-		type_function  = 8,
+		type_null      =  0,
+		type_boolean   =  1,
+		type_integer   =  2,
+		type_double    =  3,
+		type_string    =  4,
+		type_opaque    =  5,
+		type_array     =  6,
+		type_object    =  7,
+		type_function  =  8,
 	};
 
-	using Types = Type_tuple< Null        // 0
-	                        , Boolean     // 1
-	                        , Integer     // 2
-	                        , Double      // 3
-	                        , String      // 4
-	                        , Opaque      // 5
-	                        , Array       // 6
-	                        , Object      // 7
-	                        , Function    // 8
+	using Types = Type_tuple< Null       //  0
+	                        , Boolean    //  1
+	                        , Integer    //  2
+	                        , Double     //  3
+	                        , String     //  4
+	                        , Opaque     //  5
+	                        , Array      //  6
+	                        , Object     //  7
+	                        , Function   //  8
 		>;
 
 public:
@@ -43,7 +42,7 @@ private:
 	bool m_immutable;
 
 public:
-	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
 	Variable(ValueT &&value, bool immutable = false)
 		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
 	{ }

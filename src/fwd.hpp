@@ -9,6 +9,7 @@
 #include <iosfwd> // std::ostream
 #include <string> // std::string
 #include <functional> // std::function
+#include <type_traits> // std::enable_if, std::decay, std::is_base_of
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
 #include "value_ptr.hpp"
@@ -44,6 +45,8 @@ using Object    = Value_ptr_map<std::string, Variable>;
 using Function  = std::function<Asteria::Value_ptr<Variable> (Array &&)>;
 
 }
+
+#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)    typename ::std::enable_if<::std::is_base_of<Base_, typename ::std::decay<::ParamT_>::type>::value == false>::type * = nullptr
 
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
