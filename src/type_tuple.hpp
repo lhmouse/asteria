@@ -24,7 +24,7 @@ namespace Details {
 	};
 	template<unsigned subscriptT, typename ExpectT>
 	struct Type_finder<subscriptT, ExpectT> {
-		static_assert(bool{(subscriptT, false)}, "type not found in tuple");
+		static_assert(subscriptT && false, "type not found in tuple");
 	};
 }
 
