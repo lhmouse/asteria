@@ -18,9 +18,9 @@ public:
 		category_expression           = 2,
 	};
 
-	using Types = Type_tuple< Expression_list        // category_bracketed_init_list  = 0
-	                        , Key_value_list         // category_braced_init_list     = 1
-	                        , Value_ptr<Expression>  // category_expression           = 2
+	using Types = Type_tuple< Expression_list        // category_bracketed_init_list  = 0,
+	                        , Key_value_list         // category_braced_init_list     = 1,
+	                        , Value_ptr<Expression>  // category_expression           = 2,
 		>;
 
 private:
