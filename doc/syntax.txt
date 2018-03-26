@@ -108,17 +108,15 @@ return-statement ::=
 	"return" ( expression-statement | null-statement )
 
 expression ::=
-	expression-leader expression-trailer-opt
-expression-leader ::=
-	id-expression | lambda-expression | nested-expression | prefix-operator-leader
+	prefix-expression | ( id-expression | lambda-expression | nested-expression ) expression-trailer-opt
+prefix-expression ::=
+	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
 id-expression ::=
 	identifier | literal
 lambda-expression ::=
-	"lambda" "(" identifier-list-opt ")" compound-statement expression
+	"lambda" "(" identifier-list-opt ")" compound-statement
 nested-expression ::=
 	"(" expression ")"
-prefix-operator-leader ::=
-	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
 expression-trailer-opt ::=
 	infix-trailer | ternary-trailer | postfix-trailer | ""
 infix-trailer ::=
@@ -126,14 +124,14 @@ infix-trailer ::=
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
 	  "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" ) expression
 ternary-trailer ::=
-	"?" ( expression ":" expression | ":" expression )
+	"?" ( expression | "" ) ":" expression
 postfix-trailer ::=
-	( postifix-operator-trailer | function-call-trailer | subscript-trailer | bind-trailer ) expression-trailer-opt
+	( postifix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer ) expression-trailer-opt
 postifix-operator-trailer ::=
 	"++" | "--"
 function-call-trailer ::=
 	"(" expression-list-opt ")"
-subscript-trailer ::=
+subscripting-trailer ::=
 	"[" expression "]"
-bind-trailer ::=
+member-access-trailer ::=
 	"." identifier
