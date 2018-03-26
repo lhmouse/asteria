@@ -33,7 +33,7 @@ expression-list ::=
 key-value-list-opt ::=
 	key-value-list | ""
 key-value-list ::=
-	( string-literal | identifier ) "=" expression ( "," key-value-list-opt | "" )
+	( string-literal | identifier ) "=" initializer ( "," key-value-list-opt | "" )
 
 initializer ::=
 	"[" expression-list-opt "]" | "{" key-value-list-opt "}" | expression
@@ -112,7 +112,7 @@ prefix-expression ::=
 lambda-expression ::=
 	"lambda" "(" identifier-list-opt ")" compound-statement expression
 infix-or-postfix-expression ::=
-	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer )
+	( literal | identifier ) (infix-trailer | postfix-trailer | ternary-trailer | "")
 infix-trailer ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
