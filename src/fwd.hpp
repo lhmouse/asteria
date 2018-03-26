@@ -46,7 +46,7 @@ using Function  = std::function<Asteria::Value_ptr<Variable> (Array &&)>;
 
 }
 
-#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)    typename ::std::enable_if<::std::is_base_of<Base_, typename ::std::decay<::ParamT_>::type>::value == false>::type * = nullptr
+#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)    typename ::std::enable_if<::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value == false>::type * = nullptr
 
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
