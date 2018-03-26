@@ -38,7 +38,6 @@ using Function  = std::function<std::shared_ptr<Variable> (boost::container::deq
 
 }
 
-extern template class std::shared_ptr<void>;
 extern template class boost::container::deque<std::shared_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, std::shared_ptr<Asteria::Variable>>;
 extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::deque<std::shared_ptr<Asteria::Variable>> &&)>;
