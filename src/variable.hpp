@@ -44,7 +44,7 @@ private:
 
 public:
 	Variable()
-		: m_variant(nullptr), m_immutable(false)
+		: m_variant(), m_immutable(false)
 	{ }
 	template<typename ValueT, typename std::enable_if<std::is_base_of<Variable, typename std::decay<ValueT>::type>::value == false>::type * = nullptr>
 	Variable(ValueT &&value, bool immutable = false)
