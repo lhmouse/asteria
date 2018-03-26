@@ -50,14 +50,13 @@ Value_ptr<Variable> Reference::load() const {
 		std::terminate();
 	}
 }
-Value_ptr<Variable> Reference::store(Value_ptr<Variable> &&new_value){
+Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
 	case type_direct_reference: {
 		auto &variable = boost::get<Direct_reference>(m_variant);
 		ASTERIA_THROW("Attempt to write to a temporary variable of type `", variable->get_type_name(), "`");
-		/*variable = std::move(new_value);
-		return variable;*/ }
+		/*return variable = std::move(new_value);*/ }
 	case type_array_element: {
 		auto &pair = boost::get<Array_element>(m_variant);
 		const auto array = pair.first->try_get<Array>();

@@ -38,7 +38,7 @@ public:
 
 public:
 	Value_ptr<Variable> load() const;
-	Value_ptr<Variable> store(Value_ptr<Variable> &&new_value);
+	Value_ptr<Variable> &store(Value_ptr<Variable> &&new_value);
 };
 
 }
