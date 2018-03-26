@@ -72,18 +72,18 @@ public:
 		Value_ptr_deque<Statement> body;
 		Value_ptr<Trailer> trailer_opt;
 	};
-	struct Nested_expression {
+	struct Nested_expression_with_trailer {
 		Value_ptr<Expression> nested;
 		Value_ptr<Trailer> trailer_opt;
 	};
-	using Categories = Type_tuple< Prefix_expression               // 0
-	                             , Id_expression_with_trailer      // 1
-	                             , Lambda_expression_with_trailer  // 2
-	                             , Nested_expression               // 3
+	using Types = Type_tuple< Prefix_expression               // 0
+	                        , Id_expression_with_trailer      // 1
+	                        , Lambda_expression_with_trailer  // 2
+	                        , Nested_expression_with_trailer  // 3
 		>;
 
 private:
-	Categories::rebound_variant m_value;
+	Types::rebound_variant m_value;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression, ValueT)>

@@ -21,13 +21,13 @@ public:
 	using Array_element    = std::pair<Value_ptr<Variable>, std::int64_t>;
 	using Object_member    = std::pair<Value_ptr<Variable>, std::string>;
 
-	using Categories = Type_tuple< Direct_reference  // 0
-	                             , Array_element     // 1
-	                             , Object_member     // 2
+	using Types = Type_tuple< Direct_reference  // 0
+	                        , Array_element     // 1
+	                        , Object_member     // 2
 		>;
 
 private:
-	Categories::rebound_variant m_variant;
+	Types::rebound_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
