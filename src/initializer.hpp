@@ -30,7 +30,7 @@ private:
 	Types::rebound_variant m_variant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Initializer, ValueT)>
 	Initializer(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
