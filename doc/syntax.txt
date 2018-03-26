@@ -44,23 +44,26 @@ statement-list ::=
 	statement statement-list-opt
 
 statement ::=
-	null-statement |
+	null-statement | compound-statement | expression-statement |
 	variable-definition | constant-definition | using-declaration | function-definition |
 	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
 	try-statement | defer-statement |
 	label-statement | case-statement |
-	goto-statement | break-statement | continue-statement | throw-statement | return-statement |
-	compound-statement | expression-statement
+	goto-statement | break-statement | continue-statement | throw-statement | return-statement
 
 null-statement ::=
 	";"
+compound-statement ::=
+	"{" statement-list-opt "}"
+expression-statement ::=
+	expression ";"
 
 variable-definition ::=
 	"var" identifier ( "=" initializer | ";" )
 constant-definition ::=
 	"const" identifier ( "=" initializer | ";" )
 using-declaration ::=
-	"using" identifier "as" expression ";"
+	"using" identifier "for" expression ";"
 function-definition ::=
 	"function" identifier "(" identifier-list-opt ")" compound-statement
 
@@ -99,11 +102,6 @@ throw-statement ::=
 	"throw" ( expression-statement | null-statement )
 return-statement ::=
 	"return" ( expression-statement | null-statement )
-
-compound-statement ::=
-	"{" statement-list-opt "}"
-expression-statement ::=
-	expression ";"
 
 expression ::=
 	subexpression | prefix-expression | lambda-expression | infix-or-postfix-expression
