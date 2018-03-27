@@ -137,7 +137,7 @@ public:
 	~Expression();
 
 public:
-	Reference evaluate(Value_ptr<Scope> &scope) const;
+	Reference evaluate(const std::shared_ptr<Scope> &scope) const;
 };
 
 }

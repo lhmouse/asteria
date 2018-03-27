@@ -14,7 +14,7 @@ Initializer::~Initializer(){
 	//
 }
 
-Value_ptr<Variable> Initializer::create_variable(Value_ptr<Scope> &scope) const {
+Value_ptr<Variable> Initializer::create_variable(const std::shared_ptr<Scope> &scope) const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
 	case type_bracketed_init_list: {

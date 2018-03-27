@@ -13,7 +13,7 @@ Expression::~Expression(){
 	//
 }
 
-Reference Expression::evaluate(Value_ptr<Scope> &scope) const {
+Reference Expression::evaluate(const std::shared_ptr<Scope> &scope) const {
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
 	(void)scope;
 	Reference::Direct_reference ref = { std::make_shared<Variable>(std::string("hello")) };
