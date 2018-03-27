@@ -6,6 +6,7 @@
 
 #include <memory> // std::shared_ptr
 #include <utility> // std::move, std::forward
+#include <type_traits> // std::enable_if, std::is_convertible
 
 namespace Asteria {
 
@@ -18,15 +19,36 @@ public:
 	constexpr Value_ptr(std::nullptr_t = nullptr) noexcept
 		: m_ptr()
 	{ }
-	Value_ptr(std::unique_ptr<ElementT> &&ptr)
-		: m_ptr(std::move(ptr))
+	template<typename OtherT, typename std::enable_if<std::is_convertible<OtherT *, ElementT *>::value>::type * = nullptr>
+	Value_ptr(std::shared_ptr<OtherT> &&other) noexcept
+		: m_ptr(std::move(other))
 	{ }
-	Value_ptr(std::shared_ptr<ElementT> &&ptr)
-		: m_ptr(std::move(ptr))
+	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor helps us find out typos.
+		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
 	{ }
+	Value_ptr(Value_ptr &&rhs) noexcept
+		: m_ptr(std::move(rhs.m_ptr))
+	{ }
+	Value_ptr &operator=(const Value_ptr &rhs){
+		if(this != &rhs){
+			if(m_ptr && (m_ptr.use_count() == 1) && rhs.m_ptr){
+				*m_ptr = *rhs.m_ptr;
+			} else {
+				m_ptr = rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr;
+			}
+		}
+		return *this;
+	}
+	Value_ptr &operator=(Value_ptr &&rhs) noexcept {
+		m_ptr = std::move(rhs.m_ptr);
+		return *this;
+	}
 
 public:
-	const std::shared_ptr<ElementT> &share() const {
+	std::shared_ptr<const ElementT> share() const noexcept {
+		return m_ptr;
+	}
+	std::shared_ptr<ElementT> share() noexcept {
 		return m_ptr;
 	}
 

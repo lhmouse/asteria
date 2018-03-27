@@ -32,7 +32,6 @@ lib_LTLIBRARIES =	\
 	lib/libasteria.la
 
 lib_libasteria_la_SOURCES =	\
-	asteria/src/fwd.cpp	\
 	asteria/src/insertable_ostream.cpp	\
 	asteria/src/misc.cpp	\
 	asteria/src/variable.cpp	\

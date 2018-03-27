@@ -17,9 +17,9 @@ public:
 		type_object_member     = 2,
 	};
 
-	using Direct_reference = Value_ptr<Variable>;
-	using Array_element    = std::pair<Value_ptr<Variable>, std::int64_t>;
-	using Object_member    = std::pair<Value_ptr<Variable>, std::string>;
+	using Direct_reference = std::shared_ptr<Variable>;
+	using Array_element    = std::pair<std::shared_ptr<Variable>, std::int64_t>;
+	using Object_member    = std::pair<std::shared_ptr<Variable>, std::string>;
 
 	using Types = Type_tuple< Direct_reference  // 0
 	                        , Array_element     // 1

@@ -5,6 +5,10 @@
 #include "variable.hpp"
 #include "misc.hpp"
 
+template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
+template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+template class std::function<Asteria::Value_ptr<Asteria::Variable> (Asteria::Array &&)>;
+
 namespace Asteria {
 
 const char *Variable::get_name_of_type(Variable::Type type) noexcept {
