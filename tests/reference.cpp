@@ -10,15 +10,10 @@ using namespace Asteria;
 int main(){
 	auto var = make_value<Variable>(std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
-	auto ref = Reference(Reference::Direct_reference(var.share()));
+	auto ref = Reference(Reference::Direct_reference_opt(var.share()));
 	auto ptr = ref.load();
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<Integer>() == 42);
-	ASTERIA_TEST_CHECK_CATCH(ref.store(make_value<Variable>(std::int64_t(130))));
-
-	ref = Reference(Reference::Null_reference());
-	ptr = ref.load();
-	ASTERIA_TEST_CHECK(!ptr);
 	ASTERIA_TEST_CHECK_CATCH(ref.store(make_value<Variable>(std::int64_t(130))));
 
 	ref = Reference(Reference::Array_element(var.share(), 9));

@@ -15,7 +15,8 @@ Expression::~Expression(){
 
 Reference Expression::evaluate() const {
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
-	return Reference(Reference::Direct_reference(std::make_shared<Variable>(std::string("hello"))));
+	Reference::Direct_reference ref = { std::make_shared<Variable>(std::string("hello")) };
+	return Reference(std::move(ref));
 }
 
 }

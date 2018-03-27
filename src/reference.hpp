@@ -12,21 +12,26 @@ namespace Asteria {
 class Reference {
 public:
 	enum Type : unsigned {
-		type_null_reference    = 0,
-		type_direct_reference  = 1,
-		type_array_element     = 2,
-		type_object_member     = 3,
+		type_direct_reference  = 0,
+		type_array_element     = 1,
+		type_object_member     = 2,
 	};
 
-	using Null_reference   = std::nullptr_t;
-	using Direct_reference = std::shared_ptr<Variable>;
-	using Array_element    = std::pair<std::shared_ptr<Variable>, std::int64_t>;
-	using Object_member    = std::pair<std::shared_ptr<Variable>, std::string>;
+	struct Direct_reference {
+		std::shared_ptr<Variable> variable_opt;
+	};
+	struct Array_element {
+		std::shared_ptr<Variable> variable_opt;
+		std::int64_t index_bidirectional;
+	};
+	struct Object_member {
+		std::shared_ptr<Variable> variable_opt;
+		std::string key;
+	};
 
-	using Types = Type_tuple< Null_reference    // 0
-	                        , Direct_reference  // 1
-	                        , Array_element     // 2
-	                        , Object_member     // 3
+	using Types = Type_tuple< Direct_reference  // 0
+	                        , Array_element     // 1
+	                        , Object_member     // 2
 		>;
 
 private:
@@ -50,6 +55,7 @@ public:
 
 	std::shared_ptr<const Variable> load() const;
 	Value_ptr<Variable> &store(Value_ptr<Variable> &&new_value);
+
 	Value_ptr<Variable> copy() const;
 };
 
