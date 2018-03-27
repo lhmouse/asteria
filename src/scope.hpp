@@ -11,28 +11,25 @@ namespace Asteria {
 
 class Scope {
 private:
-	const std::weak_ptr<Scope> m_weak_parent_opt;
+	const std::shared_ptr<Scope> m_parent_opt;
 
-	Value_ptr_map<std::string, Reference> m_local_variables;
+	Value_ptr_map<std::string, Variable> m_local_variables;
 
 public:
-	explicit Scope(const std::shared_ptr<Scope> &parent_opt)
-		: m_weak_parent_opt(parent_opt)
+	explicit Scope(std::shared_ptr<Scope> parent_opt)
+		: m_parent_opt(std::move(parent_opt))
 	{ }
 	~Scope();
 
 public:
-	std::shared_ptr<Scope> get_parent_opt() const noexcept {
-		return m_weak_parent_opt.lock();
+	const std::shared_ptr<Scope> &get_parent_opt() const noexcept {
+		return m_parent_opt;
 	}
 
-	bool has_local_variable(const std::string &key) const noexcept;
-	Reference get_local_variable(const std::string &key) const;
-	void set_local_variable(const std::string &key, Reference &&reference);
-	bool remove_local_variable(const std::string &key) noexcept;
-	void clear_local_variables() noexcept;
+	Value_ptr<Variable> *try_get_local_variable_recursive(const std::string &key);
 
-	Reference get_variable_recursive() const;
+	Value_ptr<Variable> &declare_local_variable(const std::string &key, Value_ptr<Variable> &&variable_opt);
+	void clear_local_variables() noexcept;
 };
 
 }
