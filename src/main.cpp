@@ -11,7 +11,7 @@ using namespace Asteria;
 int main(){
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	Array arr;
-	arr.emplace_back(make_value<Variable>(nullptr));
+	arr.emplace_back(make_value<Variable>(false));
 	arr.emplace_back(make_value<Variable>(true));
 	auto first = make_value<Variable>(std::move(arr));
 	arr.clear();
@@ -31,6 +31,6 @@ int main(){
 	obj.emplace("third", std::move(third));
 	obj.emplace("world", make_value<Variable>(std::string("世界")));
 	auto root = make_value<Variable>(std::move(obj));
-	std::cerr <<*root <<std::endl;
+	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
 }

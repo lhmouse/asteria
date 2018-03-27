@@ -12,30 +12,25 @@ namespace Asteria {
 class Variable {
 public:
 	enum Type : unsigned {
-		type_null      =  0,
-		type_boolean   =  1,
-		type_integer   =  2,
-		type_double    =  3,
-		type_string    =  4,
-		type_opaque    =  5,
-		type_array     =  6,
-		type_object    =  7,
-		type_function  =  8,
+		type_null      = -1u,
+		type_boolean   =  0,
+		type_integer   =  1,
+		type_double    =  2,
+		type_string    =  3,
+		type_opaque    =  4,
+		type_array     =  5,
+		type_object    =  6,
+		type_function  =  7,
 	};
-
-	using Types = Type_tuple< Null       //  0
-	                        , Boolean    //  1
-	                        , Integer    //  2
-	                        , Double     //  3
-	                        , String     //  4
-	                        , Opaque     //  5
-	                        , Array      //  6
-	                        , Object     //  7
-	                        , Function   //  8
+	using Types = Type_tuple< Boolean    //  0
+	                        , Integer    //  1
+	                        , Double     //  2
+	                        , String     //  3
+	                        , Opaque     //  4
+	                        , Array      //  5
+	                        , Object     //  6
+	                        , Function   //  7
 		>;
-
-public:
-	static const char *get_name_of_type(Type type) noexcept;
 
 private:
 	Types::rebound_variant m_variant;
@@ -45,9 +40,6 @@ public:
 	Variable(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	Variable()
-		: Variable(nullptr)
-	{ }
 	~Variable();
 
 private:
@@ -56,10 +48,6 @@ private:
 public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
-	}
-
-	const char *get_type_name() const noexcept {
-		return get_name_of_type(get_type());
 	}
 
 	template<Type expectT>
@@ -72,11 +60,11 @@ public:
 	}
 	template<typename ExpectT>
 	const ExpectT *try_get() const noexcept {
-		return try_get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+		return boost::get<ExpectT>(&m_variant);
 	}
 	template<typename ExpectT>
 	ExpectT *try_get() noexcept {
-		return try_get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+		return boost::get<ExpectT>(&m_variant);
 	}
 
 	template<Type expectT>
@@ -97,30 +85,61 @@ public:
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		return get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+		const auto ptr = try_get<ExpectT>();
+		if(!ptr){
+			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
+		}
+		return *ptr;
 	}
 	template<typename ExpectT>
 	ExpectT &get(){
-		return get<static_cast<Type>(Types::index_of<ExpectT>::value)>();
+		const auto ptr = try_get<ExpectT>();
+		if(!ptr){
+			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
+		}
+		return *ptr;
 	}
 
 	template<typename ValueT>
 	void set(ValueT &&value){
 		m_variant = std::forward<ValueT>(value);
 	}
-
-	void dump_with_indent_recursive(std::ostream &os, bool include_types, unsigned indent_next, unsigned indent_increment) const;
 };
 
-// These functions are for debugging purposes only.
+// Non-member functions. All pointer parameters here are OPTIONAL.
 
-extern void dump_with_indent(std::ostream &os, const Array &array, bool include_types, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Object &object, bool include_types, unsigned indent_next, unsigned indent_increment);
-extern void dump_with_indent(std::ostream &os, const Variable &variable, bool include_types, unsigned indent_next, unsigned indent_increment);
+extern const char *get_type_name(Variable::Type type) noexcept;
 
-extern std::ostream &operator<<(std::ostream &os, const Array &rhs);
-extern std::ostream &operator<<(std::ostream &os, const Object &rhs);
-extern std::ostream &operator<<(std::ostream &os, const Variable &rhs);
+inline Variable::Type get_variable_type(Observer_ptr<const Variable> variable_obs) noexcept {
+	return variable_obs ? variable_obs->get_type() : Variable::type_null;
+}
+inline const char *get_variable_type_name(Observer_ptr<const Variable> variable_obs) noexcept {
+	return get_type_name(get_variable_type(variable_obs));
+}
+
+template<typename ExpectT>
+const ExpectT *cast_variable(Observer_ptr<const Variable> variable_obs){
+	return variable_obs ? variable_obs->try_get<ExpectT>() : nullptr;
+}
+template<typename ExpectT>
+ExpectT *cast_variable(Observer_ptr<Variable> variable_obs){
+	return variable_obs ? variable_obs->try_get<ExpectT>() : nullptr;
+}
+template<Variable::Type expectT>
+const typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<const Variable> variable_obs){
+	return variable_obs ? variable_obs->try_get<expectT>() : nullptr;
+}
+template<Variable::Type expectT>
+typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<Variable> variable_obs){
+	return variable_obs ? variable_obs->try_get<expectT>() : nullptr;
+}
+
+extern void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_obs, unsigned indent_next = 0, unsigned indent_increment = 2);
+
+inline std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_obs){
+	(dump_variable_recursive)(os, variable_obs);
+	return os;
+}
 
 }
 

@@ -14,16 +14,20 @@ public:
 	enum Type : unsigned {
 		type_bracketed_init_list  = 0,
 		type_braced_init_list     = 1,
-		type_expression           = 2,
+		type_assignment           = 2,
 	};
-
-	using Bracketed_init_list = Value_ptr_deque<Initializer>;
-	using Braced_init_list    = Value_ptr_map<std::string, Initializer>;
-	using Expression_ptr      = Value_ptr<Expression>;
-
-	using Types = Type_tuple< Bracketed_init_list  // type_bracketed_init_list  = 0,
-	                        , Braced_init_list     // type_braced_init_list     = 1,
-	                        , Expression_ptr       // type_expression           = 2,
+	struct Bracketed_init_list {
+		Value_ptr_deque<Initializer> initializers;
+	};
+	struct Braced_init_list {
+		Value_ptr_map<std::string, Initializer> key_values;
+	};
+	struct Assignment {
+		Value_ptr<Expression> expression;
+	};
+	using Types = Type_tuple< Bracketed_init_list  // 0
+	                        , Braced_init_list     // 1
+	                        , Assignment           // 2
 		>;
 
 private:

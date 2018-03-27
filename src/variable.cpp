@@ -11,134 +11,110 @@ template class std::function<Asteria::Value_ptr<Asteria::Variable> (Asteria::Arr
 
 namespace Asteria {
 
-const char *Variable::get_name_of_type(Variable::Type type) noexcept {
-	switch(type){
-	case type_null:
-		return "null";
-	case type_boolean:
-		return "boolean";
-	case type_integer:
-		return "integer";
-	case type_double:
-		return "double";
-	case type_string:
-		return "string";
-	case type_opaque:
-		return "opaque";
-	case type_array:
-		return "array";
-	case type_object:
-		return "object";
-	case type_function:
-		return "function";
-	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
-		return "<unknown>";
-	}
-}
-
 Variable::~Variable(){
 	//
 }
 
 void Variable::do_throw_type_mismatch(Type expect) const {
-	ASTERIA_THROW("Runtime type mismatch, expecting type `", get_name_of_type(expect), "` but got `", get_type_name(), "`");
+	ASTERIA_THROW("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
-void Variable::dump_with_indent_recursive(std::ostream &os, bool include_types, unsigned indent_next, unsigned indent_increment) const {
-	const auto type = get_type();
-	if(!include_types){
-		os <<Variable::get_name_of_type(type) <<": ";
-	}
+
+// Non-member functions
+
+const char *get_type_name(Variable::Type type) noexcept {
 	switch(type){
-	case type_null:
+	case Variable::type_null:
+		return "null";
+	case Variable::type_boolean:
+		return "boolean";
+	case Variable::type_integer:
+		return "integer";
+	case Variable::type_double:
+		return "double";
+	case Variable::type_string:
+		return "string";
+	case Variable::type_opaque:
+		return "opaque";
+	case Variable::type_array:
+		return "array";
+	case Variable::type_object:
+		return "object";
+	case Variable::type_function:
+		return "function";
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		return "unknown";
+	}
+}
+
+void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_obs, unsigned indent_next, unsigned indent_increment){
+	const auto type = get_variable_type(variable_obs);
+	os <<get_type_name(type) <<": ";
+	switch(type){
+	case Variable::type_null: {
 		os <<"null";
-		break;
-	case type_boolean: {
-		const bool value = get<Boolean>();
-		os <<std::boolalpha <<std::nouppercase <<value;
 		break; }
-	case type_integer: {
-		const std::int64_t value = get<Integer>();
-		os <<std::dec <<value;
+	case Variable::type_boolean: {
+		const auto ptr = cast_variable<Boolean>(variable_obs);
+		os <<std::boolalpha <<std::nouppercase <<*ptr;
 		break; }
-	case type_double: {
-		const double value = get<Double>();
-		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
+	case Variable::type_integer: {
+		const auto ptr = cast_variable<Integer>(variable_obs);
+		os <<std::dec <<*ptr;
 		break; }
-	case type_string: {
-		const auto &string = get<String>();
-		quote_string(os, string);
+	case Variable::type_double: {
+		const auto ptr = cast_variable<Double>(variable_obs);
+		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<*ptr;
 		break; }
-	case type_opaque: {
-		const auto &opaque = get<Opaque>();
+	case Variable::type_string: {
+		const auto ptr = cast_variable<String>(variable_obs);
+		quote_string(os, *ptr);
+		break; }
+	case Variable::type_opaque: {
+		const auto ptr = cast_variable<Opaque>(variable_obs);
 		os <<"opaque(";
-		quote_string(os, opaque.first);
-		os <<", \"" <<opaque.second << "\")";
+		quote_string(os, ptr->first);
+		os <<", \"" <<ptr->second << "\")";
 		break; }
-	case type_array: {
-		const auto &array = get<Array>();
-		dump_with_indent(os, array, include_types, indent_next, indent_increment);
+	case Variable::type_array: {
+		const auto ptr = cast_variable<Array>(variable_obs);
+		os <<'[';
+		for(const auto &elem : *ptr){
+			os <<std::endl;
+			apply_indent(os, indent_next + indent_increment);
+			dump_variable_recursive(os, elem, indent_next + indent_increment, indent_increment);
+			os <<',';
+		}
+		if(!ptr->empty()){
+			os <<std::endl;
+			apply_indent(os, indent_next);
+		}
+		os <<']';
 		break; }
-	case type_object: {
-		const auto &object = get<Object>();
-		dump_with_indent(os, object, include_types, indent_next, indent_increment);
+	case Variable::type_object: {
+		const auto ptr = cast_variable<Object>(variable_obs);
+		os <<'{';
+		for(const auto &pair : *ptr){
+			os <<std::endl;
+			apply_indent(os, indent_next + indent_increment);
+			quote_string(os, pair.first);
+			os <<" = ";
+			dump_variable_recursive(os, pair.second, indent_next + indent_increment, indent_increment);
+			os <<',';
+		}
+		if(!ptr->empty()){
+			os <<std::endl;
+			apply_indent(os, indent_next);
+		}
+		os <<'}';
 		break; }
-	case type_function:
+	case Variable::type_function: {
 		os <<"function";
-		break;
+		break; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
 	}
-}
-
-// Non-member functions.
-
-void dump_with_indent(std::ostream &os, const Array &array, bool include_types, unsigned indent_next, unsigned indent_increment){
-	os <<'[';
-	for(const auto &ptr : array){
-		os <<std::endl;
-		apply_indent(os, indent_next + indent_increment);
-		ptr->dump_with_indent_recursive(os, include_types, indent_next + indent_increment, indent_increment);
-		os <<',';
-	}
-	if(!array.empty()){
-		os <<std::endl;
-		apply_indent(os, indent_next);
-	}
-	os <<']';
-}
-void dump_with_indent(std::ostream &os, const Object &object, bool include_types, unsigned indent_next, unsigned indent_increment){
-	os <<'{';
-	for(const auto &pair : object){
-		os <<std::endl;
-		apply_indent(os, indent_next + indent_increment);
-		quote_string(os, pair.first);
-		os <<" = ";
-		pair.second->dump_with_indent_recursive(os, include_types, indent_next + indent_increment, indent_increment);
-		os <<',';
-	}
-	if(!object.empty()){
-		os <<std::endl;
-		apply_indent(os, indent_next);
-	}
-	os <<'}';
-}
-void dump_with_indent(std::ostream &os, const Variable &variable, bool include_types, unsigned indent_next, unsigned indent_increment){
-	variable.dump_with_indent_recursive(os, include_types, indent_next, indent_increment);
-}
-
-std::ostream &operator<<(std::ostream &os, const Array &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
-	return os;
-}
-std::ostream &operator<<(std::ostream &os, const Object &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
-	return os;
-}
-std::ostream &operator<<(std::ostream &os, const Variable &rhs){
-	dump_with_indent(os, rhs, true, 0, 2);
-	return os;
 }
 
 }

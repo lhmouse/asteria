@@ -8,11 +8,7 @@
 using namespace Asteria;
 
 int main(){
-	auto var = make_value<Variable>();
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_null);
-	ASTERIA_TEST_CHECK(var->get<Null>() == nullptr);
-
-	var = make_value<Variable>(true);
+	auto var = make_value<Variable>(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK_CATCH(var->get<String>());
@@ -61,7 +57,9 @@ int main(){
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Reference> params;
-	params.emplace_back(std::make_shared<Variable>(std::int64_t(12)));
-	params.emplace_back(std::make_shared<Variable>(std::int64_t(15)));
+	Reference::Direct_reference ref = { std::make_shared<Variable>(std::int64_t(12)) };
+	params.emplace_back(std::move(ref));
+	ref = { std::make_shared<Variable>(std::int64_t(15)) };
+	params.emplace_back(std::move(ref));
 	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(params))->get<Integer>() == 180);
 }

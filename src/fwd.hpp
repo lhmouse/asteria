@@ -15,6 +15,7 @@
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
 #include "value_ptr.hpp"
+#include "observer_ptr.hpp"
 
 namespace Asteria {
 
