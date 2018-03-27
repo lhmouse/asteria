@@ -26,9 +26,10 @@ class Logger;
 class Variable;
 class Reference;
 
-class Statement;
-class Expression;
+class Reference;
 class Initializer;
+class Expression;
+class Statement;
 
 template<typename ElementT>
 using Value_ptr_deque = boost::container::deque<Value_ptr<ElementT>>;
