@@ -17,7 +17,7 @@ public:
 		type_assignment           = 2,
 	};
 	struct Bracketed_init_list {
-		Value_ptr_deque<Initializer> initializers;
+		Value_ptr_vector<Initializer> initializers;
 	};
 	struct Braced_init_list {
 		Value_ptr_map<std::string, Initializer> key_values;
