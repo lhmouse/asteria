@@ -34,16 +34,18 @@ public:
 
 private:
 	Types::rebound_variant m_variant;
+	bool m_immutable;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
-	Variable(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+	Variable(ValueT &&value, bool immutable = false)
+		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
 	{ }
 	~Variable();
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
+	__attribute__((__noreturn__)) void do_throw_immutable() const;
 
 public:
 	Type get_type() const noexcept {
@@ -102,7 +104,17 @@ public:
 
 	template<typename ValueT>
 	void set(ValueT &&value){
+		if(m_immutable){
+			do_throw_immutable();
+		}
 		m_variant = std::forward<ValueT>(value);
+	}
+
+	bool is_immutable() const noexcept {
+		return m_immutable;
+	}
+	void set_immutable(bool immutable = true) noexcept {
+		m_immutable = immutable;
 	}
 };
 

@@ -18,6 +18,9 @@ Variable::~Variable(){
 void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
+void Variable::do_throw_immutable() const {
+	ASTERIA_THROW_RUNTIME_ERROR("Attempt to modify the constant `", *this, "`");
+}
 
 // Non-member functions
 

@@ -8,11 +8,14 @@
 using namespace Asteria;
 
 int main(){
-	auto var = make_value<Variable>(true);
+	auto var = make_value<Variable>(true, true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK_CATCH(var->get<String>());
 	ASTERIA_TEST_CHECK(var->try_get<Double>() == nullptr);
+	ASTERIA_TEST_CHECK(var->is_immutable());
+	ASTERIA_TEST_CHECK_CATCH(var->set(std::int64_t(42)));
+	var->set_immutable(false);
 
 	var->set(std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
