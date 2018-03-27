@@ -4,9 +4,9 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
+#include <boost/container/vector.hpp>
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
-#include <boost/container/vector.hpp>
 #include <iosfwd> // std::ostream
 #include <string> // std::string
 #include <functional> // std::function
@@ -34,6 +34,8 @@ class Initializer;
 class Expression;
 class Statement;
 
+template<typename ElementT>
+using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
 template<typename ElementT>
 using Value_ptr_deque = boost::container::deque<Value_ptr<ElementT>>;
 template<typename KeyT, typename ValueT>
