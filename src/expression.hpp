@@ -137,7 +137,7 @@ public:
 	~Expression();
 
 public:
-	Reference evaluate() const;
+	Reference evaluate(Value_ptr<Scope> &scope) const;
 };
 
 }

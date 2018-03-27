@@ -41,7 +41,7 @@ public:
 	~Initializer();
 
 public:
-	Value_ptr<Variable> create_variable() const;
+	Value_ptr<Variable> create_variable(Value_ptr<Scope> &scope) const;
 };
 
 }

@@ -27,7 +27,8 @@ pkginclude_HEADERS =	\
 	asteria/src/variable.hpp	\
 	asteria/src/reference.hpp	\
 	asteria/src/initializer.hpp	\
-	asteria/src/expression.hpp
+	asteria/src/expression.hpp	\
+	asteria/src/scope.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
@@ -38,7 +39,8 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/variable.cpp	\
 	asteria/src/reference.cpp	\
 	asteria/src/initializer.cpp	\
-	asteria/src/expression.cpp
+	asteria/src/expression.cpp	\
+	asteria/src/scope.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -version-info 0:0:0

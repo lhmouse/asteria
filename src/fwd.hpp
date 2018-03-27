@@ -32,6 +32,7 @@ class Reference;
 class Reference;
 class Initializer;
 class Expression;
+class Scope;
 class Statement;
 
 template<typename ElementT>
