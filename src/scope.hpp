@@ -28,7 +28,7 @@ public:
 
 	Value_ptr<Variable> *try_get_local_variable_recursive(const std::string &key);
 
-	Value_ptr<Variable> &declare_local_variable(const std::string &key, Value_ptr<Variable> &&variable_opt);
+	Value_ptr<Variable> &declare_local_variable(const std::string &key, Value_ptr<Variable> &&variable_opt = nullptr);
 	void clear_local_variables() noexcept;
 };
 
