@@ -28,6 +28,7 @@ class Logger;
 
 class Variable;
 class Reference;
+class Exception;
 
 class Reference;
 class Initializer;
