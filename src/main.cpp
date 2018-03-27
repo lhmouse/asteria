@@ -11,7 +11,7 @@ using namespace Asteria;
 int main(){
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	Array arr;
-	arr.emplace_back(make_value<Variable>(false));
+	arr.emplace_back(nullptr);
 	arr.emplace_back(make_value<Variable>(true));
 	auto first = make_value<Variable>(std::move(arr));
 	arr.clear();
