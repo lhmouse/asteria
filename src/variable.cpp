@@ -73,7 +73,7 @@ void Variable::dump_with_indent_recursive(std::ostream &os, bool include_types, 
 		const auto &opaque = get<Opaque>();
 		os <<"opaque(";
 		quote_string(os, opaque.first);
-		os <<", " <<std::hex <<opaque.second <<"\")";
+		os <<", \"" <<opaque.second << "\")";
 		break; }
 	case type_array: {
 		const auto &array = get<Array>();
