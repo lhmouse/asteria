@@ -85,7 +85,7 @@ __attribute__((__noreturn__)) extern void throw_runtime_error(Logger &&logger);
 #  define ASTERIA_DEBUG_LOG(...)    (static_cast<void>(0))
 #endif
 
-#define ASTERIA_THROW(...)          (::Asteria::throw_runtime_error(::std::move((::Asteria::Logger(__FILE__, __LINE__, __PRETTY_FUNCTION__), __VA_ARGS__))))
+#define ASTERIA_THROW_RUNTIME_ERROR(...)          (::Asteria::throw_runtime_error(::std::move((::Asteria::Logger(__FILE__, __LINE__, __PRETTY_FUNCTION__), __VA_ARGS__))))
 
 namespace Asteria {
 
