@@ -48,16 +48,16 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Object>().at("two")->get<String>() == "world");
 
 	Function function = [](boost::container::vector<Reference> &&params){
-		const auto param_one = params.at(0).load();
+		const auto param_one = params.at(0).load_opt();
 		ASTERIA_TEST_CHECK(param_one);
-		const auto param_two = params.at(1).load();
+		const auto param_two = params.at(1).load_opt();
 		ASTERIA_TEST_CHECK(param_two);
 		return make_value<Variable>(param_one->get<Integer>() * param_two->get<Integer>());
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Reference> params;
-	Reference::Direct_reference ref = { std::make_shared<Variable>(std::int64_t(12)) };
+	Reference::Pure_rvalue ref = { std::make_shared<Variable>(std::int64_t(12)) };
 	params.emplace_back(std::move(ref));
 	ref = { std::make_shared<Variable>(std::int64_t(15)) };
 	params.emplace_back(std::move(ref));
