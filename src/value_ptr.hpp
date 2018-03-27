@@ -23,24 +23,18 @@ public:
 	Value_ptr(std::shared_ptr<OtherT> &&other) noexcept
 		: m_ptr(std::move(other))
 	{ }
-	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor helps us find out typos.
+	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor prevents unintentional copies.
 		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
 	{ }
 	Value_ptr(Value_ptr &&rhs) noexcept
 		: m_ptr(std::move(rhs.m_ptr))
 	{ }
 	Value_ptr &operator=(const Value_ptr &rhs){
-		if(this != &rhs){
-			if(m_ptr && (m_ptr.use_count() == 1) && rhs.m_ptr){
-				*m_ptr = *rhs.m_ptr;
-			} else {
-				m_ptr = rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr;
-			}
-		}
+		Value_ptr(rhs).swap(*this);
 		return *this;
 	}
 	Value_ptr &operator=(Value_ptr &&rhs) noexcept {
-		m_ptr = std::move(rhs.m_ptr);
+		Value_ptr(std::move(rhs)).swap(*this);
 		return *this;
 	}
 
@@ -57,6 +51,11 @@ public:
 	}
 	ElementT *get() noexcept {
 		return m_ptr.get();
+	}
+
+	void swap(Value_ptr &rhs) noexcept {
+		using std::swap;
+		swap(m_ptr, rhs.m_ptr);
 	}
 
 	explicit operator bool() const noexcept {
