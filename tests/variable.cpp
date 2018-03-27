@@ -15,12 +15,7 @@ int main(){
 	var = make_value<Variable>(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<Boolean>() == true);
-	try {
-		var->get<String>();
-		ASTERIA_TEST_CHECK(false);
-	} catch(std::exception &e){
-		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
-	}
+	ASTERIA_TEST_CHECK_CATCH(var->get<String>());
 	ASTERIA_TEST_CHECK(var->try_get<Double>() == nullptr);
 
 	var->set(std::int64_t(42));

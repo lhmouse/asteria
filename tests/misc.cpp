@@ -9,9 +9,8 @@ using namespace Asteria;
 int main(){
 	try {
 		ASTERIA_THROW("test", ' ', "exception: ", 42);
-		ASTERIA_TEST_CHECK(false);
+		std::terminate();
 	} catch(std::runtime_error &e){
-		ASTERIA_DEBUG_LOG("Caught exception: ", e.what());
 		ASTERIA_TEST_CHECK(std::strstr(e.what(), "test exception: 42") != nullptr);
 	}
 }

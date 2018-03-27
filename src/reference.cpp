@@ -28,7 +28,7 @@ std::shared_ptr<const Variable> Reference::load() const {
 		}
 		auto index = static_cast<std::uint64_t>(pair.second);
 		if(pair.second < 0){
-			index += array->size() + 1;
+			index += array->size();
 		}
 		if(index >= array->size()){
 			ASTERIA_DEBUG_LOG("Array index out of range: index = ", static_cast<std::int64_t>(index), ", size = ", array->size());
@@ -61,18 +61,18 @@ Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
 	case type_null_reference: {
 		ASTERIA_THROW("Attempt to write to a null reference"); }
 	case type_direct_reference: {
-		auto &variable = boost::get<Direct_reference>(m_variant);
+		const auto &variable = boost::get<Direct_reference>(m_variant);
 		ASTERIA_THROW("Attempt to write to a temporary variable of type `", variable->get_type_name(), "`");
 		/*return variable = std::move(new_value);*/ }
 	case type_array_element: {
-		auto &pair = boost::get<Array_element>(m_variant);
+		const auto &pair = boost::get<Array_element>(m_variant);
 		const auto array = pair.first->try_get<Array>();
 		if(!array){
 			ASTERIA_THROW("Only arrays can be indexed by integers, while the operand has type `", pair.first->get_type_name(), "`");
 		}
 		auto index = static_cast<std::uint64_t>(pair.second);
 		if(pair.second < 0){
-			index += array->size() + 1;
+			index += array->size();
 		}
 		if(index >= array->max_size()){
 			ASTERIA_THROW("Array index is too large, got `", index, "`");
@@ -82,7 +82,7 @@ Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
 		}
 		return array->at(index) = std::move(new_value); }
 	case type_object_member: {
-		auto &pair = boost::get<Object_member>(m_variant);
+		const auto &pair = boost::get<Object_member>(m_variant);
 		const auto object = pair.first->try_get<Object>();
 		if(!object){
 			ASTERIA_THROW("Only objects can be indexed by strings, while the operand has type `", pair.first->get_type_name(), "`");
