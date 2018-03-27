@@ -49,7 +49,7 @@ statement-list ::=
 
 statement ::=
 	null-statement | compound-statement | expression-statement |
-	variable-definition | constant-definition | using-declaration | function-definition |
+	variable-definition | using-declaration | function-definition |
 	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
 	try-statement | defer-statement |
 	label-statement | case-statement |
@@ -63,9 +63,7 @@ expression-statement ::=
 	expression ";"
 
 variable-definition ::=
-	"var" identifier ( "=" initializer | ";" )
-constant-definition ::=
-	"const" identifier ( "=" initializer | ";" )
+	( "var" | "const" ) identifier ( "=" initializer | "" ) ";"
 using-declaration ::=
 	"using" identifier "for" expression ";"
 function-definition ::=
