@@ -53,27 +53,36 @@ void Variable::dump_with_indent_recursive(std::ostream &os, bool include_types, 
 	case type_null:
 		os <<"null";
 		break;
-	case type_boolean:
-		os <<(get<Boolean>() ? "true" : "false");
-		break;
-	case type_integer:
-		os <<get<Integer>();
-		break;
-	case type_double:
-		os <<std::setprecision(16) <<get<Double>();
-		break;
-	case type_string:
-		quote_string(os, get<String>());
-		break;
-	case type_opaque:
-		os <<"opaque(\"" <<get<Opaque>() <<"\")";
-		break;
-	case type_array:
-		dump_with_indent(os, get<Array>(), include_types, indent_next, indent_increment);
-		break;
-	case type_object:
-		dump_with_indent(os, get<Object>(), include_types, indent_next, indent_increment);
-		break;
+	case type_boolean: {
+		const bool value = get<Boolean>();
+		os <<std::boolalpha <<std::nouppercase <<value;
+		break; }
+	case type_integer: {
+		const std::int64_t value = get<Integer>();
+		os <<std::dec <<value;
+		break; }
+	case type_double: {
+		const double value = get<Double>();
+		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
+		break; }
+	case type_string: {
+		const auto &string = get<String>();
+		quote_string(os, string);
+		break; }
+	case type_opaque: {
+		const auto &opaque = get<Opaque>();
+		os <<"opaque(";
+		quote_string(os, opaque.first);
+		os <<", " <<std::hex <<opaque.second <<"\")";
+		break; }
+	case type_array: {
+		const auto &array = get<Array>();
+		dump_with_indent(os, array, include_types, indent_next, indent_increment);
+		break; }
+	case type_object: {
+		const auto &object = get<Object>();
+		dump_with_indent(os, object, include_types, indent_next, indent_increment);
+		break; }
 	case type_function:
 		os <<"function";
 		break;

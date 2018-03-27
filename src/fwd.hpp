@@ -6,10 +6,12 @@
 
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
+#include <boost/container/vector.hpp>
 #include <iosfwd> // std::ostream
 #include <string> // std::string
 #include <functional> // std::function
 #include <type_traits> // std::enable_if, std::decay, std::is_base_of
+#include <utility> // std::move, std::pair
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
 #include "value_ptr.hpp"
@@ -41,10 +43,10 @@ using Boolean   = bool;
 using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
-using Opaque    = std::shared_ptr<void>;
+using Opaque    = std::pair<std::string, std::shared_ptr<void>>;
 using Array     = Value_ptr_deque<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
-using Function  = std::function<Asteria::Value_ptr<Variable> (Array &&)>;
+using Function  = std::function<Asteria::Value_ptr<Variable> (boost::container::vector<Reference> &&)>;
 
 }
 

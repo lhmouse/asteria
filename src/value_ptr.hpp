@@ -20,7 +20,7 @@ public:
 		: m_ptr()
 	{ }
 	template<typename OtherT, typename std::enable_if<std::is_convertible<OtherT *, ElementT *>::value>::type * = nullptr>
-	Value_ptr_nocv(std::shared_ptr<OtherT> &&other) noexcept
+	explicit Value_ptr_nocv(std::shared_ptr<OtherT> &&other) noexcept
 		: m_ptr(std::move(other))
 	{ }
 	explicit Value_ptr_nocv(const Value_ptr_nocv &rhs) // An explicit copy constructor prevents unintentional copies.
@@ -77,13 +77,13 @@ public:
 	}
 };
 
-template<typename ElementT, typename ...ParamsT>
-Value_ptr_nocv<ElementT> make_value(ParamsT &&...params){
-	return std::make_shared<ElementT>(std::forward<ParamsT>(params)...);
-}
-
 template<typename ElementT>
 using Value_ptr = Value_ptr_nocv<typename std::remove_cv<ElementT>::type>;
+
+template<typename ElementT, typename ...ParamsT>
+Value_ptr<ElementT> make_value(ParamsT &&...params){
+	return Value_ptr<ElementT>(std::make_shared<ElementT>(std::forward<ParamsT>(params)...));
+}
 
 }
 

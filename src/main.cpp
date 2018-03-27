@@ -20,7 +20,7 @@ int main(){
 	auto second = make_value<Variable>(std::move(arr));
 	arr.clear();
 	arr.emplace_back(make_value<Variable>(std::string("hello")));
-	arr.emplace_back(make_value<Variable>(std::make_shared<int>()));
+	arr.emplace_back(make_value<Variable>(std::make_pair("opaque", std::make_shared<int>())));
 	auto third = make_value<Variable>(std::move(arr));
 	Object obj;
 	obj.emplace("first", std::move(first));
