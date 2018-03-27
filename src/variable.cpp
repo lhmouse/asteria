@@ -47,37 +47,37 @@ const char *get_type_name(Variable::Type type) noexcept {
 	}
 }
 
-void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_obs, unsigned indent_next, unsigned indent_increment){
-	const auto type = get_variable_type(variable_obs);
+void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
+	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
 	case Variable::type_null: {
 		os <<"null";
 		break; }
 	case Variable::type_boolean: {
-		const auto ptr = cast_variable<Boolean>(variable_obs);
+		const auto ptr = cast_variable<Boolean>(variable_opt);
 		os <<std::boolalpha <<std::nouppercase <<*ptr;
 		break; }
 	case Variable::type_integer: {
-		const auto ptr = cast_variable<Integer>(variable_obs);
+		const auto ptr = cast_variable<Integer>(variable_opt);
 		os <<std::dec <<*ptr;
 		break; }
 	case Variable::type_double: {
-		const auto ptr = cast_variable<Double>(variable_obs);
+		const auto ptr = cast_variable<Double>(variable_opt);
 		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<*ptr;
 		break; }
 	case Variable::type_string: {
-		const auto ptr = cast_variable<String>(variable_obs);
+		const auto ptr = cast_variable<String>(variable_opt);
 		quote_string(os, *ptr);
 		break; }
 	case Variable::type_opaque: {
-		const auto ptr = cast_variable<Opaque>(variable_obs);
+		const auto ptr = cast_variable<Opaque>(variable_opt);
 		os <<"opaque(";
 		quote_string(os, ptr->first);
 		os <<", \"" <<ptr->second << "\")";
 		break; }
 	case Variable::type_array: {
-		const auto ptr = cast_variable<Array>(variable_obs);
+		const auto ptr = cast_variable<Array>(variable_opt);
 		os <<'[';
 		for(const auto &elem : *ptr){
 			os <<std::endl;
@@ -92,7 +92,7 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 		os <<']';
 		break; }
 	case Variable::type_object: {
-		const auto ptr = cast_variable<Object>(variable_obs);
+		const auto ptr = cast_variable<Object>(variable_opt);
 		os <<'{';
 		for(const auto &pair : *ptr){
 			os <<std::endl;

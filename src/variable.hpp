@@ -110,34 +110,34 @@ public:
 
 extern const char *get_type_name(Variable::Type type) noexcept;
 
-inline Variable::Type get_variable_type(Observer_ptr<const Variable> variable_obs) noexcept {
-	return variable_obs ? variable_obs->get_type() : Variable::type_null;
+inline Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept {
+	return variable_opt ? variable_opt->get_type() : Variable::type_null;
 }
-inline const char *get_variable_type_name(Observer_ptr<const Variable> variable_obs) noexcept {
-	return get_type_name(get_variable_type(variable_obs));
+inline const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept {
+	return get_type_name(get_variable_type(variable_opt));
 }
 
 template<typename ExpectT>
-const ExpectT *cast_variable(Observer_ptr<const Variable> variable_obs){
-	return variable_obs ? variable_obs->try_get<ExpectT>() : nullptr;
+const ExpectT *cast_variable(Observer_ptr<const Variable> variable_opt){
+	return variable_opt ? variable_opt->try_get<ExpectT>() : nullptr;
 }
 template<typename ExpectT>
-ExpectT *cast_variable(Observer_ptr<Variable> variable_obs){
-	return variable_obs ? variable_obs->try_get<ExpectT>() : nullptr;
+ExpectT *cast_variable(Observer_ptr<Variable> variable_opt){
+	return variable_opt ? variable_opt->try_get<ExpectT>() : nullptr;
 }
 template<Variable::Type expectT>
-const typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<const Variable> variable_obs){
-	return variable_obs ? variable_obs->try_get<expectT>() : nullptr;
+const typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<const Variable> variable_opt){
+	return variable_opt ? variable_opt->try_get<expectT>() : nullptr;
 }
 template<Variable::Type expectT>
-typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<Variable> variable_obs){
-	return variable_obs ? variable_obs->try_get<expectT>() : nullptr;
+typename Variable::Types::at<expectT>::type *cast_variable(Observer_ptr<Variable> variable_opt){
+	return variable_opt ? variable_opt->try_get<expectT>() : nullptr;
 }
 
-extern void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_obs, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 
-inline std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_obs){
-	(dump_variable_recursive)(os, variable_obs);
+inline std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt){
+	(dump_variable_recursive)(os, variable_opt);
 	return os;
 }
 
