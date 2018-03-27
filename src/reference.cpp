@@ -15,6 +15,8 @@ Reference::~Reference(){
 Value_ptr<Variable> Reference::load() const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
+	case type_null_reference: {
+		return make_value<Variable>(nullptr); }
 	case type_direct_reference: {
 		const auto &variable = boost::get<Direct_reference>(m_variant);
 		return make_value<Variable>(*variable); }
@@ -53,6 +55,8 @@ Value_ptr<Variable> Reference::load() const {
 Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
+	case type_null_reference: {
+		ASTERIA_THROW("Attempt to write to a null reference"); }
 	case type_direct_reference: {
 		auto &variable = boost::get<Direct_reference>(m_variant);
 		ASTERIA_THROW("Attempt to write to a temporary variable of type `", variable->get_type_name(), "`");
