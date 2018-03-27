@@ -48,8 +48,9 @@ public:
 		m_immutable = immutable;
 	}
 
-	Value_ptr<Variable> load() const;
+	std::shared_ptr<const Variable> load() const;
 	Value_ptr<Variable> &store(Value_ptr<Variable> &&new_value);
+	Value_ptr<Variable> copy() const;
 };
 
 }

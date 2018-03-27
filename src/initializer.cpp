@@ -33,7 +33,7 @@ Value_ptr<Variable> Initializer::create_variable() const {
 		return make_value<Variable>(std::move(object)); }
 	case type_expression: {
 		const auto &ptr = boost::get<Expression_ptr>(m_variant);
-		return ptr->evaluate().load(); }
+		return ptr->evaluate().copy(); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();

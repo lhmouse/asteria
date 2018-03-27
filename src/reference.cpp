@@ -12,14 +12,14 @@ Reference::~Reference(){
 	//
 }
 
-Value_ptr<Variable> Reference::load() const {
+std::shared_ptr<const Variable> Reference::load() const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
 	case type_null_reference: {
-		return make_value<Variable>(nullptr); }
+		return nullptr; }
 	case type_direct_reference: {
 		const auto &variable = boost::get<Direct_reference>(m_variant);
-		return make_value<Variable>(*variable); }
+		return variable; }
 	case type_array_element: {
 		const auto &pair = boost::get<Array_element>(m_variant);
 		const auto array = pair.first->try_get<Array>();
@@ -32,9 +32,9 @@ Value_ptr<Variable> Reference::load() const {
 		}
 		if(index >= array->size()){
 			ASTERIA_DEBUG_LOG("Array index out of range: index = ", static_cast<std::int64_t>(index), ", size = ", array->size());
-			return make_value<Variable>(nullptr);
+			return nullptr;
 		}
-		return make_value<Variable>(*(array->at(index))); }
+		return array->at(index).share(); }
 	case type_object_member: {
 		const auto &pair = boost::get<Object_member>(m_variant);
 		const auto object = pair.first->try_get<Object>();
@@ -44,9 +44,9 @@ Value_ptr<Variable> Reference::load() const {
 		const auto it = object->find(pair.second);
 		if(it == object->end()){
 			ASTERIA_DEBUG_LOG("Object member not found: id = ", pair.second);
-			return make_value<Variable>(nullptr);
+			return nullptr;
 		}
-		return make_value<Variable>(*(it->second)); }
+		return it->second.share(); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
@@ -92,6 +92,13 @@ Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
 	}
+}
+Value_ptr<Variable> Reference::copy() const {
+	const auto ptr = load();
+	if(!ptr){
+		return nullptr;
+	}
+	return make_value<Variable>(*ptr);
 }
 
 }

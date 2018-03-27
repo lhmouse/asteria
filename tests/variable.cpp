@@ -3,6 +3,7 @@
 
 #include "test_init.hpp"
 #include "../src/variable.hpp"
+#include "../src/reference.hpp"
 
 using namespace Asteria;
 
@@ -34,7 +35,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<String>() == "hello");
 
-	const auto opaque = std::static_pointer_cast<void>(std::make_shared<char>());
+	const auto opaque = std::pair<std::string, std::shared_ptr<void>>("hello", std::make_shared<char>());
 	var->set(opaque);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_opaque);
 	ASTERIA_TEST_CHECK(var->get<Opaque>() == opaque);
@@ -55,15 +56,17 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<Object>().at("two")->get<String>() == "world");
 
-	Function function = [](boost::container::deque<Asteria::Value_ptr<Asteria::Variable>> &&params){
-		auto result = make_value<Variable>();
-		result->set(params.at(0)->get<Integer>() * params.at(1)->get<Integer>());
-		return result;
+	Function function = [](boost::container::vector<Reference> &&params){
+		const auto param_one = params.at(0).load();
+		ASTERIA_TEST_CHECK(param_one);
+		const auto param_two = params.at(1).load();
+		ASTERIA_TEST_CHECK(param_two);
+		return make_value<Variable>(param_one->get<Integer>() * param_two->get<Integer>());
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	array.clear();
-	array.emplace_back(make_value<Variable>(std::int64_t(12)));
-	array.emplace_back(make_value<Variable>(std::int64_t(15)));
-	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(array))->get<Integer>() == 180);\
+	boost::container::vector<Reference> params;
+	params.emplace_back(std::make_shared<Variable>(std::int64_t(12)));
+	params.emplace_back(std::make_shared<Variable>(std::int64_t(15)));
+	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(params))->get<Integer>() == 180);
 }
