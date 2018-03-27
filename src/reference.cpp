@@ -53,6 +53,9 @@ Value_ptr<Variable> Reference::load() const {
 	}
 }
 Value_ptr<Variable> &Reference::store(Value_ptr<Variable> &&new_value){
+	if(is_immutable()){
+		ASTERIA_THROW("Attempting to modify a variable through an immutable reference");
+	}
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
 	case type_null_reference: {

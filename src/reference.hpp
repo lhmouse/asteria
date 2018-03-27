@@ -31,15 +31,23 @@ public:
 
 private:
 	Types::rebound_variant m_variant;
+	bool m_immutable;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
-	Reference(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+	Reference(ValueT &&value, bool immutable = false)
+		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
 	{ }
 	~Reference();
 
 public:
+	bool is_immutable() const noexcept {
+		return m_immutable;
+	}
+	void set_immutable(bool immutable = true) noexcept {
+		m_immutable = immutable;
+	}
+
 	Value_ptr<Variable> load() const;
 	Value_ptr<Variable> &store(Value_ptr<Variable> &&new_value);
 };
