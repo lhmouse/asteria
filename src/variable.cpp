@@ -55,46 +55,46 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 		os <<"null";
 		break; }
 	case Variable::type_boolean: {
-		const auto ptr = cast_variable<Boolean>(variable_opt);
-		os <<std::boolalpha <<std::nouppercase <<*ptr;
+		const auto &value = variable_opt->get<Boolean>();
+		os <<std::boolalpha <<std::nouppercase <<value;
 		break; }
 	case Variable::type_integer: {
-		const auto ptr = cast_variable<Integer>(variable_opt);
-		os <<std::dec <<*ptr;
+		const auto &value = variable_opt->get<Integer>();
+		os <<std::dec <<value;
 		break; }
 	case Variable::type_double: {
-		const auto ptr = cast_variable<Double>(variable_opt);
-		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<*ptr;
+		const auto &value = variable_opt->get<Double>();
+		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
 		break; }
 	case Variable::type_string: {
-		const auto ptr = cast_variable<String>(variable_opt);
-		quote_string(os, *ptr);
+		const auto &value = variable_opt->get<String>();
+		quote_string(os, value);
 		break; }
 	case Variable::type_opaque: {
-		const auto ptr = cast_variable<Opaque>(variable_opt);
+		const auto &value = variable_opt->get<Opaque>();
 		os <<"opaque(";
-		quote_string(os, ptr->first);
-		os <<", \"" <<ptr->second << "\")";
+		quote_string(os, value.first);
+		os <<", \"" <<value.second << "\")";
 		break; }
 	case Variable::type_array: {
-		const auto ptr = cast_variable<Array>(variable_opt);
+		const auto &value = variable_opt->get<Array>();
 		os <<'[';
-		for(const auto &elem : *ptr){
+		for(const auto &elem : value){
 			os <<std::endl;
 			apply_indent(os, indent_next + indent_increment);
 			dump_variable_recursive(os, elem, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!ptr->empty()){
+		if(!value.empty()){
 			os <<std::endl;
 			apply_indent(os, indent_next);
 		}
 		os <<']';
 		break; }
 	case Variable::type_object: {
-		const auto ptr = cast_variable<Object>(variable_opt);
+		const auto &value = variable_opt->get<Object>();
 		os <<'{';
-		for(const auto &pair : *ptr){
+		for(const auto &pair : value){
 			os <<std::endl;
 			apply_indent(os, indent_next + indent_increment);
 			quote_string(os, pair.first);
@@ -102,7 +102,7 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 			dump_variable_recursive(os, pair.second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!ptr->empty()){
+		if(!value.empty()){
 			os <<std::endl;
 			apply_indent(os, indent_next);
 		}
