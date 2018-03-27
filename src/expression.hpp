@@ -54,32 +54,21 @@ public:
 	struct Trailer;
 
 	enum Type : unsigned {
-		type_prefix_expression              = 0,
-		type_id_expression_with_trailer     = 1,
-		type_lambda_expression_with_trailer = 2,
-		type_nested_expression_with_trailer = 3,
+		type_prefix_expression                  = 0,
+		type_id_expression_with_trailer_opt     = 1,
+		type_lambda_expression_with_trailer_opt = 2,
+		type_nested_expression_with_trailer_opt = 3,
 	};
-	struct Prefix_expression {
-		Operator which;
-		Value_ptr<Expression> next;
-	};
-	struct Id_expression_with_trailer {
-		boost::variant<std::string, Value_ptr<Initializer>> id_or_literal;
-		Value_ptr<Trailer> trailer_opt;
-	};
-	struct Lambda_expression_with_trailer {
-		boost::container::deque<std::string> parameters;
-		Value_ptr_deque<Statement> body;
-		Value_ptr<Trailer> trailer_opt;
-	};
-	struct Nested_expression_with_trailer {
-		Value_ptr<Expression> nested;
-		Value_ptr<Trailer> trailer_opt;
-	};
-	using Types = Type_tuple< Prefix_expression               // 0
-	                        , Id_expression_with_trailer      // 1
-	                        , Lambda_expression_with_trailer  // 2
-	                        , Nested_expression_with_trailer  // 3
+
+	using Prefix_expression                  = std::tuple<Operator, Value_ptr<Expression>>;
+	using Id_expression_with_trailer_opt     = std::tuple<boost::variant<std::string, Value_ptr<Initializer>>, Value_ptr<Trailer>>;
+	using Lambda_expression_with_trailer_opt = std::tuple<boost::container::deque<std::string>, Value_ptr_deque<Statement>, Value_ptr<Trailer>>;
+	using Nested_expression_with_trailer_opt = std::tuple<Value_ptr<Expression>, Value_ptr<Trailer>>;
+
+	using Types = Type_tuple< Prefix_expression                   // 0
+	                        , Id_expression_with_trailer_opt      // 1
+	                        , Lambda_expression_with_trailer_opt  // 2
+	                        , Nested_expression_with_trailer_opt  // 3
 		>;
 
 private:
