@@ -26,7 +26,7 @@ public:
 private:
 	template<typename ValueT>
 	void do_put(const ValueT &value){
-	    m_stream <<value;
+		m_stream <<value;
 	}
 	void do_put(bool value);
 	void do_put(char value);
