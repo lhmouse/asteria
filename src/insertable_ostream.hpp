@@ -17,7 +17,7 @@ private:
 
 public:
 	Insertable_streambuf();
-	~Insertable_streambuf();
+	~Insertable_streambuf() override;
 
 protected:
 	std::streamsize xsputn(const std::streambuf::char_type *s, std::streamsize n) override;
@@ -45,7 +45,7 @@ private:
 
 public:
 	Insertable_ostream();
-	~Insertable_ostream();
+	~Insertable_ostream() override;
 
 public:
 	Insertable_streambuf *rdbuf() const noexcept {

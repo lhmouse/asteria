@@ -40,7 +40,6 @@ public:
 	Variable(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	~Variable();
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;

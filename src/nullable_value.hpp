@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Nullable_value {
+class Nullable_value : Deleted_copy {
 public:
 	using Type = Variable::Type;
 	using Types = typename Variable::Types::prepend< Variable  // -2
@@ -23,10 +23,6 @@ public:
 	Nullable_value(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	~Nullable_value();
-
-	ASTERIA_FORBID_COPY(Nullable_value)
-	ASTERIA_ALLOW_MOVE(Nullable_value)
 
 public:
 	Type get_type() const noexcept {

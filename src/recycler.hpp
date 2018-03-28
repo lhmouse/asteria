@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Recycler {
+class Recycler : Deleted_move {
 private:
 	boost::container::vector<std::weak_ptr<Variable>> m_weak_variables;
 
@@ -17,9 +17,6 @@ public:
 		: m_weak_variables()
 	{ }
 	~Recycler();
-
-	ASTERIA_FORBID_COPY(Recycler)
-	ASTERIA_FORBID_MOVE(Recycler)
 
 private:
 	template<typename ValueT>

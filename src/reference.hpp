@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Reference {
+class Reference : Deleted_copy {
 public:
 	enum Type : int {
 		type_rvalue_generic        = 0,
@@ -45,10 +45,6 @@ public:
 	Reference(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	~Reference();
-
-	ASTERIA_FORBID_COPY(Reference)
-	ASTERIA_ALLOW_MOVE(Reference)
 
 private:
 	std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> do_dereference_once_opt(bool create_if_not_exist) const;

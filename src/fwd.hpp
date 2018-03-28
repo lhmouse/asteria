@@ -39,6 +39,19 @@ class Reference;
 class Scope;
 class Recycler;
 
+// General utilities.
+struct Deleted_copy {
+	constexpr Deleted_copy() = default;
+	Deleted_copy(Deleted_copy &&) = default;
+	Deleted_copy &operator=(Deleted_copy &&) = default;
+};
+struct Deleted_move {
+	constexpr Deleted_move() = default;
+	Deleted_move(Deleted_move &&) = delete;
+	Deleted_move &operator=(Deleted_move &&) = delete;
+};
+
+// Aliases.
 template<typename ElementT>
 using Shared_ptr = std::shared_ptr<ElementT>;
 
@@ -49,6 +62,7 @@ using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Value_ptr_map = boost::container::flat_map<KeyT, Value_ptr<ValueT>>;
 
+// Struct definitions.
 struct Named_variable {
 	Value_ptr<Variable> variable;
 };
@@ -72,25 +86,9 @@ using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<S
 
 }
 
-#define ASTERIA_ALLOW_COPY(Class_)	\
-	Class_(const Class_ &) = default;	\
-	Class_ &operator=(const Class_ &) = default;
-
-#define ASTERIA_ALLOW_MOVE(Class_)	\
-	Class_(Class_ &&) = default;	\
-	Class_ &operator=(Class_ &&) = default;
-
-#define ASTERIA_FORBID_COPY(Class_)	\
-	Class_(const Class_ &) = delete;	\
-	Class_ &operator=(const Class_ &) = delete;
-
-#define ASTERIA_FORBID_MOVE(Class_)	\
-	Class_(Class_ &&) = delete;	\
-	Class_ &operator=(Class_ &&) = delete;
-
 #define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)	\
 	typename ::std::enable_if<	\
-		::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value == false	\
+		!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)	\
 		>::type * = nullptr
 
 #endif

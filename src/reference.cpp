@@ -10,10 +10,6 @@
 
 namespace Asteria {
 
-Reference::~Reference(){
-	//
-}
-
 std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereference_once_opt(bool create_if_not_exist) const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){

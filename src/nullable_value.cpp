@@ -6,8 +6,4 @@
 
 namespace Asteria {
 
-Nullable_value::~Nullable_value(){
-	//
-}
-
 }
