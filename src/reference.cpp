@@ -39,18 +39,26 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 				return std::forward_as_tuple(nullptr, nullptr);
 			}
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", array->size());
-			do {
-				array->emplace_front();
-			} while(++normalized_index < 0);
+			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
+			if(count_to_prepend > array->max_size() - array->size()){
+				ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_prepend = ", count_to_prepend);
+			}
+			array->insert(array->begin(), static_cast<std::size_t>(count_to_prepend), nullptr);
+			normalized_index += static_cast<std::int64_t>(count_to_prepend);
+			size_current += static_cast<std::int64_t>(count_to_prepend);
 		} else if(normalized_index >= size_current){
 			if(!create_if_not_exist){
 				ASTERIA_DEBUG_LOG("Array index was after the back: index = ", params.index_bidirectional, ", size = ", array->size());
 				return std::forward_as_tuple(nullptr, nullptr);
 			}
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", array->size());
-			do {
-				array->emplace_back();
-			} while(normalized_index >= ++size_current);
+			const auto count_to_append = static_cast<std::uint64_t>(normalized_index - size_current) + 1;
+			if(count_to_append > array->max_size() - array->size()){
+				ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_append = ", count_to_append);
+			}
+			array->insert(array->end(), static_cast<std::size_t>(count_to_append), nullptr);
+			normalized_index += static_cast<std::int64_t>(0);
+			size_current += static_cast<std::int64_t>(count_to_append);
 		}
 		auto &variable = array->at(static_cast<std::size_t>(normalized_index));
 		return std::forward_as_tuple(variable, &variable); }

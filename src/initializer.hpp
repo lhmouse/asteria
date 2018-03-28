@@ -14,7 +14,7 @@ public:
 	enum Type : int {
 		type_bracketed_init_list  = 0,
 		type_braced_init_list     = 1,
-		type_assignment           = 2,
+		type_expression_init      = 2,
 	};
 	struct Bracketed_init_list {
 		Value_ptr_vector<Initializer> initializers;
@@ -22,12 +22,12 @@ public:
 	struct Braced_init_list {
 		Value_ptr_map<std::string, Initializer> key_values;
 	};
-	struct Assignment {
+	struct Expression_init {
 		Value_ptr<Expression> expression;
 	};
 	using Types = Type_tuple< Bracketed_init_list  // 0
 	                        , Braced_init_list     // 1
-	                        , Assignment           // 2
+	                        , Expression_init      // 2
 		>;
 
 private:

@@ -5,7 +5,6 @@
 #define ASTERIA_FWD_HPP_
 
 #include <boost/container/vector.hpp>
-#include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
 #include <string> // std::string
 #include <functional> // std::function
@@ -46,7 +45,7 @@ using Shared_ptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
 using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
 template<typename ElementT>
-using Value_ptr_deque = boost::container::deque<Value_ptr<ElementT>>;
+using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Value_ptr_map = boost::container::flat_map<KeyT, Value_ptr<ValueT>>;
 
@@ -66,7 +65,7 @@ using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
 using Opaque    = Magic_handle;
-using Array     = Value_ptr_deque<Variable>;
+using Array     = Value_ptr_vector<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
 using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<Shared_ptr<Variable>> &&)>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'nullable_value.hpp' accordingly.

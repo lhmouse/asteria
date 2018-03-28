@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Recycler {
 private:
-	boost::container::deque<std::weak_ptr<Variable>> m_weak_variables;
+	boost::container::vector<std::weak_ptr<Variable>> m_weak_variables;
 
 public:
 	Recycler()
