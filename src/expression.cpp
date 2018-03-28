@@ -13,8 +13,9 @@ Expression::~Expression(){
 	//
 }
 
-Reference Expression::evaluate(const std::shared_ptr<Scope> &scope) const {
+Reference Expression::evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
+	(void)recycler;
 	(void)scope;
 	Reference::Rvalue_generic ref = { std::make_shared<Variable>(std::string("hello")) };
 	return Reference(std::move(ref));

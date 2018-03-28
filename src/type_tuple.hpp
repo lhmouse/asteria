@@ -40,8 +40,8 @@ namespace Details {
 template<typename ...TypesT>
 struct Type_tuple {
 	// rebind types to a variant or tuple.
-	using rebound_variant = boost::variant<TypesT...>;
-	using rebound_tuple   = std::tuple<TypesT...>;
+	using rebind_as_variant = boost::variant<TypesT...>;
+	using rebind_as_tuple   = std::tuple<TypesT...>;
 
 	// get type by index.
 	template<unsigned indexT>
@@ -52,6 +52,16 @@ struct Type_tuple {
 	template<typename ExpectT>
 	struct index_of {
 		enum : unsigned { value = Details::Type_finder<0, ExpectT, TypesT...>::value };
+	};
+
+	// append and prepend.
+	template<typename ...AddT>
+	struct prepend {
+		using type = Type_tuple<AddT..., TypesT...>;
+	};
+	template<typename ...AddT>
+	struct append {
+		using type = Type_tuple<TypesT..., AddT...>;
 	};
 };
 

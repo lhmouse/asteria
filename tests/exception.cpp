@@ -8,11 +8,11 @@
 using namespace Asteria;
 
 int main(){
-	auto var = create_variable_opt(Integer(42));
+	auto var = Value_ptr<Variable>(std::make_shared<Variable>(Integer(42)));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<Integer>() == 42);
 	try {
-		throw Exception(var.share());
+		throw Exception(var);
 	} catch(Exception &e){
 		const auto ptr = e.get_variable_opt();
 		ASTERIA_TEST_CHECK(ptr);

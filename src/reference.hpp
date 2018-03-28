@@ -11,24 +11,24 @@ namespace Asteria {
 
 class Reference {
 public:
-	enum Type : unsigned {
+	enum Type : int {
 		type_rvalue_generic        = 0,
 		type_lvalue_generic        = 1,
 		type_lvalue_array_element  = 2,
 		type_lvalue_object_member  = 3,
 	};
 	struct Rvalue_generic {
-		std::shared_ptr<Variable> value_opt;
+		Shared_ptr<Variable> value_opt;
 	};
 	struct Lvalue_generic {
-		std::shared_ptr<Value_ptr<Variable>> variable_ptr;
+		Shared_ptr<Named_variable> named_variable;
 	};
 	struct Lvalue_array_element {
-		std::shared_ptr<Variable> variable;
+		Shared_ptr<Variable> variable;
 		std::int64_t index_bidirectional;
 	};
 	struct Lvalue_object_member {
-		std::shared_ptr<Variable> variable;
+		Shared_ptr<Variable> variable;
 		std::string key;
 	};
 	using Types = Type_tuple< Rvalue_generic        // 0
@@ -38,7 +38,7 @@ public:
 		>;
 
 private:
-	Types::rebound_variant m_variant;
+	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
@@ -47,17 +47,16 @@ public:
 	{ }
 	~Reference();
 
-	Reference(Reference &&) = default;
-	Reference &operator=(Reference &&) = default;
+	ASTERIA_FORBID_COPY(Reference)
+	ASTERIA_ALLOW_MOVE(Reference)
 
-	Reference(const Reference &) = delete;
-	Reference &operator=(const Reference &) = delete;
+private:
+	std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> do_dereference_once_opt(bool create_if_not_exist) const;
 
 public:
-	std::shared_ptr<Variable> load_opt() const;
-	Value_ptr<Variable> extract_opt();
-	void store(boost::optional<Variable> &&value_new_opt) const;
-	void store(Variable &&value_new) const;
+	Shared_ptr<Variable> load_opt() const;
+	void store(const Shared_ptr<Recycler> &recycler, Nullable_value &&value) const;
+	Value_ptr<Variable> extract_opt(const Shared_ptr<Recycler> &recycler);
 };
 
 }

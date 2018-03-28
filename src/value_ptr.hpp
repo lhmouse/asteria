@@ -26,14 +26,13 @@ public:
 	explicit Value_ptr(std::shared_ptr<OtherT> &&other) noexcept
 		: m_ptr(std::move(other))
 	{ }
-
 	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor prevents unintentional copies.
 		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
 	{ }
 	Value_ptr(Value_ptr &&rhs) noexcept
 		: m_ptr(std::move(rhs.m_ptr))
 	{ }
-	Value_ptr &operator=(const Value_ptr &rhs){
+	Value_ptr &operator=(const Value_ptr &rhs) noexcept {
 		Value_ptr(rhs).swap(*this);
 		return *this;
 	}
@@ -43,17 +42,6 @@ public:
 	}
 
 public:
-	std::shared_ptr<const ElementT> share() const noexcept {
-		return m_ptr;
-	}
-	std::shared_ptr<ElementT> share() noexcept {
-		return m_ptr;
-	}
-
-	long use_count() const noexcept {
-		return m_ptr.use_count();
-	}
-
 	const ElementT *get() const noexcept {
 		return m_ptr.get();
 	}
@@ -68,6 +56,12 @@ public:
 
 	explicit operator bool() const noexcept {
 		return bool(m_ptr);
+	}
+	operator std::shared_ptr<const ElementT>() const noexcept {
+		return m_ptr;
+	}
+	operator std::shared_ptr<ElementT>() noexcept {
+		return m_ptr;
 	}
 
 	const ElementT &operator*() const noexcept {

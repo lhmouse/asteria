@@ -10,24 +10,27 @@ namespace Asteria {
 
 class Scope {
 private:
-	const std::shared_ptr<Scope> m_parent_opt;
+	const Shared_ptr<Scope> m_parent_opt;
 
-	// XXX Can we get rid of these pointer-to-pointers ??!
-	boost::container::flat_map<std::string, std::shared_ptr<Value_ptr<Variable>>> m_local_variables;
+	boost::container::flat_map<std::string, Shared_ptr<Named_variable>> m_local_variables;
 
 public:
-	explicit Scope(std::shared_ptr<Scope> parent_opt)
+	explicit Scope(Shared_ptr<Scope> parent_opt)
 		: m_parent_opt(std::move(parent_opt))
+		, m_local_variables()
 	{ }
 	~Scope();
 
+	ASTERIA_FORBID_COPY(Scope)
+	ASTERIA_FORBID_MOVE(Scope)
+
 public:
-	const std::shared_ptr<Scope> &get_parent_opt() const noexcept {
+	const Shared_ptr<Scope> &get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
-	std::shared_ptr<Value_ptr<Variable>> get_variable_recursive_opt(const std::string &key) const noexcept;
-	std::shared_ptr<Value_ptr<Variable>> declare_local_variable(const std::string &key);
+	Shared_ptr<Named_variable> get_variable_recursive_opt(const std::string &key) const noexcept;
+	Shared_ptr<Named_variable> declare_local_variable(const std::string &key);
 	void clear_local_variables() noexcept;
 };
 

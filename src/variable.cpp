@@ -14,11 +14,6 @@ Variable::~Variable(){
 void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
-void Variable::do_throw_immutable() const {
-	ASTERIA_THROW_RUNTIME_ERROR("Attempt to modify the constant `", *this, "`");
-}
-
-// Non-member functions
 
 const char *get_type_name(Variable::Type type) noexcept {
 	switch(type){
@@ -41,21 +36,32 @@ const char *get_type_name(Variable::Type type) noexcept {
 	case Variable::type_function:
 		return "function";
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		return "unknown";
 	}
 }
-Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept {
-	if(!variable_opt){
-		return Variable::type_null;
-	}
-	return variable_opt->get_type();
+
+Variable::Type get_variable_type(const Variable *variable_opt) noexcept {
+	return variable_opt ? variable_opt->get_type() : Variable::type_null;
 }
-const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept {
-	return get_type_name(get_variable_type(variable_opt));
+Variable::Type get_variable_type(const Shared_ptr<const Variable> &variable_opt) noexcept {
+	return get_variable_type(variable_opt.get());
+}
+Variable::Type get_variable_type(const Value_ptr<Variable> &variable_opt) noexcept {
+	return get_variable_type(variable_opt.get());
 }
 
-void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
+const char *get_variable_type_name(const Variable *variable_opt) noexcept {
+	return get_type_name(get_variable_type(variable_opt));
+}
+const char *get_variable_type_name(const Shared_ptr<const Variable> &variable_opt) noexcept {
+	return get_variable_type_name(variable_opt.get());
+}
+const char *get_variable_type_name(const Value_ptr<Variable> &variable_opt) noexcept {
+	return get_variable_type_name(variable_opt.get());
+}
+
+void dump_variable_recursive(std::ostream &os, const Variable *variable_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
@@ -81,8 +87,8 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<Opaque>();
 		os <<"opaque(";
-		quote_string(os, value.first);
-		os <<", \"" <<value.second << "\")";
+		quote_string(os, value.magic);
+		os <<", \"" <<value.handle << "\")";
 		break; }
 	case Variable::type_array: {
 		const auto &value = variable_opt->get<Array>();
@@ -120,41 +126,61 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 		os <<"function";
 		break; }
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		std::terminate();
+	}
+}
+void dump_variable_recursive(std::ostream &os, const Shared_ptr<const Variable> &variable_opt, unsigned indent_next, unsigned indent_increment){
+	return dump_variable_recursive(os, variable_opt.get(), indent_next, indent_increment);
+}
+void dump_variable_recursive(std::ostream &os, const Value_ptr<Variable> &variable_opt, unsigned indent_next, unsigned indent_increment){
+	return dump_variable_recursive(os, variable_opt.get(), indent_next, indent_increment);
+}
+
+std::ostream &operator<<(std::ostream &os, const Variable *variable_opt){
+	dump_variable_recursive(os, variable_opt);
+	return os;
+}
+std::ostream &operator<<(std::ostream &os, const Shared_ptr<const Variable> &variable_opt){
+	return operator<<(os, variable_opt.get());
+}
+std::ostream &operator<<(std::ostream &os, const Value_ptr<Variable> &variable_opt){
+	return operator<<(os, variable_opt.get());
+}
+
+void dispose_variable_recursive(Variable *variable_opt) noexcept {
+	const auto type = get_variable_type(variable_opt);
+	switch(type){
+	case Variable::type_null:
+		break;
+	case Variable::type_boolean:
+	case Variable::type_integer:
+	case Variable::type_double:
+	case Variable::type_string:
+	case Variable::type_opaque:
+		variable_opt->set(false);
+		break;
+	case Variable::type_array: {
+		auto &value = variable_opt->get<Array>();
+		for(auto &elem : value){
+			dispose_variable_recursive(elem.get());
+		}
+		variable_opt->set(false);
+		break; }
+	case Variable::type_object: {
+		auto &value = variable_opt->get<Object>();
+		for(auto &pair : value){
+			dispose_variable_recursive(pair.second.get());
+		}
+		variable_opt->set(false);
+		break; }
+	case Variable::type_function:
+		variable_opt->set(false);
+		break;
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
 	}
 }
 
-Value_ptr<Variable> create_variable_opt(boost::optional<Variable> &&value_new_opt){
-	if(!value_new_opt){
-		return nullptr;
-	} else {
-		return Value_ptr<Variable>(std::make_shared<Variable>(std::move(value_new_opt.get())));
-	}
 }
-Value_ptr<Variable> create_variable_opt(Variable &&value_new){
-	return create_variable_opt(boost::optional<Variable>(std::move(value_new)));
-}
-void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt){
-	if(!value_new_opt){
-		variable = nullptr;
-	} else if(!variable){
-		variable = Value_ptr<Variable>(std::make_shared<Variable>(std::move(value_new_opt.get())));
-	} else {
-		*variable = std::move(value_new_opt.get());
-	}
-}
-void set_variable(Value_ptr<Variable> &variable, Variable &&value_new){
-	return set_variable(variable, boost::optional<Variable>(std::move(value_new)));
-}
-
-std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt){
-	dump_variable_recursive(os, variable_opt);
-	return os;
-}
-
-}
-
-template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
-template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::vector<std::shared_ptr<Asteria::Variable>> &&)>;

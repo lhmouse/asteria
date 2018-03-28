@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Expression {
 public:
-	enum Operator : unsigned {
+	enum Operator : int {
 		operator_add     =  0,  // +
 		operator_sub     =  1,  // -
 		operator_not     =  2,  // ~
@@ -53,7 +53,7 @@ public:
 
 	struct Trailer;
 
-	enum Type : unsigned {
+	enum Type : int {
 		type_prefix_operator                     = 0,
 		type_id_expression_with_trailer_opt      = 1,
 		type_lambda_expression_with_trailer_opt  = 2,
@@ -82,7 +82,7 @@ public:
 	                        , Nested_expression_with_trailer_opt  // 3
 		>;
 
-	enum Trailer_type : unsigned {
+	enum Trailer_type : int {
 		trailer_type_infix_operator     = 0,
 		trailer_type_ternary_operator   = 1,
 		trailer_type_postfix_operator   = 2,
@@ -122,12 +122,12 @@ public:
 	                                , Member_access      // 5
 		>;
 
-	struct Trailer : Trailer_types::rebound_variant {
-		using Trailer_types::rebound_variant::variant;
+	struct Trailer : Trailer_types::rebind_as_variant {
+		using Trailer_types::rebind_as_variant::variant;
 	};
 
 private:
-	Types::rebound_variant m_value;
+	Types::rebind_as_variant m_value;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression, ValueT)>
@@ -136,8 +136,11 @@ public:
 	{ }
 	~Expression();
 
+	ASTERIA_FORBID_COPY(Expression)
+	ASTERIA_ALLOW_MOVE(Expression)
+
 public:
-	Reference evaluate(const std::shared_ptr<Scope> &scope) const;
+	Reference evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
 };
 
 }

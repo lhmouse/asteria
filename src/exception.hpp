@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Exception : public std::exception {
 private:
-	std::shared_ptr<Variable> m_variable_opt;
+	Shared_ptr<Variable> m_variable_opt;
 
 public:
-	explicit Exception(std::shared_ptr<Variable> variable_opt)
+	explicit Exception(Shared_ptr<Variable> variable_opt)
 		: m_variable_opt(std::move(variable_opt))
 	{ }
 	~Exception() override;
@@ -24,10 +24,10 @@ public:
 		return "Asteria::Exception";
 	}
 
-	const std::shared_ptr<Variable> &get_variable_opt() const noexcept {
+	const Shared_ptr<Variable> &get_variable_opt() const noexcept {
 		return m_variable_opt;
 	}
-	void set_variable(std::shared_ptr<Variable> variable_opt) noexcept {
+	void set_variable(Shared_ptr<Variable> variable_opt) noexcept {
 		m_variable_opt = std::move(variable_opt);
 	}
 };

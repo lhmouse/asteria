@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Initializer {
 public:
-	enum Type : unsigned {
+	enum Type : int {
 		type_bracketed_init_list  = 0,
 		type_braced_init_list     = 1,
 		type_assignment           = 2,
@@ -31,7 +31,7 @@ public:
 		>;
 
 private:
-	Types::rebound_variant m_variant;
+	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Initializer, ValueT)>
@@ -40,8 +40,11 @@ public:
 	{ }
 	~Initializer();
 
+	ASTERIA_FORBID_COPY(Initializer)
+	ASTERIA_ALLOW_MOVE(Initializer)
+
 public:
-	Value_ptr<Variable> evaluate_opt(const std::shared_ptr<Scope> &scope) const;
+	Value_ptr<Variable> evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
 };
 
 }

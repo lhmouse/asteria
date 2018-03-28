@@ -20,16 +20,17 @@ CLEANFILES =	\
 pkginclude_HEADERS =	\
 	asteria/src/type_tuple.hpp	\
 	asteria/src/value_ptr.hpp	\
-	asteria/src/observer_ptr.hpp	\
 	asteria/src/fwd.hpp	\
 	asteria/src/insertable_ostream.hpp	\
 	asteria/src/misc.hpp	\
 	asteria/src/variable.hpp	\
+	asteria/src/nullable_value.hpp	\
 	asteria/src/reference.hpp	\
 	asteria/src/exception.hpp	\
 	asteria/src/initializer.hpp	\
 	asteria/src/expression.hpp	\
-	asteria/src/scope.hpp
+	asteria/src/scope.hpp	\
+	asteria/src/recycler.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
@@ -38,11 +39,13 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/insertable_ostream.cpp	\
 	asteria/src/misc.cpp	\
 	asteria/src/variable.cpp	\
+	asteria/src/nullable_value.cpp	\
 	asteria/src/reference.cpp	\
 	asteria/src/exception.cpp	\
 	asteria/src/initializer.cpp	\
 	asteria/src/expression.cpp	\
-	asteria/src/scope.cpp
+	asteria/src/scope.cpp	\
+	asteria/src/recycler.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -version-info 0:0:0

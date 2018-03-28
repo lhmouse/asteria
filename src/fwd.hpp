@@ -11,25 +11,37 @@
 #include <functional> // std::function
 #include <type_traits> // std::enable_if, std::decay, std::is_base_of
 #include <utility> // std::move, std::pair
+#include <memory> // std::shared_ptr
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
 #include "value_ptr.hpp"
-#include "observer_ptr.hpp"
 
 namespace Asteria {
 
+// General utilities.
 class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
-class Variable;
-class Reference;
-class Scope;
-class Exception;
-
+// Lexical elements (movable only)
 class Initializer;
 class Expression;
 class Statement;
+
+// Runtime objects (copyable)
+class Variable;
+class Exception;
+
+// Runtime objects (movable only)
+class Nullable_value;
+class Reference;
+
+// Runtime objects (not movable)
+class Scope;
+class Recycler;
+
+template<typename ElementT>
+using Shared_ptr = std::shared_ptr<ElementT>;
 
 template<typename ElementT>
 using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
@@ -38,22 +50,44 @@ using Value_ptr_deque = boost::container::deque<Value_ptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Value_ptr_map = boost::container::flat_map<KeyT, Value_ptr<ValueT>>;
 
+struct Named_variable {
+	Value_ptr<Variable> variable;
+};
+
+struct Magic_handle {
+	std::string magic;
+	std::shared_ptr<void> handle;
+};
+
+// Runtime types.
 using Null      = std::nullptr_t;
 using Boolean   = bool;
 using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
-using Opaque    = std::pair<std::string, std::shared_ptr<void>>;
+using Opaque    = Magic_handle;
 using Array     = Value_ptr_deque<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
-using Function  = std::function<std::shared_ptr<Variable> (boost::container::vector<std::shared_ptr<Variable>> &&)>;
+using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<Shared_ptr<Variable>> &&)>;
+// If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'nullable_value.hpp' accordingly.
 
 }
 
-// Defined in 'variable.cpp'.
-extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
-extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::vector<std::shared_ptr<Asteria::Variable>> &&)>;
+#define ASTERIA_ALLOW_COPY(Class_)	\
+	Class_(const Class_ &) = default;	\
+	Class_ &operator=(const Class_ &) = default;
+
+#define ASTERIA_ALLOW_MOVE(Class_)	\
+	Class_(Class_ &&) = default;	\
+	Class_ &operator=(Class_ &&) = default;
+
+#define ASTERIA_FORBID_COPY(Class_)	\
+	Class_(const Class_ &) = delete;	\
+	Class_ &operator=(const Class_ &) = delete;
+
+#define ASTERIA_FORBID_MOVE(Class_)	\
+	Class_(Class_ &&) = delete;	\
+	Class_ &operator=(Class_ &&) = delete;
 
 #define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)	\
 	typename ::std::enable_if<	\
