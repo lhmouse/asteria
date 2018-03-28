@@ -27,7 +27,7 @@ public:
 	const std::shared_ptr<Variable> &get_variable_opt() const noexcept {
 		return m_variable_opt;
 	}
-	void set_variable(std::shared_ptr<Variable> variable_opt){
+	void set_variable(std::shared_ptr<Variable> variable_opt) noexcept {
 		m_variable_opt = std::move(variable_opt);
 	}
 };
