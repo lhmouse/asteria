@@ -33,7 +33,7 @@ Value_ptr<Variable> Initializer::create_variable_opt(const std::shared_ptr<Scope
 		return make_value<Variable>(std::move(object)); }
 	case type_assignment: {
 		const auto &assignment = boost::get<Assignment>(m_variant);
-		return assignment.expression->evaluate(scope).steal_opt(); }
+		return assignment.expression->evaluate(scope).extract_result_opt(); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();

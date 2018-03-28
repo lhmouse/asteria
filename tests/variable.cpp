@@ -14,10 +14,10 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(var->get<String>());
 	ASTERIA_TEST_CHECK(var->try_get<Double>() == nullptr);
 	ASTERIA_TEST_CHECK(var->is_immutable());
-	ASTERIA_TEST_CHECK_CATCH(var->set(std::int64_t(42)));
+	ASTERIA_TEST_CHECK_CATCH(var->set(Integer(42)));
 	var->set_immutable(false);
 
-	var->set(std::int64_t(42));
+	var->set(Integer(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<Integer>() == 42);
 
@@ -55,14 +55,17 @@ int main(){
 		ASTERIA_TEST_CHECK(param_one);
 		const auto param_two = params.at(1).load_opt();
 		ASTERIA_TEST_CHECK(param_two);
-		return make_value<Variable>(param_one->get<Integer>() * param_two->get<Integer>());
+		Reference::Rvalue_generic ref = { std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
+		return Reference(std::move(ref));
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Reference> params;
-	Reference::Pure_rvalue ref = { std::make_shared<Variable>(std::int64_t(12)) };
+	Reference::Rvalue_generic ref = { std::make_shared<Variable>(Integer(12)) };
 	params.emplace_back(std::move(ref));
-	ref = { std::make_shared<Variable>(std::int64_t(15)) };
+	ref = { std::make_shared<Variable>(Integer(15)) };
 	params.emplace_back(std::move(ref));
-	ASTERIA_TEST_CHECK(var->get<Function>()(std::move(params))->get<Integer>() == 180);
+	auto result = var->get<Function>()(std::move(params));
+	auto rv = result.load_opt();
+	ASTERIA_TEST_CHECK(rv->get<Integer>() == 180);
 }

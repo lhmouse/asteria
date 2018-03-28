@@ -7,7 +7,6 @@
 #include <boost/container/vector.hpp>
 #include <boost/container/deque.hpp>
 #include <boost/container/flat_map.hpp>
-#include <iosfwd> // std::ostream
 #include <string> // std::string
 #include <functional> // std::function
 #include <type_traits> // std::enable_if, std::decay, std::is_base_of
@@ -18,9 +17,6 @@
 #include "observer_ptr.hpp"
 
 namespace Asteria {
-
-template<typename ...TypesT>
-struct Type_tuple;
 
 class Insertable_streambuf;
 class Insertable_ostream;
@@ -51,14 +47,15 @@ using String    = std::string;
 using Opaque    = std::pair<std::string, std::shared_ptr<void>>;
 using Array     = Value_ptr_deque<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
-using Function  = std::function<Asteria::Value_ptr<Variable> (boost::container::vector<Reference> &&)>;
+using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
 
 }
 
-// These are instantiated in 'variable.cpp'.
+// See 'variable.cpp'.
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-extern template class std::function<Asteria::Value_ptr<Asteria::Variable> (Asteria::Array &&)>;
+// See 'reference.cpp'.
+extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
 
 #define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)	\
 	typename ::std::enable_if<	\

@@ -30,6 +30,10 @@
 	do {	\
 		try {	\
 			{ expr_ ; };	\
+			::std::cerr <<"ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " <<#expr_ <<'\n'	\
+			            <<"  File: " <<__FILE__ <<'\n'	\
+			            <<"  Line: " <<__LINE__ <<'\n'	\
+			            <<::std::flush;	\
 			::std::terminate();	\
 		} catch(::std::exception & e_){	\
 			/* success */	\

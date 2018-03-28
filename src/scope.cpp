@@ -4,8 +4,6 @@
 #include "precompiled.hpp"
 #include "scope.hpp"
 #include "variable.hpp"
-#include "reference.hpp"
-#include "misc.hpp"
 
 namespace Asteria {
 
@@ -13,26 +11,37 @@ Scope::~Scope(){
 	//
 }
 
-Value_ptr<Variable> *Scope::try_get_local_variable_recursive(const std::string &key){
-	auto scope_current = this;
+std::shared_ptr<Value_ptr<Variable>> Scope::try_get_local_variable_recursive(const std::string &key) const noexcept {
+	auto scope = this;
 	for(;;){
-		const auto it = scope_current->m_local_variables.find(key);
-		if(it != scope_current->m_local_variables.end()){
-			return &(it->second);
+		const auto it = scope->m_local_variables.find(key);
+		if(it != scope->m_local_variables.end()){
+			return it->second;
 		}
-		scope_current = scope_current->m_parent_opt.get();
-		if(!scope_current){
+		scope = scope->m_parent_opt.get();
+		if(!scope){
 			return nullptr;
 		}
 	}
 }
-
-Value_ptr<Variable> &Scope::declare_local_variable(const std::string &key, Value_ptr<Variable> &&variable_opt){
-	return m_local_variables[key] = std::move(variable_opt);
+std::shared_ptr<Value_ptr<Variable>> Scope::declare_local_variable(const std::string &key){
+	auto it = m_local_variables.find(key);
+	if(it == m_local_variables.end()){
+		auto variable_ptr = std::make_shared<Value_ptr<Variable>>();
+		it = m_local_variables.emplace(key, std::move(variable_ptr)).first;
+	}
+	return it->second;
 }
 void Scope::clear_local_variables() noexcept {
-	for(auto &pair : m_local_variables){
-		pair.second = false;
+	for(const auto &pair : m_local_variables){
+		auto &variable_ptr = *(pair.second);
+		if(!variable_ptr){
+			continue;
+		}
+		// Overwrite the value stored in this variable first.
+		// This breaks circular references, if any.
+		variable_ptr->set(false);
+		variable_ptr = nullptr;
 	}
 	m_local_variables.clear();
 }

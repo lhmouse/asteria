@@ -50,6 +50,10 @@ public:
 		return m_ptr;
 	}
 
+	long use_count() const noexcept {
+		return m_ptr.use_count();
+	}
+
 	const ElementT *get() const noexcept {
 		return m_ptr.get();
 	}

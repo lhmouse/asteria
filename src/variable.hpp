@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "type_tuple.hpp"
+#include <boost/optional.hpp>
 
 namespace Asteria {
 
@@ -42,6 +43,24 @@ public:
 		: m_variant(std::forward<ValueT>(value)), m_immutable(immutable)
 	{ }
 	~Variable();
+
+	Variable &operator=(const Variable &rhs){
+		if(m_immutable){
+			do_throw_immutable();
+		}
+		m_variant = rhs.m_variant;
+		return *this;
+	}
+	Variable &operator=(Variable &&rhs){
+		if(m_immutable){
+			do_throw_immutable();
+		}
+		m_variant = std::move(rhs.m_variant);
+		return *this;
+	}
+
+	Variable(const Variable &) = default;
+	Variable(Variable &&) = default;
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
@@ -121,20 +140,13 @@ public:
 // Non-member functions. All pointer parameters here are OPTIONAL.
 
 extern const char *get_type_name(Variable::Type type) noexcept;
-
-inline Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept {
-	return variable_opt ? variable_opt->get_type() : Variable::type_null;
-}
-inline const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept {
-	return get_type_name(get_variable_type(variable_opt));
-}
+extern Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept;
+extern const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept;
 
 extern void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt);
 
-inline std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt){
-	(dump_variable_recursive)(os, variable_opt);
-	return os;
-}
+extern std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt);
 
 }
 

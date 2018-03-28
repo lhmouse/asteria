@@ -12,30 +12,29 @@ namespace Asteria {
 class Reference {
 public:
 	enum Type : unsigned {
-		type_scoped_variable  = 0,
-		type_array_element    = 1,
-		type_object_member    = 2,
-		type_pure_rvalue      = 3,
+		type_rvalue_generic        = 0,
+		type_lvalue_generic        = 1,
+		type_lvalue_array_element  = 2,
+		type_lvalue_object_member  = 3,
 	};
-	struct Scoped_variable {
-		std::shared_ptr<Scope> scope;
-		std::string key;
+	struct Rvalue_generic {
+		std::shared_ptr<Variable> value_opt;
 	};
-	struct Array_element {
-		std::shared_ptr<Variable> variable_opt;
+	struct Lvalue_generic {
+		std::shared_ptr<Value_ptr<Variable>> variable_ptr;
+	};
+	struct Lvalue_array_element {
+		std::shared_ptr<Variable> variable;
 		std::int64_t index_bidirectional;
 	};
-	struct Object_member {
-		std::shared_ptr<Variable> variable_opt;
+	struct Lvalue_object_member {
+		std::shared_ptr<Variable> variable;
 		std::string key;
 	};
-	struct Pure_rvalue {
-		std::shared_ptr<Variable> variable_opt;
-	};
-	using Types = Type_tuple< Scoped_variable  // 0
-	                        , Array_element    // 1
-	                        , Object_member    // 2
-	                        , Pure_rvalue      // 3
+	using Types = Type_tuple< Rvalue_generic        // 0
+	                        , Lvalue_generic        // 1
+	                        , Lvalue_array_element  // 2
+	                        , Lvalue_object_member  // 3
 		>;
 
 private:
@@ -48,11 +47,16 @@ public:
 	{ }
 	~Reference();
 
-public:
-	std::shared_ptr<const Variable> load_opt() const;
-	Value_ptr<Variable> &store(Value_ptr<Variable> &&new_value_opt);
+	Reference(Reference &&) = default;
+	Reference &operator=(Reference &&) = default;
 
-	Value_ptr<Variable> steal_opt();
+	Reference(const Reference &) = delete;
+	Reference &operator=(const Reference &) = delete;
+
+public:
+	std::shared_ptr<Variable> load_opt() const;
+	void store_opt(boost::optional<Variable> &&value_new_opt) const;
+	Value_ptr<Variable> extract_result_opt();
 };
 
 }

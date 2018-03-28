@@ -5,7 +5,6 @@
 #define ASTERIA_SCOPE_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
 
 namespace Asteria {
 
@@ -13,7 +12,8 @@ class Scope {
 private:
 	const std::shared_ptr<Scope> m_parent_opt;
 
-	Value_ptr_map<std::string, Variable> m_local_variables;
+	// XXX Can we get rid of these pointer-to-pointers ??!
+	boost::container::flat_map<std::string, std::shared_ptr<Value_ptr<Variable>>> m_local_variables;
 
 public:
 	explicit Scope(std::shared_ptr<Scope> parent_opt)
@@ -26,9 +26,8 @@ public:
 		return m_parent_opt;
 	}
 
-	Value_ptr<Variable> *try_get_local_variable_recursive(const std::string &key);
-
-	Value_ptr<Variable> &declare_local_variable(const std::string &key, Value_ptr<Variable> &&variable_opt = nullptr);
+	std::shared_ptr<Value_ptr<Variable>> try_get_local_variable_recursive(const std::string &key) const noexcept;
+	std::shared_ptr<Value_ptr<Variable>> declare_local_variable(const std::string &key);
 	void clear_local_variables() noexcept;
 };
 

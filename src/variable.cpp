@@ -5,10 +5,6 @@
 #include "variable.hpp"
 #include "misc.hpp"
 
-template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
-template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-template class std::function<Asteria::Value_ptr<Asteria::Variable> (Asteria::Array &&)>;
-
 namespace Asteria {
 
 Variable::~Variable(){
@@ -48,6 +44,15 @@ const char *get_type_name(Variable::Type type) noexcept {
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		return "unknown";
 	}
+}
+Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept {
+	if(!variable_opt){
+		return Variable::type_null;
+	}
+	return variable_opt->get_type();
+}
+const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept {
+	return get_type_name(get_variable_type(variable_opt));
 }
 
 void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
@@ -119,5 +124,22 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 		std::terminate();
 	}
 }
+void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt){
+	if(!value_new_opt){
+		variable = nullptr;
+	} else if(!variable){
+		variable = make_value<Variable>(std::move(value_new_opt.get()));
+	} else {
+		*variable = std::move(value_new_opt.get());
+	}
+}
+
+std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt){
+	dump_variable_recursive(os, variable_opt);
+	return os;
+}
 
 }
+
+template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
+template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
