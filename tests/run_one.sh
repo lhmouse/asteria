@@ -6,6 +6,10 @@ if [[ "$#" -lt 1 ]]; then
 fi
 
 _file="$(readlink -e "$1")"
+if [[ -z "${_file}" ]]; then
+	printf '\e[31;1mSource file '"'$1'"' not found.  FAILED\e[0m\n' >&2
+	exit 3;
+fi
 shift
 
 _cxx="g++"
@@ -17,7 +21,7 @@ _output="test.out~"
 _errlog="stderr.log~"
 
 printf '\e[33;1mRUNNING\e[0m  %s\n' "${_file}"
-if ! ("${_cxx}" ${_cxxflags} ${_ldflags} "$_file" ${_libs} -o "${_output}" $* && LD_LIBRARY_PATH="${_runpath}" "./${_output}") >&2; then
+if ! ("${_cxx}" ${_cxxflags} ${_ldflags} "${_file}" ${_libs} -o "${_output}" $* && LD_LIBRARY_PATH="${_runpath}" "./${_output}") >&2; then
 	printf '\e[31;1mFAILED\e[0m   %s\n' "${_file}"
 	exit 1
 fi

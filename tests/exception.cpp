@@ -8,7 +8,7 @@
 using namespace Asteria;
 
 int main(){
-	auto var = make_value<Variable>(Integer(42));
+	auto var = create_variable_opt(Integer(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<Integer>() == 42);
 	try {

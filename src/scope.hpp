@@ -26,7 +26,7 @@ public:
 		return m_parent_opt;
 	}
 
-	std::shared_ptr<Value_ptr<Variable>> try_get_local_variable_recursive(const std::string &key) const noexcept;
+	std::shared_ptr<Value_ptr<Variable>> get_variable_recursive_opt(const std::string &key) const noexcept;
 	std::shared_ptr<Value_ptr<Variable>> declare_local_variable(const std::string &key);
 	void clear_local_variables() noexcept;
 };

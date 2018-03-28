@@ -59,7 +59,7 @@ public:
 		return *this;
 	}
 
-	Variable(const Variable &) = default;
+	explicit Variable(const Variable &) = default;
 	Variable(Variable &&) = default;
 
 private:
@@ -72,25 +72,25 @@ public:
 	}
 
 	template<Type expectT>
-	const typename Types::at<expectT>::type *try_get() const noexcept {
+	const typename Types::at<expectT>::type *get_opt() const noexcept {
 		return boost::get<typename Types::at<expectT>::type>(&m_variant);
 	}
 	template<Type expectT>
-	typename Types::at<expectT>::type *try_get() noexcept {
+	typename Types::at<expectT>::type *get_opt() noexcept {
 		return boost::get<typename Types::at<expectT>::type>(&m_variant);
 	}
 	template<typename ExpectT>
-	const ExpectT *try_get() const noexcept {
+	const ExpectT *get_opt() const noexcept {
 		return boost::get<ExpectT>(&m_variant);
 	}
 	template<typename ExpectT>
-	ExpectT *try_get() noexcept {
+	ExpectT *get_opt() noexcept {
 		return boost::get<ExpectT>(&m_variant);
 	}
 
 	template<Type expectT>
 	const typename Types::at<expectT>::type &get() const {
-		const auto ptr = try_get<expectT>();
+		const auto ptr = get_opt<expectT>();
 		if(!ptr){
 			do_throw_type_mismatch(expectT);
 		}
@@ -98,7 +98,7 @@ public:
 	}
 	template<Type expectT>
 	typename Types::at<expectT>::type &get(){
-		const auto ptr = try_get<expectT>();
+		const auto ptr = get_opt<expectT>();
 		if(!ptr){
 			do_throw_type_mismatch(expectT);
 		}
@@ -106,7 +106,7 @@ public:
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		const auto ptr = try_get<ExpectT>();
+		const auto ptr = get_opt<ExpectT>();
 		if(!ptr){
 			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
 		}
@@ -114,7 +114,7 @@ public:
 	}
 	template<typename ExpectT>
 	ExpectT &get(){
-		const auto ptr = try_get<ExpectT>();
+		const auto ptr = get_opt<ExpectT>();
 		if(!ptr){
 			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
 		}
@@ -139,12 +139,16 @@ public:
 
 // Non-member functions. All pointer parameters here are OPTIONAL.
 
+extern Value_ptr<Variable> create_variable_opt(boost::optional<Variable> &&value_new_opt = boost::none);
+extern Value_ptr<Variable> create_variable_opt(Variable &&value_new);
+extern void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt);
+extern void set_variable(Value_ptr<Variable> &variable, Variable &&value_new);
+
 extern const char *get_type_name(Variable::Type type) noexcept;
 extern Variable::Type get_variable_type(Observer_ptr<const Variable> variable_opt) noexcept;
 extern const char *get_variable_type_name(Observer_ptr<const Variable> variable_opt) noexcept;
 
 extern void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt);
 
 extern std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt);
 

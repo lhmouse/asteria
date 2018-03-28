@@ -169,11 +169,6 @@ void swap(const Value_ptr<ElementT> &lhs, const Value_ptr<ElementT> &rhs) noexce
 	lhs.swap(rhs);
 }
 
-template<typename ElementT, typename ...ParamsT>
-Value_ptr<ElementT> make_value(ParamsT &&...params){
-	return Value_ptr<ElementT>(std::make_shared<ElementT>(std::forward<ParamsT>(params)...));
-}
-
 }
 
 #endif

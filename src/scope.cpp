@@ -11,7 +11,7 @@ Scope::~Scope(){
 	//
 }
 
-std::shared_ptr<Value_ptr<Variable>> Scope::try_get_local_variable_recursive(const std::string &key) const noexcept {
+std::shared_ptr<Value_ptr<Variable>> Scope::get_variable_recursive_opt(const std::string &key) const noexcept {
 	auto scope = this;
 	for(;;){
 		const auto it = scope->m_local_variables.find(key);

@@ -24,12 +24,11 @@ class Logger;
 
 class Variable;
 class Reference;
+class Scope;
 class Exception;
 
-class Reference;
 class Initializer;
 class Expression;
-class Scope;
 class Statement;
 
 template<typename ElementT>
@@ -47,15 +46,14 @@ using String    = std::string;
 using Opaque    = std::pair<std::string, std::shared_ptr<void>>;
 using Array     = Value_ptr_deque<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
-using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
+using Function  = std::function<std::shared_ptr<Variable> (boost::container::vector<std::shared_ptr<Variable>> &&)>;
 
 }
 
-// See 'variable.cpp'.
+// Defined in 'variable.cpp'.
 extern template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-// See 'reference.cpp'.
-extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
+extern template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::vector<std::shared_ptr<Asteria::Variable>> &&)>;
 
 #define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)	\
 	typename ::std::enable_if<	\

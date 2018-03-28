@@ -124,14 +124,28 @@ void dump_variable_recursive(std::ostream &os, Observer_ptr<const Variable> vari
 		std::terminate();
 	}
 }
+
+Value_ptr<Variable> create_variable_opt(boost::optional<Variable> &&value_new_opt){
+	if(!value_new_opt){
+		return nullptr;
+	} else {
+		return Value_ptr<Variable>(std::make_shared<Variable>(std::move(value_new_opt.get())));
+	}
+}
+Value_ptr<Variable> create_variable_opt(Variable &&value_new){
+	return create_variable_opt(boost::optional<Variable>(std::move(value_new)));
+}
 void set_variable(Value_ptr<Variable> &variable, boost::optional<Variable> &&value_new_opt){
 	if(!value_new_opt){
 		variable = nullptr;
 	} else if(!variable){
-		variable = make_value<Variable>(std::move(value_new_opt.get()));
+		variable = Value_ptr<Variable>(std::make_shared<Variable>(std::move(value_new_opt.get())));
 	} else {
 		*variable = std::move(value_new_opt.get());
 	}
+}
+void set_variable(Value_ptr<Variable> &variable, Variable &&value_new){
+	return set_variable(variable, boost::optional<Variable>(std::move(value_new)));
 }
 
 std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable_opt){
@@ -143,3 +157,4 @@ std::ostream &operator<<(std::ostream &os, Observer_ptr<const Variable> variable
 
 template class boost::container::deque<Asteria::Value_ptr<Asteria::Variable>>;
 template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+template class std::function<std::shared_ptr<Asteria::Variable> (boost::container::vector<std::shared_ptr<Asteria::Variable>> &&)>;

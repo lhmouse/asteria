@@ -41,7 +41,7 @@ public:
 	~Initializer();
 
 public:
-	Value_ptr<Variable> create_variable_opt(const std::shared_ptr<Scope> &scope) const;
+	Value_ptr<Variable> evaluate_opt(const std::shared_ptr<Scope> &scope) const;
 };
 
 }

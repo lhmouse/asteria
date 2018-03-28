@@ -55,8 +55,9 @@ public:
 
 public:
 	std::shared_ptr<Variable> load_opt() const;
-	void store_opt(boost::optional<Variable> &&value_new_opt) const;
-	Value_ptr<Variable> extract_result_opt();
+	Value_ptr<Variable> extract_opt();
+	void store(boost::optional<Variable> &&value_new_opt) const;
+	void store(Variable &&value_new) const;
 };
 
 }
