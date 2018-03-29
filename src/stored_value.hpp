@@ -39,12 +39,12 @@ public:
 	Variable &get(){
 		return m_value_opt.get();
 	}
-	void reset() noexcept {
-		m_value_opt = boost::none;
-	}
 	template<typename ValueT>
 	void set(ValueT &&value){
 		m_value_opt = std::forward<ValueT>(value);
+	}
+	void clear() noexcept {
+		m_value_opt = boost::none;
 	}
 
 public:

@@ -24,11 +24,14 @@ public:
 		return "Asteria::Exception";
 	}
 
-	const Shared_ptr<Variable> &get_variable_opt() const noexcept {
+	Shared_ptr<Variable> get_variable_opt() const noexcept {
 		return m_variable_opt;
 	}
 	void set_variable(Shared_ptr<Variable> variable_opt) noexcept {
 		m_variable_opt = std::move(variable_opt);
+	}
+	void clear_variable() noexcept {
+		m_variable_opt = nullptr;
 	}
 };
 
