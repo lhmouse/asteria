@@ -4,7 +4,7 @@
 #include "test_init.hpp"
 #include "../src/variable.hpp"
 #include "../src/reference.hpp"
-#include "../src/nullable_value.hpp"
+#include "../src/stored_value.hpp"
 #include "../src/recycler.hpp"
 
 using namespace Asteria;

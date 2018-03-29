@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "reference.hpp"
 #include "variable.hpp"
-#include "nullable_value.hpp"
+#include "stored_value.hpp"
 #include "recycler.hpp"
 #include "misc.hpp"
 
@@ -31,10 +31,10 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 		auto size_current = static_cast<std::int64_t>(array->size());
 		if(normalized_index < 0){
 			if(!create_if_not_exist){
-				ASTERIA_DEBUG_LOG("Array index was before the front: index = ", params.index_bidirectional, ", size = ", array->size());
+				ASTERIA_DEBUG_LOG("Array index was before the front: index = ", params.index_bidirectional, ", size = ", size_current);
 				return std::forward_as_tuple(nullptr, nullptr);
 			}
-			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", array->size());
+			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", size_current);
 			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
 			if(count_to_prepend > array->max_size() - array->size()){
 				ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_prepend = ", count_to_prepend);
@@ -42,12 +42,13 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 			array->insert(array->begin(), static_cast<std::size_t>(count_to_prepend), nullptr);
 			normalized_index += static_cast<std::int64_t>(count_to_prepend);
 			size_current += static_cast<std::int64_t>(count_to_prepend);
+			ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 		} else if(normalized_index >= size_current){
 			if(!create_if_not_exist){
-				ASTERIA_DEBUG_LOG("Array index was after the back: index = ", params.index_bidirectional, ", size = ", array->size());
+				ASTERIA_DEBUG_LOG("Array index was after the back: index = ", params.index_bidirectional, ", size = ", size_current);
 				return std::forward_as_tuple(nullptr, nullptr);
 			}
-			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", array->size());
+			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", size_current);
 			const auto count_to_append = static_cast<std::uint64_t>(normalized_index - size_current) + 1;
 			if(count_to_append > array->max_size() - array->size()){
 				ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_append = ", count_to_append);
@@ -55,6 +56,7 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 			array->insert(array->end(), static_cast<std::size_t>(count_to_append), nullptr);
 			normalized_index += static_cast<std::int64_t>(0);
 			size_current += static_cast<std::int64_t>(count_to_append);
+			ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 		}
 		auto &variable = array->at(static_cast<std::size_t>(normalized_index));
 		return std::forward_as_tuple(variable, &variable); }
@@ -86,12 +88,12 @@ Shared_ptr<Variable> Reference::load_opt() const {
 	std::tie(ref_ptr, std::ignore) = do_dereference_once_opt(false);
 	return ref_ptr;
 }
-void Reference::store(const Shared_ptr<Recycler> &recycler, Nullable_value &&value_opt) const {
+void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value_opt) const {
 	Shared_ptr<Variable> ref_ptr;
 	Value_ptr<Variable> *pvar;
 	std::tie(ref_ptr, pvar) = do_dereference_once_opt(true);
 	if(!pvar){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempted to modify a temporary variable having type ", get_variable_type_name(ref_ptr), "`");
+		ASTERIA_THROW_RUNTIME_ERROR("This variable having type ", get_variable_type_name(ref_ptr), "` was unwriteable. It was probably a temporary value.");
 	}
 	recycler->set_variable(*pvar, std::move(value_opt));
 }

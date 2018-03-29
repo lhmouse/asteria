@@ -28,8 +28,8 @@ Shared_ptr<Named_variable> Scope::get_variable_recursive_opt(const std::string &
 Shared_ptr<Named_variable> Scope::declare_local_variable(const std::string &key){
 	auto it = m_local_variables.find(key);
 	if(it == m_local_variables.end()){
-		ASTERIA_DEBUG_LOG("Creating NEW local variable: key = ", key);
 		auto named_variable = std::make_shared<Named_variable>();
+		ASTERIA_DEBUG_LOG("Creating local variable: key = ", key);
 		it = m_local_variables.emplace(key, std::move(named_variable)).first;
 	}
 	return it->second;

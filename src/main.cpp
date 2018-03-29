@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "variable.hpp"
-#include "nullable_value.hpp"
+#include "stored_value.hpp"
 #include "misc.hpp"
 #include "recycler.hpp"
 #include <iostream>

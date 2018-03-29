@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "recycler.hpp"
 #include "variable.hpp"
-#include "nullable_value.hpp"
+#include "stored_value.hpp"
 #include "misc.hpp"
 
 namespace Asteria {
@@ -13,66 +13,39 @@ Recycler::~Recycler(){
 	clear_variables();
 }
 
-template<typename ValueT>
-void Recycler::do_set_variable_explicit(Value_ptr<Variable> &variable, ValueT &&value){
-	if(!variable){
-		auto ref_ptr = std::make_shared<Variable>(std::forward<ValueT>(value));
+Value_ptr<Variable> Recycler::create_variable_opt(Stored_value &&value_opt){
+	Value_ptr<Variable> variable;
+	if(value_opt){
+		auto ref_ptr = std::make_shared<Variable>(std::move(value_opt.get()));
+		defragment_automatic();
 		m_weak_variables.emplace_back(ref_ptr);
 		variable = Value_ptr<Variable>(std::move(ref_ptr));
-	} else {
-		*variable = std::forward<ValueT>(value);
 	}
-}
-
-Value_ptr<Variable> Recycler::create_variable_opt(Nullable_value &&value_opt){
-	Value_ptr<Variable> variable;
-	set_variable(variable, std::move(value_opt));
 	return variable;
 }
-void Recycler::set_variable(Value_ptr<Variable> &variable, Nullable_value &&value_opt){
-	const auto type = value_opt.get_type();
-	switch(type){
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wswitch"
-	case -2: { // Variable
-#pragma GCC diagnostic pop
-		auto &value = value_opt.get<Variable>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_null: {
-		variable = nullptr;
-		break; }
-	case Variable::type_boolean: {
-		auto &value = value_opt.get<Boolean>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_integer: {
-		auto &value = value_opt.get<Integer>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_double: {
-		auto &value = value_opt.get<Double>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_string: {
-		auto &value = value_opt.get<String>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_opaque: {
-		auto &value = value_opt.get<Opaque>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_array: {
-		auto &value = value_opt.get<Array>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_object: {
-		auto &value = value_opt.get<Object>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	case Variable::type_function: {
-		auto &value = value_opt.get<Function>();
-		return do_set_variable_explicit(variable, std::move(value)); }
-	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
-		std::terminate();
+void Recycler::set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt){
+	if(variable && value_opt){
+		*variable = std::move(value_opt.get());
+	} else {
+		variable = create_variable_opt(std::move(value_opt.get()));
 	}
 }
+void Recycler::defragment_automatic() noexcept {
+	const auto threshold_old = m_defragmentation_threshold;
+	if(m_weak_variables.size() < threshold_old){
+		return;
+	}
+	ASTERIA_DEBUG_LOG("Performing automatic garbage defragmentation: size = ", m_weak_variables.size());
+	const auto erased_begin = std::remove_if(m_weak_variables.begin(), m_weak_variables.end(), [](const std::weak_ptr<Variable> &weak_ref){ return weak_ref.expired(); });
+	ASTERIA_DEBUG_LOG("Removing dead objects: count_removed = ", std::distance(erased_begin, m_weak_variables.end()));
+	m_weak_variables.erase(erased_begin, m_weak_variables.end());
+	const auto threshold_new = std::max(threshold_old, m_weak_variables.size() + defragmentation_threshold_increment);
+	ASTERIA_DEBUG_LOG("Setting new defragmentation threshold: threshold_old = ", threshold_old, ", threshold_new = ", threshold_new);
+	m_defragmentation_threshold = threshold_new;
+}
 void Recycler::clear_variables() noexcept {
-	for(auto &weak_variable : m_weak_variables){
-		dispose_variable_recursive(weak_variable.lock().get());
+	for(auto &weak_ref : m_weak_variables){
+		dispose_variable_recursive(weak_ref.lock().get());
 	}
 	m_weak_variables.clear();
 }

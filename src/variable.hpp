@@ -11,8 +11,8 @@ namespace Asteria {
 
 class Variable {
 public:
-	enum Type : int {
-		type_null      = -1,
+	enum Type : unsigned {
+		type_null      = -1u,
 		type_boolean   =  0,
 		type_integer   =  1,
 		type_double    =  2,

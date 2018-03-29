@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Initializer : Deleted_copy {
 public:
-	enum Type : int {
+	enum Type : unsigned {
 		type_bracketed_init_list  = 0,
 		type_braced_init_list     = 1,
 		type_expression_init      = 2,

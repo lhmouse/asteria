@@ -9,22 +9,26 @@
 namespace Asteria {
 
 class Recycler : Deleted_move {
+public:
+	enum : std::size_t {
+		defragmentation_threshold_initial    = 200,
+		defragmentation_threshold_increment  = 100,
+	};
+
 private:
 	boost::container::vector<std::weak_ptr<Variable>> m_weak_variables;
+	std::size_t m_defragmentation_threshold;
 
 public:
 	Recycler()
-		: m_weak_variables()
+		: m_weak_variables(), m_defragmentation_threshold(defragmentation_threshold_initial)
 	{ }
 	~Recycler();
 
-private:
-	template<typename ValueT>
-	void do_set_variable_explicit(Value_ptr<Variable> &variable, ValueT &&value);
-
 public:
-	Value_ptr<Variable> create_variable_opt(Nullable_value &&value_opt);
-	void set_variable(Value_ptr<Variable> &variable, Nullable_value &&value_opt);
+	Value_ptr<Variable> create_variable_opt(Stored_value &&value_opt);
+	void set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt);
+	void defragment_automatic() noexcept;
 	void clear_variables() noexcept;
 };
 

@@ -24,7 +24,7 @@ pkginclude_HEADERS =	\
 	asteria/src/insertable_ostream.hpp	\
 	asteria/src/misc.hpp	\
 	asteria/src/variable.hpp	\
-	asteria/src/nullable_value.hpp	\
+	asteria/src/stored_value.hpp	\
 	asteria/src/reference.hpp	\
 	asteria/src/exception.hpp	\
 	asteria/src/initializer.hpp	\
@@ -39,7 +39,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/insertable_ostream.cpp	\
 	asteria/src/misc.cpp	\
 	asteria/src/variable.cpp	\
-	asteria/src/nullable_value.cpp	\
+	asteria/src/stored_value.cpp	\
 	asteria/src/reference.cpp	\
 	asteria/src/exception.cpp	\
 	asteria/src/initializer.cpp	\

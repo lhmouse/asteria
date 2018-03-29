@@ -32,7 +32,7 @@ class Variable;
 class Exception;
 
 // Runtime objects (movable only)
-class Nullable_value;
+class Stored_value;
 class Reference;
 
 // Runtime objects (not movable)
@@ -82,7 +82,7 @@ using Opaque    = Magic_handle;
 using Array     = Value_ptr_vector<Variable>;
 using Object    = Value_ptr_map<std::string, Variable>;
 using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<Shared_ptr<Variable>> &&)>;
-// If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'nullable_value.hpp' accordingly.
+// If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
 }
 

@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Reference : Deleted_copy {
 public:
-	enum Type : int {
+	enum Type : unsigned {
 		type_rvalue_generic        = 0,
 		type_lvalue_generic        = 1,
 		type_lvalue_array_element  = 2,
@@ -51,7 +51,7 @@ private:
 
 public:
 	Shared_ptr<Variable> load_opt() const;
-	void store(const Shared_ptr<Recycler> &recycler, Nullable_value &&value) const;
+	void store(const Shared_ptr<Recycler> &recycler, Stored_value &&value) const;
 	Value_ptr<Variable> extract_opt(const Shared_ptr<Recycler> &recycler);
 };
 

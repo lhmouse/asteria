@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "initializer.hpp"
 #include "variable.hpp"
-#include "nullable_value.hpp"
+#include "stored_value.hpp"
 #include "expression.hpp"
 #include "recycler.hpp"
 #include "reference.hpp"

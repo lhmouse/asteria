@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Expression : Deleted_copy {
 public:
-	enum Operator : int {
+	enum Operator : unsigned {
 		operator_add     =  0,  // +
 		operator_sub     =  1,  // -
 		operator_not     =  2,  // ~
@@ -53,7 +53,7 @@ public:
 
 	struct Trailer;
 
-	enum Type : int {
+	enum Type : unsigned {
 		type_prefix_operator                     = 0,
 		type_id_expression_with_trailer_opt      = 1,
 		type_lambda_expression_with_trailer_opt  = 2,
@@ -82,7 +82,7 @@ public:
 	                        , Nested_expression_with_trailer_opt  // 3
 		>;
 
-	enum Trailer_type : int {
+	enum Trailer_type : unsigned {
 		trailer_type_infix_operator     = 0,
 		trailer_type_ternary_operator   = 1,
 		trailer_type_postfix_operator   = 2,
