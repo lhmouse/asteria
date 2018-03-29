@@ -48,19 +48,17 @@ statement-list ::=
 	statement statement-list-opt
 
 statement ::=
-	null-statement | compound-statement | expression-statement |
+	expression-statement | compound-statement |
 	variable-definition | using-declaration | function-definition |
-	if-statement | else-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
+	if-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
 	try-statement | defer-statement |
 	label-statement | case-statement |
 	goto-statement | break-statement | continue-statement | throw-statement | return-statement
 
-null-statement ::=
-	";"
+expression-statement ::=
+	expression-opt ";"
 compound-statement ::=
 	"{" statement-list-opt "}"
-expression-statement ::=
-	expression ";"
 
 variable-definition ::=
 	( "var" | "const" ) identifier ( "=" initializer | "" ) ";"
@@ -70,9 +68,7 @@ function-definition ::=
 	"function" identifier "(" identifier-list-opt ")" compound-statement
 
 if-statement ::=
-	"if" "(" expression ")" compound-statement
-else-statement ::=
-	"else" ( if-statement | compound-statement )
+	"if" "(" expression ")" compound-statement ( "else" ( if-statement | compound-statement ) | "" )
 do-while-statement ::=
 	"do" compound-statement "while" "(" expression ")" ";"
 while-statement ::=
