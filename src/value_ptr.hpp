@@ -7,7 +7,6 @@
 #include <memory> // std::shared_ptr
 #include <utility> // std::move, std::forward, std::swap
 #include <type_traits> // std::enable_if, std::is_convertible, std::remove_cv, std::is_same
-#include <cassert> // assert()
 
 namespace Asteria {
 
@@ -26,20 +25,17 @@ public:
 	explicit Value_ptr(std::shared_ptr<OtherT> &&other) noexcept
 		: m_ptr(std::move(other))
 	{ }
+
 	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor prevents unintentional copies.
 		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
-	{ }
-	Value_ptr(Value_ptr &&rhs) noexcept
-		: m_ptr(std::move(rhs.m_ptr))
 	{ }
 	Value_ptr &operator=(const Value_ptr &rhs) noexcept {
 		Value_ptr(rhs).swap(*this);
 		return *this;
 	}
-	Value_ptr &operator=(Value_ptr &&rhs) noexcept {
-		Value_ptr(std::move(rhs)).swap(*this);
-		return *this;
-	}
+
+	Value_ptr(Value_ptr &&rhs) = default;
+	Value_ptr &operator=(Value_ptr &&rhs) = default;
 
 public:
 	const ElementT *get() const noexcept {
@@ -65,21 +61,17 @@ public:
 	}
 
 	const ElementT &operator*() const noexcept {
-		assert(m_ptr);
-		return *m_ptr;
+		return m_ptr.operator*();
 	}
 	ElementT &operator*() noexcept {
-		assert(m_ptr);
-		return *m_ptr;
+		return m_ptr.operator*();
 	}
 
 	const ElementT *operator->() const noexcept {
-		assert(m_ptr);
-		return m_ptr.get();
+		return m_ptr.operator->();
 	}
 	ElementT *operator->() noexcept {
-		assert(m_ptr);
-		return m_ptr.get();
+		return m_ptr.operator->();
 	}
 };
 
