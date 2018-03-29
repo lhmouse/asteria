@@ -54,15 +54,6 @@ public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
 	}
-
-	template<Type expectT>
-	const typename Types::at<expectT>::type *get_opt() const noexcept {
-		return boost::get<typename Types::at<expectT>::type>(&m_variant);
-	}
-	template<Type expectT>
-	typename Types::at<expectT>::type *get_opt() noexcept {
-		return boost::get<typename Types::at<expectT>::type>(&m_variant);
-	}
 	template<typename ExpectT>
 	const ExpectT *get_opt() const noexcept {
 		return boost::get<ExpectT>(&m_variant);
@@ -70,23 +61,6 @@ public:
 	template<typename ExpectT>
 	ExpectT *get_opt() noexcept {
 		return boost::get<ExpectT>(&m_variant);
-	}
-
-	template<Type expectT>
-	const typename Types::at<expectT>::type &get() const {
-		const auto ptr = get_opt<expectT>();
-		if(!ptr){
-			do_throw_type_mismatch(expectT);
-		}
-		return *ptr;
-	}
-	template<Type expectT>
-	typename Types::at<expectT>::type &get(){
-		const auto ptr = get_opt<expectT>();
-		if(!ptr){
-			do_throw_type_mismatch(expectT);
-		}
-		return *ptr;
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
@@ -104,7 +78,6 @@ public:
 		}
 		return *ptr;
 	}
-
 	template<typename ValueT>
 	void set(ValueT &&value){
 		m_variant = std::forward<ValueT>(value);

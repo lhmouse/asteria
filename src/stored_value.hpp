@@ -36,6 +36,10 @@ public:
 	Variable &get(){
 		return m_value_opt.get();
 	}
+	template<typename ValueT>
+	void set(ValueT &&value){
+		m_value_opt = std::forward<ValueT>(value);
+	}
 	explicit operator bool() const noexcept {
 		return bool(m_value_opt);
 	}
