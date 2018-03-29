@@ -73,7 +73,7 @@ public:
 	};
 	struct Lambda_expression_with_trailer_opt {
 		boost::container::vector<std::string> parameter_list;
-		Value_ptr_vector<Statement> function_body;
+		Value_ptr_vector<Statement> body_statement_list;
 		Value_ptr<Trailer> trailer_opt;
 	};
 	struct Nested_expression_with_trailer_opt {
