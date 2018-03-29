@@ -10,35 +10,44 @@
 
 namespace Asteria {
 
+struct Reference::Dereference_once_result {
+	Shared_ptr<Variable> rvar_opt;  // How to read a value through this reference?
+	Value_ptr<Variable> *wptr_opt;  // How to write a value through this reference?
+	bool immutable;                 // Is this reference read-only?
+};
+
 Reference::Reference(Reference &&) = default;
 Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
 
-std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereference_once_opt(bool create_if_not_exist) const {
+Reference::Dereference_once_result Reference::do_dereference_once_opt(bool create_if_not_exist) const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){
 	case type_rvalue_generic: {
 		const auto &params = boost::get<Rvalue_generic>(m_variant);
-		return std::forward_as_tuple(params.value_opt, nullptr); }
+		Dereference_once_result res = { params.xvar_opt, nullptr, true };
+		return std::move(res); }
 
 	case type_lvalue_generic: {
 		const auto &params = boost::get<Lvalue_generic>(m_variant);
-		auto &variable = params.named_variable->variable;
-		return std::forward_as_tuple(variable, &variable); }
+		auto &variable = params.named_var->variable;
+		Dereference_once_result res = { variable, &variable, params.named_var->immutable };
+		return std::move(res); }
 
 	case type_lvalue_array_element: {
 		const auto &params = boost::get<Lvalue_array_element>(m_variant);
-		const auto array = params.variable->get_opt<Array>();
+		const auto array = params.rvar->get_opt<Array>();
 		if(!array){
-			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.variable), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.rvar), "`");
 		}
 		auto normalized_index = (params.index_bidirectional >= 0) ? params.index_bidirectional
 		                                                          : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index_bidirectional) + array->size());
 		auto size_current = static_cast<std::int64_t>(array->size());
 		if(normalized_index < 0){
-			if(!create_if_not_exist){
+			if(!create_if_not_exist || params.immutable){
 				ASTERIA_DEBUG_LOG("Array index was before the front: index = ", params.index_bidirectional, ", size = ", size_current);
-				return std::forward_as_tuple(nullptr, nullptr);
+				Dereference_once_result res = { nullptr, nullptr, params.immutable };
+				return std::move(res);
 			}
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", size_current);
 			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
@@ -50,9 +59,10 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 			size_current += static_cast<std::int64_t>(count_to_prepend);
 			ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 		} else if(normalized_index >= size_current){
-			if(!create_if_not_exist){
+			if(!create_if_not_exist || params.immutable){
 				ASTERIA_DEBUG_LOG("Array index was after the back: index = ", params.index_bidirectional, ", size = ", size_current);
-				return std::forward_as_tuple(nullptr, nullptr);
+				Dereference_once_result res = { nullptr, nullptr, params.immutable };
+				return std::move(res);
 			}
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", size_current);
 			const auto count_to_append = static_cast<std::uint64_t>(normalized_index - size_current) + 1;
@@ -65,26 +75,29 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 			ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 		}
 		auto &variable = array->at(static_cast<std::size_t>(normalized_index));
-		return std::forward_as_tuple(variable, &variable); }
+		Dereference_once_result res = { variable, &variable, params.immutable };
+		return std::move(res); }
 
 	case type_lvalue_object_member: {
 		const auto &params = boost::get<Lvalue_object_member>(m_variant);
-		const auto object = params.variable->get_opt<Object>();
+		const auto object = params.rvar->get_opt<Object>();
 		if(!object){
-			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.variable), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.rvar), "`");
 		}
 		auto it = object->find(params.key);
 		if(it == object->end()){
-			if(!create_if_not_exist){
+			if(!create_if_not_exist || params.immutable){
 				ASTERIA_DEBUG_LOG("Object member was not found: key = ", params.key);
-				return std::forward_as_tuple(nullptr, nullptr);
+				Dereference_once_result res = { nullptr, nullptr, params.immutable };
+				return std::move(res);
 			}
 			ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
 			it = object->emplace(params.key, nullptr).first;
 			ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 		}
 		auto &variable = it->second;
-		return std::forward_as_tuple(variable, &variable); }
+		Dereference_once_result res = { variable, &variable, params.immutable };
+		return std::move(res); }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
@@ -93,31 +106,27 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 }
 
 Shared_ptr<Variable> Reference::load_opt() const {
-	Shared_ptr<Variable> rptr;
-	std::tie(rptr, std::ignore) = do_dereference_once_opt(false);
-	return rptr;
+	auto result = do_dereference_once_opt(false);
+	return std::move(result.rvar_opt);
 }
 void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value_opt) const {
-	Shared_ptr<Variable> rptr;
-	Value_ptr<Variable> *pvar;
-	std::tie(rptr, pvar) = do_dereference_once_opt(true);
-	if(!pvar){
-		ASTERIA_THROW_RUNTIME_ERROR("This variable having type ", get_variable_type_name(rptr), "` was unwriteable. It was probably a temporary value.");
+	auto result = do_dereference_once_opt(true);
+	if(!(result.wptr_opt)){
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
-	recycler->set_variable(*pvar, std::move(value_opt));
+	if(result.immutable){
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
+	}
+	recycler->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
 Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler){
 	const auto type = static_cast<Type>(m_variant.which());
 	if(type == type_rvalue_generic){
 		auto &params = boost::get<Rvalue_generic>(m_variant);
-		return Value_ptr<Variable>(std::move(params.value_opt));
+		return Value_ptr<Variable>(std::move(params.xvar_opt));
 	} else {
-		Shared_ptr<Variable> rptr;
-		std::tie(rptr, std::ignore) = do_dereference_once_opt(false);
-		if(!rptr){
-			return nullptr;
-		}
-		return recycler->create_variable_opt(*rptr);
+		auto result = do_dereference_once_opt(false);
+		return result.rvar_opt ? recycler->create_variable_opt(*(result.rvar_opt)) : nullptr;
 	}
 }
 

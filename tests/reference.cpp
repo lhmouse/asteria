@@ -29,7 +29,7 @@ int main(){
 
 	var->set(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
-	Reference::Lvalue_array_element aref = { var, 9 };
+	Reference::Lvalue_array_element aref = { var, true, 9 };
 	ref = Reference(std::move(aref));
 	ASTERIA_TEST_CHECK_CATCH(ref.load_opt());
 	Array array;
@@ -40,12 +40,16 @@ int main(){
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(!ptr);
 	ASTERIA_TEST_CHECK(var->get<Array>().size() == 5);
+	ASTERIA_TEST_CHECK_CATCH(ref.store(recycler, Integer(67)));
+	ASTERIA_TEST_CHECK(var->get<Array>().size() == 5);
+	aref = { var, false, 9 };
+	ref = Reference(std::move(aref));
 	ref.store(recycler, Integer(67));
 	ASTERIA_TEST_CHECK(var->get<Array>().size() == 10);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(8) == nullptr);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(9)->get<Integer>() == 67);
 
-	aref = { var, -7 };
+	aref = { var, false, -7 };
 	ref = Reference(std::move(aref));
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(ptr);
@@ -53,7 +57,7 @@ int main(){
 	ref.store(recycler, Integer(65));
 	ASTERIA_TEST_CHECK(var->get<Array>().at(3)->get<Integer>() == 65);
 
-	aref = { var, 1 };
+	aref = { var, false, 1 };
 	ref = Reference(std::move(aref));
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(ptr);
@@ -61,7 +65,7 @@ int main(){
 	ref.store(recycler, Integer(26));
 	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<Integer>() == 26);
 
-	aref = { var, -12 };
+	aref = { var, false, -12 };
 	ref = Reference(std::move(aref));
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(!ptr);
@@ -70,7 +74,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Integer>() == 37);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(3)->get<Integer>() == 26);
 
-	Reference::Lvalue_object_member oref = { var, "three" };
+	Reference::Lvalue_object_member oref = { var, true, "three" };
 	ref = Reference(std::move(oref));
 	ASTERIA_TEST_CHECK_CATCH(ref.load_opt());
 	Object object;
@@ -80,10 +84,14 @@ int main(){
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(!ptr);
 	ASTERIA_TEST_CHECK(var->get<Object>().size() == 2);
+	ASTERIA_TEST_CHECK_CATCH(ref.store(recycler, Integer(92)));
+	ASTERIA_TEST_CHECK(var->get<Object>().size() == 2);
+	oref = { var, false, "three" };
+	ref = Reference(std::move(oref));
 	ref.store(recycler, Integer(92));
 	ASTERIA_TEST_CHECK(var->get<Object>().size() == 3);
 
-	oref = { var, "one" };
+	oref = { var, false, "one" };
 	ref = Reference(std::move(oref));
 	ptr = ref.load_opt();
 	ASTERIA_TEST_CHECK(ptr);

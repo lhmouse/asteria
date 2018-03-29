@@ -10,6 +10,9 @@
 namespace Asteria {
 
 class Reference {
+private:
+	struct Dereference_once_result;
+
 public:
 	enum Type : unsigned {
 		type_rvalue_generic        = 0,
@@ -18,17 +21,19 @@ public:
 		type_lvalue_object_member  = 3,
 	};
 	struct Rvalue_generic {
-		Shared_ptr<Variable> value_opt;
+		Shared_ptr<Variable> xvar_opt;
 	};
 	struct Lvalue_generic {
-		Shared_ptr<Named_variable> named_variable;
+		Shared_ptr<Named_variable> named_var;
 	};
 	struct Lvalue_array_element {
-		Shared_ptr<Variable> variable;
+		Shared_ptr<Variable> rvar;
+		bool immutable;
 		std::int64_t index_bidirectional;
 	};
 	struct Lvalue_object_member {
-		Shared_ptr<Variable> variable;
+		Shared_ptr<Variable> rvar;
+		bool immutable;
 		std::string key;
 	};
 	using Types = Type_tuple< Rvalue_generic        // 0
@@ -54,7 +59,7 @@ public:
 	Reference &operator=(const Reference &) = delete;
 
 private:
-	std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> do_dereference_once_opt(bool create_if_not_exist) const;
+	Dereference_once_result do_dereference_once_opt(bool create_if_not_exist) const;
 
 public:
 	Shared_ptr<Variable> load_opt() const;
