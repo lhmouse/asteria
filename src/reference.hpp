@@ -62,6 +62,22 @@ private:
 	Dereference_once_result do_dereference_once_opt(bool create_if_not_exist) const;
 
 public:
+	Type get_type() const noexcept {
+		return static_cast<Type>(m_variant.which());
+	}
+	template<typename ExpectT>
+	const ExpectT &get() const {
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT &get(){
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ValueT>
+	void set(ValueT &&value){
+		m_variant = std::forward<ValueT>(value);
+	}
+
 	Shared_ptr<Variable> load_opt() const;
 	void store(const Shared_ptr<Recycler> &recycler, Stored_value &&value) const;
 	Value_ptr<Variable> extract_opt(const Shared_ptr<Recycler> &recycler);

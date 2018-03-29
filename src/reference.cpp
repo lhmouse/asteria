@@ -21,21 +21,21 @@ Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
 
 Reference::Dereference_once_result Reference::do_dereference_once_opt(bool create_if_not_exist) const {
-	const auto type = static_cast<Type>(m_variant.which());
+	const auto type = get_type();
 	switch(type){
 	case type_rvalue_generic: {
-		const auto &params = boost::get<Rvalue_generic>(m_variant);
+		const auto &params = get<Rvalue_generic>();
 		Dereference_once_result res = { params.xvar_opt, nullptr, true };
 		return std::move(res); }
 
 	case type_lvalue_generic: {
-		const auto &params = boost::get<Lvalue_generic>(m_variant);
+		const auto &params = get<Lvalue_generic>();
 		auto &variable = params.named_var->variable;
 		Dereference_once_result res = { variable, &variable, params.named_var->immutable };
 		return std::move(res); }
 
 	case type_lvalue_array_element: {
-		const auto &params = boost::get<Lvalue_array_element>(m_variant);
+		const auto &params = get<Lvalue_array_element>();
 		const auto array = params.rvar->get_opt<Array>();
 		if(!array){
 			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.rvar), "`");
@@ -79,7 +79,7 @@ Reference::Dereference_once_result Reference::do_dereference_once_opt(bool creat
 		return std::move(res); }
 
 	case type_lvalue_object_member: {
-		const auto &params = boost::get<Lvalue_object_member>(m_variant);
+		const auto &params = get<Lvalue_object_member>();
 		const auto object = params.rvar->get_opt<Object>();
 		if(!object){
 			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.rvar), "`");
@@ -120,9 +120,9 @@ void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value
 	recycler->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
 Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler){
-	const auto type = static_cast<Type>(m_variant.which());
+	const auto type = get_type();
 	if(type == type_rvalue_generic){
-		auto &params = boost::get<Rvalue_generic>(m_variant);
+		auto &params = get<Rvalue_generic>();
 		return Value_ptr<Variable>(std::move(params.xvar_opt));
 	} else {
 		auto result = do_dereference_once_opt(false);

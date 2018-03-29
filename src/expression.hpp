@@ -130,12 +130,12 @@ public:
 	};
 
 private:
-	Types::rebind_as_variant m_value;
+	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression, ValueT)>
 	Expression(ValueT &&value)
-		: m_value(std::forward<ValueT>(value))
+		: m_variant(std::forward<ValueT>(value))
 	{ }
 
 	Expression(Expression &&);
@@ -147,19 +147,19 @@ public:
 
 public:
 	Type get_type() const noexcept {
-		return static_cast<Type>(m_value.which());
+		return static_cast<Type>(m_variant.which());
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		return boost::get<ExpectT>(m_value);
+		return boost::get<ExpectT>(m_variant);
 	}
 	template<typename ExpectT>
 	ExpectT &get(){
-		return boost::get<ExpectT>(m_value);
+		return boost::get<ExpectT>(m_variant);
 	}
 	template<typename ValueT>
 	void set(ValueT &&value){
-		m_value = std::forward<ValueT>(value);
+		m_variant = std::forward<ValueT>(value);
 	}
 
 	Reference evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
