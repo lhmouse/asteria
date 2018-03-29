@@ -51,7 +51,7 @@ public:
 	}
 
 	explicit operator bool() const noexcept {
-		return bool(m_ptr);
+		return m_ptr != nullptr;
 	}
 
 	operator std::shared_ptr<const ElementT>() const noexcept {

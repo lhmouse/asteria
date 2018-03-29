@@ -14,6 +14,9 @@ private:
 	boost::optional<Variable> m_value_opt;
 
 public:
+	Stored_value(Null = nullptr)
+		: m_value_opt()
+	{ }
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Stored_value, ValueT)>
 	Stored_value(ValueT &&value_opt)
 		: m_value_opt(std::forward<ValueT>(value_opt))
@@ -27,8 +30,8 @@ public:
 	Stored_value &operator=(const Stored_value &) = delete;
 
 public:
-	bool is_null() const noexcept {
-		return !m_value_opt;
+	bool is_set() const noexcept {
+		return m_value_opt.get_ptr() != nullptr;
 	}
 	const Variable &get() const {
 		return m_value_opt.get();
@@ -36,12 +39,17 @@ public:
 	Variable &get(){
 		return m_value_opt.get();
 	}
+	void reset() noexcept {
+		m_value_opt = boost::none;
+	}
 	template<typename ValueT>
 	void set(ValueT &&value){
 		m_value_opt = std::forward<ValueT>(value);
 	}
+
+public:
 	explicit operator bool() const noexcept {
-		return bool(m_value_opt);
+		return is_set();
 	}
 };
 

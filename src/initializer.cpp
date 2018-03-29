@@ -17,10 +17,10 @@ Initializer &Initializer::operator=(Initializer &&) = default;
 Initializer::~Initializer() = default;
 
 Value_ptr<Variable> Initializer::evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
-	const auto type = static_cast<Type>(m_variant.which());
+	const auto type = get_type();
 	switch(type){
 	case type_bracketed_init_list: {
-		const auto &params = boost::get<Bracketed_init_list>(m_variant);
+		const auto &params = get<Bracketed_init_list>();
 		Array array;
 		array.reserve(params.initializers.size());
 		for(const auto &child : params.initializers){
@@ -29,7 +29,7 @@ Value_ptr<Variable> Initializer::evaluate_opt(const Shared_ptr<Recycler> &recycl
 		return recycler->create_variable_opt(std::move(array)); }
 
 	case type_braced_init_list: {
-		const auto &params = boost::get<Braced_init_list>(m_variant);
+		const auto &params = get<Braced_init_list>();
 		Object object;
 		object.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){
@@ -38,7 +38,7 @@ Value_ptr<Variable> Initializer::evaluate_opt(const Shared_ptr<Recycler> &recycl
 		return recycler->create_variable_opt(std::move(object)); }
 
 	case type_expression_init: {
-		const auto &params = boost::get<Expression_init>(m_variant);
+		const auto &params = get<Expression_init>();
 		auto result = params.expression->evaluate(recycler, scope);
 		return result.extract_opt(recycler); }
 

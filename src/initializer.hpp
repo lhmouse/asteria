@@ -47,6 +47,22 @@ public:
 	Initializer &operator=(const Initializer &) = delete;
 
 public:
+	Type get_type() const noexcept {
+		return static_cast<Type>(m_variant.which());
+	}
+	template<typename ExpectT>
+	const ExpectT &get() const {
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT &get(){
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ValueT>
+	void set(ValueT &&value){
+		m_variant = std::forward<ValueT>(value);
+	}
+
 	Value_ptr<Variable> evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
 };
 

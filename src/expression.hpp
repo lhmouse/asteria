@@ -146,6 +146,22 @@ public:
 	Expression &operator=(const Expression &) = delete;
 
 public:
+	Type get_type() const noexcept {
+		return static_cast<Type>(m_value.which());
+	}
+	template<typename ExpectT>
+	const ExpectT &get() const {
+		return boost::get<ExpectT>(m_value);
+	}
+	template<typename ExpectT>
+	ExpectT &get(){
+		return boost::get<ExpectT>(m_value);
+	}
+	template<typename ValueT>
+	void set(ValueT &&value){
+		m_value = std::forward<ValueT>(value);
+	}
+
 	Reference evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
 };
 
