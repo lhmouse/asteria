@@ -122,11 +122,9 @@ void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value
 Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler){
 	const auto type = get_type();
 	if(type == type_rvalue_generic){
-		auto &params = get<Rvalue_generic>();
-		return Value_ptr<Variable>(std::move(params.xvar_opt));
+		return Value_ptr<Variable>(std::move(get<Rvalue_generic>().xvar_opt));
 	} else {
-		auto result = do_dereference_once_opt(false);
-		return result.rvar_opt ? recycler->create_variable_opt(*(result.rvar_opt)) : nullptr;
+		return recycler->copy_variable_opt(do_dereference_once_opt(false).rvar_opt);
 	}
 }
 

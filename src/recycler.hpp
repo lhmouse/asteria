@@ -30,6 +30,7 @@ public:
 
 public:
 	Value_ptr<Variable> create_variable_opt(Stored_value &&value_opt);
+	Value_ptr<Variable> copy_variable_opt(const std::shared_ptr<const Variable> &rvar_opt);
 	void set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt);
 	void defragment_automatic() noexcept;
 	void clear_variables() noexcept;

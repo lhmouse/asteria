@@ -23,6 +23,13 @@ Value_ptr<Variable> Recycler::create_variable_opt(Stored_value &&value_opt){
 	}
 	return variable;
 }
+Value_ptr<Variable> Recycler::copy_variable_opt(const std::shared_ptr<const Variable> &rvar_opt){
+	Stored_value value_opt;
+	if(rvar_opt){
+		value_opt.set(*rvar_opt);
+	}
+	return create_variable_opt(std::move(value_opt));
+}
 void Recycler::set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt){
 	if(variable && value_opt){
 		*variable = std::move(value_opt.get());
