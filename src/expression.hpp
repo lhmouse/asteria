@@ -118,9 +118,9 @@ public:
 		std::string key;
 		Value_ptr<Trailer> next_trailer_opt;
 	};
-	using Trailer_types = Type_tuple< Binary_remainder    // 0
-	                                , Ternary_remainder   // 1
-	                                , Postfix_remainder   // 2
+	using Trailer_types = Type_tuple< Binary_remainder   // 0
+	                                , Ternary_remainder  // 1
+	                                , Postfix_remainder  // 2
 	                                , Function_call      // 3
 	                                , Subscripting       // 4
 	                                , Member_access      // 5
