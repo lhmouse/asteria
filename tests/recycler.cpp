@@ -11,20 +11,13 @@ using namespace Asteria;
 int main(){
 	auto recycler = std::make_shared<Recycler>();
 
-	auto nested_int = std::make_shared<Variable>(Integer(42));
-	ASTERIA_TEST_CHECK(nested_int->get_type() == Variable::type_integer);
-	ASTERIA_TEST_CHECK(nested_int->get<Integer>() == 42);
-	auto nested_str = std::make_shared<Variable>(String("hello"));
-	ASTERIA_TEST_CHECK(nested_str->get_type() == Variable::type_string);
-	ASTERIA_TEST_CHECK(nested_str->get<String>() == "hello");
-
 	auto obj = recycler->create_variable_opt(Object());
-	obj->get<Object>().emplace("int", std::shared_ptr<Variable>(nested_int));
-	obj->get<Object>().emplace("str", std::shared_ptr<Variable>(nested_str));
+	auto pair = obj->get<Object>().emplace("int", std::make_shared<Variable>(Integer(42)));
+	auto weak_int = std::weak_ptr<Variable>(pair.first->second);
+	pair = obj->get<Object>().emplace("str", std::make_shared<Variable>(String("hello")));
+	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 
 	recycler->clear_variables();
-	ASTERIA_TEST_CHECK(nested_int->get_type() == Variable::type_boolean);
-	ASTERIA_TEST_CHECK(nested_int->get<Boolean>() == false);
-	ASTERIA_TEST_CHECK(nested_str->get_type() == Variable::type_boolean);
-	ASTERIA_TEST_CHECK(nested_str->get<Boolean>() == false);
+	ASTERIA_TEST_CHECK(weak_int.expired());
+	ASTERIA_TEST_CHECK(weak_str.expired());
 }

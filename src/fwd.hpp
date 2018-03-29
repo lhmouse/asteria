@@ -67,9 +67,9 @@ using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
 using Opaque    = Magic_handle;
+using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
 using Array     = boost::container::vector<Value_ptr<Variable>>;
 using Object    = boost::container::flat_map<std::string, Value_ptr<Variable>>;
-using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
 }
@@ -79,10 +79,10 @@ using Function  = std::function<Reference (boost::container::vector<Reference> &
 		!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)	\
 		>::type * = nullptr
 
+// Instantiated in 'src/reference.cpp'.
+extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
 // Instantiated in 'src/variable.cpp'.
 extern template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-// Instantiated in 'src/reference.cpp'.
-extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
 
 #endif

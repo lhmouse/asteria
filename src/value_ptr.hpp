@@ -53,10 +53,18 @@ public:
 	explicit operator bool() const noexcept {
 		return bool(m_ptr);
 	}
+
 	operator std::shared_ptr<const ElementT>() const noexcept {
 		return m_ptr;
 	}
 	operator std::shared_ptr<ElementT>() noexcept {
+		return m_ptr;
+	}
+
+	operator std::weak_ptr<const ElementT>() const noexcept {
+		return m_ptr;
+	}
+	operator std::weak_ptr<ElementT>() noexcept {
 		return m_ptr;
 	}
 

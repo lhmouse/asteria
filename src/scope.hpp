@@ -30,7 +30,7 @@ public:
 	}
 
 	Shared_ptr<Named_variable> get_variable_local_opt(const std::string &key) const noexcept;
-	Shared_ptr<Named_variable> set_variable_local(const std::string &key);
+	Shared_ptr<Named_variable> declare_variable_local(const std::string &key);
 	void clear_variables_local() noexcept;
 };
 

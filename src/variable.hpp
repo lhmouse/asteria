@@ -18,18 +18,18 @@ public:
 		type_double    =  2,
 		type_string    =  3,
 		type_opaque    =  4,
-		type_array     =  5,
-		type_object    =  6,
-		type_function  =  7,
+		type_function  =  5,
+		type_array     =  6,
+		type_object    =  7,
 	};
 	using Types = Type_tuple< Boolean    //  0
 	                        , Integer    //  1
 	                        , Double     //  2
 	                        , String     //  3
 	                        , Opaque     //  4
-	                        , Array      //  5
-	                        , Object     //  6
-	                        , Function   //  7
+	                        , Function   //  5
+	                        , Array      //  6
+	                        , Object     //  7
 		>;
 
 private:

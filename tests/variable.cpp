@@ -32,22 +32,6 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Opaque>().magic == opaque.magic);
 	ASTERIA_TEST_CHECK(var->get<Opaque>().handle == opaque.handle);
 
-	Array array;
-	array.emplace_back(Value_ptr<Variable>(std::make_shared<Variable>(true)));
-	array.emplace_back(Value_ptr<Variable>(std::make_shared<Variable>(std::string("world"))));
-	var->set(std::move(array));
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
-	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Boolean>() == true);
-	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
-
-	Object object;
-	object.emplace("one", Value_ptr<Variable>(std::make_shared<Variable>(true)));
-	object.emplace("two", Value_ptr<Variable>(std::make_shared<Variable>(std::string("world"))));
-	var->set(std::move(object));
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
-	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
-	ASTERIA_TEST_CHECK(var->get<Object>().at("two")->get<String>() == "world");
-
 	Function function = [](boost::container::vector<Reference> &&params) -> Reference {
 		auto param_one = params.at(0).load_opt();
 		ASTERIA_TEST_CHECK(param_one);
@@ -64,4 +48,20 @@ int main(){
 	auto result = ref.load_opt();
 	ASTERIA_TEST_CHECK(result);
 	ASTERIA_TEST_CHECK(result->get<Integer>() == 180);
+
+	Array array;
+	array.emplace_back(Value_ptr<Variable>(std::make_shared<Variable>(true)));
+	array.emplace_back(Value_ptr<Variable>(std::make_shared<Variable>(std::string("world"))));
+	var->set(std::move(array));
+	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
+	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Boolean>() == true);
+	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
+
+	Object object;
+	object.emplace("one", Value_ptr<Variable>(std::make_shared<Variable>(true)));
+	object.emplace("two", Value_ptr<Variable>(std::make_shared<Variable>(std::string("world"))));
+	var->set(std::move(object));
+	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
+	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
+	ASTERIA_TEST_CHECK(var->get<Object>().at("two")->get<String>() == "world");
 }

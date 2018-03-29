@@ -31,12 +31,12 @@ const char *get_type_name(Variable::Type type) noexcept {
 		return "string";
 	case Variable::type_opaque:
 		return "opaque";
+	case Variable::type_function:
+		return "function";
 	case Variable::type_array:
 		return "array";
 	case Variable::type_object:
 		return "object";
-	case Variable::type_function:
-		return "function";
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		return "unknown";
@@ -92,6 +92,9 @@ void dump_variable_recursive(std::ostream &os, const Variable *variable_opt, uns
 		quote_string(os, value.magic);
 		os <<", \"" <<value.handle << "\")";
 		break; }
+	case Variable::type_function: {
+		os <<"function";
+		break; }
 	case Variable::type_array: {
 		const auto &value = variable_opt->get<Array>();
 		os <<'[';
@@ -124,9 +127,6 @@ void dump_variable_recursive(std::ostream &os, const Variable *variable_opt, uns
 		}
 		os <<'}';
 		break; }
-	case Variable::type_function: {
-		os <<"function";
-		break; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
@@ -154,31 +154,27 @@ void dispose_variable_recursive(Variable *variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
 	case Variable::type_null:
-		break;
 	case Variable::type_boolean:
 	case Variable::type_integer:
 	case Variable::type_double:
 	case Variable::type_string:
 	case Variable::type_opaque:
-		variable_opt->set(false);
+	case Variable::type_function:
 		break;
 	case Variable::type_array: {
 		auto &value = variable_opt->get<Array>();
 		for(auto &elem : value){
 			dispose_variable_recursive(elem.get());
+			elem = nullptr;
 		}
-		variable_opt->set(false);
 		break; }
 	case Variable::type_object: {
 		auto &value = variable_opt->get<Object>();
 		for(auto &pair : value){
 			dispose_variable_recursive(pair.second.get());
+			pair.second = nullptr;
 		}
-		variable_opt->set(false);
 		break; }
-	case Variable::type_function:
-		variable_opt->set(false);
-		break;
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();

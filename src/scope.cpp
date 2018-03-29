@@ -19,7 +19,7 @@ Shared_ptr<Named_variable> Scope::get_variable_local_opt(const std::string &key)
 	}
 	return it->second;
 }
-Shared_ptr<Named_variable> Scope::set_variable_local(const std::string &key){
+Shared_ptr<Named_variable> Scope::declare_variable_local(const std::string &key){
 	auto it = m_variables.find(key);
 	if(it == m_variables.end()){
 		ASTERIA_DEBUG_LOG("Creating local variable: key = ", key);
