@@ -20,10 +20,12 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 	case type_rvalue_generic: {
 		const auto &params = boost::get<Rvalue_generic>(m_variant);
 		return std::forward_as_tuple(params.value_opt, nullptr); }
+
 	case type_lvalue_generic: {
 		const auto &params = boost::get<Lvalue_generic>(m_variant);
 		auto &variable = params.named_variable->variable;
 		return std::forward_as_tuple(variable, &variable); }
+
 	case type_lvalue_array_element: {
 		const auto &params = boost::get<Lvalue_array_element>(m_variant);
 		const auto array = params.variable->get_opt<Array>();
@@ -64,6 +66,7 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 		}
 		auto &variable = array->at(static_cast<std::size_t>(normalized_index));
 		return std::forward_as_tuple(variable, &variable); }
+
 	case type_lvalue_object_member: {
 		const auto &params = boost::get<Lvalue_object_member>(m_variant);
 		const auto object = params.variable->get_opt<Object>();
@@ -82,6 +85,7 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 		}
 		auto &variable = it->second;
 		return std::forward_as_tuple(variable, &variable); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
