@@ -11,52 +11,48 @@ namespace Asteria {
 
 class Expression {
 public:
-	enum Prefix_operator : unsigned {
-		prefix_operator_add     = 100,  // +
-		prefix_operator_sub     = 101,  // -
-		prefix_operator_not     = 102,  // ~
-		prefix_operator_not_l   = 103,  // !
-		prefix_operator_inc     = 104,  // ++
-		prefix_operator_dec     = 105,  // --
-	};
-	enum Infix_operator : unsigned {
-		infix_operator_add      = 200,  // *
-		infix_operator_sub      = 201,  // *
-		infix_operator_mul      = 202,  // *
-		infix_operator_div      = 203,  // /
-		infix_operator_mod      = 204,  // %
-		infix_operator_sll      = 205,  // <<
-		infix_operator_srl      = 206,  // >>>
-		infix_operator_sra      = 207,  // >>
-		infix_operator_and      = 208,  // &
-		infix_operator_or       = 209,  // |
-		infix_operator_xor      = 210,  // ^
-		infix_operator_and_l    = 211,  // &&
-		infix_operator_or_l     = 212,  // ||
-		infix_operator_add_a    = 213,  // *
-		infix_operator_sub_a    = 214,  // *
-		infix_operator_mul_a    = 215,  // *
-		infix_operator_div_a    = 216,  // /
-		infix_operator_mod_a    = 217,  // %
-		infix_operator_sll_a    = 218,  // <<
-		infix_operator_srl_a    = 219,  // >>>
-		infix_operator_sra_a    = 220,  // >>
-		infix_operator_and_a    = 221,  // &
-		infix_operator_or_a     = 222,  // |
-		infix_operator_xor_a    = 223,  // ^
-		infix_operator_and_l_a  = 224,  // &&
-		infix_operator_or_l_a   = 225,  // ||
-		infix_operator_assign   = 226,  // =
-		infix_operator_cmpeq    = 227,  // ==
-		infix_operator_cmpne    = 228,  // !=
-		infix_operator_cmplt    = 229,  // <
-		infix_operator_cmpgt    = 230,  // >
-		infix_operator_cmplte   = 231,  // <=
-		infix_operator_cmpgte   = 232,  // >=
-	};
-	enum Postfix_operator : unsigned {
-		postfix_operator_inc    = 300,  // ++
-		postfix_operator_dec    = 301,  // --
+	enum Operator : unsigned {
+		operator_prefix_add     = 100,  // +
+		operator_prefix_sub     = 101,  // -
+		operator_prefix_not     = 102,  // ~
+		operator_prefix_not_l   = 103,  // !
+		operator_prefix_inc     = 104,  // ++
+		operator_prefix_dec     = 105,  // --
+		operator_infix_add      = 200,  // +
+		operator_infix_sub      = 201,  // -
+		operator_infix_mul      = 202,  // *
+		operator_infix_div      = 203,  // /
+		operator_infix_mod      = 204,  // %
+		operator_infix_sll      = 205,  // <<
+		operator_infix_srl      = 206,  // >>>
+		operator_infix_sra      = 207,  // >>
+		operator_infix_and      = 208,  // &
+		operator_infix_or       = 209,  // |
+		operator_infix_xor      = 210,  // ^
+		operator_infix_and_l    = 211,  // &&
+		operator_infix_or_l     = 212,  // ||
+		operator_infix_add_a    = 213,  // *=
+		operator_infix_sub_a    = 214,  // *=
+		operator_infix_mul_a    = 215,  // *=
+		operator_infix_div_a    = 216,  // /=
+		operator_infix_mod_a    = 217,  // %=
+		operator_infix_sll_a    = 218,  // <<=
+		operator_infix_srl_a    = 219,  // >>>=
+		operator_infix_sra_a    = 220,  // >>=
+		operator_infix_and_a    = 221,  // &=
+		operator_infix_or_a     = 222,  // |=
+		operator_infix_xor_a    = 223,  // ^=
+		operator_infix_and_l_a  = 224,  // &&=
+		operator_infix_or_l_a   = 225,  // ||=
+		operator_infix_assign   = 226,  // =
+		operator_infix_cmpeq    = 227,  // ==
+		operator_infix_cmpne    = 228,  // !=
+		operator_infix_cmplt    = 229,  // <
+		operator_infix_cmpgt    = 230,  // >
+		operator_infix_cmplte   = 231,  // <=
+		operator_infix_cmpgte   = 232,  // >=
+		operator_postfix_inc    = 300,  // ++
+		operator_postfix_dec    = 301,  // --
 	};
 
 	struct Trailer;
@@ -68,7 +64,7 @@ public:
 		type_nested_expression_with_trailer_opt  = 3,
 	};
 	struct Unary_expression {
-		Prefix_operator prefix_operator;
+		Operator operator_prefix;
 		Value_ptr<Expression> next;
 	};
 	struct Id_expression_with_trailer_opt {
@@ -99,7 +95,7 @@ public:
 		trailer_type_member_access      = 5,
 	};
 	struct Binary_modifier {
-		Infix_operator infix_operator;
+		Operator operator_infix;
 		Value_ptr<Expression> next;
 	};
 	struct Ternary_modifier {
@@ -107,7 +103,7 @@ public:
 		Value_ptr<Expression> false_branch;
 	};
 	struct Postfix_modifier {
-		Postfix_operator postfix_operator;
+		Operator operator_postfix;
 		Value_ptr<Trailer> next_trailer_opt;
 	};
 	struct Function_call {
