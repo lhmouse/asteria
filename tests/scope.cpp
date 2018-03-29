@@ -7,14 +7,14 @@
 using namespace Asteria;
 
 int main(){
-	auto parent = std::make_shared<Scope>(nullptr);
+	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
 	auto hidden_p = parent->declare_variable_local("hidden");
 	auto one = parent->declare_variable_local("one");
 
 	auto ptr = get_variable_recursive_opt(parent, "nonexistent");
 	ASTERIA_TEST_CHECK(ptr == nullptr);
 
-	auto child = std::make_shared<Scope>(parent);
+	auto child = std::make_shared<Scope>(Scope::type_plain, parent);
 	auto hidden_c = child->declare_variable_local("hidden");
 	auto two = child->declare_variable_local("two");
 
