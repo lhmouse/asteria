@@ -12,12 +12,12 @@ class Scope {
 private:
 	const Shared_ptr<Scope> m_parent_opt;
 
-	boost::container::flat_map<std::string, Shared_ptr<Named_variable>> m_local_variables;
+	boost::container::flat_map<std::string, Shared_ptr<Named_variable>> m_variables;
 
 public:
 	explicit Scope(Shared_ptr<Scope> parent_opt)
 		: m_parent_opt(std::move(parent_opt))
-		, m_local_variables()
+		, m_variables()
 	{ }
 	~Scope();
 
@@ -29,10 +29,12 @@ public:
 		return m_parent_opt;
 	}
 
-	Shared_ptr<Named_variable> get_variable_recursive_opt(const std::string &key) const noexcept;
-	Shared_ptr<Named_variable> declare_local_variable(const std::string &key);
-	void clear_local_variables() noexcept;
+	Shared_ptr<Named_variable> get_variable_local_opt(const std::string &key) const noexcept;
+	Shared_ptr<Named_variable> set_variable_local(const std::string &key);
+	void clear_variables_local() noexcept;
 };
+
+extern Shared_ptr<Named_variable> get_variable_recursive_opt(const std::shared_ptr<const Scope> &scope_opt, const std::string &key) noexcept;
 
 }
 
