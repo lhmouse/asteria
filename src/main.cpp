@@ -33,13 +33,11 @@ int main(){
 	obj.emplace("third", std::move(third));
 	obj.emplace("world", recycler->create_variable_opt(std::string("世界")));
 	auto root = recycler->create_variable_opt(std::move(obj));
-	auto root2 = recycler->create_variable_opt(*root);
+	auto root2 = std::make_shared<Variable>(*root);
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	recycler->clear_variables();
 	std::cerr <<root2 <<std::endl;
-	ASTERIA_DEBUG_LOG("---- ", "working");
-	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
-	std::cerr <<root2 <<std::endl;
+	std::cerr <<root <<std::endl;
 }
