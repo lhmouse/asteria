@@ -55,8 +55,8 @@ public:
 		infix_operator_cmpgte   = 232,  // >=
 	};
 	enum Postfix_operator : unsigned {
-		postfix_operator_inc    = 301,  // ++
-		postfix_operator_dec    = 302,  // --
+		postfix_operator_inc    = 300,  // ++
+		postfix_operator_dec    = 301,  // --
 	};
 
 	struct Trailer;
