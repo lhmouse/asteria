@@ -78,6 +78,7 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 			}
 			ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
 			it = object->emplace(params.key, nullptr).first;
+			ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 		}
 		auto &variable = it->second;
 		return std::forward_as_tuple(variable, &variable); }
