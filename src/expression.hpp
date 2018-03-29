@@ -87,22 +87,22 @@ public:
 		>;
 
 	enum Trailer_type : unsigned {
-		trailer_type_binary_modifier    = 0,
-		trailer_type_ternary_modifier   = 1,
-		trailer_type_postfix_modifier   = 2,
+		trailer_type_binary_remainder   = 0,
+		trailer_type_ternary_remainder  = 1,
+		trailer_type_postfix_remainder  = 2,
 		trailer_type_function_call      = 3,
 		trailer_type_subscripting       = 4,
 		trailer_type_member_access      = 5,
 	};
-	struct Binary_modifier {
+	struct Binary_remainder {
 		Operator operator_infix;
 		Value_ptr<Expression> next;
 	};
-	struct Ternary_modifier {
+	struct Ternary_remainder {
 		Value_ptr<Expression> true_branch_opt;
 		Value_ptr<Expression> false_branch;
 	};
-	struct Postfix_modifier {
+	struct Postfix_remainder {
 		Operator operator_postfix;
 		Value_ptr<Trailer> next_trailer_opt;
 	};
@@ -118,14 +118,13 @@ public:
 		std::string key;
 		Value_ptr<Trailer> next_trailer_opt;
 	};
-	using Trailer_types = Type_tuple< Binary_modifier    // 0
-	                                , Ternary_modifier   // 1
-	                                , Postfix_modifier   // 2
+	using Trailer_types = Type_tuple< Binary_remainder    // 0
+	                                , Ternary_remainder   // 1
+	                                , Postfix_remainder   // 2
 	                                , Function_call      // 3
 	                                , Subscripting       // 4
 	                                , Member_access      // 5
 		>;
-
 	struct Trailer : Trailer_types::rebind_as_variant {
 		using Trailer_types::rebind_as_variant::variant;
 	};
