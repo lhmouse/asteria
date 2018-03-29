@@ -3,6 +3,7 @@
 
 #include "test_init.hpp"
 #include "../src/variable.hpp"
+#include "../src/reference.hpp"
 
 using namespace Asteria;
 
@@ -47,18 +48,20 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<Object>().at("two")->get<String>() == "world");
 
-	Function function = [](boost::container::vector<std::shared_ptr<Variable>> &&params){
-		const auto param_one = params.at(0);
+	Function function = [](boost::container::vector<Reference> &&params) -> Reference {
+		auto param_one = params.at(0).load_opt();
 		ASTERIA_TEST_CHECK(param_one);
-		const auto param_two = params.at(1);
+		auto param_two = params.at(1).load_opt();
 		ASTERIA_TEST_CHECK(param_two);
-		return std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>());
+		return Reference::Rvalue_generic{ std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	boost::container::vector<std::shared_ptr<Variable>> params;
-	params.emplace_back(std::make_shared<Variable>(Integer(12)));
-	params.emplace_back(std::make_shared<Variable>(Integer(15)));
-	auto rv = var->get<Function>()(std::move(params));
-	ASTERIA_TEST_CHECK(rv->get<Integer>() == 180);
+	boost::container::vector<Reference> params;
+	params.emplace_back(Reference::Rvalue_generic{ std::make_shared<Variable>(Integer(12)) });
+	params.emplace_back(Reference::Rvalue_generic{ std::make_shared<Variable>(Integer(15)) });
+	auto ref = var->get<Function>()(std::move(params));
+	auto result = ref.load_opt();
+	ASTERIA_TEST_CHECK(result);
+	ASTERIA_TEST_CHECK(result->get<Integer>() == 180);
 }

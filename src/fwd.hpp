@@ -69,7 +69,7 @@ using String    = std::string;
 using Opaque    = Magic_handle;
 using Array     = boost::container::vector<Value_ptr<Variable>>;
 using Object    = boost::container::flat_map<std::string, Value_ptr<Variable>>;
-using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<Shared_ptr<Variable>> &&)>;
+using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
 }
@@ -82,7 +82,7 @@ using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<S
 // Instantiated in 'src/variable.cpp'.
 extern template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
 extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-extern template class std::function<Asteria::Shared_ptr<Asteria::Variable> (boost::container::vector<Asteria::Shared_ptr<Asteria::Variable>> &&)>;
-
+// Instantiated in 'src/reference.cpp'.
+extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
 
 #endif

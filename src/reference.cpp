@@ -122,3 +122,5 @@ Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler)
 }
 
 }
+
+template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;

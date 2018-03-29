@@ -189,4 +189,3 @@ void dispose_variable_recursive(Variable *variable_opt) noexcept {
 
 template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
 template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
-template class std::function<Asteria::Shared_ptr<Asteria::Variable> (boost::container::vector<Asteria::Shared_ptr<Asteria::Variable>> &&)>;
