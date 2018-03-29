@@ -16,10 +16,10 @@ Recycler::~Recycler(){
 Value_ptr<Variable> Recycler::create_variable_opt(Stored_value &&value_opt){
 	Value_ptr<Variable> variable;
 	if(value_opt){
-		auto ref_ptr = std::make_shared<Variable>(std::move(value_opt.get()));
+		auto xptr = std::make_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
-		m_weak_variables.emplace_back(ref_ptr);
-		variable = Value_ptr<Variable>(std::move(ref_ptr));
+		m_weak_variables.emplace_back(xptr);
+		variable = Value_ptr<Variable>(std::move(xptr));
 	}
 	return variable;
 }

@@ -93,16 +93,16 @@ std::tuple<Shared_ptr<Variable>, Value_ptr<Variable> *> Reference::do_dereferenc
 }
 
 Shared_ptr<Variable> Reference::load_opt() const {
-	Shared_ptr<Variable> ref_ptr;
-	std::tie(ref_ptr, std::ignore) = do_dereference_once_opt(false);
-	return ref_ptr;
+	Shared_ptr<Variable> rptr;
+	std::tie(rptr, std::ignore) = do_dereference_once_opt(false);
+	return rptr;
 }
 void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value_opt) const {
-	Shared_ptr<Variable> ref_ptr;
+	Shared_ptr<Variable> rptr;
 	Value_ptr<Variable> *pvar;
-	std::tie(ref_ptr, pvar) = do_dereference_once_opt(true);
+	std::tie(rptr, pvar) = do_dereference_once_opt(true);
 	if(!pvar){
-		ASTERIA_THROW_RUNTIME_ERROR("This variable having type ", get_variable_type_name(ref_ptr), "` was unwriteable. It was probably a temporary value.");
+		ASTERIA_THROW_RUNTIME_ERROR("This variable having type ", get_variable_type_name(rptr), "` was unwriteable. It was probably a temporary value.");
 	}
 	recycler->set_variable(*pvar, std::move(value_opt));
 }
@@ -112,12 +112,12 @@ Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler)
 		auto &params = boost::get<Rvalue_generic>(m_variant);
 		return Value_ptr<Variable>(std::move(params.value_opt));
 	} else {
-		Shared_ptr<Variable> ref_ptr;
-		std::tie(ref_ptr, std::ignore) = do_dereference_once_opt(false);
-		if(!ref_ptr){
+		Shared_ptr<Variable> rptr;
+		std::tie(rptr, std::ignore) = do_dereference_once_opt(false);
+		if(!rptr){
 			return nullptr;
 		}
-		return recycler->create_variable_opt(*ref_ptr);
+		return recycler->create_variable_opt(*rptr);
 	}
 }
 
