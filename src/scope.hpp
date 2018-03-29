@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Scope : Deleted_move {
+class Scope {
 private:
 	const Shared_ptr<Scope> m_parent_opt;
 
@@ -20,6 +20,9 @@ public:
 		, m_local_variables()
 	{ }
 	~Scope();
+
+	Scope(const Scope &) = delete;
+	Scope &operator=(const Scope &) = delete;
 
 public:
 	const Shared_ptr<Scope> &get_parent_opt() const noexcept {

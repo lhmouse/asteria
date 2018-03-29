@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Expression : Deleted_copy {
+class Expression {
 public:
 	enum Operator : unsigned {
 		operator_add     =  0,  // +
@@ -134,6 +134,13 @@ public:
 	Expression(ValueT &&value)
 		: m_value(std::forward<ValueT>(value))
 	{ }
+
+	Expression(Expression &&);
+	Expression &operator=(Expression &&);
+	~Expression();
+
+	Expression(const Expression &) = delete;
+	Expression &operator=(const Expression &) = delete;
 
 public:
 	Reference evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;

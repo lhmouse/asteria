@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Stored_value : Deleted_copy {
+class Stored_value {
 private:
 	boost::optional<Variable> m_value_opt;
 
@@ -18,6 +18,13 @@ public:
 	Stored_value(ValueT &&value_opt)
 		: m_value_opt(std::forward<ValueT>(value_opt))
 	{ }
+
+	Stored_value(Stored_value &&);
+	Stored_value &operator=(Stored_value &&);
+	~Stored_value();
+
+	Stored_value(const Stored_value &) = delete;
+	Stored_value &operator=(const Stored_value &) = delete;
 
 public:
 	bool is_null() const noexcept {

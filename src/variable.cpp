@@ -7,6 +7,12 @@
 
 namespace Asteria {
 
+Variable::Variable(const Variable &) = default;
+Variable &Variable::operator=(const Variable &) = default;
+Variable::Variable(Variable &&) = default;
+Variable &Variable::operator=(Variable &&) = default;
+Variable::~Variable() = default;
+
 void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
@@ -180,3 +186,7 @@ void dispose_variable_recursive(Variable *variable_opt) noexcept {
 }
 
 }
+
+template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
+template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+template class std::function<Asteria::Shared_ptr<Asteria::Variable> (boost::container::vector<Asteria::Shared_ptr<Asteria::Variable>> &&)>;

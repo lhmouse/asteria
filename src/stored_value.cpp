@@ -6,4 +6,8 @@
 
 namespace Asteria {
 
+Stored_value::Stored_value(Stored_value &&) = default;
+Stored_value &Stored_value::operator=(Stored_value &&) = default;
+Stored_value::~Stored_value() = default;
+
 }

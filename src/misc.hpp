@@ -20,9 +20,6 @@ public:
 	Logger(const char *file, unsigned long line, const char *func) noexcept;
 	~Logger();
 
-	Logger(const Logger &) = delete;
-	Logger &operator=(const Logger &) = delete;
-
 private:
 	template<typename ValueT>
 	void do_put(const ValueT &value){

@@ -9,6 +9,10 @@
 
 namespace Asteria {
 
+Expression::Expression(Expression &&) = default;
+Expression &Expression::operator=(Expression &&) = default;
+Expression::~Expression() = default;
+
 Reference Expression::evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
 	(void)recycler;

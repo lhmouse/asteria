@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Initializer : Deleted_copy {
+class Initializer {
 public:
 	enum Type : unsigned {
 		type_bracketed_init_list  = 0,
@@ -38,6 +38,13 @@ public:
 	Initializer(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
+
+	Initializer(Initializer &&);
+	Initializer &operator=(Initializer &&);
+	~Initializer();
+
+	Initializer(const Initializer &) = delete;
+	Initializer &operator=(const Initializer &) = delete;
 
 public:
 	Value_ptr<Variable> evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;

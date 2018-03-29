@@ -12,6 +12,10 @@
 
 namespace Asteria {
 
+Initializer::Initializer(Initializer &&) = default;
+Initializer &Initializer::operator=(Initializer &&) = default;
+Initializer::~Initializer() = default;
+
 Value_ptr<Variable> Initializer::evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
 	const auto type = static_cast<Type>(m_variant.which());
 	switch(type){

@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Recycler : Deleted_move {
+class Recycler {
 public:
 	enum : std::size_t {
 		defragmentation_threshold_initial    = 200,
@@ -24,6 +24,9 @@ public:
 		: m_weak_variables(), m_defragmentation_threshold(defragmentation_threshold_initial)
 	{ }
 	~Recycler();
+
+	Recycler(const Recycler &) = delete;
+	Recycler &operator=(const Recycler &) = delete;
 
 public:
 	Value_ptr<Variable> create_variable_opt(Stored_value &&value_opt);

@@ -35,7 +35,6 @@
 #include <boost/container/list.hpp>
 
 namespace Asteria {
-	//
 }
 
 #endif

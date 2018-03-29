@@ -9,12 +9,8 @@ namespace Asteria {
 Insertable_streambuf::Insertable_streambuf()
 	: std::streambuf()
 	, m_string(), m_caret(0)
-{
-	//
-}
-Insertable_streambuf::~Insertable_streambuf(){
-	//
-}
+{ }
+Insertable_streambuf::~Insertable_streambuf() = default;
 
 std::streamsize Insertable_streambuf::xsputn(const std::streambuf::char_type *s, std::streamsize n){
 	const auto n_put = static_cast<std::size_t>(std::min<std::streamsize>(n, PTRDIFF_MAX));
@@ -33,11 +29,7 @@ std::streambuf::int_type Insertable_streambuf::overflow(std::streambuf::int_type
 
 Insertable_ostream::Insertable_ostream()
 	: std::ostream(&m_sb)
-{
-	//
-}
-Insertable_ostream::~Insertable_ostream(){
-	//
-}
+{ }
+Insertable_ostream::~Insertable_ostream() = default;
 
 }

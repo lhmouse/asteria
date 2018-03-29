@@ -27,7 +27,7 @@ class Initializer;
 class Expression;
 class Statement;
 
-// Runtime objects (copyable)
+// Runtime objects (copyable and movable)
 class Variable;
 class Exception;
 
@@ -35,21 +35,9 @@ class Exception;
 class Stored_value;
 class Reference;
 
-// Runtime objects (not movable)
+// Runtime objects (neither copyable nor movable)
 class Scope;
 class Recycler;
-
-// General utilities.
-struct Deleted_copy {
-	constexpr Deleted_copy() = default;
-	Deleted_copy(Deleted_copy &&) = default;
-	Deleted_copy &operator=(Deleted_copy &&) = default;
-};
-struct Deleted_move {
-	constexpr Deleted_move() = default;
-	Deleted_move(Deleted_move &&) = delete;
-	Deleted_move &operator=(Deleted_move &&) = delete;
-};
 
 // Aliases.
 template<typename ElementT>
@@ -79,8 +67,8 @@ using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
 using Opaque    = Magic_handle;
-using Array     = Value_ptr_vector<Variable>;
-using Object    = Value_ptr_map<std::string, Variable>;
+using Array     = boost::container::vector<Value_ptr<Variable>>;
+using Object    = boost::container::flat_map<std::string, Value_ptr<Variable>>;
 using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<Shared_ptr<Variable>> &&)>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
@@ -90,5 +78,11 @@ using Function  = std::function<Shared_ptr<Variable> (boost::container::vector<S
 	typename ::std::enable_if<	\
 		!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)	\
 		>::type * = nullptr
+
+// Instantiated in 'src/variable.cpp'.
+extern template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
+extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+extern template class std::function<Asteria::Shared_ptr<Asteria::Variable> (boost::container::vector<Asteria::Shared_ptr<Asteria::Variable>> &&)>;
+
 
 #endif

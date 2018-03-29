@@ -1,4 +1,4 @@
-/// This file is part of asteria.
+// This file is part of asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_VARIABLE_HPP_
@@ -40,6 +40,12 @@ public:
 	Variable(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
+
+	Variable(const Variable &);
+	Variable &operator=(const Variable &);
+	Variable(Variable &&);
+	Variable &operator=(Variable &&);
+	~Variable();
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;

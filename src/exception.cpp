@@ -6,8 +6,6 @@
 
 namespace Asteria {
 
-Exception::~Exception(){
-	//
-}
+Exception::~Exception() = default;
 
 }
