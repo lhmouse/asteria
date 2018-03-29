@@ -96,32 +96,34 @@ void dump_variable_recursive(std::ostream &os, const Variable *variable_opt, uns
 		os <<"function";
 		break; }
 	case Variable::type_array: {
-		const auto &value = variable_opt->get<Array>();
+		const auto &array = variable_opt->get<Array>();
 		os <<'[';
-		for(const auto &elem : value){
+		for(auto it = array.begin(); it != array.end(); ++it){
 			os <<std::endl;
 			apply_indent(os, indent_next + indent_increment);
-			dump_variable_recursive(os, elem, indent_next + indent_increment, indent_increment);
+			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()))))) <<(it - array.begin());
+			os <<" = ";
+			dump_variable_recursive(os, *it, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!value.empty()){
+		if(!(array.empty())){
 			os <<std::endl;
 			apply_indent(os, indent_next);
 		}
 		os <<']';
 		break; }
 	case Variable::type_object: {
-		const auto &value = variable_opt->get<Object>();
+		const auto &object = variable_opt->get<Object>();
 		os <<'{';
-		for(const auto &pair : value){
+		for(auto it = object.begin(); it != object.end(); ++it){
 			os <<std::endl;
 			apply_indent(os, indent_next + indent_increment);
-			quote_string(os, pair.first);
+			quote_string(os, it->first);
 			os <<" = ";
-			dump_variable_recursive(os, pair.second, indent_next + indent_increment, indent_increment);
+			dump_variable_recursive(os, it->second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!value.empty()){
+		if(!(object.empty())){
 			os <<std::endl;
 			apply_indent(os, indent_next);
 		}
