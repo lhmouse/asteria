@@ -104,6 +104,7 @@ expression ::=
 	prefix-operator-expression | expression-initiator expression-trailer-opt
 prefix-operator-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
+
 expression-initiator ::=
 	identifier | literal | lambda-expression | nested-expression
 lambda-expression ::=
@@ -114,8 +115,8 @@ nested-expression ::=
 expression-trailer-opt ::=
 	expression-trailer | ""
 expression-trailer ::=
-	infix-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer
-infix-trailer ::=
+	infix-operator-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer
+infix-operator-trailer ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
 	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  ) expression
