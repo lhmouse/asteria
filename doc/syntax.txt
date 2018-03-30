@@ -74,7 +74,7 @@ do-while-statement ::=
 while-statement ::=
 	"while" "(" expression ")" compound-statement
 for-statement ::=
-	"for" "(" statement expression ";" expression ")" compound-statement
+	"for" "(" statement expression-opt ";" expression-opt ")" compound-statement
 foreach-statement ::=
 	"foreach" "(" identifier "," identifier "in" expression ")" compound-statement
 switch-statement ::=
