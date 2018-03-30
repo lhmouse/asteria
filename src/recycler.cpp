@@ -51,8 +51,9 @@ void Recycler::defragment_automatic() noexcept {
 	m_defragmentation_threshold = threshold_new;
 }
 void Recycler::clear_variables() noexcept {
-	for(auto &weak_ref : m_weak_variables){
-		dispose_variable_recursive(weak_ref.lock().get());
+	for(auto &weak_rvar : m_weak_variables){
+		auto rvar = weak_rvar.lock();
+		dispose_variable_recursive(rvar.get());
 	}
 	m_weak_variables.clear();
 }
