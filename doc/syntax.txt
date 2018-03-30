@@ -115,7 +115,8 @@ nested-expression ::=
 expression-trailer-opt ::=
 	expression-trailer | ""
 expression-trailer ::=
-	infix-operator-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer
+	infix-operator-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer |
+	subscripting-trailer | member-access-trailer
 infix-operator-trailer ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
