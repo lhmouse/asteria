@@ -9,9 +9,20 @@
 
 namespace Asteria {
 
+using Initiator = Expression::Initiator;
+using Trailer   = Expression::Trailer;
+
 Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
+
+Initiator::Initiator(Initiator &&) = default;
+Initiator &Initiator::operator=(Initiator &&) = default;
+Initiator::~Initiator() = default;
+
+Trailer::Trailer(Trailer &&) = default;
+Trailer &Trailer::operator=(Trailer &&) = default;
+Trailer::~Trailer() = default;
 
 Reference evaluate_expression(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");

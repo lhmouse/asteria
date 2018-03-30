@@ -24,7 +24,7 @@ public:
 		Sp<Variable> xvar_opt;
 	};
 	struct Lvalue_generic {
-		Sp<Named_variable> named_var;
+		Sp<Scoped_variable> scoped_var;
 	};
 	struct Lvalue_array_element {
 		Sp<Variable> rvar;

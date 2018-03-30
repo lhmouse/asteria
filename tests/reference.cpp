@@ -20,7 +20,7 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr->get<Integer>() == 42);
 	ASTERIA_TEST_CHECK_CATCH(ref.store(Integer(130)));
 
-	auto nvar = create_shared<Named_variable>();
+	auto nvar = create_shared<Scoped_variable>();
 	nvar->variable = Value_ptr<Variable>(create_shared<Variable>(4.2));
 	Reference::Lvalue_generic lref = { nvar };
 	ref = Reference(recycler, std::move(lref));

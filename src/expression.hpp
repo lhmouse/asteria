@@ -64,18 +64,18 @@ public:
 
 	enum Type : unsigned {
 		type_prefix_operator_expression  = 0,
-		type_initiator_and_trailer       = 1,
+		type_initiator_and_trailers      = 1,
 	};
 	struct Prefix_operator_expression {
 		Prefix_operator prefix_operator;
 		Value_ptr<Expression> operand;
 	};
-	struct Initiator_and_trailer {
+	struct Initiator_and_trailers {
 		Value_ptr<Initiator> initiator;
-		Value_ptr<Trailer> trailer_opt;
+		Value_ptr<Trailer> trailer_first_opt;
 	};
 	using Types = Type_tuple< Prefix_operator_expression  // 0
-	                        , Initiator_and_trailer       // 1
+	                        , Initiator_and_trailers      // 1
 		>;
 
 private:
@@ -115,19 +115,28 @@ public:
 class Expression::Initiator {
 public:
 	enum Type : unsigned {
-		type_prefix_operator_expression  = 0,
-		type_initiator_and_trailer       = 1,
+		type_identifier         = 0,
+		type_literal            = 1,
+		type_lambda_expression  = 2,
+		type_nested_expression  = 3,
 	};
-	struct Prefix_operator_expression {
-		Prefix_operator prefix_operator;
-		Value_ptr<Expression> operand;
+	struct Identifier {
+		std::string identifier;
 	};
-	struct Initiator_and_trailer {
-		Value_ptr<Initiator> initiator;
-		Value_ptr<Trailer> trailer_opt;
+	struct Literal {
+		Value_ptr<Variable> value;
 	};
-	using Types = Type_tuple< Prefix_operator_expression  // 0
-	                        , Initiator_and_trailer       // 1
+	struct Lambda_expression {
+		boost::container::vector<Function_parameter> parameter_list;
+		Value_ptr_vector<Statement> body_statement_list;
+	};
+	struct Nested_expression {
+		Value_ptr<Expression> nested_expression;
+	};
+	using Types = Type_tuple< Identifier         // 0
+	                        , Literal            // 1
+	                        , Lambda_expression  // 2
+	                        , Nested_expression  // 3
 		>;
 
 private:
@@ -145,6 +154,82 @@ public:
 
 	Initiator(const Initiator &) = delete;
 	Initiator &operator=(const Initiator &) = delete;
+
+public:
+	Type get_type() const noexcept {
+		return static_cast<Type>(m_variant.which());
+	}
+	template<typename ExpectT>
+	const ExpectT &get() const {
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT &get(){
+		return boost::get<ExpectT>(m_variant);
+	}
+	template<typename ValueT>
+	void set(ValueT &&value){
+		m_variant = std::forward<ValueT>(value);
+	}
+};
+
+class Expression::Trailer {
+public:
+	enum Type : unsigned {
+		type_infix_operator_trailer    = 0,
+		type_ternary_trailer           = 1,
+		type_postfix_operator_trailer  = 2,
+		type_function_call_trailer     = 3,
+		type_subscripting_trailer      = 4,
+		type_member_access_trailer     = 5,
+	};
+	struct Infix_operator_trailer {
+		Infix_operator infix_operator;
+		Value_ptr<Expression> operand_next;
+	};
+	struct Ternary_trailer {
+		Value_ptr<Expression> branch_true_opt;
+		Value_ptr<Expression> branch_false;
+	};
+	struct Postfix_operator_trailer {
+		Postfix_operator postfix_operator;
+		Value_ptr<Trailer> trailer_next_opt;
+	};
+	struct Function_call_trailer {
+		Value_ptr_vector<Expression> argument_list_opt;
+		Value_ptr<Trailer> trailer_next_opt;
+	};
+	struct Subscripting_trailer {
+		Value_ptr<Expression> subscript;
+		Value_ptr<Trailer> trailer_next_opt;
+	};
+	struct Member_access_trailer {
+		std::string identifier;
+		Value_ptr<Trailer> trailer_next_opt;
+	};
+	using Types = Type_tuple< Infix_operator_trailer    // 0
+	                        , Ternary_trailer           // 1
+	                        , Postfix_operator_trailer  // 2
+	                        , Function_call_trailer     // 3
+	                        , Subscripting_trailer      // 4
+	                        , Member_access_trailer     // 5
+		>;
+
+private:
+	Types::rebind_as_variant m_variant;
+
+public:
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Trailer, ValueT)>
+	Trailer(ValueT &&value)
+		: m_variant(std::forward<ValueT>(value))
+	{ }
+
+	Trailer(Trailer &&);
+	Trailer &operator=(Trailer &&);
+	~Trailer();
+
+	Trailer(const Trailer &) = delete;
+	Trailer &operator=(const Trailer &) = delete;
 
 public:
 	Type get_type() const noexcept {

@@ -48,9 +48,14 @@ template<typename KeyT, typename ValueT>
 using Value_ptr_map = boost::container::flat_map<KeyT, Value_ptr<ValueT>>;
 
 // Struct definitions.
-struct Named_variable {
+struct Scoped_variable {
 	Value_ptr<Variable> variable;
 	bool immutable;
+};
+
+struct Function_parameter {
+	std::string identifier;
+	Value_ptr<Initializer> default_initializer_opt;
 };
 
 struct Magic_handle {

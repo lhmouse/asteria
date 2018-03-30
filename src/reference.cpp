@@ -30,8 +30,8 @@ Reference::Dereference_once_result Reference::do_dereference_once_opt(bool creat
 
 	case type_lvalue_generic: {
 		const auto &params = get<Lvalue_generic>();
-		auto &variable = params.named_var->variable;
-		Dereference_once_result res = { variable, &variable, params.named_var->immutable };
+		auto &variable = params.scoped_var->variable;
+		Dereference_once_result res = { variable, &variable, params.scoped_var->immutable };
 		return std::move(res); }
 
 	case type_lvalue_array_element: {
