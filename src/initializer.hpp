@@ -12,9 +12,13 @@ namespace Asteria {
 class Initializer {
 public:
 	enum Type : unsigned {
-		type_bracketed_init_list  = 0,
-		type_braced_init_list     = 1,
-		type_expression_init      = 2,
+		type_none                 = -1u,
+		type_assignment_init      =  0,
+		type_bracketed_init_list  =  1,
+		type_braced_init_list     =  2,
+	};
+	struct Assignment_init {
+		Value_ptr<Expression> expression;
 	};
 	struct Bracketed_init_list {
 		Value_ptr_vector<Initializer> initializers;
@@ -22,12 +26,9 @@ public:
 	struct Braced_init_list {
 		Value_ptr_map<std::string, Initializer> key_values;
 	};
-	struct Expression_init {
-		Value_ptr<Expression> expression;
-	};
-	using Types = Type_tuple< Bracketed_init_list  // 0
-	                        , Braced_init_list     // 1
-	                        , Expression_init      // 2
+	using Types = Type_tuple< Assignment_init      // 0
+	                        , Bracketed_init_list  // 1
+	                        , Braced_init_list     // 2
 		>;
 
 private:
@@ -62,9 +63,10 @@ public:
 	void set(ValueT &&value){
 		m_variant = std::forward<ValueT>(value);
 	}
-
-	Value_ptr<Variable> evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const;
 };
+
+extern Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept;
+extern void set_variable_using_initializer_recursive(Value_ptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
 
 }
 

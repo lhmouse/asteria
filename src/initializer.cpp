@@ -3,11 +3,10 @@
 
 #include "precompiled.hpp"
 #include "initializer.hpp"
-#include "variable.hpp"
 #include "stored_value.hpp"
 #include "expression.hpp"
-#include "recycler.hpp"
 #include "reference.hpp"
+#include "recycler.hpp"
 #include "misc.hpp"
 
 namespace Asteria {
@@ -16,32 +15,38 @@ Initializer::Initializer(Initializer &&) = default;
 Initializer &Initializer::operator=(Initializer &&) = default;
 Initializer::~Initializer() = default;
 
-Value_ptr<Variable> Initializer::evaluate_opt(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
-	const auto type = get_type();
+Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept {
+	return initializer_opt ? initializer_opt->get_type() : Initializer::type_none;
+}
+void set_variable_using_initializer_recursive(Value_ptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
+	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
-	case type_bracketed_init_list: {
-		const auto &params = get<Bracketed_init_list>();
+	case Initializer::type_none: {
+		variable_out_opt = nullptr;
+		return; }
+	case Initializer::type_assignment_init: {
+		const auto &params = initializer_opt->get<Initializer::Assignment_init>();
+		auto result = evaluate_expression(recycler, scope, params.expression);
+		variable_out_opt = result.extract_opt();
+		return; }
+	case Initializer::type_bracketed_init_list: {
+		const auto &params = initializer_opt->get<Initializer::Bracketed_init_list>();
 		Array array;
 		array.reserve(params.initializers.size());
-		for(const auto &child : params.initializers){
-			array.emplace_back(child->evaluate_opt(recycler, scope));
+		for(const auto &elem : params.initializers){
+			set_variable_using_initializer_recursive(variable_out_opt, recycler, scope, elem);
+			array.emplace_back(std::move(variable_out_opt));
 		}
-		return recycler->create_variable_opt(std::move(array)); }
-
-	case type_braced_init_list: {
-		const auto &params = get<Braced_init_list>();
+		return recycler->set_variable(variable_out_opt, std::move(array)); }
+	case Initializer::type_braced_init_list: {
+		const auto &params = initializer_opt->get<Initializer::Braced_init_list>();
 		Object object;
 		object.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){
-			object.emplace(pair.first, pair.second->evaluate_opt(recycler, scope));
+			set_variable_using_initializer_recursive(variable_out_opt, recycler, scope, pair.second);
+			object.emplace(pair.first, std::move(variable_out_opt));
 		}
-		return recycler->create_variable_opt(std::move(object)); }
-
-	case type_expression_init: {
-		const auto &params = get<Expression_init>();
-		auto result = params.expression->evaluate(recycler, scope);
-		return result.extract_opt(recycler); }
-
+		return recycler->set_variable(variable_out_opt, std::move(object)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();

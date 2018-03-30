@@ -11,7 +11,7 @@
 namespace Asteria {
 
 struct Reference::Dereference_once_result {
-	Shared_ptr<Variable> rvar_opt;  // How to read a value through this reference?
+	Sp<Variable> rvar_opt;  // How to read a value through this reference?
 	Value_ptr<Variable> *wptr_opt;  // How to write a value through this reference?
 	bool immutable;                 // Is this reference read-only?
 };
@@ -105,11 +105,14 @@ Reference::Dereference_once_result Reference::do_dereference_once_opt(bool creat
 	}
 }
 
-Shared_ptr<Variable> Reference::load_opt() const {
+Sp<Variable> Reference::load_opt() const {
 	auto result = do_dereference_once_opt(false);
 	return std::move(result.rvar_opt);
 }
-void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value_opt) const {
+void Reference::store(Stored_value &&value_opt) const {
+	if(!m_recycler){
+		ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
+	}
 	auto result = do_dereference_once_opt(true);
 	if(!(result.wptr_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
@@ -117,15 +120,21 @@ void Reference::store(const Shared_ptr<Recycler> &recycler, Stored_value &&value
 	if(result.immutable){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
-	recycler->set_variable(*(result.wptr_opt), std::move(value_opt));
+	m_recycler->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
-Value_ptr<Variable> Reference::extract_opt(const Shared_ptr<Recycler> &recycler){
-	const auto type = get_type();
-	if(type == type_rvalue_generic){
-		return Value_ptr<Variable>(std::move(get<Rvalue_generic>().xvar_opt));
-	} else {
-		return recycler->copy_variable_opt(do_dereference_once_opt(false).rvar_opt);
+Value_ptr<Variable> Reference::extract_opt(){
+	if(!m_recycler){
+		ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
 	}
+	Value_ptr<Variable> variable;
+	if(get_type() == type_rvalue_generic){
+		auto &params = get<Rvalue_generic>();
+		variable = Value_ptr<Variable>(std::move(params.xvar_opt));
+	} else {
+		auto result = do_dereference_once_opt(false);
+		m_recycler->copy_variable(variable, result.rvar_opt);
+	}
+	return variable;
 }
 
 }

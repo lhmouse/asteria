@@ -13,12 +13,13 @@ Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
-Reference Expression::evaluate(const Shared_ptr<Recycler> &recycler, const Shared_ptr<Scope> &scope) const {
+Reference evaluate_expression(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
 	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
 	(void)recycler;
 	(void)scope;
-	Reference::Rvalue_generic ref = { std::make_shared<Variable>(std::string("hello")) };
-	return Reference(std::move(ref));
+	(void)expression_opt;
+	Reference::Rvalue_generic ref = { create_shared<Variable>(std::string("hello")) };
+	return Reference(recycler, std::move(ref));
 }
 
 }

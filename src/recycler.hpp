@@ -29,9 +29,8 @@ public:
 	Recycler &operator=(const Recycler &) = delete;
 
 public:
-	Value_ptr<Variable> create_variable_opt(Stored_value &&value_opt);
-	Value_ptr<Variable> copy_variable_opt(const std::shared_ptr<const Variable> &rvar_opt);
-	void set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt);
+	void set_variable(Value_ptr<Variable> &variable_out_opt, Stored_value &&value_opt);
+	void copy_variable(Value_ptr<Variable> &variable_out_opt, Spref<const Variable> source_opt);
 	void defragment_automatic() noexcept;
 	void clear_variables() noexcept;
 };

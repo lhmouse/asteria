@@ -27,7 +27,7 @@ public:
 	{ }
 
 	explicit Value_ptr(const Value_ptr &rhs) // An explicit copy constructor prevents unintentional copies.
-		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
+		: m_ptr(rhs.m_ptr ? create_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
 	{ }
 	Value_ptr &operator=(const Value_ptr &rhs) noexcept {
 		Value_ptr(rhs).swap(*this);

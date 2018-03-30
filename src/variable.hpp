@@ -85,25 +85,13 @@ public:
 };
 
 extern const char *get_type_name(Variable::Type type) noexcept;
-
-extern Variable::Type get_variable_type(const Variable *variable_opt) noexcept;
-extern Variable::Type get_variable_type(const Shared_ptr<const Variable> &variable_opt) noexcept;
-extern Variable::Type get_variable_type(const Value_ptr<Variable> &variable_opt) noexcept;
-
-extern const char *get_variable_type_name(const Variable *variable_opt) noexcept;
-extern const char *get_variable_type_name(const Shared_ptr<const Variable> &variable_opt) noexcept;
-extern const char *get_variable_type_name(const Value_ptr<Variable> &variable_opt) noexcept;
-
-extern void dump_variable_recursive(std::ostream &os, const Variable *variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern void dump_variable_recursive(std::ostream &os, const Shared_ptr<const Variable> &variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern void dump_variable_recursive(std::ostream &os, const Value_ptr<Variable> &variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-
-extern std::ostream &operator<<(std::ostream &os, const Variable *variable_opt);
-extern std::ostream &operator<<(std::ostream &os, const Shared_ptr<const Variable> &variable_opt);
-extern std::ostream &operator<<(std::ostream &os, const Value_ptr<Variable> &variable_opt);
+extern Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept;
+extern const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept;
+extern void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
 
 // This function is used to break dependency circles.
-extern void dispose_variable_recursive(Variable *variable_opt) noexcept;
+extern void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept;
 
 }
 

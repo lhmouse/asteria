@@ -9,12 +9,13 @@
 using namespace Asteria;
 
 int main(){
-	auto recycler = std::make_shared<Recycler>();
+	auto recycler = create_shared<Recycler>();
 
-	auto obj = recycler->create_variable_opt(Object());
-	auto pair = obj->get<Object>().emplace("int", std::make_shared<Variable>(Integer(42)));
+	Value_ptr<Variable> obj;
+	recycler->set_variable(obj, Object());
+	auto pair = obj->get<Object>().emplace("int", create_shared<Variable>(Integer(42)));
 	auto weak_int = std::weak_ptr<Variable>(pair.first->second);
-	pair = obj->get<Object>().emplace("str", std::make_shared<Variable>(String("hello")));
+	pair = obj->get<Object>().emplace("str", create_shared<Variable>(String("hello")));
 	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 
 	recycler->clear_variables();

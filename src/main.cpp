@@ -11,33 +11,52 @@
 using namespace Asteria;
 
 int main(){
-	const auto recycler = std::make_shared<Recycler>();
+	const auto recycler = create_shared<Recycler>();
+
+	Value_ptr<Variable> root, copy;
+	Value_ptr<Variable> first, second, third, route;
+	Value_ptr<Variable> temp;
+
 	Array arr;
-	arr.emplace_back(nullptr);
-	arr.emplace_back(recycler->create_variable_opt(true));
-	auto first = recycler->create_variable_opt(std::move(arr));
+	recycler->set_variable(temp, nullptr);
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(temp, true);
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(first, std::move(arr));
+
 	arr.clear();
-	arr.emplace_back(recycler->create_variable_opt(std::int64_t(42)));
-	arr.emplace_back(recycler->create_variable_opt(123.45));
-	auto second = recycler->create_variable_opt(std::move(arr));
+	recycler->set_variable(temp, INT64_C(42));
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(temp, 123.456);
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(second, std::move(arr));
+
 	arr.clear();
-	arr.emplace_back(recycler->create_variable_opt(std::string("hello")));
-	arr.emplace_back(recycler->create_variable_opt(Opaque{"opaque", std::make_shared<int>()}));
-	auto third = recycler->create_variable_opt(std::move(arr));
+	recycler->set_variable(temp, std::string("hello"));
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(temp, Opaque{"opaque", create_shared<int>()});
+	arr.emplace_back(std::move(temp));
+	recycler->set_variable(third, std::move(arr));
+
 	Object obj;
 	obj.emplace("first", std::move(first));
 	obj.emplace("second", std::move(second));
-	auto route = recycler->create_variable_opt(std::move(obj));
+	recycler->set_variable(route, std::move(obj));
+
 	obj.clear();
-	obj.emplace("route", std::move(route));
 	obj.emplace("third", std::move(third));
-	obj.emplace("world", recycler->create_variable_opt(std::string("世界")));
-	auto root = recycler->create_variable_opt(std::move(obj));
-	auto root2 = std::make_shared<Variable>(*root);
+	obj.emplace("route", std::move(route));
+	recycler->set_variable(temp, std::string("世界"));
+	obj.emplace("world", std::move(temp));
+
+	recycler->set_variable(root, std::move(obj));
+	//recycler->copy_variable(copy, root);
+	copy = Value_ptr<Variable>(create_shared<Variable>(*root));
+
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	recycler->clear_variables();
-	std::cerr <<root2 <<std::endl;
+	std::cerr <<copy <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
 	std::cerr <<root <<std::endl;
 }

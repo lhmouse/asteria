@@ -41,9 +41,6 @@ class Recycler;
 
 // Aliases.
 template<typename ElementT>
-using Shared_ptr = std::shared_ptr<ElementT>;
-
-template<typename ElementT>
 using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
 template<typename ElementT>
 using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;

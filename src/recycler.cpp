@@ -13,30 +13,26 @@ Recycler::~Recycler(){
 	clear_variables();
 }
 
-Value_ptr<Variable> Recycler::create_variable_opt(Stored_value &&value_opt){
-	Value_ptr<Variable> variable;
-	if(value_opt){
-		auto xptr = std::make_shared<Variable>(std::move(value_opt.get()));
+void Recycler::set_variable(Value_ptr<Variable> &variable_out_opt, Stored_value &&value_opt){
+	if(!value_opt){
+		variable_out_opt = nullptr;
+	} else if(!variable_out_opt){
+		auto xptr = create_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
 		m_weak_variables.emplace_back(xptr);
-		variable = Value_ptr<Variable>(std::move(xptr));
-	}
-	return variable;
-}
-Value_ptr<Variable> Recycler::copy_variable_opt(const std::shared_ptr<const Variable> &rvar_opt){
-	Stored_value value_opt;
-	if(rvar_opt){
-		value_opt.set(*rvar_opt);
-	}
-	return create_variable_opt(std::move(value_opt));
-}
-void Recycler::set_variable(Value_ptr<Variable> &variable, Stored_value &&value_opt){
-	if(variable && value_opt){
-		*variable = std::move(value_opt.get());
+		variable_out_opt = Value_ptr<Variable>(std::move(xptr));
 	} else {
-		variable = create_variable_opt(std::move(value_opt.get()));
+		*variable_out_opt = Variable(std::move(value_opt.get()));
 	}
 }
+void Recycler::copy_variable(Value_ptr<Variable> &variable_out_opt, Spref<const Variable> source_opt){
+	if(!source_opt){
+		set_variable(variable_out_opt, nullptr);
+	} else {
+		set_variable(variable_out_opt, *source_opt);
+	}
+}
+
 void Recycler::defragment_automatic() noexcept {
 	const auto threshold_old = m_defragmentation_threshold;
 	if(m_weak_variables.size() < threshold_old){
@@ -52,8 +48,7 @@ void Recycler::defragment_automatic() noexcept {
 }
 void Recycler::clear_variables() noexcept {
 	for(auto &weak_rvar : m_weak_variables){
-		auto rvar = weak_rvar.lock();
-		dispose_variable_recursive(rvar.get());
+		dispose_variable_recursive(weak_rvar.lock());
 	}
 	m_weak_variables.clear();
 }

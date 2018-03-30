@@ -35,6 +35,17 @@
 #include <boost/container/list.hpp>
 
 namespace Asteria {
+
+template<typename ElementT>
+using Sp = std::shared_ptr<ElementT>;
+template<typename ElementT>
+using Spref = const Sp<ElementT> &;
+
+template<typename ElementT, typename ...ParamsT>
+inline Sp<ElementT> create_shared(ParamsT &&...params){
+	return std::make_shared<ElementT, ParamsT &&...>(std::forward<ParamsT>(params)...);
+}
+
 }
 
 #endif

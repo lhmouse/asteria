@@ -19,12 +19,12 @@ public:
 
 private:
 	const Type m_type;
-	const Shared_ptr<Scope> m_parent_opt;
+	const Sp<Scope> m_parent_opt;
 
-	boost::container::flat_map<std::string, Shared_ptr<Named_variable>> m_variables;
+	boost::container::flat_map<std::string, Sp<Named_variable>> m_variables;
 
 public:
-	Scope(Type type, Shared_ptr<Scope> parent_opt)
+	Scope(Type type, Sp<Scope> parent_opt)
 		: m_type(type), m_parent_opt(std::move(parent_opt))
 		, m_variables()
 	{ }
@@ -37,16 +37,16 @@ public:
 	Type get_type() const noexcept {
 		return m_type;
 	}
-	Shared_ptr<Scope> get_parent_opt() const noexcept {
+	Sp<Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
-	Shared_ptr<Named_variable> get_variable_local_opt(const std::string &key) const noexcept;
-	Shared_ptr<Named_variable> declare_variable_local(const std::string &key);
+	Sp<Named_variable> get_variable_local_opt(const std::string &key) const noexcept;
+	Sp<Named_variable> declare_variable_local(const std::string &key);
 	void clear_variables_local() noexcept;
 };
 
-extern Shared_ptr<Named_variable> get_variable_recursive_opt(const std::shared_ptr<const Scope> &scope_opt, const std::string &key) noexcept;
+extern Sp<Named_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &key) noexcept;
 
 }
 
