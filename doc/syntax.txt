@@ -9,6 +9,8 @@ null-literal ::=
 	"null"
 boolean-litearl ::=
 	"false" | "true"
+string-literal ::=
+	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
 numeric-literal ::=
 	binary-literal | octal-literal | decimal-literal | hexadecimal-literal
 binary-literal ::=
@@ -19,33 +21,6 @@ decimal-literal ::=
 	PCRE([1-9][0-9]*(\.[0-9]+)([eE][-+]?[0-9]+)?)
 hexadecimal-literal ::=
 	PCRE(0[xX][0-9A-Fa-f]+(\.[0-9A-Fa-f]+)([pP][-+]?[0-9]+)?)
-string-literal ::=
-	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
-
-identifier-list-opt ::=
-	identifier-list | ""
-identifier-list ::=
-	identifier ( "," identifier-list-opt | "" )
-expression-list-opt ::=
-	expression-list | ""
-expression-list ::=
-	expression ( "," expression-list-opt | "" )
-
-initializer-list-opt ::=
-	initializer-list | ""
-initializer-list ::=
-	initializer ( "," initializer-list-opt | "" )
-key-value-list-opt ::=
-	key-value-list | ""
-key-value-list ::=
-	( string-literal | identifier ) "=" initializer ( "," key-value-list-opt | "" )
-initializer ::=
-	"[" initializer-list-opt "]" | "{" key-value-list-opt "}" | expression
-
-statement-list-opt ::=
-	statement-list | ""
-statement-list ::=
-	statement statement-list-opt
 
 statement ::=
 	expression-statement | compound-statement |
@@ -59,16 +34,38 @@ expression-statement ::=
 	expression-opt ";"
 compound-statement ::=
 	"{" statement-list-opt "}"
+statement-list-opt ::=
+	statement-list | ""
+statement-list ::=
+	statement statement-list-opt
 
 variable-definition ::=
-	( "var" | "const" ) identifier ( "=" initializer | "" ) ";"
+	( "var" | "const" ) identifier equal-initailizer-opt ";"
+equal-initializer-opt ::=
+	"=" initializer | ""
 using-declaration ::=
-	"using" identifier "for" expression ";"
+	"using" identifier "for" initializer ";"
+initializer ::=
+	"[" initializer-list-opt "]" | "{" key-value-list-opt "}" | expression
+initializer-list-opt ::=
+	initializer-list | ""
+initializer-list ::=
+	initializer ( "," initializer-list-opt | "" )
+key-value-list-opt ::=
+	key-value-list | ""
+key-value-list ::=
+	( string-literal | identifier ) "=" initializer ( "," key-value-list-opt | "" )
 function-definition ::=
-	"function" identifier "(" identifier-list-opt ")" compound-statement
+	"function" identifier "(" parameter-list-opt ")" compound-statement
+parameter-list-opt ::=
+	parameter-list | ""
+parameter-list ::=
+	identifier equal-initializer-opt ( "," parameter-list-opt | "" )
 
 if-statement ::=
-	"if" "(" expression ")" compound-statement ( "else" ( if-statement | compound-statement ) | "" )
+	"if" "(" expression ")" compound-statement ( "else" else-branch | "" )
+else-branch ::=
+	if-statement | compound-statement
 do-while-statement ::=
 	"do" compound-statement "while" "(" expression ")" ";"
 while-statement ::=
@@ -104,30 +101,35 @@ return-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	prefix-expression | ( id-expression | lambda-expression | nested-expression ) expression-trailer-opt
-prefix-expression ::=
+	prefix-operator-expression | expression-initiator expression-trailer-opt
+prefix-operator-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
-id-expression ::=
-	identifier | literal
+expression-initiator ::=
+	identifier | literal | lambda-expression | nested-expression
 lambda-expression ::=
 	"lambda" "(" identifier-list-opt ")" compound-statement
 nested-expression ::=
 	"(" expression ")"
+
 expression-trailer-opt ::=
-	infix-trailer | ternary-trailer | postfix-trailer | ""
+	expression-trailer | ""
+expression-trailer ::=
+	infix-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer
 infix-trailer ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
-	  "=" | "==" | "!=" | "<" | ">" | "<=" | ">=" ) expression
+	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  ) expression
 ternary-trailer ::=
 	"?" expression-opt ":" expression
-postfix-trailer ::=
-	( postifix-operator-trailer | function-call-trailer | subscripting-trailer | member-access-trailer ) expression-trailer-opt
 postifix-operator-trailer ::=
-	"++" | "--"
+	( "++" | "--" ) expression-trailer-opt
 function-call-trailer ::=
-	"(" expression-list-opt ")"
+	"(" expression-list-opt ")" expression-trailer-opt
+expression-list-opt ::=
+	expression-list | ""
+expression-list ::=
+	expression ( "," expression-list-opt | "" )
 subscripting-trailer ::=
-	"[" expression "]"
+	"[" expression "]" expression-trailer-opt
 member-access-trailer ::=
-	"." identifier
+	"." identifier expression-trailer-opt
