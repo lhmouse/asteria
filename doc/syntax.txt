@@ -125,11 +125,11 @@ ternary-trailer ::=
 postifix-operator-trailer ::=
 	( "++" | "--" ) expression-trailer-opt
 function-call-trailer ::=
-	"(" expression-list-opt ")" expression-trailer-opt
-expression-list-opt ::=
-	expression-list | ""
-expression-list ::=
-	expression ( "," expression-list-opt | "" )
+	"(" argument-list-opt ")" expression-trailer-opt
+argument-list-opt ::=
+	argument-list | ""
+argument-list ::=
+	expression-opt ( "," argument-list-opt | "" )
 subscripting-trailer ::=
 	"[" expression "]" expression-trailer-opt
 member-access-trailer ::=
