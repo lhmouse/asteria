@@ -1,8 +1,8 @@
 // This file is part of asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_VPTR_HPP_
-#define ASTERIA_VPTR_HPP_
+#ifndef ASTERIA_XPTR_HPP_
+#define ASTERIA_XPTR_HPP_
 
 #include <memory> // std::shared_ptr
 #include <utility> // std::move, std::forward, std::swap
