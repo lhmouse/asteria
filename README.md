@@ -12,6 +12,17 @@
 6. Easy to intergrate in a C++ project. (C++11 and boost are required.)
 7. Native to C++ exceptions, particularly `std::bad_alloc`.
 
+# Characteristics
+
+1. First-class functions.
+2. Closure functions (`lambda` expressions).
+3. Exceptions.
+4. Deterministic cleanup functions (`defer` statements).
+5. Flexible syntax similar to C++ and JavaScript.
+6. Regualr grammar.
+7. Passing by reference only, including the operand of a `throw` statement and the return value of a function.
+8. Explicit deep copying (an object is deep copied if and only if the `=` operator is used).
+
 # License
 
 BSD 3-Clause License
