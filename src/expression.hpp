@@ -33,8 +33,8 @@ public:
 		infix_operator_xor      = 50,  // ^
 		infix_operator_and_l    = 51,  // &&
 		infix_operator_or_l     = 52,  // ||
-		infix_operator_add_a    = 53,  // *=
-		infix_operator_sub_a    = 54,  // *=
+		infix_operator_add_a    = 53,  // +=
+		infix_operator_sub_a    = 54,  // -=
 		infix_operator_mul_a    = 55,  // *=
 		infix_operator_div_a    = 56,  // /=
 		infix_operator_mod_a    = 57,  // %=
