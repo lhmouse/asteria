@@ -47,7 +47,7 @@ private:
 	Types::rebind_as_variant m_variant;
 
 public:
-	template<typename ValueT>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
 	Reference(Sp<Recycler> recycler, ValueT &&value)
 		: m_recycler(std::move(recycler)), m_variant(std::forward<ValueT>(value))
 	{ }
