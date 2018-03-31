@@ -4,20 +4,26 @@
 #include "test_init.hpp"
 #include "../src/exception.hpp"
 #include "../src/variable.hpp"
+#include "../src/recycler.hpp"
+#include "../src/stored_value.hpp"
+#include "../src/reference.hpp"
 
 using namespace Asteria;
 
 int main(){
-	auto var = Value_ptr<Variable>(create_shared<Variable>(Integer(42)));
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
-	ASTERIA_TEST_CHECK(var->get<Integer>() == 42);
+	const auto recycler = create_shared<Recycler>();
+	auto named_var = create_shared<Scoped_variable>();
+	recycler->set_variable(named_var->variable, Integer(42));
+	ASTERIA_TEST_CHECK(named_var->variable->get_type() == Variable::type_integer);
+	ASTERIA_TEST_CHECK(named_var->variable->get<Integer>() == 42);
 	try {
-		throw Exception(var);
+		throw Exception(Reference(recycler, Reference::Lvalue_generic{named_var}));
 	} catch(Exception &e){
-		const auto ptr = e.get_variable_opt();
+		auto ref = e.get_reference();
+		const auto ptr = ref.load_opt();
 		ASTERIA_TEST_CHECK(ptr);
 		ptr->set(String("hello"));
 	}
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
-	ASTERIA_TEST_CHECK(var->get<String>() == "hello");
+	ASTERIA_TEST_CHECK(named_var->variable->get_type() == Variable::type_string);
+	ASTERIA_TEST_CHECK(named_var->variable->get<String>() == "hello");
 }
