@@ -27,7 +27,7 @@ public:
 	{ }
 
 	explicit Xptr(const Xptr &rhs) // An explicit copy constructor prevents unintentional copies.
-		: m_ptr(rhs.m_ptr ? create_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
+		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
 	{ }
 	Xptr &operator=(const Xptr &rhs) noexcept {
 		Xptr(rhs).swap(*this);

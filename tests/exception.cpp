@@ -11,8 +11,8 @@
 using namespace Asteria;
 
 int main(){
-	const auto recycler = create_shared<Recycler>();
-	auto named_var = create_shared<Scoped_variable>();
+	const auto recycler = std::make_shared<Recycler>();
+	auto named_var = std::make_shared<Scoped_variable>();
 	recycler->set_variable(named_var->variable, Integer(42));
 	ASTERIA_TEST_CHECK(named_var->variable->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(named_var->variable->get<Integer>() == 42);

@@ -41,11 +41,6 @@ using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
 using Spref = const Sptr<ElementT> &;
 
-template<typename ElementT, typename ...ParamsT>
-inline Sptr<ElementT> create_shared(ParamsT &&...params){
-	return std::make_shared<ElementT, ParamsT &&...>(std::forward<ParamsT>(params)...);
-}
-
 }
 
 #endif

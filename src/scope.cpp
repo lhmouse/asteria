@@ -23,7 +23,7 @@ Sptr<Scoped_variable> Scope::declare_variable_local(const std::string &key){
 	auto it = m_variables.find(key);
 	if(it == m_variables.end()){
 		ASTERIA_DEBUG_LOG("Creating local variable: key = ", key);
-		auto xptr = create_shared<Scoped_variable>();
+		auto xptr = std::make_shared<Scoped_variable>();
 		it = m_variables.emplace(key, std::move(xptr)).first;
 	}
 	return it->second;

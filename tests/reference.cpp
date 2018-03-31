@@ -10,9 +10,9 @@
 using namespace Asteria;
 
 int main(){
-	const auto recycler = create_shared<Recycler>();
+	const auto recycler = std::make_shared<Recycler>();
 
-	auto var = Xptr<Variable>(create_shared<Variable>(Integer(42)));
+	auto var = Xptr<Variable>(std::make_shared<Variable>(Integer(42)));
 	Reference::Rvalue_generic rref = { var };
 	auto ref = Reference(recycler, std::move(rref));
 	auto ptr = read_reference_opt(ref);
@@ -20,8 +20,8 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr->get<Integer>() == 42);
 	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, Integer(130)));
 
-	auto nvar = create_shared<Scoped_variable>();
-	nvar->variable = Xptr<Variable>(create_shared<Variable>(4.2));
+	auto nvar = std::make_shared<Scoped_variable>();
+	nvar->variable = Xptr<Variable>(std::make_shared<Variable>(4.2));
 	Reference::Lvalue_generic lref = { nvar };
 	ref = Reference(recycler, std::move(lref));
 	ptr = read_reference_opt(ref);
@@ -34,7 +34,7 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	Array array;
 	for(std::int64_t i = 0; i < 5; ++i){
-		array.emplace_back(Xptr<Variable>(create_shared<Variable>(i + 200)));
+		array.emplace_back(Xptr<Variable>(std::make_shared<Variable>(i + 200)));
 	}
 	var->set(std::move(array));
 	ptr = read_reference_opt(ref);
@@ -78,8 +78,8 @@ int main(){
 	ref = Reference(recycler, std::move(oref));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	Object object;
-	object.emplace("one", Xptr<Variable>(create_shared<Variable>(Integer(1))));
-	object.emplace("two", Xptr<Variable>(create_shared<Variable>(Integer(2))));
+	object.emplace("one", Xptr<Variable>(std::make_shared<Variable>(Integer(1))));
+	object.emplace("two", Xptr<Variable>(std::make_shared<Variable>(Integer(2))));
 	var->set(std::move(object));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(!ptr);

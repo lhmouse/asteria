@@ -11,7 +11,7 @@
 using namespace Asteria;
 
 int main(){
-	const auto recycler = create_shared<Recycler>();
+	const auto recycler = std::make_shared<Recycler>();
 
 	Xptr<Variable> root, copy;
 	Xptr<Variable> first, second, third, route;
@@ -34,7 +34,7 @@ int main(){
 	arr.clear();
 	recycler->set_variable(temp, std::string("hello"));
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(temp, Opaque{"opaque", create_shared<int>()});
+	recycler->set_variable(temp, Opaque{"opaque", std::make_shared<int>()});
 	arr.emplace_back(std::move(temp));
 	recycler->set_variable(third, std::move(arr));
 
@@ -51,7 +51,7 @@ int main(){
 
 	recycler->set_variable(root, std::move(obj));
 	//recycler->copy_variable(copy, root);
-	copy = Xptr<Variable>(create_shared<Variable>(*root));
+	copy = Xptr<Variable>(std::make_shared<Variable>(*root));
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

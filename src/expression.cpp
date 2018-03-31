@@ -38,7 +38,7 @@ Reference evaluate_expression(Spref<Recycler> recycler, Spref<Scope> scope, Spre
 	(void)recycler;
 	(void)scope;
 	(void)expression_opt;
-	Reference::Rvalue_generic ref = { create_shared<Variable>(std::string("hello")) };
+	Reference::Rvalue_generic ref = { std::make_shared<Variable>(std::string("hello")) };
 	return Reference(recycler, std::move(ref));
 }
 
