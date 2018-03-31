@@ -6,6 +6,8 @@
 
 namespace Asteria {
 
+Exception::Exception(Exception &&) = default;
+Exception &Exception::operator=(Exception &&) = default;
 Exception::~Exception() = default;
 
 }

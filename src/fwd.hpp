@@ -31,6 +31,8 @@ class Statement;
 class Variable;
 class Stored_value;
 class Reference;
+
+// Runtime objects (movable only)
 class Exception;
 
 // Runtime objects (neither copyable nor movable)
