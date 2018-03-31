@@ -17,6 +17,56 @@ void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
 
+namespace {
+	void apply_indent(std::ostream &os, unsigned indent){
+		if(indent == 0){
+			return;
+		}
+		os <<std::setfill(' ') <<std::setw(static_cast<int>(indent)) <<"";
+	}
+	void quote_string(std::ostream &os, const std::string &str){
+		os <<'\"';
+		for(auto it = str.begin(); it != str.end(); ++it){
+			const unsigned value = static_cast<unsigned char>(*it);
+			switch(value){
+			case '\"':
+				os <<'\\' <<'\"';
+				continue;
+			case '\\':
+				os <<'\\' <<'\\';
+				continue;
+			case '\a':
+				os <<'\\' <<'a';
+				continue;
+			case '\b':
+				os <<'\\' <<'b';
+				continue;
+			case '\f':
+				os <<'\\' <<'f';
+				continue;
+			case '\n':
+				os <<'\\' <<'n';
+				continue;
+			case '\r':
+				os <<'\\' <<'r';
+				continue;
+			case '\t':
+				os <<'\\' <<'t';
+				continue;
+			case '\v':
+				os <<'\\' <<'v';
+				continue;
+			}
+			if((value < 0x20) || (0x7E < value)){
+				os <<'\\' <<'x' <<std::hex <<std::setfill('0') <<std::setw(2) <<value;
+				continue;
+			}
+			os <<static_cast<char>(value);
+		}
+		os <<'\"';
+	}
+}
+
 const char *get_type_name(Variable::Type type) noexcept {
 	switch(type){
 	case Variable::type_null:
@@ -123,6 +173,7 @@ std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt){
 	dump_variable_recursive(os, variable_opt);
 	return os;
 }
+
 void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
