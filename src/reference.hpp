@@ -10,9 +10,6 @@
 namespace Asteria {
 
 class Reference {
-private:
-	struct Dereference_once_result;
-
 public:
 	enum Type : unsigned {
 		type_rvalue_generic        = 0,
@@ -58,12 +55,24 @@ public:
 	Reference &operator=(Reference &&);
 	~Reference();
 
-private:
-	Dereference_once_result do_dereference(bool create_if_not_exist) const;
-
 public:
+	Spref<Recycler> get_recycler() const noexcept {
+		return m_recycler;
+	}
+	void set_recycler(Sptr<Recycler> recycler) noexcept {
+		m_recycler = std::move(recycler);
+	}
+
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
+	}
+	template<typename ExpectT>
+	const ExpectT *get_opt() const noexcept {
+		return boost::get<ExpectT>(&m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT *get_opt() noexcept {
+		return boost::get<ExpectT>(&m_variant);
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
@@ -77,11 +86,11 @@ public:
 	void set(ValueT &&value){
 		m_variant = std::forward<ValueT>(value);
 	}
-
-	Sptr<Variable> load_opt() const;
-	void store(Stored_value &&value) const;
-	Value_ptr<Variable> extract_opt();
 };
+
+extern Sptr<Variable> read_reference_opt(const Reference &reference);
+extern void write_reference(Reference &reference, Stored_value &&value_opt);
+extern Value_ptr<Variable> extract_variable_from_reference(Reference &&reference);
 
 }
 

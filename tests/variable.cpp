@@ -35,9 +35,9 @@ int main(){
 
 	const auto recycler = create_shared<Recycler>();
 	Function function = [recycler](boost::container::vector<Reference> &&params) -> Reference {
-		auto param_one = params.at(0).load_opt();
+		auto param_one = read_reference_opt(params.at(0));
 		ASTERIA_TEST_CHECK(param_one);
-		auto param_two = params.at(1).load_opt();
+		auto param_two = read_reference_opt(params.at(1));
 		ASTERIA_TEST_CHECK(param_two);
 		Reference::Rvalue_generic ref = { create_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
 		return Reference(recycler, std::move(ref));
@@ -50,7 +50,7 @@ int main(){
 	ref = { create_shared<Variable>(Integer(15)) };
 	params.emplace_back(recycler, std::move(ref));
 	auto result = var->get<Function>()(std::move(params));
-	auto rptr = result.load_opt();
+	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<Integer>() == 180);
 

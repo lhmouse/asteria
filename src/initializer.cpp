@@ -29,7 +29,7 @@ void set_variable_using_initializer_recursive(Value_ptr<Variable> &variable_out_
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::Assignment_init>();
 		auto result = evaluate_expression(recycler, scope, params.expression);
-		variable_out_opt = result.extract_opt();
+		variable_out_opt = extract_variable_from_reference(std::move(result));
 		return; }
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::Bracketed_init_list>();

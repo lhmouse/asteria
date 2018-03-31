@@ -19,8 +19,7 @@ int main(){
 	try {
 		throw Exception(Reference(recycler, Reference::Lvalue_generic{named_var}));
 	} catch(Exception &e){
-		auto ref = e.get_reference();
-		const auto ptr = ref.load_opt();
+		const auto ptr = read_reference_opt(e.get_reference());
 		ASTERIA_TEST_CHECK(ptr);
 		ptr->set(String("hello"));
 	}

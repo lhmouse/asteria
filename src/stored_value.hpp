@@ -32,6 +32,12 @@ public:
 	bool is_set() const noexcept {
 		return m_value_opt.get_ptr() != nullptr;
 	}
+	const Variable *get_opt() const noexcept {
+		return m_value_opt.get_ptr();
+	}
+	Variable *get_opt() noexcept {
+		return m_value_opt.get_ptr();
+	}
 	const Variable &get() const {
 		return m_value_opt.get();
 	}
