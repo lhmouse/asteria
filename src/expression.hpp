@@ -98,6 +98,14 @@ public:
 		return static_cast<Type>(m_variant.which());
 	}
 	template<typename ExpectT>
+	const ExpectT *get_opt() const noexcept {
+		return boost::get<ExpectT>(&m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT *get_opt() noexcept {
+		return boost::get<ExpectT>(&m_variant);
+	}
+	template<typename ExpectT>
 	const ExpectT &get() const {
 		return boost::get<ExpectT>(m_variant);
 	}
@@ -156,6 +164,14 @@ public:
 public:
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
+	}
+	template<typename ExpectT>
+	const ExpectT *get_opt() const noexcept {
+		return boost::get<ExpectT>(&m_variant);
+	}
+	template<typename ExpectT>
+	ExpectT *get_opt() noexcept {
+		return boost::get<ExpectT>(&m_variant);
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
