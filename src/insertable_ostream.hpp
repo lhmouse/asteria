@@ -37,6 +37,12 @@ public:
 	void set_caret(std::size_t caret) noexcept {
 		m_caret = caret;
 	}
+	std::string extract_string() noexcept {
+		std::string result;
+		result.swap(m_string);
+		m_caret = 0;
+		return result;
+	}
 };
 
 class Insertable_ostream : public std::ostream {
