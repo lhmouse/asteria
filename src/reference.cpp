@@ -22,7 +22,7 @@ Reference::Reference(Reference &&) = default;
 Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
 
-Reference::Dereference_once_result Reference::do_dereference_once_opt(bool create_if_not_exist) const {
+Reference::Dereference_once_result Reference::do_dereference(bool create_if_not_exist) const {
 	const auto type = get_type();
 	switch(type){
 	case type_rvalue_generic: {
@@ -108,14 +108,14 @@ Reference::Dereference_once_result Reference::do_dereference_once_opt(bool creat
 }
 
 Sptr<Variable> Reference::load_opt() const {
-	auto result = do_dereference_once_opt(false);
+	auto result = do_dereference(false);
 	return std::move(result.rvar_opt);
 }
 void Reference::store(Stored_value &&value_opt) const {
 	if(!m_recycler){
 		ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
 	}
-	auto result = do_dereference_once_opt(true);
+	auto result = do_dereference(true);
 	if(!(result.wptr_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
@@ -133,7 +133,7 @@ Value_ptr<Variable> Reference::extract_opt(){
 		auto &params = get<Rvalue_generic>();
 		variable = Value_ptr<Variable>(std::move(params.xvar_opt));
 	} else {
-		auto result = do_dereference_once_opt(false);
+		auto result = do_dereference(false);
 		m_recycler->copy_variable(variable, result.rvar_opt);
 	}
 	return variable;

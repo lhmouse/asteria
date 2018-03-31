@@ -59,7 +59,7 @@ public:
 	~Reference();
 
 private:
-	Dereference_once_result do_dereference_once_opt(bool create_if_not_exist) const;
+	Dereference_once_result do_dereference(bool create_if_not_exist) const;
 
 public:
 	Type get_type() const noexcept {
