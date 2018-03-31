@@ -16,6 +16,8 @@ struct Reference::Dereference_once_result {
 	bool immutable;                 // Is this reference read-only?
 };
 
+Reference::Reference(const Reference &) = default;
+Reference &Reference::operator=(const Reference &) = default;
 Reference::Reference(Reference &&) = default;
 Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;

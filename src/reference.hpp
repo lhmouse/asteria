@@ -52,12 +52,11 @@ public:
 		: m_recycler(std::move(recycler)), m_variant(std::forward<ValueT>(value))
 	{ }
 
+	Reference(const Reference &);
+	Reference &operator=(const Reference &);
 	Reference(Reference &&);
 	Reference &operator=(Reference &&);
 	~Reference();
-
-	Reference(const Reference &) = delete;
-	Reference &operator=(const Reference &) = delete;
 
 private:
 	Dereference_once_result do_dereference_once_opt(bool create_if_not_exist) const;

@@ -29,11 +29,9 @@ class Statement;
 
 // Runtime objects (copyable and movable)
 class Variable;
-class Exception;
-
-// Runtime objects (movable only)
 class Stored_value;
 class Reference;
+class Exception;
 
 // Runtime objects (neither copyable nor movable)
 class Scope;
