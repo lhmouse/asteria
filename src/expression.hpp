@@ -87,12 +87,11 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
+	Expression(const Expression &);
+	Expression &operator=(const Expression &);
 	Expression(Expression &&);
 	Expression &operator=(Expression &&);
 	~Expression();
-
-	Expression(const Expression &) = delete;
-	Expression &operator=(const Expression &) = delete;
 
 public:
 	Type get_type() const noexcept {
@@ -128,7 +127,7 @@ public:
 	};
 	struct Lambda_expression {
 		boost::container::vector<Function_parameter> parameter_list;
-		Value_ptr_vector<Statement> body_statement_list;
+		// TODO Value_ptr_vector<Statement> body_statement_list;
 	};
 	struct Nested_expression {
 		Value_ptr<Expression> nested_expression;
@@ -148,12 +147,11 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
+	Initiator(const Initiator &);
+	Initiator &operator=(const Initiator &);
 	Initiator(Initiator &&);
 	Initiator &operator=(Initiator &&);
 	~Initiator();
-
-	Initiator(const Initiator &) = delete;
-	Initiator &operator=(const Initiator &) = delete;
 
 public:
 	Type get_type() const noexcept {
@@ -224,12 +222,11 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
+	Trailer(const Trailer &);
+	Trailer &operator=(const Trailer &);
 	Trailer(Trailer &&);
 	Trailer &operator=(Trailer &&);
 	~Trailer();
-
-	Trailer(const Trailer &) = delete;
-	Trailer &operator=(const Trailer &) = delete;
 
 public:
 	Type get_type() const noexcept {

@@ -5,6 +5,7 @@
 #include "expression.hpp"
 #include "variable.hpp"
 #include "reference.hpp"
+#include "initializer.hpp"
 #include "misc.hpp"
 
 namespace Asteria {
@@ -12,14 +13,20 @@ namespace Asteria {
 using Initiator = Expression::Initiator;
 using Trailer   = Expression::Trailer;
 
+Expression::Expression(const Expression &) = default;
+Expression &Expression::operator=(const Expression &) = default;
 Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
+Initiator::Initiator(const Initiator &) = default;
+Initiator &Initiator::operator=(const Initiator &) = default;
 Initiator::Initiator(Initiator &&) = default;
 Initiator &Initiator::operator=(Initiator &&) = default;
 Initiator::~Initiator() = default;
 
+Trailer::Trailer(const Trailer &) = default;
+Trailer &Trailer::operator=(const Trailer &) = default;
 Trailer::Trailer(Trailer &&) = default;
 Trailer &Trailer::operator=(Trailer &&) = default;
 Trailer::~Trailer() = default;

@@ -40,12 +40,11 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
+	Initializer(const Initializer &);
+	Initializer &operator=(const Initializer &);
 	Initializer(Initializer &&);
 	Initializer &operator=(Initializer &&);
 	~Initializer();
-
-	Initializer(const Initializer &) = delete;
-	Initializer &operator=(const Initializer &) = delete;
 
 public:
 	Type get_type() const noexcept {

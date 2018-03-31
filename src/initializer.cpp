@@ -11,6 +11,8 @@
 
 namespace Asteria {
 
+Initializer::Initializer(const Initializer &) = default;
+Initializer &Initializer::operator=(const Initializer &) = default;
 Initializer::Initializer(Initializer &&) = default;
 Initializer &Initializer::operator=(Initializer &&) = default;
 Initializer::~Initializer() = default;

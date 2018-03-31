@@ -22,7 +22,7 @@ class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
-// Lexical elements (movable only)
+// Lexical elements (copyable and movable)
 class Initializer;
 class Expression;
 class Statement;
