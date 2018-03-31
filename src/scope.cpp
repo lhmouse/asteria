@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "scope.hpp"
 #include "variable.hpp"
-#include "misc.hpp"
+#include "utilities.hpp"
 
 namespace Asteria {
 

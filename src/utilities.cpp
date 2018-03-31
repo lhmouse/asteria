@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "misc.hpp"
+#include "utilities.hpp"
 #include <iostream> // std::cerr
 #include <time.h> // time_t, time(), asctime_r()
 

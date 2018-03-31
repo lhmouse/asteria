@@ -12,7 +12,7 @@
 #ifndef ENABLE_DEBUG_LOGS
 #  define ENABLE_DEBUG_LOGS   1
 #endif
-#include "../src/misc.hpp"
+#include "../src/utilities.hpp"
 
 #define ASTERIA_TEST_CHECK(expr_)	\
 	do {	\

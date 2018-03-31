@@ -1,8 +1,8 @@
 // This file is part of asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_MISC_HPP_
-#define ASTERIA_MISC_HPP_
+#ifndef ASTERIA_UTILITIES_HPP_
+#define ASTERIA_UTILITIES_HPP_
 
 #include "insertable_ostream.hpp"
 

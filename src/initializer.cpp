@@ -7,7 +7,7 @@
 #include "expression.hpp"
 #include "reference.hpp"
 #include "recycler.hpp"
-#include "misc.hpp"
+#include "utilities.hpp"
 
 namespace Asteria {
 

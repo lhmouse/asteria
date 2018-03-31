@@ -6,7 +6,7 @@
 #include "variable.hpp"
 #include "reference.hpp"
 #include "initializer.hpp"
-#include "misc.hpp"
+#include "utilities.hpp"
 
 namespace Asteria {
 

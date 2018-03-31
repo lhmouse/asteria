@@ -6,7 +6,7 @@
 #include "variable.hpp"
 #include "stored_value.hpp"
 #include "recycler.hpp"
-#include "misc.hpp"
+#include "utilities.hpp"
 
 namespace Asteria {
 
