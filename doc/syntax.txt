@@ -12,7 +12,7 @@ boolean-litearl ::=
 string-literal ::=
 	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
 numeric-literal ::=
-	binary-literal | octal-literal | decimal-literal | hexadecimal-literal
+	binary-literal | octal-literal | decimal-literal | hexadecimal-literal | nan-literal | infinity-literal
 binary-literal ::=
 	PCRE(0b[01]+(\.[01]+)([pP][-+]?[0-9]+)?)
 octal-literal ::=
@@ -21,6 +21,10 @@ decimal-literal ::=
 	PCRE([1-9][0-9]*(\.[0-9]+)([eE][-+]?[0-9]+)?)
 hexadecimal-literal ::=
 	PCRE(0[xX][0-9A-Fa-f]+(\.[0-9A-Fa-f]+)([pP][-+]?[0-9]+)?)
+nan-literal ::=
+	"nan"
+infinity-literal ::=
+	"infinity"
 
 statement ::=
 	expression-statement | compound-statement |
