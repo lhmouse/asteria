@@ -6,6 +6,8 @@
 #include "variable.hpp"
 #include "reference.hpp"
 #include "initializer.hpp"
+#include "recycler.hpp"
+#include "scope.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {

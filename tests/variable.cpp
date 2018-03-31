@@ -9,7 +9,7 @@
 using namespace Asteria;
 
 int main(){
-	auto var = Value_ptr<Variable>(create_shared<Variable>(true));
+	auto var = Xptr<Variable>(create_shared<Variable>(true));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK_CATCH(var->get<String>());
@@ -55,16 +55,16 @@ int main(){
 	ASTERIA_TEST_CHECK(rptr->get<Integer>() == 180);
 
 	Array array;
-	array.emplace_back(Value_ptr<Variable>(create_shared<Variable>(true)));
-	array.emplace_back(Value_ptr<Variable>(create_shared<Variable>(std::string("world"))));
+	array.emplace_back(Xptr<Variable>(create_shared<Variable>(true)));
+	array.emplace_back(Xptr<Variable>(create_shared<Variable>(std::string("world"))));
 	var->set(std::move(array));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(1)->get<String>() == "world");
 
 	Object object;
-	object.emplace("one", Value_ptr<Variable>(create_shared<Variable>(true)));
-	object.emplace("two", Value_ptr<Variable>(create_shared<Variable>(std::string("world"))));
+	object.emplace("one", Xptr<Variable>(create_shared<Variable>(true)));
+	object.emplace("two", Xptr<Variable>(create_shared<Variable>(std::string("world"))));
 	var->set(std::move(object));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
 	ASTERIA_TEST_CHECK(var->get<Object>().at("one")->get<Boolean>() == true);

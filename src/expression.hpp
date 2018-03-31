@@ -68,11 +68,11 @@ public:
 	};
 	struct Prefix_operator_expression {
 		Prefix_operator prefix_operator;
-		Value_ptr<Expression> operand;
+		Xptr<Expression> operand;
 	};
 	struct Initiator_and_trailers {
-		Value_ptr<Initiator> initiator;
-		Value_ptr<Trailer> trailer_first_opt;
+		Xptr<Initiator> initiator;
+		Xptr<Trailer> trailer_first_opt;
 	};
 	using Types = Type_tuple< Prefix_operator_expression  // 0
 	                        , Initiator_and_trailers      // 1
@@ -131,14 +131,14 @@ public:
 		std::string identifier;
 	};
 	struct Literal {
-		Value_ptr<Variable> value;
+		Xptr<Variable> value;
 	};
 	struct Lambda_expression {
 		boost::container::vector<Function_parameter> parameter_list;
-		// TODO Value_ptr_vector<Statement> body_statement_list;
+		// TODO Xptr_vector<Statement> body_statement_list;
 	};
 	struct Nested_expression {
-		Value_ptr<Expression> nested_expression;
+		Xptr<Expression> nested_expression;
 	};
 	using Types = Type_tuple< Identifier         // 0
 	                        , Literal            // 1
@@ -199,27 +199,27 @@ public:
 	};
 	struct Infix_operator_trailer {
 		Infix_operator infix_operator;
-		Value_ptr<Expression> operand_next;
+		Xptr<Expression> operand_next;
 	};
 	struct Ternary_trailer {
-		Value_ptr<Expression> branch_true_opt;
-		Value_ptr<Expression> branch_false;
+		Xptr<Expression> branch_true_opt;
+		Xptr<Expression> branch_false;
 	};
 	struct Postfix_operator_trailer {
 		Postfix_operator postfix_operator;
-		Value_ptr<Trailer> trailer_next_opt;
+		Xptr<Trailer> trailer_next_opt;
 	};
 	struct Function_call_trailer {
-		Value_ptr_vector<Expression> argument_list_opt;
-		Value_ptr<Trailer> trailer_next_opt;
+		Xptr_vector<Expression> argument_list_opt;
+		Xptr<Trailer> trailer_next_opt;
 	};
 	struct Subscripting_trailer {
-		Value_ptr<Expression> subscript;
-		Value_ptr<Trailer> trailer_next_opt;
+		Xptr<Expression> subscript;
+		Xptr<Trailer> trailer_next_opt;
 	};
 	struct Member_access_trailer {
 		std::string identifier;
-		Value_ptr<Trailer> trailer_next_opt;
+		Xptr<Trailer> trailer_next_opt;
 	};
 	using Types = Type_tuple< Infix_operator_trailer    // 0
 	                        , Ternary_trailer           // 1

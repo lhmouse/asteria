@@ -18,13 +18,13 @@ public:
 		type_braced_init_list     =  2,
 	};
 	struct Assignment_init {
-		Value_ptr<Expression> expression;
+		Xptr<Expression> expression;
 	};
 	struct Bracketed_init_list {
-		Value_ptr_vector<Initializer> initializers;
+		Xptr_vector<Initializer> initializers;
 	};
 	struct Braced_init_list {
-		Value_ptr_map<std::string, Initializer> key_values;
+		Xptr_map<std::string, Initializer> key_values;
 	};
 	using Types = Type_tuple< Assignment_init      // 0
 	                        , Bracketed_init_list  // 1
@@ -73,7 +73,7 @@ public:
 };
 
 extern Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept;
-extern void set_variable_using_initializer_recursive(Value_ptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
+extern void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
 
 }
 

@@ -13,19 +13,19 @@ Recycler::~Recycler(){
 	clear_variables();
 }
 
-void Recycler::set_variable(Value_ptr<Variable> &variable_out_opt, Stored_value &&value_opt){
+void Recycler::set_variable(Xptr<Variable> &variable_out_opt, Stored_value &&value_opt){
 	if(!value_opt){
 		variable_out_opt = nullptr;
 	} else if(!variable_out_opt){
 		auto xptr = create_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
 		m_weak_variables.emplace_back(xptr);
-		variable_out_opt = Value_ptr<Variable>(std::move(xptr));
+		variable_out_opt = Xptr<Variable>(std::move(xptr));
 	} else {
 		*variable_out_opt = Variable(std::move(value_opt.get()));
 	}
 }
-void Recycler::copy_variable(Value_ptr<Variable> &variable_out_opt, Spref<const Variable> source_opt){
+void Recycler::copy_variable(Xptr<Variable> &variable_out_opt, Spref<const Variable> source_opt){
 	if(!source_opt){
 		set_variable(variable_out_opt, nullptr);
 	} else {

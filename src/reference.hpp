@@ -90,7 +90,7 @@ public:
 
 extern Sptr<Variable> read_reference_opt(const Reference &reference);
 extern void write_reference(Reference &reference, Stored_value &&value_opt);
-extern Value_ptr<Variable> extract_variable_from_reference(Reference &&reference);
+extern Xptr<Variable> extract_variable_from_reference(Reference &&reference);
 
 }
 

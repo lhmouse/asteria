@@ -20,7 +20,7 @@ Initializer::~Initializer() = default;
 Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept {
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_none;
 }
-void set_variable_using_initializer_recursive(Value_ptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
+void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_none: {

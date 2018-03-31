@@ -18,9 +18,9 @@ Reference::~Reference() = default;
 
 namespace {
 	struct Dereference_once_result {
-		Sptr<Variable> rvar_opt;  // How to read a value through this reference?
-		Value_ptr<Variable> *wptr_opt;  // How to write a value through this reference?
-		bool immutable;                 // Is this reference read-only?
+		Sptr<Variable> rvar_opt;   // How to read a value through this reference?
+		Xptr<Variable> *wptr_opt;  // How to write a value through this reference?
+		bool immutable;            // Is this reference read-only?
 	};
 
 	Dereference_once_result do_dereference(const Reference &reference, bool create_if_not_exist){
@@ -123,16 +123,16 @@ void write_reference(Reference &reference, Stored_value &&value_opt){
 	}
 	recycler->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
-Value_ptr<Variable> extract_variable_from_reference(Reference &&reference){
+Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 	const auto rv_params = reference.get_opt<Reference::Rvalue_generic>();
 	if(rv_params){
-		return Value_ptr<Variable>(std::move(rv_params->xvar_opt));
+		return Xptr<Variable>(std::move(rv_params->xvar_opt));
 	} else {
 		const auto recycler = reference.get_recycler();
 		if(!recycler){
 			ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
 		}
-		Value_ptr<Variable> variable;
+		Xptr<Variable> variable;
 		auto result = do_dereference(reference, false);
 		recycler->copy_variable(variable, result.rvar_opt);
 		return variable;

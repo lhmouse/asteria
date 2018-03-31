@@ -19,7 +19,7 @@ CLEANFILES =	\
 
 pkginclude_HEADERS =	\
 	asteria/src/type_tuple.hpp	\
-	asteria/src/value_ptr.hpp	\
+	asteria/src/xptr.hpp	\
 	asteria/src/fwd.hpp	\
 	asteria/src/insertable_ostream.hpp	\
 	asteria/src/utilities.hpp	\

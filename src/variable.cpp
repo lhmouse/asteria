@@ -207,5 +207,5 @@ void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
 
 }
 
-template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
-template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+template class boost::container::vector<Asteria::Xptr<Asteria::Variable>>;
+template class boost::container::flat_map<std::string, Asteria::Xptr<Asteria::Variable>>;

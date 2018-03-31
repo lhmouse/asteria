@@ -11,7 +11,7 @@ using namespace Asteria;
 int main(){
 	auto recycler = create_shared<Recycler>();
 
-	Value_ptr<Variable> obj;
+	Xptr<Variable> obj;
 	recycler->set_variable(obj, Object());
 	auto pair = obj->get<Object>().emplace("int", create_shared<Variable>(Integer(42)));
 	auto weak_int = std::weak_ptr<Variable>(pair.first->second);

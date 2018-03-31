@@ -13,7 +13,7 @@
 #include <memory> // std::shared_ptr
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
-#include "value_ptr.hpp"
+#include "xptr.hpp"
 
 namespace Asteria {
 
@@ -41,21 +41,21 @@ class Recycler;
 
 // Aliases.
 template<typename ElementT>
-using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
+using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename ElementT>
-using Value_ptr_vector = boost::container::vector<Value_ptr<ElementT>>;
+using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
-using Value_ptr_map = boost::container::flat_map<KeyT, Value_ptr<ValueT>>;
+using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
 // Struct definitions.
 struct Scoped_variable {
-	Value_ptr<Variable> variable;
+	Xptr<Variable> variable;
 	bool immutable;
 };
 
 struct Function_parameter {
 	std::string identifier;
-	Value_ptr<Initializer> default_initializer_opt;
+	Xptr<Initializer> default_initializer_opt;
 };
 
 struct Magic_handle {
@@ -71,8 +71,8 @@ using Double    = double;
 using String    = std::string;
 using Opaque    = Magic_handle;
 using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
-using Array     = boost::container::vector<Value_ptr<Variable>>;
-using Object    = boost::container::flat_map<std::string, Value_ptr<Variable>>;
+using Array     = boost::container::vector<Xptr<Variable>>;
+using Object    = boost::container::flat_map<std::string, Xptr<Variable>>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
 }
@@ -85,7 +85,7 @@ using Object    = boost::container::flat_map<std::string, Value_ptr<Variable>>;
 // Instantiated in 'src/reference.cpp'.
 extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
 // Instantiated in 'src/variable.cpp'.
-extern template class boost::container::vector<Asteria::Value_ptr<Asteria::Variable>>;
-extern template class boost::container::flat_map<std::string, Asteria::Value_ptr<Asteria::Variable>>;
+extern template class boost::container::vector<Asteria::Xptr<Asteria::Variable>>;
+extern template class boost::container::flat_map<std::string, Asteria::Xptr<Asteria::Variable>>;
 
 #endif
