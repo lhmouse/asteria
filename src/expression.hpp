@@ -12,61 +12,48 @@ namespace Asteria {
 class Expression {
 public:
 	enum Prefix_operator : unsigned {
-		prefix_operator_add     = 10,  // +
-		prefix_operator_sub     = 11,  // -
-		prefix_operator_not     = 12,  // ~
-		prefix_operator_not_l   = 13,  // !
-		prefix_operator_inc     = 14,  // ++
-		prefix_operator_dec     = 15,  // --
-	};
-	enum Infix_operator : unsigned {
-		infix_operator_add      = 40,  // +
-		infix_operator_sub      = 41,  // -
-		infix_operator_mul      = 42,  // *
-		infix_operator_div      = 43,  // /
-		infix_operator_mod      = 44,  // %
-		infix_operator_sll      = 45,  // <<
-		infix_operator_srl      = 46,  // >>>
-		infix_operator_sra      = 47,  // >>
-		infix_operator_and      = 48,  // &
-		infix_operator_or       = 49,  // |
-		infix_operator_xor      = 50,  // ^
-		infix_operator_and_l    = 51,  // &&
-		infix_operator_or_l     = 52,  // ||
-		infix_operator_add_a    = 53,  // +=
-		infix_operator_sub_a    = 54,  // -=
-		infix_operator_mul_a    = 55,  // *=
-		infix_operator_div_a    = 56,  // /=
-		infix_operator_mod_a    = 57,  // %=
-		infix_operator_sll_a    = 58,  // <<=
-		infix_operator_srl_a    = 59,  // >>>=
-		infix_operator_sra_a    = 60,  // >>=
-		infix_operator_and_a    = 61,  // &=
-		infix_operator_or_a     = 62,  // |=
-		infix_operator_xor_a    = 63,  // ^=
-		infix_operator_and_l_a  = 64,  // &&=
-		infix_operator_or_l_a   = 65,  // ||=
-		infix_operator_assign   = 66,  // =
-		infix_operator_cmpeq    = 67,  // ==
-		infix_operator_cmpne    = 68,  // !=
-		infix_operator_cmplt    = 69,  // <
-		infix_operator_cmpgt    = 70,  // >
-		infix_operator_cmplte   = 71,  // <=
-		infix_operator_cmpgte   = 72,  // >=
+		prefix_operator_add    = 10,  // +
+		prefix_operator_sub    = 11,  // -
+		prefix_operator_not    = 12,  // ~
+		prefix_operator_not_l  = 13,  // !
+		prefix_operator_inc    = 14,  // ++
+		prefix_operator_dec    = 15,  // --
 	};
 	enum Postfix_operator : unsigned {
-		postfix_operator_inc    = 90,  // ++
-		postfix_operator_dec    = 91,  // --
+		postfix_operator_inc   = 30,  // ++
+		postfix_operator_dec   = 31,  // --
+	};
+	enum Infix_operator : unsigned {
+		infix_operator_add     = 50,  // +
+		infix_operator_sub     = 51,  // -
+		infix_operator_mul     = 52,  // *
+		infix_operator_div     = 53,  // /
+		infix_operator_mod     = 54,  // %
+		infix_operator_sll     = 55,  // <<
+		infix_operator_srl     = 56,  // >>>
+		infix_operator_sra     = 57,  // >>
+		infix_operator_and     = 58,  // &
+		infix_operator_or      = 59,  // |
+		infix_operator_xor     = 60,  // ^
+		infix_operator_and_l   = 61,  // &&
+		infix_operator_or_l    = 62,  // ||
+		infix_operator_cmpeq   = 63,  // ==
+		infix_operator_cmpne   = 64,  // !=
+		infix_operator_cmplt   = 65,  // <
+		infix_operator_cmpgt   = 66,  // >
+		infix_operator_cmplte  = 67,  // <=
+		infix_operator_cmpgte  = 68,  // >=
+		infix_operator_assign  = 69,  // =
 	};
 
 	class Initiator;
 	class Trailer;
 
 	enum Type : unsigned {
-		type_prefix_operator_expression  = 0,
-		type_initiator_and_trailers      = 1,
+		type_prefix_expression       = 0,
+		type_initiator_and_trailers  = 1,
 	};
-	struct Prefix_operator_expression {
+	struct Prefix_expression {
 		Prefix_operator prefix_operator;
 		Xptr<Expression> operand;
 	};
@@ -74,8 +61,8 @@ public:
 		Xptr<Initiator> initiator;
 		Xptr<Trailer> trailer_first_opt;
 	};
-	using Types = Type_tuple< Prefix_operator_expression  // 0
-	                        , Initiator_and_trailers      // 1
+	using Types = Type_tuple< Prefix_expression       // 0
+	                        , Initiator_and_trailers  // 1
 		>;
 
 private:
@@ -190,14 +177,19 @@ public:
 class Expression::Trailer {
 public:
 	enum Type : unsigned {
-		type_infix_operator_trailer    = 0,
-		type_ternary_trailer           = 1,
-		type_postfix_operator_trailer  = 2,
-		type_function_call_trailer     = 3,
-		type_subscripting_trailer      = 4,
-		type_member_access_trailer     = 5,
+		type_postfix_trailer        = 0,
+		type_infix_trailer          = 1,
+		type_ternary_trailer        = 2,
+		type_assignment_trailer     = 3,
+		type_function_call_trailer  = 4,
+		type_subscripting_trailer   = 5,
+		type_member_access_trailer  = 6,
 	};
-	struct Infix_operator_trailer {
+	struct Postfix_trailer {
+		Postfix_operator postfix_operator;
+		Xptr<Trailer> trailer_next_opt;
+	};
+	struct Infix_trailer {
 		Infix_operator infix_operator;
 		Xptr<Expression> operand_next;
 	};
@@ -205,9 +197,9 @@ public:
 		Xptr<Expression> branch_true_opt;
 		Xptr<Expression> branch_false;
 	};
-	struct Postfix_operator_trailer {
-		Postfix_operator postfix_operator;
-		Xptr<Trailer> trailer_next_opt;
+	struct Assignment_trailer {
+		Infix_operator infix_operator;
+		Xptr<Expression> operand_next;
 	};
 	struct Function_call_trailer {
 		Xptr_vector<Expression> argument_list_opt;
@@ -221,12 +213,13 @@ public:
 		std::string identifier;
 		Xptr<Trailer> trailer_next_opt;
 	};
-	using Types = Type_tuple< Infix_operator_trailer    // 0
-	                        , Ternary_trailer           // 1
-	                        , Postfix_operator_trailer  // 2
-	                        , Function_call_trailer     // 3
-	                        , Subscripting_trailer      // 4
-	                        , Member_access_trailer     // 5
+	using Types = Type_tuple< Postfix_trailer        // 0
+	                        , Infix_trailer          // 1
+	                        , Ternary_trailer        // 2
+	                        , Assignment_trailer     // 3
+	                        , Function_call_trailer  // 4
+	                        , Subscripting_trailer   // 5
+	                        , Member_access_trailer  // 6
 		>;
 
 private:

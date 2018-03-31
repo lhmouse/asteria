@@ -25,7 +25,8 @@ hexadecimal-literal ::=
 statement ::=
 	expression-statement | compound-statement |
 	variable-definition | using-declaration | function-definition |
-	if-statement | do-while-statement | while-statement | for-statement | foreach-statement | switch-statement |
+	if-statement | switch-statement |
+	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
 	label-statement | case-statement |
 	goto-statement | break-statement | continue-statement | throw-statement | return-statement
@@ -64,6 +65,9 @@ parameter-list ::=
 
 if-statement ::=
 	"if" "(" expression ")" compound-statement ( "else" else-branch | "" )
+switch-statement ::=
+	"switch" "(" expression ")" compound-statement
+
 else-branch ::=
 	if-statement | compound-statement
 do-while-statement ::=
@@ -74,8 +78,6 @@ for-statement ::=
 	"for" "(" statement expression-opt ";" expression-opt ")" compound-statement
 foreach-statement ::=
 	"foreach" "(" identifier "," identifier "in" initializer ")" compound-statement
-switch-statement ::=
-	"switch" "(" expression ")" compound-statement
 
 try-statement ::=
 	"try" compound-statement "catch" "(" identifier ")" compound-statement
@@ -115,16 +117,19 @@ nested-expression ::=
 expression-trailer-opt ::=
 	expression-trailer | ""
 expression-trailer ::=
-	infix-operator-trailer | ternary-trailer | postfix-operator-trailer | function-call-trailer |
-	subscripting-trailer | member-access-trailer
-infix-operator-trailer ::=
-	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | ">>>"  | "&"  | "|"  | "^"  | "&&"  | "||"  |
-	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | ">>>=" | "&=" | "|=" | "^=" | "&&=" | "||=" |
-	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  ) expression
-ternary-trailer ::=
-	"?" expression-opt ":" expression
+	postfix-operator-trailer | infix-operator-trailer | ternary-trailer | assignment-trailer |
+	function-call-trailer | subscripting-trailer | member-access-trailer
 postifix-operator-trailer ::=
 	( "++" | "--" ) expression-trailer-opt
+infix-operator-trailer ::=
+	( "+" | "-" | "*" | "/"  | "%"  | "<<" | ">>" | ">>>" |
+	  "&" | "|" | "^" | "&&" | "||" | "==" | "!=" | "<"   | ">" | "<=" | ">=" ) expression
+ternary-trailer ::=
+	"?" expression-opt ":" expression
+assignment-trailer ::=
+	( "+=" | "-=" | "*=" | "/="  | "%="  | "<<=" | ">>=" | ">>>=" |
+	  "&=" | "|=" | "^=" | "&&=" | "||=" | "="   ) expression
+
 function-call-trailer ::=
 	"(" argument-list-opt ")" expression-trailer-opt
 argument-list-opt ::=
