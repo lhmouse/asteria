@@ -37,12 +37,12 @@
 namespace Asteria {
 
 template<typename ElementT>
-using Sp = std::shared_ptr<ElementT>;
+using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Spref = const Sp<ElementT> &;
+using Spref = const Sptr<ElementT> &;
 
 template<typename ElementT, typename ...ParamsT>
-inline Sp<ElementT> create_shared(ParamsT &&...params){
+inline Sptr<ElementT> create_shared(ParamsT &&...params){
 	return std::make_shared<ElementT, ParamsT &&...>(std::forward<ParamsT>(params)...);
 }
 

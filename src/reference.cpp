@@ -11,7 +11,7 @@
 namespace Asteria {
 
 struct Reference::Dereference_once_result {
-	Sp<Variable> rvar_opt;  // How to read a value through this reference?
+	Sptr<Variable> rvar_opt;  // How to read a value through this reference?
 	Value_ptr<Variable> *wptr_opt;  // How to write a value through this reference?
 	bool immutable;                 // Is this reference read-only?
 };
@@ -107,7 +107,7 @@ Reference::Dereference_once_result Reference::do_dereference_once_opt(bool creat
 	}
 }
 
-Sp<Variable> Reference::load_opt() const {
+Sptr<Variable> Reference::load_opt() const {
 	auto result = do_dereference_once_opt(false);
 	return std::move(result.rvar_opt);
 }

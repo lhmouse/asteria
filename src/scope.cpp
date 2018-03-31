@@ -12,14 +12,14 @@ Scope::~Scope(){
 	clear_variables_local();
 }
 
-Sp<Scoped_variable> Scope::get_variable_local_opt(const std::string &key) const noexcept {
+Sptr<Scoped_variable> Scope::get_variable_local_opt(const std::string &key) const noexcept {
 	auto it = m_variables.find(key);
 	if(it == m_variables.end()){
 		return nullptr;
 	}
 	return it->second;
 }
-Sp<Scoped_variable> Scope::declare_variable_local(const std::string &key){
+Sptr<Scoped_variable> Scope::declare_variable_local(const std::string &key){
 	auto it = m_variables.find(key);
 	if(it == m_variables.end()){
 		ASTERIA_DEBUG_LOG("Creating local variable: key = ", key);
@@ -32,7 +32,7 @@ void Scope::clear_variables_local() noexcept {
 	m_variables.clear();
 }
 
-Sp<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &key) noexcept {
+Sptr<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &key) noexcept {
 	for(auto scope = scope_opt.get(); scope; scope = scope->get_parent_opt().get()){
 		auto scoped_var = scope->get_variable_local_opt(key);
 		if(scoped_var){

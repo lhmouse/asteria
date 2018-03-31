@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Exception : public std::exception {
 private:
-	Sp<Variable> m_variable_opt;
+	Sptr<Variable> m_variable_opt;
 
 public:
-	explicit Exception(Sp<Variable> variable_opt)
+	explicit Exception(Sptr<Variable> variable_opt)
 		: m_variable_opt(std::move(variable_opt))
 	{ }
 	~Exception() override;
@@ -24,10 +24,10 @@ public:
 		return "Asteria::Exception";
 	}
 
-	Sp<Variable> get_variable_opt() const noexcept {
+	Sptr<Variable> get_variable_opt() const noexcept {
 		return m_variable_opt;
 	}
-	void set_variable(Sp<Variable> variable_opt) noexcept {
+	void set_variable(Sptr<Variable> variable_opt) noexcept {
 		m_variable_opt = std::move(variable_opt);
 	}
 	void clear_variable() noexcept {
