@@ -41,8 +41,6 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
-	Variable(const Variable &);
-	Variable &operator=(const Variable &);
 	Variable(Variable &&);
 	Variable &operator=(Variable &&);
 	~Variable();

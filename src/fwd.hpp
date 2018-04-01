@@ -27,11 +27,9 @@ class Initializer;
 class Expression;
 class Statement;
 
-// Runtime objects (copyable and movable)
+// Runtime objects (movable only)
 class Variable;
 class Reference;
-
-// Runtime objects (movable only)
 class Exception;
 class Stored_value;
 
@@ -81,11 +79,5 @@ using Object    = boost::container::flat_map<std::string, Xptr<Variable>>;
 	typename ::std::enable_if<	\
 		!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)	\
 		>::type * = nullptr
-
-// Instantiated in 'src/reference.cpp'.
-extern template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;
-// Instantiated in 'src/variable.cpp'.
-extern template class boost::container::vector<Asteria::Xptr<Asteria::Variable>>;
-extern template class boost::container::flat_map<std::string, Asteria::Xptr<Asteria::Variable>>;
 
 #endif

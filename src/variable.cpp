@@ -7,8 +7,6 @@
 
 namespace Asteria {
 
-Variable::Variable(const Variable &) = default;
-Variable &Variable::operator=(const Variable &) = default;
 Variable::Variable(Variable &&) = default;
 Variable &Variable::operator=(Variable &&) = default;
 Variable::~Variable() = default;
@@ -206,6 +204,3 @@ void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
 }
 
 }
-
-template class boost::container::vector<Asteria::Xptr<Asteria::Variable>>;
-template class boost::container::flat_map<std::string, Asteria::Xptr<Asteria::Variable>>;

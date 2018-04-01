@@ -26,14 +26,7 @@ public:
 		: m_ptr(std::move(other))
 	{ }
 
-	Xptr(const Xptr &rhs)
-		: m_ptr(rhs.m_ptr ? std::make_shared<ElementT>(*(rhs.m_ptr)) : nullptr)
-	{ }
-	Xptr &operator=(const Xptr &rhs) noexcept {
-		Xptr(rhs).swap(*this);
-		return *this;
-	}
-
+	// The move constructor and move assignment operator are deleted implicitly.
 	Xptr(Xptr &&rhs) = default;
 	Xptr &operator=(Xptr &&rhs) = default;
 

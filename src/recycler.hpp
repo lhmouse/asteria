@@ -30,7 +30,7 @@ public:
 
 public:
 	void set_variable(Xptr<Variable> &variable_out_opt, Stored_value &&value_opt);
-	void copy_variable(Xptr<Variable> &variable_out_opt, Spref<const Variable> source_opt);
+	void copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<const Variable> source_opt);
 	void defragment_automatic() noexcept;
 	void clear_variables() noexcept;
 };

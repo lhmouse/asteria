@@ -10,8 +10,6 @@
 
 namespace Asteria {
 
-Reference::Reference(const Reference &) = default;
-Reference &Reference::operator=(const Reference &) = default;
 Reference::Reference(Reference &&) = default;
 Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
@@ -55,7 +53,11 @@ namespace {
 				if(count_to_prepend > array->max_size() - array->size()){
 					ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_prepend = ", count_to_prepend);
 				}
-				array->insert(array->begin(), static_cast<std::size_t>(count_to_prepend), nullptr);
+				array->reserve(array->size() + static_cast<std::size_t>(count_to_prepend));
+				for(std::size_t i = 0; i < count_to_prepend; ++i){
+					array->emplace_back();
+				}
+				std::move_backward(array->begin(), array->begin() + static_cast<std::ptrdiff_t>(size_current), array->end());
 				normalized_index += static_cast<std::int64_t>(count_to_prepend);
 				size_current += static_cast<std::int64_t>(count_to_prepend);
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
@@ -70,8 +72,10 @@ namespace {
 				if(count_to_append > array->max_size() - array->size()){
 					ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_append = ", count_to_append);
 				}
-				array->insert(array->end(), static_cast<std::size_t>(count_to_append), nullptr);
-				normalized_index += static_cast<std::int64_t>(0);
+				array->reserve(array->size() + static_cast<std::size_t>(count_to_append));
+				for(std::size_t i = 0; i < count_to_append; ++i){
+					array->emplace_back();
+				}
 				size_current += static_cast<std::int64_t>(count_to_append);
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			}
@@ -134,11 +138,9 @@ Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 		}
 		Xptr<Variable> variable;
 		auto result = do_dereference(reference, false);
-		recycler->copy_variable(variable, result.rvar_opt);
+		recycler->copy_variable_recursive(variable, result.rvar_opt);
 		return variable;
 	}
 }
 
 }
-
-template class std::function<Asteria::Reference (boost::container::vector<Asteria::Reference> &&)>;

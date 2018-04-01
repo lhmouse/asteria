@@ -49,8 +49,6 @@ public:
 		: m_recycler(std::move(recycler)), m_variant(std::forward<ValueT>(value))
 	{ }
 
-	Reference(const Reference &);
-	Reference &operator=(const Reference &);
 	Reference(Reference &&);
 	Reference &operator=(Reference &&);
 	~Reference();
