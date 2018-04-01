@@ -27,8 +27,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	expression-statement | compound-statement |
-	variable-definition | function-definition |
+	expression-statement | compound-statement | variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
@@ -43,7 +42,6 @@ statement-list-opt ::=
 	statement-list | ""
 statement-list ::=
 	statement statement-list-opt
-
 variable-definition ::=
 	( "var" | "const" ) identifier equal-initailizer-opt ";"
 equal-initializer-opt ::=
