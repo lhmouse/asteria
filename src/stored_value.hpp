@@ -12,8 +12,11 @@
 namespace Asteria {
 
 class Stored_value {
+public:
+	using Variant = Variable::Types::rebind_as_variant;
+
 private:
-	boost::optional<Variable> m_value_opt;
+	boost::optional<Variant> m_value_opt;
 
 public:
 	Stored_value(Null = nullptr)
@@ -32,16 +35,16 @@ public:
 	bool is_set() const noexcept {
 		return m_value_opt.get_ptr() != nullptr;
 	}
-	const Variable *get_opt() const noexcept {
+	const Variant *get_opt() const noexcept {
 		return m_value_opt.get_ptr();
 	}
-	Variable *get_opt() noexcept {
+	Variant *get_opt() noexcept {
 		return m_value_opt.get_ptr();
 	}
-	const Variable &get() const {
+	const Variant &get() const {
 		return m_value_opt.get();
 	}
-	Variable &get(){
+	Variant &get(){
 		return m_value_opt.get();
 	}
 	template<typename ValueT>
