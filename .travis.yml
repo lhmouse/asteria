@@ -16,7 +16,7 @@ matrix:
     - env: "_options=\"\""
 
 before_install:
-  - "sudo apt-get install libboost-dev checkinstall
+  - "sudo apt-get install libboost-dev checkinstall"
 
 install:
   - "mkdir -p m4"
