@@ -4,7 +4,7 @@ document ::=
 identifier ::=
 	PCRE([A-Za-z_][0-9A-Za-z_]*)
 literal ::=
-	null-literal | boolean-literal | string-literal | numeric-literal
+	null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
 null-literal ::=
 	"null"
 boolean-litearl ::=
@@ -12,7 +12,7 @@ boolean-litearl ::=
 string-literal ::=
 	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
 numeric-literal ::=
-	binary-literal | octal-literal | decimal-literal | hexadecimal-literal | nan-literal | infinity-literal
+	binary-literal | octal-literal | decimal-literal | hexadecimal-literal
 binary-literal ::=
 	PCRE(0b[01]+(\.[01]+)([pP][-+]?[0-9]+)?)
 octal-literal ::=
@@ -28,11 +28,11 @@ infinity-literal ::=
 
 statement ::=
 	expression-statement | compound-statement |
-	variable-definition | using-declaration | function-definition |
+	variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
-	label-statement | case-statement |
+	label-statement | case-label-statement | default-label-statement |
 	goto-statement | break-statement | continue-statement | throw-statement | return-statement
 
 expression-statement ::=
@@ -48,8 +48,6 @@ variable-definition ::=
 	( "var" | "const" ) identifier equal-initailizer-opt ";"
 equal-initializer-opt ::=
 	"=" initializer | ""
-using-declaration ::=
-	"using" identifier "for" initializer ";"
 initializer ::=
 	"[" initializer-list-opt "]" | "{" key-value-list-opt "}" | expression
 initializer-list-opt ::=
@@ -69,11 +67,11 @@ parameter-list ::=
 
 if-statement ::=
 	"if" "(" expression ")" compound-statement ( "else" else-branch | "" )
+else-branch ::=
+	if-statement | compound-statement
 switch-statement ::=
 	"switch" "(" expression ")" compound-statement
 
-else-branch ::=
-	if-statement | compound-statement
 do-while-statement ::=
 	"do" compound-statement "while" "(" expression ")" ";"
 while-statement ::=
@@ -81,17 +79,19 @@ while-statement ::=
 for-statement ::=
 	"for" "(" statement expression-opt ";" expression-opt ")" compound-statement
 foreach-statement ::=
-	"foreach" "(" identifier "," identifier "in" initializer ")" compound-statement
+	"foreach" "(" "const" identifier "," ( "var" | "const" ) identifier "in" initializer ")" compound-statement
 
 try-statement ::=
-	"try" compound-statement "catch" "(" identifier ")" compound-statement
+	"try" compound-statement "catch" "(" ( "var" | "const" ) identifier ")" compound-statement
 defer-statement ::=
 	"defer" compound-statement
 
 label-statement ::=
 	"label" identifier ":"
-case-statement ::=
-	"case" ( string-literal | numeric-literal ) ":"
+case-label-statement ::=
+	"case" ( null-literal | boolean-literal | string-literal | numeric-literal ) ":"
+default-label-statement ::=
+	"default" ":"
 
 goto-statement ::=
 	"goto" identifier ";"
