@@ -29,6 +29,7 @@ pkginclude_HEADERS =	\
 	asteria/src/exception.hpp	\
 	asteria/src/initializer.hpp	\
 	asteria/src/expression.hpp	\
+	asteria/src/statement.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp
 
@@ -44,6 +45,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/exception.cpp	\
 	asteria/src/initializer.cpp	\
 	asteria/src/expression.cpp	\
+	asteria/src/statement.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/recycler.cpp
 

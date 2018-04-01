@@ -4,6 +4,8 @@
 #ifndef ASTERIA_STORED_VALUE_HPP_
 #define ASTERIA_STORED_VALUE_HPP_
 
+#include "fwd.hpp"
+#include "type_tuple.hpp"
 #include "variable.hpp"
 #include <boost/optional.hpp>
 
@@ -22,8 +24,6 @@ public:
 		: m_value_opt(std::forward<ValueT>(value_opt))
 	{ }
 
-	Stored_value(const Stored_value &);
-	Stored_value &operator=(const Stored_value &);
 	Stored_value(Stored_value &&);
 	Stored_value &operator=(Stored_value &&);
 	~Stored_value();

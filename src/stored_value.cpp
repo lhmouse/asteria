@@ -3,11 +3,10 @@
 
 #include "precompiled.hpp"
 #include "stored_value.hpp"
+#include "variable.hpp"
 
 namespace Asteria {
 
-Stored_value::Stored_value(const Stored_value &) = default;
-Stored_value &Stored_value::operator=(const Stored_value &) = default;
 Stored_value::Stored_value(Stored_value &&) = default;
 Stored_value &Stored_value::operator=(Stored_value &&) = default;
 Stored_value::~Stored_value() = default;

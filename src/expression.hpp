@@ -74,8 +74,6 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
-	Expression(const Expression &);
-	Expression &operator=(const Expression &);
 	Expression(Expression &&);
 	Expression &operator=(Expression &&);
 	~Expression();
@@ -122,7 +120,7 @@ public:
 	};
 	struct Lambda_expression {
 		boost::container::vector<Function_parameter> parameter_list;
-		// TODO Xptr_vector<Statement> body_statement_list;
+		Xptr_vector<Statement> statement_list;
 	};
 	struct Nested_expression {
 		Xptr<Expression> nested_expression;
@@ -142,8 +140,6 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
-	Initiator(const Initiator &);
-	Initiator &operator=(const Initiator &);
 	Initiator(Initiator &&);
 	Initiator &operator=(Initiator &&);
 	~Initiator();
@@ -194,8 +190,8 @@ public:
 		Xptr<Expression> operand_next;
 	};
 	struct Ternary_trailer {
-		Xptr<Expression> branch_true_opt;
-		Xptr<Expression> branch_false;
+		Xptr<Expression> false_branch_opt;
+		Xptr<Expression> false_branch;
 	};
 	struct Assignment_trailer {
 		Infix_operator infix_operator;
@@ -231,8 +227,6 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 
-	Trailer(const Trailer &);
-	Trailer &operator=(const Trailer &);
 	Trailer(Trailer &&);
 	Trailer &operator=(Trailer &&);
 	~Trailer();

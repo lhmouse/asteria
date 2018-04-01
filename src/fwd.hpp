@@ -22,18 +22,18 @@ class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
-// Lexical elements (copyable and movable)
+// Lexical elements (movable only)
 class Initializer;
 class Expression;
 class Statement;
 
 // Runtime objects (copyable and movable)
 class Variable;
-class Stored_value;
 class Reference;
 
 // Runtime objects (movable only)
 class Exception;
+class Stored_value;
 
 // Runtime objects (neither copyable nor movable)
 class Scope;

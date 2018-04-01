@@ -23,9 +23,6 @@ public:
 	Exception &operator=(Exception &&);
 	~Exception() override;
 
-	Exception(const Exception &) = delete;
-	Exception &operator=(const Exception &) = delete;
-
 public:
 	const char *what() const noexcept override {
 		return "Asteria::Exception";
