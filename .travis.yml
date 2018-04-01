@@ -1,22 +1,19 @@
 language: cpp
 
 os: linux
-dist: xenial
+dist: trusty
 sudo: required
 
-#addons:
-#  apt:
-#    packages:
-#      - libboost-dev
-#      - checkinstall
+addons:
+  apt:
+    packages:
+      - libboost-dev
+      - checkinstall
 
 matrix:
   include:
     - env: "_options=\"--enable-debug-logs --enable-debug-checks\""
     - env: "_options=\"\""
-
-before_install:
-  - "sudo apt-get install libboost-dev checkinstall"
 
 install:
   - "mkdir -p m4"
