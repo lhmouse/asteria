@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "variable.hpp"
 #include "utilities.hpp"
+#include <cmath> // std::ceil
 
 namespace Asteria {
 
