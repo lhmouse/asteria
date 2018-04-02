@@ -39,6 +39,12 @@ class Recycler;
 
 // Aliases.
 template<typename ElementT>
+using Sptr = std::shared_ptr<ElementT>;
+template<typename ElementT>
+using Spref = const Sptr<ElementT> &;
+
+// Aliases.
+template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;

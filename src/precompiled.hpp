@@ -33,13 +33,4 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/variant.hpp>
 
-namespace Asteria {
-
-template<typename ElementT>
-using Sptr = std::shared_ptr<ElementT>;
-template<typename ElementT>
-using Spref = const Sptr<ElementT> &;
-
-}
-
 #endif
