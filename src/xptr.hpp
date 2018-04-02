@@ -27,8 +27,8 @@ public:
 	{ }
 
 	// The move constructor and move assignment operator are deleted implicitly.
-	Xptr(Xptr &&rhs) = default;
-	Xptr &operator=(Xptr &&rhs) = default;
+	Xptr(Xptr &&) = default;
+	Xptr &operator=(Xptr &&) = default;
 
 public:
 	const ElementT *get() const noexcept {
