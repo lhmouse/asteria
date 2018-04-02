@@ -80,9 +80,6 @@ using Object    = Xptr_map<std::string, Variable>;
 
 }
 
-#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)	\
-	typename ::std::enable_if<	\
-		!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)	\
-		>::type * = nullptr
+#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)     typename ::std::enable_if<!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)>::type * = nullptr
 
 #endif

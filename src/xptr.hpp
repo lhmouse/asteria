@@ -5,7 +5,7 @@
 #define ASTERIA_XPTR_HPP_
 
 #include <memory> // std::shared_ptr
-#include <utility> // std::move, std::forward, std::swap
+#include <utility> // std::move, std::swap
 #include <type_traits> // std::enable_if, std::is_convertible, std::remove_cv, std::is_same
 
 namespace Asteria {
@@ -43,10 +43,6 @@ public:
 		swap(m_ptr, rhs.m_ptr);
 	}
 
-	explicit operator bool() const noexcept {
-		return m_ptr != nullptr;
-	}
-
 	operator std::shared_ptr<const ElementT>() const noexcept {
 		return m_ptr;
 	}
@@ -59,6 +55,10 @@ public:
 	}
 	operator std::weak_ptr<ElementT>() noexcept {
 		return m_ptr;
+	}
+
+	explicit operator bool() const noexcept {
+		return m_ptr.operator bool();
 	}
 
 	const ElementT &operator*() const noexcept {
