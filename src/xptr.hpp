@@ -12,6 +12,8 @@ namespace Asteria {
 
 template<typename ElementT>
 class Xptr {
+	static_assert(std::is_same<typename std::remove_cv<ElementT>::type, ElementT>::value, "Please remove top-level cv-qualifiers from `ElementT`");
+
 private:
 	std::shared_ptr<ElementT> m_ptr;
 
