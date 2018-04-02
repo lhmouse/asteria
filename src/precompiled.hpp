@@ -32,7 +32,6 @@
 #include <boost/container/vector.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/variant.hpp>
-#include <boost/optional.hpp>
 
 namespace Asteria {
 

@@ -14,7 +14,7 @@ Recycler::~Recycler(){
 }
 
 void Recycler::set_variable(Xptr<Variable> &variable_out_opt, Stored_value &&value_opt){
-	if(!value_opt){
+	if(value_opt.is_null()){
 		variable_out_opt = nullptr;
 	} else if(!variable_out_opt){
 		auto sptr = std::make_shared<Variable>(std::move(value_opt.get()));
