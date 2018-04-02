@@ -4,15 +4,15 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
-#include <boost/container/vector.hpp>
-#include <boost/container/flat_map.hpp>
 #include <string> // std::string
 #include <functional> // std::function
 #include <type_traits> // std::enable_if, std::decay, std::is_base_of
-#include <utility> // std::move, std::pair
+#include <utility> // std::move, std::forward, std::pair
 #include <memory> // std::shared_ptr
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
+#include <boost/container/vector.hpp>
+#include <boost/container/flat_map.hpp>
 #include "xptr.hpp"
 
 namespace Asteria {
@@ -75,8 +75,8 @@ using Double    = double;
 using String    = std::string;
 using Opaque    = Magic_handle;
 using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
-using Array     = boost::container::vector<Xptr<Variable>>;
-using Object    = boost::container::flat_map<std::string, Xptr<Variable>>;
+using Array     = Xptr_vector<Variable>;
+using Object    = Xptr_map<std::string, Variable>;
 // If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
 
 }
