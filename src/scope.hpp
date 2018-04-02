@@ -20,12 +20,13 @@ public:
 private:
 	const Type m_type;
 	const Sptr<Scope> m_parent_opt;
+	const Sptr<const Xptr_vector<Statement>> m_statement_list;
 
 	boost::container::flat_map<std::string, Sptr<Scoped_variable>> m_variables;
 
 public:
-	Scope(Type type, Sptr<Scope> parent_opt)
-		: m_type(type), m_parent_opt(std::move(parent_opt))
+	Scope(Type type, Sptr<Scope> parent_opt, Sptr<const Xptr_vector<Statement>> statement_list)
+		: m_type(type), m_parent_opt(std::move(parent_opt)), m_statement_list(std::move(statement_list))
 		, m_variables()
 	{ }
 	~Scope();
@@ -39,6 +40,9 @@ public:
 	}
 	Spref<Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
+	}
+	Spref<const Xptr_vector<Statement>> get_statement_list() const noexcept {
+		return m_statement_list;
 	}
 
 	Sptr<Scoped_variable> get_variable_local_opt(const std::string &key) const noexcept;
