@@ -58,7 +58,7 @@ struct Opaque_struct {
 };
 
 struct Function_struct {
-	boost::container::vector<Sptr<const Expression>> default_parameter_list_opt;
+	boost::container::vector<Sptr<const Expression>> default_argument_list_opt;
 	std::function<Reference (boost::container::vector<Reference> &&)> payload;
 };
 
