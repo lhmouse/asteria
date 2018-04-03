@@ -135,7 +135,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			}
 			const auto &function = callee->get<Function>();
 			// Pop arguments off the stack.
-			if(stack.size() - 1 < params.number_of_arguments){
+			if(stack.size() < params.number_of_arguments){
 				ASTERIA_THROW_RUNTIME_ERROR("No enough arguments provided for this function call node");
 			}
 			boost::container::vector<Reference> argument_list;
