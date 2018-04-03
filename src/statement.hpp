@@ -140,7 +140,6 @@ public:
 	Statement(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-
 	Statement(Statement &&);
 	Statement &operator=(Statement &&);
 	~Statement();

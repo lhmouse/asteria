@@ -39,7 +39,6 @@ public:
 	Initializer(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-
 	Initializer(Initializer &&);
 	Initializer &operator=(Initializer &&);
 	~Initializer();

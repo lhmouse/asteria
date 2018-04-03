@@ -40,7 +40,6 @@ public:
 	Variable(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-
 	Variable(Variable &&);
 	Variable &operator=(Variable &&);
 	~Variable();

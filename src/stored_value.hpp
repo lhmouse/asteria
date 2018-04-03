@@ -23,7 +23,6 @@ public:
 	Stored_value(ValueT &&value_opt)
 		: m_value_opt(std::forward<ValueT>(value_opt))
 	{ }
-
 	Stored_value(Stored_value &&);
 	Stored_value &operator=(Stored_value &&);
 	~Stored_value();

@@ -18,7 +18,6 @@ public:
 	explicit Exception(Reference reference)
 		: m_reference(std::move(reference))
 	{ }
-
 	Exception(Exception &&);
 	Exception &operator=(Exception &&);
 	~Exception() override;

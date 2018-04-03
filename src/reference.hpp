@@ -50,7 +50,6 @@ public:
 	Reference(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-
 	Reference(Reference &&);
 	Reference &operator=(Reference &&);
 	~Reference();

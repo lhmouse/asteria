@@ -86,7 +86,6 @@ public:
 	Expression()
 		: m_variant_list()
 	{ }
-
 	Expression(Expression &&);
 	Expression &operator=(Expression &&);
 	~Expression();
