@@ -25,9 +25,13 @@ namespace {
 	Dereference_once_result do_dereference(const Reference &reference, bool create_if_not_exist){
 		const auto type = reference.get_type();
 		switch(type){
+		case Reference::type_rvalue_null: {
+			//const auto &params = reference.get<Reference::Rvalue_null>();
+			Dereference_once_result res = { nullptr, nullptr, nullptr, true };
+			return std::move(res); }
 		case Reference::type_rvalue_generic: {
 			const auto &params = reference.get<Reference::Rvalue_generic>();
-			Dereference_once_result res = { params.xvar_opt, nullptr, nullptr, true };
+			Dereference_once_result res = { params.xvar, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_lvalue_generic: {
 			const auto &params = reference.get<Reference::Lvalue_generic>();
@@ -125,15 +129,15 @@ void write_reference(Reference &reference, Stored_value &&value_opt){
 	result.recycler_opt->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
 Xptr<Variable> extract_variable_from_reference(Reference &&reference){
+	Xptr<Variable> variable;
 	const auto rv_params = reference.get_opt<Reference::Rvalue_generic>();
 	if(rv_params){
-		return Xptr<Variable>(std::move(rv_params->xvar_opt));
+		variable.reset(std::move(rv_params->xvar));
 	} else {
-		Xptr<Variable> variable;
 		auto result = do_dereference(reference, false);
 		result.recycler_opt->copy_variable_recursive(variable, result.rvar_opt);
-		return variable;
 	}
+	return variable;
 }
 
 }
