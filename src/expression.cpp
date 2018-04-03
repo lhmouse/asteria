@@ -59,7 +59,7 @@ namespace {
 		}
 		Xptr<Variable> xvar;
 		recycler->copy_variable_recursive(xvar, read_reference_opt(argument_generator(recycler)));
-		Reference::Rvalue_generic ref = { xvar.release() };
+		Reference::Rvalue_generic ref = { std::move(xvar) };
 		return std::move(ref);
 	}
 }
@@ -79,10 +79,10 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 		case Expression_node::type_literal: {
 			const auto &params = node.get<Expression_node::Literal>();
 			// Copy the literal to create a new variable.
-			Xptr<Variable> var;
-			recycler->copy_variable_recursive(var, params.source_opt);
+			Xptr<Variable> xvar;
+			recycler->copy_variable_recursive(xvar, params.source_opt);
 			// Push it onto the stack. The result is an rvalue.
-			Reference::Rvalue_generic ref = { std::move(var) };
+			Reference::Rvalue_generic ref = { std::move(xvar) };
 			stack.emplace_back(std::move(ref));
 			continue; }
 		case Expression_node::type_named_variable: {
