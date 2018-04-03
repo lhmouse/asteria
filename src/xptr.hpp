@@ -38,6 +38,19 @@ public:
 		return m_ptr.get();
 	}
 
+	void reset() noexcept {
+		m_ptr.reset();
+	}
+	template<typename OtherT>
+	void reset(std::shared_ptr<OtherT> &&other) noexcept {
+		m_ptr = std::move(other);
+	}
+	std::shared_ptr<ElementT> release() noexcept {
+		std::shared_ptr<ElementT> ptr;
+		ptr.swap(m_ptr);
+		return ptr;
+	}
+
 	void swap(Xptr &rhs) noexcept {
 		using std::swap;
 		swap(m_ptr, rhs.m_ptr);

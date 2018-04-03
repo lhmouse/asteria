@@ -20,7 +20,7 @@ void Recycler::set_variable(Xptr<Variable> &variable_out_opt, Stored_value &&val
 		auto sptr = std::make_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
 		m_weak_variables.emplace_back(sptr);
-		variable_out_opt = Xptr<Variable>(std::move(sptr));
+		variable_out_opt.reset(std::move(sptr));
 	} else {
 		*variable_out_opt = Variable(std::move(value_opt.get()));
 	}
