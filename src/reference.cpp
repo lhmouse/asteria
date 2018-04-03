@@ -122,9 +122,6 @@ void write_reference(Reference &reference, Stored_value &&value_opt){
 	if(result.immutable){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
-	if(!(result.recycler_opt)){
-		ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
-	}
 	result.recycler_opt->set_variable(*(result.wptr_opt), std::move(value_opt));
 }
 Xptr<Variable> extract_variable_from_reference(Reference &&reference){
@@ -134,9 +131,6 @@ Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 	} else {
 		Xptr<Variable> variable;
 		auto result = do_dereference(reference, false);
-		if(!(result.recycler_opt)){
-			ASTERIA_THROW_RUNTIME_ERROR("No recycler has been associated with this reference. This is probably a bug, please report.");
-		}
 		result.recycler_opt->copy_variable_recursive(variable, result.rvar_opt);
 		return variable;
 	}
