@@ -25,13 +25,12 @@ namespace {
 	Dereference_once_result do_dereference(const Reference &reference, bool create_if_not_exist){
 		const auto type = reference.get_type();
 		switch(type){
-		case Reference::type_rvalue_null: {
-			//const auto &params = reference.get<Reference::Rvalue_null>();
+		case Reference::type_null: {
 			Dereference_once_result res = { nullptr, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_rvalue_generic: {
 			const auto &params = reference.get<Reference::Rvalue_generic>();
-			Dereference_once_result res = { params.xvar, nullptr, nullptr, true };
+			Dereference_once_result res = { params.xvar_opt, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_lvalue_generic: {
 			const auto &params = reference.get<Reference::Lvalue_generic>();
@@ -118,7 +117,7 @@ Sptr<Variable> read_reference_opt(const Reference &reference){
 	auto result = do_dereference(reference, false);
 	return std::move(result.rvar_opt);
 }
-void write_reference(Reference &reference, Stored_value &&value_opt){
+Xptr<Variable> &write_reference(Reference &reference, Stored_value &&value_opt){
 	auto result = do_dereference(reference, true);
 	if(!(result.wptr_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
@@ -127,12 +126,13 @@ void write_reference(Reference &reference, Stored_value &&value_opt){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
 	result.recycler_opt->set_variable(*(result.wptr_opt), std::move(value_opt));
+	return *(result.wptr_opt);
 }
 Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 	Xptr<Variable> variable;
 	const auto rv_params = reference.get_opt<Reference::Rvalue_generic>();
 	if(rv_params){
-		variable.reset(std::move(rv_params->xvar));
+		variable.reset(std::move(rv_params->xvar_opt));
 	} else {
 		auto result = do_dereference(reference, false);
 		result.recycler_opt->copy_variable_recursive(variable, result.rvar_opt);
