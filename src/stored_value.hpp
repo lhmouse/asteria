@@ -5,7 +5,6 @@
 #define ASTERIA_STORED_VALUE_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
 #include "variable.hpp"
 
 namespace Asteria {
