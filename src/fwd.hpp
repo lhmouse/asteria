@@ -50,33 +50,33 @@ using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
-// Struct definitions.
-struct Scoped_variable {
-	Xptr<Variable> variable;
-	bool immutable;
-};
-
-struct Function_parameter {
-	std::string identifier;
-	Xptr<Initializer> default_initializer_opt;
-};
-
-struct Magic_handle {
-	std::string magic;
+// Runtime types.
+struct Opaque_struct {
+	std::array<unsigned char, 16> uuid;
+	std::intptr_t context;
 	std::shared_ptr<void> handle;
 };
 
-// Runtime types.
+struct Function_struct {
+	boost::container::vector<Sptr<const Expression>> default_parameter_list_opt;
+	std::function<Reference (boost::container::vector<Reference> &&)> payload;
+};
+
 using Null      = std::nullptr_t;
 using Boolean   = bool;
 using Integer   = std::int64_t;
 using Double    = double;
 using String    = std::string;
-using Opaque    = Magic_handle;
-using Function  = std::function<Reference (boost::container::vector<Reference> &&)>;
+using Opaque    = Opaque_struct;
+using Function  = Function_struct;
 using Array     = Xptr_vector<Variable>;
 using Object    = Xptr_map<std::string, Variable>;
-// If you want to add a new type, don't forget to update the enumerations in 'variable.hpp' and 'stored_value.hpp' accordingly.
+
+// Miscellaneous struct definitions.
+struct Scoped_variable {
+	Xptr<Variable> variable;
+	bool immutable;
+};
 
 }
 

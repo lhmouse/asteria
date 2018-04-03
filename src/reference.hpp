@@ -21,14 +21,17 @@ public:
 		Sptr<Variable> xvar_opt;
 	};
 	struct Lvalue_generic {
+		Sptr<Recycler> recycler;
 		Sptr<Scoped_variable> scoped_var;
 	};
 	struct Lvalue_array_element {
+		Sptr<Recycler> recycler;
 		Sptr<Variable> rvar;
 		bool immutable;
 		std::int64_t index_bidirectional;
 	};
 	struct Lvalue_object_member {
+		Sptr<Recycler> recycler;
 		Sptr<Variable> rvar;
 		bool immutable;
 		std::string key;
@@ -40,13 +43,12 @@ public:
 		>;
 
 private:
-	Sptr<Recycler> m_recycler;
 	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
-	Reference(Sptr<Recycler> recycler, ValueT &&value)
-		: m_recycler(std::move(recycler)), m_variant(std::forward<ValueT>(value))
+	Reference(ValueT &&value)
+		: m_variant(std::forward<ValueT>(value))
 	{ }
 
 	Reference(Reference &&);
@@ -54,13 +56,6 @@ public:
 	~Reference();
 
 public:
-	Spref<Recycler> get_recycler() const noexcept {
-		return m_recycler;
-	}
-	void set_recycler(Sptr<Recycler> recycler) noexcept {
-		m_recycler = std::move(recycler);
-	}
-
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
 	}

@@ -4,6 +4,8 @@
 #include "precompiled.hpp"
 #include "variable.hpp"
 #include "utilities.hpp"
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <cmath> // std::ceil
 
 namespace Asteria {
@@ -122,9 +124,9 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		return; }
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<Opaque>();
-		os <<"opaque(";
-		quote_string(os, value.magic);
-		os <<", \"" <<value.handle << "\")";
+		boost::uuids::uuid uuid_temp;
+		std::memcpy(&uuid_temp, value.uuid.data(), 16);
+		os <<"opaque(\"" <<uuid_temp <<"\", " <<std::dec <<value.context <<", \"" <<value.handle << "\")";
 		return; }
 	case Variable::type_function: {
 		os <<"function";

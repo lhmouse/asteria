@@ -45,9 +45,7 @@ public:
 		Xptr<Initializer> initializer_opt;
 	};
 	struct Function_definition {
-		std::string identifier;
-		boost::container::vector<Function_parameter> parameter_list;
-		Xptr_vector<Statement> statement_list;
+		// TODO
 	};
 	struct If_statement {
 		Xptr<Expression> condition_opt;

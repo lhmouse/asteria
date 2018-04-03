@@ -4,7 +4,6 @@
 #include "test_init.hpp"
 #include "../src/variable.hpp"
 #include "../src/reference.hpp"
-#include "../src/recycler.hpp"
 
 using namespace Asteria;
 
@@ -27,29 +26,33 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<String>() == "hello");
 
-	Magic_handle opaque = { "hello", std::make_shared<char>() };
+	std::array<unsigned char, 16> uuid = { 1,2,3,4,5,6,7,8,2,2,3,4,5,6,7,8 };
+	Opaque_struct opaque = { uuid, 12345, std::make_shared<char>() };
 	var->set(opaque);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_opaque);
-	ASTERIA_TEST_CHECK(var->get<Opaque>().magic == opaque.magic);
+	ASTERIA_TEST_CHECK(var->get<Opaque>().uuid == opaque.uuid);
+	ASTERIA_TEST_CHECK(var->get<Opaque>().context == opaque.context);
 	ASTERIA_TEST_CHECK(var->get<Opaque>().handle == opaque.handle);
 
-	const auto recycler = std::make_shared<Recycler>();
-	Function function = [recycler](boost::container::vector<Reference> &&params) -> Reference {
-		auto param_one = read_reference_opt(params.at(0));
-		ASTERIA_TEST_CHECK(param_one);
-		auto param_two = read_reference_opt(params.at(1));
-		ASTERIA_TEST_CHECK(param_two);
-		Reference::Rvalue_generic ref = { std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
-		return Reference(recycler, std::move(ref));
+	Function function = {
+		{ },
+		[](boost::container::vector<Reference> &&params) -> Reference {
+			auto param_one = read_reference_opt(params.at(0));
+			ASTERIA_TEST_CHECK(param_one);
+			auto param_two = read_reference_opt(params.at(1));
+			ASTERIA_TEST_CHECK(param_two);
+			Reference::Rvalue_generic ref = { std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
+			return std::move(ref);
+		}
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Reference> params;
 	Reference::Rvalue_generic ref = { std::make_shared<Variable>(Integer(12)) };
-	params.emplace_back(recycler, std::move(ref));
+	params.emplace_back(std::move(ref));
 	ref = { std::make_shared<Variable>(Integer(15)) };
-	params.emplace_back(recycler, std::move(ref));
-	auto result = var->get<Function>()(std::move(params));
+	params.emplace_back(std::move(ref));
+	auto result = var->get<Function>().payload(std::move(params));
 	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<Integer>() == 180);

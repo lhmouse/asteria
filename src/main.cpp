@@ -35,8 +35,6 @@ int main(){
 	arr.clear();
 	recycler->set_variable(temp, std::string("hello"));
 	arr.emplace_back(std::move(temp));
-//	recycler->set_variable(temp, Opaque{"opaque", std::make_shared<int>()});
-//	arr.emplace_back(std::move(temp));
 	recycler->set_variable(third, std::move(arr));
 
 	Object obj;
@@ -52,6 +50,10 @@ int main(){
 
 	recycler->set_variable(root, std::move(obj));
 	backup->copy_variable_recursive(copy, root);
+
+	Opaque_struct opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, 987654321, std::make_shared<int>() };
+	backup->set_variable(temp, std::move(opaque));
+	copy->get<Object>().emplace("opaque", std::move(temp));
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

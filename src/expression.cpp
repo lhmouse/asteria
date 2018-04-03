@@ -5,35 +5,39 @@
 #include "expression.hpp"
 #include "variable.hpp"
 #include "reference.hpp"
-#include "initializer.hpp"
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
 
-using Initiator = Expression::Initiator;
-using Trailer   = Expression::Trailer;
-
 Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
-Initiator::Initiator(Initiator &&) = default;
-Initiator &Initiator::operator=(Initiator &&) = default;
-Initiator::~Initiator() = default;
-
-Trailer::Trailer(Trailer &&) = default;
-Trailer &Trailer::operator=(Trailer &&) = default;
-Trailer::~Trailer() = default;
-
-Reference evaluate_expression(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
-	ASTERIA_DEBUG_LOG("NOT IMPLEMENTED YET");
+Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
 	(void)recycler;
 	(void)scope;
 	(void)expression_opt;
-	Reference::Rvalue_generic ref = { std::make_shared<Variable>(std::string("hello")) };
-	return Reference(recycler, std::move(ref));
+	Reference::Rvalue_generic ref = { nullptr };
+	return ref;
 }
-
+/*
+Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
+	if(!expression_opt){
+		// Return a null reference.
+		Reference::Rvalue_generic ref = { nullptr };
+		return Reference(recycler, std::move(ref));
+	} else {
+		boost::container::vector<Reference> evaluation_stack;
+		for(std::size_t i = 0; i < expression_opt->size(); ++i){
+			const auto type = expression_opt->get_type_at(i);
+			switch(type){
+			case Expression::type_literal_generic: {
+				const auto &params = expression_opt->get_at<Literla_generic>();
+				evaluation_stack.emplace_back(
+		}
+	}
+}
+*/
 }
