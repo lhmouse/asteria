@@ -45,12 +45,12 @@ public:
 		return m_statement_list;
 	}
 
-	Sptr<Scoped_variable> get_variable_local_opt(const std::string &key) const noexcept;
-	Sptr<Scoped_variable> declare_variable_local(const std::string &key);
+	Sptr<Scoped_variable> get_variable_local_opt(const std::string &identifier) const noexcept;
+	Sptr<Scoped_variable> declare_variable_local(const std::string &identifier);
 	void clear_variables_local() noexcept;
 };
 
-extern Sptr<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &key) noexcept;
+extern Sptr<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept;
 
 }
 
