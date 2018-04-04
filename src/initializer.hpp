@@ -12,7 +12,7 @@ namespace Asteria {
 class Initializer {
 public:
 	enum Type : unsigned {
-		type_none                 = -1u,
+		type_null                 = -1u,
 		type_assignment_init      =  0,
 		type_bracketed_init_list  =  1,
 		type_braced_init_list     =  2,
