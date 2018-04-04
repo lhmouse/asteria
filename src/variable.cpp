@@ -18,6 +18,38 @@ void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
 
+const char *get_type_name(Variable::Type type) noexcept {
+	switch(type){
+	case Variable::type_null:
+		return "null";
+	case Variable::type_boolean:
+		return "boolean";
+	case Variable::type_integer:
+		return "integer";
+	case Variable::type_double:
+		return "double";
+	case Variable::type_string:
+		return "string";
+	case Variable::type_opaque:
+		return "opaque";
+	case Variable::type_function:
+		return "function";
+	case Variable::type_array:
+		return "array";
+	case Variable::type_object:
+		return "object";
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		return "unknown";
+	}
+}
+Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept {
+	return variable_opt ? variable_opt->get_type() : Variable::type_null;
+}
+const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept {
+	return get_type_name(get_variable_type(variable_opt));
+}
+
 namespace {
 	void apply_indent(std::ostream &os, unsigned indent){
 		if(indent == 0){
@@ -68,37 +100,6 @@ namespace {
 	}
 }
 
-const char *get_type_name(Variable::Type type) noexcept {
-	switch(type){
-	case Variable::type_null:
-		return "null";
-	case Variable::type_boolean:
-		return "boolean";
-	case Variable::type_integer:
-		return "integer";
-	case Variable::type_double:
-		return "double";
-	case Variable::type_string:
-		return "string";
-	case Variable::type_opaque:
-		return "opaque";
-	case Variable::type_function:
-		return "function";
-	case Variable::type_array:
-		return "array";
-	case Variable::type_object:
-		return "object";
-	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
-		return "unknown";
-	}
-}
-Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept {
-	return variable_opt ? variable_opt->get_type() : Variable::type_null;
-}
-const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept {
-	return get_type_name(get_variable_type(variable_opt));
-}
 void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
@@ -173,6 +174,38 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt){
 	dump_variable_recursive(os, variable_opt);
 	return os;
+}
+
+bool test_variable(Spref<const Variable> variable_opt) noexcept {
+	const auto type = get_variable_type(variable_opt);
+	switch(type){
+	case Variable::type_null:
+		return false;
+	case Variable::type_boolean: {
+		const auto &value = variable_opt->get<D_boolean>();
+		return value; }
+	case Variable::type_integer: {
+		const auto &value = variable_opt->get<D_integer>();
+		return value != 0; }
+	case Variable::type_double: {
+		const auto &value = variable_opt->get<D_double>();
+		return std::fpclassify(value) != FP_ZERO; }
+	case Variable::type_string: {
+		const auto &value = variable_opt->get<D_string>();
+		return value.empty() == false; }
+	case Variable::type_opaque:
+	case Variable::type_function:
+		return true;
+	case Variable::type_array: {
+		const auto &value = variable_opt->get<D_array>();
+		return value.empty() == false; }
+	case Variable::type_object: {
+		const auto &value = variable_opt->get<D_object>();
+		return value.empty() == false; }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		std::terminate();
+	}
 }
 
 void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
