@@ -12,12 +12,14 @@ namespace Asteria {
 
 class Exception : public std::exception {
 private:
-	Reference m_reference;
+	Sptr<Reference> m_reference_opt;
 
 public:
-	explicit Exception(Reference reference)
-		: m_reference(std::move(reference))
+	explicit Exception(Xptr<Reference> reference_opt)
+		: m_reference_opt(std::move(reference_opt))
 	{ }
+	Exception(const Exception &);
+	Exception &operator=(const Exception &);
 	Exception(Exception &&);
 	Exception &operator=(Exception &&);
 	~Exception() override;
@@ -27,14 +29,11 @@ public:
 		return "Asteria::Exception";
 	}
 
-	const Reference &get_reference() const noexcept {
-		return m_reference;
+	Sptr<const Reference> get_reference_opt() const noexcept {
+		return m_reference_opt;
 	}
-	Reference &get_reference() noexcept {
-		return m_reference;
-	}
-	void set_reference(Reference &&reference){
-		m_reference = std::move(reference);
+	Sptr<Reference> get_reference_opt() noexcept {
+		return m_reference_opt;
 	}
 };
 

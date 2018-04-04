@@ -27,10 +27,12 @@ class Initializer;
 class Expression;
 class Statement;
 
+// Runtime objects (copyable and movable)
+class Exception;
+
 // Runtime objects (movable only)
 class Variable;
 class Reference;
-class Exception;
 class Stored_value;
 
 // Runtime objects (neither copyable nor movable)
