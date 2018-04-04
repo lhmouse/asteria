@@ -82,6 +82,9 @@ public:
 	}
 };
 
+extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
+
+
 extern Sptr<Variable> read_reference_opt(const Reference &reference);
 extern void write_reference(Reference &reference, Stored_value &&value_opt);
 extern Xptr<Variable> extract_variable_from_reference(Reference &&reference);

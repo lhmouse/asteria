@@ -15,7 +15,7 @@ namespace Asteria {
 Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
-
+#if 0
 namespace {
 	bool convert_to_boolean(Spref<const Variable> variable_opt) noexcept {
 		const auto type = get_variable_type(variable_opt);
@@ -332,5 +332,5 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 	}
 #endif
 }
-
+#endif
 }

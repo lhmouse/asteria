@@ -126,7 +126,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		const auto &value = variable_opt->get<D_opaque>();
 		boost::uuids::uuid uuid_temp;
 		std::memcpy(&uuid_temp, value.uuid.data(), 16);
-		os <<"opaque(\"" <<uuid_temp <<"\", " <<std::dec <<value.context <<", \"" <<value.handle << "\")";
+		os <<"opaque(\"" <<uuid_temp <<"\", \"" <<value.handle << "\")";
 		return; }
 	case Variable::type_function: {
 		os <<"function";

@@ -53,15 +53,17 @@ template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
 // Runtime types.
-struct Opaque_struct {
+struct Uuid_handle {
 	std::array<unsigned char, 16> uuid;
-	std::intptr_t context;
 	std::shared_ptr<void> handle;
 };
 
-struct Function_struct {
-	boost::container::vector<std::function<Reference (Spref<Recycler>)>> default_argument_list_opt;
-	std::function<Reference (Spref<Recycler>, boost::container::vector<Reference> &&)> payload;
+using Argument_generator_prototype = Sptr<Reference> (Spref<Recycler> recycler);
+using Binding_function_prototype   = Sptr<Reference> (Spref<Recycler> recycler, boost::container::vector<Reference> &&arguments);
+
+struct Binding_function {
+	boost::container::vector<std::function<Argument_generator_prototype>> default_argument_generator_list_opt;
+	std::function<Binding_function_prototype> function;
 };
 
 using D_null      = std::nullptr_t;
@@ -69,8 +71,8 @@ using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_double    = double;
 using D_string    = std::string;
-using D_opaque    = Opaque_struct;
-using D_function  = Function_struct;
+using D_opaque    = Uuid_handle;
+using D_function  = Binding_function;
 using D_array     = Xptr_vector<Variable>;
 using D_object    = Xptr_map<std::string, Variable>;
 
