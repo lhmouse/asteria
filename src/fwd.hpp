@@ -78,7 +78,7 @@ using D_object    = Xptr_map<std::string, Variable>;
 
 // Miscellaneous struct definitions.
 struct Scoped_variable {
-	Xptr<Variable> variable;
+	Xptr<Variable> variable_opt;
 	bool immutable;
 };
 

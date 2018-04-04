@@ -38,8 +38,8 @@ namespace {
 			return std::move(res); }
 		case Reference::type_lvalue_scoped_variable: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_scoped_variable>();
-			auto &variable = params.scoped_variable->variable;
-			Dereference_once_result res = { variable, &variable, params.recycler, params.scoped_variable->immutable };
+			auto &variable_opt = params.scoped_variable->variable_opt;
+			Dereference_once_result res = { variable_opt, &variable_opt, params.recycler, params.scoped_variable->immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
@@ -87,8 +87,8 @@ namespace {
 				size_current += static_cast<std::int64_t>(count_to_append);
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			}
-			auto &variable = array->at(static_cast<std::size_t>(normalized_index));
-			Dereference_once_result res = { variable, &variable, params.recycler, params.immutable };
+			auto &variable_opt = array->at(static_cast<std::size_t>(normalized_index));
+			Dereference_once_result res = { variable_opt, &variable_opt, params.recycler, params.immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
@@ -107,8 +107,8 @@ namespace {
 				it = object->emplace(params.key, nullptr).first;
 				ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 			}
-			auto &variable = it->second;
-			Dereference_once_result res = { variable, &variable, params.recycler, params.immutable };
+			auto &variable_opt = it->second;
+			Dereference_once_result res = { variable_opt, &variable_opt, params.recycler, params.immutable };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);

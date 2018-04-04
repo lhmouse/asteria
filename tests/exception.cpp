@@ -13,9 +13,9 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 	auto named_var = std::make_shared<Scoped_variable>();
-	recycler->set_variable(named_var->variable, D_integer(42));
-	ASTERIA_TEST_CHECK(named_var->variable->get_type() == Variable::type_integer);
-	ASTERIA_TEST_CHECK(named_var->variable->get<D_integer>() == 42);
+	recycler->set_variable(named_var->variable_opt, D_integer(42));
+	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_integer);
+	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_integer>() == 42);
 	try {
 		Reference::S_lvalue_scoped_variable ref = { recycler, named_var };
 		throw Exception(Xptr<Reference>(std::make_shared<Reference>(std::move(ref))));
@@ -24,6 +24,6 @@ int main(){
 		ASTERIA_TEST_CHECK(ref);
 		ref->set(D_string("hello"));
 	}
-	ASTERIA_TEST_CHECK(named_var->variable->get_type() == Variable::type_string);
-	ASTERIA_TEST_CHECK(named_var->variable->get<D_string>() == "hello");
+	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_string);
+	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_string>() == "hello");
 }

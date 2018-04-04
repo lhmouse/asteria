@@ -22,11 +22,11 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(130)));
 
 	auto nvar = std::make_shared<Scoped_variable>();
-	nvar->variable = Xptr<Variable>(std::make_shared<Variable>(4.2));
+	nvar->variable_opt = Xptr<Variable>(std::make_shared<Variable>(4.2));
 	Reference::S_lvalue_scoped_variable lref = { recycler, nvar };
 	ref.reset(std::make_shared<Reference>(std::move(lref)));
 	ptr = read_reference_opt(ref);
-	ASTERIA_TEST_CHECK(ptr.get() == nvar->variable.get());
+	ASTERIA_TEST_CHECK(ptr.get() == nvar->variable_opt.get());
 
 	var->set(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);

@@ -3,35 +3,52 @@
 
 #include "test_init.hpp"
 #include "../src/scope.hpp"
+#include "../src/recycler.hpp"
+#include "../src/reference.hpp"
+#include "../src/variable.hpp"
+#include "../src/stored_value.hpp"
 
 using namespace Asteria;
 
 int main(){
-	auto statement_list = std::make_shared<Xptr_vector<Statement>>();
-	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr, statement_list);
-	auto hidden_p = parent->declare_variable_local("hidden");
-	auto one = parent->declare_variable_local("one");
+	const auto recycler = std::make_shared<Recycler>();
+
+	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
+	auto hidden_p = std::make_shared<Scoped_variable>();
+	recycler->set_variable(hidden_p->variable_opt, D_boolean(true));
+	Reference::S_lvalue_scoped_variable lref = { recycler, hidden_p };
+	parent->set_local_variable("hidden", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	auto one = std::make_shared<Scoped_variable>();
+	recycler->set_variable(one->variable_opt, D_integer(42));
+	lref = { recycler, one };
+	parent->set_local_variable("one", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 
 	auto ptr = get_variable_recursive_opt(parent, "nonexistent");
-	ASTERIA_TEST_CHECK(ptr == nullptr);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == nullptr);
 
-	auto child = std::make_shared<Scope>(Scope::type_plain, parent, statement_list);
-	auto hidden_c = child->declare_variable_local("hidden");
-	auto two = child->declare_variable_local("two");
+	auto child = std::make_shared<Scope>(Scope::type_plain, parent);
+	auto hidden_c = std::make_shared<Scoped_variable>();
+	recycler->set_variable(hidden_c->variable_opt, D_string("hello"));
+	lref = { recycler, hidden_c };
+	child->set_local_variable("hidden", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	auto two = std::make_shared<Scoped_variable>();
+	recycler->set_variable(two->variable_opt, D_array(5));
+	lref = { recycler, two };
+	child->set_local_variable("two", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 
 	ptr = get_variable_recursive_opt(child, "hidden");
-	ASTERIA_TEST_CHECK(ptr == hidden_c);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == hidden_c->variable_opt.get());
 
 	ptr = get_variable_recursive_opt(parent, "hidden");
-	ASTERIA_TEST_CHECK(ptr == hidden_p);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == hidden_p->variable_opt.get());
 
 	ptr = get_variable_recursive_opt(child, "one");
-	ASTERIA_TEST_CHECK(ptr == one);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == one->variable_opt.get());
 
 	ptr = get_variable_recursive_opt(child, "two");
-	ASTERIA_TEST_CHECK(ptr == two);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == two->variable_opt.get());
 
-	child->clear_variables_local();
+	child->clear_local_variables();
 	ptr = get_variable_recursive_opt(child, "hidden");
-	ASTERIA_TEST_CHECK(ptr == hidden_p);
+	ASTERIA_TEST_CHECK(read_reference_opt(ptr).get() == hidden_p->variable_opt.get());
 }
