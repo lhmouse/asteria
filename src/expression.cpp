@@ -59,7 +59,7 @@ namespace {
 		}
 		Xptr<Variable> xvar;
 		recycler->copy_variable_recursive(xvar, read_reference_opt(argument_generator(recycler)));
-		Reference::Rvalue_generic ref = { std::move(xvar) };
+		Reference::S_rvalue_generic ref = { std::move(xvar) };
 		return std::move(ref);
 	}
 }
@@ -77,33 +77,33 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 		const auto type = node.get_type();
 		switch(type){
 		case Expression_node::type_literal: {
-			const auto &params = node.get<Expression_node::Literal>();
+			const auto &params = node.get<Expression_node::S_literal>();
 			// Copy the literal to create a new variable.
 			Xptr<Variable> xvar;
 			recycler->copy_variable_recursive(xvar, params.source_opt);
 			// Push it onto the stack. The result is an rvalue.
-			Reference::Rvalue_generic ref = { std::move(xvar) };
+			Reference::S_rvalue_generic ref = { std::move(xvar) };
 			stack.emplace_back(std::move(ref));
 			continue; }
 		case Expression_node::type_named_variable: {
-			const auto &params = node.get<Expression_node::Named_variable>();
+			const auto &params = node.get<Expression_node::S_named_variable>();
 			// Look up the variable in the enclosing scope.
 			auto scoped_var = get_variable_recursive_opt(scope, params.identifier);
 			if(!scoped_var){
 				ASTERIA_THROW_RUNTIME_ERROR("Referring an undeclared identifier `", params.identifier, "`");
 			}
 			// Push a reference to it onto the stack. The result is an lvalue.
-			Reference::Lvalue_scoped_variable ref = { recycler, std::move(scoped_var) };
+			Reference::S_lvalue_scoped_variable ref = { recycler, std::move(scoped_var) };
 			stack.emplace_back(std::move(ref));
 			continue; }
 		case Expression_node::type_subexpression: {
-			const auto &params = node.get<Expression_node::Subexpression>();
+			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively, then push the result onto the stack as-is.
 			auto result_ref = evaluate_expression_recursive(recycler, scope, params.subexpression);
 			stack.emplace_back(std::move(result_ref));
 			continue; }
 		case Expression_node::type_branch: {
-			const auto &params = node.get<Expression_node::Branch>();
+			const auto &params = node.get<Expression_node::S_branch>();
 			// Pop an operand off the stack.
 			if(stack.size() < 1){
 				ASTERIA_THROW_RUNTIME_ERROR("No operand found for this branch node");
@@ -121,7 +121,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			stack.emplace_back(std::move(result_ref));
 			continue; }
 		case Expression_node::type_function_call: {
-			const auto &params = node.get<Expression_node::Function_call>();
+			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			if(stack.size() < 1){
 				ASTERIA_THROW_RUNTIME_ERROR("No operand found for this function call node");
@@ -210,7 +210,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 						ASTERIA_THROW_RUNTIME_ERROR("The operand of a postfix increment operator has an inacceptable type `", operand_one, "`");
 					}
 					// Push the old value onto the stack. The result is an rvalue.
-					Reference::Rvalue_generic ref = { result.release() };
+					Reference::S_rvalue_generic ref = { result.release() };
 					stack.emplace_back(std::move(ref));
 					break; }
 				case Expression::operator_postfix_dec: {
@@ -236,7 +236,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 						ASTERIA_THROW_RUNTIME_ERROR("The operand of a postfix decrement operator has an inacceptable type `", operand_one, "`");
 					}
 					// Push the old value onto the stack. The result is an rvalue.
-					Reference::Rvalue_generic ref = { result.release() };
+					Reference::S_rvalue_generic ref = { result.release() };
 					stack.emplace_back(std::move(ref));
 					break; }
 //				case Expression::operator_prefix_add: {
@@ -284,18 +284,18 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 				}
 				break; }
 			case Expression::type_function_call: {
-				const auto &params = expression_opt->get_at<Expression::Function_call>(i);
+				const auto &params = expression_opt->get_at<Expression::S_function_call>(i);
 				// Copy the literal to create a new variable.
 				Xptr<Variable> var;
 				recycler->copy_variable_recursive(var, params.source_opt);
 				// Push it onto the stack. The result is an rvalue.
-				Reference::Rvalue_generic ref = { std::move(var) };
+				Reference::S_rvalue_generic ref = { std::move(var) };
 				stack.emplace_back(std::move(ref));
 				
 
 				ASTERIA_THROW_RUNTIME_ERROR("TODO");
 				
-//				const auto &params = expression_opt->get_at<Expression::Function_call>(i);
+//				const auto &params = expression_opt->get_at<Expression::S_function_call>(i);
 //				if(stack.size() < 1){
 //					ASTERIA_THROW_RUNTIME_ERROR("Could not find the left operand of a function call expression. This is probably a bug, please report.");
 //				}
@@ -310,13 +310,13 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 //				const auto subscript = read_reference_opt(stack.back());
 //				if(read_reference_opt
 /*
-				struct Lvalue_array_element {
+				struct S_lvalue_array_element {
 				    Sptr<Recycler> recycler;
 				        Sptr<Variable> rvar;
 				            bool immutable;
 				                std::int64_t index_bidirectional;
 				                };
-				                struct Lvalue_object_member {
+				                struct S_lvalue_object_member {
 				                    Sptr<Recycler> recycler;
 				                        Sptr<Variable> rvar;
 				                            bool immutable;

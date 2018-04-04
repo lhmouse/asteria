@@ -25,12 +25,12 @@ void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, 
 		variable_out_opt = nullptr;
 		return; }
 	case Initializer::type_assignment_init: {
-		const auto &params = initializer_opt->get<Initializer::Assignment_init>();
+		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
 		auto result = evaluate_expression_recursive(recycler, scope, params.expression);
 		variable_out_opt = extract_variable_from_reference(std::move(result));
 		return; }
 	case Initializer::type_bracketed_init_list: {
-		const auto &params = initializer_opt->get<Initializer::Bracketed_init_list>();
+		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Array array;
 		array.reserve(params.initializers.size());
 		for(const auto &elem : params.initializers){
@@ -39,7 +39,7 @@ void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, 
 		}
 		return recycler->set_variable(variable_out_opt, std::move(array)); }
 	case Initializer::type_braced_init_list: {
-		const auto &params = initializer_opt->get<Initializer::Braced_init_list>();
+		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
 		Object object;
 		object.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){

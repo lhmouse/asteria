@@ -13,7 +13,7 @@ int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
 	auto var = Xptr<Variable>(std::make_shared<Variable>(Integer(42)));
-	Reference::Rvalue_generic rref = { var };
+	Reference::S_rvalue_generic rref = { var };
 	Reference ref = std::move(rref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
@@ -22,14 +22,14 @@ int main(){
 
 	auto nvar = std::make_shared<Scoped_variable>();
 	nvar->variable = Xptr<Variable>(std::make_shared<Variable>(4.2));
-	Reference::Lvalue_scoped_variable lref = { recycler, nvar };
+	Reference::S_lvalue_scoped_variable lref = { recycler, nvar };
 	ref = std::move(lref);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr.get() == nvar->variable.get());
 
 	var->set(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
-	Reference::Lvalue_array_element aref = { recycler, var, true, 9 };
+	Reference::S_lvalue_array_element aref = { recycler, var, true, 9 };
 	ref = std::move(aref);
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	Array array;
@@ -74,7 +74,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<Array>().at(0)->get<Integer>() == 37);
 	ASTERIA_TEST_CHECK(var->get<Array>().at(3)->get<Integer>() == 26);
 
-	Reference::Lvalue_object_member oref = { recycler, var, true, "three" };
+	Reference::S_lvalue_object_member oref = { recycler, var, true, "three" };
 	ref = std::move(oref);
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	Object object;

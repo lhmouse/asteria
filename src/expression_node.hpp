@@ -66,49 +66,49 @@ public:
 		type_operator_rpn       = 5,
 		type_lambda_definition  = 6,
 	};
-	struct Literal {
+	struct S_literal {
 		// Consumes: Nothing.
 		// Produces: An rvalue.
 		Sptr<const Variable> source_opt;
 	};
-	struct Named_variable {
+	struct S_named_variable {
 		// Consumes: Nothing.
 		// Produces: An lvalue.
 		std::string identifier;
 	};
-	struct Subexpression {
+	struct S_subexpression {
 		// Consumes: Nothing.
 		// Produces: A reference.
 		Xptr<Expression> subexpression;
 	};
-	struct Branch {
+	struct S_branch {
 		// Consumes: A reference.
 		// Produces: A reference.
 		Xptr<Expression> branch_true_opt;
 		Xptr<Expression> branch_false_opt;
 	};
-	struct Function_call {
+	struct S_function_call {
 		// Consumes: A reference followed by the specified number of references.
 		// Produces: A reference.
 		std::size_t number_of_arguments;
 	};
-	struct Operator_rpn {
+	struct S_operator_rpn {
 		// Consumes: One or two references.
 		// Produces: A reference.
 		Operator_generic operator_generic;
 	};
-	struct Lambda_definition {
+	struct S_lambda_definition {
 		// Consumes: Nothing.
 		// Produces: A reference.
 		// TODO
 	};
-	using Types = Type_tuple< Literal            // 0
-	                        , Named_variable     // 1
-	                        , Subexpression      // 2
-	                        , Branch             // 3
-	                        , Function_call      // 4
-	                        , Operator_rpn       // 5
-	                        , Lambda_definition  // 6
+	using Types = Type_tuple< S_literal            // 0
+	                        , S_named_variable     // 1
+	                        , S_subexpression      // 2
+	                        , S_branch             // 3
+	                        , S_function_call      // 4
+	                        , S_operator_rpn       // 5
+	                        , S_lambda_definition  // 6
 		>;
 
 private:

@@ -18,30 +18,30 @@ public:
 		type_lvalue_array_element    = 3,
 		type_lvalue_object_member    = 4,
 	};
-	struct Rvalue_generic {
+	struct S_rvalue_generic {
 		Sptr<Variable> xvar_opt;
 	};
-	struct Lvalue_scoped_variable {
+	struct S_lvalue_scoped_variable {
 		Sptr<Recycler> recycler;
 		Sptr<Scoped_variable> scoped_var;
 	};
-	struct Lvalue_array_element {
+	struct S_lvalue_array_element {
 		Sptr<Recycler> recycler;
 		Sptr<Variable> rvar;
 		bool immutable;
 		std::int64_t index_bidirectional;
 	};
-	struct Lvalue_object_member {
+	struct S_lvalue_object_member {
 		Sptr<Recycler> recycler;
 		Sptr<Variable> rvar;
 		bool immutable;
 		std::string key;
 	};
 	using Types = Type_tuple< Null                    // 0
-	                        , Rvalue_generic          // 1
-	                        , Lvalue_scoped_variable  // 2
-	                        , Lvalue_array_element    // 3
-	                        , Lvalue_object_member    // 4
+	                        , S_rvalue_generic          // 1
+	                        , S_lvalue_scoped_variable  // 2
+	                        , S_lvalue_array_element    // 3
+	                        , S_lvalue_object_member    // 4
 		>;
 
 private:

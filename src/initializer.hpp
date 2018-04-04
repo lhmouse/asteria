@@ -17,18 +17,18 @@ public:
 		type_bracketed_init_list  =  1,
 		type_braced_init_list     =  2,
 	};
-	struct Assignment_init {
+	struct S_assignment_init {
 		Xptr<Expression> expression;
 	};
-	struct Bracketed_init_list {
+	struct S_bracketed_init_list {
 		Xptr_vector<Initializer> initializers;
 	};
-	struct Braced_init_list {
+	struct S_braced_init_list {
 		Xptr_map<std::string, Initializer> key_values;
 	};
-	using Types = Type_tuple< Assignment_init      // 0
-	                        , Bracketed_init_list  // 1
-	                        , Braced_init_list     // 2
+	using Types = Type_tuple< S_assignment_init      // 0
+	                        , S_bracketed_init_list  // 1
+	                        , S_braced_init_list     // 2
 		>;
 
 private:

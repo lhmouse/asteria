@@ -33,103 +33,103 @@ public:
 		type_throw_statement          = 18,
 		type_return_statement         = 19,
 	};
-	struct Expression_statement {
+	struct S_expression_statement {
 		Xptr<Expression> expression_opt;
 	};
-	struct Compound_statement {
+	struct S_compound_statement {
 		Xptr_vector<Statement> statement_list;
 	};
-	struct Variable_definition {
+	struct S_variable_definition {
 		std::string identifier;
 		bool immutable;
 		Xptr<Initializer> initializer_opt;
 	};
-	struct Function_definition {
+	struct S_function_definition {
 		// TODO
 	};
-	struct If_statement {
+	struct S_if_statement {
 		Xptr<Expression> condition_opt;
 		Xptr_vector<Statement> true_branch;
-		Xptr<If_statement> false_branch_opt;
+		Xptr<S_if_statement> false_branch_opt;
 	};
-	struct Switch_statement {
+	struct S_switch_statement {
 		Xptr<Expression> control_expression;
 		Xptr_vector<Statement> statement_list;
 	};
-	struct Do_while_statement {
+	struct S_do_while_statement {
 		Xptr_vector<Statement> statement_list;
 		Xptr<Expression> condition_opt;
 	};
-	struct While_statement {
+	struct S_while_statement {
 		Xptr<Expression> condition_opt;
 		Xptr_vector<Statement> statement_list;
 	};
-	struct For_statement {
+	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
 		Xptr_vector<Statement> statement_list;
 	};
-	struct Foreach_statement {
+	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		bool value_immutable;
 		Xptr<Initializer> range_initializer;
 		Xptr_vector<Statement> statement_list;
 	};
-	struct Try_statement {
+	struct S_try_statement {
 		Xptr_vector<Statement> try_statement_list;
 		std::string exception_identifier;
 		bool exception_immutable;
 		Xptr_vector<Statement> catch_statement_list;
 	};
-	struct Defer_statement {
+	struct S_defer_statement {
 		Xptr_vector<Statement> statement_list;
 	};
-	struct Label_statement {
+	struct S_label_statement {
 		std::string identifier;
 	};
-	struct Case_label_statement {
+	struct S_case_label_statement {
 		boost::variant<Null, Boolean, Integer, Double, String> value_opt;
 	};
-	struct Default_label_statement {
+	struct S_default_label_statement {
 		// Nothing.
 	};
-	struct Goto_statement {
+	struct S_goto_statement {
 		std::string target_label;
 	};
-	struct Break_statement {
+	struct S_break_statement {
 		// Nothing.
 	};
-	struct Continue_statement {
+	struct S_continue_statement {
 		// Nothing.
 	};
-	struct Throw_statement {
+	struct S_throw_statement {
 		Xptr<Expression> value_opt;
 	};
-	struct Return_statement {
+	struct S_return_statement {
 		Xptr<Expression> value_opt;
 	};
-	using Types = Type_tuple< Expression_statement     //  0
-	                        , Compound_statement       //  1
-	                        , Variable_definition      //  2
-	                        , Function_definition      //  3
-	                        , If_statement             //  4
-	                        , Switch_statement         //  5
-	                        , Do_while_statement       //  6
-	                        , While_statement          //  7
-	                        , For_statement            //  8
-	                        , Foreach_statement        //  9
-	                        , Try_statement            // 10
-	                        , Defer_statement          // 11
-	                        , Label_statement          // 12
-	                        , Case_label_statement     // 13
-	                        , Default_label_statement  // 14
-	                        , Goto_statement           // 15
-	                        , Break_statement          // 16
-	                        , Continue_statement       // 17
-	                        , Throw_statement          // 18
-	                        , Return_statement         // 19
+	using Types = Type_tuple< S_expression_statement     //  0
+	                        , S_compound_statement       //  1
+	                        , S_variable_definition      //  2
+	                        , S_function_definition      //  3
+	                        , S_if_statement             //  4
+	                        , S_switch_statement         //  5
+	                        , S_do_while_statement       //  6
+	                        , S_while_statement          //  7
+	                        , S_for_statement            //  8
+	                        , S_foreach_statement        //  9
+	                        , S_try_statement            // 10
+	                        , S_defer_statement          // 11
+	                        , S_label_statement          // 12
+	                        , S_case_label_statement     // 13
+	                        , S_default_label_statement  // 14
+	                        , S_goto_statement           // 15
+	                        , S_break_statement          // 16
+	                        , S_continue_statement       // 17
+	                        , S_throw_statement          // 18
+	                        , S_return_statement         // 19
 		>;
 
 private:

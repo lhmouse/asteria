@@ -29,16 +29,16 @@ namespace {
 			Dereference_once_result res = { nullptr, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_rvalue_generic: {
-			const auto &params = reference.get<Reference::Rvalue_generic>();
+			const auto &params = reference.get<Reference::S_rvalue_generic>();
 			Dereference_once_result res = { params.xvar_opt, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_lvalue_scoped_variable: {
-			const auto &params = reference.get<Reference::Lvalue_scoped_variable>();
+			const auto &params = reference.get<Reference::S_lvalue_scoped_variable>();
 			auto &variable = params.scoped_var->variable;
 			Dereference_once_result res = { variable, &variable, params.recycler, params.scoped_var->immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
-			const auto &params = reference.get<Reference::Lvalue_array_element>();
+			const auto &params = reference.get<Reference::S_lvalue_array_element>();
 			const auto array = params.rvar->get_opt<Array>();
 			if(!array){
 				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.rvar), "`");
@@ -87,7 +87,7 @@ namespace {
 			Dereference_once_result res = { variable, &variable, params.recycler, params.immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
-			const auto &params = reference.get<Reference::Lvalue_object_member>();
+			const auto &params = reference.get<Reference::S_lvalue_object_member>();
 			const auto object = params.rvar->get_opt<Object>();
 			if(!object){
 				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.rvar), "`");
@@ -129,7 +129,7 @@ void write_reference(Reference &reference, Stored_value &&value_opt){
 }
 Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 	Xptr<Variable> variable;
-	const auto rv_params = reference.get_opt<Reference::Rvalue_generic>();
+	const auto rv_params = reference.get_opt<Reference::S_rvalue_generic>();
 	if(rv_params){
 		variable.reset(std::move(rv_params->xvar_opt));
 	} else {
