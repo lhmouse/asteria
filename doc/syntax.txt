@@ -61,7 +61,7 @@ function-definition ::=
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
-	identifier equal-initializer-opt ( "," parameter-list-opt | "" )
+	( "var" | "const" ) identifier equal-initializer-opt ( "," parameter-list-opt | "" )
 
 if-statement ::=
 	"if" "(" expression ")" compound-statement ( "else" else-branch | "" )
