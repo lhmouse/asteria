@@ -93,7 +93,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 				ASTERIA_THROW_RUNTIME_ERROR("Referring an undeclared identifier `", params.identifier, "`");
 			}
 			// Push a reference to it onto the stack. The result is an lvalue.
-			Reference::Lvalue_generic ref = { recycler, std::move(scoped_var) };
+			Reference::Lvalue_scoped_variable ref = { recycler, std::move(scoped_var) };
 			stack.emplace_back(std::move(ref));
 			continue; }
 		case Expression_node::type_subexpression: {

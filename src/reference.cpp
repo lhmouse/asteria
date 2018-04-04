@@ -32,8 +32,8 @@ namespace {
 			const auto &params = reference.get<Reference::Rvalue_generic>();
 			Dereference_once_result res = { params.xvar_opt, nullptr, nullptr, true };
 			return std::move(res); }
-		case Reference::type_lvalue_generic: {
-			const auto &params = reference.get<Reference::Lvalue_generic>();
+		case Reference::type_lvalue_scoped_variable: {
+			const auto &params = reference.get<Reference::Lvalue_scoped_variable>();
 			auto &variable = params.scoped_var->variable;
 			Dereference_once_result res = { variable, &variable, params.recycler, params.scoped_var->immutable };
 			return std::move(res); }

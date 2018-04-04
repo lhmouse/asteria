@@ -22,7 +22,7 @@ int main(){
 
 	auto nvar = std::make_shared<Scoped_variable>();
 	nvar->variable = Xptr<Variable>(std::make_shared<Variable>(4.2));
-	Reference::Lvalue_generic lref = { recycler, nvar };
+	Reference::Lvalue_scoped_variable lref = { recycler, nvar };
 	ref = std::move(lref);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr.get() == nvar->variable.get());

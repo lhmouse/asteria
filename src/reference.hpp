@@ -12,16 +12,16 @@ namespace Asteria {
 class Reference {
 public:
 	enum Type : unsigned {
-		type_null                  = 0,
-		type_rvalue_generic        = 1,
-		type_lvalue_generic        = 2,
-		type_lvalue_array_element  = 3,
-		type_lvalue_object_member  = 4,
+		type_null                    = 0,
+		type_rvalue_generic          = 1,
+		type_lvalue_scoped_variable  = 2,
+		type_lvalue_array_element    = 3,
+		type_lvalue_object_member    = 4,
 	};
 	struct Rvalue_generic {
 		Sptr<Variable> xvar_opt;
 	};
-	struct Lvalue_generic {
+	struct Lvalue_scoped_variable {
 		Sptr<Recycler> recycler;
 		Sptr<Scoped_variable> scoped_var;
 	};
@@ -37,11 +37,11 @@ public:
 		bool immutable;
 		std::string key;
 	};
-	using Types = Type_tuple< Null                  // 0
-	                        , Rvalue_generic        // 1
-	                        , Lvalue_generic        // 2
-	                        , Lvalue_array_element  // 3
-	                        , Lvalue_object_member  // 4
+	using Types = Type_tuple< Null                    // 0
+	                        , Rvalue_generic          // 1
+	                        , Lvalue_scoped_variable  // 2
+	                        , Lvalue_array_element    // 3
+	                        , Lvalue_object_member    // 4
 		>;
 
 private:
