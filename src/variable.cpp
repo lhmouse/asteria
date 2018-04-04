@@ -107,23 +107,23 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<"null";
 		return; }
 	case Variable::type_boolean: {
-		const auto &value = variable_opt->get<Boolean>();
+		const auto &value = variable_opt->get<D_boolean>();
 		os <<std::boolalpha <<std::nouppercase <<value;
 		return; }
 	case Variable::type_integer: {
-		const auto &value = variable_opt->get<Integer>();
+		const auto &value = variable_opt->get<D_integer>();
 		os <<std::dec <<value;
 		return; }
 	case Variable::type_double: {
-		const auto &value = variable_opt->get<Double>();
+		const auto &value = variable_opt->get<D_double>();
 		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
 		return; }
 	case Variable::type_string: {
-		const auto &value = variable_opt->get<String>();
+		const auto &value = variable_opt->get<D_string>();
 		quote_string(os, value);
 		return; }
 	case Variable::type_opaque: {
-		const auto &value = variable_opt->get<Opaque>();
+		const auto &value = variable_opt->get<D_opaque>();
 		boost::uuids::uuid uuid_temp;
 		std::memcpy(&uuid_temp, value.uuid.data(), 16);
 		os <<"opaque(\"" <<uuid_temp <<"\", " <<std::dec <<value.context <<", \"" <<value.handle << "\")";
@@ -132,7 +132,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<"function";
 		return; }
 	case Variable::type_array: {
-		const auto &array = variable_opt->get<Array>();
+		const auto &array = variable_opt->get<D_array>();
 		os <<'[';
 		for(auto it = array.begin(); it != array.end(); ++it){
 			os <<std::endl;
@@ -149,7 +149,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<']';
 		return; }
 	case Variable::type_object: {
-		const auto &object = variable_opt->get<Object>();
+		const auto &object = variable_opt->get<D_object>();
 		os <<'{';
 		for(auto it = object.begin(); it != object.end(); ++it){
 			os <<std::endl;
@@ -187,14 +187,14 @@ void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
 	case Variable::type_function:
 		return;
 	case Variable::type_array: {
-		auto &value = variable_opt->get<Array>();
+		auto &value = variable_opt->get<D_array>();
 		for(auto &elem : value){
 			dispose_variable_recursive(elem);
 			elem = nullptr;
 		}
 		return; }
 	case Variable::type_object: {
-		auto &value = variable_opt->get<Object>();
+		auto &value = variable_opt->get<D_object>();
 		for(auto &pair : value){
 			dispose_variable_recursive(pair.second);
 			pair.second = nullptr;

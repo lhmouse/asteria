@@ -64,15 +64,15 @@ struct Function_struct {
 	std::function<Reference (Spref<Recycler>, boost::container::vector<Reference> &&)> payload;
 };
 
-using Null      = std::nullptr_t;
-using Boolean   = bool;
-using Integer   = std::int64_t;
-using Double    = double;
-using String    = std::string;
-using Opaque    = Opaque_struct;
-using Function  = Function_struct;
-using Array     = Xptr_vector<Variable>;
-using Object    = Xptr_map<std::string, Variable>;
+using D_null      = std::nullptr_t;
+using D_boolean   = bool;
+using D_integer   = std::int64_t;
+using D_double    = double;
+using D_string    = std::string;
+using D_opaque    = Opaque_struct;
+using D_function  = Function_struct;
+using D_array     = Xptr_vector<Variable>;
+using D_object    = Xptr_map<std::string, Variable>;
 
 // Miscellaneous struct definitions.
 struct Scoped_variable {

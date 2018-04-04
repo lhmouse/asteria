@@ -39,7 +39,7 @@ namespace {
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference.get<Reference::S_lvalue_array_element>();
-			const auto array = params.rvar->get_opt<Array>();
+			const auto array = params.rvar->get_opt<D_array>();
 			if(!array){
 				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.rvar), "`");
 			}
@@ -48,7 +48,7 @@ namespace {
 			auto size_current = static_cast<std::int64_t>(array->size());
 			if(normalized_index < 0){
 				if(!create_if_not_exist || params.immutable){
-					ASTERIA_DEBUG_LOG("Array index was before the front: index = ", params.index_bidirectional, ", size = ", size_current);
+					ASTERIA_DEBUG_LOG("D_array index was before the front: index = ", params.index_bidirectional, ", size = ", size_current);
 					Dereference_once_result res = { nullptr, nullptr, nullptr, params.immutable };
 					return std::move(res);
 				}
@@ -67,7 +67,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			} else if(normalized_index >= size_current){
 				if(!create_if_not_exist || params.immutable){
-					ASTERIA_DEBUG_LOG("Array index was after the back: index = ", params.index_bidirectional, ", size = ", size_current);
+					ASTERIA_DEBUG_LOG("D_array index was after the back: index = ", params.index_bidirectional, ", size = ", size_current);
 					Dereference_once_result res = { nullptr, nullptr, nullptr, params.immutable };
 					return std::move(res);
 				}
@@ -88,14 +88,14 @@ namespace {
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference.get<Reference::S_lvalue_object_member>();
-			const auto object = params.rvar->get_opt<Object>();
+			const auto object = params.rvar->get_opt<D_object>();
 			if(!object){
 				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.rvar), "`");
 			}
 			auto it = object->find(params.key);
 			if(it == object->end()){
 				if(!create_if_not_exist || params.immutable){
-					ASTERIA_DEBUG_LOG("Object member was not found: key = ", params.key);
+					ASTERIA_DEBUG_LOG("D_object member was not found: key = ", params.key);
 					Dereference_once_result res = { nullptr, nullptr, nullptr, params.immutable };
 					return std::move(res);
 				}

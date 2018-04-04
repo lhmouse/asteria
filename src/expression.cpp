@@ -23,25 +23,25 @@ namespace {
 		case Variable::type_null:
 			return false;
 		case Variable::type_boolean: {
-			const auto &value = variable_opt->get<Boolean>();
+			const auto &value = variable_opt->get<D_boolean>();
 			return value; }
 		case Variable::type_integer: {
-			const auto &value = variable_opt->get<Integer>();
+			const auto &value = variable_opt->get<D_integer>();
 			return value != 0; }
 		case Variable::type_double: {
-			const auto &value = variable_opt->get<Double>();
+			const auto &value = variable_opt->get<D_double>();
 			return std::fpclassify(value) != FP_ZERO; }
 		case Variable::type_string: {
-			const auto &value = variable_opt->get<String>();
+			const auto &value = variable_opt->get<D_string>();
 			return value.empty() == false; }
 		case Variable::type_opaque:
 		case Variable::type_function:
 			return true;
 		case Variable::type_array: {
-			const auto &value = variable_opt->get<Array>();
+			const auto &value = variable_opt->get<D_array>();
 			return value.empty() == false; }
 		case Variable::type_object: {
-			const auto &value = variable_opt->get<Object>();
+			const auto &value = variable_opt->get<D_object>();
 			return value.empty() == false; }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
@@ -49,7 +49,7 @@ namespace {
 		}
 	}
 
-	Reference get_default_argument_opt(Spref<Recycler> recycler, const Function &function, std::size_t index){
+	Reference get_default_argument_opt(Spref<Recycler> recycler, const D_function &function, std::size_t index){
 		if(index >= function.default_argument_list_opt.size()){
 			return nullptr;
 		}
@@ -129,11 +129,11 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			auto callee_ref = std::move(stack.back());
 			stack.pop_back();
 			const auto callee = read_reference_opt(callee_ref);
-			// Ensure this variable has type `Function`.
+			// Ensure this variable has type `D_function`.
 			if(get_variable_type(callee) != Variable::type_function){
 				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", get_variable_type_name(callee), "`, which is not a function");
 			}
-			const auto &function = callee->get<Function>();
+			const auto &function = callee->get<D_function>();
 			// Pop arguments off the stack.
 			if(stack.size() < params.number_of_arguments){
 				ASTERIA_THROW_RUNTIME_ERROR("No enough arguments provided for this function call node");
@@ -195,16 +195,16 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 					// Make a copy of it, which will be the value of this expression.
 					Xptr<Variable> result;
 					recycler->copy_variable_recursive(result, operand_one);
-					// The operand must have type `Boolean`, `Integer` or `Double`.
+					// The operand must have type `D_boolean`, `D_integer` or `D_double`.
 					const auto type_one = get_variable_type(operand_one);
 					if(type_one == Variable::type_boolean){
-						auto &value_one = operand_one->get<Boolean>();
+						auto &value_one = operand_one->get<D_boolean>();
 						value_one = true;
 					} else if(type_one == Variable::type_integer){
-						auto &value_one = operand_one->get<Integer>();
-						value_one = static_cast<Integer>(static_cast<std::uint64_t>(value_one) + 1);
+						auto &value_one = operand_one->get<D_integer>();
+						value_one = static_cast<D_integer>(static_cast<std::uint64_t>(value_one) + 1);
 					} else if(type_one == Variable::type_double){
-						auto &value_one = operand_one->get<Double>();
+						auto &value_one = operand_one->get<D_double>();
 						value_one = value_one + 1.0;
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("The operand of a postfix increment operator has an inacceptable type `", operand_one, "`");
@@ -224,13 +224,13 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 					// Make a copy of it, which will be the value of this expression.
 					Xptr<Variable> result;
 					recycler->copy_variable_recursive(result, operand_one);
-					// The operand must have type `Integer` or `Double`.
+					// The operand must have type `D_integer` or `D_double`.
 					const auto type_one = get_variable_type(operand_one);
 					if(type_one == Variable::type_integer){
-						auto &value_one = operand_one->get<Integer>();
-						value_one = static_cast<Integer>(static_cast<std::uint64_t>(value_one) - 1);
+						auto &value_one = operand_one->get<D_integer>();
+						value_one = static_cast<D_integer>(static_cast<std::uint64_t>(value_one) - 1);
 					} else if(type_one == Variable::type_double){
-						auto &value_one = operand_one->get<Double>();
+						auto &value_one = operand_one->get<D_double>();
 						value_one = value_one - 1.0;
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("The operand of a postfix decrement operator has an inacceptable type `", operand_one, "`");

@@ -12,10 +12,10 @@ int main(){
 	auto recycler = std::make_shared<Recycler>();
 
 	Xptr<Variable> obj;
-	recycler->set_variable(obj, Object());
-	auto pair = obj->get<Object>().emplace("int", std::make_shared<Variable>(Integer(42)));
+	recycler->set_variable(obj, D_object());
+	auto pair = obj->get<D_object>().emplace("int", std::make_shared<Variable>(D_integer(42)));
 	auto weak_int = std::weak_ptr<Variable>(pair.first->second);
-	pair = obj->get<Object>().emplace("str", std::make_shared<Variable>(String("hello")));
+	pair = obj->get<D_object>().emplace("str", std::make_shared<Variable>(D_string("hello")));
 	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 
 	recycler->clear_variables();

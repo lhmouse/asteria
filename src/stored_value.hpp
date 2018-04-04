@@ -12,7 +12,7 @@ namespace Asteria {
 class Stored_value {
 public:
 	using Variant = Variable::Types::rebind_as_variant;
-	using Types   = Type_tuple<Null, Variant>;
+	using Types   = Type_tuple<D_null, Variant>;
 
 private:
 	Types::rebind_as_variant m_value_opt;

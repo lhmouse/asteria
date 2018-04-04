@@ -90,7 +90,7 @@ public:
 		std::string identifier;
 	};
 	struct S_case_label_statement {
-		boost::variant<Null, Boolean, Integer, Double, String> value_opt;
+		boost::variant<D_null, D_boolean, D_integer, D_double, D_string> value_opt;
 	};
 	struct S_default_label_statement {
 		// Nothing.

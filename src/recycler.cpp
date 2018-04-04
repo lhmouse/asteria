@@ -32,31 +32,31 @@ void Recycler::copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<c
 		variable_out_opt = nullptr;
 		return;
 	case Variable::type_boolean: {
-		const auto &source = source_opt->get<Boolean>();
+		const auto &source = source_opt->get<D_boolean>();
 		set_variable(variable_out_opt, source);
 		return; }
 	case Variable::type_integer: {
-		const auto &source = source_opt->get<Integer>();
+		const auto &source = source_opt->get<D_integer>();
 		set_variable(variable_out_opt, source);
 		return; }
 	case Variable::type_double: {
-		const auto &source = source_opt->get<Double>();
+		const auto &source = source_opt->get<D_double>();
 		set_variable(variable_out_opt, source);
 		return; }
 	case Variable::type_string: {
-		const auto &source = source_opt->get<String>();
+		const auto &source = source_opt->get<D_string>();
 		set_variable(variable_out_opt, source);
 		return; }
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
 		/*return;*/
 	case Variable::type_function: {
-		const auto &source = source_opt->get<Function>();
+		const auto &source = source_opt->get<D_function>();
 		set_variable(variable_out_opt, source);
 		return; }
 	case Variable::type_array: {
-		const auto &source = source_opt->get<Array>();
-		Array array;
+		const auto &source = source_opt->get<D_array>();
+		D_array array;
 		array.reserve(source.size());
 		for(const auto &elem : source){
 			copy_variable_recursive(variable_out_opt, elem);
@@ -65,8 +65,8 @@ void Recycler::copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<c
 		set_variable(variable_out_opt, std::move(array));
 		return; }
 	case Variable::type_object: {
-		const auto &source = source_opt->get<Object>();
-		Object object;
+		const auto &source = source_opt->get<D_object>();
+		D_object object;
 		object.reserve(source.size());
 		for(const auto &pair : source){
 			copy_variable_recursive(variable_out_opt, pair.second);

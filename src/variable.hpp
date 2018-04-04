@@ -22,14 +22,14 @@ public:
 		type_array     =  6,
 		type_object    =  7,
 	};
-	using Types = Type_tuple< Boolean    //  0
-	                        , Integer    //  1
-	                        , Double     //  2
-	                        , String     //  3
-	                        , Opaque     //  4
-	                        , Function   //  5
-	                        , Array      //  6
-	                        , Object     //  7
+	using Types = Type_tuple< D_boolean    //  0
+	                        , D_integer    //  1
+	                        , D_double     //  2
+	                        , D_string     //  3
+	                        , D_opaque     //  4
+	                        , D_function   //  5
+	                        , D_array      //  6
+	                        , D_object     //  7
 		>;
 
 private:

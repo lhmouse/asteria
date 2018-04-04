@@ -31,7 +31,7 @@ void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, 
 		return; }
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
-		Array array;
+		D_array array;
 		array.reserve(params.initializers.size());
 		for(const auto &elem : params.initializers){
 			set_variable_using_initializer_recursive(variable_out_opt, recycler, scope, elem);
@@ -40,7 +40,7 @@ void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, 
 		return recycler->set_variable(variable_out_opt, std::move(array)); }
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
-		Object object;
+		D_object object;
 		object.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){
 			set_variable_using_initializer_recursive(variable_out_opt, recycler, scope, pair.second);

@@ -37,7 +37,7 @@ public:
 		bool immutable;
 		std::string key;
 	};
-	using Types = Type_tuple< Null                    // 0
+	using Types = Type_tuple< D_null                    // 0
 	                        , S_rvalue_generic          // 1
 	                        , S_lvalue_scoped_variable  // 2
 	                        , S_lvalue_array_element    // 3

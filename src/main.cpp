@@ -18,7 +18,7 @@ int main(){
 	Xptr<Variable> first, second, third, route;
 	Xptr<Variable> temp;
 
-	Array arr;
+	D_array arr;
 	recycler->set_variable(temp, nullptr);
 	arr.emplace_back(std::move(temp));
 	recycler->set_variable(temp, true);
@@ -37,7 +37,7 @@ int main(){
 	arr.emplace_back(std::move(temp));
 	recycler->set_variable(third, std::move(arr));
 
-	Object obj;
+	D_object obj;
 	obj.emplace("first", std::move(first));
 	obj.emplace("second", std::move(second));
 	recycler->set_variable(route, std::move(obj));
@@ -53,7 +53,7 @@ int main(){
 
 	Opaque_struct opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, 987654321, std::make_shared<int>() };
 	backup->set_variable(temp, std::move(opaque));
-	copy->get<Object>().emplace("opaque", std::move(temp));
+	copy->get<D_object>().emplace("opaque", std::move(temp));
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
