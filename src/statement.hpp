@@ -37,7 +37,7 @@ public:
 		Xptr<Expression> expression_opt;
 	};
 	struct S_compound_statement {
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_variable_definition {
 		std::string identifier;
@@ -54,37 +54,37 @@ public:
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_expression;
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_do_while_statement {
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 		Xptr<Expression> condition_opt;
 	};
 	struct S_while_statement {
 		Xptr<Expression> condition_opt;
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		bool value_immutable;
 		Xptr<Initializer> range_initializer;
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_try_statement {
-		Xptr_vector<Statement> try_statement_list;
+		Xptr_vector<Statement> try_statements;
 		std::string exception_identifier;
 		bool exception_immutable;
-		Xptr_vector<Statement> catch_statement_list;
+		Xptr_vector<Statement> catch_statements;
 	};
 	struct S_defer_statement {
-		Xptr_vector<Statement> statement_list;
+		Xptr_vector<Statement> statements;
 	};
 	struct S_label_statement {
 		std::string identifier;

@@ -79,7 +79,6 @@ void Recycler::copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<c
 		std::terminate();
 	}
 }
-
 void Recycler::defragment_automatic() noexcept {
 	const auto threshold_old = m_defragmentation_threshold;
 	if(m_weak_variables.size() < threshold_old){

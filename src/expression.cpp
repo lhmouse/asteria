@@ -58,10 +58,10 @@ namespace {
 	}
 
 	Reference get_default_argument_opt(Spref<Recycler> recycler, const D_function &function, std::size_t index){
-		if(index >= function.default_argument_list_opt.size()){
+		if(index >= function.default_arguments_opt.size()){
 			return nullptr;
 		}
-		const auto &argument_generator = function.default_argument_list_opt.at(index);
+		const auto &argument_generator = function.default_arguments_opt.at(index);
 		if(!argument_generator){
 			return nullptr;
 		}
@@ -146,8 +146,8 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			if(stack.size() < params.number_of_arguments){
 				ASTERIA_THROW_RUNTIME_ERROR("No enough arguments provided for this function call node");
 			}
-			boost::container::vector<Reference> argument_list;
-			argument_list.reserve(std::max(function.default_argument_list_opt.size(), params.number_of_arguments));
+			boost::container::vector<Reference> arguments;
+			arguments.reserve(std::max(function.default_arguments_opt.size(), params.number_of_arguments));
 			// There could be more arguments than parameters.
 			for(std::size_t i = 0; i < params.number_of_arguments; ++i){
 				auto argument_ref = std::move(stack.back());
@@ -155,15 +155,15 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 				if(argument_ref.get_type() == Reference::type_null){
 					argument_ref = get_default_argument_opt(recycler, function, i);
 				}
-				argument_list.emplace_back(std::move(argument_ref));
+				arguments.emplace_back(std::move(argument_ref));
 			}
 			// Ensure there are no fewer arguments than parameters.
-			for(std::size_t i = params.number_of_arguments; i < function.default_argument_list_opt.size(); ++i){
+			for(std::size_t i = params.number_of_arguments; i < function.default_arguments_opt.size(); ++i){
 				auto argument_ref = get_default_argument_opt(recycler, function, i);
-				argument_list.emplace_back(std::move(argument_ref));
+				arguments.emplace_back(std::move(argument_ref));
 			}
 			// Call the function and push the result as-is.
-			auto result_ref = function.payload(recycler, std::move(argument_list));
+			auto result_ref = function.payload(recycler, std::move(arguments));
 			stack.emplace_back(std::move(result_ref));
 			continue; }
 		case Expression_node::type_operator_rpn:

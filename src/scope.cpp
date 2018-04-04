@@ -9,34 +9,33 @@
 namespace Asteria {
 
 Scope::~Scope(){
-	clear_variables_local();
+	clear_local_variables();
 }
 
-Sptr<Scoped_variable> Scope::get_variable_local_opt(const std::string &identifier) const noexcept {
-	auto it = m_variables.find(identifier);
-	if(it == m_variables.end()){
+Sptr<Reference> Scope::get_local_variable(const std::string &identifier) const noexcept {
+	auto it = m_local_variables.find(identifier);
+	if(it == m_local_variables.end()){
 		return nullptr;
 	}
 	return it->second;
 }
-Sptr<Scoped_variable> Scope::declare_variable_local(const std::string &identifier){
-	auto it = m_variables.find(identifier);
-	if(it == m_variables.end()){
+void Scope::set_local_variable(const std::string &identifier, Xptr<Reference> &&reference_opt){
+	auto it = m_local_variables.find(identifier);
+	if(it == m_local_variables.end()){
 		ASTERIA_DEBUG_LOG("Creating local variable: identifier = ", identifier);
-		auto xptr = std::make_shared<Scoped_variable>();
-		it = m_variables.emplace(identifier, std::move(xptr)).first;
+		it = m_local_variables.emplace(identifier, nullptr).first;
 	}
-	return it->second;
+	it->second = std::move(reference_opt);
 }
-void Scope::clear_variables_local() noexcept {
-	m_variables.clear();
+void Scope::clear_local_variables() noexcept {
+	m_local_variables.clear();
 }
 
-Sptr<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept {
-	for(auto scope = scope_opt.get(); scope; scope = scope->get_parent_opt().get()){
-		auto scoped_var = scope->get_variable_local_opt(identifier);
-		if(scoped_var){
-			return std::move(scoped_var);
+Sptr<Reference> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept {
+	for(auto scope = scope_opt; scope; scope = scope->get_parent_opt()){
+		auto reference = scope->get_local_variable(identifier);
+		if(reference){
+			return std::move(reference);
 		}
 	}
 	return nullptr;

@@ -20,14 +20,13 @@ public:
 private:
 	const Type m_type;
 	const Sptr<Scope> m_parent_opt;
-	const Sptr<const Xptr_vector<Statement>> m_statement_list;
 
-	boost::container::flat_map<std::string, Sptr<Scoped_variable>> m_variables;
+	boost::container::flat_map<std::string, Sptr<Reference>> m_local_variables;
 
 public:
-	Scope(Type type, Sptr<Scope> parent_opt, Sptr<const Xptr_vector<Statement>> statement_list)
-		: m_type(type), m_parent_opt(std::move(parent_opt)), m_statement_list(std::move(statement_list))
-		, m_variables()
+	Scope(Type type, Sptr<Scope> parent_opt)
+		: m_type(type), m_parent_opt(std::move(parent_opt))
+		, m_local_variables()
 	{ }
 	~Scope();
 
@@ -41,16 +40,13 @@ public:
 	Spref<Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
-	Spref<const Xptr_vector<Statement>> get_statement_list() const noexcept {
-		return m_statement_list;
-	}
 
-	Sptr<Scoped_variable> get_variable_local_opt(const std::string &identifier) const noexcept;
-	Sptr<Scoped_variable> declare_variable_local(const std::string &identifier);
-	void clear_variables_local() noexcept;
+	Sptr<Reference> get_local_variable(const std::string &identifier) const noexcept;
+	void set_local_variable(const std::string &identifier, Xptr<Reference> &&reference_opt);
+	void clear_local_variables() noexcept;
 };
 
-extern Sptr<Scoped_variable> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept;
+extern Sptr<Reference> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept;
 
 }
 

@@ -11,11 +11,11 @@ namespace Asteria {
 
 class Expression {
 private:
-	boost::container::vector<Expression_node> m_node_list;
+	boost::container::vector<Expression_node> m_nodes;
 
 public:
 	Expression()
-		: m_node_list()
+		: m_nodes()
 	{ }
 	Expression(Expression &&);
 	Expression &operator=(Expression &&);
@@ -23,35 +23,35 @@ public:
 
 public:
 	bool empty() const noexcept {
-		return m_node_list.empty();
+		return m_nodes.empty();
 	}
 	std::size_t size() const noexcept {
-		return m_node_list.size();
+		return m_nodes.size();
 	}
-	decltype(m_node_list)::const_iterator begin() const noexcept {
-		return m_node_list.begin();
+	decltype(m_nodes)::const_iterator begin() const noexcept {
+		return m_nodes.begin();
 	}
-	decltype(m_node_list)::iterator begin() noexcept {
-		return m_node_list.begin();
+	decltype(m_nodes)::iterator begin() noexcept {
+		return m_nodes.begin();
 	}
-	decltype(m_node_list)::const_iterator end() const noexcept {
-		return m_node_list.end();
+	decltype(m_nodes)::const_iterator end() const noexcept {
+		return m_nodes.end();
 	}
-	decltype(m_node_list)::iterator end() noexcept {
-		return m_node_list.end();
+	decltype(m_nodes)::iterator end() noexcept {
+		return m_nodes.end();
 	}
 	const Expression_node &at(std::size_t n) const {
-		return m_node_list.at(n);
+		return m_nodes.at(n);
 	}
 	Expression_node &at(std::size_t n){
-		return m_node_list.at(n);
+		return m_nodes.at(n);
 	}
 	template<typename ValueT>
 	void append(ValueT &&value){
-		m_node_list.emplace_back(std::forward<ValueT>(value));
+		m_nodes.emplace_back(std::forward<ValueT>(value));
 	}
 	void clear() noexcept {
-		return m_node_list.clear();
+		return m_nodes.clear();
 	}
 };
 
