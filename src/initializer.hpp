@@ -70,6 +70,7 @@ public:
 };
 
 extern Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept;
+
 extern void set_variable_using_initializer_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
 
 }
