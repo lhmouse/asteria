@@ -12,7 +12,7 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	auto var = Xptr<Variable>(std::make_shared<Variable>(Integer(42)));
+	auto var = std::make_shared<Variable>(Integer(42));
 	Reference::S_rvalue_generic rref = { var };
 	Reference ref = std::move(rref);
 	auto ptr = read_reference_opt(ref);

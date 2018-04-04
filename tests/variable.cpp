@@ -45,7 +45,7 @@ int main(){
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
 			recycler->set_variable(xptr, param_one->get<Integer>() * param_two->get<Integer>());
-			Reference::S_rvalue_generic ref = { std::move(xptr) };
+			Reference::S_rvalue_generic ref = { xptr.release() };
 			return std::move(ref);
 		}
 	};
