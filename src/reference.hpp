@@ -12,36 +12,35 @@ namespace Asteria {
 class Reference {
 public:
 	enum Type : unsigned {
-		type_null                    = 0,
-		type_rvalue_generic          = 1,
-		type_lvalue_scoped_variable  = 2,
-		type_lvalue_array_element    = 3,
-		type_lvalue_object_member    = 4,
+		type_null                    = -1u,
+		type_rvalue_generic          =  0,
+		type_lvalue_scoped_variable  =  1,
+		type_lvalue_array_element    =  2,
+		type_lvalue_object_member    =  3,
 	};
 	struct S_rvalue_generic {
-		Sptr<Variable> xvar_opt;
+		Sptr<Variable> variable_opt;
 	};
 	struct S_lvalue_scoped_variable {
 		Sptr<Recycler> recycler;
-		Sptr<Scoped_variable> scoped_var;
+		Sptr<Scoped_variable> scoped_variable;
 	};
 	struct S_lvalue_array_element {
 		Sptr<Recycler> recycler;
-		Sptr<Variable> rvar;
+		Sptr<Variable> variable;
 		bool immutable;
 		std::int64_t index_bidirectional;
 	};
 	struct S_lvalue_object_member {
 		Sptr<Recycler> recycler;
-		Sptr<Variable> rvar;
+		Sptr<Variable> variable;
 		bool immutable;
 		std::string key;
 	};
-	using Types = Type_tuple< D_null                    // 0
-	                        , S_rvalue_generic          // 1
-	                        , S_lvalue_scoped_variable  // 2
-	                        , S_lvalue_array_element    // 3
-	                        , S_lvalue_object_member    // 4
+	using Types = Type_tuple< S_rvalue_generic          // 0
+	                        , S_lvalue_scoped_variable  // 1
+	                        , S_lvalue_array_element    // 2
+	                        , S_lvalue_object_member    // 3
 		>;
 
 private:
@@ -84,10 +83,9 @@ public:
 
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
-
-extern Sptr<Variable> read_reference_opt(const Reference &reference);
-extern void write_reference(Reference &reference, Stored_value &&value_opt);
-extern Xptr<Variable> extract_variable_from_reference(Reference &&reference);
+extern Sptr<Variable> read_reference_opt(Spref<const Reference> reference_opt);
+extern void write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt);
+extern Xptr<Variable> extract_variable_from_reference_opt(Xptr<Reference> &&reference_opt);
 
 }
 

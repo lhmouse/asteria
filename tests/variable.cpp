@@ -29,16 +29,15 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
 
 	std::array<unsigned char, 16> uuid = { 1,2,3,4,5,6,7,8,2,2,3,4,5,6,7,8 };
-	Opaque_struct opaque = { uuid, 12345, std::make_shared<char>() };
+	D_opaque opaque = { uuid, std::make_shared<char>() };
 	var->set(opaque);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_opaque);
 	ASTERIA_TEST_CHECK(var->get<D_opaque>().uuid == opaque.uuid);
-	ASTERIA_TEST_CHECK(var->get<D_opaque>().context == opaque.context);
 	ASTERIA_TEST_CHECK(var->get<D_opaque>().handle == opaque.handle);
 
 	D_function function = {
 		{ },
-		[](Spref<Recycler> recycler, boost::container::vector<Reference> &&params) -> Reference {
+		[](Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
 			auto param_one = read_reference_opt(params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(params.at(1));
@@ -46,18 +45,18 @@ int main(){
 			Xptr<Variable> xptr;
 			recycler->set_variable(xptr, param_one->get<D_integer>() * param_two->get<D_integer>());
 			Reference::S_rvalue_generic ref = { xptr.release() };
-			return std::move(ref);
+			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
 		}
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	boost::container::vector<Reference> params;
+	boost::container::vector<Xptr<Reference>> params;
 	Reference::S_rvalue_generic ref = { std::make_shared<Variable>(D_integer(12)) };
-	params.emplace_back(std::move(ref));
+	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	ref = { std::make_shared<Variable>(D_integer(15)) };
-	params.emplace_back(std::move(ref));
+	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	auto recycler = std::make_shared<Recycler>();
-	auto result = var->get<D_function>().payload(recycler, std::move(params));
+	auto result = var->get<D_function>().function(recycler, std::move(params));
 	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<D_integer>() == 180);

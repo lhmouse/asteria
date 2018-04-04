@@ -51,7 +51,7 @@ int main(){
 	recycler->set_variable(root, std::move(obj));
 	backup->copy_variable_recursive(copy, root);
 
-	Opaque_struct opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, 987654321, std::make_shared<int>() };
+	D_opaque opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, std::make_shared<int>() };
 	backup->set_variable(temp, std::move(opaque));
 	copy->get<D_object>().emplace("opaque", std::move(temp));
 

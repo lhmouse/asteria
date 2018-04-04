@@ -14,34 +14,38 @@ Reference::Reference(Reference &&) = default;
 Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
 
+Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept {
+	return reference_opt ? reference_opt->get_type() : Reference::type_null;
+}
+
 namespace {
 	struct Dereference_once_result {
-		Sptr<Variable> rvar_opt;      // How to read a value through this reference?
-		Xptr<Variable> *wptr_opt;     // How to write a value through this reference?
+		Sptr<Variable> rptr_opt;      // How to read a value through this reference?
+		Xptr<Variable> *wref_opt;     // How to write a value through this reference?
 		Sptr<Recycler> recycler_opt;  // Which recycler to use?
 		bool immutable;               // Is this reference read-only?
 	};
 
-	Dereference_once_result do_dereference(const Reference &reference, bool create_if_not_exist){
-		const auto type = reference.get_type();
+	Dereference_once_result do_dereference(Spref<const Reference> reference_opt, bool create_if_not_exist){
+		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null: {
 			Dereference_once_result res = { nullptr, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_rvalue_generic: {
-			const auto &params = reference.get<Reference::S_rvalue_generic>();
-			Dereference_once_result res = { params.xvar_opt, nullptr, nullptr, true };
+			const auto &params = reference_opt->get<Reference::S_rvalue_generic>();
+			Dereference_once_result res = { params.variable_opt, nullptr, nullptr, true };
 			return std::move(res); }
 		case Reference::type_lvalue_scoped_variable: {
-			const auto &params = reference.get<Reference::S_lvalue_scoped_variable>();
-			auto &variable = params.scoped_var->variable;
-			Dereference_once_result res = { variable, &variable, params.recycler, params.scoped_var->immutable };
+			const auto &params = reference_opt->get<Reference::S_lvalue_scoped_variable>();
+			auto &variable = params.scoped_variable->variable;
+			Dereference_once_result res = { variable, &variable, params.recycler, params.scoped_variable->immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
-			const auto &params = reference.get<Reference::S_lvalue_array_element>();
-			const auto array = params.rvar->get_opt<D_array>();
+			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
+			const auto array = params.variable->get_opt<D_array>();
 			if(!array){
-				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.rvar), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.variable), "`");
 			}
 			auto normalized_index = (params.index_bidirectional >= 0) ? params.index_bidirectional
 			                                                          : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index_bidirectional) + array->size());
@@ -87,10 +91,10 @@ namespace {
 			Dereference_once_result res = { variable, &variable, params.recycler, params.immutable };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
-			const auto &params = reference.get<Reference::S_lvalue_object_member>();
-			const auto object = params.rvar->get_opt<D_object>();
+			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
+			const auto object = params.variable->get_opt<D_object>();
 			if(!object){
-				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.rvar), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.variable), "`");
 			}
 			auto it = object->find(params.key);
 			if(it == object->end()){
@@ -113,28 +117,28 @@ namespace {
 	}
 }
 
-Sptr<Variable> read_reference_opt(const Reference &reference){
-	auto result = do_dereference(reference, false);
-	return std::move(result.rvar_opt);
+Sptr<Variable> read_reference_opt(Spref<const Reference> reference_opt){
+	auto result = do_dereference(reference_opt, false);
+	return std::move(result.rptr_opt);
 }
-void write_reference(Reference &reference, Stored_value &&value_opt){
-	auto result = do_dereference(reference, true);
-	if(!(result.wptr_opt)){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
+void write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt){
+	auto result = do_dereference(reference_opt, true);
+	if(!(result.wref_opt)){
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
 	if(result.immutable){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
-	result.recycler_opt->set_variable(*(result.wptr_opt), std::move(value_opt));
+	result.recycler_opt->set_variable(*(result.wref_opt), std::move(value_opt));
 }
-Xptr<Variable> extract_variable_from_reference(Reference &&reference){
+Xptr<Variable> extract_variable_from_reference_opt(Xptr<Reference> &&reference_opt){
 	Xptr<Variable> variable;
-	const auto rv_params = reference.get_opt<Reference::S_rvalue_generic>();
-	if(rv_params){
-		variable.reset(std::move(rv_params->xvar_opt));
+	if(get_reference_type(reference_opt) == Reference::type_rvalue_generic){
+		auto &params = reference_opt->get<Reference::S_rvalue_generic>();
+		variable.reset(std::move(params.variable_opt));
 	} else {
-		auto result = do_dereference(reference, false);
-		result.recycler_opt->copy_variable_recursive(variable, result.rvar_opt);
+		auto result = do_dereference(reference_opt, false);
+		result.recycler_opt->copy_variable_recursive(variable, result.rptr_opt);
 	}
 	return variable;
 }
