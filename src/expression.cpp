@@ -155,7 +155,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 				argument_list.emplace_back(std::move(argument_ref));
 			}
 			// Call the function and push the result as-is.
-			auto result_ref = function.payload(std::move(argument_list));
+			auto result_ref = function.payload(recycler, std::move(argument_list));
 			stack.emplace_back(std::move(result_ref));
 			continue; }
 		case Expression_node::type_operator_rpn:

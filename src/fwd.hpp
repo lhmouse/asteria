@@ -59,7 +59,7 @@ struct Opaque_struct {
 
 struct Function_struct {
 	boost::container::vector<std::function<Reference (Spref<Recycler>)>> default_argument_list_opt;
-	std::function<Reference (boost::container::vector<Reference> &&)> payload;
+	std::function<Reference (Spref<Recycler>, boost::container::vector<Reference> &&)> payload;
 };
 
 using Null      = std::nullptr_t;
