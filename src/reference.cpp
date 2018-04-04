@@ -117,7 +117,7 @@ Sptr<Variable> read_reference_opt(const Reference &reference){
 	auto result = do_dereference(reference, false);
 	return std::move(result.rvar_opt);
 }
-Xptr<Variable> &write_reference(Reference &reference, Stored_value &&value_opt){
+void write_reference(Reference &reference, Stored_value &&value_opt){
 	auto result = do_dereference(reference, true);
 	if(!(result.wptr_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary variable having type `", get_variable_type_name(result.rvar_opt), "`");
@@ -126,7 +126,6 @@ Xptr<Variable> &write_reference(Reference &reference, Stored_value &&value_opt){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant having type `", get_variable_type_name(result.rvar_opt), "`");
 	}
 	result.recycler_opt->set_variable(*(result.wptr_opt), std::move(value_opt));
-	return *(result.wptr_opt);
 }
 Xptr<Variable> extract_variable_from_reference(Reference &&reference){
 	Xptr<Variable> variable;
