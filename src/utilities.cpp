@@ -87,6 +87,7 @@ void throw_runtime_error(Logger &&logger){
 	// Prepend the function name and throw an `std::runtime_error`.
 	stream.set_caret(0);
 	stream <<logger.get_func() <<": ";
+	ASTERIA_DEBUG_LOG(">>> Throwing exception: ", stream.get_string());
 	throw std::runtime_error(stream.get_string());
 }
 
