@@ -15,21 +15,19 @@ Recycler::~Recycler(){
 
 void Recycler::set_variable(Xptr<Variable> &variable_out_opt, Stored_value &&value_opt){
 	if(value_opt.is_null()){
-		variable_out_opt = nullptr;
-	} else if(!variable_out_opt){
+		variable_out_opt.reset();
+	} else {
 		auto sptr = std::make_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
 		m_weak_variables.emplace_back(sptr);
 		variable_out_opt.reset(std::move(sptr));
-	} else {
-		*variable_out_opt = Variable(std::move(value_opt.get()));
 	}
 }
 void Recycler::copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null:
-		variable_out_opt = nullptr;
+		set_variable(variable_out_opt, nullptr);
 		return;
 	case Variable::type_boolean: {
 		const auto &source = source_opt->get<D_boolean>();
