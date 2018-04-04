@@ -4,6 +4,8 @@
 #include "test_init.hpp"
 #include "../src/variable.hpp"
 #include "../src/reference.hpp"
+#include "../src/stored_value.hpp"
+#include "../src/recycler.hpp"
 
 using namespace Asteria;
 
@@ -36,12 +38,14 @@ int main(){
 
 	Function function = {
 		{ },
-		[](boost::container::vector<Reference> &&params) -> Reference {
+		[](Spref<Recycler> recycler, boost::container::vector<Reference> &&params) -> Reference {
 			auto param_one = read_reference_opt(params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(params.at(1));
 			ASTERIA_TEST_CHECK(param_two);
-			Reference::Rvalue_generic ref = { std::make_shared<Variable>(param_one->get<Integer>() * param_two->get<Integer>()) };
+			Xptr<Variable> xptr;
+			recycler->set_variable(xptr, param_one->get<Integer>() * param_two->get<Integer>());
+			Reference::Rvalue_generic ref = { std::move(xptr) };
 			return std::move(ref);
 		}
 	};
@@ -52,7 +56,8 @@ int main(){
 	params.emplace_back(std::move(ref));
 	ref = { std::make_shared<Variable>(Integer(15)) };
 	params.emplace_back(std::move(ref));
-	auto result = var->get<Function>().payload(std::move(params));
+	auto recycler = std::make_shared<Recycler>();
+	auto result = var->get<Function>().payload(recycler, std::move(params));
 	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<Integer>() == 180);
