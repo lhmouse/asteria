@@ -16,11 +16,11 @@ int main(){
 	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
 	auto hidden_p = std::make_shared<Scoped_variable>();
 	recycler->set_variable(hidden_p->variable_opt, D_boolean(true));
-	Reference::S_lvalue_scoped_variable lref = { recycler, hidden_p };
+	Reference::S_lvalue_scoped_variable lref = { hidden_p };
 	parent->set_local_reference("hidden", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 	auto one = std::make_shared<Scoped_variable>();
 	recycler->set_variable(one->variable_opt, D_integer(42));
-	lref = { recycler, one };
+	lref = { one };
 	parent->set_local_reference("one", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 
 	auto ptr = parent->get_reference_recursive_opt("nonexistent");
@@ -29,11 +29,11 @@ int main(){
 	auto child = std::make_shared<Scope>(Scope::type_plain, parent);
 	auto hidden_c = std::make_shared<Scoped_variable>();
 	recycler->set_variable(hidden_c->variable_opt, D_string("hello"));
-	lref = { recycler, hidden_c };
+	lref = { hidden_c };
 	child->set_local_reference("hidden", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 	auto two = std::make_shared<Scoped_variable>();
 	recycler->set_variable(two->variable_opt, D_array(5));
-	lref = { recycler, two };
+	lref = { two };
 	child->set_local_reference("two", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
 
 	ptr = child->get_reference_recursive_opt("hidden");

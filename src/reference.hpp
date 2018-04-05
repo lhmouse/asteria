@@ -20,24 +20,20 @@ public:
 		type_lvalue_object_member    =  4,
 	};
 	struct S_rvalue_static {
-		Sptr<Recycler> recycler;
 		Sptr<const Variable> variable_opt;
 	};
 	struct S_rvalue_dynamic {
 		Sptr<Variable> variable_opt;
 	};
 	struct S_lvalue_scoped_variable {
-		Sptr<Recycler> recycler;
 		Sptr<Scoped_variable> scoped_variable;
 	};
 	struct S_lvalue_array_element {
-		Sptr<Recycler> recycler;
 		Sptr<Variable> variable;
 		bool immutable;
 		std::int64_t index_bidirectional;
 	};
 	struct S_lvalue_object_member {
-		Sptr<Recycler> recycler;
 		Sptr<Variable> variable;
 		bool immutable;
 		std::string key;
@@ -90,8 +86,8 @@ public:
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
 extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
-extern Sptr<Variable> write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt);
-extern Xptr<Variable> extract_variable_from_reference_opt(Xptr<Reference> &&reference_opt);
+extern Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
+extern Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_opt, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 
 }
 

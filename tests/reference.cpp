@@ -14,12 +14,12 @@ int main(){
 
 	auto var = std::make_shared<Variable>(D_integer(42));
 	Xptr<Reference> ref;
-	Reference::S_rvalue_static rsref = { recycler, var };
+	Reference::S_rvalue_static rsref = { var };
 	ref.reset(std::make_shared<Reference>(std::move(rsref)));
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 42);
-	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(130)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(130)));
 	ASTERIA_TEST_CHECK(ptr.get() == var.get());
 	auto tvar = extract_variable_from_reference_opt(std::move(ref));
 	ASTERIA_TEST_CHECK(tvar);
@@ -31,7 +31,7 @@ int main(){
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 42);
-	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(130)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(130)));
 	ASTERIA_TEST_CHECK(ptr.get() == var.get());
 	tvar = extract_variable_from_reference_opt(std::move(ref));
 	ASTERIA_TEST_CHECK(tvar);
@@ -40,14 +40,14 @@ int main(){
 
 	auto nvar = std::make_shared<Scoped_variable>();
 	nvar->variable_opt = Xptr<Variable>(std::make_shared<Variable>(4.2));
-	Reference::S_lvalue_scoped_variable lref = { recycler, nvar };
+	Reference::S_lvalue_scoped_variable lref = { nvar };
 	ref.reset(std::make_shared<Reference>(std::move(lref)));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr.get() == nvar->variable_opt.get());
 
 	var->set(true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
-	Reference::S_lvalue_array_element aref = { recycler, var, true, 9 };
+	Reference::S_lvalue_array_element aref = { var, true, 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_array array;
@@ -58,41 +58,41 @@ int main(){
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(!ptr);
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 5);
-	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(67)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(67)));
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 5);
-	aref = { recycler, var, false, 9 };
+	aref = { var, false, 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
-	write_reference(ref, D_integer(67));
+	write_reference(ref, recycler, D_integer(67));
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 10);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(8) == nullptr);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(9)->get<D_integer>() == 67);
 
-	aref = { recycler, var, false, -7 };
+	aref = { var, false, -7 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 203);
-	write_reference(ref, D_integer(65));
+	write_reference(ref, recycler, D_integer(65));
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(3)->get<D_integer>() == 65);
 
-	aref = { recycler, var, false, 1 };
+	aref = { var, false, 1 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 201);
-	write_reference(ref, D_integer(26));
+	write_reference(ref, recycler, D_integer(26));
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(1)->get<D_integer>() == 26);
 
-	aref = { recycler, var, false, -12 };
+	aref = { var, false, -12 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(!ptr);
-	write_reference(ref, D_integer(37));
+	write_reference(ref, recycler, D_integer(37));
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 12);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(0)->get<D_integer>() == 37);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(3)->get<D_integer>() == 26);
 
-	Reference::S_lvalue_object_member oref = { recycler, var, true, "three" };
+	Reference::S_lvalue_object_member oref = { var, true, "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_object object;
@@ -102,18 +102,18 @@ int main(){
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(!ptr);
 	ASTERIA_TEST_CHECK(var->get<D_object>().size() == 2);
-	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(92)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(92)));
 	ASTERIA_TEST_CHECK(var->get<D_object>().size() == 2);
-	oref = { recycler, var, false, "three" };
+	oref = { var, false, "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
-	write_reference(ref, D_integer(92));
+	write_reference(ref, recycler, D_integer(92));
 	ASTERIA_TEST_CHECK(var->get<D_object>().size() == 3);
 
-	oref = { recycler, var, false, "one" };
+	oref = { var, false, "one" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 1);
-	write_reference(ref, D_integer(97));
+	write_reference(ref, recycler, D_integer(97));
 	ASTERIA_TEST_CHECK(var->get<D_object>().at("one")->get<D_integer>() == 97);
 }

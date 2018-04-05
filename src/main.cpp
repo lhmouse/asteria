@@ -48,8 +48,8 @@ int main(){
 	recycler->set_variable(temp, std::string("世界"));
 	obj.emplace("world", std::move(temp));
 
-	recycler->set_variable(root, std::move(obj));
-	backup->copy_variable_recursive(copy, root);
+	set_variable(root, recycler, std::move(obj));
+	copy_variable_recursive(copy, backup, root);
 
 	D_opaque opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, std::make_shared<int>() };
 	backup->set_variable(temp, std::move(opaque));

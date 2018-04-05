@@ -23,27 +23,26 @@ namespace {
 		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
 		bool rvalue;                    // Is this reference an rvalue that must not be written into?
 		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
-		Sptr<Recycler> recycler_opt;    // Which recycler to use?
 	};
 
 	Dereference_once_result do_dereference(Spref<const Reference> reference_opt, bool create_if_not_exist){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null: {
-			Dereference_once_result res = { nullptr, true, nullptr, nullptr };
+			Dereference_once_result res = { nullptr, true, nullptr };
 			return std::move(res); }
 		case Reference::type_rvalue_static: {
 			const auto &params = reference_opt->get<Reference::S_rvalue_static>();
-			Dereference_once_result res = { params.variable_opt, true, nullptr, params.recycler };
+			Dereference_once_result res = { params.variable_opt, true, nullptr };
 			return std::move(res); }
 		case Reference::type_rvalue_dynamic: {
 			const auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
-			Dereference_once_result res = { params.variable_opt, true, nullptr, nullptr };
+			Dereference_once_result res = { params.variable_opt, true, nullptr };
 			return std::move(res); }
 		case Reference::type_lvalue_scoped_variable: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_scoped_variable>();
 			auto &variable_opt = params.scoped_variable->variable_opt;
-			Dereference_once_result res = { variable_opt, false, &variable_opt, params.recycler };
+			Dereference_once_result res = { variable_opt, false, &variable_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
@@ -57,7 +56,7 @@ namespace {
 			if(normalized_index < 0){
 				if(!create_if_not_exist || params.immutable){
 					ASTERIA_DEBUG_LOG("D_array index was before the front: index = ", params.index_bidirectional, ", size = ", size_current);
-					Dereference_once_result res = { nullptr, false, nullptr, nullptr };
+					Dereference_once_result res = { nullptr, false, nullptr };
 					return std::move(res);
 				}
 				ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", size_current);
@@ -76,7 +75,7 @@ namespace {
 			} else if(normalized_index >= size_current){
 				if(!create_if_not_exist || params.immutable){
 					ASTERIA_DEBUG_LOG("D_array index was after the back: index = ", params.index_bidirectional, ", size = ", size_current);
-					Dereference_once_result res = { nullptr, false, nullptr, nullptr };
+					Dereference_once_result res = { nullptr, false, nullptr };
 					return std::move(res);
 				}
 				ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", size_current);
@@ -92,7 +91,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			}
 			auto &variable_opt = array->at(static_cast<std::size_t>(normalized_index));
-			Dereference_once_result res = { variable_opt, false, &variable_opt, params.recycler };
+			Dereference_once_result res = { variable_opt, false, &variable_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
@@ -104,7 +103,7 @@ namespace {
 			if(it == object->end()){
 				if(!create_if_not_exist || params.immutable){
 					ASTERIA_DEBUG_LOG("D_object member was not found: key = ", params.key);
-					Dereference_once_result res = { nullptr, false, nullptr, nullptr };
+					Dereference_once_result res = { nullptr, false, nullptr };
 					return std::move(res);
 				}
 				ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
@@ -112,7 +111,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 			}
 			auto &variable_opt = it->second;
-			Dereference_once_result res = { variable_opt, false, &variable_opt, params.recycler };
+			Dereference_once_result res = { variable_opt, false, &variable_opt };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
@@ -125,7 +124,7 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	auto result = do_dereference(reference_opt, false);
 	return std::move(result.rptr_opt);
 }
-Sptr<Variable> write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt){
+Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
 	auto result = do_dereference(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`");
@@ -133,18 +132,7 @@ Sptr<Variable> write_reference(Spref<Reference> reference_opt, Stored_value &&va
 	if(!(result.wref_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant reference having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
-	return result.recycler_opt->set_variable(*(result.wref_opt), std::move(value_opt));
-}
-Xptr<Variable> extract_variable_from_reference_opt(Xptr<Reference> &&reference_opt){
-	Xptr<Variable> variable;
-	if(get_reference_type(reference_opt) == Reference::type_rvalue_dynamic){
-		auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
-		variable.reset(std::move(params.variable_opt));
-	} else {
-		auto result = do_dereference(reference_opt, false);
-		result.recycler_opt->copy_variable_recursive(variable, result.rptr_opt);
-	}
-	return variable;
+	return recycler->set_variable(*(result.wref_opt), std::move(value_opt));
 }
 
 }

@@ -10,6 +10,8 @@
 namespace Asteria {
 
 class Variable {
+	friend Stored_value;
+
 public:
 	enum Type : unsigned {
 		type_null      = -1u,
@@ -85,10 +87,12 @@ extern const char *get_type_name(Variable::Type type) noexcept;
 extern Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept;
 extern const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept;
 
+extern bool test_variable(Spref<const Variable> variable_opt) noexcept;
 extern void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
 
-extern bool test_variable(Spref<const Variable> variable_opt) noexcept;
+extern Sptr<Variable> set_variable(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
+extern Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<const Variable> source_opt);
 
 // This function is used to break dependency circles.
 extern void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept;

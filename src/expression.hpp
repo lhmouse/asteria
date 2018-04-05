@@ -10,6 +10,8 @@
 namespace Asteria {
 
 class Expression {
+	friend Expression_node;
+
 private:
 	boost::container::vector<Expression_node> m_nodes;
 
