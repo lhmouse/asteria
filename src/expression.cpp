@@ -33,11 +33,8 @@ Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spre
 		switch(type){
 		case Expression_node::type_literal: {
 			const auto &params = node.get<Expression_node::S_literal>();
-			// Copy the literal to create a new variable.
-			Xptr<Variable> variable;
-			recycler->copy_variable_recursive(variable, params.source_opt);
 			// Push it onto the stack. The result is an rvalue.
-			Reference::S_rvalue_generic ref_s = { std::move(variable) };
+			Reference::S_rvalue_static ref_s = { recycler, params.source_opt };
 			auto ref = Xptr<Reference>(std::make_shared<Reference>(std::move(ref_s)));
 			stack.emplace_back(std::move(ref));
 			continue; }

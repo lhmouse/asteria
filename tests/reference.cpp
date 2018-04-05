@@ -14,12 +14,29 @@ int main(){
 
 	auto var = std::make_shared<Variable>(D_integer(42));
 	Xptr<Reference> ref;
-	Reference::S_rvalue_generic rref = { var };
-	ref.reset(std::make_shared<Reference>(std::move(rref)));
+	Reference::S_rvalue_static rsref = { recycler, var };
+	ref.reset(std::make_shared<Reference>(std::move(rsref)));
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 42);
 	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(130)));
+	ASTERIA_TEST_CHECK(ptr.get() == var.get());
+	auto tvar = extract_variable_from_reference_opt(std::move(ref));
+	ASTERIA_TEST_CHECK(tvar);
+	ASTERIA_TEST_CHECK(tvar->get<D_integer>() == 42);
+	ASTERIA_TEST_CHECK(tvar.get() != var.get());
+
+	Reference::S_rvalue_dynamic rrref = { var };
+	ref.reset(std::make_shared<Reference>(std::move(rrref)));
+	ptr = read_reference_opt(ref);
+	ASTERIA_TEST_CHECK(ptr);
+	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 42);
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_integer(130)));
+	ASTERIA_TEST_CHECK(ptr.get() == var.get());
+	tvar = extract_variable_from_reference_opt(std::move(ref));
+	ASTERIA_TEST_CHECK(tvar);
+	ASTERIA_TEST_CHECK(tvar->get<D_integer>() == 42);
+	ASTERIA_TEST_CHECK(tvar.get() == var.get());
 
 	auto nvar = std::make_shared<Scoped_variable>();
 	nvar->variable_opt = Xptr<Variable>(std::make_shared<Variable>(4.2));

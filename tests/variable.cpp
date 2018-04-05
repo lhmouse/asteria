@@ -44,14 +44,14 @@ int main(){
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
 			recycler->set_variable(xptr, param_one->get<D_integer>() * param_two->get<D_integer>());
-			Reference::S_rvalue_generic ref = { xptr.release() };
+			Reference::S_rvalue_dynamic ref = { xptr.release() };
 			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
 		}
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Xptr<Reference>> params;
-	Reference::S_rvalue_generic ref = { std::make_shared<Variable>(D_integer(12)) };
+	Reference::S_rvalue_dynamic ref = { std::make_shared<Variable>(D_integer(12)) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	ref = { std::make_shared<Variable>(D_integer(15)) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));

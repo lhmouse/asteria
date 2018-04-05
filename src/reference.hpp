@@ -13,12 +13,17 @@ class Reference {
 public:
 	enum Type : unsigned {
 		type_null                    = -1u,
-		type_rvalue_generic          =  0,
-		type_lvalue_scoped_variable  =  1,
-		type_lvalue_array_element    =  2,
-		type_lvalue_object_member    =  3,
+		type_rvalue_static           =  0,
+		type_rvalue_dynamic          =  1,
+		type_lvalue_scoped_variable  =  2,
+		type_lvalue_array_element    =  3,
+		type_lvalue_object_member    =  4,
 	};
-	struct S_rvalue_generic {
+	struct S_rvalue_static {
+		Sptr<Recycler> recycler;
+		Sptr<const Variable> variable_opt;
+	};
+	struct S_rvalue_dynamic {
 		Sptr<Variable> variable_opt;
 	};
 	struct S_lvalue_scoped_variable {
@@ -37,10 +42,11 @@ public:
 		bool immutable;
 		std::string key;
 	};
-	using Types = Type_tuple< S_rvalue_generic          // 0
-	                        , S_lvalue_scoped_variable  // 1
-	                        , S_lvalue_array_element    // 2
-	                        , S_lvalue_object_member    // 3
+	using Types = Type_tuple< S_rvalue_static           // 0
+	                        , S_rvalue_dynamic          // 1
+	                        , S_lvalue_scoped_variable  // 2
+	                        , S_lvalue_array_element    // 3
+	                        , S_lvalue_object_member    // 4
 		>;
 
 private:
