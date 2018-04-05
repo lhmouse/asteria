@@ -59,7 +59,7 @@ public:
 
 	enum Type : unsigned {
 		type_literal            = 0,
-		type_named_variable     = 1,
+		type_named_reference    = 1,
 		type_subexpression      = 2,
 		type_branch             = 3,
 		type_function_call      = 4,
@@ -71,7 +71,7 @@ public:
 		// Produces: An rvalue.
 		Sptr<const Variable> source_opt;
 	};
-	struct S_named_variable {
+	struct S_named_reference {
 		// Consumes: Nothing.
 		// Produces: An lvalue.
 		std::string identifier;
@@ -79,7 +79,7 @@ public:
 	struct S_subexpression {
 		// Consumes: Nothing.
 		// Produces: A reference.
-		Xptr<Expression> subexpression;
+		Xptr<Expression> subexpression_opt;
 	};
 	struct S_branch {
 		// Consumes: A reference.
@@ -103,7 +103,7 @@ public:
 		// TODO
 	};
 	using Types = Type_tuple< S_literal            // 0
-	                        , S_named_variable     // 1
+	                        , S_named_reference    // 1
 	                        , S_subexpression      // 2
 	                        , S_branch             // 3
 	                        , S_function_call      // 4

@@ -21,12 +21,12 @@ private:
 	const Type m_type;
 	const Sptr<Scope> m_parent_opt;
 
-	boost::container::flat_map<std::string, Sptr<Reference>> m_local_variables;
+	boost::container::flat_map<std::string, Sptr<Reference>> m_local_references;
 
 public:
 	Scope(Type type, Sptr<Scope> parent_opt)
 		: m_type(type), m_parent_opt(std::move(parent_opt))
-		, m_local_variables()
+		, m_local_references()
 	{ }
 	~Scope();
 
@@ -41,12 +41,12 @@ public:
 		return m_parent_opt;
 	}
 
-	Sptr<Reference> get_local_variable(const std::string &identifier) const noexcept;
-	void set_local_variable(const std::string &identifier, Xptr<Reference> &&reference_opt);
-	void clear_local_variables() noexcept;
+	Sptr<Reference> get_local_reference(const std::string &identifier) const noexcept;
+	void set_local_reference(const std::string &identifier, Xptr<Reference> &&reference_opt);
+	void clear_local_references() noexcept;
 };
 
-extern Sptr<Reference> get_variable_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept;
+extern Sptr<Reference> get_reference_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept;
 
 }
 
