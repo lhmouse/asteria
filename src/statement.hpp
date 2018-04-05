@@ -12,6 +12,7 @@ namespace Asteria {
 class Statement {
 public:
 	enum Type : unsigned {
+		type_null                     = -1u,
 		type_expression_statement     =  0,
 		type_compound_statement       =  1,
 		type_variable_definition      =  2,
@@ -169,6 +170,8 @@ public:
 		m_variant = std::forward<ValueT>(value);
 	}
 };
+
+extern Statement::Type get_statement_type(Spref<const Statement> statement_opt) noexcept;
 
 }
 

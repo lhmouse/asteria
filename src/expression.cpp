@@ -41,7 +41,7 @@ Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spre
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			auto ref = get_reference_recursive_opt(scope, params.identifier);
+			auto ref = scope->get_reference_recursive_opt(params.identifier);
 			if(!ref){
 				ASTERIA_THROW_RUNTIME_ERROR("Referring an undeclared identifier `", params.identifier, "`");
 			}

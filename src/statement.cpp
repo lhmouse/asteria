@@ -11,4 +11,8 @@ Statement::Statement(Statement &&) = default;
 Statement &Statement::operator=(Statement &&) = default;
 Statement::~Statement() = default;
 
+Statement::Type get_statement_type(Spref<const Statement> statement_opt) noexcept {
+	return statement_opt ? statement_opt->get_type() : Statement::type_null;
+}
+
 }

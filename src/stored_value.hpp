@@ -27,8 +27,8 @@ public:
 	~Stored_value();
 
 public:
-	bool is_null() const noexcept {
-		return m_value_opt.which() == 0;
+	bool has_value() const noexcept {
+		return m_value_opt.which() == 1;
 	}
 	const Variant *get_opt() const noexcept {
 		return boost::get<Variant>(&m_value_opt);

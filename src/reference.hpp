@@ -90,7 +90,7 @@ public:
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
 extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
-extern void write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt);
+extern Sptr<Variable> write_reference(Spref<Reference> reference_opt, Stored_value &&value_opt);
 extern Xptr<Variable> extract_variable_from_reference_opt(Xptr<Reference> &&reference_opt);
 
 }

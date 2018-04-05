@@ -12,7 +12,7 @@ Scope::~Scope(){
 	clear_local_references();
 }
 
-Sptr<Reference> Scope::get_local_reference(const std::string &identifier) const noexcept {
+Sptr<Reference> Scope::get_local_reference_opt(const std::string &identifier) const noexcept {
 	auto it = m_local_references.find(identifier);
 	if(it == m_local_references.end()){
 		return nullptr;
@@ -31,9 +31,9 @@ void Scope::clear_local_references() noexcept {
 	m_local_references.clear();
 }
 
-Sptr<Reference> get_reference_recursive_opt(Spref<const Scope> scope_opt, const std::string &identifier) noexcept {
-	for(auto scope = scope_opt; scope; scope = scope->get_parent_opt()){
-		auto reference = scope->get_local_reference(identifier);
+Sptr<Reference> Scope::get_reference_recursive_opt(const std::string &identifier) const noexcept {
+	for(auto scope = this; scope; scope = scope->get_parent_opt().get()){
+		auto reference = scope->get_local_reference_opt(identifier);
 		if(reference){
 			return std::move(reference);
 		}
