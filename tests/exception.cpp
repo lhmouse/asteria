@@ -20,9 +20,9 @@ int main(){
 		Reference::S_lvalue_scoped_variable ref = { recycler, named_var };
 		throw Exception(Xptr<Reference>(std::make_shared<Reference>(std::move(ref))));
 	} catch(Exception &e){
-		const auto ref = read_reference_opt(e.get_reference_opt());
+		const auto ref = e.get_reference_opt();
 		ASTERIA_TEST_CHECK(ref);
-		ref->set(D_string("hello"));
+		write_reference(ref, D_string("hello"));
 	}
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_string>() == "hello");

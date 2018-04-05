@@ -20,10 +20,10 @@ Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcep
 
 namespace {
 	struct Dereference_once_result {
-		Sptr<Variable> rptr_opt;      // How to read a value through this reference?
-		Xptr<Variable> *wref_opt;     // How to write a value through this reference?
-		Sptr<Recycler> recycler_opt;  // Which recycler to use?
-		bool immutable;               // Is this reference read-only?
+		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
+		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
+		Sptr<Recycler> recycler_opt;    // Which recycler to use?
+		bool immutable;                 // Is this reference read-only?
 	};
 
 	Dereference_once_result do_dereference(Spref<const Reference> reference_opt, bool create_if_not_exist){
@@ -117,7 +117,7 @@ namespace {
 	}
 }
 
-Sptr<Variable> read_reference_opt(Spref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	auto result = do_dereference(reference_opt, false);
 	return std::move(result.rptr_opt);
 }
