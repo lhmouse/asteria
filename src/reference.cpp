@@ -5,7 +5,6 @@
 #include "reference.hpp"
 #include "variable.hpp"
 #include "stored_value.hpp"
-#include "recycler.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -132,7 +131,16 @@ Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> r
 	if(!(result.wref_opt)){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant reference having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
-	return recycler->set_variable(*(result.wref_opt), std::move(value_opt));
+	return set_variable(*(result.wref_opt), recycler, std::move(value_opt));
+}
+Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
+	if(get_reference_type(reference_opt) == Reference::type_rvalue_dynamic){
+		auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
+		return set_variable(variable_out, recycler, std::move(*(params.variable_opt)));
+	} else {
+		auto result = do_dereference(reference_opt, false);
+		return copy_variable_recursive(variable_out, recycler, result.rptr_opt);
+	}
 }
 
 }

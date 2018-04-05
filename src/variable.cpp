@@ -210,49 +210,49 @@ std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt){
 	return os;
 }
 
-Sptr<Variable> set_variable(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
-	return recycler->set_variable(variable_out_opt, std::move(value_opt));
+Sptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt){
+	return recycler->set_variable(variable_out, std::move(value_opt));
 }
-Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<const Variable> source_opt){
+Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null: {
-		return recycler->set_variable(variable_out_opt, nullptr); }
+		return recycler->set_variable(variable_out, nullptr); }
 	case Variable::type_boolean: {
 		const auto &source = source_opt->get<D_boolean>();
-		return recycler->set_variable(variable_out_opt, source); }
+		return recycler->set_variable(variable_out, source); }
 	case Variable::type_integer: {
 		const auto &source = source_opt->get<D_integer>();
-		return recycler->set_variable(variable_out_opt, source); }
+		return recycler->set_variable(variable_out, source); }
 	case Variable::type_double: {
 		const auto &source = source_opt->get<D_double>();
-		return recycler->set_variable(variable_out_opt, source); }
+		return recycler->set_variable(variable_out, source); }
 	case Variable::type_string: {
 		const auto &source = source_opt->get<D_string>();
-		return recycler->set_variable(variable_out_opt, source); }
+		return recycler->set_variable(variable_out, source); }
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
 	case Variable::type_function: {
 		const auto &source = source_opt->get<D_function>();
-		return recycler->set_variable(variable_out_opt, source); }
+		return recycler->set_variable(variable_out, source); }
 	case Variable::type_array: {
 		const auto &source = source_opt->get<D_array>();
 		D_array array;
 		array.reserve(source.size());
 		for(const auto &elem : source){
-			copy_variable_recursive(variable_out_opt, recycler, elem);
-			array.emplace_back(std::move(variable_out_opt));
+			copy_variable_recursive(variable_out, recycler, elem);
+			array.emplace_back(std::move(variable_out));
 		}
-		return recycler->set_variable(variable_out_opt, std::move(array)); }
+		return recycler->set_variable(variable_out, std::move(array)); }
 	case Variable::type_object: {
 		const auto &source = source_opt->get<D_object>();
 		D_object object;
 		object.reserve(source.size());
 		for(const auto &pair : source){
-			copy_variable_recursive(variable_out_opt, recycler, pair.second);
-			object.emplace(pair.first, std::move(variable_out_opt));
+			copy_variable_recursive(variable_out, recycler, pair.second);
+			object.emplace(pair.first, std::move(variable_out));
 		}
-		return recycler->set_variable(variable_out_opt, std::move(object)); }
+		return recycler->set_variable(variable_out, std::move(object)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();

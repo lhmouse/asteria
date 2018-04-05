@@ -10,23 +10,33 @@
 using namespace Asteria;
 
 int main(){
-	auto var = Xptr<Variable>(std::make_shared<Variable>(true));
+	const auto recycler = std::make_shared<Recycler>();
+
+	Xptr<Variable> var;
+	auto old = recycler->set_variable(var, true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<D_boolean>() == true);
 	ASTERIA_TEST_CHECK_CATCH(var->get<D_string>());
 	ASTERIA_TEST_CHECK(var->get_opt<D_double>() == nullptr);
+	ASTERIA_TEST_CHECK(old == nullptr);
 
-	var->set(D_integer(42));
+	old = recycler->set_variable(var, std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<D_integer>() == 42);
+	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_boolean);
+	ASTERIA_TEST_CHECK(old->get<D_boolean>() == true);
 
-	var->set(1.5);
+	old = recycler->set_variable(var, 1.5);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_double);
 	ASTERIA_TEST_CHECK(var->get<D_double>() == 1.5);
+	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_integer);
+	ASTERIA_TEST_CHECK(old->get<D_integer>() == 42);
 
-	var->set(std::string("hello"));
+	old = recycler->set_variable(var, std::string("hello"));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
+	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_double);
+	ASTERIA_TEST_CHECK(old->get<D_double>() ==1.5);
 
 	std::array<unsigned char, 16> uuid = { 1,2,3,4,5,6,7,8,2,2,3,4,5,6,7,8 };
 	D_opaque opaque = { uuid, std::make_shared<char>() };
@@ -55,7 +65,6 @@ int main(){
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	ref = { std::make_shared<Variable>(D_integer(15)) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
-	auto recycler = std::make_shared<Recycler>();
 	auto result = var->get<D_function>().function(recycler, std::move(params));
 	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);

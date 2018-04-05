@@ -91,8 +91,8 @@ extern bool test_variable(Spref<const Variable> variable_opt) noexcept;
 extern void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
 
-extern Sptr<Variable> set_variable(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
-extern Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out_opt, Spref<Recycler> recycler, Spref<const Variable> source_opt);
+extern Sptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
+extern Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
 
 // This function is used to break dependency circles.
 extern void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept;

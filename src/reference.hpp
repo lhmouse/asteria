@@ -87,7 +87,7 @@ extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) 
 
 extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
 extern Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
-extern Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_opt, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
+extern Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 
 }
 
