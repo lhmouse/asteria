@@ -16,47 +16,124 @@ Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
-Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
-	(void)(recycler);
-	(void)(scope);
-	(void)(expression_opt);
-	return nullptr;
+namespace {
+	
 }
 
-#if 0
-namespace {
-	bool convert_to_boolean(Spref<const Variable> variable_opt) noexcept {
-		const auto type = get_variable_type(variable_opt);
+Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
+	// Return a null reference only when a null expression is given.
+	if(!expression_opt){
+		return nullptr;
+	}
+	// Parameters are pushed from right to left, in lexical order.
+	boost::container::vector<Xptr<Reference>> stack;
+	// Evaluate nodes in reverse-polish order.
+	for(const auto &node : *expression_opt){
+		const auto type = node.get_type();
 		switch(type){
-		case Variable::type_null:
-			return false;
-		case Variable::type_boolean: {
-			const auto &value = variable_opt->get<D_boolean>();
-			return value; }
-		case Variable::type_integer: {
-			const auto &value = variable_opt->get<D_integer>();
-			return value != 0; }
-		case Variable::type_double: {
-			const auto &value = variable_opt->get<D_double>();
-			return std::fpclassify(value) != FP_ZERO; }
-		case Variable::type_string: {
-			const auto &value = variable_opt->get<D_string>();
-			return value.empty() == false; }
-		case Variable::type_opaque:
-		case Variable::type_function:
-			return true;
-		case Variable::type_array: {
-			const auto &value = variable_opt->get<D_array>();
-			return value.empty() == false; }
-		case Variable::type_object: {
-			const auto &value = variable_opt->get<D_object>();
-			return value.empty() == false; }
+		case Expression_node::type_literal: {
+			const auto &params = node.get<Expression_node::S_literal>();
+			// Copy the literal to create a new variable.
+			Xptr<Variable> variable;
+			recycler->copy_variable_recursive(variable, params.source_opt);
+			// Push it onto the stack. The result is an rvalue.
+			Reference::S_rvalue_generic ref_s = { std::move(variable) };
+			auto ref = Xptr<Reference>(std::make_shared<Reference>(std::move(ref_s)));
+			stack.emplace_back(std::move(ref));
+			continue; }
+		case Expression_node::type_named_reference: {
+			const auto &params = node.get<Expression_node::S_named_reference>();
+			// Look up the reference in the enclosing scope.
+			auto ref = get_reference_recursive_opt(scope, params.identifier);
+			if(!ref){
+				ASTERIA_THROW_RUNTIME_ERROR("Referring an undeclared identifier `", params.identifier, "`");
+			}
+			// Push the reference onto the stack as-is.
+			stack.emplace_back(std::move(ref));
+			continue; }
+		case Expression_node::type_subexpression: {
+			const auto &params = node.get<Expression_node::S_subexpression>();
+			// Evaluate the subexpression recursively.
+			auto ref = evaluate_expression_recursive_opt(recycler, scope, params.subexpression_opt);
+			// Push the result reference onto the stack as-is.
+			stack.emplace_back(std::move(ref));
+			continue; }
+		case Expression_node::type_branch: {
+			const auto &params = node.get<Expression_node::S_branch>();
+			// Pop the condition off the stack.
+			if(stack.size() < 1){
+				ASTERIA_THROW_RUNTIME_ERROR("No operand found for this branch node");
+			}
+			auto condition_ref = std::move(stack.back());
+			stack.pop_back();
+			const auto condition = read_reference_opt(condition_ref);
+			// Pick a branch basing on the condition.
+			auto ref = evaluate_expression_recursive_opt(recycler, scope, test_variable(condition) ? params.branch_true_opt : params.branch_false_opt);
+			if(!ref){
+				// If the branch selected is absent, push `condition_ref` instead.
+				ref = std::move(condition_ref);
+			}
+			stack.emplace_back(std::move(ref));
+			continue; }
+		case Expression_node::type_function_call: {
+			const auto &params = node.get<Expression_node::S_function_call>();
+			// Pop the function off the stack.
+			if(stack.size() < 1){
+				ASTERIA_THROW_RUNTIME_ERROR("No operand found for this function call node");
+			}
+			auto function_ref = std::move(stack.back());
+			stack.pop_back();
+			const auto function_variable = read_reference_opt(function_ref);
+			// Make sure it is really a function.
+			if(get_variable_type(function_variable) != Variable::type_function){
+				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", get_variable_type_name(function_variable), "`, which is not a function");
+			}
+			const auto &function = function_variable->get<D_function>();
+			// Reserve size for the argument vector. There will not be fewer arguments than parameters.
+			boost::container::vector<Xptr<Reference>> arguments;
+			arguments.resize(std::max(params.number_of_arguments, function.default_argument_generators_opt.size()));
+			// Pop arguments off the stack.
+			if(stack.size() < params.number_of_arguments){
+				ASTERIA_THROW_RUNTIME_ERROR("No enough arguments pushed for this function call node");
+			}
+			for(std::size_t i = 0; i < params.number_of_arguments; ++i){
+				auto argument_ref = std::move(stack.back());
+				stack.pop_back();
+				arguments.at(i) = std::move(argument_ref);
+			}
+			// If a null argument is specified, replace it with its corresponding default argument.
+			for(std::size_t i = 0; i < function.default_argument_generators_opt.size(); ++i){
+				if(arguments.at(i)){
+					continue;
+				}
+				const auto &generator = function.default_argument_generators_opt.at(i);
+				if(!generator){
+					continue;
+				}
+				arguments.at(i) = generator(recycler);
+			}
+			// Call the function and push the result as-is.
+			auto ref = function.function(recycler, std::move(arguments));
+			stack.emplace_back(std::move(ref));
+			continue; }
+		case Expression_node::type_operator_rpn: {
+			continue; }
+		case Expression_node::type_lambda_definition: {
+			ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
+			continue; }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
+	// Get the result. If the stack is empty or has more than one elements, the expression is unbalanced.
+	if(stack.size() != 1){
+		ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression, number of references remaining is `", stack.size(), "`");
+	}
+	return std::move(stack.front());
+}
 
+#if 0
 	Reference get_default_argument_opt(Spref<Recycler> recycler, const D_function &function, std::size_t index){
 		if(index >= function.default_arguments_opt.size()){
 			return nullptr;
@@ -73,28 +150,16 @@ namespace {
 }
 
 Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
-	// Return a null reference only when a null expression is given.
-	if(!expression_opt){
-		return nullptr;
-	}
-
-	// Parameters are pushed from right to left, in lexical order.
-	boost::container::vector<Reference> stack;
-	// Evaluate nodes in reverse-polish order.
-	for(const auto &node : *expression_opt){
-		const auto type = node.get_type();
-		switch(type){
 		case Expression_node::type_literal: {
 			const auto &params = node.get<Expression_node::S_literal>();
 			// Copy the literal to create a new variable.
 			Xptr<Variable> xvar;
 			recycler->copy_variable_recursive(xvar, params.source_opt);
-			// Push it onto the stack. The result is an rvalue.
 			Reference::S_rvalue_generic ref = { std::move(xvar) };
 			stack.emplace_back(std::move(ref));
 			continue; }
-		case Expression_node::type_named_variable: {
-			const auto &params = node.get<Expression_node::S_named_variable>();
+		case Expression_node::type_named_reference: {
+			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the variable in the enclosing scope.
 			auto scoped_var = get_variable_recursive_opt(scope, params.identifier);
 			if(!scoped_var){
@@ -105,10 +170,6 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			stack.emplace_back(std::move(ref));
 			continue; }
 		case Expression_node::type_subexpression: {
-			const auto &params = node.get<Expression_node::S_subexpression>();
-			// Evaluate the subexpression recursively, then push the result onto the stack as-is.
-			auto result_ref = evaluate_expression_recursive(recycler, scope, params.subexpression);
-			stack.emplace_back(std::move(result_ref));
 			continue; }
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
@@ -169,16 +230,6 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 		case Expression_node::type_operator_rpn:
 		case Expression_node::type_lambda_definition:
 			continue;
-		default:
-			ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
-			std::terminate();
-		}
-	}
-	// Get the result. If the stack is empty or has more than one elements, the expression is unbalanced.
-	if(stack.size() != 1){
-		ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression, number of references remaining is `", stack.size(), "`");
-	}
-	return std::move(stack.front());
 
 #if 0
 	 else {
@@ -188,7 +239,7 @@ Reference evaluate_expression_recursive(Spref<Recycler> recycler, Spref<Scope> s
 			const auto type = expression_opt->get_type_at(i);
 			switch(type){
 			case Expression::type_literal_generic: {
-			case Expression::type_named_variable: {
+			case Expression::type_named_reference: {
 			case Expression::type_operator_reverse_polish: {
 				const auto &params = expression_opt->get_at<Expression::Operator_reverse_polish>(i);
 				switch(params.operator_generic){
