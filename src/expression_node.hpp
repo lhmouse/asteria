@@ -17,44 +17,32 @@ public:
 		operator_postfix_dec   = 11, // --
 		operator_postfix_at    = 12, // []
 		// Prefix operators.
-		operator_prefix_add    = 20, // +
-		operator_prefix_sub    = 21, // -
-		operator_prefix_not    = 22, // ~
-		operator_prefix_not_l  = 23, // !
-		operator_prefix_inc    = 24, // ++
-		operator_prefix_dec    = 25, // --
+		operator_prefix_add    = 30, // +
+		operator_prefix_sub    = 31, // -
+		operator_prefix_not_b  = 32, // ~
+		operator_prefix_not_l  = 33, // !
+		operator_prefix_inc    = 34, // ++
+		operator_prefix_dec    = 35, // --
 		// Infix relational operators.
-		operator_infix_cmpeq   = 34, // ==
-		operator_infix_cmpne   = 35, // !=
-		operator_infix_cmplt   = 36, // <
-		operator_infix_cmpgt   = 37, // >
-		operator_infix_cmplte  = 38, // <=
-		operator_infix_cmpgte  = 39, // >=
+		operator_infix_cmp_eq  = 50, // ==
+		operator_infix_cmp_ne  = 51, // !=
+		operator_infix_cmp_lt  = 52, // <
+		operator_infix_cmp_gt  = 53, // >
+		operator_infix_cmp_lte = 54, // <=
+		operator_infix_cmp_gte = 55, // >=
 		// Infix arithmetic operators.
-		operator_infix_add     = 40, // +
-		operator_infix_sub     = 41, // -
-		operator_infix_mul     = 42, // *
-		operator_infix_div     = 43, // /
-		operator_infix_mod     = 44, // %
-		operator_infix_sll     = 45, // <<
-		operator_infix_srl     = 46, // >>>
-		operator_infix_sra     = 47, // >>
-		operator_infix_and     = 48, // &
-		operator_infix_or      = 49, // |
-		operator_infix_xor     = 50, // ^
-		// Infix assignment operators.
-		operator_infix_assign  = 69, // =
-		operator_infix_add_a   = 70, // +
-		operator_infix_sub_a   = 71, // -
-		operator_infix_mul_a   = 72, // *
-		operator_infix_div_a   = 73, // /
-		operator_infix_mod_a   = 74, // %
-		operator_infix_sll_a   = 75, // <<
-		operator_infix_srl_a   = 76, // >>>
-		operator_infix_sra_a   = 77, // >>
-		operator_infix_and_a   = 78, // &
-		operator_infix_or_a    = 79, // |
-		operator_infix_xor_a   = 80, // ^
+		operator_infix_add     = 60, // +
+		operator_infix_sub     = 61, // -
+		operator_infix_mul     = 62, // *
+		operator_infix_div     = 63, // /
+		operator_infix_mod     = 64, // %
+		operator_infix_sll     = 65, // <<
+		operator_infix_srl     = 66, // >>>
+		operator_infix_sra     = 67, // >>
+		operator_infix_and_b   = 68, // &
+		operator_infix_or_b    = 69, // |
+		operator_infix_xor_b   = 70, // ^
+		operator_infix_assign  = 71, // =
 	};
 
 	enum Type : unsigned {
@@ -96,10 +84,11 @@ public:
 		// Consumes: One or two references.
 		// Produces: A reference.
 		Operator_generic operator_generic;
+		bool compound_assignment;
 	};
 	struct S_lambda_definition {
 		// Consumes: Nothing.
-		// Produces: A reference.
+		// Produces: An rvalue.
 		// TODO
 	};
 	using Types = Type_tuple< S_literal            // 0
