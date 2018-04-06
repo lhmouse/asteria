@@ -41,7 +41,8 @@ namespace {
 		case Reference::type_lvalue_scoped_variable: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_scoped_variable>();
 			auto &variable_opt = params.scoped_variable->variable_opt;
-			Dereference_once_result res = { variable_opt, false, &variable_opt };
+			const auto wref_opt = params.scoped_variable->immutable ? nullptr : &variable_opt;
+			Dereference_once_result res = { variable_opt, false, wref_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
@@ -90,7 +91,8 @@ namespace {
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			}
 			auto &variable_opt = array->at(static_cast<std::size_t>(normalized_index));
-			Dereference_once_result res = { variable_opt, false, &variable_opt };
+			const auto wref_opt = params.immutable ? nullptr : &variable_opt;
+			Dereference_once_result res = { variable_opt, false, wref_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
@@ -110,7 +112,8 @@ namespace {
 				ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 			}
 			auto &variable_opt = it->second;
-			Dereference_once_result res = { variable_opt, false, &variable_opt };
+			const auto wref_opt = params.immutable ? nullptr : &variable_opt;
+			Dereference_once_result res = { variable_opt, false, wref_opt };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
