@@ -71,6 +71,7 @@ public:
 
 extern Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept;
 
+// This function returns the old contents of the variable before the call.
 extern Sptr<Variable> initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
 
 }
