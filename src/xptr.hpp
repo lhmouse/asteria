@@ -37,6 +37,19 @@ public:
 		return m_ptr.get();
 	}
 
+	std::shared_ptr<const ElementT> share() const noexcept {
+		return m_ptr;
+	}
+	std::shared_ptr<ElementT> share() noexcept {
+		return m_ptr;
+	}
+	std::weak_ptr<const ElementT> weaken() const noexcept {
+		return m_ptr;
+	}
+	std::weak_ptr<ElementT> weaken() noexcept {
+		return m_ptr;
+	}
+
 	void reset() noexcept {
 		m_ptr.reset();
 	}
@@ -55,13 +68,13 @@ public:
 		swap(m_ptr, rhs.m_ptr);
 	}
 
+public:
 	operator std::shared_ptr<const ElementT>() const noexcept {
 		return m_ptr;
 	}
 	operator std::shared_ptr<ElementT>() noexcept {
 		return m_ptr;
 	}
-
 	operator std::weak_ptr<const ElementT>() const noexcept {
 		return m_ptr;
 	}
@@ -88,28 +101,28 @@ public:
 	}
 };
 
-template<typename ElementT>
-bool operator==(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator==(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() == rhs.get();
 }
-template<typename ElementT>
-bool operator!=(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator!=(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() != rhs.get();
 }
-template<typename ElementT>
-bool operator<(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator<(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() < rhs.get();
 }
-template<typename ElementT>
-bool operator>(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator>(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() > rhs.get();
 }
-template<typename ElementT>
-bool operator<=(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator<=(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() <= rhs.get();
 }
-template<typename ElementT>
-bool operator>=(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+template<typename ElementT, typename OtherT>
+bool operator>=(const Xptr<ElementT> &lhs, const Xptr<OtherT> &rhs) noexcept {
 	return lhs.get() >= rhs.get();
 }
 
@@ -138,28 +151,28 @@ bool operator>=(const Xptr<ElementT> &lhs, std::nullptr_t) noexcept {
 	return lhs.get() >= nullptr;
 }
 
-template<typename ElementT>
-bool operator==(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator==(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr == rhs.get();
 }
-template<typename ElementT>
-bool operator!=(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator!=(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr != rhs.get();
 }
-template<typename ElementT>
-bool operator<(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator<(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr < rhs.get();
 }
-template<typename ElementT>
-bool operator>(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator>(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr > rhs.get();
 }
-template<typename ElementT>
-bool operator<=(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator<=(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr <= rhs.get();
 }
-template<typename ElementT>
-bool operator>=(std::nullptr_t, const Xptr<ElementT> &rhs) noexcept {
+template<typename OtherT>
+bool operator>=(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 	return nullptr >= rhs.get();
 }
 
