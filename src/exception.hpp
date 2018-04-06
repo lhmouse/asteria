@@ -15,7 +15,7 @@ private:
 	Sptr<Reference> m_reference_opt;
 
 public:
-	explicit Exception(Xptr<Reference> reference_opt)
+	explicit Exception(Sptr<Reference> reference_opt)
 		: m_reference_opt(std::move(reference_opt))
 	{ }
 	Exception(const Exception &);
