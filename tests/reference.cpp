@@ -67,6 +67,9 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 10);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(8) == nullptr);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(9)->get<D_integer>() == 67);
+	aref = { var, true, 9 };
+	ref.reset(std::make_shared<Reference>(std::move(aref)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(43)));
 
 	aref = { var, false, -7 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
@@ -109,6 +112,9 @@ int main(){
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	write_reference(ref, recycler, D_integer(92));
 	ASTERIA_TEST_CHECK(var->get<D_object>().size() == 3);
+	oref = { var, true, "three" };
+	ref.reset(std::make_shared<Reference>(std::move(oref)));
+	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(43)));
 
 	oref = { var, false, "one" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
