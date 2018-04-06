@@ -67,8 +67,6 @@ void Logger::do_put(const void *value){
 void write_log_to_stderr(Logger &&logger) noexcept
 try {
 	auto &stream = logger.get_stream();
-	stream <<std::endl;
-	// Prepend the timestamp and write the result to stderr.
 	::time_t now;
 	::time(&now);
 	char time_str[26];
@@ -76,15 +74,12 @@ try {
 	time_str[24] = 0;
 	stream.set_caret(0);
 	stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ## ";
-	std::cerr <<stream.get_string() <<std::flush;
+	std::cerr <<stream.get_string() <<std::endl;
 } catch(...){
 	// Swallow any exceptions thrown.
 }
 void throw_runtime_error(Logger &&logger){
 	auto &stream = logger.get_stream();
-	stream <<std::endl;
-	stream <<"  (thrown from '" <<logger.get_file() <<":" <<logger.get_line() <<"')";
-	// Prepend the function name and throw an `std::runtime_error`.
 	stream.set_caret(0);
 	stream <<logger.get_func() <<": ";
 	ASTERIA_DEBUG_LOG("*** Throwing exception: ", stream.get_string());
