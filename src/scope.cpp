@@ -25,7 +25,7 @@ void Scope::set_local_reference(const std::string &identifier, Xptr<Reference> &
 		ASTERIA_DEBUG_LOG("Creating local reference: identifier = ", identifier);
 		it = m_local_references.emplace(identifier, nullptr).first;
 	}
-	it->second = std::move(reference_opt);
+	it->second = reference_opt.release();
 }
 void Scope::clear_local_references() noexcept {
 	m_local_references.clear();
