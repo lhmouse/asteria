@@ -46,58 +46,49 @@ public:
 	};
 
 	enum Type : unsigned {
-		type_literal            = 0,
-		type_named_reference    = 1,
-		type_subexpression      = 2,
-		type_branch             = 3,
-		type_function_call      = 4,
-		type_operator_rpn       = 5,
-		type_lambda_definition  = 6,
+		type_literal            = 0, // +1
+		type_named_reference    = 1, // +1
+		type_subexpression      = 2, // +1
+		type_lambda_definition  = 3, // +1
+		type_pruning            = 4, // -X
+		type_branch             = 5, // -1, +1
+		type_function_call      = 6, // -X, +1
+		type_operator_rpn       = 7, // -X, +1
 	};
 	struct S_literal {
-		// Consumes: Nothing.
-		// Produces: An rvalue.
 		Sptr<const Variable> source_opt;
 	};
 	struct S_named_reference {
-		// Consumes: Nothing.
-		// Produces: An lvalue.
 		std::string identifier;
 	};
 	struct S_subexpression {
-		// Consumes: Nothing.
-		// Produces: A reference.
 		Xptr<Expression> subexpression_opt;
 	};
+	struct S_lambda_definition {
+		// TODO
+	};
+	struct S_pruning {
+		std::size_t count_to_pop;
+	};
 	struct S_branch {
-		// Consumes: A reference.
-		// Produces: A reference.
 		Xptr<Expression> branch_true_opt;
 		Xptr<Expression> branch_false_opt;
 	};
 	struct S_function_call {
-		// Consumes: A reference followed by the specified number of references.
-		// Produces: A reference.
-		std::size_t number_of_arguments;
+		std::size_t argument_count;
 	};
 	struct S_operator_rpn {
-		// Consumes: One or two references.
-		// Produces: A reference.
 		Operator_generic operator_generic;
 		bool compound_assignment;
-	};
-	struct S_lambda_definition {
-		// Consumes: Nothing.
-		// Produces: An rvalue.
-		// TODO
 	};
 	using Types = Type_tuple< S_literal            // 0
 	                        , S_named_reference    // 1
 	                        , S_subexpression      // 2
-	                        , S_branch             // 3
-	                        , S_function_call      // 4
-	                        , S_operator_rpn       // 5
-	                        , S_lambda_definition  // 6
+	                        , S_lambda_definition  // 3
+	                        , S_pruning            // 4
+	                        , S_branch             // 5
+	                        , S_function_call      // 6
+	                        , S_operator_rpn       // 7
 		>;
 
 private:
