@@ -35,7 +35,7 @@ int main(){
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "meow");
-	ASTERIA_TEST_CHECK(immutable == false);
+	ASTERIA_TEST_CHECK(immutable == true);
 	ASTERIA_TEST_CHECK_CATCH(write_reference(ref, recycler, D_integer(42)));
 	ASTERIA_TEST_CHECK(ptr.get() == var.get());
 	set_variable_using_reference(tvar, recycler, std::move(ref));
