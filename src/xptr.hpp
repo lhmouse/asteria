@@ -85,14 +85,12 @@ public:
 	explicit operator bool() const noexcept {
 		return m_ptr.operator bool();
 	}
-
 	const ElementT &operator*() const noexcept {
 		return m_ptr.operator*();
 	}
 	ElementT &operator*() noexcept {
 		return m_ptr.operator*();
 	}
-
 	const ElementT *operator->() const noexcept {
 		return m_ptr.operator->();
 	}

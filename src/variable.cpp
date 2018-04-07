@@ -171,10 +171,11 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<'[';
 		for(auto it = array.begin(); it != array.end(); ++it){
 			os <<std::endl;
+			const auto &elem = *it;
 			do_indent(os, indent_next + indent_increment);
 			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()))))) <<(it - array.begin());
 			os <<" = ";
-			dump_variable_recursive(os, *it, indent_next + indent_increment, indent_increment);
+			dump_variable_recursive(os, elem, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
 		if(!(array.empty())){
@@ -188,10 +189,11 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<'{';
 		for(auto it = object.begin(); it != object.end(); ++it){
 			os <<std::endl;
+			const auto &pair = *it;
 			do_indent(os, indent_next + indent_increment);
-			do_quote_string(os, it->first);
+			do_quote_string(os, pair.first);
 			os <<" = ";
-			dump_variable_recursive(os, it->second, indent_next + indent_increment, indent_increment);
+			dump_variable_recursive(os, pair.second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
 		if(!(object.empty())){
