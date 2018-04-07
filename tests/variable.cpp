@@ -47,7 +47,7 @@ int main(){
 
 	D_function function = {
 		{ },
-		[](Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
+		[](Spref<Recycler> recycler, boost::container::vector<Sptr<const Reference>> &&params) -> Xptr<Reference> {
 			auto param_one = read_reference_opt(nullptr, params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(nullptr, params.at(1));
@@ -60,7 +60,7 @@ int main(){
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	boost::container::vector<Xptr<Reference>> params;
+	boost::container::vector<Sptr<const Reference>> params;
 	Reference::S_rvalue_dynamic ref = { Xptr<Variable>(std::make_shared<Variable>(D_integer(12))) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	ref = { Xptr<Variable>(std::make_shared<Variable>(D_integer(15))) };
