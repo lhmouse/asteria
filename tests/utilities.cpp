@@ -13,4 +13,13 @@ int main(){
 	} catch(std::runtime_error &e){
 		ASTERIA_TEST_CHECK(std::strstr(e.what(), "test exception: 42") != nullptr);
 	}
+
+	volatile bool flag = false;
+	try {
+		ASTERIA_VERIFY(flag, "flag is ", flag);
+		std::terminate();
+	} catch(std::runtime_error &e){
+		ASTERIA_TEST_CHECK(std::strstr(e.what(), "flag is false") != nullptr);
+	}
+	ASTERIA_VERIFY(!flag, "should not throw");
 }
