@@ -47,9 +47,7 @@ namespace {
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
 			const auto array = params.variable->get_opt<D_array>();
-			if(!array){
-				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integers, while the operand had type `", get_variable_type_name(params.variable), "`");
-			}
+			ASTERIA_VERIFY(array, ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(params.variable), "`"));
 			auto normalized_index = (params.index_bidirectional >= 0) ? params.index_bidirectional
 			                                                          : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index_bidirectional) + array->size());
 			auto size_current = static_cast<std::int64_t>(array->size());
@@ -61,9 +59,7 @@ namespace {
 				}
 				ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", size_current);
 				const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
-				if(count_to_prepend > array->max_size() - array->size()){
-					ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_prepend = ", count_to_prepend);
-				}
+				ASTERIA_VERIFY(count_to_prepend <= array->max_size() - array->size(), ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend));
 				array->reserve(array->size() + static_cast<std::size_t>(count_to_prepend));
 				for(std::size_t i = 0; i < count_to_prepend; ++i){
 					array->emplace_back();
@@ -80,9 +76,7 @@ namespace {
 				}
 				ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", size_current);
 				const auto count_to_append = static_cast<std::uint64_t>(normalized_index - size_current) + 1;
-				if(count_to_append > array->max_size() - array->size()){
-					ASTERIA_THROW_RUNTIME_ERROR("The array is too large and cannot be allocated: count_to_append = ", count_to_append);
-				}
+				ASTERIA_VERIFY(count_to_append <= array->max_size() - array->size(), ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append));
 				array->reserve(array->size() + static_cast<std::size_t>(count_to_append));
 				for(std::size_t i = 0; i < count_to_append; ++i){
 					array->emplace_back();
@@ -97,9 +91,7 @@ namespace {
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
 			const auto object = params.variable->get_opt<D_object>();
-			if(!object){
-				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by strings, while the operand had type `", get_variable_type_name(params.variable), "`");
-			}
+			ASTERIA_VERIFY(object, ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(params.variable), "`"));
 			auto it = object->find(params.key);
 			if(it == object->end()){
 				if(!create_if_not_exist || params.immutable){
@@ -128,12 +120,8 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 }
 Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
 	auto result = do_dereference_once(reference_opt, true);
-	if(result.rvalue){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`");
-	}
-	if(!(result.wref_opt)){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant reference having type `", get_variable_type_name(result.rptr_opt), "`");
-	}
+	ASTERIA_VERIFY(result.rvalue == false, ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`"));
+	ASTERIA_VERIFY(result.wref_opt != nullptr, ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant reference having type `", get_variable_type_name(result.rptr_opt), "`"));
 	return set_variable(*(result.wref_opt), recycler, std::move(value_opt));
 }
 Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
