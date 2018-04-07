@@ -48,25 +48,25 @@ int main(){
 	D_function function = {
 		{ },
 		[](Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
-			auto param_one = read_reference_opt(params.at(0));
+			auto param_one = read_reference_opt(nullptr, params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
-			auto param_two = read_reference_opt(params.at(1));
+			auto param_two = read_reference_opt(nullptr, params.at(1));
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
 			recycler->set_variable(xptr, param_one->get<D_integer>() * param_two->get<D_integer>());
-			Reference::S_rvalue_dynamic ref = { xptr.release() };
+			Reference::S_rvalue_dynamic ref = { std::move(xptr) };
 			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
 		}
 	};
 	var->set(std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
 	boost::container::vector<Xptr<Reference>> params;
-	Reference::S_rvalue_dynamic ref = { std::make_shared<Variable>(D_integer(12)) };
+	Reference::S_rvalue_dynamic ref = { Xptr<Variable>(std::make_shared<Variable>(D_integer(12))) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
-	ref = { std::make_shared<Variable>(D_integer(15)) };
+	ref = { Xptr<Variable>(std::make_shared<Variable>(D_integer(15))) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	auto result = var->get<D_function>().function(recycler, std::move(params));
-	auto rptr = read_reference_opt(result);
+	auto rptr = read_reference_opt(nullptr, result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<D_integer>() == 180);
 

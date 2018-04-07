@@ -207,7 +207,12 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		std::terminate();
 	}
 }
+
 std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt){
+	dump_variable_recursive(os, variable_opt);
+	return os;
+}
+std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
 	dump_variable_recursive(os, variable_opt);
 	return os;
 }

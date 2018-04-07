@@ -23,7 +23,7 @@ public:
 		Sptr<const Variable> variable_opt;
 	};
 	struct S_rvalue_dynamic {
-		Sptr<Variable> variable_opt;
+		Xptr<Variable> variable_opt;
 	};
 	struct S_lvalue_scoped_variable {
 		Sptr<Scoped_variable> scoped_variable;
@@ -86,13 +86,13 @@ public:
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
 // This function returns a read-only pointer.
-extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
+extern Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt);
 // This function returns the contents of the variable before the call.
 extern Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
 // This function returns the contents of the variable before the call.
 // This function takes an rvalue of `Xptr<Reference>` to allow moving an dynamic rvalue efficiently.
 // If you do not have an `Xptr` but an `Sptr`, use the following code to copy through the reference:
-//   `copy_variable_recursive(variable_out, recycler, read_reference_opt(reference_opt))`
+//   `copy_variable_recursive(variable_out, recycler, read_reference_opt(nullptr, reference_opt))`
 extern Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 
 }

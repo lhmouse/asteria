@@ -32,17 +32,18 @@ namespace {
 			return std::move(res); }
 		case Reference::type_rvalue_static: {
 			const auto &params = reference_opt->get<Reference::S_rvalue_static>();
-			Dereference_once_result res = { params.variable_opt, true, nullptr };
+			auto &variable_opt = params.variable_opt;
+			Dereference_once_result res = { variable_opt, true, nullptr };
 			return std::move(res); }
 		case Reference::type_rvalue_dynamic: {
 			const auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
-			Dereference_once_result res = { params.variable_opt, true, nullptr };
+			auto &variable_opt = params.variable_opt;
+			Dereference_once_result res = { variable_opt, true, const_cast<Xptr<Variable> *>(&variable_opt) };
 			return std::move(res); }
 		case Reference::type_lvalue_scoped_variable: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_scoped_variable>();
 			auto &variable_opt = params.scoped_variable->variable_opt;
-			const auto wref_opt = params.scoped_variable->immutable ? nullptr : &variable_opt;
-			Dereference_once_result res = { variable_opt, false, wref_opt };
+			Dereference_once_result res = { variable_opt, false, params.scoped_variable->immutable ? nullptr : &variable_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_array_element: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_array_element>();
@@ -85,8 +86,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Resized array successfully: normalized_index = ", normalized_index, ", size_current = ", size_current);
 			}
 			auto &variable_opt = array->at(static_cast<std::size_t>(normalized_index));
-			const auto wref_opt = params.immutable ? nullptr : &variable_opt;
-			Dereference_once_result res = { variable_opt, false, wref_opt };
+			Dereference_once_result res = { variable_opt, false, params.immutable ? nullptr : &variable_opt };
 			return std::move(res); }
 		case Reference::type_lvalue_object_member: {
 			const auto &params = reference_opt->get<Reference::S_lvalue_object_member>();
@@ -104,8 +104,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Created object member successfuly: key = ", params.key);
 			}
 			auto &variable_opt = it->second;
-			const auto wref_opt = params.immutable ? nullptr : &variable_opt;
-			Dereference_once_result res = { variable_opt, false, wref_opt };
+			Dereference_once_result res = { variable_opt, false, params.immutable ? nullptr : &variable_opt };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
@@ -114,8 +113,11 @@ namespace {
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt){
 	auto result = do_dereference_once(reference_opt, false);
+	if(immutable_out_opt){
+		*immutable_out_opt = result.wref_opt == nullptr;
+	}
 	return std::move(result.rptr_opt);
 }
 Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
@@ -125,11 +127,10 @@ Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> r
 	return set_variable(*(result.wref_opt), recycler, std::move(value_opt));
 }
 Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
-	if(get_reference_type(reference_opt) == Reference::type_rvalue_dynamic){
-		auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
-		return set_variable(variable_out, recycler, std::move(*(params.variable_opt)));
+	auto result = do_dereference_once(reference_opt, false);
+	if(result.rvalue && result.wref_opt){
+		return set_variable(variable_out, recycler, std::move(**(result.wref_opt)));
 	} else {
-		auto result = do_dereference_once(reference_opt, false);
 		return copy_variable_recursive(variable_out, recycler, result.rptr_opt);
 	}
 }
