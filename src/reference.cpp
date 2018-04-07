@@ -139,4 +139,41 @@ Xptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<
 	}
 }
 
+bool is_reference_trivial(Spref<const Reference> reference_opt) noexcept {
+	const auto type = get_reference_type(reference_opt);
+	switch(type){
+	case Reference::type_null:
+	case Reference::type_rvalue_static:
+		return true;
+	case Reference::type_rvalue_dynamic:
+		return false;
+	case Reference::type_lvalue_scoped_variable:
+	case Reference::type_lvalue_array_element:
+	case Reference::type_lvalue_object_member:
+		return true;
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		std::terminate();
+	}
+}
+void trivialize_reference(Xptr<Reference> &reference_inout_opt){
+	if(is_reference_trivial(reference_inout_opt)){
+		return;
+	}
+	// Convert the non-trivial reference to a scoped variable reference, which will be trivial.
+	auto scoped_variable = std::make_shared<Scoped_variable>();
+	auto result = do_dereference_once(reference_inout_opt, false);
+	scoped_variable->variable_opt = std::move(*(result.wref_opt));
+	Reference::S_lvalue_scoped_variable ref_l = { std::move(scoped_variable) };
+	reference_inout_opt->set(std::move(ref_l));
+}
+Xptr<Reference> duplicate_reference_trivial(Spref<Reference> source_opt){
+	if(!is_reference_trivial(source_opt)){
+		ASTERIA_THROW_RUNTIME_ERROR("Cannot duplicate this non-trivial reference having type `", get_reference_type(source_opt), "`");
+	}
+	Xptr<Reference> reference;
+	reference.reset(Sptr<Reference>(source_opt));
+	return reference;
+}
+
 }
