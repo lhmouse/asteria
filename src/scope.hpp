@@ -41,11 +41,11 @@ public:
 		return m_parent_opt;
 	}
 
-	Xptr<Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
+	Sptr<Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
 	void set_local_reference(const std::string &identifier, Xptr<Reference> &&reference_opt);
 	void clear_local_references() noexcept;
 
-	Xptr<Reference> get_reference_recursive_opt(const std::string &identifier) const noexcept;
+	Sptr<Reference> get_reference_recursive_opt(const std::string &identifier) const noexcept;
 };
 
 }

@@ -95,10 +95,6 @@ extern Xptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recy
 //   `copy_variable_recursive(variable_out, recycler, read_reference_opt(nullptr, reference_opt))`
 extern Xptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 
-extern bool is_reference_trivial(Spref<const Reference> reference_opt) noexcept;
-extern void trivialize_reference(Xptr<Reference> &reference_inout_opt);
-extern Xptr<Reference> duplicate_reference_trivial(Spref<Reference> source_opt);
-
 }
 
 #endif
