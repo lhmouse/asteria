@@ -93,7 +93,7 @@ extern void dump_variable_recursive(std::ostream &os, Spref<const Variable> vari
 extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt);
 
-// These functions return the old contents of the variables before the operations.
+// These functions return the old contents of the variables before the operation.
 extern Xptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
 extern Xptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
 
