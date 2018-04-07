@@ -53,13 +53,13 @@ const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept 
 }
 
 namespace {
-	void apply_indent(std::ostream &os, unsigned indent){
+	void do_indent(std::ostream &os, unsigned indent){
 		if(indent == 0){
 			return;
 		}
 		os <<std::setfill(' ') <<std::setw(static_cast<int>(indent)) <<"";
 	}
-	void quote_string(std::ostream &os, const std::string &str){
+	void do_quote_string(std::ostream &os, const std::string &str){
 		os <<'\"';
 		for(auto it = str.begin(); it != str.end(); ++it){
 			const unsigned value = static_cast<unsigned char>(*it);
@@ -155,7 +155,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		return; }
 	case Variable::type_string: {
 		const auto &value = variable_opt->get<D_string>();
-		quote_string(os, value);
+		do_quote_string(os, value);
 		return; }
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<D_opaque>();
@@ -171,7 +171,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<'[';
 		for(auto it = array.begin(); it != array.end(); ++it){
 			os <<std::endl;
-			apply_indent(os, indent_next + indent_increment);
+			do_indent(os, indent_next + indent_increment);
 			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()))))) <<(it - array.begin());
 			os <<" = ";
 			dump_variable_recursive(os, *it, indent_next + indent_increment, indent_increment);
@@ -179,7 +179,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		}
 		if(!(array.empty())){
 			os <<std::endl;
-			apply_indent(os, indent_next);
+			do_indent(os, indent_next);
 		}
 		os <<']';
 		return; }
@@ -188,15 +188,15 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 		os <<'{';
 		for(auto it = object.begin(); it != object.end(); ++it){
 			os <<std::endl;
-			apply_indent(os, indent_next + indent_increment);
-			quote_string(os, it->first);
+			do_indent(os, indent_next + indent_increment);
+			do_quote_string(os, it->first);
 			os <<" = ";
 			dump_variable_recursive(os, it->second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
 		if(!(object.empty())){
 			os <<std::endl;
-			apply_indent(os, indent_next);
+			do_indent(os, indent_next);
 		}
 		os <<'}';
 		return; }

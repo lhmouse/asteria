@@ -24,7 +24,7 @@ namespace {
 		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
 	};
 
-	Dereference_once_result do_dereference(Spref<const Reference> reference_opt, bool create_if_not_exist){
+	Dereference_once_result do_dereference_once(Spref<const Reference> reference_opt, bool create_if_not_exist){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null: {
@@ -123,11 +123,11 @@ namespace {
 }
 
 Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
-	auto result = do_dereference(reference_opt, false);
+	auto result = do_dereference_once(reference_opt, false);
 	return std::move(result.rptr_opt);
 }
 Sptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
-	auto result = do_dereference(reference_opt, true);
+	auto result = do_dereference_once(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
@@ -141,7 +141,7 @@ Sptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<
 		auto &params = reference_opt->get<Reference::S_rvalue_dynamic>();
 		return set_variable(variable_out, recycler, std::move(*(params.variable_opt)));
 	} else {
-		auto result = do_dereference(reference_opt, false);
+		auto result = do_dereference_once(reference_opt, false);
 		return copy_variable_recursive(variable_out, recycler, result.rptr_opt);
 	}
 }
