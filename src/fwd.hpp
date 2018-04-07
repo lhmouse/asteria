@@ -58,12 +58,9 @@ struct Uuid_handle {
 	std::shared_ptr<void> handle;
 };
 
-using Argument_generator_prototype = Xptr<Reference> (Spref<Recycler> recycler);
-using Binding_function_prototype   = Xptr<Reference> (Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&arguments);
-
 struct Binding_function {
-	boost::container::vector<std::function<Argument_generator_prototype>> default_argument_generators_opt;
-	std::function<Binding_function_prototype> function;
+	boost::container::vector<Sptr<const Reference>> default_arguments_opt;
+	std::function<Xptr<Reference> (Spref<Recycler>, boost::container::vector<Xptr<Reference>> &&)> function;
 };
 
 using D_null      = std::nullptr_t;
