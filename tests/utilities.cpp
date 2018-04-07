@@ -16,10 +16,10 @@ int main(){
 
 	volatile bool flag = false;
 	try {
-		ASTERIA_VERIFY(flag, "flag is ", flag);
+		ASTERIA_VERIFY(flag, ASTERIA_THROW_RUNTIME_ERROR("flag is ", flag));
 		std::terminate();
 	} catch(std::runtime_error &e){
 		ASTERIA_TEST_CHECK(std::strstr(e.what(), "flag is false") != nullptr);
 	}
-	ASTERIA_VERIFY(!flag, "should not throw");
+	ASTERIA_VERIFY(!flag, std::terminate());
 }
