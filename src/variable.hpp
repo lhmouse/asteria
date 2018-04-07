@@ -94,8 +94,8 @@ extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt);
 
 // These functions return the old contents of the variables before the operations.
-extern Sptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
-extern Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
+extern Xptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
+extern Xptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
 
 // This function is used to break dependency circles.
 extern void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept;

@@ -217,10 +217,10 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
 	return os;
 }
 
-Sptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt){
+Xptr<Variable> set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt){
 	return recycler->set_variable(variable_out, std::move(value_opt));
 }
-Sptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
+Xptr<Variable> copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null: {

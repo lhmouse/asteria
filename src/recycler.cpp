@@ -13,16 +13,16 @@ Recycler::~Recycler(){
 	clear_variables();
 }
 
-Sptr<Variable> Recycler::set_variable(Xptr<Variable> &variable_out, Stored_value &&value_opt){
-	Sptr<Variable> sptr_old, sptr_new;
+Xptr<Variable> Recycler::set_variable(Xptr<Variable> &variable_out, Stored_value &&value_opt){
+	Xptr<Variable> variable_new;
 	if(value_opt.has_value()){
-		sptr_new = std::make_shared<Variable>(std::move(value_opt.get()));
+		auto sptr = std::make_shared<Variable>(std::move(value_opt.get()));
 		defragment_automatic();
-		m_weak_variables.emplace_back(sptr_new);
+		m_weak_variables.emplace_back(sptr);
+		variable_new.reset(std::move(sptr));
 	}
-	sptr_old = variable_out.release();
-	variable_out.reset(std::move(sptr_new));
-	return sptr_old;
+	variable_new.swap(variable_out);
+	return variable_new;
 }
 void Recycler::defragment_automatic() noexcept {
 	const auto threshold_old = m_defragmentation_threshold;

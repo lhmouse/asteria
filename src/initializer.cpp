@@ -19,7 +19,7 @@ Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt)
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-Sptr<Variable> initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
+Xptr<Variable> initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null: {
