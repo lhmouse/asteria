@@ -13,7 +13,7 @@ Recycler::~Recycler(){
 	clear_variables();
 }
 
-Xptr<Variable> Recycler::set_variable(Xptr<Variable> &variable_out, Stored_value &&value_opt){
+Xptr<Variable> Recycler::set_variable_opt(Xptr<Variable> &variable_out, Stored_value &&value_opt){
 	Xptr<Variable> variable_new;
 	if(value_opt.has_value()){
 		auto sptr = std::make_shared<Variable>(std::move(value_opt.get()));

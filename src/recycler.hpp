@@ -29,7 +29,7 @@ public:
 	Recycler &operator=(const Recycler &) = delete;
 
 public:
-	Xptr<Variable> set_variable(Xptr<Variable> &variable_out, Stored_value &&value_opt);
+	Xptr<Variable> set_variable_opt(Xptr<Variable> &variable_out, Stored_value &&value_opt);
 	void defragment_automatic() noexcept;
 	void clear_variables() noexcept;
 };

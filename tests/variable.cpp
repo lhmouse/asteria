@@ -13,26 +13,26 @@ int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
 	Xptr<Variable> var;
-	auto old = recycler->set_variable(var, true);
+	auto old = recycler->set_variable_opt(var, true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(var->get<D_boolean>() == true);
 	ASTERIA_TEST_CHECK_CATCH(var->get<D_string>());
 	ASTERIA_TEST_CHECK(var->get_opt<D_double>() == nullptr);
 	ASTERIA_TEST_CHECK(old == nullptr);
 
-	old = recycler->set_variable(var, std::int64_t(42));
+	old = recycler->set_variable_opt(var, std::int64_t(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<D_integer>() == 42);
 	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_boolean);
 	ASTERIA_TEST_CHECK(old->get<D_boolean>() == true);
 
-	old = recycler->set_variable(var, 1.5);
+	old = recycler->set_variable_opt(var, 1.5);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_double);
 	ASTERIA_TEST_CHECK(var->get<D_double>() == 1.5);
 	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(old->get<D_integer>() == 42);
 
-	old = recycler->set_variable(var, std::string("hello"));
+	old = recycler->set_variable_opt(var, std::string("hello"));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
 	ASTERIA_TEST_CHECK(old->get_type() == Variable::type_double);
@@ -53,7 +53,7 @@ int main(){
 			auto param_two = read_reference_opt(nullptr, params.at(1));
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
-			recycler->set_variable(xptr, param_one->get<D_integer>() * param_two->get<D_integer>());
+			recycler->set_variable_opt(xptr, param_one->get<D_integer>() * param_two->get<D_integer>());
 			Reference::S_rvalue_dynamic ref = { std::move(xptr) };
 			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
 		}

@@ -19,40 +19,40 @@ int main(){
 	Xptr<Variable> temp;
 
 	D_array arr;
-	recycler->set_variable(temp, nullptr);
+	recycler->set_variable_opt(temp, nullptr);
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(temp, true);
+	recycler->set_variable_opt(temp, true);
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(first, std::move(arr));
+	recycler->set_variable_opt(first, std::move(arr));
 
 	arr.clear();
-	recycler->set_variable(temp, INT64_C(42));
+	recycler->set_variable_opt(temp, INT64_C(42));
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(temp, 123.456);
+	recycler->set_variable_opt(temp, 123.456);
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(second, std::move(arr));
+	recycler->set_variable_opt(second, std::move(arr));
 
 	arr.clear();
-	recycler->set_variable(temp, std::string("hello"));
+	recycler->set_variable_opt(temp, std::string("hello"));
 	arr.emplace_back(std::move(temp));
-	recycler->set_variable(third, std::move(arr));
+	recycler->set_variable_opt(third, std::move(arr));
 
 	D_object obj;
 	obj.emplace("first", std::move(first));
 	obj.emplace("second", std::move(second));
-	recycler->set_variable(route, std::move(obj));
+	recycler->set_variable_opt(route, std::move(obj));
 
 	obj.clear();
 	obj.emplace("third", std::move(third));
 	obj.emplace("route", std::move(route));
-	recycler->set_variable(temp, std::string("世界"));
+	recycler->set_variable_opt(temp, std::string("世界"));
 	obj.emplace("world", std::move(temp));
 
-	set_variable(root, recycler, std::move(obj));
-	copy_variable_recursive(copy, backup, root);
+	set_variable_opt(root, recycler, std::move(obj));
+	copy_variable_recursive_opt(copy, backup, root);
 
 	D_opaque opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, std::make_shared<int>() };
-	backup->set_variable(temp, std::move(opaque));
+	backup->set_variable_opt(temp, std::move(opaque));
 	copy->get<D_object>().emplace("opaque", std::move(temp));
 
 	std::cerr <<root <<std::endl;
