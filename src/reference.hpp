@@ -53,9 +53,10 @@ public:
 	Reference(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	Reference(Reference &&);
-	Reference &operator=(Reference &&);
 	~Reference();
+
+	Reference(const Reference &) = delete;
+	Reference &operator=(const Reference &) = delete;
 
 public:
 	Type get_type() const noexcept {

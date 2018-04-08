@@ -31,11 +31,11 @@ class Statement;
 class Exception;
 
 // Runtime objects (movable only)
-class Variable;
-class Reference;
 class Stored_value;
 
 // Runtime objects (neither copyable nor movable)
+class Variable;
+class Reference;
 class Scope;
 class Recycler;
 

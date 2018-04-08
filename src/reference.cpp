@@ -8,8 +8,6 @@
 
 namespace Asteria {
 
-Reference::Reference(Reference &&) = default;
-Reference &Reference::operator=(Reference &&) = default;
 Reference::~Reference() = default;
 
 Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept {

@@ -42,9 +42,10 @@ public:
 	Variable(ValueT &&value)
 		: m_variant(std::forward<ValueT>(value))
 	{ }
-	Variable(Variable &&);
-	Variable &operator=(Variable &&);
 	~Variable();
+
+	Variable(const Variable &) = delete;
+	Variable &operator=(const Variable &) = delete;
 
 private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;

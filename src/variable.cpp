@@ -12,8 +12,6 @@
 
 namespace Asteria {
 
-Variable::Variable(Variable &&) = default;
-Variable &Variable::operator=(Variable &&) = default;
 Variable::~Variable() = default;
 
 void Variable::do_throw_type_mismatch(Type expect) const {
