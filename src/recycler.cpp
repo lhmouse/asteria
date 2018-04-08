@@ -30,7 +30,7 @@ void Recycler::defragment_automatic() noexcept {
 		return;
 	}
 	ASTERIA_DEBUG_LOG("Performing automatic garbage defragmentation: size = ", m_weak_variables.size());
-	const auto erased_begin = std::remove_if(m_weak_variables.begin(), m_weak_variables.end(), [](const std::weak_ptr<Variable> &weak_ref){ return weak_ref.expired(); });
+	const auto erased_begin = std::remove_if(m_weak_variables.begin(), m_weak_variables.end(), [](Wpref<Variable> weak_ref){ return weak_ref.expired(); });
 	ASTERIA_DEBUG_LOG("Removing dead objects: count_removed = ", std::distance(erased_begin, m_weak_variables.end()));
 	m_weak_variables.erase(erased_begin, m_weak_variables.end());
 	const auto threshold_new = std::max(threshold_old, m_weak_variables.size() + defragmentation_threshold_increment);

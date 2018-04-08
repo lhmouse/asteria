@@ -46,6 +46,11 @@ template<typename ElementT>
 using Spref = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
+using Wptr = std::weak_ptr<ElementT>;
+template<typename ElementT>
+using Wpref = const std::weak_ptr<ElementT> &;
+
+template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
