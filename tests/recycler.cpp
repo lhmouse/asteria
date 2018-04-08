@@ -12,11 +12,11 @@ int main(){
 	auto recycler = std::make_shared<Recycler>();
 
 	Xptr<Variable> obj, var;
-	set_variable_opt(obj, recycler, D_object());
-	set_variable_opt(var, recycler, D_integer(42));
+	set_variable(obj, recycler, D_object());
+	set_variable(var, recycler, D_integer(42));
 	auto pair = obj->get<D_object>().emplace("int", std::move(var));
 	auto weak_int = std::weak_ptr<Variable>(pair.first->second);
-	set_variable_opt(var, recycler, D_string("hello"));
+	set_variable(var, recycler, D_string("hello"));
 	pair = obj->get<D_object>().emplace("str", std::move(var));
 	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 

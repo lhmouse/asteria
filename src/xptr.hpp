@@ -50,7 +50,7 @@ public:
 		return m_ptr;
 	}
 
-	void reset() noexcept {
+	void reset(std::nullptr_t = nullptr) noexcept {
 		m_ptr.reset();
 	}
 	template<typename OtherT>
