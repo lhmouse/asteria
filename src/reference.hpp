@@ -88,7 +88,7 @@ extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) 
 // This function returns a read-only pointer.
 extern Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt);
 // This function returns the contents of the variable before the call.
-extern Xptr<Variable> write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt);
+extern Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt);
 
 }
 

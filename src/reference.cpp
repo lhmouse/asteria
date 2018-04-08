@@ -119,7 +119,7 @@ Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Ref
 	}
 	return std::move(result.rptr_opt);
 }
-Xptr<Variable> write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt){
+Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt){
 	auto result = do_dereference_once(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`");

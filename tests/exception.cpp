@@ -24,7 +24,7 @@ int main(){
 		ASTERIA_TEST_CHECK(ref);
 		Xptr<Variable> new_var;
 		set_variable_opt(new_var, recycler, D_string("hello"));
-		write_reference(ref, std::move(new_var));
+		write_reference_opt(ref, std::move(new_var));
 	}
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_string>() == "hello");
