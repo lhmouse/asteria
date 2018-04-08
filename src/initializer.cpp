@@ -27,7 +27,7 @@ Xptr<Variable> initialize_variable_recursive(Xptr<Variable> &variable_out, Spref
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
 		auto result = evaluate_expression_recursive_opt(recycler, scope, params.expression);
-		return set_variable_using_reference(variable_out, recycler, std::move(result)); }
+		return copy_variable_recursive(variable_out, recycler, read_reference_opt(nullptr, result)); }
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		D_array array;

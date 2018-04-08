@@ -22,7 +22,9 @@ int main(){
 	} catch(Exception &e){
 		const auto ref = e.get_reference_opt();
 		ASTERIA_TEST_CHECK(ref);
-		write_reference(ref, recycler, D_string("hello"));
+		Xptr<Variable> new_var;
+		set_variable(new_var, recycler, D_string("hello"));
+		write_reference(ref, std::move(new_var));
 	}
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_string>() == "hello");

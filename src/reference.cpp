@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "reference.hpp"
 #include "variable.hpp"
-#include "stored_value.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -120,7 +119,7 @@ Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Ref
 	}
 	return std::move(result.rptr_opt);
 }
-Xptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt){
+Xptr<Variable> write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt){
 	auto result = do_dereference_once(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a temporary reference having type `", get_variable_type_name(result.rptr_opt), "`");
@@ -128,15 +127,9 @@ Xptr<Variable> write_reference(Spref<Reference> reference_opt, Spref<Recycler> r
 	if(result.wref_opt == nullptr){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write to a constant reference having type `", get_variable_type_name(result.rptr_opt), "`");
 	}
-	return set_variable(*(result.wref_opt), recycler, std::move(value_opt));
-}
-Xptr<Variable> set_variable_using_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
-	auto result = do_dereference_once(reference_opt, false);
-	if(result.rvalue && result.wref_opt){
-		return set_variable(variable_out, recycler, std::move(**(result.wref_opt)));
-	} else {
-		return copy_variable_recursive(variable_out, recycler, result.rptr_opt);
-	}
+	auto variable_old = std::move(variable_new_opt);
+	variable_old.swap(*(result.wref_opt));
+	return variable_old;
 }
 
 }
