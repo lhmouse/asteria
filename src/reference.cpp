@@ -17,6 +17,49 @@ Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcep
 }
 
 namespace {
+	Sptr<Reference> do_make_shared_reference(std::nullptr_t){
+		return nullptr;
+	}
+	template<typename ValueT>
+	Sptr<Reference> do_make_shared_reference(ValueT &&value_new){
+		return std::make_shared<Reference>(std::forward<ValueT>(value_new));
+	}
+
+	template<typename ValueT>
+	Xptr<Reference> do_copy_reference_opt(Xptr<Reference> &reference_out, ValueT &&value_new){
+		Xptr<Reference> reference_new;
+		reference_new.reset(do_make_shared_reference(std::forward<ValueT>(value_new)));
+		reference_new.swap(reference_out);
+		return reference_new;
+	}
+}
+
+Xptr<Reference> copy_reference_opt(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
+	const auto type = get_reference_type(source_opt);
+	switch(type){
+	case Reference::type_null: {
+		return do_copy_reference_opt(reference_out, nullptr); }
+	case Reference::type_rvalue_static: {
+		const auto &params = source_opt->get<Reference::S_rvalue_static>();
+		return do_copy_reference_opt(reference_out, params); }
+	case Reference::type_rvalue_dynamic:
+		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
+	case Reference::type_lvalue_scoped_variable: {
+		const auto &params = source_opt->get<Reference::S_lvalue_scoped_variable>();
+		return do_copy_reference_opt(reference_out, params); }
+	case Reference::type_lvalue_array_element: {
+		const auto &params = source_opt->get<Reference::S_lvalue_array_element>();
+		return do_copy_reference_opt(reference_out, params); }
+	case Reference::type_lvalue_object_member: {
+		const auto &params = source_opt->get<Reference::S_lvalue_object_member>();
+		return do_copy_reference_opt(reference_out, params); }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		std::terminate();
+	}
+}
+
+namespace {
 	struct Dereference_once_result {
 		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
 		bool rvalue;                    // Is this reference an rvalue that must not be written into?

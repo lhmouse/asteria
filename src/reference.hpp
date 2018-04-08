@@ -85,6 +85,9 @@ public:
 
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
+// This function returns the old contents of the reference before the operation.
+extern Xptr<Reference> copy_reference_opt(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
+
 // This function returns a read-only pointer.
 extern Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt);
 // This function returns the contents of the variable before the call.
