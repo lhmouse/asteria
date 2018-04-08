@@ -15,35 +15,25 @@ Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcep
 	return reference_opt ? reference_opt->get_type() : Reference::type_null;
 }
 
-namespace {
-	template<typename ElementT, typename ...ParamsT>
-	Xptr<ElementT> do_emplace_exchange_opt(Xptr<ElementT> &element_out, ParamsT &&...params){
-		Xptr<ElementT> element_new;
-		element_new.reset(std::forward<ParamsT>(params)...);
-		element_new.swap(element_out);
-		return element_new;
-	}
-}
-
-Xptr<Reference> copy_reference_opt(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
+void copy_reference_opt(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
 	case Reference::type_null: {
-		return do_emplace_exchange_opt(reference_out, nullptr); }
+		return reference_out.reset(nullptr); }
 	case Reference::type_rvalue_static: {
 		const auto &params = source_opt->get<Reference::S_rvalue_static>();
-		return do_emplace_exchange_opt(reference_out, std::make_shared<Reference>(params)); }
+		return reference_out.reset(std::make_shared<Reference>(params)); }
 	case Reference::type_rvalue_dynamic:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
 	case Reference::type_lvalue_scoped_variable: {
 		const auto &params = source_opt->get<Reference::S_lvalue_scoped_variable>();
-		return do_emplace_exchange_opt(reference_out, std::make_shared<Reference>(params)); }
+		return reference_out.reset(std::make_shared<Reference>(params)); }
 	case Reference::type_lvalue_array_element: {
 		const auto &params = source_opt->get<Reference::S_lvalue_array_element>();
-		return do_emplace_exchange_opt(reference_out, std::make_shared<Reference>(params)); }
+		return reference_out.reset(std::make_shared<Reference>(params)); }
 	case Reference::type_lvalue_object_member: {
 		const auto &params = source_opt->get<Reference::S_lvalue_object_member>();
-		return do_emplace_exchange_opt(reference_out, std::make_shared<Reference>(params)); }
+		return reference_out.reset(std::make_shared<Reference>(params)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
@@ -165,7 +155,7 @@ Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable
 	variable_old.swap(*(result.wref_opt));
 	return variable_old;
 }
-Xptr<Variable> extract_variable_from_reference_opt(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
+void extract_variable_from_reference_opt(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
 	auto result = do_dereference_once(reference_opt, false);
 	if(!(result.rptr_opt && result.rvalue && result.wref_opt)){
 		// The variable cannot be moved.
@@ -178,7 +168,7 @@ Xptr<Variable> extract_variable_from_reference_opt(Xptr<Variable> &variable_out,
 	} else {
 		// The variable itself can be moved.
 		// Move the variable pointer.
-		return do_emplace_exchange_opt(variable_out, result.wref_opt->release());
+		return variable_out.reset(result.wref_opt->release());
 	}
 }
 
