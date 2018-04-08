@@ -10,6 +10,8 @@
 namespace Asteria {
 
 class Stored_value {
+	friend Variable;
+
 public:
 	using Variant = Variable::Types::rebind_as_variant;
 	using Types   = Type_tuple<D_null, Variant>;
