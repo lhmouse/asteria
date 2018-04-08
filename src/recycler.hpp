@@ -29,9 +29,9 @@ public:
 	Recycler &operator=(const Recycler &) = delete;
 
 public:
-	Xptr<Variable> set_variable_opt(Xptr<Variable> &variable_out, Stored_value &&value_opt);
-	void defragment_automatic() noexcept;
-	void clear_variables() noexcept;
+	void adopt_variable(Spref<Variable> variable_opt);
+	void defragment(bool aggressive = false) noexcept;
+	void purge_variables() noexcept;
 };
 
 }

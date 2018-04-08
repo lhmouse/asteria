@@ -16,8 +16,8 @@ private:
 	boost::container::vector<Expression_node> m_nodes;
 
 public:
-	Expression()
-		: m_nodes()
+	Expression(boost::container::vector<Expression_node> nodes)
+		: m_nodes(std::move(nodes))
 	{ }
 	Expression(Expression &&);
 	Expression &operator=(Expression &&);
@@ -33,27 +33,11 @@ public:
 	decltype(m_nodes)::const_iterator begin() const noexcept {
 		return m_nodes.begin();
 	}
-	decltype(m_nodes)::iterator begin() noexcept {
-		return m_nodes.begin();
-	}
 	decltype(m_nodes)::const_iterator end() const noexcept {
-		return m_nodes.end();
-	}
-	decltype(m_nodes)::iterator end() noexcept {
 		return m_nodes.end();
 	}
 	const Expression_node &at(std::size_t n) const {
 		return m_nodes.at(n);
-	}
-	Expression_node &at(std::size_t n){
-		return m_nodes.at(n);
-	}
-	template<typename ValueT>
-	void append(ValueT &&value){
-		m_nodes.emplace_back(std::forward<ValueT>(value));
-	}
-	void clear() noexcept {
-		return m_nodes.clear();
 	}
 };
 

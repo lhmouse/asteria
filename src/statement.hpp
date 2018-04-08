@@ -154,20 +154,8 @@ public:
 		return boost::get<ExpectT>(&m_variant);
 	}
 	template<typename ExpectT>
-	ExpectT *get_opt() noexcept {
-		return boost::get<ExpectT>(&m_variant);
-	}
-	template<typename ExpectT>
 	const ExpectT &get() const {
 		return boost::get<ExpectT>(m_variant);
-	}
-	template<typename ExpectT>
-	ExpectT &get(){
-		return boost::get<ExpectT>(m_variant);
-	}
-	template<typename ValueT>
-	void set(ValueT &&value){
-		m_variant = std::forward<ValueT>(value);
 	}
 };
 

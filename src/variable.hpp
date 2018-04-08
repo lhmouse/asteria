@@ -35,12 +35,13 @@ public:
 		>;
 
 private:
+	Wptr<Recycler> m_weak_recycler;
 	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
-	Variable(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+	Variable(Wptr<Recycler> weak_recycler, ValueT &&value)
+		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<ValueT>(value))
 	{ }
 	~Variable();
 
@@ -51,6 +52,10 @@ private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
 
 public:
+	Sptr<Recycler> get_recycler() const noexcept {
+		return m_weak_recycler.lock();
+	}
+
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.which());
 	}

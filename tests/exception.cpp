@@ -13,7 +13,7 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 	auto named_var = std::make_shared<Scoped_variable>();
-	recycler->set_variable_opt(named_var->variable_opt, D_integer(42));
+	set_variable_opt(named_var->variable_opt, recycler, D_integer(42));
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(named_var->variable_opt->get<D_integer>() == 42);
 	try {

@@ -38,23 +38,26 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr.get() == var.get());
 
 	auto scoped_var = std::make_shared<Scoped_variable>();
-	scoped_var->variable_opt = Xptr<Variable>(std::make_shared<Variable>(4.2));
+	set_variable_opt(scoped_var->variable_opt, recycler, D_double(4.2));
 	Reference::S_lvalue_scoped_variable lref = { scoped_var };
 	ref.reset(std::make_shared<Reference>(std::move(lref)));
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr.get() == scoped_var->variable_opt.get());
 	ASTERIA_TEST_CHECK(immutable == false);
 
-	var->set(true);
+	set_variable_opt(var, recycler, true);
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_boolean);
 	Reference::S_lvalue_array_element aref = { var, true, 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(&immutable, ref));
 	D_array array;
-	for(std::int64_t i = 0; i < 5; ++i){
-		array.emplace_back(Xptr<Variable>(std::make_shared<Variable>(i + 200)));
+	for(int i = 0; i < 5; ++i){
+		set_variable_opt(var, recycler, D_integer(i + 200));
+		array.emplace_back(std::move(var));
 	}
-	var->set(std::move(array));
+	set_variable_opt(var, recycler, std::move(array));
+	aref = { var, true, 9 };
+	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
 	ASTERIA_TEST_CHECK(var->get<D_array>().size() == 5);
@@ -105,9 +108,13 @@ int main(){
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(&immutable, ref));
 	D_object object;
-	object.emplace("one", Xptr<Variable>(std::make_shared<Variable>(D_integer(1))));
-	object.emplace("two", Xptr<Variable>(std::make_shared<Variable>(D_integer(2))));
-	var->set(std::move(object));
+	set_variable_opt(var, recycler, D_integer(1));
+	object.emplace("one", std::move(var));
+	set_variable_opt(var, recycler, D_integer(2));
+	object.emplace("two", std::move(var));
+	set_variable_opt(var, recycler, std::move(object));
+	oref = { var, true, "three" };
+	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
 	ASTERIA_TEST_CHECK(var->get<D_object>().size() == 2);
