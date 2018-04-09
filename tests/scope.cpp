@@ -22,11 +22,9 @@ int main(){
 
 	auto ref = scope->get_local_reference_opt("one");
 	ASTERIA_TEST_CHECK(ref);
-	bool immutable;
-	auto ptr = read_reference_opt(&immutable, ref);
+	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->variable_opt.get());
-	ASTERIA_TEST_CHECK(immutable);
 
 	ref = scope->get_local_reference_opt("nonexistent");
 	ASTERIA_TEST_CHECK(ref == nullptr);

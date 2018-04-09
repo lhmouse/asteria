@@ -151,11 +151,8 @@ namespace {
 	}
 }
 
-Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
-	if(immutable_out_opt){
-		*immutable_out_opt = result.rvalue || (result.wref_opt == nullptr);
-	}
 	return std::move(result.rptr_opt);
 }
 Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt){
