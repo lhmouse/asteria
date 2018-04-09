@@ -14,7 +14,7 @@ int main(){
 
 	Xptr<Variable> var, nvar;
 	set_variable(var, recycler, D_string("meow"));
-	Xptr<Reference> ref, ref_local;
+	Xptr<Reference> ref;
 	Reference::S_constant rsref = { var };
 	ref.reset(std::make_shared<Reference>(std::move(rsref)));
 	bool immutable;
@@ -41,14 +41,14 @@ int main(){
 	set_variable(local_var->variable_opt, recycler, D_double(4.2));
 	Reference::S_local_variable lref = { local_var };
 	ref.reset(std::make_shared<Reference>(std::move(lref)));
-	copy_reference(ref_local, ref);
+	auto ref_local = ref.share();
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr.get() == local_var->variable_opt.get());
 	ASTERIA_TEST_CHECK(immutable == false);
 
 	set_variable(local_var->variable_opt, recycler, true);
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get_type() == Variable::type_boolean);
-	Reference::S_array_element aref = { ref_local, 9 };
+	Reference::S_array_element aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(&immutable, ref));
 	D_array array;
@@ -57,7 +57,7 @@ int main(){
 		array.emplace_back(std::move(local_var->variable_opt));
 	}
 	set_variable(local_var->variable_opt, recycler, std::move(array));
-	aref = { ref_local, 9 };
+	aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	local_var->immutable = true;
 	ptr = read_reference_opt(&immutable, ref);
@@ -72,13 +72,13 @@ int main(){
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().size() == 10);
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(8) == nullptr);
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(9)->get<D_integer>() == 67);
-	aref = { ref_local, 9 };
+	aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), 9 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	local_var->immutable = true;
 	set_variable(nvar, recycler, D_integer(43));
 	ASTERIA_TEST_CHECK_CATCH(write_reference_opt(ref, std::move(nvar)));
 
-	aref = { ref_local, -7 };
+	aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), -7 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	local_var->immutable = false;
 	ptr = read_reference_opt(&immutable, ref);
@@ -88,7 +88,7 @@ int main(){
 	write_reference_opt(ref, std::move(nvar));
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(3)->get<D_integer>() == 65);
 
-	aref = { ref_local, 1 };
+	aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), 1 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr);
@@ -97,7 +97,7 @@ int main(){
 	write_reference_opt(ref, std::move(nvar));
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(1)->get<D_integer>() == 26);
 
-	aref = { ref_local, -12 };
+	aref = { Xptr<Reference>(Sptr<Reference>(ref_local)), -12 };
 	ref.reset(std::make_shared<Reference>(std::move(aref)));
 	ptr = read_reference_opt(&immutable, ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
@@ -107,7 +107,7 @@ int main(){
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(0)->get<D_integer>() == 37);
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_array>().at(3)->get<D_integer>() == 26);
 
-	Reference::S_object_member oref = { ref_local, "three" };
+	Reference::S_object_member oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(&immutable, ref));
 	D_object object;
@@ -116,7 +116,7 @@ int main(){
 	set_variable(local_var->variable_opt, recycler, D_integer(2));
 	object.emplace("two", std::move(local_var->variable_opt));
 	set_variable(local_var->variable_opt, recycler, std::move(object));
-	oref = { ref_local, "three" };
+	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = true;
 	ptr = read_reference_opt(&immutable, ref);
@@ -125,19 +125,19 @@ int main(){
 	set_variable(nvar, recycler, D_integer(92));
 	ASTERIA_TEST_CHECK_CATCH(write_reference_opt(ref, std::move(nvar)));
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_object>().size() == 2);
-	oref = { ref_local, "three" };
+	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = false;
 	set_variable(nvar, recycler, D_integer(92));
 	write_reference_opt(ref, std::move(nvar));
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_object>().size() == 3);
-	oref = { ref_local, "three" };
+	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = true;
 	set_variable(nvar, recycler, D_integer(43));
 	ASTERIA_TEST_CHECK_CATCH(write_reference_opt(ref, std::move(nvar)));
 
-	oref = { ref_local, "one" };
+	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "one" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = false;
 	ptr = read_reference_opt(&immutable, ref);

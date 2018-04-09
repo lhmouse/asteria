@@ -29,11 +29,11 @@ public:
 		Sptr<Local_variable> local_variable;
 	};
 	struct S_array_element {
-		Sptr<Reference> parent_opt;
-		std::int64_t index_bidirectional;
+		Xptr<Reference> parent_opt;
+		std::int64_t index;
 	};
 	struct S_object_member {
-		Sptr<Reference> parent_opt;
+		Xptr<Reference> parent_opt;
 		std::string key;
 	};
 	using Types = Type_tuple< S_constant         //  0

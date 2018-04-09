@@ -21,19 +21,23 @@ void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> sourc
 	case Reference::type_null: {
 		return reference_out.reset(); }
 	case Reference::type_constant: {
-		const auto &params = source_opt->get<Reference::S_constant>();
-		return reference_out.reset(std::make_shared<Reference>(params)); }
+		const auto &source = source_opt->get<Reference::S_constant>();
+		return reference_out.reset(std::make_shared<Reference>(source)); }
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
 	case Reference::type_local_variable: {
-		const auto &params = source_opt->get<Reference::S_local_variable>();
-		return reference_out.reset(std::make_shared<Reference>(params)); }
+		const auto &source = source_opt->get<Reference::S_local_variable>();
+		return reference_out.reset(std::make_shared<Reference>(source)); }
 	case Reference::type_array_element: {
-		const auto &params = source_opt->get<Reference::S_array_element>();
-		return reference_out.reset(std::make_shared<Reference>(params)); }
+		const auto &source = source_opt->get<Reference::S_array_element>();
+		Reference::S_array_element array_element = { nullptr, source.index };
+		copy_reference(array_element.parent_opt, source.parent_opt);
+		return reference_out.reset(std::make_shared<Reference>(std::move(array_element))); }
 	case Reference::type_object_member: {
-		const auto &params = source_opt->get<Reference::S_object_member>();
-		return reference_out.reset(std::make_shared<Reference>(params)); }
+		const auto &source = source_opt->get<Reference::S_object_member>();
+		Reference::S_object_member object_member = { nullptr, source.key };
+		copy_reference(object_member.parent_opt, source.parent_opt);
+		return reference_out.reset(std::make_shared<Reference>(std::move(object_member))); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();
@@ -82,16 +86,15 @@ namespace {
 			}
 			auto &array = std::const_pointer_cast<Variable>(parent_result.rptr_opt)->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-			auto normalized_index = (params.index_bidirectional >= 0) ? params.index_bidirectional
-			                                                          : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index_bidirectional) + array.size());
+			auto normalized_index = (params.index >= 0) ? params.index : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index) + array.size());
 			if(normalized_index < 0){
 				if(!create_as_needed){
-					ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index_bidirectional, ", size = ", array.size());
+					ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
 					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Prepend `null`s until the subscript designates the beginning.
-				ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index_bidirectional, ", size = ", array.size());
+				ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
 				const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
 				if(count_to_prepend > array.max_size() - array.size()){
 					ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend);
@@ -101,12 +104,12 @@ namespace {
 				normalized_index = 0;
 			} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
 				if(!create_as_needed){
-					ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index_bidirectional, ", size = ", array.size());
+					ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Append `null`s until the subscript designates the end.
-				ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index_bidirectional, ", size = ", array.size());
+				ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
 				const auto count_to_append = static_cast<std::uint64_t>(normalized_index) - array.size() + 1;
 				if(count_to_append > array.max_size() - array.size()){
 					ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append);
