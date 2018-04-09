@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "scope.hpp"
-#include "reference.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -29,16 +28,6 @@ void Scope::set_local_reference(const std::string &identifier, Xptr<Reference> &
 }
 void Scope::clear_local_references() noexcept {
 	m_local_references.clear();
-}
-
-Sptr<const Reference> Scope::get_reference_recursive_opt(const std::string &identifier) const noexcept {
-	for(auto scope = this; scope; scope = scope->get_parent_opt().get()){
-		auto reference = scope->get_local_reference_opt(identifier);
-		if(reference){
-			return std::move(reference);
-		}
-	}
-	return nullptr;
 }
 
 }

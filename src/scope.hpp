@@ -44,8 +44,6 @@ public:
 	Sptr<const Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
 	void set_local_reference(const std::string &identifier, Xptr<Reference> &&reference_opt);
 	void clear_local_references() noexcept;
-
-	Sptr<const Reference> get_reference_recursive_opt(const std::string &identifier) const noexcept;
 };
 
 }
