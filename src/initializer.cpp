@@ -19,7 +19,7 @@ Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt)
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
+void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null: {
@@ -35,7 +35,7 @@ void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler>
 		D_array array;
 		array.reserve(params.initializers.size());
 		for(const auto &elem : params.initializers){
-			initialize_variable_recursive(variable_out, recycler, scope, elem);
+			initialize_variable(variable_out, recycler, scope, elem);
 			array.emplace_back(std::move(variable_out));
 		}
 		set_variable(variable_out, recycler, std::move(array));
@@ -45,7 +45,7 @@ void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler>
 		D_object object;
 		object.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){
-			initialize_variable_recursive(variable_out, recycler, scope, pair.second);
+			initialize_variable(variable_out, recycler, scope, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
 		set_variable(variable_out, recycler, std::move(object));

@@ -47,7 +47,7 @@ namespace {
 		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
 	};
 
-	Dereference_result do_dereference_unsafe_recursive(Spref<Reference> reference_opt, bool create_as_needed){
+	Dereference_result do_dereference_unsafe(Spref<Reference> reference_opt, bool create_as_needed){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null: {
@@ -72,7 +72,7 @@ namespace {
 		case Reference::type_array_element: {
 			auto &params = reference_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
-			const auto parent_result = do_dereference_unsafe_recursive(params.parent_opt, create_as_needed);
+			const auto parent_result = do_dereference_unsafe(params.parent_opt, create_as_needed);
 			if(get_variable_type(parent_result.rptr_opt) != Variable::type_array){
 				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent_result.rptr_opt), "`");
 			}
@@ -119,7 +119,7 @@ namespace {
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
-			const auto parent_result = do_dereference_unsafe_recursive(params.parent_opt, create_as_needed);
+			const auto parent_result = do_dereference_unsafe(params.parent_opt, create_as_needed);
 			if(get_variable_type(parent_result.rptr_opt) != Variable::type_object){
 				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent_result.rptr_opt), "`");
 			}
@@ -149,14 +149,14 @@ namespace {
 }
 
 Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt){
-	auto result = do_dereference_unsafe_recursive(std::const_pointer_cast<Reference>(reference_opt), false);
+	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
 	if(immutable_out_opt){
 		*immutable_out_opt = result.rvalue || (result.wref_opt == nullptr);
 	}
 	return std::move(result.rptr_opt);
 }
 Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable> &&variable_new_opt){
-	auto result = do_dereference_unsafe_recursive(reference_opt, true);
+	auto result = do_dereference_unsafe(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a temporary value of type `", get_variable_type_name(result.rptr_opt), "`");
 	}
@@ -168,10 +168,10 @@ Xptr<Variable> write_reference_opt(Spref<Reference> reference_opt, Xptr<Variable
 	return variable_old;
 }
 void extract_variable_from_reference_opt(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
-	auto result = do_dereference_unsafe_recursive(reference_opt, false);
+	auto result = do_dereference_unsafe(reference_opt, false);
 	if(!(result.rptr_opt && result.rvalue && result.wref_opt)){
 		// The variable cannot be moved. Make a copy instead.
-		return copy_variable_recursive(variable_out, recycler, result.rptr_opt);
+		return copy_variable(variable_out, recycler, result.rptr_opt);
 	} else if(result.rptr_opt->get_recycler() != recycler){
 		// The variable itself cannot be moved because it was allocated using a different recycler. Move its contents instead.
 		return set_variable(variable_out, recycler, std::move(*(result.wref_opt->release())));

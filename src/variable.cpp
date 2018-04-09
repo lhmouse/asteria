@@ -132,7 +132,7 @@ bool test_variable(Spref<const Variable> variable_opt) noexcept {
 	}
 }
 
-void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
+void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
@@ -173,7 +173,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 			do_indent(os, indent_next + indent_increment);
 			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()))))) <<(it - array.begin());
 			os <<" = ";
-			dump_variable_recursive(os, elem, indent_next + indent_increment, indent_increment);
+			dump_variable(os, elem, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
 		if(!(array.empty())){
@@ -191,7 +191,7 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 			do_indent(os, indent_next + indent_increment);
 			do_quote_string(os, pair.first);
 			os <<" = ";
-			dump_variable_recursive(os, pair.second, indent_next + indent_increment, indent_increment);
+			dump_variable(os, pair.second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
 		if(!(object.empty())){
@@ -207,11 +207,11 @@ void dump_variable_recursive(std::ostream &os, Spref<const Variable> variable_op
 }
 
 std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt){
-	dump_variable_recursive(os, variable_opt);
+	dump_variable(os, variable_opt);
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
-	dump_variable_recursive(os, variable_opt);
+	dump_variable(os, variable_opt);
 	return os;
 }
 
@@ -227,7 +227,7 @@ void set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored
 		return variable_out->set(std::move(*value));
 	}
 }
-void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
+void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null: {
@@ -260,7 +260,7 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 		D_array array;
 		array.reserve(source.size());
 		for(const auto &elem : source){
-			copy_variable_recursive(variable_out, recycler, elem);
+			copy_variable(variable_out, recycler, elem);
 			array.emplace_back(std::move(variable_out));
 		}
 		set_variable(variable_out, recycler, std::move(array));
@@ -270,7 +270,7 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 		D_object object;
 		object.reserve(source.size());
 		for(const auto &pair : source){
-			copy_variable_recursive(variable_out, recycler, pair.second);
+			copy_variable(variable_out, recycler, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
 		set_variable(variable_out, recycler, std::move(object));
@@ -281,7 +281,7 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 	}
 }
 
-void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
+void dispose_variable(Spref<Variable> variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
 	case Variable::type_null:
@@ -295,14 +295,14 @@ void dispose_variable_recursive(Spref<Variable> variable_opt) noexcept {
 	case Variable::type_array: {
 		auto &value = variable_opt->get<D_array>();
 		for(auto &elem : value){
-			dispose_variable_recursive(elem);
+			dispose_variable(elem);
 			elem = nullptr;
 		}
 		return; }
 	case Variable::type_object: {
 		auto &value = variable_opt->get<D_object>();
 		for(auto &pair : value){
-			dispose_variable_recursive(pair.second);
+			dispose_variable(pair.second);
 			pair.second = nullptr;
 		}
 		return; }

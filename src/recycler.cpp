@@ -34,7 +34,7 @@ void Recycler::defragment(bool aggressive) noexcept {
 }
 void Recycler::purge_variables() noexcept {
 	for(auto &weak_rvar : m_weak_variables){
-		dispose_variable_recursive(weak_rvar.lock());
+		dispose_variable(weak_rvar.lock());
 	}
 	m_weak_variables.clear();
 }

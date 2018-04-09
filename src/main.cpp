@@ -49,7 +49,7 @@ int main(){
 	obj.emplace("world", std::move(temp));
 
 	set_variable(root, recycler, std::move(obj));
-	copy_variable_recursive(copy, backup, root);
+	copy_variable(copy, backup, root);
 
 	D_opaque opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, std::make_shared<int>() };
 	set_variable(temp, backup, std::move(opaque));
