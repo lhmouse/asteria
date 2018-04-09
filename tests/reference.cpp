@@ -115,7 +115,7 @@ int main(){
 	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "three" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = true;
-	ptr = read_reference_opt(&immutable, ref);
+	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_object>().size() == 2);
 	set_variable(nvar, recycler, D_integer(92));
@@ -136,7 +136,7 @@ int main(){
 	oref = { Xptr<Reference>(Sptr<Reference>(ref_local)), "one" };
 	ref.reset(std::make_shared<Reference>(std::move(oref)));
 	local_var->immutable = false;
-	ptr = read_reference_opt(&immutable, ref);
+	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 1);
 	set_variable(nvar, recycler, D_integer(97));
