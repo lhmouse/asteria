@@ -175,7 +175,7 @@ void extract_variable_from_reference_opt(Xptr<Variable> &variable_out, Spref<Rec
 	if(!(result.rptr_opt && result.rvalue && result.wref_opt)){
 		// The variable cannot be moved. Make a copy instead.
 		return copy_variable(variable_out, recycler, result.rptr_opt);
-	} else if(result.rptr_opt->get_recycler() != recycler){
+	} else if(result.rptr_opt->get_recycler_opt() != recycler){
 		// The variable itself cannot be moved because it was allocated using a different recycler. Move its contents instead.
 		return set_variable(variable_out, recycler, std::move(*(result.wref_opt->release())));
 	} else {

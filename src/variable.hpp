@@ -52,7 +52,7 @@ private:
 	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
 
 public:
-	Sptr<Recycler> get_recycler() const noexcept {
+	Sptr<Recycler> get_recycler_opt() const noexcept {
 		return m_weak_recycler.lock();
 	}
 
