@@ -57,6 +57,12 @@ using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
+// Runtime objects.
+struct Local_variable {
+	Xptr<Variable> variable_opt;
+	bool immutable;
+};
+
 // Runtime types.
 struct Uuid_handle {
 	std::array<unsigned char, 16> uuid;
@@ -77,12 +83,6 @@ using D_opaque    = Uuid_handle;
 using D_function  = Binding_function;
 using D_array     = Xptr_vector<Variable>;
 using D_object    = Xptr_map<std::string, Variable>;
-
-// Miscellaneous struct definitions.
-struct Scoped_variable {
-	Xptr<Variable> variable_opt;
-	bool immutable;
-};
 
 }
 

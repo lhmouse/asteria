@@ -12,37 +12,35 @@ namespace Asteria {
 class Reference {
 public:
 	enum Type : unsigned {
-		type_null                    = -1u,
-		type_rvalue_static           =  0,
-		type_rvalue_dynamic          =  1,
-		type_lvalue_scoped_variable  =  2,
-		type_lvalue_array_element    =  3,
-		type_lvalue_object_member    =  4,
+		type_null             = -1u,
+		type_constant         =  0,
+		type_temporary_value  =  1,
+		type_local_variable   =  2,
+		type_array_element    =  3,
+		type_object_member    =  4,
 	};
-	struct S_rvalue_static {
-		Sptr<const Variable> variable_opt;
+	struct S_constant {
+		Sptr<const Variable> source_opt;
 	};
-	struct S_rvalue_dynamic {
+	struct S_temporary_value {
 		Xptr<Variable> variable_opt;
 	};
-	struct S_lvalue_scoped_variable {
-		Sptr<Scoped_variable> scoped_variable;
+	struct S_local_variable {
+		Sptr<Local_variable> local_variable;
 	};
-	struct S_lvalue_array_element {
-		Sptr<Variable> variable;
-		bool immutable;
+	struct S_array_element {
+		Sptr<Reference> parent_opt;
 		std::int64_t index_bidirectional;
 	};
-	struct S_lvalue_object_member {
-		Sptr<Variable> variable;
-		bool immutable;
+	struct S_object_member {
+		Sptr<Reference> parent_opt;
 		std::string key;
 	};
-	using Types = Type_tuple< S_rvalue_static           // 0
-	                        , S_rvalue_dynamic          // 1
-	                        , S_lvalue_scoped_variable  // 2
-	                        , S_lvalue_array_element    // 3
-	                        , S_lvalue_object_member    // 4
+	using Types = Type_tuple< S_constant         //  0
+	                        , S_temporary_value  //  1
+	                        , S_local_variable   //  2
+	                        , S_array_element    //  3
+	                        , S_object_member    //  4
 		>;
 
 private:
@@ -86,7 +84,7 @@ public:
 
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
-extern void copy_reference_opt(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
+extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
 
 // This function returns a read-only pointer.
 extern Sptr<const Variable> read_reference_opt(bool *immutable_out_opt, Spref<const Reference> reference_opt);

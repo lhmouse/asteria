@@ -40,7 +40,7 @@ int main(){
 
 	boost::container::vector<Xptr<Reference>> params;
 	set_variable(var, recycler, D_integer(12));
-	Reference::S_rvalue_dynamic ref = { std::move(var) };
+	Reference::S_temporary_value ref = { std::move(var) };
 	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
 	set_variable(var, recycler, D_integer(15));
 	ref = { std::move(var) };
@@ -54,7 +54,7 @@ int main(){
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
 			set_variable(xptr, recycler, param_one->get<D_integer>() * param_two->get<D_integer>());
-			Reference::S_rvalue_dynamic ref = { std::move(xptr) };
+			Reference::S_temporary_value ref = { std::move(xptr) };
 			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
 		}
 	};
