@@ -20,7 +20,7 @@ namespace {
 	
 }
 
-Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
+Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
 	(void)recycler;
 	(void)scope;
 	(void)expression_opt;

@@ -27,7 +27,7 @@ void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler,
 		return; }
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
-		auto result = evaluate_expression_recursive_opt(recycler, scope, params.expression);
+		auto result = evaluate_expression_opt(recycler, scope, params.expression);
 		extract_variable_from_reference_opt(variable_out, recycler, std::move(result));
 		return; }
 	case Initializer::type_bracketed_init_list: {
