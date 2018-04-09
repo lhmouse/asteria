@@ -218,13 +218,13 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
 void set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt){
 	const auto value = value_opt.get_opt();
 	if(value == nullptr){
-		variable_out = nullptr;
+		return variable_out.reset();
 	} else if(variable_out == nullptr){
 		auto sptr = std::make_shared<Variable>(recycler, std::move(*value));
 		recycler->adopt_variable(sptr);
-		variable_out.reset(std::move(sptr));
+		return variable_out.reset(std::move(sptr));
 	} else {
-		variable_out->set(std::move(*value));
+		return variable_out->set(std::move(*value));
 	}
 }
 void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
