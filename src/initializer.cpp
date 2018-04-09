@@ -23,11 +23,13 @@ void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler>
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null: {
-		return set_variable(variable_out, recycler, nullptr); }
+		set_variable(variable_out, recycler, nullptr);
+		return; }
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
 		auto result = evaluate_expression_recursive_opt(recycler, scope, params.expression);
-		return extract_variable_from_reference_opt(variable_out, recycler, std::move(result)); }
+		extract_variable_from_reference_opt(variable_out, recycler, std::move(result));
+		return; }
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		D_array array;
@@ -36,7 +38,8 @@ void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler>
 			initialize_variable_recursive(variable_out, recycler, scope, elem);
 			array.emplace_back(std::move(variable_out));
 		}
-		return set_variable(variable_out, recycler, std::move(array)); }
+		set_variable(variable_out, recycler, std::move(array));
+		return; }
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
 		D_object object;
@@ -45,7 +48,8 @@ void initialize_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler>
 			initialize_variable_recursive(variable_out, recycler, scope, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
-		return set_variable(variable_out, recycler, std::move(object)); }
+		set_variable(variable_out, recycler, std::move(object));
+		return; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
 		std::terminate();

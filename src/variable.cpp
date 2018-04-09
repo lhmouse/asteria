@@ -231,24 +231,30 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null: {
-		return set_variable(variable_out, recycler, nullptr); }
+		set_variable(variable_out, recycler, nullptr);
+		return; }
 	case Variable::type_boolean: {
 		const auto &source = source_opt->get<D_boolean>();
-		return set_variable(variable_out, recycler, source); }
+		set_variable(variable_out, recycler, source);
+		return; }
 	case Variable::type_integer: {
 		const auto &source = source_opt->get<D_integer>();
-		return set_variable(variable_out, recycler, source); }
+		set_variable(variable_out, recycler, source);
+		return; }
 	case Variable::type_double: {
 		const auto &source = source_opt->get<D_double>();
-		return set_variable(variable_out, recycler, source); }
+		set_variable(variable_out, recycler, source);
+		return; }
 	case Variable::type_string: {
 		const auto &source = source_opt->get<D_string>();
-		return set_variable(variable_out, recycler, source); }
+		set_variable(variable_out, recycler, source);
+		return; }
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
 	case Variable::type_function: {
 		const auto &source = source_opt->get<D_function>();
-		return set_variable(variable_out, recycler, source); }
+		set_variable(variable_out, recycler, source);
+		return; }
 	case Variable::type_array: {
 		const auto &source = source_opt->get<D_array>();
 		D_array array;
@@ -257,7 +263,8 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 			copy_variable_recursive(variable_out, recycler, elem);
 			array.emplace_back(std::move(variable_out));
 		}
-		return set_variable(variable_out, recycler, std::move(array)); }
+		set_variable(variable_out, recycler, std::move(array));
+		return; }
 	case Variable::type_object: {
 		const auto &source = source_opt->get<D_object>();
 		D_object object;
@@ -266,7 +273,8 @@ void copy_variable_recursive(Xptr<Variable> &variable_out, Spref<Recycler> recyc
 			copy_variable_recursive(variable_out, recycler, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
-		return set_variable(variable_out, recycler, std::move(object)); }
+		set_variable(variable_out, recycler, std::move(object));
+		return; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
