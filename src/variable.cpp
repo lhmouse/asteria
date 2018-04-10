@@ -40,7 +40,7 @@ const char *get_type_name(Variable::Type type) noexcept {
 		return "object";
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
-		return "unknown";
+		return "<unknown>";
 	}
 }
 Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept {
