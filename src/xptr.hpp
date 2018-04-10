@@ -175,7 +175,7 @@ bool operator>=(std::nullptr_t, const Xptr<OtherT> &rhs) noexcept {
 }
 
 template<typename ElementT>
-void swap(const Xptr<ElementT> &lhs, const Xptr<ElementT> &rhs) noexcept {
+void swap(Xptr<ElementT> &lhs, Xptr<ElementT> &rhs) noexcept {
 	lhs.swap(rhs);
 }
 
