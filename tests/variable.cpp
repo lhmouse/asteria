@@ -84,4 +84,107 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
 	ASTERIA_TEST_CHECK(var->get<D_object>().at("one")->get<D_boolean>() == true);
 	ASTERIA_TEST_CHECK(var->get<D_object>().at("two")->get<D_string>() == "world");
+
+	Xptr<Variable> cmp;
+	set_variable(var, recycler, D_null());
+	set_variable(cmp, recycler, D_null());
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+
+	set_variable(var, recycler, D_null());
+	set_variable(cmp, recycler, D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	set_variable(var, recycler, D_boolean(true));
+	set_variable(cmp, recycler, D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+
+	set_variable(var, recycler, D_boolean(false));
+	set_variable(cmp, recycler, D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	set_variable(var, recycler, D_integer(42));
+	set_variable(cmp, recycler, D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+
+	set_variable(var, recycler, D_integer(5));
+	set_variable(cmp, recycler, D_integer(6));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	set_variable(var, recycler, D_integer(3));
+	set_variable(cmp, recycler, D_integer(3));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+
+	set_variable(var, recycler, D_double(-2.5));
+	set_variable(cmp, recycler, D_double(11.0));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	set_variable(var, recycler, D_double(1.0));
+	set_variable(cmp, recycler, D_double(NAN));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+
+	set_variable(var, recycler, D_string("hello"));
+	set_variable(cmp, recycler, D_string("world"));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	array.clear();
+	set_variable(var, recycler, D_boolean(true));
+	array.emplace_back(std::move(var));
+	set_variable(var, recycler, D_string("world"));
+	array.emplace_back(std::move(var));
+	set_variable(var, recycler, std::move(array));
+	copy_variable(cmp, recycler, var);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+
+	var->get<D_array>().at(1)->set(D_string("hello"));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	var->get<D_array>().at(1)->set(D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+
+	object.clear();
+	set_variable(var, recycler, D_boolean(true));
+	object.emplace("one", std::move(var));
+	set_variable(var, recycler, D_string("world"));
+	object.emplace("two", std::move(var));
+	set_variable(var, recycler, std::move(object));
+	copy_variable(cmp, recycler, var);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+
+	var->get<D_object>().at("two")->set(D_string("hello"));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater_than);
+
+	var->get<D_object>().at("two")->set(D_boolean(true));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	swap(var, cmp);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
 }

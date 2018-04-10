@@ -63,6 +63,13 @@ struct Local_variable {
 	bool immutable;
 };
 
+enum Comparison_result : unsigned {
+	comparison_result_unordered     = 1,
+	comparison_result_less_than     = 2,
+	comparison_result_equal         = 3,
+	comparison_result_greater_than  = 4,
+};
+
 // Runtime types.
 struct Uuid_handle {
 	std::array<unsigned char, 16> uuid;

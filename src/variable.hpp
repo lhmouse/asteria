@@ -106,6 +106,8 @@ extern void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler
 // This function is used to break dependency circles.
 extern void dispose_variable(Spref<Variable> variable_opt) noexcept;
 
+extern Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept;
+
 }
 
 #endif
