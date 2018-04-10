@@ -155,7 +155,7 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
 	return std::move(result.rptr_opt);
 }
-void write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&value_new_opt){
+Xptr<Variable> &drill_reference(Spref<Reference> reference_opt){
 	auto result = do_dereference_unsafe(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a temporary value of type `", get_variable_type_name(result.rptr_opt), "`");
@@ -163,7 +163,7 @@ void write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&value_new_
 	if(result.wref_opt == nullptr){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a constant value of type `", get_variable_type_name(result.rptr_opt), "`");
 	}
-	return result.wref_opt->reset(value_new_opt.release());
+	return *(result.wref_opt);
 }
 
 void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
