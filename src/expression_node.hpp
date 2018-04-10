@@ -15,36 +15,36 @@ class Expression_node {
 public:
 	enum Operator_generic : unsigned {
 		// Postfix operators
-		operator_postfix_inc   = 10, // ++
-		operator_postfix_dec   = 11, // --
-		operator_postfix_at    = 12, // []
+		operator_postfix_inc    = 10, // ++
+		operator_postfix_dec    = 11, // --
+		operator_postfix_at     = 12, // []
 		// Prefix operators.
-		operator_prefix_add    = 30, // +
-		operator_prefix_sub    = 31, // -
-		operator_prefix_not_b  = 32, // ~
-		operator_prefix_not_l  = 33, // !
-		operator_prefix_inc    = 34, // ++
-		operator_prefix_dec    = 35, // --
+		operator_prefix_add     = 30, // +
+		operator_prefix_sub     = 31, // -
+		operator_prefix_not_b   = 32, // ~
+		operator_prefix_not_l   = 33, // !
+		operator_prefix_inc     = 34, // ++
+		operator_prefix_dec     = 35, // --
 		// Infix relational operators.
-		operator_infix_cmp_eq  = 50, // ==
-		operator_infix_cmp_ne  = 51, // !=
-		operator_infix_cmp_lt  = 52, // <
-		operator_infix_cmp_gt  = 53, // >
-		operator_infix_cmp_lte = 54, // <=
-		operator_infix_cmp_gte = 55, // >=
+		operator_infix_cmp_eq   = 50, // ==
+		operator_infix_cmp_ne   = 51, // !=
+		operator_infix_cmp_lt   = 52, // <
+		operator_infix_cmp_gt   = 53, // >
+		operator_infix_cmp_lte  = 54, // <=
+		operator_infix_cmp_gte  = 55, // >=
 		// Infix arithmetic operators.
-		operator_infix_add     = 60, // +
-		operator_infix_sub     = 61, // -
-		operator_infix_mul     = 62, // *
-		operator_infix_div     = 63, // /
-		operator_infix_mod     = 64, // %
-		operator_infix_sll     = 65, // <<
-		operator_infix_srl     = 66, // >>>
-		operator_infix_sra     = 67, // >>
-		operator_infix_and_b   = 68, // &
-		operator_infix_or_b    = 69, // |
-		operator_infix_xor_b   = 70, // ^
-		operator_infix_assign  = 71, // =
+		operator_infix_add      = 60, // +
+		operator_infix_sub      = 61, // -
+		operator_infix_mul      = 62, // *
+		operator_infix_div      = 63, // /
+		operator_infix_mod      = 64, // %
+		operator_infix_sll      = 65, // <<
+		operator_infix_srl      = 66, // >>>
+		operator_infix_sra      = 67, // >>
+		operator_infix_and_b    = 68, // &
+		operator_infix_or_b     = 69, // |
+		operator_infix_xor_b    = 70, // ^
+		operator_infix_assign   = 71, // =
 	};
 
 	enum Type : unsigned {
