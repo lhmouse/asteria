@@ -165,7 +165,7 @@ void write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, S
 	}
 	return set_variable(*(result.wref_opt), recycler, std::move(value_opt));
 }
-void extract_variable_from_reference_opt(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
+void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
 	auto result = do_dereference_unsafe(reference_opt, false);
 	if(!(result.rptr_opt && result.rvalue && result.wref_opt)){
 		// The variable cannot be moved. Make a copy instead.
