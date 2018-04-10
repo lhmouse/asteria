@@ -119,6 +119,8 @@ public:
 	}
 };
 
+extern const char *get_operator_name_generic(Expression_node::Operator_generic operator_generic) noexcept;
+
 }
 
 #endif
