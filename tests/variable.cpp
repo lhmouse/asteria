@@ -166,6 +166,8 @@ int main(){
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	var->get<D_array>().erase(std::prev(var->get<D_array>().end()));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
 
 	object.clear();
 	set_variable(var, recycler, D_boolean(true));
@@ -187,4 +189,6 @@ int main(){
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	var->get<D_object>().erase(std::prev(var->get<D_object>().end()));
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less_than);
 }
