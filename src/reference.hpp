@@ -87,7 +87,8 @@ extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) 
 extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
 
 extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
-extern void write_reference(Spref<Reference> reference_opt, Spref<Recycler> recycler, Stored_value &&value_opt);
+extern void write_reference(Spref<Reference> reference_opt, Xptr<Variable> &&value_new_opt);
+
 // If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the variable through the reference:
 //   `copy_variable(variable_out, recycler, read_reference_opt(reference_opt))`
 extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
