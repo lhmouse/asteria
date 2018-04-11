@@ -64,10 +64,10 @@ struct Local_variable {
 };
 
 enum Comparison_result : unsigned {
-	comparison_result_unordered     = 1,
-	comparison_result_less_than     = 2,
-	comparison_result_equal         = 3,
-	comparison_result_greater_than  = 4,
+	comparison_result_unordered  = 1,
+	comparison_result_less       = 2,
+	comparison_result_equal      = 3,
+	comparison_result_greater    = 4,
 };
 
 // Runtime types.

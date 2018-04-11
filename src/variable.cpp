@@ -316,9 +316,9 @@ namespace {
 	Comparison_result do_compare_strings(const std::string &value_lhs, const std::string &value_rhs){
 		const int cmp = value_lhs.compare(value_rhs);
 		if(cmp < 0){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(cmp > 0){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal;
 	}
@@ -330,9 +330,9 @@ Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const V
 	const auto type_rhs = get_variable_type(rhs_opt);
 	if(type_lhs != type_rhs){
 		if(type_lhs == Variable::type_null){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(type_rhs == Variable::type_null){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_unordered;
 	}
@@ -344,18 +344,18 @@ Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const V
 		const auto &value_lhs = lhs_opt->get<D_boolean>();
 		const auto &value_rhs = rhs_opt->get<D_boolean>();
 		if(value_lhs < value_rhs){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(value_lhs > value_rhs){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal; }
 	case Variable::type_integer: {
 		const auto &value_lhs = lhs_opt->get<D_integer>();
 		const auto &value_rhs = rhs_opt->get<D_integer>();
 		if(value_lhs < value_rhs){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(value_lhs > value_rhs){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal; }
 	case Variable::type_double: {
@@ -364,9 +364,9 @@ Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const V
 		if(std::isunordered(value_lhs, value_rhs)){
 			return comparison_result_unordered;
 		} else if(std::isless(value_lhs, value_rhs)){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(std::isgreater(value_lhs, value_rhs)){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal; }
 	case Variable::type_string: {
@@ -388,9 +388,9 @@ Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const V
 			++lhs_it, ++rhs_it;
 		}
 		if(rhs_it != array_rhs.end()){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(lhs_it != array_lhs.end()){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal; }
 	case Variable::type_object: {
@@ -409,9 +409,9 @@ Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const V
 			++lhs_it, ++rhs_it;
 		}
 		if(rhs_it != object_rhs.end()){
-			return comparison_result_less_than;
+			return comparison_result_less;
 		} else if(lhs_it != object_lhs.end()){
-			return comparison_result_greater_than;
+			return comparison_result_greater;
 		}
 		return comparison_result_equal; }
 	default:
