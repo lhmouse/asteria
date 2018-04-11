@@ -19,8 +19,8 @@ public:
 		operator_postfix_dec    = 11, // --
 		operator_postfix_at     = 12, // []
 		// Prefix operators.
-		operator_prefix_add     = 30, // +
-		operator_prefix_sub     = 31, // -
+		operator_prefix_pos     = 30, // +
+		operator_prefix_neg     = 31, // -
 		operator_prefix_not_b   = 32, // ~
 		operator_prefix_not_l   = 33, // !
 		operator_prefix_inc     = 34, // ++
@@ -81,7 +81,7 @@ public:
 	};
 	struct S_operator_rpn {
 		Operator_generic operator_generic;
-		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]`, unary `+`, `!`, and all rational operators.
+		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]` and all rational operators.
 	};
 	using Types = Type_tuple< S_literal            // 0
 	                        , S_named_reference    // 1

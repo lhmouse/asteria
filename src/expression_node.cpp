@@ -19,10 +19,10 @@ const char *get_operator_name_generic(Expression_node::Operator_generic operator
 		return "postfix decrement";
 	case Expression_node::operator_postfix_at:
 		return "subscripting";
-	case Expression_node::operator_prefix_add:
+	case Expression_node::operator_prefix_pos:
 		return "unary plus";
-	case Expression_node::operator_prefix_sub:
-		return "unary minus";
+	case Expression_node::operator_prefix_neg:
+		return "negation";
 	case Expression_node::operator_prefix_not_b:
 		return "bitwise not";
 	case Expression_node::operator_prefix_not_l:
