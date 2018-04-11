@@ -72,7 +72,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 		case Expression_node::type_pruning: {
 			const auto &params = node.get<Expression_node::S_pruning>();
 			// Pop references requested.
-			ASTERIA_VERIFY(stack.size() >= params.count_to_pop, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+			ASTERIA_VERIFY(stack.size() >= params.count_to_pop, ASTERIA_THROW_RUNTIME_ERROR("No enough arguments have been pushed"));
 			for(std::size_t i = 0; i < params.count_to_pop; ++i){
 				stack.pop_back();
 			}
@@ -80,7 +80,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
 			// Pop the condition off the stack.
-			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for branch node"));
 			auto condition_ref = std::move(stack.back());
 			stack.pop_back();
 			// Pick a branch basing on the condition.
@@ -96,7 +96,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 		case Expression_node::type_function_call: {
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
-			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for function call node"));
 			auto function_ref = std::move(stack.back());
 			stack.pop_back();
 			// Make sure it is really a function.
@@ -135,7 +135,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			switch(params.operator_generic){
 			case Expression_node::operator_postfix_inc: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto lhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -144,22 +144,24 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(get_variable_type(lhs_var)){
 				case Variable::type_integer: {
 					// Increment the operand.
+					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_integer>();
-					write_reference(lhs_ref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) + 1));
+					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) + 1));
 					// Save the old value into `lhs_ref`, which will not be null here.
-					Xptr<Variable> value_old;
-					set_variable(value_old, recycler, lhs);
-					Reference::S_temporary_value ref_d = { std::move(value_old) };
+					Xptr<Variable> var;
+					set_variable(var, recycler, lhs);
+					Reference::S_temporary_value ref_d = { std::move(var) };
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				case Variable::type_double: {
 					// Increment the operand.
+					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_double>();
-					write_reference(lhs_ref, recycler, std::isfinite(lhs) ? (lhs + 1) : lhs);
+					set_variable(wref, recycler, std::isfinite(lhs) ? (lhs + 1) : lhs);
 					// Save the old value into `lhs_ref`, which will not be null here.
-					Xptr<Variable> value_old;
-					set_variable(value_old, recycler, lhs);
-					Reference::S_temporary_value ref_d = { std::move(value_old) };
+					Xptr<Variable> var;
+					set_variable(var, recycler, lhs);
+					Reference::S_temporary_value ref_d = { std::move(var) };
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				default:
@@ -170,7 +172,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_postfix_dec: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto lhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -179,22 +181,24 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(get_variable_type(lhs_var)){
 				case Variable::type_integer: {
 					// Decrement the operand.
+					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_integer>();
-					write_reference(lhs_ref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) - 1));
+					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) - 1));
 					// Save the old value into `lhs_ref`, which will not be null here.
-					Xptr<Variable> value_old;
-					set_variable(value_old, recycler, lhs);
-					Reference::S_temporary_value ref_d = { std::move(value_old) };
+					Xptr<Variable> var;
+					set_variable(var, recycler, lhs);
+					Reference::S_temporary_value ref_d = { std::move(var) };
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				case Variable::type_double: {
-					// Increment the operand.
+					// Decrement the operand.
+					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_double>();
-					write_reference(lhs_ref, recycler, std::isfinite(lhs) ? (lhs - 1) : lhs);
+					set_variable(wref, recycler, std::isfinite(lhs) ? (lhs - 1) : lhs);
 					// Save the old value into `lhs_ref`, which will not be null here.
-					Xptr<Variable> value_old;
-					set_variable(value_old, recycler, lhs);
-					Reference::S_temporary_value ref_d = { std::move(value_old) };
+					Xptr<Variable> var;
+					set_variable(var, recycler, lhs);
+					Reference::S_temporary_value ref_d = { std::move(var) };
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				default:
@@ -205,7 +209,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_postfix_at: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto lhs_ref = std::move(stack.back());
 				stack.pop_back();
 				auto rhs_ref = std::move(stack.back());
@@ -233,10 +237,9 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_prefix_add: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
-				// Convert the operand to an rvalue and return it.
 				// N.B. This is one of the few operators that work on all types.
 				if(rhs_ref){
 					// Copy the operand to create an rvalue, then save it into `rhs_ref`.
@@ -249,7 +252,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_prefix_sub: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -280,7 +283,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_prefix_not_b: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -311,25 +314,26 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_prefix_not_l: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
+				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				// Convert the operand to a boolean value, negate it and return it.
-				// N.B. This is one of the few operators that work on all types.
 				Xptr<Variable> value_new;
-				set_variable(value_new, recycler, !(test_variable(rhs_var)));
+				const bool generalized_true = test_variable(rhs_var);
+				set_variable(value_new, recycler, generalized_true == false);
 				Reference::S_temporary_value ref_d = { std::move(value_new) };
-				if(rhs_ref){
-					rhs_ref->set(std::move(ref_d));
-				} else {
+				if(!rhs_ref){
 					rhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					rhs_ref->set(std::move(ref_d));
 				}
 				stack.emplace_back(std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_inc: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -338,13 +342,15 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(get_variable_type(rhs_var)){
 				case Variable::type_integer: {
 					// Increment the operand.
+					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_integer>();
-					write_reference(rhs_ref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) + 1));
+					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) + 1));
 					break; }
 				case Variable::type_double: {
 					// Increment the operand.
+					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_double>();
-					write_reference(rhs_ref, recycler, std::isfinite(rhs) ? (rhs + 1) : rhs);
+					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs + 1) : rhs);
 					break; }
 				default:
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
@@ -354,7 +360,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				break; }
 			case Expression_node::operator_prefix_dec: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand near node of type `", type, "`"));
+				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -363,13 +369,15 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(get_variable_type(rhs_var)){
 				case Variable::type_integer: {
 					// Decrement the operand.
+					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_integer>();
-					write_reference(rhs_ref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) - 1));
+					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) - 1));
 					break; }
 				case Variable::type_double: {
 					// Decrement the operand.
+					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_double>();
-					write_reference(rhs_ref, recycler, std::isfinite(rhs) ? (rhs - 1) : rhs);
+					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs - 1) : rhs);
 					break; }
 				default:
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
@@ -377,25 +385,165 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
 				break; }
-/*			case Expression_node::operator_infix_cmpeq: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_eq: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Report unordered operands as being unequal.
+				// N.B. This is one of the few operators that work on all types.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				set_variable(value_new, recycler, comparison_result == comparison_result_equal);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_cmpne: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_ne: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Report unordered operands as being unequal.
+				// N.B. This is one of the few operators that work on all types.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				set_variable(value_new, recycler, comparison_result != comparison_result_equal);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_cmplt: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_lt: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Throw an exception if the operands are unordered.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				if(comparison_result == comparison_result_unordered){
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", get_operator_name_generic(params.operator_generic));
+				}
+				set_variable(value_new, recycler, comparison_result == comparison_result_less);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_cmpgt: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_gt: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Throw an exception if the operands are unordered.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				if(comparison_result == comparison_result_unordered){
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", get_operator_name_generic(params.operator_generic));
+				}
+				set_variable(value_new, recycler, comparison_result == comparison_result_greater);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_cmplte: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_lte: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Throw an exception if the operands are unordered.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				if(comparison_result == comparison_result_unordered){
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", get_operator_name_generic(params.operator_generic));
+				}
+				set_variable(value_new, recycler, comparison_result != comparison_result_greater);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_cmpgte: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_cmp_gte: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// Throw an exception if the operands are unordered.
+				Xptr<Variable> value_new;
+				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				if(comparison_result == comparison_result_unordered){
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", get_operator_name_generic(params.operator_generic));
+				}
+				set_variable(value_new, recycler, comparison_result != comparison_result_less);
+				Reference::S_temporary_value ref_d = { std::move(value_new) };
+				if(!lhs_ref){
+					lhs_ref = std::move(rhs_ref);
+				}
+				if(!lhs_ref){
+					lhs_ref.reset(std::make_shared<Reference>(std::move(ref_d)));
+				} else {
+					lhs_ref->set(std::move(ref_d));
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_add: {
+/*			case Expression_node::operator_infix_add: {
 				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_sub: {
@@ -428,10 +576,20 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			case Expression_node::operator_infix_xor: {
 				stack.emplace_back(std::move(result_ref));
 				break; }
-			case Expression_node::operator_infix_assign: {
-				stack.emplace_back(std::move(result_ref));
+*/			case Expression_node::operator_infix_assign: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto wref = drill_reference(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				// N.B. This is one of the few operators that work on all types.
+				copy_variable(wref, recycler, rhs_var);
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-*/			default:
+			default:
 				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "`. This is probably a bug, please report.");
 				std::terminate();
 			}
