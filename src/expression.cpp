@@ -18,7 +18,33 @@ Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
 namespace {
-	
+	template<typename ResultT>
+	void do_set_result(Xptr<Reference> &result_ref_inout, Spref<Recycler> recycler, bool compound_assignment, ResultT &&result){
+		if(compound_assignment){
+			// Update the result in-place.
+			const auto wref = drill_reference(result_ref_inout);
+			set_variable(wref, recycler, std::forward<ResultT>(result));
+		} else {
+			// Create a new variable for the result, then replace `lhs_ref` with an rvalue reference to it.
+			Xptr<Variable> var;
+			set_variable(var, recycler, std::forward<ResultT>(result));
+			Reference::S_temporary_value ref_d = { std::move(var) };
+			result_ref_inout->set(std::move(ref_d));
+		}
+	}
+
+	template<typename FunctionT>
+	std::string do_operate_strings_bytewise(const std::string &lhs, const std::string &rhs, const FunctionT &function){
+		if(lhs.size() != rhs.size()){
+			ASTERIA_THROW_RUNTIME_ERROR("Bitwise operations on strings requires both operands to have the same length");
+		}
+		std::string result;
+		result.resize(lhs.size());
+		for(std::size_t i = 0; i < lhs.size(); ++i){
+			result[i] = function(lhs[i], rhs[i]);
+		}
+		return result;
+	}
 }
 
 Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
@@ -560,39 +586,136 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				stack.emplace_back(std::move(lhs_ref));
 				break; }
 /*			case Expression_node::operator_infix_add: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_sub: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_mul: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_div: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_mod: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_sll: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_srl: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
 			case Expression_node::operator_infix_sra: {
-				stack.emplace_back(std::move(result_ref));
 				break; }
-			case Expression_node::operator_infix_and: {
-				stack.emplace_back(std::move(result_ref));
+*/			case Expression_node::operator_infix_and_b: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if(lhs_type != rhs_type){
+					ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name_generic(params.operator_generic), " operation requires both operands to have the same type");
+				}
+				switch(lhs_type){
+				case Variable::type_boolean: {
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_and<D_boolean>()(lhs, rhs));
+					break; }
+				case Variable::type_integer: {
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_and<D_integer>()(lhs, rhs));
+					break; }
+				case Variable::type_string: {
+					const auto lhs = lhs_var->get<D_string>();
+					const auto rhs = rhs_var->get<D_string>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_operate_strings_bytewise(lhs, rhs, std::bit_and<char>()));
+					break; }
+				default:
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(lhs_var), "`");
+				}
+#pragma GCC diagnostic pop
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_or: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_or_b: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if(lhs_type != rhs_type){
+					ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name_generic(params.operator_generic), " operation requires both operands to have the same type");
+				}
+				switch(lhs_type){
+				case Variable::type_boolean: {
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_or<D_boolean>()(lhs, rhs));
+					break; }
+				case Variable::type_integer: {
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_or<D_integer>()(lhs, rhs));
+					break; }
+				case Variable::type_string: {
+					const auto lhs = lhs_var->get<D_string>();
+					const auto rhs = rhs_var->get<D_string>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_operate_strings_bytewise(lhs, rhs, std::bit_or<char>()));
+					break; }
+				default:
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(lhs_var), "`");
+				}
+#pragma GCC diagnostic pop
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-			case Expression_node::operator_infix_xor: {
-				stack.emplace_back(std::move(result_ref));
+			case Expression_node::operator_infix_xor_b: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if(lhs_type != rhs_type){
+					ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name_generic(params.operator_generic), " operation requires both operands to have the same type");
+				}
+				switch(lhs_type){
+				case Variable::type_boolean: {
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_xor<D_boolean>()(lhs, rhs));
+					break; }
+				case Variable::type_integer: {
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, std::bit_xor<D_integer>()(lhs, rhs));
+					break; }
+				case Variable::type_string: {
+					const auto lhs = lhs_var->get<D_string>();
+					const auto rhs = rhs_var->get<D_string>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_operate_strings_bytewise(lhs, rhs, std::bit_xor<char>()));
+					break; }
+				default:
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(lhs_var), "`");
+				}
+#pragma GCC diagnostic pop
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-*/			case Expression_node::operator_infix_assign: {
+			case Expression_node::operator_infix_assign: {
 				// Pop two operands off the stack.
 				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", get_operator_name_generic(params.operator_generic)));
 				auto lhs_ref = std::move(stack.back());
