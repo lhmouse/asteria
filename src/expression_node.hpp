@@ -81,7 +81,7 @@ public:
 	};
 	struct S_operator_rpn {
 		Operator_generic operator_generic;
-		bool compound_assignment;
+		bool compound_assignment; // This parameter is ignored in the case of `++`, `--` and `[]` operators.
 	};
 	using Types = Type_tuple< S_literal            // 0
 	                        , S_named_reference    // 1
