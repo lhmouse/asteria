@@ -146,9 +146,10 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(lhs_type){
 				case Variable::type_integer: {
 					// Increment the operand.
-					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_integer>();
-					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) + 1));
+					const auto result = static_cast<D_integer>(static_cast<std::uint64_t>(lhs) + 1);
+					const auto wref = drill_reference(lhs_ref);
+					set_variable(wref, recycler, result);
 					// Save the old value into `lhs_ref`, which will not be null here.
 					Xptr<Variable> var;
 					set_variable(var, recycler, lhs);
@@ -157,9 +158,10 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					break; }
 				case Variable::type_double: {
 					// Increment the operand.
-					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_double>();
-					set_variable(wref, recycler, std::isfinite(lhs) ? (lhs + 1) : lhs);
+					const auto result = std::isfinite(lhs) ? (lhs + 1) : lhs;
+					const auto wref = drill_reference(lhs_ref);
+					set_variable(wref, recycler, result);
 					// Save the old value into `lhs_ref`, which will not be null here.
 					Xptr<Variable> var;
 					set_variable(var, recycler, lhs);
@@ -184,9 +186,10 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(lhs_type){
 				case Variable::type_integer: {
 					// Decrement the operand.
-					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_integer>();
-					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(lhs) - 1));
+					const auto result = static_cast<D_integer>(static_cast<std::uint64_t>(lhs) - 1);
+					const auto wref = drill_reference(lhs_ref);
+					set_variable(wref, recycler, result);
 					// Save the old value into `lhs_ref`, which will not be null here.
 					Xptr<Variable> var;
 					set_variable(var, recycler, lhs);
@@ -195,9 +198,10 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					break; }
 				case Variable::type_double: {
 					// Decrement the operand.
-					const auto wref = drill_reference(lhs_ref);
 					const auto lhs = lhs_var->get<D_double>();
-					set_variable(wref, recycler, std::isfinite(lhs) ? (lhs - 1) : lhs);
+					const auto result = std::isfinite(lhs) ? (lhs - 1) : lhs;
+					const auto wref = drill_reference(lhs_ref);
+					set_variable(wref, recycler, result);
 					// Save the old value into `lhs_ref`, which will not be null here.
 					Xptr<Variable> var;
 					set_variable(var, recycler, lhs);
@@ -349,15 +353,17 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(rhs_type){
 				case Variable::type_integer: {
 					// Increment the operand.
-					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_integer>();
-					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) + 1));
+					const auto result = static_cast<D_integer>(static_cast<std::uint64_t>(rhs) + 1);
+					const auto wref = drill_reference(rhs_ref);
+					set_variable(wref, recycler, result);
 					break; }
 				case Variable::type_double: {
 					// Increment the operand.
-					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_double>();
-					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs + 1) : rhs);
+					const auto result = std::isfinite(rhs) ? (rhs + 1) : rhs;
+					const auto wref = drill_reference(rhs_ref);
+					set_variable(wref, recycler, result);
 					break; }
 				default:
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
@@ -377,15 +383,17 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				switch(rhs_type){
 				case Variable::type_integer: {
 					// Decrement the operand.
-					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_integer>();
-					set_variable(wref, recycler, static_cast<D_integer>(static_cast<std::uint64_t>(rhs) - 1));
+					const auto result = static_cast<D_integer>(static_cast<std::uint64_t>(rhs) - 1);
+					const auto wref = drill_reference(rhs_ref);
+					set_variable(wref, recycler, result);
 					break; }
 				case Variable::type_double: {
 					// Decrement the operand.
-					const auto wref = drill_reference(rhs_ref);
 					const auto rhs = rhs_var->get<D_double>();
-					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs - 1) : rhs);
+					const auto result = std::isfinite(rhs) ? (rhs - 1) : rhs;
+					const auto wref = drill_reference(rhs_ref);
+					set_variable(wref, recycler, result);
 					break; }
 				default:
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
@@ -591,9 +599,9 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				stack.pop_back();
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
-				const auto wref = drill_reference(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				// N.B. This is one of the few operators that work on all types.
+				const auto wref = drill_reference(lhs_ref);
 				copy_variable(wref, recycler, rhs_var);
 				stack.emplace_back(std::move(lhs_ref));
 				break; }
