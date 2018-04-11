@@ -97,17 +97,18 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for function call node"));
-			auto function_ref = std::move(stack.back());
+			auto callee_ref = std::move(stack.back());
 			stack.pop_back();
+			const auto callee_var = read_reference_opt(callee_ref);
 			// Make sure it is really a function.
-			const auto function_var = read_reference_opt(function_ref);
-			if(get_variable_type(function_var) != Variable::type_function){
-				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", get_variable_type_name(function_var), "`, which is not a function");
+			const auto callee_type = get_variable_type(callee_var);
+			if(callee_type != Variable::type_function){
+				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", get_type_name(callee_type), "`, which is not a function");
 			}
-			const auto &function = function_var->get<D_function>();
+			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
 			boost::container::vector<Xptr<Reference>> arguments;
-			arguments.resize(std::max(params.argument_count, function.default_arguments_opt.size()));
+			arguments.resize(std::max(params.argument_count, callee.default_arguments_opt.size()));
 			// Pop arguments off the stack.
 			ASTERIA_VERIFY(stack.size() >= params.argument_count, ASTERIA_THROW_RUNTIME_ERROR("No enough arguments have been pushed"));
 			for(std::size_t i = 0; i < params.argument_count; ++i){
@@ -115,11 +116,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				stack.pop_back();
 			}
 			// Replace null arguments with default ones.
-			for(std::size_t i = 0; i < function.default_arguments_opt.size(); ++i){
+			for(std::size_t i = 0; i < callee.default_arguments_opt.size(); ++i){
 				if(arguments.at(i)){
 					continue;
 				}
-				const auto &default_argument = function.default_arguments_opt.at(i);
+				const auto &default_argument = callee.default_arguments_opt.at(i);
 				if(!default_argument){
 					continue;
 				}
@@ -127,7 +128,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				arguments.at(i).reset(std::make_shared<Reference>(std::move(ref_c)));
 			}
 			// Call the function and push the result as-is.
-			auto ref = function.function(recycler, std::move(arguments));
+			auto ref = callee.function(recycler, std::move(arguments));
 			stack.emplace_back(std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {
@@ -141,7 +142,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(lhs_var)){
+				const auto lhs_type = get_variable_type(lhs_var);
+				switch(lhs_type){
 				case Variable::type_integer: {
 					// Increment the operand.
 					const auto wref = drill_reference(lhs_ref);
@@ -165,7 +167,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(lhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(lhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(lhs_ref));
@@ -178,7 +180,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(lhs_var)){
+				const auto lhs_type = get_variable_type(lhs_var);
+				switch(lhs_type){
 				case Variable::type_integer: {
 					// Decrement the operand.
 					const auto wref = drill_reference(lhs_ref);
@@ -202,7 +205,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref->set(std::move(ref_d));
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(lhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(lhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(lhs_ref));
@@ -218,7 +221,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(rhs_var)){
+				const auto rhs_type = get_variable_type(rhs_var);
+				switch(rhs_type){
 				case Variable::type_integer: {
 					// Create an array element reference in `rhs_ref`, which will not be null here.
 					Reference::S_array_element ref_a = { std::move(lhs_ref), rhs_var->get<D_integer>() };
@@ -230,7 +234,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					rhs_ref->set(std::move(ref_o));
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
@@ -258,7 +262,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(rhs_var)){
+				const auto rhs_type = get_variable_type(rhs_var);
+				switch(rhs_type){
 				case Variable::type_integer: {
 					// Negate the operand to create an rvalue, then save it into `rhs_ref`.
 					const auto rhs = rhs_var->get<D_integer>();
@@ -276,7 +281,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					rhs_ref->set(std::move(ref_d));
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
@@ -289,7 +294,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(rhs_var)){
+				const auto rhs_type = get_variable_type(rhs_var);
+				switch(rhs_type){
 				case Variable::type_boolean: {
 					// Flip the operand to create an rvalue, then save it into `rhs_ref`.
 					const auto rhs = rhs_var->get<D_boolean>();
@@ -307,7 +313,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					rhs_ref->set(std::move(ref_d));
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
@@ -339,7 +345,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(rhs_var)){
+				const auto rhs_type = get_variable_type(rhs_var);
+				switch(rhs_type){
 				case Variable::type_integer: {
 					// Increment the operand.
 					const auto wref = drill_reference(rhs_ref);
@@ -353,7 +360,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs + 1) : rhs);
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
@@ -366,7 +373,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-				switch(get_variable_type(rhs_var)){
+				const auto rhs_type = get_variable_type(rhs_var);
+				switch(rhs_type){
 				case Variable::type_integer: {
 					// Decrement the operand.
 					const auto wref = drill_reference(rhs_ref);
@@ -380,7 +388,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					set_variable(wref, recycler, std::isfinite(rhs) ? (rhs - 1) : rhs);
 					break; }
 				default:
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_variable_type_name(rhs_var), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", get_operator_name_generic(params.operator_generic), " operation on type `", get_type_name(rhs_type), "`");
 				}
 #pragma GCC diagnostic pop
 				stack.emplace_back(std::move(rhs_ref));
