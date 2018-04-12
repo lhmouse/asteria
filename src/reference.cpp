@@ -156,6 +156,9 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	return std::move(result.rptr_opt);
 }
 std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<Reference> reference_opt){
+	if(reference_opt == nullptr){
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
+	}
 	auto result = do_dereference_unsafe(reference_opt, true);
 	if(result.rvalue){
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a temporary value of type `", get_variable_type_name(result.rptr_opt), "`");
