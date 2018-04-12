@@ -54,7 +54,9 @@ const char *get_operator_name_generic(Expression_node::Operator_generic operator
 	case Expression_node::operator_infix_mod:
 		return "modulo";
 	case Expression_node::operator_infix_sll:
-		return "left shift";
+		return "logical left shift";
+	case Expression_node::operator_infix_sla:
+		return "arithmetic left shift";
 	case Expression_node::operator_infix_srl:
 		return "logical right shift";
 	case Expression_node::operator_infix_sra:
