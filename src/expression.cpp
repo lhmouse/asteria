@@ -91,7 +91,7 @@ namespace {
 		const auto alhs = std::abs(lhs);
 		const auto arhs = std::abs(rhs);
 		const auto srhs = ((lhs >= 0) == (rhs >= 0)) ? arhs : -arhs;
-		if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (-alhs < INT64_MIN / srhs)){
+		if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
 		}
 		return alhs * srhs;
@@ -140,7 +140,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
 		}
 		if(rhs >= 64){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count was larger than 64: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count must be less than 64: lhs = ", lhs, ", rhs = ", rhs);
 		}
 		const auto mask = INT64_MIN >> rhs;
 		if(((lhs & mask) != 0) && ((lhs & mask) != mask)){
@@ -162,7 +162,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
 		}
 		if(rhs >= 64){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count was larger than 64: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count must be less than 64: lhs = ", lhs, ", rhs = ", rhs);
 		}
 		return lhs >> rhs;
 	}
