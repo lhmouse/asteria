@@ -18,7 +18,7 @@ matrix:
 install:
   - "mkdir -p m4"
   - "autoreconf -ifv"
-  - "./configure ${_options}"
+  - "./configure CXXFLAGS=\"-O0\" ${_options}"
   - "make -j$(nproc)"
 
 script:
