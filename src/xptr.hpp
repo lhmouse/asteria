@@ -25,9 +25,13 @@ public:
 	explicit Xptr(std::shared_ptr<OtherT> &&other) noexcept
 		: m_ptr(std::move(other))
 	{ }
-	// The move constructor and move assignment operator are deleted implicitly.
-	Xptr(Xptr &&) = default;
-	Xptr &operator=(Xptr &&) = default;
+	Xptr(Xptr &&rhs) noexcept
+		: m_ptr(std::move(rhs.m_ptr))
+	{ }
+	Xptr &operator=(Xptr &&rhs) noexcept {
+		m_ptr = std::move(rhs.m_ptr);
+		return *this;
+	}
 
 public:
 	const ElementT *get() const noexcept {
