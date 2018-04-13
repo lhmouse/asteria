@@ -25,6 +25,20 @@ namespace {
 		return get_type_name(type);
 	}
 
+	void do_push_reference(boost::container::vector<Xptr<Reference>> &stack, Xptr<Reference> &&ref){
+		ASTERIA_DEBUG_LOG("Pushing: ",  read_reference_opt(ref));
+		stack.emplace_back(std::move(ref));
+	}
+	Xptr<Reference> do_pop_reference(boost::container::vector<Xptr<Reference>> &stack){
+		if(stack.empty()){
+			ASTERIA_THROW_RUNTIME_ERROR("The reference stack is empty (this is probably due to an unbalanced expression)");
+		}
+		auto ref = std::move(stack.back());
+		ASTERIA_DEBUG_LOG("Popping: ",  read_reference_opt(ref));
+		stack.pop_back();
+		return ref;
+	}
+
 	template<typename ResultT>
 	void do_set_result(Xptr<Reference> &ref_inout_opt, Spref<Recycler> recycler, bool compound_assignment, ResultT &&result){
 		if(compound_assignment){
@@ -195,14 +209,14 @@ namespace {
 		return lhs ^ rhs;
 	}
 
-	std::string do_concatenate_strings(const std::string &lhs, const std::string &rhs){
+	std::string do_concatenate(const std::string &lhs, const std::string &rhs){
 		std::string result;
 		result.reserve(lhs.size() + rhs.size());
 		result.append(lhs);
 		result.append(rhs);
 		return result;
 	}
-	std::string do_duplicate_string(const std::string &lhs, std::int64_t rhs){
+	std::string do_duplicate(const std::string &lhs, std::int64_t rhs){
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("String duplication count was negative: lhs = ", lhs, ", rhs = ", rhs);
 		}
@@ -230,6 +244,7 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 	if(!expression_opt){
 		return nullptr;
 	}
+	ASTERIA_DEBUG_LOG(">>>>>>> Beginning of evaluation of expression >>>>>>>");
 	// Parameters are pushed from right to left, in lexical order.
 	boost::container::vector<Xptr<Reference>> stack;
 	// Evaluate nodes in reverse-polish order.
@@ -243,7 +258,7 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 			Reference::S_constant ref_c = { params.source_opt };
 			auto sptr = std::make_shared<Reference>(std::move(ref_c));
 			ref.reset(std::move(sptr));
-			stack.emplace_back(std::move(ref));
+			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
@@ -256,14 +271,14 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
 			}
 			// Push the reference onto the stack as-is.
-			stack.emplace_back(std::move(ref));
+			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
 			auto ref = evaluate_expression_opt(recycler, scope, params.subexpression_opt);
 			// Push the result reference onto the stack as-is.
-			stack.emplace_back(std::move(ref));
+			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_lambda_definition: {
 //			const auto &params = node.get<Expression_node::S_lambda_definition>();
@@ -272,17 +287,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 		case Expression_node::type_pruning: {
 			const auto &params = node.get<Expression_node::S_pruning>();
 			// Pop references requested.
-			ASTERIA_VERIFY(stack.size() >= params.count_to_pop, ASTERIA_THROW_RUNTIME_ERROR("No enough arguments have been pushed"));
 			for(std::size_t i = 0; i < params.count_to_pop; ++i){
-				stack.pop_back();
+				do_pop_reference(stack);
 			}
 			break; }
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
 			// Pop the condition off the stack.
-			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for branch node"));
-			auto condition_ref = std::move(stack.back());
-			stack.pop_back();
+			auto condition_ref = do_pop_reference(stack);
 			// Pick a branch basing on the condition.
 			const auto condition_var = read_reference_opt(condition_ref);
 			const auto branch_taken = test_variable(condition_var) ? params.branch_true_opt.share() : params.branch_false_opt.share();
@@ -291,14 +303,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			if(!ref){
 				ref = std::move(condition_ref);
 			}
-			stack.emplace_back(std::move(ref));
+			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_function_call: {
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
-			ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for function call node"));
-			auto callee_ref = std::move(stack.back());
-			stack.pop_back();
+			auto callee_ref = do_pop_reference(stack);
 			const auto callee_var = read_reference_opt(callee_ref);
 			// Make sure it is really a function.
 			const auto callee_type = get_variable_type(callee_var);
@@ -310,10 +320,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			boost::container::vector<Xptr<Reference>> arguments;
 			arguments.resize(std::max(params.argument_count, callee.default_arguments_opt.size()));
 			// Pop arguments off the stack.
-			ASTERIA_VERIFY(stack.size() >= params.argument_count, ASTERIA_THROW_RUNTIME_ERROR("No enough arguments have been pushed"));
 			for(std::size_t i = 0; i < params.argument_count; ++i){
-				arguments.at(i) = std::move(stack.back());
-				stack.pop_back();
+				arguments.at(i) = do_pop_reference(stack);
 			}
 			// Replace null arguments with default ones.
 			for(std::size_t i = 0; i < callee.default_arguments_opt.size(); ++i){
@@ -330,16 +338,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			}
 			// Call the function and push the result as-is.
 			auto ref = callee.function(recycler, std::move(arguments));
-			stack.emplace_back(std::move(ref));
+			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {
 			const auto &params = node.get<Expression_node::S_operator_rpn>();
 			switch(params.operator_generic){
 			case Expression_node::operator_postfix_inc: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
 				// Increment the operand and return the old value.
 				// `compound_assignment` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -355,13 +361,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_postfix_dec: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
 				// Decrement the operand and return the old value.
 				// `compound_assignment` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -377,15 +381,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_postfix_at: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// The subscript operand shall have type `integer` or `string`. In neither case will `rhs_ref` be null, hence it can be safely reused.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -399,13 +400,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined subscript type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_pos: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Copy the referenced variable to create an rvalue, then return it.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_variable_type(rhs_var);
@@ -418,13 +417,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_neg: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Negate the operand.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_variable_type(rhs_var);
@@ -437,13 +434,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_not_b: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Bitwise NOT the operand.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_variable_type(rhs_var);
@@ -456,24 +451,20 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_not_l: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
 				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(test_variable(rhs_var)));
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_inc: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Increment the operand and return it.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -487,13 +478,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_prefix_dec: {
 				// Pop the operand off the stack.
-				ASTERIA_VERIFY(stack.size() >= 1, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto rhs_ref = do_pop_reference(stack);
 				// Decrement the operand and return it.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -507,15 +496,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(rhs_ref));
+				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_eq: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Report unordered operands as being unequal.
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -526,15 +512,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_equal);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_ne: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Report unordered operands as being unequal.
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -545,15 +528,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_equal);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_lt: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -566,15 +546,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_less);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_gt: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -587,15 +564,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_greater);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_lte: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -608,15 +582,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_greater);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_gte: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -629,15 +600,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					lhs_ref = std::move(rhs_ref);
 				}
 				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_less);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_add: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// For the boolean type, return the logical OR'd result of both operands.
 				// For the integer and double types, return the sum of both operands.
 				// For the string type, concatenate the operands in the lexical order to create a new string, then return it.
@@ -660,19 +628,16 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_string)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate_strings(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_sub: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// For the boolean type, return the logical XOR'd result of both operands.
 				// For the integer and double types, return the difference of both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
@@ -694,15 +659,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_mul: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// For the boolean type, return the logical AND'd result of both operands.
 				// For the integer and double types, return the product of both operands.
 				// If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
@@ -725,23 +687,20 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate_string(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_string)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate_string(rhs, lhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(rhs, lhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_div: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Divide the first operand by the second operand and return the quotient.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -758,15 +717,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_mod: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Divide the first operand by the second operand and return the remainder.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -783,15 +739,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_sll: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Shift the first operand to the left by the number of bits specified by the second operand
 				// Bits shifted out are discarded. Bits shifted in are filled with zeroes.
 				// Both operands have to be integers.
@@ -806,15 +759,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_sla: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Shift the first operand to the left by the number of bits specified by the second operand
 				// Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
 				// If a bit unequal to the sign bit would be shifted into or across the sign bit, an exception is thrown.
@@ -830,15 +780,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_srl: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Shift the first operand to the right by the number of bits specified by the second operand
 				// Bits shifted out are discarded. Bits shifted in are filled with zeroes.
 				// Both operands have to be integers.
@@ -853,15 +800,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_sra: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Shift the first operand to the right by the number of bits specified by the second operand
 				// Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
 				// Both operands have to be integers.
@@ -876,15 +820,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_and_b: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Perform bitwise and on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -901,15 +842,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_or_b: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Perform bitwise or on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -926,15 +864,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_xor_b: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Perform bitwise xor on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
@@ -951,15 +886,12 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
 				}
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_assign: {
 				// Pop two operands off the stack.
-				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
-				auto lhs_ref = std::move(stack.back());
-				stack.pop_back();
-				auto rhs_ref = std::move(stack.back());
-				stack.pop_back();
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
 				// Copy the variable referenced by `rhs_ref` into `lhs_ref`, then return it.
 				// `compound_assignment` is ignored.
 				// N.B. This is one of the few operators that work on all types.
@@ -967,7 +899,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				extract_variable_from_reference(var, recycler, std::move(rhs_ref));
 				const auto wref = drill_reference(lhs_ref);
 				wref.get() = std::move(var);
-				stack.emplace_back(std::move(lhs_ref));
+				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			default:
 				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "`. This is probably a bug, please report.");
@@ -983,6 +915,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 	if(stack.size() != 1){
 		ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression, number of references remaining is `", stack.size(), "`");
 	}
+	ASTERIA_DEBUG_LOG("<<<<<<< End of evaluation of expression <<<<<<<<<<<<");
 	return std::move(stack.front());
 }
 
