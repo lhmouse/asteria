@@ -160,7 +160,7 @@ namespace {
 		if(((lhs & mask) != 0) && ((lhs & mask) != mask)){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
 		}
-		return lhs << rhs;
+		return static_cast<std::int64_t>(static_cast<std::uint64_t>(lhs) << rhs);
 	}
 	std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs){
 		if(rhs < 0){
