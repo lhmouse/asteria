@@ -15,6 +15,60 @@ Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcep
 	return reference_opt ? reference_opt->get_type() : Reference::type_null;
 }
 
+void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
+	const auto type = get_reference_type(reference_opt);
+	switch(type){
+	case Reference::type_null: {
+		os <<"null";
+		return; }
+	case Reference::type_constant: {
+		const auto &value = reference_opt->get<Reference::S_constant>();
+		os <<"constant `";
+		dump_variable(os, value.source_opt, indent_next, indent_increment);
+		os <<"`";
+		return; }
+	case Reference::type_temporary_value: {
+		const auto &value = reference_opt->get<Reference::S_temporary_value>();
+		os <<"temporary value `";
+		dump_variable(os, value.variable_opt, indent_next, indent_increment);
+		os <<"`";
+		return; }
+	case Reference::type_local_variable: {
+		const auto &value = reference_opt->get<Reference::S_local_variable>();
+		if(value.local_variable->immutable){
+			os <<"constant ";
+		}
+		os <<"local variable `";
+		dump_variable(os, value.local_variable->variable_opt, indent_next, indent_increment);
+		os <<"`";
+		return; }
+	case Reference::type_array_element: {
+		const auto &value = reference_opt->get<Reference::S_array_element>();
+		os <<"the element at index [" <<value.index <<"] of `";
+		dump_reference(os, value.parent_opt, indent_next, indent_increment);
+		os <<"`";
+		return; }
+	case Reference::type_object_member: {
+		const auto &value = reference_opt->get<Reference::S_object_member>();
+		os <<"the value having key \"" <<value.key <<"\"] in `";
+		dump_reference(os, value.parent_opt, indent_next, indent_increment);
+		os <<"`";
+		return; }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		std::terminate();
+	}
+}
+
+std::ostream &operator<<(std::ostream &os, Spref<const Reference> reference_opt){
+	dump_reference(os, reference_opt);
+	return os;
+}
+std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt){
+	dump_reference(os, reference_opt);
+	return os;
+}
+
 void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
@@ -39,7 +93,7 @@ void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> sourc
 		copy_reference(object_member.parent_opt, source.parent_opt);
 		return reference_out.reset(std::make_shared<Reference>(std::move(object_member))); }
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
@@ -145,7 +199,7 @@ namespace {
 			Dereference_result res = { it->second, parent_result.rvalue, &(it->second) };
 			return std::move(res); }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 			std::terminate();
 		}
 	}

@@ -94,6 +94,7 @@ public:
 };
 
 extern const char *get_type_name(Variable::Type type) noexcept;
+
 extern Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept;
 extern const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept;
 

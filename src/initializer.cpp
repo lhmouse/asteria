@@ -51,7 +51,7 @@ void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler,
 		set_variable(variable_out, recycler, std::move(object));
 		return; }
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);
 		std::terminate();
 	}
 }

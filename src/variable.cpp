@@ -43,6 +43,7 @@ const char *get_type_name(Variable::Type type) noexcept {
 		return "<unknown>";
 	}
 }
+
 Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept {
 	return variable_opt ? variable_opt->get_type() : Variable::type_null;
 }

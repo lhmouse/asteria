@@ -84,6 +84,11 @@ public:
 
 extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
 
+extern void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+
+extern std::ostream &operator<<(std::ostream &os, Spref<const Reference> reference_opt);
+extern std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt);
+
 extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
 
 extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);

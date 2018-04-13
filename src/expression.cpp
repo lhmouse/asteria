@@ -26,7 +26,7 @@ namespace {
 	}
 
 	void do_push_reference(boost::container::vector<Xptr<Reference>> &stack, Xptr<Reference> &&ref){
-		ASTERIA_DEBUG_LOG("Pushing: ",  read_reference_opt(ref));
+		ASTERIA_DEBUG_LOG("Pushing: ", ref);
 		stack.emplace_back(std::move(ref));
 	}
 	Xptr<Reference> do_pop_reference(boost::container::vector<Xptr<Reference>> &stack){
@@ -34,7 +34,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("The reference stack is empty (this is probably due to an unbalanced expression)");
 		}
 		auto ref = std::move(stack.back());
-		ASTERIA_DEBUG_LOG("Popping: ",  read_reference_opt(ref));
+		ASTERIA_DEBUG_LOG("Popping: ", ref);
 		stack.pop_back();
 		return ref;
 	}
@@ -907,7 +907,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			}
 			break; }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unknown reference node type enumeration `", type, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
