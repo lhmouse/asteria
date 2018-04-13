@@ -4,8 +4,9 @@ AM_CPPFLAGS = -Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wno-error=un
 	-Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas -Wswitch-enum	\
 	-pipe -fPIC -DPIC
 AM_CXXFLAGS = -Wnon-virtual-dtor -pedantic -pedantic-errors -std=c++11
+
 if ENABLE_DEBUG_CHECKS
-AM_CXXFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
+AM_CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC
 endif
 
 %.hpp.gch: %.hpp
