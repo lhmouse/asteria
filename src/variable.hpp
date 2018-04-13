@@ -35,11 +35,15 @@ public:
 		>;
 
 private:
-	Wptr<Recycler> m_weak_recycler;
+	const Wptr<Recycler> m_weak_recycler;
 	Types::rebind_as_variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
+	Variable(ValueT &&value)
+		: m_weak_recycler(), m_variant(std::forward<ValueT>(value))
+	{ }
+	template<typename ValueT>
 	Variable(Wptr<Recycler> weak_recycler, ValueT &&value)
 		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<ValueT>(value))
 	{ }
