@@ -9,7 +9,7 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
-#include <cmath> // isless(), isgreater(), etc.
+#include <cmath> // fmod()
 
 namespace Asteria {
 
