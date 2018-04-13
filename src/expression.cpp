@@ -608,7 +608,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				auto rhs_ref = do_pop_reference(stack);
 				// For the boolean type, return the logical OR'd result of both operands.
 				// For the integer and double types, return the sum of both operands.
-				// For the string type, concatenate the operands in the lexical order to create a new string, then return it.
+				// For the string type, concatenate the operands in lexical order to create a new string, then return it.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto lhs_type = get_variable_type(lhs_var);
