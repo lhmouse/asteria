@@ -6,6 +6,7 @@
 #include "../src/reference.hpp"
 #include "../src/stored_value.hpp"
 #include "../src/recycler.hpp"
+#include <cmath> // NAN
 
 using namespace Asteria;
 

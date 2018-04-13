@@ -8,7 +8,7 @@
 #include "recycler.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
-#include <cmath> // ceil(), isgreater(), etc.
+#include <cmath> // std::ceil(), std::isgreater(), etc.
 
 namespace Asteria {
 

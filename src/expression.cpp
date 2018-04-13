@@ -9,7 +9,7 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
-#include <cmath> // fmod()
+#include <cmath> // std::fmod()
 
 namespace Asteria {
 

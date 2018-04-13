@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include <iostream> // std::cerr
-#include <time.h> // time_t, time(), asctime_r()
+#include <time.h> // ::time_t, ::time(), ::asctime_r()
 
 namespace Asteria {
 

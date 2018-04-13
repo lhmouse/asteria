@@ -4,9 +4,9 @@
 #ifndef ASTERIA_XPTR_HPP_
 #define ASTERIA_XPTR_HPP_
 
-#include <memory> // std::shared_ptr
-#include <utility> // std::move, std::swap
-#include <type_traits> // std::enable_if, std::is_convertible, std::remove_cv, std::is_same
+#include <memory> // std::shared_ptr<>
+#include <utility> // std::move(), std::swap()
+#include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
 
 namespace Asteria {
 
