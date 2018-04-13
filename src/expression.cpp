@@ -194,9 +194,38 @@ namespace {
 	std::int64_t do_bitwise_xor(std::int64_t lhs, std::int64_t rhs){
 		return lhs ^ rhs;
 	}
+
+	std::string do_concatenate_strings(const std::string &lhs, const std::string &rhs){
+		std::string result;
+		result.reserve(lhs.size() + rhs.size());
+		result.append(lhs);
+		result.append(rhs);
+		return result;
+	}
+	std::string do_duplicate_string(const std::string &lhs, std::int64_t rhs){
+		if(rhs < 0){
+			ASTERIA_THROW_RUNTIME_ERROR("String duplication count was negative: lhs = ", lhs, ", rhs = ", rhs);
+		}
+		std::string result;
+		if(rhs == 0){
+			return result;
+		}
+		const auto count = static_cast<std::uint64_t>(rhs);
+		if(lhs.size() > result.max_size() / count){
+			ASTERIA_THROW_RUNTIME_ERROR("The result string is too long and cannot be allocated: lhs = ", lhs, ", rhs = ", rhs);
+		}
+		result.reserve(lhs.size() * static_cast<std::size_t>(count));
+		for(auto mask = UINT64_C(1) << 63; mask != 0; mask >>= 1){
+			result.append(result);
+			if(count & mask){
+				result.append(lhs);
+			}
+		}
+		return result;
+	}
 }
 
-Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
+Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
 	// Return a null reference only when a null expression is given.
 	if(!expression_opt){
 		return nullptr;
@@ -232,7 +261,7 @@ Xptr<Reference> evaluate_expression_recursive_opt(Spref<Recycler> recycler, Spre
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
-			auto ref = evaluate_expression_recursive_opt(recycler, scope, params.subexpression_opt);
+			auto ref = evaluate_expression_opt(recycler, scope, params.subexpression_opt);
 			// Push the result reference onto the stack as-is.
 			stack.emplace_back(std::move(ref));
 			break; }
@@ -258,7 +287,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto condition_var = read_reference_opt(condition_ref);
 			const auto branch_taken = test_variable(condition_var) ? params.branch_true_opt.share() : params.branch_false_opt.share();
 			// If the branch exists, evaluate it. Otherwise, pick the condition instead.
-			auto ref = evaluate_expression_recursive_opt(recycler, scope, branch_taken);
+			auto ref = evaluate_expression_opt(recycler, scope, branch_taken);
 			if(!ref){
 				ref = std::move(condition_ref);
 			}
@@ -602,21 +631,59 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_less);
 				stack.emplace_back(std::move(lhs_ref));
 				break; }
-/*			case Expression_node::operator_infix_add: {
-				break; }
-*/			case Expression_node::operator_infix_sub: {
+			case Expression_node::operator_infix_add: {
 				// Pop two operands off the stack.
 				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
 				auto lhs_ref = std::move(stack.back());
 				stack.pop_back();
 				auto rhs_ref = std::move(stack.back());
 				stack.pop_back();
-				// Subtract the second operand from the first operand.
+				// For the boolean type, return the logical OR'd result of both operands.
+				// For the integer and double types, return the sum of both operands.
+				// For the string type, concatenate the operands in the lexical order to create a new string, then return it.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto lhs_type = get_variable_type(lhs_var);
 				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
+				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_add(lhs, rhs));
+				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+					const auto lhs = lhs_var->get<D_double>();
+					const auto rhs = rhs_var->get<D_double>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_add(lhs, rhs));
+				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_string)){
+					const auto lhs = lhs_var->get<D_string>();
+					const auto rhs = rhs_var->get<D_string>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate_strings(lhs, rhs));
+				} else {
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+				}
+				stack.emplace_back(std::move(lhs_ref));
+				break; }
+			case Expression_node::operator_infix_sub: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				// For the boolean type, return the logical XOR'd result of both operands.
+				// For the integer and double types, return the difference of both operands.
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
+				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_subtract(lhs, rhs));
@@ -629,9 +696,46 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				}
 				stack.emplace_back(std::move(lhs_ref));
 				break; }
-/*			case Expression_node::operator_infix_mul: {
+			case Expression_node::operator_infix_mul: {
+				// Pop two operands off the stack.
+				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
+				auto lhs_ref = std::move(stack.back());
+				stack.pop_back();
+				auto rhs_ref = std::move(stack.back());
+				stack.pop_back();
+				// For the boolean type, return the logical AND'd result of both operands.
+				// For the integer and double types, return the product of both operands.
+				// If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+					const auto lhs = lhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->get<D_boolean>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
+				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_multiply(lhs, rhs));
+				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+					const auto lhs = lhs_var->get<D_double>();
+					const auto rhs = rhs_var->get<D_double>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_multiply(lhs, rhs));
+				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_integer)){
+					const auto lhs = lhs_var->get<D_string>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate_string(lhs, rhs));
+				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_string)){
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_string>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate_string(rhs, lhs));
+				} else {
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+				}
+				stack.emplace_back(std::move(lhs_ref));
 				break; }
-*/			case Expression_node::operator_infix_div: {
+			case Expression_node::operator_infix_div: {
 				// Pop two operands off the stack.
 				ASTERIA_VERIFY(stack.size() >= 2, ASTERIA_THROW_RUNTIME_ERROR("Missing operand for ", opn(params)));
 				auto lhs_ref = std::move(stack.back());
