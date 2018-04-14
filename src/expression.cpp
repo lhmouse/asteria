@@ -4,8 +4,9 @@
 #include "precompiled.hpp"
 #include "expression.hpp"
 #include "variable.hpp"
-#include "reference.hpp"
 #include "stored_value.hpp"
+#include "reference.hpp"
+#include "stored_reference.hpp"
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
@@ -50,12 +51,7 @@ namespace {
 			Xptr<Variable> var;
 			set_variable(var, recycler, std::forward<ResultT>(result));
 			Reference::S_temporary_value ref_d = { std::move(var) };
-			if(ref_inout_opt == nullptr){
-				auto sptr = std::make_shared<Reference>(std::move(ref_d));
-				return ref_inout_opt.reset(std::move(sptr));
-			} else {
-				return ref_inout_opt->set(std::move(ref_d));
-			}
+			return set_reference(ref_inout_opt, std::move(ref_d));
 		}
 	}
 
@@ -256,8 +252,7 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 			// Create an immutable reference to the constant.
 			Xptr<Reference> ref;
 			Reference::S_constant ref_c = { params.source_opt };
-			auto sptr = std::make_shared<Reference>(std::move(ref_c));
-			ref.reset(std::move(sptr));
+			set_reference(ref, std::move(ref_c));
 			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_named_reference: {
@@ -333,8 +328,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					continue;
 				}
 				Reference::S_constant ref_c = { default_argument };
-				auto sptr = std::make_shared<Reference>(std::move(ref_c));
-				arguments.at(i).reset(std::move(sptr));
+				set_reference(arguments.at(i), std::move(ref_c));
 			}
 			// Call the function and push the result as-is.
 			auto ref = callee.function(recycler, std::move(arguments));

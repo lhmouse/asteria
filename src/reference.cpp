@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "reference.hpp"
+#include "stored_reference.hpp"
 #include "variable.hpp"
 #include "stored_value.hpp"
 #include "utilities.hpp"
@@ -69,32 +70,50 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt)
 	return os;
 }
 
+void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt){
+	const auto value = value_opt.get_opt();
+	if(value == nullptr){
+		return reference_out.reset();
+	} else if(reference_out == nullptr){
+		auto sptr = std::make_shared<Reference>(std::move(*value));
+		return reference_out.reset(std::move(sptr));
+	} else {
+		return reference_out->set(std::move(*value));
+	}
+}
 void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
 	case Reference::type_null: {
-		return reference_out.reset(); }
+		return set_reference(reference_out, nullptr); }
 	case Reference::type_constant: {
 		const auto &source = source_opt->get<Reference::S_constant>();
-		return reference_out.reset(std::make_shared<Reference>(source)); }
+		return set_reference(reference_out, source); }
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
 	case Reference::type_local_variable: {
 		const auto &source = source_opt->get<Reference::S_local_variable>();
-		return reference_out.reset(std::make_shared<Reference>(source)); }
+		return set_reference(reference_out, source); }
 	case Reference::type_array_element: {
 		const auto &source = source_opt->get<Reference::S_array_element>();
-		Reference::S_array_element array_element = { nullptr, source.index };
-		copy_reference(array_element.parent_opt, source.parent_opt);
-		return reference_out.reset(std::make_shared<Reference>(std::move(array_element))); }
+		copy_reference(reference_out, source.parent_opt);
+		Reference::S_array_element array_element = { std::move(reference_out), source.index };
+		return set_reference(reference_out, std::move(array_element)); }
 	case Reference::type_object_member: {
 		const auto &source = source_opt->get<Reference::S_object_member>();
-		Reference::S_object_member object_member = { nullptr, source.key };
-		copy_reference(object_member.parent_opt, source.parent_opt);
-		return reference_out.reset(std::make_shared<Reference>(std::move(object_member))); }
+		copy_reference(reference_out, source.parent_opt);
+		Reference::S_object_member object_member = { std::move(reference_out), source.key };
+		return set_reference(reference_out, std::move(object_member)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
+	}
+}
+void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt){
+	if(source_opt == nullptr){
+		return reference_out.reset();
+	} else {
+		return reference_out.reset(source_opt.release());
 	}
 }
 

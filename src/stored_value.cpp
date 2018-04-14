@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "stored_value.hpp"
-#include "variable.hpp"
 
 namespace Asteria {
 

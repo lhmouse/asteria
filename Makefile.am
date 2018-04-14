@@ -26,6 +26,7 @@ pkginclude_HEADERS =	\
 	asteria/src/variable.hpp	\
 	asteria/src/stored_value.hpp	\
 	asteria/src/reference.hpp	\
+	asteria/src/stored_reference.hpp	\
 	asteria/src/exception.hpp	\
 	asteria/src/initializer.hpp	\
 	asteria/src/expression_node.hpp	\
@@ -43,6 +44,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/variable.cpp	\
 	asteria/src/stored_value.cpp	\
 	asteria/src/reference.cpp	\
+	asteria/src/stored_reference.cpp	\
 	asteria/src/exception.cpp	\
 	asteria/src/initializer.cpp	\
 	asteria/src/expression_node.cpp	\
