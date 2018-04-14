@@ -3,8 +3,9 @@
 
 #include "test_init.hpp"
 #include "../src/variable.hpp"
-#include "../src/reference.hpp"
 #include "../src/stored_value.hpp"
+#include "../src/reference.hpp"
+#include "../src/stored_reference.hpp"
 #include "../src/recycler.hpp"
 #include <cmath> // NAN
 
@@ -40,12 +41,13 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<D_opaque>().handle == opaque.handle);
 
 	boost::container::vector<Xptr<Reference>> params;
+	params.resize(2);
 	set_variable(var, recycler, D_integer(12));
-	Reference::S_temporary_value ref = { std::move(var) };
-	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
+	Reference::S_temporary_value ref_t = { std::move(var) };
+	set_reference(params.at(0), std::move(ref_t));
 	set_variable(var, recycler, D_integer(15));
-	ref = { std::move(var) };
-	params.emplace_back(std::make_shared<Reference>(std::move(ref)));
+	ref_t = { std::move(var) };
+	set_reference(params.at(1), std::move(ref_t));
 	D_function function = {
 		{ },
 		[](Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
@@ -55,8 +57,9 @@ int main(){
 			ASTERIA_TEST_CHECK(param_two);
 			Xptr<Variable> xptr;
 			set_variable(xptr, recycler, param_one->get<D_integer>() * param_two->get<D_integer>());
-			Reference::S_temporary_value ref = { std::move(xptr) };
-			return Xptr<Reference>(std::make_shared<Reference>(std::move(ref)));
+			Reference::S_temporary_value ref_t = { std::move(xptr) };
+			set_reference(params.at(0), std::move(ref_t));
+			return std::move(params.at(0));
 		}
 	};
 	set_variable(var, recycler, std::move(function));

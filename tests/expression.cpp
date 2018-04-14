@@ -6,6 +6,7 @@
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
 #include "../src/reference.hpp"
+#include "../src/stored_reference.hpp"
 #include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
 
@@ -18,17 +19,20 @@ int main(){
 	auto dval = std::make_shared<Local_variable>();
 	set_variable(dval->variable_opt, recycler, D_double(1.5));
 	Reference::S_local_variable lref = { dval };
-	scope->set_local_reference("dval", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	auto lrwref = scope->drill_for_local_reference("dval");
+	set_reference(lrwref, std::move(lref));
 
 	auto cval = std::make_shared<Local_variable>();
 	set_variable(cval->variable_opt, recycler, D_integer(3));
 	lref = { cval };
-	scope->set_local_reference("cval", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	lrwref = scope->drill_for_local_reference("cval");
+	set_reference(lrwref, std::move(lref));
 
 	auto rval = std::make_shared<Local_variable>();
 	set_variable(rval->variable_opt, recycler, D_string("???"));
 	lref = { rval };
-	scope->set_local_reference("rval", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	lrwref = scope->drill_for_local_reference("rval");
+	set_reference(lrwref, std::move(lref));
 
 	// Plain: rval = !condition ? (dval++ + 0.25) : (cval * "hello,");
 	// RPN:   condition ! [?:] rval =              ::= expr
@@ -70,7 +74,8 @@ int main(){
 
 	auto condition = std::make_shared<Local_variable>();
 	lref = { condition };
-	scope->set_local_reference("condition", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	lrwref = scope->drill_for_local_reference("condition");
+	set_reference(lrwref, std::move(lref));
 
 	set_variable(condition->variable_opt, recycler, D_boolean(false));
 	auto result = evaluate_expression_opt(recycler, scope, expr);

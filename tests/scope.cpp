@@ -5,6 +5,7 @@
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
 #include "../src/reference.hpp"
+#include "../src/stored_reference.hpp"
 #include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
 
@@ -18,7 +19,8 @@ int main(){
 	set_variable(one->variable_opt, recycler, D_integer(42));
 	one->immutable = true;
 	Reference::S_local_variable lref = { one };
-	scope->set_local_reference("one", Xptr<Reference>(std::make_shared<Reference>(std::move(lref))));
+	auto wref= scope->drill_for_local_reference("one");
+	set_reference(wref, std::move(lref));
 
 	auto ref = scope->get_local_reference_opt("one");
 	ASTERIA_TEST_CHECK(ref);
