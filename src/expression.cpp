@@ -222,7 +222,7 @@ namespace {
 		}
 		const auto count = static_cast<std::uint64_t>(rhs);
 		if(lhs.size() > result.max_size() / count){
-			ASTERIA_THROW_RUNTIME_ERROR("The result string is too long and cannot be allocated: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("The result string would be too long and could not be allocated: lhs.length() = ", lhs.length(), ", rhs = ", rhs);
 		}
 		result.reserve(lhs.size() * static_cast<std::size_t>(count));
 		for(auto mask = UINT64_C(1) << 63; mask != 0; mask >>= 1){
