@@ -5,7 +5,6 @@
 #include "variable.hpp"
 #include "stored_value.hpp"
 #include "utilities.hpp"
-#include "recycler.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <cmath> // std::ceil(), std::isgreater(), etc.
@@ -216,18 +215,6 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
 	return os;
 }
 
-void set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt){
-	const auto value = value_opt.get_opt();
-	if(value == nullptr){
-		return variable_out.reset();
-	} else if(variable_out == nullptr){
-		auto sptr = std::make_shared<Variable>(recycler, std::move(*value));
-		recycler->adopt_variable(sptr);
-		return variable_out.reset(std::move(sptr));
-	} else {
-		return variable_out->set(std::move(*value));
-	}
-}
 void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){

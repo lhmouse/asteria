@@ -91,7 +91,6 @@ extern void dump_reference(std::ostream &os, Spref<const Reference> reference_op
 extern std::ostream &operator<<(std::ostream &os, Spref<const Reference> reference_opt);
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt);
 
-extern void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt);
 extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
 extern void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt);
 

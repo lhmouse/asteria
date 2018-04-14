@@ -53,6 +53,8 @@ public:
 	}
 };
 
+extern void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt);
+
 }
 
 #endif

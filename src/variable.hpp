@@ -104,7 +104,6 @@ extern void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, 
 extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt);
 
-extern void set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
 extern void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
 extern void move_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Variable> &&source_opt);
 

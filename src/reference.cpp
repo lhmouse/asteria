@@ -70,17 +70,6 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt)
 	return os;
 }
 
-void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt){
-	const auto value = value_opt.get_opt();
-	if(value == nullptr){
-		return reference_out.reset();
-	} else if(reference_out == nullptr){
-		auto sptr = std::make_shared<Reference>(std::move(*value));
-		return reference_out.reset(std::move(sptr));
-	} else {
-		return reference_out->set(std::move(*value));
-	}
-}
 void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
