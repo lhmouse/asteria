@@ -108,9 +108,10 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 
 namespace {
 	struct Dereference_result {
-		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
-		bool rvalue;                    // Is this reference an rvalue that must not be written into?
-		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
+		Sptr<const Variable> rptr_opt;   // How to read a value through this reference?
+		Sptr<const Variable> prptr_opt;  // Where is my parent?
+		bool rvalue;                     // Is this reference an rvalue that must not be written into?
+		Xptr<Variable> *wref_opt;        // How to write a value through this reference?
 	};
 
 	Dereference_result do_dereference_unsafe(Spref<Reference> reference_opt, bool create_as_needed){
@@ -118,22 +119,23 @@ namespace {
 		switch(type){
 		case Reference::type_null: {
 			// Return a null result.
-			Dereference_result res = { nullptr, true, nullptr };
+			Dereference_result res = { nullptr, nullptr, true, nullptr };
 			return std::move(res); }
 		case Reference::type_constant: {
 			auto &params = reference_opt->get<Reference::S_constant>();
 			// The variable is read-only.
-			Dereference_result res = { params.source_opt, true, nullptr };
+			Dereference_result res = { params.source_opt, nullptr, true, nullptr };
 			return std::move(res); }
 		case Reference::type_temporary_value: {
 			auto &params = reference_opt->get<Reference::S_temporary_value>();
 			// The variable has to be 'writeable' because it can be moved from.
-			Dereference_result res = { params.variable_opt, true, &(params.variable_opt) };
+			Dereference_result res = { params.variable_opt, nullptr, true, &(params.variable_opt) };
 			return std::move(res); }
 		case Reference::type_local_variable: {
 			auto &params = reference_opt->get<Reference::S_local_variable>();
 			// Local variables can be either read from or written into.
-			Dereference_result res = { params.local_variable->variable_opt, false, params.local_variable->immutable ? nullptr : &(params.local_variable->variable_opt) };
+			const auto &local_var = params.local_variable;
+			Dereference_result res = { local_var->variable_opt, nullptr, false, local_var->immutable ? nullptr : &(local_var->variable_opt) };
 			return std::move(res); }
 		case Reference::type_array_element: {
 			auto &params = reference_opt->get<Reference::S_array_element>();
@@ -152,7 +154,7 @@ namespace {
 			if(normalized_index < 0){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Prepend `null`s until the subscript designates the beginning.
@@ -167,7 +169,7 @@ namespace {
 			} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Append `null`s until the subscript designates the end.
@@ -179,7 +181,7 @@ namespace {
 				array.resize(array.size() + static_cast<std::size_t>(count_to_append));
 			}
 			auto it = std::next(array.begin(), static_cast<std::ptrdiff_t>(normalized_index));
-			Dereference_result res = { *it, parent_result.rvalue, &*it };
+			Dereference_result res = { *it, parent_result.rptr_opt, parent_result.rvalue, &*it };
 			return std::move(res); }
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
@@ -198,13 +200,13 @@ namespace {
 			if(it == object.end()){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
 				it = object.emplace(params.key, nullptr).first;
 			}
-			Dereference_result res = { it->second, parent_result.rvalue, &(it->second) };
+			Dereference_result res = { it->second, parent_result.rptr_opt, parent_result.rvalue, &(it->second) };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
@@ -213,8 +215,11 @@ namespace {
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt, Sptr<const Variable> *parent_out_opt){
 	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
+	if(parent_out_opt){
+		*parent_out_opt = std::move(result.prptr_opt);
+	}
 	return std::move(result.rptr_opt);
 }
 std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<Reference> reference_opt){
