@@ -107,6 +107,7 @@ extern std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable
 // These functions return the old contents of the variables before the operation.
 extern void set_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Stored_value &&value_opt);
 extern void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
+extern void move_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Variable> &&source_opt);
 
 // This function is used to break dependency circles.
 extern void dispose_variable(Spref<Variable> variable_opt) noexcept;

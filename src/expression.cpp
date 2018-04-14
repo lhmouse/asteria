@@ -898,7 +898,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				Xptr<Variable> var;
 				extract_variable_from_reference(var, recycler, std::move(rhs_ref));
 				const auto wref = drill_reference(lhs_ref);
-				wref.get() = std::move(var);
+				move_variable(wref, recycler, std::move(var));
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			default:

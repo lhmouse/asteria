@@ -225,15 +225,10 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<Reference> referenc
 
 void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
 	auto result = do_dereference_unsafe(reference_opt, false);
-	if(!(result.rptr_opt && result.rvalue && result.wref_opt)){
-		// The variable cannot be moved. Make a copy instead.
-		return copy_variable(variable_out, recycler, result.rptr_opt);
-	} else if(result.rptr_opt->get_recycler_opt() != recycler){
-		// The variable itself cannot be moved because it was allocated using a different recycler. Move its contents instead.
-		return set_variable(variable_out, recycler, std::move(*(result.wref_opt->release())));
+	if(result.rptr_opt && result.rvalue && result.wref_opt){
+		return move_variable(variable_out, recycler, std::move(*(result.wref_opt)));
 	} else {
-		// The variable itself can be moved. Move the variable pointer.
-		return variable_out.reset(result.wref_opt->release());
+		return copy_variable(variable_out, recycler, result.rptr_opt);
 	}
 }
 
