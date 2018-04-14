@@ -18,13 +18,13 @@ Sptr<const Reference> Scope::get_local_reference_opt(const std::string &identifi
 	}
 	return it->second;
 }
-void Scope::set_local_reference(const std::string &identifier, Xptr<Reference> &&reference_opt){
+std::reference_wrapper<Xptr<Reference>> Scope::drill_for_local_reference(const std::string &identifier){
 	auto it = m_local_references.find(identifier);
 	if(it == m_local_references.end()){
 		ASTERIA_DEBUG_LOG("Creating local reference: identifier = ", identifier);
 		it = m_local_references.emplace(identifier, nullptr).first;
 	}
-	it->second = std::move(reference_opt);
+	return it->second;
 }
 void Scope::clear_local_references() noexcept {
 	m_local_references.clear();

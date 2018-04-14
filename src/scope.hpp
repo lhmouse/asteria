@@ -42,7 +42,7 @@ public:
 	}
 
 	Sptr<const Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
-	void set_local_reference(const std::string &identifier, Xptr<Reference> &&reference_opt);
+	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const std::string &identifier);
 	void clear_local_references() noexcept;
 };
 
