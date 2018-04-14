@@ -79,7 +79,7 @@ struct Uuid_handle {
 
 struct Binding_function {
 	boost::container::vector<Sptr<const Variable>> default_arguments_opt;
-	std::function<Xptr<Reference> (Spref<Recycler>, boost::container::vector<Xptr<Reference>> &&)> function;
+	std::function<Xptr<Reference> (Spref<Recycler> /*recycler*/, Spref<Variable> /*this*/, boost::container::vector<Xptr<Reference>> &&/*arguments*/)> function;
 };
 
 using D_null      = std::nullptr_t;

@@ -304,7 +304,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			auto callee_ref = do_pop_reference(stack);
-			const auto callee_var = read_reference_opt(callee_ref);
+			Sptr<Variable> parent_opt;
+			const auto callee_var = read_reference_opt(callee_ref, &parent_opt);
 			// Make sure it is really a function.
 			const auto callee_type = get_variable_type(callee_var);
 			if(callee_type != Variable::type_function){
@@ -331,7 +332,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				set_reference(arguments.at(i), std::move(ref_c));
 			}
 			// Call the function and push the result as-is.
-			auto ref = callee.function(recycler, std::move(arguments));
+			auto ref = callee.function(recycler, parent_opt, std::move(arguments));
 			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {

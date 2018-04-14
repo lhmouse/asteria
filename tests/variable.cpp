@@ -50,7 +50,7 @@ int main(){
 	set_reference(params.at(1), std::move(ref_t));
 	D_function function = {
 		{ },
-		[](Spref<Recycler> recycler, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
+		[](Spref<Recycler> recycler, Spref<Variable> /*parent*/, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
 			auto param_one = read_reference_opt(params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(params.at(1));
@@ -64,7 +64,7 @@ int main(){
 	};
 	set_variable(var, recycler, std::move(function));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	auto result = var->get<D_function>().function(recycler, std::move(params));
+	auto result = var->get<D_function>().function(recycler, nullptr, std::move(params));
 	auto rptr = read_reference_opt(result);
 	ASTERIA_TEST_CHECK(rptr);
 	ASTERIA_TEST_CHECK(rptr->get<D_integer>() == 180);
