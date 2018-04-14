@@ -304,8 +304,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			auto callee_ref = do_pop_reference(stack);
-			Sptr<Variable> parent_opt;
-			const auto callee_var = read_reference_opt(callee_ref, &parent_opt);
+			const auto callee_var = read_reference_opt(callee_ref);
 			// Make sure it is really a function.
 			const auto callee_type = get_variable_type(callee_var);
 			if(callee_type != Variable::type_function){
@@ -331,8 +330,18 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				Reference::S_constant ref_c = { default_argument };
 				set_reference(arguments.at(i), std::move(ref_c));
 			}
+			// Get the `this` pointer.
+			Xptr<Reference> parent;
+			const auto callee_ref_type = get_reference_type(callee_ref);
+			if(callee_ref_type == Reference::type_array_element){
+				auto &callee_params = callee_ref->get<Reference::S_array_element>();
+				parent = std::move(callee_params.parent_opt);
+			} else if(callee_ref_type == Reference::type_object_member){
+				auto &callee_params = callee_ref->get<Reference::S_object_member>();
+				parent = std::move(callee_params.parent_opt);
+			}
 			// Call the function and push the result as-is.
-			auto ref = callee.function(recycler, parent_opt, std::move(arguments));
+			auto ref = callee.function(recycler, std::move(parent), std::move(arguments));
 			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {
