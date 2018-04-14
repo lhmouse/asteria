@@ -23,21 +23,21 @@ int main(){
 	set_reference(lrwref, std::move(lref));
 
 	auto cval = std::make_shared<Local_variable>();
-	set_variable(cval->variable_opt, recycler, D_integer(3));
+	set_variable(cval->variable_opt, recycler, D_integer(10));
 	lref = { cval };
 	lrwref = scope->drill_for_local_reference("cval");
 	set_reference(lrwref, std::move(lref));
 
 	auto rval = std::make_shared<Local_variable>();
-	set_variable(rval->variable_opt, recycler, D_string("???"));
+	set_variable(rval->variable_opt, recycler, D_array());
 	lref = { rval };
 	lrwref = scope->drill_for_local_reference("rval");
 	set_reference(lrwref, std::move(lref));
 
-	// Plain: rval = !condition ? (dval++ + 0.25) : (cval * "hello,");
-	// RPN:   condition ! [?:] rval =              ::= expr
-	//                     \+-- 0.25 dval ++ +     ::= branch_true
-	//                      \-- "hello," cval *    ::= branch_false
+	// Plain: rval[1] = !condition ? (dval++ + 0.25) : (cval * "hello,");
+	// RPN:   condition ! ?: 1 rval [] =          ::= expr
+	//                    \+-- 0.25 dval ++ +     ::= branch_true
+	//                     \-- "hello," cval *    ::= branch_false
 
 	boost::container::vector<Expression_node> nodes;
 	Expression_node::S_literal s_lit = { std::make_shared<Variable>(D_double(0.25)) };
@@ -65,9 +65,13 @@ int main(){
 	s_opr = { Expression_node::operator_prefix_not_l, false };
 	nodes.emplace_back(std::move(s_opr)); // !
 	Expression_node::S_branch s_br = { std::move(branch_true), std::move(branch_false) };
-	nodes.emplace_back(std::move(s_br)); // [?:]
+	nodes.emplace_back(std::move(s_br)); // ?:
+	s_lit = { std::make_shared<Variable>(D_integer(1)) };
+	nodes.emplace_back(std::move(s_lit)); // 1
 	s_nref = { "rval" };
 	nodes.emplace_back(std::move(s_nref)); // rval
+	s_opr = { Expression_node::operator_postfix_at, false };
+	nodes.emplace_back(std::move(s_opr)); // []
 	s_opr = { Expression_node::operator_infix_assign, false };
 	nodes.emplace_back(std::move(s_opr)); // =
 	auto expr = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
@@ -80,16 +84,16 @@ int main(){
 	set_variable(condition->variable_opt, recycler, D_boolean(false));
 	auto result = evaluate_expression_opt(recycler, scope, expr);
 	ASTERIA_TEST_CHECK(dval->variable_opt->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 3);
-	ASTERIA_TEST_CHECK(rval->variable_opt->get<D_double>() == 1.75);
+	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 10);
 	auto rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rptr.get() == rval->variable_opt.get());
+	ASTERIA_TEST_CHECK(rval->variable_opt->get<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rptr->get<D_double>() == 1.75);
 
 	set_variable(condition->variable_opt, recycler, D_boolean(true));
 	result = evaluate_expression_opt(recycler, scope, expr);
 	ASTERIA_TEST_CHECK(dval->variable_opt->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 3);
-	ASTERIA_TEST_CHECK(rval->variable_opt->get<D_string>() == "hello,hello,hello,");
+	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 10);
 	rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rptr.get() == rval->variable_opt.get());
+	ASTERIA_TEST_CHECK(rval->variable_opt->get<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rptr->get<D_string>() == "hello,hello,hello,hello,hello,hello,hello,hello,hello,hello,");
 }
