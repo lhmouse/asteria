@@ -108,10 +108,10 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 
 namespace {
 	struct Dereference_result {
-		Sptr<const Variable> rptr_opt;   // How to read a value through this reference?
-		Sptr<const Variable> prptr_opt;  // Where is my parent?
-		bool rvalue;                     // Is this reference an rvalue that must not be written into?
-		Xptr<Variable> *wref_opt;        // How to write a value through this reference?
+		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
+		Sptr<Variable> prptr_opt;       // Where is my parent?
+		bool rvalue;                    // Is this reference an rvalue that must not be written into?
+		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
 	};
 
 	Dereference_result do_dereference_unsafe(Spref<Reference> reference_opt, bool create_as_needed){
@@ -148,13 +148,14 @@ namespace {
 			if(create_as_needed && (parent_result.wref_opt == nullptr)){
 				ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant array");
 			}
-			auto &array = std::const_pointer_cast<Variable>(parent_result.rptr_opt)->get<D_array>();
+			const auto prptr = std::const_pointer_cast<Variable>(parent_result.rptr_opt);
+			auto &array = prptr->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 			auto normalized_index = (params.index >= 0) ? params.index : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index) + array.size());
 			if(normalized_index < 0){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, prptr, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Prepend `null`s until the subscript designates the beginning.
@@ -169,7 +170,7 @@ namespace {
 			} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, prptr, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				// Append `null`s until the subscript designates the end.
@@ -181,7 +182,7 @@ namespace {
 				array.resize(array.size() + static_cast<std::size_t>(count_to_append));
 			}
 			auto it = std::next(array.begin(), static_cast<std::ptrdiff_t>(normalized_index));
-			Dereference_result res = { *it, parent_result.rptr_opt, parent_result.rvalue, &*it };
+			Dereference_result res = { *it, prptr, parent_result.rvalue, &*it };
 			return std::move(res); }
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
@@ -194,19 +195,20 @@ namespace {
 			if(create_as_needed && (parent_result.wref_opt == nullptr)){
 				ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant object");
 			}
-			auto &object = std::const_pointer_cast<Variable>(parent_result.rptr_opt)->get<D_object>();
+			const auto prptr = std::const_pointer_cast<Variable>(parent_result.rptr_opt);
+			auto &object = prptr->get<D_object>();
 			// Find the element.
 			auto it = object.find(params.key);
 			if(it == object.end()){
 				if(!create_as_needed){
 					ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
-					Dereference_result res = { nullptr, parent_result.rptr_opt, parent_result.rvalue, nullptr };
+					Dereference_result res = { nullptr, prptr, parent_result.rvalue, nullptr };
 					return std::move(res);
 				}
 				ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
 				it = object.emplace(params.key, nullptr).first;
 			}
-			Dereference_result res = { it->second, parent_result.rptr_opt, parent_result.rvalue, &(it->second) };
+			Dereference_result res = { it->second, prptr, parent_result.rvalue, &(it->second) };
 			return std::move(res); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
@@ -215,7 +217,7 @@ namespace {
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt, Sptr<const Variable> *parent_out_opt){
+Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt, Sptr<Variable> *parent_out_opt){
 	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
 	if(parent_out_opt){
 		*parent_out_opt = std::move(result.prptr_opt);

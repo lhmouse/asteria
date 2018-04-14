@@ -94,7 +94,7 @@ extern std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &referen
 extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
 extern void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt);
 
-extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt, Sptr<const Variable> *parent_out_opt = nullptr);
+extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt, Sptr<Variable> *parent_out_opt = nullptr);
 extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<Reference> reference_opt);
 
 // If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the variable through the reference:

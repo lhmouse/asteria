@@ -18,8 +18,8 @@ int main(){
 	Xptr<Reference> ref;
 	Reference::S_constant rsref = { var };
 	set_reference(ref, std::move(rsref));
-	Sptr<const Variable> ptr, pptr;
-	ptr = read_reference_opt(ref, &pptr);
+	Sptr<Variable> pptr;
+	auto ptr = read_reference_opt(ref, &pptr);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "meow");
 	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, D_integer(42)));
