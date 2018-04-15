@@ -33,10 +33,12 @@ void Recycler::defragment(bool aggressive) noexcept {
 	m_defragmentation_threshold = threshold_new;
 }
 void Recycler::purge_variables() noexcept {
-	for(auto &weak_rvar : m_weak_variables){
+	decltype(m_weak_variables) weak_variables;
+	weak_variables.swap(m_weak_variables);
+
+	for(auto &weak_rvar : weak_variables){
 		dispose_variable(weak_rvar.lock());
 	}
-	m_weak_variables.clear();
 }
 
 }

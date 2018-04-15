@@ -27,7 +27,8 @@ std::reference_wrapper<Xptr<Reference>> Scope::drill_for_local_reference(const s
 	return it->second;
 }
 void Scope::clear_local_references() noexcept {
-	m_local_references.clear();
+	decltype(m_local_references) local_references;
+	local_references.swap(m_local_references);
 }
 
 Sptr<const Reference> get_local_reference_cascade(Spref<const Scope> scope_opt, const std::string &identifier){
