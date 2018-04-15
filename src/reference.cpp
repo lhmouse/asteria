@@ -106,106 +106,186 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 	}
 }
 
-namespace {
-	struct Dereference_result {
-		Sptr<const Variable> rptr_opt;  // How to read a value through this reference?
-		bool rvalue;                    // Is this reference an rvalue that must not be written into?
-		Xptr<Variable> *wref_opt;       // How to write a value through this reference?
-	};
+Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
+	const auto type = get_reference_type(reference_opt);
+	switch(type){
+	case Reference::type_null:
+		return nullptr;
+	case Reference::type_constant: {
+		const auto &params = reference_opt->get<Reference::S_constant>();
+		return params.source_opt; }
+	case Reference::type_temporary_value: {
+		const auto &params = reference_opt->get<Reference::S_temporary_value>();
+		return params.variable_opt; }
+	case Reference::type_local_variable: {
+		const auto &params = reference_opt->get<Reference::S_local_variable>();
+		return params.local_variable->variable_opt; }
+	case Reference::type_array_element: {
+		const auto &params = reference_opt->get<Reference::S_array_element>();
+		// Get the parent, which has to be an array.
+		const auto parent = read_reference_opt(params.parent_opt);
+		if(get_variable_type(parent) != Variable::type_array){
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
+		}
+		const auto &array = parent->get<D_array>();
+		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
+		auto normalized_index = (params.index >= 0) ? params.index : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index) + array.size());
+		if(normalized_index < 0){
+			ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
+			return nullptr;
+		} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
+			ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
+			return nullptr;
+		}
+		const auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+		return variable_opt; }
+	case Reference::type_object_member: {
+		const auto &params = reference_opt->get<Reference::S_object_member>();
+		// Get the parent, which has to be an object.
+		const auto parent = read_reference_opt(params.parent_opt);
+		if(get_variable_type(parent) != Variable::type_object){
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
+		}
+		const auto &object = parent->get<D_object>();
+		// Find the element.
+		auto it = object.find(params.key);
+		if(it == object.end()){
+			ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
+			return nullptr;
+		}
+		const auto &variable_opt = it->second;
+		return variable_opt; }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		std::terminate();
+	}
+}
+std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> reference_opt){
+	const auto type = get_reference_type(reference_opt);
+	switch(type){
+	case Reference::type_null:
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
+	case Reference::type_constant: {
+		const auto &params = reference_opt->get<Reference::S_constant>();
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant `", params.source_opt, "`");
+		/*return;*/ }
+	case Reference::type_temporary_value: {
+		const auto &params = reference_opt->get<Reference::S_temporary_value>();
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a temporary value `", params.variable_opt, "`");
+		/*return;*/ }
+	case Reference::type_local_variable: {
+		const auto &params = reference_opt->get<Reference::S_local_variable>();
+		if(params.local_variable->immutable){
+			ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify an immutable variable `", params.local_variable->variable_opt, "`");
+		}
+		return std::ref(params.local_variable->variable_opt); }
+	case Reference::type_array_element: {
+		const auto &params = reference_opt->get<Reference::S_array_element>();
+		// Get the parent, which has to be an array.
+		const auto parent = drill_reference(params.parent_opt).get().share();
+		if(get_variable_type(parent) != Variable::type_array){
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
+		}
+		auto &array = parent->get<D_array>();
+		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
+		auto normalized_index = (params.index >= 0) ? params.index : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index) + array.size());
+		if(normalized_index < 0){
+			// Prepend `null`s until the subscript designates the beginning.
+			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
+			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
+			if(count_to_prepend > array.max_size() - array.size()){
+				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend);
+			}
+			array.resize(array.size() + static_cast<std::size_t>(count_to_prepend));
+			std::move_backward(array.begin(), std::prev(array.end(), static_cast<std::ptrdiff_t>(count_to_prepend)), array.end());
+			normalized_index = 0;
+		} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
+			// Append `null`s until the subscript designates the end.
+			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
+			const auto count_to_append = static_cast<std::uint64_t>(normalized_index) - array.size() + 1;
+			if(count_to_append > array.max_size() - array.size()){
+				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append);
+			}
+			array.resize(array.size() + static_cast<std::size_t>(count_to_append));
+		}
+		auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+		return std::ref(variable_opt); }
+	case Reference::type_object_member: {
+		const auto &params = reference_opt->get<Reference::S_object_member>();
+		// Get the parent, which has to be an object.
+		const auto parent = drill_reference(params.parent_opt).get().share();
+		if(get_variable_type(parent) != Variable::type_object){
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
+		}
+		auto &object = parent->get<D_object>();
+		// Find the element.
+		auto it = object.find(params.key);
+		if(it == object.end()){
+			ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
+			it = object.emplace(params.key, nullptr).first;
+		}
+		auto &variable_opt = it->second;
+		return std::ref(variable_opt); }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		std::terminate();
+	}
+}
 
-	Dereference_result do_dereference_unsafe(Spref<Reference> reference_opt, bool create_as_needed){
+namespace {
+	std::tuple<Sptr<const Variable>, Xptr<Variable> *> do_try_extract_variable(Spref<Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
-		case Reference::type_null: {
-			// Return a null result.
-			Dereference_result res = { nullptr, true, nullptr };
-			return std::move(res); }
+		case Reference::type_null:
+			return std::forward_as_tuple(nullptr, nullptr);
 		case Reference::type_constant: {
 			auto &params = reference_opt->get<Reference::S_constant>();
-			// The variable is read-only.
-			Dereference_result res = { params.source_opt, true, nullptr };
-			return std::move(res); }
+			return std::forward_as_tuple(params.source_opt, nullptr); }
 		case Reference::type_temporary_value: {
 			auto &params = reference_opt->get<Reference::S_temporary_value>();
-			// The variable has to be 'writeable' because it can be moved from.
-			Dereference_result res = { params.variable_opt, true, &(params.variable_opt) };
-			return std::move(res); }
+			return std::forward_as_tuple(params.variable_opt, &(params.variable_opt)); }
 		case Reference::type_local_variable: {
 			auto &params = reference_opt->get<Reference::S_local_variable>();
-			// Local variables can be either read from or written into.
-			Dereference_result res = { params.local_variable->variable_opt, false, params.local_variable->immutable ? nullptr : &(params.local_variable->variable_opt) };
-			return std::move(res); }
+			return std::forward_as_tuple(params.local_variable->variable_opt, nullptr); }
 		case Reference::type_array_element: {
 			auto &params = reference_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
-			const auto parent_result = do_dereference_unsafe(params.parent_opt, create_as_needed);
-			if(get_variable_type(parent_result.rptr_opt) != Variable::type_array){
-				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent_result.rptr_opt), "`");
+			Sptr<const Variable> parent;
+			Xptr<Variable> *parent_wptr;
+			std::tie(parent, parent_wptr) = do_try_extract_variable(params.parent_opt);
+			if(get_variable_type(parent) != Variable::type_array){
+				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
 			}
-			// Throw an error in case of possibility of modification, even when there is no need to create a new element.
-			if(create_as_needed && (parent_result.wref_opt == nullptr)){
-				ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant array");
-			}
-			auto &array = std::const_pointer_cast<Variable>(parent_result.rptr_opt)->get<D_array>();
+			const auto &array = parent->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 			auto normalized_index = (params.index >= 0) ? params.index : static_cast<std::int64_t>(static_cast<std::uint64_t>(params.index) + array.size());
 			if(normalized_index < 0){
-				if(!create_as_needed){
-					ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
-					return std::move(res);
-				}
-				// Prepend `null`s until the subscript designates the beginning.
-				ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
-				const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
-				if(count_to_prepend > array.max_size() - array.size()){
-					ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend);
-				}
-				array.resize(array.size() + static_cast<std::size_t>(count_to_prepend));
-				std::move_backward(array.begin(), std::prev(array.end(), static_cast<std::ptrdiff_t>(count_to_prepend)), array.end());
-				normalized_index = 0;
+				ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", params.index, ", size = ", array.size());
+				return std::forward_as_tuple(nullptr, nullptr);
 			} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
-				if(!create_as_needed){
-					ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
-					return std::move(res);
-				}
-				// Append `null`s until the subscript designates the end.
-				ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
-				const auto count_to_append = static_cast<std::uint64_t>(normalized_index) - array.size() + 1;
-				if(count_to_append > array.max_size() - array.size()){
-					ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append);
-				}
-				array.resize(array.size() + static_cast<std::size_t>(count_to_append));
+				ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
+				return std::forward_as_tuple(nullptr, nullptr);
 			}
-			auto it = std::next(array.begin(), static_cast<std::ptrdiff_t>(normalized_index));
-			Dereference_result res = { *it, parent_result.rvalue, &*it };
-			return std::move(res); }
+			const auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+			return std::forward_as_tuple(variable_opt, parent_wptr ? const_cast<Xptr<Variable> *>(&variable_opt) : nullptr); }
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
-			const auto parent_result = do_dereference_unsafe(params.parent_opt, create_as_needed);
-			if(get_variable_type(parent_result.rptr_opt) != Variable::type_object){
-				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent_result.rptr_opt), "`");
+			Sptr<const Variable> parent;
+			Xptr<Variable> *parent_wptr;
+			std::tie(parent, parent_wptr) = do_try_extract_variable(params.parent_opt);
+			if(get_variable_type(parent) != Variable::type_object){
+				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
 			}
-			// Throw an error in case of possibility of modification, even when there is no need to create a new member.
-			if(create_as_needed && (parent_result.wref_opt == nullptr)){
-				ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant object");
-			}
-			auto &object = std::const_pointer_cast<Variable>(parent_result.rptr_opt)->get<D_object>();
+			const auto &object = parent->get<D_object>();
 			// Find the element.
 			auto it = object.find(params.key);
 			if(it == object.end()){
-				if(!create_as_needed){
-					ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
-					Dereference_result res = { nullptr, parent_result.rvalue, nullptr };
-					return std::move(res);
-				}
-				ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", params.key);
-				it = object.emplace(params.key, nullptr).first;
+				ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
+				return std::forward_as_tuple(nullptr, nullptr);
 			}
-			Dereference_result res = { it->second, parent_result.rvalue, &(it->second) };
-			return std::move(res); }
+			const auto &variable_opt = it->second;
+			return std::forward_as_tuple(variable_opt, parent_wptr ? const_cast<Xptr<Variable> *>(&variable_opt) : nullptr); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 			std::terminate();
@@ -213,30 +293,14 @@ namespace {
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
-	auto result = do_dereference_unsafe(std::const_pointer_cast<Reference>(reference_opt), false);
-	return std::move(result.rptr_opt);
-}
-std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<Reference> reference_opt){
-	if(reference_opt == nullptr){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
-	}
-	auto result = do_dereference_unsafe(reference_opt, true);
-	if(result.rvalue){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a temporary value of type `", get_variable_type_name(result.rptr_opt), "`");
-	}
-	if(result.wref_opt == nullptr){
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a reference holding a constant value of type `", get_variable_type_name(result.rptr_opt), "`");
-	}
-	return std::ref(*(result.wref_opt));
-}
-
 void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
-	auto result = do_dereference_unsafe(reference_opt, false);
-	if(result.rptr_opt && result.rvalue && result.wref_opt){
-		return move_variable(variable_out, recycler, std::move(*(result.wref_opt)));
+	Sptr<const Variable> rref;
+	Xptr<Variable> *wptr;
+	std::tie(rref, wptr) = do_try_extract_variable(reference_opt);
+	if(wptr == nullptr){
+		return copy_variable(variable_out, recycler, rref);
 	} else {
-		return copy_variable(variable_out, recycler, result.rptr_opt);
+		return move_variable(variable_out, recycler, std::move(*wptr));
 	}
 }
 
