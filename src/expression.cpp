@@ -322,6 +322,17 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			for(std::size_t i = 0; i < params.argument_count; ++i){
 				arguments.at(i) = do_pop_reference(stack);
 			}
+			// Get the `this` reference.
+			Xptr<Reference> this_ref;
+			const auto callee_ref_type = get_reference_type(callee_ref);
+			if(callee_ref_type == Reference::type_array_element){
+				auto &callee_params = callee_ref->get<Reference::S_array_element>();
+				this_ref = std::move(callee_params.parent_opt);
+			} else if(callee_ref_type == Reference::type_object_member){
+				auto &callee_params = callee_ref->get<Reference::S_object_member>();
+				this_ref = std::move(callee_params.parent_opt);
+			}
+			materialize_reference(this_ref, recycler);
 			// Replace null arguments with default ones.
 			for(std::size_t i = 0; i < callee.default_arguments_opt.size(); ++i){
 				if(arguments.at(i)){
@@ -334,19 +345,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				Reference::S_constant ref_c = { default_argument };
 				set_reference(arguments.at(i), std::move(ref_c));
 			}
-			// Get the `this` pointer.
-			Xptr<Reference> parent;
-			const auto callee_ref_type = get_reference_type(callee_ref);
-			if(callee_ref_type == Reference::type_array_element){
-				auto &callee_params = callee_ref->get<Reference::S_array_element>();
-				parent = std::move(callee_params.parent_opt);
-			} else if(callee_ref_type == Reference::type_object_member){
-				auto &callee_params = callee_ref->get<Reference::S_object_member>();
-				parent = std::move(callee_params.parent_opt);
-			}
-			materialize_reference(parent, recycler);
 			// Call the function and push the result as-is.
-			auto ref = callee.function(recycler, std::move(parent), std::move(arguments));
+			auto ref = callee.function(recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {
