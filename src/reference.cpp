@@ -133,7 +133,7 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 			ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 			return nullptr;
 		}
-		const auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+		const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return variable_opt; }
 	case Reference::type_object_member: {
 		const auto &params = reference_opt->get<Reference::S_object_member>();
@@ -204,7 +204,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> re
 			}
 			array.resize(array.size() + static_cast<std::size_t>(count_to_append));
 		}
-		auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return std::ref(variable_opt); }
 	case Reference::type_object_member: {
 		const auto &params = reference_opt->get<Reference::S_object_member>();
@@ -262,7 +262,7 @@ namespace {
 				ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 				return std::forward_as_tuple(nullptr, nullptr);
 			}
-			const auto &variable_opt = array[static_cast<std::size_t>(normalized_index)];
+			const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 			return std::forward_as_tuple(variable_opt, parent_wptr ? const_cast<Xptr<Variable> *>(&variable_opt) : nullptr); }
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
