@@ -268,6 +268,14 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 			// Push the reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
 			break; }
+		case Expression_node::type_bound_reference: {
+			const auto &params = node.get<Expression_node::S_bound_reference>();
+			// Look up the reference in the enclosing scope.
+			Xptr<Reference> ref;
+			copy_reference(ref, params.reference_opt);
+			// Push the reference onto the stack as-is.
+			do_push_reference(stack, std::move(ref));
+			break; }
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
