@@ -50,7 +50,7 @@ int main(){
 	set_reference(params.at(1), std::move(ref_t));
 	D_function function = {
 		{ },
-		[](Spref<Recycler> recycler, Spref<Reference> /*this_opt*/, boost::container::vector<Xptr<Reference>> &&params) -> Xptr<Reference> {
+		[](Spref<Recycler> recycler, Spref<Reference> /*this_opt*/, Xptr_vector<Reference> &&params) -> Xptr<Reference> {
 			auto param_one = read_reference_opt(params.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(params.at(1));
