@@ -14,20 +14,45 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	auto scope = std::make_shared<Scope>(Scope::type_plain, nullptr);
+	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
 	auto one = std::make_shared<Local_variable>();
 	set_variable(one->variable_opt, recycler, D_integer(42));
 	one->immutable = true;
 	Reference::S_local_variable lref = { one };
-	auto wref= scope->drill_for_local_reference("one");
+	auto wref = parent->drill_for_local_reference("one");
 	set_reference(wref, std::move(lref));
 
-	auto ref = scope->get_local_reference_opt("one");
+	auto ref = parent->get_local_reference_opt("one");
 	ASTERIA_TEST_CHECK(ref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->variable_opt.get());
 
-	ref = scope->get_local_reference_opt("nonexistent");
+	ref = parent->get_local_reference_opt("nonexistent");
 	ASTERIA_TEST_CHECK(ref == nullptr);
+
+	auto child = std::make_shared<Scope>(Scope::type_plain, parent);
+	auto hidden_p = std::make_shared<Local_variable>();
+	set_variable(hidden_p->variable_opt, recycler, D_string("in parent"));
+	lref = { hidden_p };
+	wref = parent->drill_for_local_reference("hidden");
+	set_reference(wref, std::move(lref));
+	auto hidden_c = std::make_shared<Local_variable>();
+	set_variable(hidden_c->variable_opt, recycler, D_string("in child"));
+	lref = { hidden_c };
+	wref = child->drill_for_local_reference("hidden");
+	set_reference(wref, std::move(lref));
+	ref = get_local_reference_cascade(child, "hidden");
+	ptr = read_reference_opt(ref);
+	ASTERIA_TEST_CHECK(ptr);
+	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in child");
+
+	child->clear_local_references();
+	ref = get_local_reference_cascade(child, "hidden");
+	ptr = read_reference_opt(ref);
+	ASTERIA_TEST_CHECK(ptr);
+	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in parent");
+
+	parent->clear_local_references();
+	ASTERIA_TEST_CHECK_CATCH(get_local_reference_cascade(child, "hidden"));
 }

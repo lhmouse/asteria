@@ -259,12 +259,8 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
 			Xptr<Reference> ref;
-			for(auto scope_cur = scope; !ref && scope_cur; scope_cur = scope_cur->get_parent_opt()){
-				copy_reference(ref, scope_cur->get_local_reference_opt(params.identifier));
-			}
-			if(!ref){
-				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
-			}
+			const auto local_ref = get_local_reference_cascade(scope, params.identifier);
+			copy_reference(ref, local_ref);
 			// Push the reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
 			break; }

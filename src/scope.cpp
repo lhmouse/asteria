@@ -30,4 +30,18 @@ void Scope::clear_local_references() noexcept {
 	m_local_references.clear();
 }
 
+Sptr<const Reference> get_local_reference_cascade(Spref<const Scope> scope_opt, const std::string &identifier){
+	auto scope = scope_opt;
+	for(;;){
+		if(!scope){
+			ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", identifier, "`");
+		}
+		auto local_ref = scope->get_local_reference_opt(identifier);
+		if(local_ref){
+			return std::move(local_ref);
+		}
+		scope = scope->get_parent_opt();
+	}
+}
+
 }
