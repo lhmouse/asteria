@@ -171,7 +171,7 @@ void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigne
 			os <<std::endl;
 			const auto &elem = *it;
 			do_indent(os, indent_next + indent_increment);
-			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()))))) <<(it - array.begin());
+			os <<std::dec <<std::setw(static_cast<int>(std::ceil(std::log10(static_cast<double>(array.size()) - 0.1)))) <<(it - array.begin());
 			os <<" = ";
 			dump_variable(os, elem, indent_next + indent_increment, indent_increment);
 			os <<',';
