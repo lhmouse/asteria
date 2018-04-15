@@ -53,8 +53,6 @@ using Wpref = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
-template<typename ElementT>
-using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
