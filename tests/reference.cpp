@@ -49,8 +49,8 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_array array;
 	for(int i = 0; i < 5; ++i){
-		set_variable(local_var->variable_opt, recycler, D_integer(i + 200));
-		array.emplace_back(std::move(local_var->variable_opt));
+		set_variable(var, recycler, D_integer(i + 200));
+		array.emplace_back(std::move(var));
 	}
 	set_variable(local_var->variable_opt, recycler, std::move(array));
 	aref = { Xptr<Reference>(ref_local.share()), 9 };
@@ -101,10 +101,10 @@ int main(){
 	set_reference(ref, std::move(oref));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_object object;
-	set_variable(local_var->variable_opt, recycler, D_integer(1));
-	object.emplace("one", std::move(local_var->variable_opt));
-	set_variable(local_var->variable_opt, recycler, D_integer(2));
-	object.emplace("two", std::move(local_var->variable_opt));
+	set_variable(var, recycler, D_integer(1));
+	object.emplace("one", std::move(var));
+	set_variable(var, recycler, D_integer(2));
+	object.emplace("two", std::move(var));
 	set_variable(local_var->variable_opt, recycler, std::move(object));
 	oref = { Xptr<Reference>(ref_local.share()), "three" };
 	set_reference(ref, std::move(oref));
@@ -132,4 +132,26 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 1);
 	set_variable(drill_reference(ref), recycler, D_integer(97));
 	ASTERIA_TEST_CHECK(local_var->variable_opt->get<D_object>().at("one")->get<D_integer>() == 97);
+
+	array.clear();
+	set_variable(var, recycler, D_string("first"));
+	array.emplace_back(std::move(var));
+	set_variable(var, recycler, D_string("second"));
+	array.emplace_back(std::move(var));
+	set_variable(var, recycler, D_string("third"));
+	array.emplace_back(std::move(var));
+	set_variable(var, recycler, std::move(array));
+	rdref = { std::move(var) };
+	set_reference(ref, std::move(rdref));
+	aref = { std::move(ref), 2 };
+	set_reference(ref, std::move(aref));
+	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, "meow"));
+	ptr = read_reference_opt(ref);
+	ASTERIA_TEST_CHECK(ptr);
+	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "third");
+	materialize_reference(ref, recycler);
+	set_variable(drill_reference(ref), recycler, D_string("meow"));
+	ptr = read_reference_opt(ref);
+	ASTERIA_TEST_CHECK(ptr);
+	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "meow");
 }

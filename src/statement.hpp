@@ -91,7 +91,7 @@ public:
 		std::string identifier;
 	};
 	struct S_case_label_statement {
-		boost::variant<D_null, D_boolean, D_integer, D_double, D_string> value_opt;
+		Sptr<const Variable> value_opt;
 	};
 	struct S_default_label_statement {
 		// Nothing.
@@ -160,6 +160,8 @@ public:
 };
 
 extern Statement::Type get_statement_type(Spref<const Statement> statement_opt) noexcept;
+
+extern void execute_statement(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Statement> statement_opt);
 
 }
 
