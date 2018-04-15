@@ -20,40 +20,36 @@ void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsi
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null: {
-		os <<"null";
+		os <<"null ";
+		dump_variable(os, nullptr, indent_next, indent_increment);
 		return; }
 	case Reference::type_constant: {
 		const auto &value = reference_opt->get<Reference::S_constant>();
-		os <<"constant `";
+		os <<"constant ";
 		dump_variable(os, value.source_opt, indent_next, indent_increment);
-		os <<"`";
 		return; }
 	case Reference::type_temporary_value: {
 		const auto &value = reference_opt->get<Reference::S_temporary_value>();
-		os <<"temporary value `";
+		os <<"temporary value ";
 		dump_variable(os, value.variable_opt, indent_next, indent_increment);
-		os <<"`";
 		return; }
 	case Reference::type_local_variable: {
 		const auto &value = reference_opt->get<Reference::S_local_variable>();
 		if(value.local_variable->immutable){
 			os <<"constant ";
 		}
-		os <<"local variable `";
+		os <<"local variable ";
 		dump_variable(os, value.local_variable->variable_opt, indent_next, indent_increment);
-		os <<"`";
 		return; }
 	case Reference::type_array_element: {
 		const auto &value = reference_opt->get<Reference::S_array_element>();
-		os <<"the element at index [" <<value.index <<"] of `";
+		os <<"the element at index [" <<value.index <<"] of ";
 		dump_reference(os, value.parent_opt, indent_next, indent_increment);
-		os <<"`";
 		return; }
 	case Reference::type_object_member: {
 		const auto &value = reference_opt->get<Reference::S_object_member>();
-		os <<"the value having key \"" <<value.key <<"\"] in `";
+		os <<"the value having key \"" <<value.key <<"\"] in ";
 		dump_reference(os, value.parent_opt, indent_next, indent_increment);
-		os <<"`";
 		return; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
