@@ -583,7 +583,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_equal);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_ne: {
@@ -599,7 +599,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_equal);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_lt: {
@@ -610,14 +610,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == comparison_result_unordered){
+				if(comparison_result == Variable::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_less);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_gt: {
@@ -628,14 +628,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == comparison_result_unordered){
+				if(comparison_result == Variable::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == comparison_result_greater);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_lte: {
@@ -646,14 +646,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == comparison_result_unordered){
+				if(comparison_result == Variable::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_greater);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_cmp_gte: {
@@ -664,14 +664,14 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == comparison_result_unordered){
+				if(comparison_result == Variable::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != comparison_result_less);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			case Expression_node::operator_infix_add: {

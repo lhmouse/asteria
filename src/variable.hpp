@@ -34,6 +34,13 @@ public:
 	                        , D_object     //  7
 		>;
 
+	enum Comparison_result : unsigned {
+		comparison_result_unordered  = 0,
+		comparison_result_less       = 1,
+		comparison_result_equal      = 2,
+		comparison_result_greater    = 3,
+	};
+
 private:
 	const Wptr<Recycler> m_weak_recycler;
 	Types::rebind_as_variant m_variant;
@@ -110,7 +117,7 @@ extern void move_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler
 // This function is useful for breaking dependency circles.
 extern void dispose_variable(Spref<Variable> variable_opt) noexcept;
 
-extern Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept;
+extern Variable::Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept;
 
 }
 

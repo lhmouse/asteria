@@ -92,63 +92,63 @@ int main(){
 	Xptr<Variable> cmp;
 	set_variable(var, recycler, D_null());
 	set_variable(cmp, recycler, D_null());
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
 	set_variable(var, recycler, D_null());
 	set_variable(cmp, recycler, D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	set_variable(var, recycler, D_boolean(true));
 	set_variable(cmp, recycler, D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
 	set_variable(var, recycler, D_boolean(false));
 	set_variable(cmp, recycler, D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	set_variable(var, recycler, D_integer(42));
 	set_variable(cmp, recycler, D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 
 	set_variable(var, recycler, D_integer(5));
 	set_variable(cmp, recycler, D_integer(6));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	set_variable(var, recycler, D_integer(3));
 	set_variable(cmp, recycler, D_integer(3));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
 	set_variable(var, recycler, D_double(-2.5));
 	set_variable(cmp, recycler, D_double(11.0));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	set_variable(var, recycler, D_double(1.0));
 	set_variable(cmp, recycler, D_double(NAN));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 
 	set_variable(var, recycler, D_string("hello"));
 	set_variable(cmp, recycler, D_string("world"));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	array.clear();
 	set_variable(var, recycler, D_boolean(true));
@@ -157,21 +157,21 @@ int main(){
 	array.emplace_back(std::move(var));
 	set_variable(var, recycler, std::move(array));
 	copy_variable(cmp, recycler, var);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
 	var->get<D_array>().at(1)->set(D_string("hello"));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	var->get<D_array>().at(1)->set(D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	var->get<D_array>().erase(std::prev(var->get<D_array>().end()));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 
 	object.clear();
 	set_variable(var, recycler, D_boolean(true));
@@ -180,19 +180,19 @@ int main(){
 	object.emplace("two", std::move(var));
 	set_variable(var, recycler, std::move(object));
 	copy_variable(cmp, recycler, var);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_equal);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
 	var->get<D_object>().at("two")->set(D_string("hello"));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_greater);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
 
 	var->get<D_object>().at("two")->set(D_boolean(true));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_unordered);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	var->get<D_object>().erase(std::prev(var->get<D_object>().end()));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == comparison_result_less);
+	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 }

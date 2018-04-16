@@ -309,107 +309,107 @@ void dispose_variable(Spref<Variable> variable_opt) noexcept {
 }
 
 namespace {
-	Comparison_result do_compare_strings(const std::string &value_lhs, const std::string &value_rhs){
+	Variable::Comparison_result do_compare_strings(const std::string &value_lhs, const std::string &value_rhs){
 		const int cmp = value_lhs.compare(value_rhs);
 		if(cmp < 0){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(cmp > 0){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal;
+		return Variable::comparison_result_equal;
 	}
 }
 
-Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept {
+Variable::Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept {
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = get_variable_type(lhs_opt);
 	const auto type_rhs = get_variable_type(rhs_opt);
 	if(type_lhs != type_rhs){
 		if(type_lhs == Variable::type_null){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(type_rhs == Variable::type_null){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_unordered;
+		return Variable::comparison_result_unordered;
 	}
 	// If both operands have the same type, perform normal comparison.
 	switch(type_lhs){
 	case Variable::type_null:
-		return comparison_result_equal;
+		return Variable::comparison_result_equal;
 	case Variable::type_boolean: {
 		const auto &value_lhs = lhs_opt->get<D_boolean>();
 		const auto &value_rhs = rhs_opt->get<D_boolean>();
 		if(value_lhs < value_rhs){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(value_lhs > value_rhs){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal; }
+		return Variable::comparison_result_equal; }
 	case Variable::type_integer: {
 		const auto &value_lhs = lhs_opt->get<D_integer>();
 		const auto &value_rhs = rhs_opt->get<D_integer>();
 		if(value_lhs < value_rhs){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(value_lhs > value_rhs){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal; }
+		return Variable::comparison_result_equal; }
 	case Variable::type_double: {
 		const auto &value_lhs = lhs_opt->get<D_double>();
 		const auto &value_rhs = rhs_opt->get<D_double>();
 		if(std::isunordered(value_lhs, value_rhs)){
-			return comparison_result_unordered;
+			return Variable::comparison_result_unordered;
 		} else if(std::isless(value_lhs, value_rhs)){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(std::isgreater(value_lhs, value_rhs)){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal; }
+		return Variable::comparison_result_equal; }
 	case Variable::type_string: {
 		const auto &value_lhs = lhs_opt->get<D_string>();
 		const auto &value_rhs = rhs_opt->get<D_string>();
 		return do_compare_strings(value_lhs, value_rhs); }
 	case Variable::type_opaque:
 	case Variable::type_function:
-		return comparison_result_unordered;
+		return Variable::comparison_result_unordered;
 	case Variable::type_array: {
 		const auto &array_lhs = lhs_opt->get<D_array>();
 		const auto &array_rhs = rhs_opt->get<D_array>();
 		auto lhs_it = array_lhs.begin(), rhs_it = array_rhs.begin();
 		while((lhs_it != array_lhs.end()) && (rhs_it != array_rhs.end())){
 			auto result = compare_variables(*lhs_it, *rhs_it);
-			if(result != comparison_result_equal){
+			if(result != Variable::comparison_result_equal){
 				return result;
 			}
 			++lhs_it, ++rhs_it;
 		}
 		if(rhs_it != array_rhs.end()){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(lhs_it != array_lhs.end()){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal; }
+		return Variable::comparison_result_equal; }
 	case Variable::type_object: {
 		const auto &object_lhs = lhs_opt->get<D_object>();
 		const auto &object_rhs = rhs_opt->get<D_object>();
 		auto lhs_it = object_lhs.begin(), rhs_it = object_rhs.begin();
 		while((lhs_it != object_lhs.end()) && (rhs_it != object_rhs.end())){
 			auto result = do_compare_strings(lhs_it->first, rhs_it->first);
-			if(result != comparison_result_equal){
+			if(result != Variable::comparison_result_equal){
 				return result;
 			}
 			result = compare_variables(lhs_it->second, rhs_it->second);
-			if(result != comparison_result_equal){
+			if(result != Variable::comparison_result_equal){
 				return result;
 			}
 			++lhs_it, ++rhs_it;
 		}
 		if(rhs_it != object_rhs.end()){
-			return comparison_result_less;
+			return Variable::comparison_result_less;
 		} else if(lhs_it != object_lhs.end()){
-			return comparison_result_greater;
+			return Variable::comparison_result_greater;
 		}
-		return comparison_result_equal; }
+		return Variable::comparison_result_equal; }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type_lhs, "`. This is probably a bug, please report.");
 		std::terminate();
