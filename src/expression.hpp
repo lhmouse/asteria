@@ -41,6 +41,7 @@ public:
 	}
 };
 
+extern Xptr<Expression> bind_expression_opt(Spref<Scope> scope, Spref<const Expression> source_opt);
 extern Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt);
 
 }

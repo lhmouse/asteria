@@ -18,6 +18,70 @@ Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
+Xptr<Expression> bind_expression_opt(Spref<Scope> scope, Spref<const Expression> source_opt){
+	Xptr<Expression> expression;
+	if(source_opt == nullptr){
+		return expression;
+	}
+	boost::container::vector<Expression_node> nodes;
+	nodes.reserve(source_opt->size());
+	for(const auto &node : *source_opt){
+		const auto type = node.get_type();
+		switch(type){
+		case Expression_node::type_literal: {
+			const auto &params = node.get<Expression_node::S_literal>();
+			nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_named_reference: {
+			const auto &params = node.get<Expression_node::S_named_reference>();
+			Xptr<Reference> ref;
+			const auto local_ref = get_local_reference_cascade(scope, params.identifier);
+			copy_reference(ref, local_ref);
+			Expression_node::S_bound_reference node_b = { std::move(ref) };
+			nodes.emplace_back(std::move(node_b));
+			break; }
+		case Expression_node::type_bound_reference: {
+			const auto &params = node.get<Expression_node::S_bound_reference>();
+			nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_subexpression: {
+			const auto &params = node.get<Expression_node::S_subexpression>();
+			auto bound_subexpression = bind_expression_opt(scope, params.subexpression_opt);
+			Expression_node::S_subexpression node_s = { std::move(bound_subexpression) };
+			nodes.emplace_back(std::move(node_s));
+			break; }
+		case Expression_node::type_lambda_definition: {
+//			const auto &params = node.get<Expression_node::S_lambda_definition>();
+ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
+			break; }
+		case Expression_node::type_pruning: {
+			const auto &params = node.get<Expression_node::S_pruning>();
+			nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_branch: {
+			const auto &params = node.get<Expression_node::S_branch>();
+			auto bound_branch_true = bind_expression_opt(scope, params.branch_true_opt);
+			auto bound_branch_false = bind_expression_opt(scope, params.branch_false_opt);
+			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
+			nodes.emplace_back(std::move(node_b));
+			break; }
+		case Expression_node::type_function_call: {
+			const auto &params = node.get<Expression_node::S_function_call>();
+			nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_operator_rpn: {
+			const auto &params = node.get<Expression_node::S_operator_rpn>();
+			nodes.emplace_back(params);
+			break; }
+		default:
+			ASTERIA_DEBUG_LOG("Unknown reference node type enumeration `", type, "`. This is probably a bug, please report.");
+			std::terminate();
+		}
+	}
+	expression.reset(std::make_shared<Expression>(std::move(nodes)));
+	return expression;
+}
+
 namespace {
 	const char *opn(const Expression_node::S_operator_rpn &params){
 		return get_operator_name_generic(params.operator_generic);
