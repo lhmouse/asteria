@@ -36,7 +36,7 @@ void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsi
 	case Reference::type_local_variable: {
 		const auto &value = reference_opt->get<Reference::S_local_variable>();
 		if(value.local_variable->immutable){
-			os <<"constant ";
+			os <<"immutable ";
 		}
 		os <<"local variable ";
 		dump_variable(os, value.local_variable->variable_opt, indent_next, indent_increment);
