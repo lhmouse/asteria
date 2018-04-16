@@ -101,7 +101,7 @@ extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Refere
 //   `copy_variable(variable_out, recycler, read_reference_opt(reference_opt))`
 extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 // If the reference is a temporary value, convert it to an unnamed local variable, allowing further modification to it.
-extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler);
+extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler, bool immutable);
 
 }
 

@@ -149,7 +149,7 @@ int main(){
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "third");
-	materialize_reference(ref, recycler);
+	materialize_reference(ref, recycler, false);
 	set_variable(drill_reference(ref), recycler, D_string("meow"));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);

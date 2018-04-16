@@ -298,12 +298,13 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycle
 	}
 	return copy_variable(variable_out, recycler, rref);
 }
-void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler){
+void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler, bool immutable){
 	Xptr<Variable> *wptr;
 	std::tie(std::ignore, wptr) = do_try_extract_variable(reference_inout_opt);
 	if(wptr){
 		auto local_var = std::make_shared<Local_variable>();
 		move_variable(local_var->variable_opt, recycler, std::move(*wptr));
+		local_var->immutable = immutable;
 		Reference::S_local_variable ref_l = { std::move(local_var) };
 		return set_reference(reference_inout_opt, std::move(ref_l));
 	}

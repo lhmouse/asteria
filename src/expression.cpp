@@ -395,7 +395,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				auto &callee_params = callee_ref->get<Reference::S_object_member>();
 				this_ref = std::move(callee_params.parent_opt);
 			}
-			materialize_reference(this_ref, recycler);
+			materialize_reference(this_ref, recycler, false);
 			// Replace null arguments with default ones.
 			for(std::size_t i = 0; i < callee.default_arguments_opt.size(); ++i){
 				if(arguments.at(i)){
