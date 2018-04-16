@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <climits>
 #include <cctype>
+#include <cmath>
 
 #include <boost/container/vector.hpp>
 #include <boost/container/flat_map.hpp>

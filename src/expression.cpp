@@ -10,7 +10,6 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
-#include <cmath> // std::fmod()
 
 namespace Asteria {
 
