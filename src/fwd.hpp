@@ -6,9 +6,9 @@
 
 #include <string> // std::string
 #include <functional> // std::function
-#include <type_traits> // std::enable_if, std::decay, std::is_base_of
-#include <utility> // std::move, std::forward, std::pair
-#include <memory> // std::shared_ptr
+#include <type_traits> // std::enable_if<>, std::decay<>, std::is_base_of<>
+#include <utility> // std::move(), std::forward(), std::pair<>
+#include <memory> // std::shared_ptr<>
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
 #include <boost/container/vector.hpp>
