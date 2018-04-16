@@ -50,42 +50,42 @@ public:
 	};
 	struct S_if_statement {
 		Xptr<Expression> condition_opt;
-		Xptr_vector<Statement> true_branch;
-		Xptr<S_if_statement> false_branch_opt;
+		Xptr<Statement> branch_true_opt;
+		Xptr<Statement> branch_false_opt;
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_expression;
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 	};
 	struct S_do_while_statement {
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 		Xptr<Expression> condition_opt;
 	};
 	struct S_while_statement {
 		Xptr<Expression> condition_opt;
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 	};
 	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 	};
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		bool value_immutable;
 		Xptr<Initializer> range_initializer;
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 	};
 	struct S_try_statement {
-		Xptr_vector<Statement> try_statements;
+		Xptr<Statement> branch_try;
 		std::string exception_identifier;
 		bool exception_immutable;
-		Xptr_vector<Statement> catch_statements;
+		Xptr<Statement> branch_catch;
 	};
 	struct S_defer_statement {
-		Xptr_vector<Statement> statements;
+		Xptr<Statement> statement;
 	};
 	struct S_label_statement {
 		std::string identifier;

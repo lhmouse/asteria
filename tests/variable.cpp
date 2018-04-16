@@ -40,7 +40,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get<D_opaque>().uuid == opaque.uuid);
 	ASTERIA_TEST_CHECK(var->get<D_opaque>().handle == opaque.handle);
 
-	boost::container::vector<Xptr<Reference>> params;
+	Xptr<Vector> params;
 	params.resize(2);
 	set_variable(var, recycler, D_integer(12));
 	Reference::S_temporary_value ref_t = { std::move(var) };

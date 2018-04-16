@@ -90,11 +90,11 @@ namespace {
 		return get_type_name(type);
 	}
 
-	void do_push_reference(boost::container::vector<Xptr<Reference>> &stack, Xptr<Reference> &&ref){
+	void do_push_reference(Xptr_vector<Reference> &stack, Xptr<Reference> &&ref){
 		ASTERIA_DEBUG_LOG("Pushing: ", ref);
 		stack.emplace_back(std::move(ref));
 	}
-	Xptr<Reference> do_pop_reference(boost::container::vector<Xptr<Reference>> &stack){
+	Xptr<Reference> do_pop_reference(Xptr_vector<Reference> &stack){
 		if(stack.empty()){
 			ASTERIA_THROW_RUNTIME_ERROR("The reference stack is empty (this is probably due to an unbalanced expression)");
 		}
@@ -306,7 +306,7 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<const Ex
 	}
 	ASTERIA_DEBUG_LOG(">>>>>>> Beginning of evaluation of expression >>>>>>>");
 	// Parameters are pushed from right to left, in lexical order.
-	boost::container::vector<Xptr<Reference>> stack;
+	Xptr_vector<Reference> stack;
 	// Evaluate nodes in reverse-polish order.
 	for(const auto &node : *expression_opt){
 		const auto type = node.get_type();
@@ -380,7 +380,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			}
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
-			boost::container::vector<Xptr<Reference>> arguments;
+			Xptr_vector<Reference> arguments;
 			arguments.resize(std::max(params.argument_count, callee.default_arguments_opt.size()));
 			// Pop arguments off the stack.
 			for(std::size_t i = 0; i < params.argument_count; ++i){

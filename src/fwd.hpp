@@ -52,6 +52,16 @@ template<typename ElementT>
 using Wpref = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
+using Sptr_vector = boost::container::vector<Sptr<ElementT>>;
+template<typename KeyT, typename ValueT>
+using Sptr_map = boost::container::flat_map<KeyT, Sptr<ValueT>>;
+
+template<typename ElementT>
+using Wptr_vector = boost::container::vector<Wptr<ElementT>>;
+template<typename KeyT, typename ValueT>
+using Wptr_map = boost::container::flat_map<KeyT, Wptr<ValueT>>;
+
+template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
@@ -76,7 +86,7 @@ struct Uuid_handle {
 };
 
 struct Binding_function {
-	boost::container::vector<Sptr<const Variable>> default_arguments_opt;
+	Sptr_vector<const Variable> default_arguments_opt;
 	std::function<Xptr<Reference> (Spref<Recycler>, Xptr<Reference> /*this_opt*/, Xptr_vector<Reference> &&/*arguments*/)> function;
 };
 

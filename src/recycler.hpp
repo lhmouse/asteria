@@ -16,7 +16,7 @@ public:
 	};
 
 private:
-	boost::container::vector<Wptr<Variable>> m_weak_variables;
+	Wptr_vector<Variable> m_weak_variables;
 	std::size_t m_defragmentation_threshold;
 
 public:
