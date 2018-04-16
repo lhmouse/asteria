@@ -50,7 +50,7 @@ int main(){
 	set_reference(arguments.at(1), std::move(ref_t));
 	D_function function = {
 		{ },
-		[](Spref<Recycler> recycler, Spref<Reference> /*this_opt*/, Xptr_vector<Reference> &&parameters) -> Xptr<Reference> {
+		[](Spref<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&parameters) -> Xptr<Reference> {
 			auto param_one = read_reference_opt(parameters.at(0));
 			ASTERIA_TEST_CHECK(param_one);
 			auto param_two = read_reference_opt(parameters.at(1));
