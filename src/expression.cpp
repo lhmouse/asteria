@@ -18,7 +18,7 @@ Expression::Expression(Expression &&) = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
-Xptr<Expression> bind_expression_opt(Spref<Scope> scope, Spref<const Expression> source_opt){
+Xptr<Expression> bind_expression_opt(Spref<const Expression> source_opt, Spref<const Scope> scope){
 	Xptr<Expression> expression;
 	if(source_opt == nullptr){
 		return expression;
@@ -46,7 +46,7 @@ Xptr<Expression> bind_expression_opt(Spref<Scope> scope, Spref<const Expression>
 			break; }
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
-			auto bound_subexpression = bind_expression_opt(scope, params.subexpression_opt);
+			auto bound_subexpression = bind_expression_opt(params.subexpression_opt, scope);
 			Expression_node::S_subexpression node_s = { std::move(bound_subexpression) };
 			nodes.emplace_back(std::move(node_s));
 			break; }
@@ -60,8 +60,8 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			break; }
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
-			auto bound_branch_true = bind_expression_opt(scope, params.branch_true_opt);
-			auto bound_branch_false = bind_expression_opt(scope, params.branch_false_opt);
+			auto bound_branch_true = bind_expression_opt(params.branch_true_opt, scope);
+			auto bound_branch_false = bind_expression_opt(params.branch_false_opt, scope);
 			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
 			nodes.emplace_back(std::move(node_b));
 			break; }
@@ -299,7 +299,7 @@ namespace {
 	}
 }
 
-Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Expression> expression_opt){
+Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<const Expression> expression_opt, Spref<const Scope> scope){
 	// Return a null reference only when a null expression is given.
 	if(!expression_opt){
 		return nullptr;
@@ -339,7 +339,7 @@ Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<Scope> s
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
-			auto ref = evaluate_expression_opt(recycler, scope, params.subexpression_opt);
+			auto ref = evaluate_expression_opt(recycler, params.subexpression_opt, scope);
 			// Push the result reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
 			break; }
@@ -362,7 +362,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto condition_var = read_reference_opt(condition_ref);
 			const auto branch_taken = test_variable(condition_var) ? params.branch_true_opt.share() : params.branch_false_opt.share();
 			// If the branch exists, evaluate it. Otherwise, pick the condition instead.
-			auto ref = evaluate_expression_opt(recycler, scope, branch_taken);
+			auto ref = evaluate_expression_opt(recycler, branch_taken, scope);
 			if(!ref){
 				ref = std::move(condition_ref);
 			}

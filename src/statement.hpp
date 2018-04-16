@@ -161,8 +161,6 @@ public:
 
 extern Statement::Type get_statement_type(Spref<const Statement> statement_opt) noexcept;
 
-extern void execute_statement(Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Statement> statement_opt);
-
 }
 
 #endif

@@ -82,7 +82,7 @@ int main(){
 	set_reference(lrwref, std::move(lref));
 
 	set_variable(condition->variable_opt, recycler, D_boolean(false));
-	auto result = evaluate_expression_opt(recycler, scope, expr);
+	auto result = evaluate_expression_opt(recycler, expr, scope);
 	ASTERIA_TEST_CHECK(dval->variable_opt->get<D_double>() == 2.5);
 	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 10);
 	auto rptr = read_reference_opt(result);
@@ -90,7 +90,7 @@ int main(){
 	ASTERIA_TEST_CHECK(rptr->get<D_double>() == 1.75);
 
 	set_variable(condition->variable_opt, recycler, D_boolean(true));
-	result = evaluate_expression_opt(recycler, scope, expr);
+	result = evaluate_expression_opt(recycler, expr, scope);
 	ASTERIA_TEST_CHECK(dval->variable_opt->get<D_double>() == 2.5);
 	ASTERIA_TEST_CHECK(cval->variable_opt->get<D_integer>() == 10);
 	rptr = read_reference_opt(result);

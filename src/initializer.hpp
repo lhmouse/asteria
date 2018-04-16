@@ -59,7 +59,7 @@ public:
 
 extern Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept;
 
-extern void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<Scope> scope, Spref<const Initializer> initializer_opt);
+extern void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Initializer> initializer_opt, Spref<const Scope> scope);
 
 }
 
