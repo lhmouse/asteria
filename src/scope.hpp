@@ -19,12 +19,12 @@ public:
 
 private:
 	const Type m_type;
-	const Sptr<Scope> m_parent_opt;
+	const Sptr<const Scope> m_parent_opt;
 
 	boost::container::flat_map<std::string, Xptr<Reference>> m_local_references;
 
 public:
-	Scope(Type type, Sptr<Scope> parent_opt)
+	Scope(Type type, Sptr<const Scope> parent_opt)
 		: m_type(type), m_parent_opt(std::move(parent_opt))
 		, m_local_references()
 	{ }
@@ -37,7 +37,7 @@ public:
 	Type get_type() const noexcept {
 		return m_type;
 	}
-	Spref<Scope> get_parent_opt() const noexcept {
+	Spref<const Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
