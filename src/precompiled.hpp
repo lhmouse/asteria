@@ -30,6 +30,8 @@
 #include <cctype>
 #include <cmath>
 
+#include "rocket/value_ptr.hpp"
+
 #include <boost/container/vector.hpp>
 #include <boost/container/flat_map.hpp>
 #include <boost/variant.hpp>

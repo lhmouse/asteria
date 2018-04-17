@@ -13,7 +13,6 @@
 #include <cstdint> // std::int64_t
 #include <boost/container/vector.hpp>
 #include <boost/container/flat_map.hpp>
-#include "xptr.hpp"
 
 namespace Asteria {
 
@@ -47,19 +46,24 @@ template<typename ElementT>
 using Spref = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
-using Wptr = std::weak_ptr<ElementT>;
-template<typename ElementT>
-using Wpref = const std::weak_ptr<ElementT> &;
-
-template<typename ElementT>
 using Sptr_vector = boost::container::vector<Sptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Sptr_map = boost::container::flat_map<KeyT, Sptr<ValueT>>;
 
 template<typename ElementT>
+using Wptr = std::weak_ptr<ElementT>;
+template<typename ElementT>
+using Wpref = const std::weak_ptr<ElementT> &;
+
+template<typename ElementT>
 using Wptr_vector = boost::container::vector<Wptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Wptr_map = boost::container::flat_map<KeyT, Wptr<ValueT>>;
+
+template<typename ElementT>
+using Xptr = rocket::value_ptr<ElementT>;
+//template<typename ElementT>
+//using Xpref = const rocket::value_ptr<ElementT> &;
 
 template<typename ElementT>
 using Xptr_vector = boost::container::vector<Xptr<ElementT>>;

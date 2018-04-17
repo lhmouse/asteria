@@ -19,7 +19,6 @@ CLEANFILES =	\
 
 pkginclude_HEADERS =	\
 	asteria/src/type_tuple.hpp	\
-	asteria/src/xptr.hpp	\
 	asteria/src/fwd.hpp	\
 	asteria/src/insertable_ostream.hpp	\
 	asteria/src/utilities.hpp	\
@@ -34,6 +33,10 @@ pkginclude_HEADERS =	\
 	asteria/src/statement.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp
+
+pkginclude_rocketdir = ${pkgincludedir}/rocket
+pkginclude_rocket_HEADERS = \
+	asteria/src/rocket/value_ptr.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
