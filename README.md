@@ -9,7 +9,7 @@
 3. Simple to use.
 4. Lightweight.
 5. Procedural.
-6. Easy to intergrate in a C++ project. (C++11 and boost are required.)
+6. Easy to intergrate in a C++ project. (C++11 is required.)
 7. Native to C++ exceptions, particularly `std::bad_alloc`.
 
 # Characteristics

@@ -21,6 +21,8 @@
 #include <memory>
 #include <tuple>
 #include <type_traits>
+#include <vector>
+#include <unordered_map>
 
 #include <cassert>
 #include <cstring>
@@ -32,8 +34,6 @@
 
 #include "rocket/value_ptr.hpp"
 
-#include <boost/container/vector.hpp>
-#include <boost/container/flat_map.hpp>
 #include <boost/variant.hpp>
 
 #endif

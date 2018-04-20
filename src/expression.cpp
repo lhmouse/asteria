@@ -23,7 +23,7 @@ Xptr<Expression> bind_expression_opt(Spref<const Expression> source_opt, Spref<c
 	if(source_opt == nullptr){
 		return expression;
 	}
-	boost::container::vector<Expression_node> nodes;
+	std::vector<Expression_node> nodes;
 	nodes.reserve(source_opt->size());
 	for(const auto &node : *source_opt){
 		const auto type = node.get_type();

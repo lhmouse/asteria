@@ -10,8 +10,8 @@
 #include <memory> // std::shared_ptr<>
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t
-#include <boost/container/vector.hpp>
-#include <boost/container/flat_map.hpp>
+#include <vector> // std::vector<>
+#include <unordered_map> // std::unordered_map<>
 
 namespace Asteria {
 
@@ -48,9 +48,9 @@ template<typename ElementT>
 using Spref = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
-using Sptr_vector = boost::container::vector<Sptr<ElementT>>;
+using Sptr_vector = std::vector<Sptr<ElementT>>;
 template<typename KeyT, typename ValueT>
-using Sptr_map = boost::container::flat_map<KeyT, Sptr<ValueT>>;
+using Sptr_map = std::unordered_map<KeyT, Sptr<ValueT>>;
 
 template<typename ElementT>
 using Wptr = std::weak_ptr<ElementT>;
@@ -58,9 +58,9 @@ template<typename ElementT>
 using Wpref = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
-using Wptr_vector = boost::container::vector<Wptr<ElementT>>;
+using Wptr_vector = std::vector<Wptr<ElementT>>;
 template<typename KeyT, typename ValueT>
-using Wptr_map = boost::container::flat_map<KeyT, Wptr<ValueT>>;
+using Wptr_map = std::unordered_map<KeyT, Wptr<ValueT>>;
 
 template<typename ElementT>
 using Xptr = rocket::value_ptr<ElementT>;
@@ -68,9 +68,9 @@ using Xptr = rocket::value_ptr<ElementT>;
 //using Xpref = const rocket::value_ptr<ElementT> &;
 
 template<typename ElementT>
-using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
+using Xptr_vector = std::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
-using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
+using Xptr_map = std::unordered_map<KeyT, Xptr<ValueT>>;
 
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;

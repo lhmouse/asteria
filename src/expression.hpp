@@ -13,10 +13,10 @@ class Expression {
 	friend Expression_node;
 
 private:
-	boost::container::vector<Expression_node> m_nodes;
+	std::vector<Expression_node> m_nodes;
 
 public:
-	Expression(boost::container::vector<Expression_node> nodes)
+	Expression(std::vector<Expression_node> nodes)
 		: m_nodes(std::move(nodes))
 	{ }
 	Expression(Expression &&);
