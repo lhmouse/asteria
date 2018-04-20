@@ -21,7 +21,7 @@ private:
 	const Type m_type;
 	const Sptr<const Scope> m_parent_opt;
 
-	boost::container::flat_map<std::string, Xptr<Reference>> m_local_references;
+	Xptr_map<std::string, Reference> m_local_references;
 
 public:
 	Scope(Type type, Sptr<const Scope> parent_opt)
