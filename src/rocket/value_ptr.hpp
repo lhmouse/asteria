@@ -15,7 +15,6 @@ using std::nullptr_t;
 using std::shared_ptr;
 using std::weak_ptr;
 using std::move;
-using std::swap;
 using std::enable_if;
 using std::is_convertible;
 using std::remove_cv;
@@ -36,8 +35,8 @@ public:
 	explicit value_ptr(shared_ptr<otherT> &&other) noexcept
 		: m_ptr(move(other))
 	{ }
-	value_ptr(value_ptr &&rhs) noexcept = default;
-	value_ptr &operator=(value_ptr &&rhs) noexcept = default;
+	value_ptr(value_ptr &&rhs) = default;
+	value_ptr &operator=(value_ptr &&rhs) = default;
 
 public:
 	const elementT *get() const noexcept {
@@ -74,7 +73,8 @@ public:
 	}
 
 	void swap(value_ptr &rhs) noexcept {
-		m_ptr.swap(rhs.m_ptr);
+		using ::std::swap;
+		swap(m_ptr, rhs.m_ptr);
 	}
 
 public:
