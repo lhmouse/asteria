@@ -31,6 +31,7 @@ pkginclude_HEADERS =	\
 	asteria/src/expression_node.hpp	\
 	asteria/src/expression.hpp	\
 	asteria/src/statement.hpp	\
+	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp
 
@@ -53,6 +54,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/expression_node.cpp	\
 	asteria/src/expression.cpp	\
 	asteria/src/statement.cpp	\
+	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/recycler.cpp
 

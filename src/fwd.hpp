@@ -36,6 +36,7 @@ class Stored_reference;
 // Runtime objects (neither copyable nor movable)
 class Variable;
 class Reference;
+class Local_variable;
 class Scope;
 class Recycler;
 
@@ -70,13 +71,6 @@ using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
-// Runtime objects.
-struct Local_variable {
-	Xptr<Variable> variable_opt;
-	bool immutable;
-};
-
-// Runtime types.
 struct Uuid_handle {
 	std::array<unsigned char, 16> uuid;
 	std::shared_ptr<void> handle;

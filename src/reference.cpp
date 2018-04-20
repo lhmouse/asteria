@@ -6,6 +6,7 @@
 #include "stored_reference.hpp"
 #include "variable.hpp"
 #include "stored_value.hpp"
+#include "local_variable.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -35,11 +36,11 @@ void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsi
 		return; }
 	case Reference::type_local_variable: {
 		const auto &value = reference_opt->get<Reference::S_local_variable>();
-		if(value.local_variable->immutable){
+		if(value.local_variable->is_immutable()){
 			os <<"immutable ";
 		}
 		os <<"local variable ";
-		dump_variable(os, value.local_variable->variable_opt, indent_next, indent_increment);
+		dump_variable(os, value.local_variable->get_variable_opt(), indent_next, indent_increment);
 		return; }
 	case Reference::type_array_element: {
 		const auto &value = reference_opt->get<Reference::S_array_element>();
@@ -115,7 +116,7 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 		return params.variable_opt; }
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
-		return params.local_variable->variable_opt; }
+		return params.local_variable->get_variable_opt(); }
 	case Reference::type_array_element: {
 		const auto &params = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
@@ -171,10 +172,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> re
 		/*return;*/ }
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
-		if(params.local_variable->immutable){
-			ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify an immutable variable `", params.local_variable->variable_opt, "`");
-		}
-		return std::ref(params.local_variable->variable_opt); }
+		return params.local_variable->drill_for_variable(); }
 	case Reference::type_array_element: {
 		const auto &params = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
@@ -242,7 +240,7 @@ namespace {
 			return std::forward_as_tuple(params.variable_opt, &(params.variable_opt)); }
 		case Reference::type_local_variable: {
 			auto &params = reference_opt->get<Reference::S_local_variable>();
-			return std::forward_as_tuple(params.local_variable->variable_opt, nullptr); }
+			return std::forward_as_tuple(params.local_variable->get_variable_opt(), nullptr); }
 		case Reference::type_array_element: {
 			auto &params = reference_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
@@ -302,9 +300,9 @@ void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler>
 	Xptr<Variable> *wptr;
 	std::tie(std::ignore, wptr) = do_try_extract_variable(reference_inout_opt);
 	if(wptr){
-		auto local_var = std::make_shared<Local_variable>();
-		move_variable(local_var->variable_opt, recycler, std::move(*wptr));
-		local_var->immutable = immutable;
+		Xptr<Variable> variable;
+		move_variable(variable, recycler, std::move(*wptr));
+		auto local_var = std::make_shared<Local_variable>(std::move(variable), immutable);
 		Reference::S_local_variable ref_l = { std::move(local_var) };
 		return set_reference(reference_inout_opt, std::move(ref_l));
 	}
