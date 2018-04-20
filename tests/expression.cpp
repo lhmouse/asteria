@@ -40,7 +40,7 @@ int main(){
 	//                    \+-- 0.25 dval ++ +     ::= branch_true
 	//                     \-- "hello," cval *    ::= branch_false
 
-	boost::container::vector<Expression_node> nodes;
+	std::vector<Expression_node> nodes;
 	Expression_node::S_literal s_lit = { std::make_shared<Variable>(D_double(0.25)) };
 	nodes.emplace_back(std::move(s_lit)); // 0.25
 	Expression_node::S_named_reference s_nref = { "dval" };

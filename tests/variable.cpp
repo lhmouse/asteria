@@ -144,19 +144,7 @@ int main(){
 	object.emplace("two", std::move(var));
 	set_variable(var, recycler, std::move(object));
 	copy_variable(cmp, recycler, var);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
-	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
-
-	var->get<D_object>().at("two")->set(D_string("hello"));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
-	swap(var, cmp);
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
-
-	var->get<D_object>().at("two")->set(D_boolean(true));
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
-	var->get<D_object>().erase(std::prev(var->get<D_object>().end()));
-	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 }
