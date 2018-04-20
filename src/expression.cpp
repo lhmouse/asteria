@@ -9,6 +9,7 @@
 #include "stored_reference.hpp"
 #include "recycler.hpp"
 #include "scope.hpp"
+#include "function_base.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -380,10 +381,11 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
 			Xptr_vector<Reference> arguments;
-			arguments.resize(std::max(params.argument_count, callee.default_arguments_opt.size()));
+			arguments.reserve(32);
 			// Pop arguments off the stack.
 			for(std::size_t i = 0; i < params.argument_count; ++i){
-				arguments.at(i) = do_pop_reference(stack);
+				auto arg_ref = do_pop_reference(stack);
+				arguments.emplace_back(std::move(arg_ref));
 			}
 			// Get the `this` reference.
 			Xptr<Reference> this_ref;
@@ -397,19 +399,25 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			}
 			materialize_reference(this_ref, recycler, false);
 			// Replace null arguments with default ones.
-			for(std::size_t i = 0; i < callee.default_arguments_opt.size(); ++i){
-				if(arguments.at(i)){
-					continue;
+			const auto default_args = callee->get_default_arguments_opt();
+			if(default_args){
+				if(arguments.size() < default_args->size()){
+					arguments.resize(default_args->size());
 				}
-				const auto &default_argument = callee.default_arguments_opt.at(i);
-				if(!default_argument){
-					continue;
+				for(std::size_t i = 0; i < default_args->size(); ++i){
+					if(arguments.at(i)){
+						continue;
+					}
+					const auto &arg_source = default_args->at(i);
+					if(!arg_source){
+						continue;
+					}
+					Reference::S_constant ref_c = { arg_source };
+					set_reference(arguments.at(i), std::move(ref_c));
 				}
-				Reference::S_constant ref_c = { default_argument };
-				set_reference(arguments.at(i), std::move(ref_c));
 			}
 			// Call the function and push the result as-is.
-			auto ref = callee.function(recycler, std::move(this_ref), std::move(arguments));
+			auto ref = callee->invoke(recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(ref));
 			break; }
 		case Expression_node::type_operator_rpn: {

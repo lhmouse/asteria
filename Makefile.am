@@ -22,6 +22,8 @@ pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
 	asteria/src/insertable_ostream.hpp	\
 	asteria/src/utilities.hpp	\
+	asteria/src/opaque_base.hpp	\
+	asteria/src/function_base.hpp	\
 	asteria/src/variable.hpp	\
 	asteria/src/stored_value.hpp	\
 	asteria/src/reference.hpp	\
@@ -45,6 +47,8 @@ lib_LTLIBRARIES =	\
 lib_libasteria_la_SOURCES =	\
 	asteria/src/insertable_ostream.cpp	\
 	asteria/src/utilities.cpp	\
+	asteria/src/opaque_base.cpp	\
+	asteria/src/function_base.cpp	\
 	asteria/src/variable.cpp	\
 	asteria/src/stored_value.cpp	\
 	asteria/src/reference.cpp	\

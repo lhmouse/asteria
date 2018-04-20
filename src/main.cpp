@@ -6,9 +6,19 @@
 #include "stored_value.hpp"
 #include "utilities.hpp"
 #include "recycler.hpp"
+#include "opaque_base.hpp"
 #include <iostream>
 
 using namespace Asteria;
+
+namespace {
+	class My_opaque : public Opaque_base {
+	public:
+		const char *describe() const noexcept override {
+			return "my fancy opaque class";
+		}
+	};
+}
 
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
@@ -51,7 +61,8 @@ int main(){
 	set_variable(root, recycler, std::move(obj));
 	copy_variable(copy, backup, root);
 
-	D_opaque opaque = { { 0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0 }, std::make_shared<int>() };
+	D_opaque opaque;
+	opaque.reset(std::make_shared<My_opaque>());
 	set_variable(temp, backup, std::move(opaque));
 	copy->get<D_object>().emplace("opaque", std::move(temp));
 

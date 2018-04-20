@@ -5,7 +5,6 @@
 #define ASTERIA_FWD_HPP_
 
 #include <string> // std::string
-#include <functional> // std::function
 #include <type_traits> // std::enable_if<>, std::decay<>, std::is_base_of<>
 #include <utility> // std::move(), std::forward(), std::pair<>
 #include <memory> // std::shared_ptr<>
@@ -34,6 +33,8 @@ class Stored_value;
 class Stored_reference;
 
 // Runtime objects (neither copyable nor movable)
+class Opaque_base;
+class Function_base;
 class Variable;
 class Reference;
 class Local_variable;
@@ -71,23 +72,13 @@ using Xptr_vector = boost::container::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = boost::container::flat_map<KeyT, Xptr<ValueT>>;
 
-struct Uuid_handle {
-	std::array<unsigned char, 16> uuid;
-	std::shared_ptr<void> handle;
-};
-
-struct Binding_function {
-	Sptr_vector<const Variable> default_arguments_opt;
-	std::function<Xptr<Reference> (Spref<Recycler>, Xptr<Reference> /*this_opt*/, Xptr_vector<Reference> &&/*arguments*/)> function;
-};
-
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_double    = double;
 using D_string    = std::string;
-using D_opaque    = Uuid_handle;
-using D_function  = Binding_function;
+using D_opaque    = Xptr<Opaque_base>;
+using D_function  = Sptr<Function_base>;
 using D_array     = Xptr_vector<Variable>;
 using D_object    = Xptr_map<std::string, Variable>;
 

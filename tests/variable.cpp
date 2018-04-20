@@ -33,42 +33,6 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
 
-	std::array<unsigned char, 16> uuid = { 1,2,3,4,5,6,7,8,2,2,3,4,5,6,7,8 };
-	D_opaque opaque = { uuid, std::make_shared<char>() };
-	set_variable(var, recycler, opaque);
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_opaque);
-	ASTERIA_TEST_CHECK(var->get<D_opaque>().uuid == opaque.uuid);
-	ASTERIA_TEST_CHECK(var->get<D_opaque>().handle == opaque.handle);
-
-	Xptr_vector<Reference> arguments;
-	arguments.resize(2);
-	set_variable(var, recycler, D_integer(12));
-	Reference::S_temporary_value ref_t = { std::move(var) };
-	set_reference(arguments.at(0), std::move(ref_t));
-	set_variable(var, recycler, D_integer(15));
-	ref_t = { std::move(var) };
-	set_reference(arguments.at(1), std::move(ref_t));
-	D_function function = {
-		{ },
-		[](Spref<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&parameters) -> Xptr<Reference> {
-			auto param_one = read_reference_opt(parameters.at(0));
-			ASTERIA_TEST_CHECK(param_one);
-			auto param_two = read_reference_opt(parameters.at(1));
-			ASTERIA_TEST_CHECK(param_two);
-			Xptr<Variable> xptr;
-			set_variable(xptr, recycler, param_one->get<D_integer>() * param_two->get<D_integer>());
-			Reference::S_temporary_value ref_t = { std::move(xptr) };
-			set_reference(parameters.at(0), std::move(ref_t));
-			return std::move(parameters.at(0));
-		}
-	};
-	set_variable(var, recycler, std::move(function));
-	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_function);
-	auto result = var->get<D_function>().function(recycler, nullptr, std::move(arguments));
-	auto rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rptr);
-	ASTERIA_TEST_CHECK(rptr->get<D_integer>() == 180);
-
 	D_array array;
 	set_variable(var, recycler, D_boolean(true));
 	array.emplace_back(std::move(var));

@@ -4,9 +4,9 @@
 #include "precompiled.hpp"
 #include "variable.hpp"
 #include "stored_value.hpp"
+#include "opaque_base.hpp"
+#include "function_base.hpp"
 #include "utilities.hpp"
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
 
 namespace Asteria {
 
@@ -156,12 +156,15 @@ void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigne
 		return; }
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<D_opaque>();
-		boost::uuids::uuid uuid_temp;
-		std::memcpy(&uuid_temp, value.uuid.data(), 16);
-		os <<"opaque(\"" <<uuid_temp <<"\", \"" <<value.handle << "\")";
+		os <<"opaque(\"" <<typeid(*value).name() <<"\", ";
+		do_quote_string(os, value->describe());
+		os << ')';
 		return; }
 	case Variable::type_function: {
-		os <<"function";
+		const auto &value = variable_opt->get<D_opaque>();
+		os <<"function(\"" <<typeid(*value).name() <<"\", ";
+		do_quote_string(os, value->describe());
+		os << ')';
 		return; }
 	case Variable::type_array: {
 		const auto &array = variable_opt->get<D_array>();
@@ -218,30 +221,24 @@ void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null: {
-		set_variable(variable_out, recycler, nullptr);
-		return; }
+		return set_variable(variable_out, recycler, nullptr); }
 	case Variable::type_boolean: {
 		const auto &source = source_opt->get<D_boolean>();
-		set_variable(variable_out, recycler, source);
-		return; }
+		return set_variable(variable_out, recycler, source); }
 	case Variable::type_integer: {
 		const auto &source = source_opt->get<D_integer>();
-		set_variable(variable_out, recycler, source);
-		return; }
+		return set_variable(variable_out, recycler, source); }
 	case Variable::type_double: {
 		const auto &source = source_opt->get<D_double>();
-		set_variable(variable_out, recycler, source);
-		return; }
+		return set_variable(variable_out, recycler, source); }
 	case Variable::type_string: {
 		const auto &source = source_opt->get<D_string>();
-		set_variable(variable_out, recycler, source);
-		return; }
+		return set_variable(variable_out, recycler, source); }
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
 	case Variable::type_function: {
 		const auto &source = source_opt->get<D_function>();
-		set_variable(variable_out, recycler, source);
-		return; }
+		return set_variable(variable_out, recycler, source); }
 	case Variable::type_array: {
 		const auto &source = source_opt->get<D_array>();
 		D_array array;
@@ -250,8 +247,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref
 			copy_variable(variable_out, recycler, elem);
 			array.emplace_back(std::move(variable_out));
 		}
-		set_variable(variable_out, recycler, std::move(array));
-		return; }
+		return set_variable(variable_out, recycler, std::move(array)); }
 	case Variable::type_object: {
 		const auto &source = source_opt->get<D_object>();
 		D_object object;
@@ -260,8 +256,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref
 			copy_variable(variable_out, recycler, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
-		set_variable(variable_out, recycler, std::move(object));
-		return; }
+		return set_variable(variable_out, recycler, std::move(object)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
