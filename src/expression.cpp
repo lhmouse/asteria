@@ -83,10 +83,10 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 }
 
 namespace {
-	const char *opn(const Expression_node::S_operator_rpn &params){
+	const char *op_name_of(const Expression_node::S_operator_rpn &params){
 		return get_operator_name_generic(params.operator_generic);
 	}
-	const char *tyn(Variable::Type type){
+	const char *type_name_of(Variable::Type type){
 		return get_type_name(type);
 	}
 
@@ -376,7 +376,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 			// Make sure it is really a function.
 			const auto callee_type = get_variable_type(callee_var);
 			if(callee_type != Variable::type_function){
-				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", tyn(callee_type), "`, which is not a function");
+				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", type_name_of(callee_type), "`, which is not a function");
 			}
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
@@ -439,7 +439,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, static_cast<D_double>(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -459,7 +459,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, static_cast<D_double>(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -478,7 +478,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->get<D_string>() };
 					rhs_ref->set(std::move(ref_o));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined subscript type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined subscript type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -495,7 +495,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, rhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -512,7 +512,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, do_negate(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -529,7 +529,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -556,7 +556,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, static_cast<D_double>(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -574,7 +574,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, static_cast<D_double>(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -619,7 +619,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -637,7 +637,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -655,7 +655,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -673,7 +673,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", opn(params));
+					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -710,7 +710,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -737,7 +737,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_subtract(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -773,7 +773,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(rhs, lhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -795,7 +795,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_divide(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -817,7 +817,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_modulo(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -837,7 +837,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -858,7 +858,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -878,7 +878,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -898,7 +898,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -920,7 +920,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -942,7 +942,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -964,7 +964,7 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", opn(params), " operation on type `", tyn(lhs_type), "` and `", tyn(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
