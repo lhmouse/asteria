@@ -67,13 +67,13 @@ namespace details {
 	struct has_type_recursive<expectT, firstT, remainingT...> {
 		enum : bool { value = has_type_recursive<expectT, remainingT...>::value };
 	};
-	template<typename expectT, typename ...elementsT, typename ...remainingT>
-	struct has_type_recursive<expectT, variant<elementsT...>, remainingT...> {
-		enum : bool { value = has_type_recursive<expectT, elementsT...>::value || has_type_recursive<expectT, remainingT...>::value };
-	};
 	template<typename expectT, typename ...remainingT>
 	struct has_type_recursive<expectT, expectT, remainingT...> {
 		enum : bool { value = true };
+	};
+	template<typename expectT, typename ...elementsT, typename ...remainingT>
+	struct has_type_recursive<expectT, variant<elementsT...>, remainingT...> {
+		enum : bool { value = has_type_recursive<expectT, elementsT...>::value || has_type_recursive<expectT, remainingT...>::value };
 	};
 	template<typename ...elementsT, typename ...remainingT>
 	struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...> {
