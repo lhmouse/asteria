@@ -13,7 +13,7 @@ fi
 shift
 
 _cxx="g++"
-_cxxflags="-std=c++11 -O0 -g3 -fPIC -Wall -Wextra -Werror -pedantic -pedantic-errors -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"
+_cxxflags="-std=c++11 -O0 -g3 -fPIC -Wall -Wextra -Werror -pedantic -pedantic-errors"
 _ldflags="-L../lib -L../lib/.libs"
 _runpath="../lib/.libs"
 _libs="-lasteria"
@@ -22,7 +22,7 @@ _errlog="stderr.log~"
 
 _cmd=$(cat <<EOF
 	set -e
-	"${_cxx}" ${_cxxflags} ${_ldflags} "${_file}" ${_libs} -o "${_output}" $*
+	"${_cxx}" ${CPPFLAGS} ${_cxxflags} ${CXXFLAGS} ${_ldflags} ${LDFLAGS} "${_file}" ${_libs} -o "${_output}" $*
 	LD_LIBRARY_PATH="${_runpath}" "./${_output}"
 EOF
 )

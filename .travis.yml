@@ -12,18 +12,18 @@ addons:
 
 matrix:
   include:
-    - env: "_options=\"--enable-debug-logs --enable-debug-checks\""
+    - env: "_options=\"--enable-debug-logs\""
     - env: "_options=\"\""
 
 install:
   - "mkdir -p m4"
   - "autoreconf -ifv"
-  - "./configure CXXFLAGS=\"-O1\" ${_options}"
+  - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" ${_options}"
   - "make -j$(nproc)"
 
 script:
   - "./bin/asteria </dev/null"
-  - "./run_tests.sh"
+  - "CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" ./run_tests.sh"
 
 notifications:
   irc:

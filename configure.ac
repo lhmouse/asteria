@@ -15,11 +15,5 @@ AM_COND_IF([ENABLE_DEBUG_LOGS], [
 	AC_DEFINE([ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
 ])
 
-AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable debug check in libstdc++]))
-AM_CONDITIONAL([ENABLE_DEBUG_CHECKS], [test "${enable_debug_checks}" == "yes"])
-AM_COND_IF([ENABLE_DEBUG_CHECKS], [
-	AC_DEFINE([ENABLE_DEBUG_CHECKS], [1], [Define to 1 to enable debug checks.])
-])
-
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
