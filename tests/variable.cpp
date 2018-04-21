@@ -21,15 +21,15 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(var->get<D_string>());
 	ASTERIA_TEST_CHECK(var->get_opt<D_double>() == nullptr);
 
-	set_variable(var, recycler, std::int64_t(42));
+	set_variable(var, recycler, D_integer(42));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_integer);
 	ASTERIA_TEST_CHECK(var->get<D_integer>() == 42);
 
-	set_variable(var, recycler, 1.5);
+	set_variable(var, recycler, D_double(1.5));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_double);
 	ASTERIA_TEST_CHECK(var->get<D_double>() == 1.5);
 
-	set_variable(var, recycler, std::string("hello"));
+	set_variable(var, recycler, D_string("hello"));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
 	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
 
