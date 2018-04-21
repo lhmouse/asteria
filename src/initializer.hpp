@@ -26,10 +26,11 @@ public:
 	struct S_braced_init_list {
 		Xptr_map<std::string, Initializer> key_values;
 	};
-	using Variant = rocket::variant< S_assignment_init      // 0
-	                               , S_bracketed_init_list  // 1
-	                               , S_braced_init_list     // 2
-		>;
+	using Variant = rocket::variant<ASTERIA_CDR(void
+		, S_assignment_init     // 0
+		, S_bracketed_init_list // 1
+		, S_braced_init_list    // 2
+	)>;
 
 private:
 	Variant m_variant;

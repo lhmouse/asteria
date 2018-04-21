@@ -24,15 +24,16 @@ public:
 		type_array     =  6,
 		type_object    =  7,
 	};
-	using Variant = rocket::variant< D_boolean    //  0
-	                               , D_integer    //  1
-	                               , D_double     //  2
-	                               , D_string     //  3
-	                               , D_opaque     //  4
-	                               , D_function   //  5
-	                               , D_array      //  6
-	                               , D_object     //  7
-		>;
+	using Variant = rocket::variant<ASTERIA_CDR(void
+		, D_boolean   //  0
+		, D_integer   //  1
+		, D_double    //  2
+		, D_string    //  3
+		, D_opaque    //  4
+		, D_function  //  5
+		, D_array     //  6
+		, D_object    //  7
+	)>;
 
 	enum Comparison_result : unsigned {
 		comparison_result_unordered  = 0,

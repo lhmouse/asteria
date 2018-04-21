@@ -88,16 +88,17 @@ public:
 		Operator_generic operator_generic;
 		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
-	using Variant = rocket::variant< S_literal            // 0
-	                               , S_named_reference    // 1
-	                               , S_bound_reference    // 2
-	                               , S_subexpression      // 3
-	                               , S_lambda_definition  // 4
-	                               , S_pruning            // 5
-	                               , S_branch             // 6
-	                               , S_function_call      // 7
-	                               , S_operator_rpn       // 8
-		>;
+	using Variant = rocket::variant<ASTERIA_CDR(void
+		, S_literal            // 0
+		, S_named_reference    // 1
+		, S_bound_reference    // 2
+		, S_subexpression      // 3
+		, S_lambda_definition  // 4
+		, S_pruning            // 5
+		, S_branch             // 6
+		, S_function_call      // 7
+		, S_operator_rpn       // 8
+	)>;
 
 private:
 	Variant m_variant;
