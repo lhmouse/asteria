@@ -5,7 +5,7 @@
 #define ASTERIA_EXPRESSION_NODE_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -88,19 +88,19 @@ public:
 		Operator_generic operator_generic;
 		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
-	using Types = Type_tuple< S_literal            // 0
-	                        , S_named_reference    // 1
-	                        , S_bound_reference    // 2
-	                        , S_subexpression      // 3
-	                        , S_lambda_definition  // 4
-	                        , S_pruning            // 5
-	                        , S_branch             // 6
-	                        , S_function_call      // 7
-	                        , S_operator_rpn       // 8
+	using Variant = rocket::variant< S_literal            // 0
+	                               , S_named_reference    // 1
+	                               , S_bound_reference    // 2
+	                               , S_subexpression      // 3
+	                               , S_lambda_definition  // 4
+	                               , S_pruning            // 5
+	                               , S_branch             // 6
+	                               , S_function_call      // 7
+	                               , S_operator_rpn       // 8
 		>;
 
 private:
-	Types::rebind_as_variant m_variant;
+	Variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression_node, ValueT)>
@@ -113,15 +113,15 @@ public:
 
 public:
 	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.which());
+		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT *get_opt() const noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		return boost::get<ExpectT>(m_variant);
+		return m_variant.get<ExpectT>();
 	}
 };
 

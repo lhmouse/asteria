@@ -5,7 +5,7 @@
 #define ASTERIA_VARIABLE_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -24,14 +24,14 @@ public:
 		type_array     =  6,
 		type_object    =  7,
 	};
-	using Types = Type_tuple< D_boolean    //  0
-	                        , D_integer    //  1
-	                        , D_double     //  2
-	                        , D_string     //  3
-	                        , D_opaque     //  4
-	                        , D_function   //  5
-	                        , D_array      //  6
-	                        , D_object     //  7
+	using Variant = rocket::variant< D_boolean    //  0
+	                               , D_integer    //  1
+	                               , D_double     //  2
+	                               , D_string     //  3
+	                               , D_opaque     //  4
+	                               , D_function   //  5
+	                               , D_array      //  6
+	                               , D_object     //  7
 		>;
 
 	enum Comparison_result : unsigned {
@@ -43,7 +43,7 @@ public:
 
 private:
 	const Wptr<Recycler> m_weak_recycler;
-	Types::rebind_as_variant m_variant;
+	Variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
@@ -68,29 +68,29 @@ public:
 	}
 
 	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.which());
+		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT *get_opt() const noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	ExpectT *get_opt() noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		const auto ptr = get_opt<ExpectT>();
+		const auto ptr = m_variant.try_get<ExpectT>();
 		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
+			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
 		}
 		return *ptr;
 	}
 	template<typename ExpectT>
 	ExpectT &get(){
-		const auto ptr = get_opt<ExpectT>();
+		const auto ptr = m_variant.try_get<ExpectT>();
 		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Types::index_of<ExpectT>::value));
+			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
 		}
 		return *ptr;
 	}
