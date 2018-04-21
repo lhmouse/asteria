@@ -5,7 +5,7 @@
 #define ASTERIA_STATEMENT_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -111,30 +111,30 @@ public:
 	struct S_return_statement {
 		Xptr<Expression> value_opt;
 	};
-	using Types = Type_tuple< S_expression_statement     //  0
-	                        , S_compound_statement       //  1
-	                        , S_variable_definition      //  2
-	                        , S_function_definition      //  3
-	                        , S_if_statement             //  4
-	                        , S_switch_statement         //  5
-	                        , S_do_while_statement       //  6
-	                        , S_while_statement          //  7
-	                        , S_for_statement            //  8
-	                        , S_foreach_statement        //  9
-	                        , S_try_statement            // 10
-	                        , S_defer_statement          // 11
-	                        , S_label_statement          // 12
-	                        , S_case_label_statement     // 13
-	                        , S_default_label_statement  // 14
-	                        , S_goto_statement           // 15
-	                        , S_break_statement          // 16
-	                        , S_continue_statement       // 17
-	                        , S_throw_statement          // 18
-	                        , S_return_statement         // 19
+	using Variant = rocket::variant< S_expression_statement     //  0
+	                               , S_compound_statement       //  1
+	                               , S_variable_definition      //  2
+	                               , S_function_definition      //  3
+	                               , S_if_statement             //  4
+	                               , S_switch_statement         //  5
+	                               , S_do_while_statement       //  6
+	                               , S_while_statement          //  7
+	                               , S_for_statement            //  8
+	                               , S_foreach_statement        //  9
+	                               , S_try_statement            // 10
+	                               , S_defer_statement          // 11
+	                               , S_label_statement          // 12
+	                               , S_case_label_statement     // 13
+	                               , S_default_label_statement  // 14
+	                               , S_goto_statement           // 15
+	                               , S_break_statement          // 16
+	                               , S_continue_statement       // 17
+	                               , S_throw_statement          // 18
+	                               , S_return_statement         // 19
 		>;
 
 private:
-	Types::rebind_as_variant m_variant;
+	Variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Statement, ValueT)>
@@ -147,15 +147,15 @@ public:
 
 public:
 	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.which());
+		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT *get_opt() const noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		return boost::get<ExpectT>(m_variant);
+		return m_variant.get<ExpectT>();
 	}
 };
 

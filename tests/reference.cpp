@@ -146,7 +146,7 @@ int main(){
 	set_reference(ref, std::move(rdref));
 	aref = { std::move(ref), 2 };
 	set_reference(ref, std::move(aref));
-	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, "meow"));
+	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, D_string("meow")));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "third");

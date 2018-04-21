@@ -13,11 +13,10 @@ class Stored_reference {
 	friend Reference;
 
 public:
-	using Variant = Reference::Types::rebind_as_variant;
-	using Types   = Type_tuple<D_null, Variant>;
+	using Variant = rocket::variant<D_null, Reference::Variant>;
 
 private:
-	Types::rebind_as_variant m_value_opt;
+	Variant m_value_opt;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT), ASTERIA_UNLESS_IS_BASE_OF(Stored_reference, ValueT)>
@@ -33,19 +32,19 @@ public:
 
 public:
 	bool has_value() const noexcept {
-		return m_value_opt.which() == 1;
+		return m_value_opt.index() == 1;
 	}
-	const Variant *get_opt() const noexcept {
-		return boost::get<Variant>(&m_value_opt);
+	const Reference::Variant *get_opt() const noexcept {
+		return m_value_opt.try_get<Reference::Variant>();
 	}
-	Variant *get_opt() noexcept {
-		return boost::get<Variant>(&m_value_opt);
+	Reference::Variant *get_opt() noexcept {
+		return m_value_opt.try_get<Reference::Variant>();
 	}
-	const Variant &get() const {
-		return boost::get<Variant>(m_value_opt);
+	const Reference::Variant &get() const {
+		return m_value_opt.get<Reference::Variant>();
 	}
-	Variant &get(){
-		return boost::get<Variant>(m_value_opt);
+	Reference::Variant &get(){
+		return m_value_opt.get<Reference::Variant>();
 	}
 	template<typename ValueT>
 	void set(ValueT &&value){

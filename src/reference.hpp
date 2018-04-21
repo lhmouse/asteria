@@ -5,7 +5,7 @@
 #define ASTERIA_REFERENCE_HPP_
 
 #include "fwd.hpp"
-#include "type_tuple.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -38,15 +38,15 @@ public:
 		Xptr<Reference> parent_opt;
 		std::string key;
 	};
-	using Types = Type_tuple< S_constant         //  0
-	                        , S_temporary_value  //  1
-	                        , S_local_variable   //  2
-	                        , S_array_element    //  3
-	                        , S_object_member    //  4
+	using Variant = rocket::variant< S_constant         //  0
+	                               , S_temporary_value  //  1
+	                               , S_local_variable   //  2
+	                               , S_array_element    //  3
+	                               , S_object_member    //  4
 		>;
 
 private:
-	Types::rebind_as_variant m_variant;
+	Variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
@@ -60,23 +60,23 @@ public:
 
 public:
 	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.which());
+		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT *get_opt() const noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	ExpectT *get_opt() noexcept {
-		return boost::get<ExpectT>(&m_variant);
+		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
 	const ExpectT &get() const {
-		return boost::get<ExpectT>(m_variant);
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
 	ExpectT &get(){
-		return boost::get<ExpectT>(m_variant);
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ValueT>
 	void set(ValueT &&value){

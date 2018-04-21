@@ -33,7 +33,6 @@
 #include <cmath>
 
 #include "rocket/value_ptr.hpp"
-
-#include <boost/variant.hpp>
+#include "rocket/variant.hpp"
 
 #endif

@@ -14,7 +14,6 @@ namespace rocket {
 using std::nullptr_t;
 using std::shared_ptr;
 using std::weak_ptr;
-using std::move;
 using std::enable_if;
 using std::is_convertible;
 using std::remove_cv;
@@ -33,78 +32,78 @@ public:
 	{ }
 	template<typename otherT, typename enable_if<is_convertible<otherT *, elementT *>::value>::type * = nullptr>
 	explicit value_ptr(shared_ptr<otherT> &&other) noexcept
-		: m_ptr(move(other))
+		: m_ptr(::std::move(other))
 	{ }
 	value_ptr(value_ptr &&rhs) = default;
 	value_ptr &operator=(value_ptr &&rhs) = default;
 
 public:
 	const elementT *get() const noexcept {
-		return m_ptr.get();
+		return this->m_ptr.get();
 	}
 	elementT *get() noexcept {
-		return m_ptr.get();
+		return this->m_ptr.get();
 	}
 
 	shared_ptr<const elementT> share() const noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	shared_ptr<elementT> share() noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	weak_ptr<const elementT> weaken() const noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	weak_ptr<elementT> weaken() noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 
 	void reset(nullptr_t = nullptr) noexcept {
-		m_ptr.reset();
+		this->m_ptr.reset();
 	}
 	template<typename otherT>
 	void reset(shared_ptr<otherT> &&other) noexcept {
-		m_ptr = move(other);
+		this->m_ptr = ::std::move(other);
 	}
 	shared_ptr<elementT> release() noexcept {
 		shared_ptr<elementT> ptr;
-		ptr.swap(m_ptr);
+		ptr.swap(this->m_ptr);
 		return ptr;
 	}
 
 	void swap(value_ptr &rhs) noexcept {
 		using ::std::swap;
-		swap(m_ptr, rhs.m_ptr);
+		swap(this->m_ptr, rhs.m_ptr);
 	}
 
 public:
 	operator shared_ptr<const elementT>() const noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	operator shared_ptr<elementT>() noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	operator weak_ptr<const elementT>() const noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 	operator weak_ptr<elementT>() noexcept {
-		return m_ptr;
+		return this->m_ptr;
 	}
 
 	explicit operator bool() const noexcept {
-		return m_ptr.operator bool();
+		return this->m_ptr.operator bool();
 	}
 	const elementT &operator*() const noexcept {
-		return m_ptr.operator*();
+		return this->m_ptr.operator*();
 	}
 	elementT &operator*() noexcept {
-		return m_ptr.operator*();
+		return this->m_ptr.operator*();
 	}
 	const elementT *operator->() const noexcept {
-		return m_ptr.operator->();
+		return this->m_ptr.operator->();
 	}
 	elementT *operator->() noexcept {
-		return m_ptr.operator->();
+		return this->m_ptr.operator->();
 	}
 };
 
