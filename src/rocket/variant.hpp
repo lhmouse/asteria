@@ -201,6 +201,14 @@ namespace details {
 			ptr->~elementT();
 		}
 	};
+	template<typename fvisitorT>
+	struct visitor_forward {
+		fvisitorT &fvisitor;
+		template<size_t indexT, typename elementT>
+		void dispatch(elementT *ptr){
+			::std::forward<fvisitorT>(this->fvisitor)(*ptr);
+		}
+	};
 
 	template<typename paramT>
 	struct is_nothrow_forward_constructible {
@@ -376,6 +384,17 @@ public:
 	template<typename elementT>
 	void set(elementT &&element) noexcept(noexcept(::std::declval<variant &>() = ::std::forward<elementT>(element))) {
 		*this = ::std::forward<elementT>(element);
+	}
+
+	template<typename fvisitorT>
+	void visit(fvisitorT &&fvisitor) const {
+		details::visitor_forward<fvisitorT> visitor = { fvisitor };
+		this->m_buffer.apply_visitor(this->m_index, visitor);
+	}
+	template<typename fvisitorT>
+	void visit(fvisitorT &&fvisitor){
+		details::visitor_forward<fvisitorT> visitor = { fvisitor };
+		this->m_buffer.apply_visitor(this->m_index, visitor);
 	}
 
 	void swap(variant &rhs) noexcept(details::conjunction<details::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
