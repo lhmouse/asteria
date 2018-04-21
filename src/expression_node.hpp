@@ -107,7 +107,7 @@ public:
 	Expression_node(ValueT &&variant)
 		: m_variant(std::forward<ValueT>(variant))
 	{ }
-	Expression_node(Expression_node &&);
+	Expression_node(Expression_node &&) noexcept;
 	Expression_node &operator=(Expression_node &&);
 	~Expression_node();
 

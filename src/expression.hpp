@@ -19,7 +19,7 @@ public:
 	Expression(std::vector<Expression_node> nodes)
 		: m_nodes(std::move(nodes))
 	{ }
-	Expression(Expression &&);
+	Expression(Expression &&) noexcept;
 	Expression &operator=(Expression &&);
 	~Expression();
 

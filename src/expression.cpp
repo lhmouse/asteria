@@ -14,7 +14,7 @@
 
 namespace Asteria {
 
-Expression::Expression(Expression &&) = default;
+Expression::Expression(Expression &&) noexcept = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
