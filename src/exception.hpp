@@ -15,13 +15,13 @@ private:
 	Sptr<Reference> m_reference_opt;
 
 public:
-	explicit Exception(Sptr<Reference> reference_opt)
+	explicit Exception(Sptr<Reference> reference_opt) noexcept
 		: m_reference_opt(std::move(reference_opt))
 	{ }
-	Exception(const Exception &);
-	Exception &operator=(const Exception &);
-	Exception(Exception &&);
-	Exception &operator=(Exception &&);
+	Exception(const Exception &) noexcept;
+	Exception &operator=(const Exception &) noexcept;
+	Exception(Exception &&) noexcept;
+	Exception &operator=(Exception &&) noexcept;
 	~Exception() override;
 
 public:

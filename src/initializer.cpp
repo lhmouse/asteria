@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-Initializer::Initializer(Initializer &&) = default;
+Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer &Initializer::operator=(Initializer &&) = default;
 Initializer::~Initializer() = default;
 

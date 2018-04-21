@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-Expression_node::Expression_node(Expression_node &&) = default;
+Expression_node::Expression_node(Expression_node &&) noexcept = default;
 Expression_node &Expression_node::operator=(Expression_node &&) = default;
 Expression_node::~Expression_node() = default;
 
