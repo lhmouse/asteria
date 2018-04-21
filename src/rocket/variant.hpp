@@ -130,7 +130,7 @@ namespace details {
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor) const {
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(reinterpret_cast<const firstT *>(this->m_storage));
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(static_cast<const firstT *>(static_cast<const void *>(this->m_storage)));
 			} else {
 				this->m_next.apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
@@ -138,7 +138,7 @@ namespace details {
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor){
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(reinterpret_cast<firstT *>(this->m_storage));
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(static_cast<firstT *>(static_cast<void *>(this->m_storage)));
 			} else {
 				this->m_next.apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
