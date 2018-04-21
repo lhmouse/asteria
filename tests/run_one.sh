@@ -20,9 +20,16 @@ _libs="-lasteria"
 _output="test.out~"
 _errlog="stderr.log~"
 
+_cmd=$(cat <<EOF
+	set -e
+	"${_cxx}" ${_cxxflags} ${_ldflags} "${_file}" ${_libs} -o "${_output}" $*
+	LD_LIBRARY_PATH="${_runpath}" "./${_output}"
+EOF
+)
+
 printf '\e[33;1mRUNNING  %s\e[0m\n' "${_file}"
-if ! ("${_cxx}" ${_cxxflags} ${_ldflags} "${_file}" ${_libs} -o "${_output}" $* && LD_LIBRARY_PATH="${_runpath}" "./${_output}") >&2; then
-	printf '\e[31;1mFAILED   %s\e[0m\n' "${_file}"
+if ! sh -c "${_cmd}" >&2; then
+	printf '\e[31;1mFAILED   %s\n%s\e[0m\n' "${_file}" "${_cmd}"
 	exit 1
 fi
 printf '\e[32;1mPASSED   %s\e[0m\n' "${_file}"
