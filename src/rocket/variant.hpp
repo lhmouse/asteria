@@ -230,6 +230,10 @@ namespace details {
 	struct is_nothrow_swappable {
 		enum : bool { value = noexcept(nothrow_swappable_helper::check<paramT>()) };
 	};
+
+	__attribute__((__noreturn__)) inline void rethrow_current_exception(){
+		throw;
+	}
 }
 
 template<typename ...elementsT>
@@ -414,7 +418,7 @@ public:
 			} catch(...){
 				details::visitor_destroy cleaner = { };
 				this->m_buffer.apply_visitor(rhs.m_index, cleaner);
-				throw;
+				details::rethrow_current_exception();
 			}
 			details::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
