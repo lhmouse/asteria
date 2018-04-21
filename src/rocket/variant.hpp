@@ -5,8 +5,7 @@
 #define ROCKET_VARIANT_HPP_
 
 #include <cstddef> // std::size_t
-#include <type_traits> // std::is_convertible<>, std::decay<>, std::enable_if<>, std::is_base_of<>, std::remove_cv<>,
-                       // std::is_nothrow_{{copy,move}_,}{constructible,assignable}<>, std::is_nothrow_destructible<>
+#include <type_traits> // so many
 #include <stdexcept> // std::out_of_range, std::invalid_argument
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
