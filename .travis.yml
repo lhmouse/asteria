@@ -7,7 +7,6 @@ sudo: required
 addons:
   apt:
     packages:
-      - libboost-dev
       - checkinstall
 
 matrix:
@@ -22,6 +21,7 @@ install:
   - "make -j$(nproc)"
 
 script:
+  - "./makedeb.sh"
   - "./bin/asteria </dev/null"
   - "CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" ./run_tests.sh"
 
