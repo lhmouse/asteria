@@ -20,7 +20,9 @@ int main(){
 	pair = obj->get<D_object>().emplace("str", std::move(var));
 	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 
+	ASTERIA_TEST_CHECK(weak_int.expired() == false);
+	ASTERIA_TEST_CHECK(weak_str.expired() == false);
 	recycler->purge_variables();
-	ASTERIA_TEST_CHECK(weak_int.expired());
-	ASTERIA_TEST_CHECK(weak_str.expired());
+	ASTERIA_TEST_CHECK(weak_int.expired() == true);
+	ASTERIA_TEST_CHECK(weak_str.expired() == true);
 }
