@@ -1,0 +1,29 @@
+matrix:
+  arch:
+    - 64
+    - 32
+  options:
+    - "--enable-debug-logs"
+    - ""
+
+build:
+  image: "teaci/msys$${arch}"
+  pull: true
+  shell: "mingw$${arch}"
+  commands:
+    - "mkdir -p m4"
+    - "autoreconf -ifv"
+    - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" $${options}"
+    - "make -j$(nproc)"
+    - "./bin/asteria </dev/null"
+    - "CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" ./run_tests.sh"
+
+notify:
+  irc:
+    prefix: " lh_mouse"
+    nick: tea-ci
+    channel: mcfproj
+    server:
+      host: chat.freenode.net
+      port: 6697
+      tls: true
