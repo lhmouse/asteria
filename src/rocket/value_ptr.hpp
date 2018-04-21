@@ -21,7 +21,7 @@ using std::is_same;
 
 template<typename elementT>
 class value_ptr {
-	static_assert(is_same<typename remove_cv<elementT>::type, elementT>::value, "Please remove top-level cv-qualifiers from `elementT`");
+	static_assert(is_same<typename remove_cv<elementT>::type, elementT>::value, "top-level cv-qualifiers are not allowed");
 
 private:
 	shared_ptr<elementT> m_ptr;
