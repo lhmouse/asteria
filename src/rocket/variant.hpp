@@ -378,7 +378,7 @@ public:
 		*this = ::std::forward<elementT>(element);
 	}
 
-	void swap(variant &rhs) noexcept(details::conjunction<details::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>..., is_nothrow_move_assignable<elementsT>...>::value) {
+	void swap(variant &rhs) noexcept(details::conjunction<details::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		details::visitor_get_pointer<void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
