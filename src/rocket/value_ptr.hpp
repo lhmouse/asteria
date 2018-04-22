@@ -8,6 +8,7 @@
 #include <memory> // std::shared_ptr<>, std::weak_ptr<>
 #include <utility> // std::move(), std::swap()
 #include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
+#include <cassert> // assert
 
 namespace rocket {
 
@@ -94,15 +95,19 @@ public:
 		return this->m_ptr.operator bool();
 	}
 	const elementT &operator*() const noexcept {
+		assert(this->m_ptr);
 		return this->m_ptr.operator*();
 	}
 	elementT &operator*() noexcept {
+		assert(this->m_ptr);
 		return this->m_ptr.operator*();
 	}
 	const elementT *operator->() const noexcept {
+		assert(this->m_ptr);
 		return this->m_ptr.operator->();
 	}
 	elementT *operator->() noexcept {
+		assert(this->m_ptr);
 		return this->m_ptr.operator->();
 	}
 };

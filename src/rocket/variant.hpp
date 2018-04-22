@@ -6,9 +6,10 @@
 
 #include <cstddef> // std::size_t
 #include <type_traits> // so many
-#include <stdexcept> // std::out_of_range, std::invalid_argument
+#include <stdexcept> // std::invalid_argument
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
+#include <cassert> // assert()
 
 namespace rocket {
 
@@ -25,7 +26,6 @@ using std::is_nothrow_move_constructible;
 using std::is_nothrow_copy_assignable;
 using std::is_nothrow_move_assignable;
 using std::is_nothrow_destructible;
-using std::out_of_range;
 using std::invalid_argument;
 
 template<typename ...elementsT>
@@ -122,11 +122,13 @@ namespace details {
 	struct variant_buffer {
 		template<typename visitorT>
 		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/) const {
-			throw out_of_range("variant_buffer::visit(): type index out of range");
+			assert(false);
+			__builtin_unreachable();
 		}
 		template<typename visitorT>
 		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/){
-			throw out_of_range("variant_buffer::visit(): type index out of range");
+			assert(false);
+			__builtin_unreachable();
 		}
 	};
 
@@ -326,8 +328,8 @@ public:
 			new(visitor.result_ptr) etype(::std::forward<elementT>(element));
 			details::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
-			this->m_index = eindex;
 		}
+		this->m_index = eindex;
 		return *this;
 	}
 	variant &operator=(const variant &rhs) noexcept(details::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
@@ -341,8 +343,8 @@ public:
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
 			details::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
-			this->m_index = rhs.m_index;
 		}
+		this->m_index = rhs.m_index;
 		return *this;
 	}
 	variant &operator=(variant &&rhs) noexcept(details::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
@@ -356,8 +358,8 @@ public:
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
 			details::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
-			this->m_index = rhs.m_index;
 		}
+		this->m_index = rhs.m_index;
 		return *this;
 	}
 	~variant(){
@@ -443,8 +445,8 @@ public:
 			details::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
 			rhs.m_buffer.apply_visitor(rhs.m_index, cleaner);
-			::std::swap(this->m_index, rhs.m_index);
 		}
+		::std::swap(this->m_index, rhs.m_index);
 	}
 };
 
