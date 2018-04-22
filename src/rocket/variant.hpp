@@ -313,7 +313,7 @@ public:
 		this->m_index = rhs.m_index;
 	}
 	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
-	variant &operator=(elementT &&element) noexcept(details::is_nothrow_forward_constructible<elementT>::value && details::is_nothrow_forward_assignable<elementT>::value) {
+	variant &operator=(elementT &&element) noexcept(details::is_nothrow_forward_assignable<elementT>::value && details::is_nothrow_forward_constructible<elementT>::value) {
 		enum : size_t { eindex = details::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
