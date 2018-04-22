@@ -106,9 +106,20 @@ namespace details {
 		enum : bool { value = firstT::value ? conjunction<remainingT...>::value : 0 };
 	};
 
+	template<size_t indexT, typename elementT>
+	struct storage_for {
+		alignas(elementT) char data[sizeof(elementT)];
+
+		const elementT *get() const {
+			return reinterpret_cast<const elementT *>(this->data);
+		}
+		elementT *get(){
+			return reinterpret_cast<elementT *>(this->data);
+		}
+	};
+
 	template<size_t indexT, typename ...elementsT>
-	class variant_buffer {
-	public:
+	struct variant_buffer {
 		template<typename visitorT>
 		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/) const {
 			throw out_of_range("variant_buffer::visit(): type index out of range");
@@ -120,26 +131,21 @@ namespace details {
 	};
 
 	template<size_t indexT, typename firstT, typename ...remainingT>
-	class variant_buffer<indexT, firstT, remainingT...> {
-	private:
-		alignas(firstT) char m_storage[sizeof(firstT)];
-		variant_buffer<indexT + 1, remainingT...> m_next;
-
-	public:
+	struct variant_buffer<indexT, firstT, remainingT...> : private storage_for<indexT, firstT>, public variant_buffer<indexT + 1, remainingT...> {
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor) const {
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(static_cast<const firstT *>(static_cast<const void *>(this->m_storage)));
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(this->storage_for<indexT, firstT>::get());
 			} else {
-				this->m_next.apply_visitor(expect, ::std::forward<visitorT>(visitor));
+				this->variant_buffer<indexT + 1, remainingT...>::apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
 		}
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor){
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(static_cast<firstT *>(static_cast<void *>(this->m_storage)));
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(this->storage_for<indexT, firstT>::get());
 			} else {
-				this->m_next.apply_visitor(expect, ::std::forward<visitorT>(visitor));
+				this->variant_buffer<indexT + 1, remainingT...>::apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
 		}
 	};
@@ -147,62 +153,77 @@ namespace details {
 	template<typename expectT>
 	struct visitor_get_pointer {
 		expectT *result_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			this->result_ptr = ptr;
 		}
 	};
+
 	struct visitor_value_initialize {
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT();
 		}
 	};
+
 	struct visitor_copy_construct_from {
 		const void *source_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT(*static_cast<const elementT *>(this->source_ptr));
 		}
 	};
+
 	struct visitor_move_construct_from {
 		void *source_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT(::std::move(*static_cast<elementT *>(this->source_ptr)));
 		}
 	};
+
 	struct visitor_copy_assign_from {
 		const void *source_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			*ptr = *static_cast<const elementT *>(this->source_ptr);
 		}
 	};
+
 	struct visitor_move_assign_from {
 		void *source_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			*ptr = ::std::move(*static_cast<elementT *>(this->source_ptr));
 		}
 	};
+
 	struct visitor_swap {
 		void *source_ptr;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			using ::std::swap;
 			swap(*ptr, *static_cast<elementT *>(this->source_ptr));
 		}
 	};
+
 	struct visitor_destroy {
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			ptr->~elementT();
 		}
 	};
+
 	template<typename fvisitorT>
 	struct visitor_forward {
 		fvisitorT &fvisitor;
+
 		template<size_t indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::std::forward<fvisitorT>(this->fvisitor)(*ptr);
