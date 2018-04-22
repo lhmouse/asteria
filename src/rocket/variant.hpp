@@ -9,7 +9,7 @@
 #include <stdexcept> // std::invalid_argument
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
-#include <cassert> // assert()
+#include "assert.hpp"
 
 namespace rocket {
 
@@ -122,13 +122,11 @@ namespace details {
 	struct variant_buffer {
 		template<typename visitorT>
 		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/) const {
-			assert(false);
-			__builtin_unreachable();
+			ROCKET_ASSERT_MSG(false, "type index expected is out of range");
 		}
 		template<typename visitorT>
 		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/){
-			assert(false);
-			__builtin_unreachable();
+			ROCKET_ASSERT_MSG(false, "type index expected is out of range");
 		}
 	};
 
