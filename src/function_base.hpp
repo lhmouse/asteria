@@ -18,7 +18,6 @@ public:
 
 public:
 	virtual const char *describe() const noexcept = 0;
-	virtual const Sptr_vector<const Variable> *get_default_arguments_opt() const = 0;
 	virtual Xptr<Reference> invoke(Spref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments) = 0;
 };
 

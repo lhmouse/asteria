@@ -398,24 +398,6 @@ ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
 				this_ref = std::move(callee_params.parent_opt);
 			}
 			materialize_reference(this_ref, recycler, false);
-			// Replace null arguments with default ones.
-			const auto default_args = callee->get_default_arguments_opt();
-			if(default_args){
-				if(arguments.size() < default_args->size()){
-					arguments.resize(default_args->size());
-				}
-				for(std::size_t i = 0; i < default_args->size(); ++i){
-					if(arguments.at(i)){
-						continue;
-					}
-					const auto &arg_source = default_args->at(i);
-					if(!arg_source){
-						continue;
-					}
-					Reference::S_constant ref_c = { arg_source };
-					set_reference(arguments.at(i), std::move(ref_c));
-				}
-			}
 			// Call the function and push the result as-is.
 			auto ref = callee->invoke(recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(ref));
