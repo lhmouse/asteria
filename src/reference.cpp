@@ -103,6 +103,79 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 	}
 }
 
+namespace {
+	class Fancy_nullptr_setter : public std::iterator<std::random_access_iterator_tag, std::nullptr_t> {
+	private:
+		difference_type m_position;
+
+	public:
+		explicit constexpr Fancy_nullptr_setter(difference_type position) noexcept
+			: m_position(position)
+		{ }
+
+	public:
+		constexpr std::nullptr_t operator*() const noexcept {
+			return nullptr;
+		}
+
+		Fancy_nullptr_setter &operator++() noexcept {
+			++m_position;
+			return *this;
+		}
+		Fancy_nullptr_setter &operator--() noexcept {
+			--m_position;
+			return *this;
+		}
+		Fancy_nullptr_setter &operator+=(difference_type n) noexcept {
+			m_position += n;
+			return *this;
+		}
+		Fancy_nullptr_setter &operator-=(difference_type n) noexcept {
+			m_position -= n;
+			return *this;
+		}
+
+		Fancy_nullptr_setter operator++(int) noexcept {
+			return Fancy_nullptr_setter(m_position++);
+		}
+		Fancy_nullptr_setter operator--(int) noexcept {
+			return Fancy_nullptr_setter(m_position--);
+		}
+		Fancy_nullptr_setter operator+(difference_type n) const noexcept {
+			return Fancy_nullptr_setter(m_position + n);
+		}
+		Fancy_nullptr_setter operator-(difference_type n) const noexcept {
+			return Fancy_nullptr_setter(m_position - n);
+		}
+
+		friend Fancy_nullptr_setter operator+(difference_type n, const Fancy_nullptr_setter &it) noexcept {
+			return Fancy_nullptr_setter(n + it.m_position);
+		}
+		difference_type operator-(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position - it.m_position;
+		}
+
+		bool operator==(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position == it.m_position;
+		}
+		bool operator!=(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position != it.m_position;
+		}
+		bool operator<(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position < it.m_position;
+		}
+		bool operator>(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position > it.m_position;
+		}
+		bool operator<=(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position <= it.m_position;
+		}
+		bool operator>=(const Fancy_nullptr_setter &it) const noexcept {
+			return m_position >= it.m_position;
+		}
+	};
+}
+
 Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
@@ -190,8 +263,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> re
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend);
 			}
-			array.resize(array.size() + static_cast<std::size_t>(count_to_prepend));
-			std::move_backward(array.begin(), std::prev(array.end(), static_cast<std::ptrdiff_t>(count_to_prepend)), array.end());
+			array.insert(array.begin(), Fancy_nullptr_setter(0), Fancy_nullptr_setter(static_cast<std::ptrdiff_t>(count_to_prepend)));
 			normalized_index = 0;
 		} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
 			// Append `null`s until the subscript designates the end.
@@ -200,7 +272,8 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> re
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append);
 			}
-			array.resize(array.size() + static_cast<std::size_t>(count_to_append));
+			array.insert(array.end(), Fancy_nullptr_setter(0), Fancy_nullptr_setter(static_cast<std::ptrdiff_t>(count_to_append)));
+			normalized_index = static_cast<std::int64_t>(array.size() - 1);
 		}
 		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return std::ref(variable_opt); }
