@@ -25,14 +25,12 @@ public:
 		type_foreach_statement        =  9,
 		type_try_statement            = 10,
 		type_defer_statement          = 11,
-		type_label_statement          = 12,
-		type_case_label_statement     = 13,
-		type_default_label_statement  = 14,
-		type_goto_statement           = 15,
-		type_break_statement          = 16,
-		type_continue_statement       = 17,
-		type_throw_statement          = 18,
-		type_return_statement         = 19,
+		type_case_label_statement     = 12,
+		type_default_label_statement  = 13,
+		type_break_statement          = 14,
+		type_continue_statement       = 15,
+		type_throw_statement          = 16,
+		type_return_statement         = 17,
 	};
 	struct S_expression_statement {
 		Xptr<Expression> expression_opt;
@@ -87,17 +85,11 @@ public:
 	struct S_defer_statement {
 		Xptr<Statement> statement;
 	};
-	struct S_label_statement {
-		std::string identifier;
-	};
 	struct S_case_label_statement {
 		Sptr<const Variable> value_opt;
 	};
 	struct S_default_label_statement {
 		// Nothing.
-	};
-	struct S_goto_statement {
-		std::string target_label;
 	};
 	struct S_break_statement {
 		// Nothing.
@@ -124,14 +116,12 @@ public:
 		, S_foreach_statement       //  9
 		, S_try_statement           // 10
 		, S_defer_statement         // 11
-		, S_label_statement         // 12
-		, S_case_label_statement    // 13
-		, S_default_label_statement // 14
-		, S_goto_statement          // 15
-		, S_break_statement         // 16
-		, S_continue_statement      // 17
-		, S_throw_statement         // 18
-		, S_return_statement        // 19
+		, S_case_label_statement    // 12
+		, S_default_label_statement // 13
+		, S_break_statement         // 14
+		, S_continue_statement      // 15
+		, S_throw_statement         // 16
+		, S_return_statement        // 17
 	)>;
 
 private:

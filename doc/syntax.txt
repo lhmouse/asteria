@@ -31,8 +31,8 @@ statement ::=
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
-	label-statement | case-label-statement | default-label-statement |
-	goto-statement | break-statement | continue-statement | throw-statement | return-statement
+	case-label-statement | default-label-statement |
+	break-statement | continue-statement | throw-statement | return-statement
 
 expression-statement ::=
 	expression-opt ";"
@@ -86,15 +86,11 @@ try-statement ::=
 defer-statement ::=
 	"defer" compound-statement
 
-label-statement ::=
-	"label" identifier ":"
 case-label-statement ::=
 	"case" ( null-literal | boolean-literal | string-literal | numeric-literal ) ":"
 default-label-statement ::=
 	"default" ":"
 
-goto-statement ::=
-	"goto" identifier ";"
 break-statement ::=
 	"break" ";"
 continue-statement ::=
