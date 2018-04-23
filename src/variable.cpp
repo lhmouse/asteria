@@ -263,12 +263,10 @@ void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref
 	}
 }
 void move_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Variable> &&source_opt){
-	if(source_opt == nullptr){
-		return variable_out.reset();
-	} else if(source_opt->get_recycler_opt() == recycler){
+	if(source_opt && (source_opt->get_recycler_opt() == recycler)){
 		return variable_out.reset(source_opt.release());
 	} else {
-		return set_variable(variable_out, recycler, std::move(*source_opt));
+		return copy_variable(variable_out, recycler, source_opt);
 	}
 }
 
