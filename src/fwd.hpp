@@ -79,7 +79,7 @@ using D_integer   = std::int64_t;
 using D_double    = double;
 using D_string    = std::string;
 using D_opaque    = Xptr<Opaque_base>;
-using D_function  = Sptr<Function_base>;
+using D_function  = Sptr<const Function_base>;
 using D_array     = Xptr_vector<Variable>;
 using D_object    = Xptr_map<std::string, Variable>;
 
