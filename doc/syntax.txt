@@ -61,7 +61,7 @@ function-definition ::=
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
-	"var" identifier default-argument-initializer-opt ( "," parameter-list-opt | "" )
+	identifier default-argument-initializer-opt ( "," parameter-list-opt | "" )
 default-argument-initializer-opt ::=
 	"=" ( identifier | literal ) | ""
 
@@ -79,10 +79,10 @@ while-statement ::=
 for-statement ::=
 	"for" "(" statement expression-opt ";" expression-opt ")" compound-statement
 foreach-statement ::=
-	"foreach" "(" "const" identifier "," ( "var" | "const" ) identifier "in" initializer ")" compound-statement
+	"foreach" "(" identifier "," identifier "in" initializer ")" compound-statement
 
 try-statement ::=
-	"try" compound-statement "catch" "(" "var" identifier ")" compound-statement
+	"try" compound-statement "catch" "(" identifier ")" compound-statement
 defer-statement ::=
 	"defer" compound-statement
 
