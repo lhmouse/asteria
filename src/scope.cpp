@@ -31,11 +31,12 @@ void Scope::clear_local_references() noexcept {
 	local_references.swap(m_local_references);
 }
 
-Sptr<const Reference> get_local_reference_cascade(Spref<const Scope> scope_opt, const std::string &identifier){
+Sptr<const Reference> get_local_reference_cascade_opt(Spref<const Scope> scope_opt, const std::string &identifier){
+	Sptr<const Reference> ref;
 	auto scope = scope_opt;
 	for(;;){
 		if(!scope){
-			ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", identifier, "`");
+			return nullptr;
 		}
 		auto local_ref = scope->get_local_reference_opt(identifier);
 		if(local_ref){

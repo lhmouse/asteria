@@ -43,17 +43,17 @@ int main(){
 	lref = { hidden_c };
 	wref = child->drill_for_local_reference("hidden");
 	set_reference(wref, std::move(lref));
-	ref = get_local_reference_cascade(child, "hidden");
+	ref = get_local_reference_cascade_opt(child, "hidden");
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in child");
 
 	child->clear_local_references();
-	ref = get_local_reference_cascade(child, "hidden");
+	ref = get_local_reference_cascade_opt(child, "hidden");
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in parent");
 
 	parent->clear_local_references();
-	ASTERIA_TEST_CHECK_CATCH(get_local_reference_cascade(child, "hidden"));
+	ASTERIA_TEST_CHECK(get_local_reference_cascade_opt(child, "hidden") == nullptr);
 }

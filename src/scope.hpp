@@ -46,7 +46,7 @@ public:
 	void clear_local_references() noexcept;
 };
 
-extern Sptr<const Reference> get_local_reference_cascade(Spref<const Scope> scope_opt, const std::string &identifier);
+extern Sptr<const Reference> get_local_reference_cascade_opt(Spref<const Scope> scope_opt, const std::string &identifier);
 
 }
 
