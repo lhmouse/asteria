@@ -44,7 +44,12 @@ public:
 		Xptr<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
-		// TODO
+		struct Parameter {
+			std::string identifier;
+			Sptr<const Variable> default_argument_opt;
+		};
+		std::vector<Parameter> parameters;
+		Xptr<Statement> body_opt;
 	};
 	struct S_if_statement {
 		Xptr<Expression> condition_opt;
@@ -53,37 +58,35 @@ public:
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_expression;
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 	};
 	struct S_do_while_statement {
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 		Xptr<Expression> condition_opt;
 	};
 	struct S_while_statement {
 		Xptr<Expression> condition_opt;
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 	};
 	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 	};
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
-		bool value_immutable;
 		Xptr<Initializer> range_initializer;
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 	};
 	struct S_try_statement {
 		Xptr<Statement> branch_try;
 		std::string exception_identifier;
-		bool exception_immutable;
 		Xptr<Statement> branch_catch;
 	};
 	struct S_defer_statement {
-		Xptr<Statement> statement;
+		Xptr<Statement> body_opt;
 	};
 	struct S_case_label_statement {
 		Sptr<const Variable> value_opt;
