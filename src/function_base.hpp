@@ -18,7 +18,7 @@ public:
 
 public:
 	virtual const char *describe() const noexcept = 0;
-	virtual Xptr<Reference> invoke(Spref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments) const = 0;
+	virtual void invoke(Xptr<Reference> &result_out, Spref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments) const = 0;
 };
 
 }

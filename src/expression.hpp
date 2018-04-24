@@ -41,8 +41,8 @@ public:
 	}
 };
 
-extern Xptr<Expression> bind_expression_opt(Spref<const Expression> source_opt, Spref<const Scope> scope);
-extern Xptr<Reference> evaluate_expression_opt(Spref<Recycler> recycler, Spref<const Expression> expression_opt, Spref<const Scope> scope);
+extern void bind_expression(Xptr<Expression> &expression_out, Spref<const Expression> source_opt, Spref<const Scope> scope);
+extern void evaluate_expression(Xptr<Reference> &reference_out, Spref<Recycler> recycler, Spref<const Expression> expression_opt, Spref<const Scope> scope);
 
 }
 
