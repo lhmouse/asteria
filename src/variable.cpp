@@ -88,10 +88,10 @@ namespace {
 		}
 		os <<std::setfill(' ') <<std::setw(static_cast<int>(indent)) <<"";
 	}
-	void do_quote_string(std::ostream &os, const std::string &str){
+	void do_quote_string(std::ostream &os, const char *str, std::size_t len){
 		os <<'\"';
-		for(auto it = str.begin(); it != str.end(); ++it){
-			const unsigned value = static_cast<unsigned char>(*it);
+		for(std::size_t i = 0; i < len; ++i){
+			const unsigned value = static_cast<unsigned char>(str[i]);
 			switch(value){
 			case '\"':
 				os <<'\\' <<'\"';
@@ -152,18 +152,20 @@ void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigne
 		return; }
 	case Variable::type_string: {
 		const auto &value = variable_opt->get<D_string>();
-		do_quote_string(os, value);
+		do_quote_string(os, value.data(), value.size());
 		return; }
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<D_opaque>();
 		os <<"opaque(\"" <<typeid(*value).name() <<"\", ";
-		do_quote_string(os, value->describe());
+		const auto desc = value->describe();
+		do_quote_string(os, desc, std::strlen(desc));
 		os << ')';
 		return; }
 	case Variable::type_function: {
 		const auto &value = variable_opt->get<D_opaque>();
 		os <<"function(\"" <<typeid(*value).name() <<"\", ";
-		do_quote_string(os, value->describe());
+		const auto desc = value->describe();
+		do_quote_string(os, desc, std::strlen(desc));
 		os << ')';
 		return; }
 	case Variable::type_array: {
@@ -191,7 +193,7 @@ void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigne
 			os <<std::endl;
 			const auto &pair = *it;
 			do_indent(os, indent_next + indent_increment);
-			do_quote_string(os, pair.first);
+			do_quote_string(os, pair.first.data(), pair.first.size());
 			os <<" = ";
 			dump_variable(os, pair.second, indent_next + indent_increment, indent_increment);
 			os <<',';
