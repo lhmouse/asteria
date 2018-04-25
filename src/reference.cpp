@@ -13,11 +13,11 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept {
+Reference::Type get_reference_type(Spcref<const Reference> reference_opt) noexcept {
 	return reference_opt ? reference_opt->get_type() : Reference::type_null;
 }
 
-void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
+void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null: {
@@ -58,7 +58,7 @@ void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsi
 	}
 }
 
-std::ostream &operator<<(std::ostream &os, Spref<const Reference> reference_opt){
+std::ostream &operator<<(std::ostream &os, Spcref<const Reference> reference_opt){
 	dump_reference(os, reference_opt);
 	return os;
 }
@@ -67,7 +67,7 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt)
 	return os;
 }
 
-void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt){
+void copy_reference(Xptr<Reference> &reference_out, Spcref<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
 	case Reference::type_null: {
@@ -176,7 +176,7 @@ namespace {
 	};
 }
 
-Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -230,7 +230,7 @@ Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> reference_opt){
+std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -300,7 +300,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> re
 }
 
 namespace {
-	std::tuple<Sptr<const Variable>, Xptr<Variable> *> do_try_extract_variable(Spref<Reference> reference_opt){
+	std::tuple<Sptr<const Variable>, Xptr<Variable> *> do_try_extract_variable(Spcref<Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -360,7 +360,7 @@ namespace {
 	}
 }
 
-void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt){
+void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Reference> &&reference_opt){
 	Sptr<const Variable> rref;
 	Xptr<Variable> *wptr;
 	std::tie(rref, wptr) = do_try_extract_variable(reference_opt);
@@ -369,7 +369,7 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycle
 	}
 	return copy_variable(variable_out, recycler, rref);
 }
-void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler, bool immutable){
+void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool immutable){
 	Xptr<Variable> *wptr;
 	std::tie(std::ignore, wptr) = do_try_extract_variable(reference_inout_opt);
 	if(wptr){

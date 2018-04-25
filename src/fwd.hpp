@@ -26,6 +26,7 @@ class Logger;
 class Initializer;
 class Expression;
 class Statement;
+class Function_parameter;
 
 // Runtime objects (copyable and movable)
 class Exception;
@@ -48,7 +49,7 @@ class Recycler;
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Spref = const std::shared_ptr<ElementT> &;
+using Spcref = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
 using Sptr_vector = std::vector<Sptr<ElementT>>;
@@ -58,7 +59,7 @@ using Sptr_map = std::unordered_map<KeyT, Sptr<ValueT>>;
 template<typename ElementT>
 using Wptr = std::weak_ptr<ElementT>;
 template<typename ElementT>
-using Wpref = const std::weak_ptr<ElementT> &;
+using Wpcref = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Wptr_vector = std::vector<Wptr<ElementT>>;
@@ -68,7 +69,7 @@ using Wptr_map = std::unordered_map<KeyT, Wptr<ValueT>>;
 template<typename ElementT>
 using Xptr = rocket::value_ptr<ElementT>;
 //template<typename ElementT>
-//using Xpref = const rocket::value_ptr<ElementT> &;
+//using Xpcref = const rocket::value_ptr<ElementT> &;
 
 template<typename ElementT>
 using Xptr_vector = std::vector<Xptr<ElementT>>;

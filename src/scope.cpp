@@ -31,7 +31,7 @@ void Scope::clear_local_references() noexcept {
 	local_references.swap(m_local_references);
 }
 
-Sptr<const Reference> get_local_reference_cascade_opt(Spref<const Scope> scope_opt, const std::string &identifier){
+Sptr<const Reference> get_local_reference_cascade_opt(Spcref<const Scope> scope_opt, const std::string &identifier){
 	Sptr<const Reference> ref;
 	auto scope = scope_opt;
 	for(;;){

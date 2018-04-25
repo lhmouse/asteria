@@ -85,24 +85,24 @@ public:
 	}
 };
 
-extern Reference::Type get_reference_type(Spref<const Reference> reference_opt) noexcept;
+extern Reference::Type get_reference_type(Spcref<const Reference> reference_opt) noexcept;
 
-extern void dump_reference(std::ostream &os, Spref<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 
-extern std::ostream &operator<<(std::ostream &os, Spref<const Reference> reference_opt);
+extern std::ostream &operator<<(std::ostream &os, Spcref<const Reference> reference_opt);
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt);
 
-extern void copy_reference(Xptr<Reference> &reference_out, Spref<const Reference> source_opt);
+extern void copy_reference(Xptr<Reference> &reference_out, Spcref<const Reference> source_opt);
 extern void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt);
 
-extern Sptr<const Variable> read_reference_opt(Spref<const Reference> reference_opt);
-extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spref<const Reference> reference_opt);
+extern Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt);
+extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> reference_opt);
 
 // If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the variable through the reference:
 //   `copy_variable(variable_out, recycler, read_reference_opt(reference_opt))`
-extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Reference> &&reference_opt);
+extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Reference> &&reference_opt);
 // If the reference is a temporary value, convert it to an unnamed local variable, allowing further modification to it.
-extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spref<Recycler> recycler, bool immutable);
+extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool immutable);
 
 }
 

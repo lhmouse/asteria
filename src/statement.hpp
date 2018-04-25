@@ -153,7 +153,7 @@ public:
 	}
 };
 
-extern Statement::Type get_statement_type(Spref<const Statement> statement_opt) noexcept;
+extern Statement::Type get_statement_type(Spcref<const Statement> statement_opt) noexcept;
 
 }
 

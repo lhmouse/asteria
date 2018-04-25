@@ -15,11 +15,11 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer &Initializer::operator=(Initializer &&) = default;
 Initializer::~Initializer() = default;
 
-Initializer::Type get_initializer_type(Spref<const Initializer> initializer_opt) noexcept {
+Initializer::Type get_initializer_type(Spcref<const Initializer> initializer_opt) noexcept {
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-void initialize_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Initializer> initializer_opt, Spref<const Scope> scope){
+void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null: {

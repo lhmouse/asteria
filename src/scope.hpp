@@ -37,7 +37,7 @@ public:
 	Type get_type() const noexcept {
 		return m_type;
 	}
-	Spref<const Scope> get_parent_opt() const noexcept {
+	Spcref<const Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
@@ -46,7 +46,7 @@ public:
 	void clear_local_references() noexcept;
 };
 
-extern Sptr<const Reference> get_local_reference_cascade_opt(Spref<const Scope> scope_opt, const std::string &identifier);
+extern Sptr<const Reference> get_local_reference_cascade_opt(Spcref<const Scope> scope_opt, const std::string &identifier);
 
 }
 

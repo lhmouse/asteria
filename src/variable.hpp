@@ -103,22 +103,22 @@ public:
 
 extern const char *get_type_name(Variable::Type type) noexcept;
 
-extern Variable::Type get_variable_type(Spref<const Variable> variable_opt) noexcept;
-extern const char *get_variable_type_name(Spref<const Variable> variable_opt) noexcept;
+extern Variable::Type get_variable_type(Spcref<const Variable> variable_opt) noexcept;
+extern const char *get_variable_type_name(Spcref<const Variable> variable_opt) noexcept;
 
-extern bool test_variable(Spref<const Variable> variable_opt) noexcept;
-extern void dump_variable(std::ostream &os, Spref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern bool test_variable(Spcref<const Variable> variable_opt) noexcept;
+extern void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 
-extern std::ostream &operator<<(std::ostream &os, Spref<const Variable> variable_opt);
+extern std::ostream &operator<<(std::ostream &os, Spcref<const Variable> variable_opt);
 extern std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt);
 
-extern void copy_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Spref<const Variable> source_opt);
-extern void move_variable(Xptr<Variable> &variable_out, Spref<Recycler> recycler, Xptr<Variable> &&source_opt);
+extern void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Variable> source_opt);
+extern void move_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Variable> &&source_opt);
 
 // This function is useful for breaking dependency circles.
-extern void dispose_variable(Spref<Variable> variable_opt) noexcept;
+extern void dispose_variable(Spcref<Variable> variable_opt) noexcept;
 
-extern Variable::Comparison_result compare_variables(Spref<const Variable> lhs_opt, Spref<const Variable> rhs_opt) noexcept;
+extern Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Spcref<const Variable> rhs_opt) noexcept;
 
 }
 
