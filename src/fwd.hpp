@@ -12,6 +12,8 @@
 #include <cstdint> // std::int64_t
 #include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
+#include "rocket/value_ptr.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
