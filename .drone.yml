@@ -17,6 +17,11 @@ build:
     - "make -j$(nproc)"
     - "./bin/asteria </dev/null"
     - "CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" ./run_tests.sh"
+    # Make sure that all `#include` directives in our headers are met.
+    - |
+      _cmd="${CXX} -x c++ -std=c++11"
+      echo "Checking #include directives using command:" ${_cmd}
+      ${_cmd} -Wall -Wextra -Werror $(find src -name "*.hpp") -c /dev/null
 
 notify:
   irc:
