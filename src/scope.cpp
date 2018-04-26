@@ -16,7 +16,7 @@ namespace Asteria {
 Scope::~Scope(){
 	for(auto it = m_deferred_callbacks.rbegin(); it != m_deferred_callbacks.rend(); ++it){
 		Xptr<Reference> result;
-		(*it)->invoke(result, nullptr, nullptr, { });
+		it->get()->invoke(result, nullptr, nullptr, { });
 	}
 }
 
