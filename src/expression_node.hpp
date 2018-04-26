@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "function_parameter.hpp"
 
 namespace Asteria {
 
@@ -72,7 +73,8 @@ public:
 		Xptr<Expression> subexpression_opt;
 	};
 	struct S_lambda_definition {
-		// TODO
+		Sptr<const std::vector<Function_parameter>> parameters_opt;
+		Xptr<Statement> body_opt;
 	};
 	struct S_pruning {
 		std::size_t count_to_pop;

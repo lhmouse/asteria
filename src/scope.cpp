@@ -16,7 +16,11 @@ namespace Asteria {
 Scope::~Scope(){
 	for(auto it = m_deferred_callbacks.rbegin(); it != m_deferred_callbacks.rend(); ++it){
 		Xptr<Reference> result;
-		it->get()->invoke(result, nullptr, nullptr, { });
+		try {
+			it->get()->invoke(result, nullptr, nullptr, { });
+		} catch(std::exception &e){
+			ASTERIA_DEBUG_LOG("`std::exception` thrown from a deferred callback has been ignored: ", e.what());
+		}
 	}
 }
 
