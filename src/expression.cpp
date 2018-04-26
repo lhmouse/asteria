@@ -307,7 +307,7 @@ namespace {
 void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Spcref<const Expression> expression_opt, Spcref<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
-		return result_out.reset();
+		return move_reference(result_out, nullptr);
 	} else {
 		ASTERIA_DEBUG_LOG(">>>>>>> Beginning of evaluation of expression >>>>>>>");
 		// Parameters are pushed from right to left, in lexical order.
@@ -425,11 +425,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto lhs_type = get_variable_type(lhs_var);
 					if(lhs_type == Variable::type_integer){
 						const auto lhs = lhs_var->get<D_integer>();
-						do_set_result(lhs_ref, recycler, true, do_add(lhs, static_cast<D_integer>(1)));
+						do_set_result(lhs_ref, recycler, true, do_add(lhs, D_integer(1)));
 						do_set_result(lhs_ref, recycler, false, lhs);
 					} else if(lhs_type == Variable::type_double){
 						const auto lhs = lhs_var->get<D_double>();
-						do_set_result(lhs_ref, recycler, true, do_add(lhs, static_cast<D_double>(1)));
+						do_set_result(lhs_ref, recycler, true, do_add(lhs, D_double(1)));
 						do_set_result(lhs_ref, recycler, false, lhs);
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
@@ -445,11 +445,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto lhs_type = get_variable_type(lhs_var);
 					if(lhs_type == Variable::type_integer){
 						const auto lhs = lhs_var->get<D_integer>();
-						do_set_result(lhs_ref, recycler, true, do_subtract(lhs, static_cast<D_integer>(1)));
+						do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_integer(1)));
 						do_set_result(lhs_ref, recycler, false, lhs);
 					} else if(lhs_type == Variable::type_double){
 						const auto lhs = lhs_var->get<D_double>();
-						do_set_result(lhs_ref, recycler, true, do_subtract(lhs, static_cast<D_double>(1)));
+						do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_double(1)));
 						do_set_result(lhs_ref, recycler, false, lhs);
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
@@ -544,10 +544,10 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs_type = get_variable_type(rhs_var);
 					if(rhs_type == Variable::type_integer){
 						const auto rhs = rhs_var->get<D_integer>();
-						do_set_result(rhs_ref, recycler, true, do_add(rhs, static_cast<D_integer>(1)));
+						do_set_result(rhs_ref, recycler, true, do_add(rhs, D_integer(1)));
 					} else if(rhs_type == Variable::type_double){
 						const auto rhs = rhs_var->get<D_double>();
-						do_set_result(rhs_ref, recycler, true, do_add(rhs, static_cast<D_double>(1)));
+						do_set_result(rhs_ref, recycler, true, do_add(rhs, D_double(1)));
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 					}
@@ -562,10 +562,10 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs_type = get_variable_type(rhs_var);
 					if(rhs_type == Variable::type_integer){
 						const auto rhs = rhs_var->get<D_integer>();
-						do_set_result(rhs_ref, recycler, true, do_subtract(rhs, static_cast<D_integer>(1)));
+						do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_integer(1)));
 					} else if(rhs_type == Variable::type_double){
 						const auto rhs = rhs_var->get<D_double>();
-						do_set_result(rhs_ref, recycler, true, do_subtract(rhs, static_cast<D_double>(1)));
+						do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_double(1)));
 					} else {
 						ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
 					}

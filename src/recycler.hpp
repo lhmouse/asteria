@@ -31,7 +31,6 @@ public:
 public:
 	void adopt_variable(Spcref<Variable> variable_opt);
 	void defragment(bool aggressive = false) noexcept;
-	void purge_variables() noexcept;
 };
 
 }

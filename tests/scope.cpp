@@ -9,13 +9,38 @@
 #include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
 #include "../src/local_variable.hpp"
+#include "../src/function_base.hpp"
 
 using namespace Asteria;
+
+namespace {
+	int g_fancy_value = 42;
+
+	class Fancy_deferred_callback : public Function_base {
+	private:
+		int m_multiplier;
+		int m_addend;
+
+	public:
+		Fancy_deferred_callback(int multiplier, int addend)
+			: m_multiplier(multiplier), m_addend(addend)
+		{ }
+
+	public:
+		const char *describe() const noexcept override {
+			return "fancy deferred callback";
+		}
+		void invoke(Xptr<Reference> &/*result_out*/, Spcref<Recycler> /*recycler*/, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&/*arguments_opt*/) const override {
+			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
+		}
+	};
+}
 
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
 	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
+	ASTERIA_TEST_CHECK(get_local_reference_cascade_opt(parent, "hidden") == nullptr);
 	auto one = std::make_shared<Local_variable>();
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
 	one->set_immutable(true);
@@ -48,12 +73,15 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in child");
 
-	child->clear_local_references();
+	child = std::make_shared<Scope>(Scope::type_plain, parent);
 	ref = get_local_reference_cascade_opt(child, "hidden");
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in parent");
 
-	parent->clear_local_references();
-	ASTERIA_TEST_CHECK(get_local_reference_cascade_opt(child, "hidden") == nullptr);
+	child->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14
+	child->defer_callback(std::make_shared<Fancy_deferred_callback>(2, -100)); // 89 * 2 - 100 = 78
+	child->defer_callback(std::make_shared<Fancy_deferred_callback>(2,    5)); // 42 * 2 +   5 = 89
+	child.reset();
+	ASTERIA_TEST_CHECK(g_fancy_value == 14);
 }

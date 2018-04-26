@@ -21,8 +21,8 @@ namespace {
 }
 
 int main(){
-	const auto recycler = std::make_shared<Recycler>();
-	const auto backup = std::make_shared<Recycler>();
+	auto recycler = std::make_shared<Recycler>();
+	auto backup = std::make_shared<Recycler>();
 
 	Xptr<Variable> root, copy;
 	Xptr<Variable> first, second, third, route;
@@ -68,7 +68,7 @@ int main(){
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
-	recycler->purge_variables();
+	recycler.reset();
 	std::cerr <<copy <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
 	std::cerr <<root <<std::endl;

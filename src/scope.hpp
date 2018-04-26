@@ -22,11 +22,12 @@ private:
 	const Sptr<const Scope> m_parent_opt;
 
 	Xptr_map<std::string, Reference> m_local_references;
+	Sptr_vector<const Function_base> m_deferred_callbacks;
 
 public:
 	Scope(Type type, Sptr<const Scope> parent_opt)
 		: m_type(type), m_parent_opt(std::move(parent_opt))
-		, m_local_references()
+		, m_local_references(), m_deferred_callbacks()
 	{ }
 	~Scope();
 
@@ -43,10 +44,13 @@ public:
 
 	Sptr<const Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
 	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const std::string &identifier);
-	void clear_local_references() noexcept;
+
+	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
 extern Sptr<const Reference> get_local_reference_cascade_opt(Spcref<const Scope> scope_opt, const std::string &identifier);
+
+extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
 
 }
 

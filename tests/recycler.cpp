@@ -22,7 +22,7 @@ int main(){
 
 	ASTERIA_TEST_CHECK(weak_int.expired() == false);
 	ASTERIA_TEST_CHECK(weak_str.expired() == false);
-	recycler->purge_variables();
+	recycler.reset();
 	ASTERIA_TEST_CHECK(weak_int.expired() == true);
 	ASTERIA_TEST_CHECK(weak_str.expired() == true);
 }

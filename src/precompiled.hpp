@@ -34,5 +34,6 @@
 
 #include "rocket/value_ptr.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/nullptr_filler.hpp"
 
 #endif

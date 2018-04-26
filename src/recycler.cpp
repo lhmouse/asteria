@@ -9,7 +9,9 @@
 namespace Asteria {
 
 Recycler::~Recycler(){
-	purge_variables();
+	for(auto it = m_weak_variables.begin(); it != m_weak_variables.end(); ++it){
+		dispose_variable(it->lock());
+	}
 }
 
 void Recycler::adopt_variable(Spcref<Variable> variable_opt){
@@ -31,14 +33,6 @@ void Recycler::defragment(bool aggressive) noexcept {
 	const auto threshold_new = std::max(threshold_old, m_weak_variables.size() + defragmentation_threshold_increment);
 	ASTERIA_DEBUG_LOG("Setting new defragmentation threshold: threshold_old = ", threshold_old, ", threshold_new = ", threshold_new);
 	m_defragmentation_threshold = threshold_new;
-}
-void Recycler::purge_variables() noexcept {
-	decltype(m_weak_variables) weak_variables;
-	weak_variables.swap(m_weak_variables);
-
-	for(auto &weak_rvar : weak_variables){
-		dispose_variable(weak_rvar.lock());
-	}
 }
 
 }
