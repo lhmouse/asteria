@@ -98,7 +98,7 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			nodes.emplace_back(params);
 			break; }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown reference node type enumeration `", type, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
@@ -1047,7 +1047,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			}
 			break; }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown reference node type enumeration `", type, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
