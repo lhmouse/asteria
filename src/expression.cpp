@@ -34,11 +34,26 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			break; }
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
-			Xptr<Reference> ref;
-			const auto local_ref = get_local_reference_cascade_opt(scope, params.identifier);
-			if(!local_ref){
-				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+			// Look up the reference in the enclosing scope.
+			Sptr<const Reference> local_ref;
+			auto scope_cur = scope;
+			for(;;){
+				if(!scope_cur){
+					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+				}
+				local_ref = scope_cur->get_local_reference_opt(params.identifier);
+				if(local_ref){
+					break;
+				}
+				scope_cur = scope_cur->get_parent_opt();
 			}
+			if(scope_cur->get_type() == Scope::type_dummy){
+				// This identifier designates a local reference inside the function.
+				nodes.emplace_back(params);
+				break;
+			}
+			// Capture the reference outside the function.
+			Xptr<Reference> ref;
 			copy_reference(ref, local_ref);
 			Expression_node::S_bound_reference node_b = { std::move(ref) };
 			nodes.emplace_back(std::move(node_b));
@@ -360,11 +375,19 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Xptr<Reference> ref;
-			const auto local_ref = get_local_reference_cascade_opt(scope, params.identifier);
-			if(!local_ref){
-				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+			Sptr<const Reference> local_ref;
+			auto scope_cur = scope;
+			for(;;){
+				if(!scope_cur){
+					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+				}
+				local_ref = scope_cur->get_local_reference_opt(params.identifier);
+				if(local_ref){
+					break;
+				}
+				scope_cur = scope_cur->get_parent_opt();
 			}
+			Xptr<Reference> ref;
 			copy_reference(ref, local_ref);
 			// Push the reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
