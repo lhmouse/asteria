@@ -19,12 +19,9 @@ private:
 	Variant m_value_opt;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT), ASTERIA_UNLESS_IS_BASE_OF(Stored_value, ValueT)>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Stored_value, ValueT)>
 	Stored_value(ValueT &&value_opt)
 		: m_value_opt(std::forward<ValueT>(value_opt))
-	{ }
-	Stored_value(Variable &&variable) noexcept
-		: m_value_opt(std::move(variable.m_variant))
 	{ }
 	Stored_value(Stored_value &&) noexcept;
 	Stored_value &operator=(Stored_value &&);

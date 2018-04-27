@@ -19,12 +19,9 @@ private:
 	Variant m_value_opt;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT), ASTERIA_UNLESS_IS_BASE_OF(Stored_reference, ValueT)>
+	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Stored_reference, ValueT)>
 	Stored_reference(ValueT &&value_opt)
 		: m_value_opt(std::forward<ValueT>(value_opt))
-	{ }
-	Stored_reference(Reference &&reference) noexcept
-		: m_value_opt(std::move(reference.m_variant))
 	{ }
 	Stored_reference(Stored_reference &&) noexcept;
 	Stored_reference &operator=(Stored_reference &&);
