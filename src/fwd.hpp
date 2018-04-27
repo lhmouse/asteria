@@ -39,7 +39,6 @@ class Exception;
 // Runtime objects (movable only)
 class Stored_value;
 class Stored_reference;
-class Statement_result;
 
 // Runtime objects (neither copyable nor movable)
 class Opaque_base;
