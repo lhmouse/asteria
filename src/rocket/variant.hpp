@@ -111,10 +111,12 @@ namespace details {
 		alignas(elementT) char data[sizeof(elementT)];
 
 		const elementT *get() const {
-			return reinterpret_cast<const elementT *>(this->data);
+			const auto ptr = static_cast<const void *>(this->data);
+			return static_cast<const elementT *>(ptr);
 		}
 		elementT *get(){
-			return reinterpret_cast<elementT *>(this->data);
+			const auto ptr = static_cast<void *>(this->data);
+			return static_cast<elementT *>(ptr);
 		}
 	};
 
