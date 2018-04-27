@@ -11,7 +11,7 @@ namespace Asteria {
 Local_variable::~Local_variable() = default;
 
 void Local_variable::do_throw_immutable_local_variable() const {
-	ASTERIA_THROW_RUNTIME_ERROR("This local variable is immutable: ", m_variable_opt);
+	ASTERIA_THROW_RUNTIME_ERROR("Immutable local variable: ", m_variable_opt);
 }
 
 }
