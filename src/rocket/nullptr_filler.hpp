@@ -13,7 +13,7 @@ using std::iterator;
 using std::random_access_iterator_tag;
 using std::nullptr_t;
 
-class nullptr_filler : public iterator<random_access_iterator_tag, nullptr_t> {
+class nullptr_filler : public iterator<random_access_iterator_tag, const nullptr_t> {
 private:
 	difference_type m_pos;
 
@@ -29,11 +29,12 @@ public:
 	void seek(difference_type pos) noexcept {
 		this->m_pos = pos;
 	}
-
-	constexpr std::nullptr_t operator*() const noexcept {
-		return nullptr;
-	}
 };
+
+inline nullptr_filler::reference operator*(const nullptr_filler &) noexcept {
+	static constexpr nullptr_filler::value_type s_value = nullptr;
+	return s_value;
+}
 
 inline nullptr_filler &operator++(nullptr_filler &rhs) noexcept {
 	rhs.seek(rhs.tell() + 1);
