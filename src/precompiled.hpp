@@ -36,4 +36,8 @@
 #include "rocket/variant.hpp"
 #include "rocket/nullptr_filler.hpp"
 
+namespace Asteria {
+	//
+}
+
 #endif
