@@ -10,6 +10,7 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "function_base.hpp"
+#include "statement.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -54,8 +55,11 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 				nodes.emplace_back(std::move(node_s));
 				break; }
 			case Expression_node::type_lambda_definition: {
-	//			const auto &params = node.get<Expression_node::S_lambda_definition>();
-	ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
+				const auto &params = node.get<Expression_node::S_lambda_definition>();
+				Xptr<Statement> bound_body;
+				bind_statement(bound_body, params.body_opt, scope);
+				Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
+				nodes.emplace_back(std::move(node_l));
 				break; }
 			case Expression_node::type_pruning: {
 				const auto &params = node.get<Expression_node::S_pruning>();
@@ -302,6 +306,36 @@ namespace {
 		}
 		return result;
 	}
+
+	class Function_instantiated_lambda : public Function_base {
+	private:
+		Sptr<const std::vector<Function_parameter>> m_parameters_opt;
+		Xptr<Statement> m_bound_body_opt;
+
+	public:
+		Function_instantiated_lambda(Sptr<const std::vector<Function_parameter>> parameters_opt, Xptr<Statement> &&bound_body_opt)
+			: m_parameters_opt(std::move(parameters_opt)), m_bound_body_opt(std::move(bound_body_opt))
+		{ }
+
+	public:
+		const char *describe() const noexcept override {
+			return "instantiated lambda expression";
+		}
+		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override {
+			// Allocate a function scope.
+			const auto scope = std::make_shared<Scope>(Scope::type_function, nullptr);
+			prepare_function_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(this_opt), std::move(arguments_opt));
+			// Execute the body.
+			Xptr<Reference> returned_ref;
+			const auto exec_result = execute_statement(returned_ref, recycler, m_bound_body_opt, scope);
+			// If control flow reaches the end of the function, return `null`.
+			if(exec_result != Statement::execute_result_return){
+				return set_reference(result_out, nullptr);
+			}
+			// Forward the return value;
+			return move_reference(result_out, std::move(returned_ref));
+		}
+	};
 }
 
 void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Spcref<const Expression> expression_opt, Spcref<const Scope> scope){
@@ -353,8 +387,19 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_push_reference(stack, std::move(result_ref));
 				break; }
 			case Expression_node::type_lambda_definition: {
-	//			const auto &params = node.get<Expression_node::S_lambda_definition>();
-	ASTERIA_THROW_RUNTIME_ERROR("TODO TODO not implemented");
+				const auto &params = node.get<Expression_node::S_lambda_definition>();
+				// Bind the body, a compound-statement, onto the current scope.
+				Xptr<Statement> bound_body;
+				bind_statement(bound_body, params.body_opt, scope);
+				auto func = std::make_shared<Function_instantiated_lambda>(params.parameters_opt, std::move(bound_body));
+				// Create a temporary variable for the function.
+				Xptr<Variable> var;
+				set_variable(var, recycler, D_function(std::move(func)));
+				Xptr<Reference> result_ref;
+				Reference::S_temporary_value ref_d = { std::move(var) };
+				set_reference(result_ref, std::move(ref_d));
+				// Push the result onto the stack.
+				do_push_reference(stack, std::move(result_ref));
 				break; }
 			case Expression_node::type_pruning: {
 				const auto &params = node.get<Expression_node::S_pruning>();

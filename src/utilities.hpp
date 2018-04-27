@@ -5,6 +5,7 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "insertable_ostream.hpp"
+#include <type_traits>
 
 namespace Asteria {
 
@@ -73,6 +74,15 @@ public:
 
 extern bool write_log_to_stderr(Logger &&logger) noexcept;
 __attribute__((__noreturn__)) extern bool throw_runtime_error(Logger &&logger);
+
+template<typename PointerT>
+inline typename std::add_lvalue_reference<const typename std::pointer_traits<PointerT>::element_type>::type &dereference_nullable_pointer(const PointerT &pointer){
+	if(pointer){
+		return *pointer;
+	}
+	static const typename std::pointer_traits<PointerT>::element_type s_fallback;
+	return s_fallback;
+}
 
 }
 

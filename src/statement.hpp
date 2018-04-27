@@ -127,6 +127,13 @@ public:
 		, S_return_statement        // 17
 	)>;
 
+	enum Execute_result : unsigned {
+		execute_result_next      = 0,
+		execute_result_break     = 1,
+		execute_result_continue  = 2,
+		execute_result_return    = 3,
+	};
+
 private:
 	Variant m_variant;
 
@@ -154,6 +161,9 @@ public:
 };
 
 extern Statement::Type get_statement_type(Spcref<const Statement> statement_opt) noexcept;
+
+extern void bind_statement(Xptr<Statement> &statement_out, Spcref<const Statement> source_opt, Spcref<const Scope> scope);
+extern Statement::Execute_result execute_statement(Xptr<Reference> &returned_reference_out, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt, Spcref<const Scope> scope);
 
 }
 
