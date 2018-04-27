@@ -44,21 +44,6 @@ void Scope::defer_callback(Sptr<const Function_base> &&callback){
 	m_deferred_callbacks.emplace_back(std::move(callback));
 }
 
-Sptr<const Reference> get_local_reference_cascade_opt(Spcref<const Scope> scope_opt, const std::string &identifier){
-	Sptr<const Reference> ref;
-	auto scope = scope_opt;
-	for(;;){
-		if(!scope){
-			return nullptr;
-		}
-		auto local_ref = scope->get_local_reference_opt(identifier);
-		if(local_ref){
-			return std::move(local_ref);
-		}
-		scope = scope->get_parent_opt();
-	}
-}
-
 namespace {
 	const std::string id_this    = "this";
 	const std::string id_va_arg  = "va_arg";

@@ -39,49 +39,26 @@ namespace {
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	auto parent = std::make_shared<Scope>(Scope::type_plain, nullptr);
-	ASTERIA_TEST_CHECK(get_local_reference_cascade_opt(parent, "hidden") == nullptr);
+	auto scope = std::make_shared<Scope>(Scope::type_plain, nullptr);
 	auto one = std::make_shared<Local_variable>();
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
 	one->set_immutable(true);
 	Reference::S_local_variable lref = { one };
-	auto wref = parent->drill_for_local_reference("one");
+	auto wref = scope->drill_for_local_reference("one");
 	set_reference(wref, std::move(lref));
 
-	auto ref = parent->get_local_reference_opt("one");
+	auto ref = scope->get_local_reference_opt("one");
 	ASTERIA_TEST_CHECK(ref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->get_variable_opt().get());
 
-	ref = parent->get_local_reference_opt("nonexistent");
+	ref = scope->get_local_reference_opt("nonexistent");
 	ASTERIA_TEST_CHECK(ref == nullptr);
 
-	auto child = std::make_shared<Scope>(Scope::type_plain, parent);
-	auto hidden_p = std::make_shared<Local_variable>();
-	set_variable(hidden_p->drill_for_variable(), recycler, D_string("in parent"));
-	lref = { hidden_p };
-	wref = parent->drill_for_local_reference("hidden");
-	set_reference(wref, std::move(lref));
-	auto hidden_c = std::make_shared<Local_variable>();
-	set_variable(hidden_c->drill_for_variable(), recycler, D_string("in child"));
-	lref = { hidden_c };
-	wref = child->drill_for_local_reference("hidden");
-	set_reference(wref, std::move(lref));
-	ref = get_local_reference_cascade_opt(child, "hidden");
-	ptr = read_reference_opt(ref);
-	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in child");
-
-	child = std::make_shared<Scope>(Scope::type_plain, parent);
-	ref = get_local_reference_cascade_opt(child, "hidden");
-	ptr = read_reference_opt(ref);
-	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "in parent");
-
-	child->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14
-	child->defer_callback(std::make_shared<Fancy_deferred_callback>(2, -100)); // 89 * 2 - 100 = 78
-	child->defer_callback(std::make_shared<Fancy_deferred_callback>(2,    5)); // 42 * 2 +   5 = 89
-	child.reset();
+	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14
+	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(2, -100)); // 89 * 2 - 100 = 78
+	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(2,    5)); // 42 * 2 +   5 = 89
+	scope.reset();
 	ASTERIA_TEST_CHECK(g_fancy_value == 14);
 }
