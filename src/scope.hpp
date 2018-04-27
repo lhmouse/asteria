@@ -15,7 +15,7 @@ public:
 		type_function  = 1, // Created by a call to a plain function, a lambda function or to a deferred function.
 		type_switch    = 2, // Created by a switch-statement.
 		type_loop      = 3, // Created by a do-while-statement, a while-statement, a for-statement or a foreach-statement.
-		type_dummy     = 4, // Created by a lexical analyzer internally.
+		type_lexical   = 4, // Created by a lexical analyzer internally.
 	};
 
 private:
@@ -49,7 +49,8 @@ public:
 	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_lambda_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr_vector<Reference> &&arguments_opt);
 
 }
 

@@ -19,6 +19,28 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
+namespace {
+	struct Lookup_result {
+		Sptr<const Reference> reference;
+		Sptr<const Scope> scope;
+	};
+
+	Lookup_result lookup_local_reference(Spcref<const Scope> scope_opt, const std::string &identifier){
+		Lookup_result result = { nullptr, scope_opt };
+		for(;;){
+			if(result.scope == nullptr){
+				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", identifier, "`");
+			}
+			result.reference = result.scope->get_local_reference_opt(identifier);
+			if(result.reference != nullptr){
+				break;
+			}
+			result.scope = result.scope->get_parent_opt();
+		}
+		return result;
+	}
+}
+
 void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> source_opt, Spcref<const Scope> scope){
 	if(source_opt == nullptr){
 		return expression_out.reset();
@@ -35,26 +57,15 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Sptr<const Reference> local_ref;
-			auto scope_cur = scope;
-			for(;;){
-				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
-				}
-				local_ref = scope_cur->get_local_reference_opt(params.identifier);
-				if(local_ref){
-					break;
-				}
-				scope_cur = scope_cur->get_parent_opt();
-			}
-			if(scope_cur->get_type() == Scope::type_dummy){
+			const auto lookup_result = lookup_local_reference(scope, params.identifier);
+			if(lookup_result.scope->get_type() == Scope::type_lexical){
 				// This identifier designates a local reference inside the function.
 				nodes.emplace_back(params);
 				break;
 			}
 			// Capture the reference outside the function.
 			Xptr<Reference> ref;
-			copy_reference(ref, local_ref);
+			copy_reference(ref, lookup_result.reference);
 			Expression_node::S_bound_reference node_b = { std::move(ref) };
 			nodes.emplace_back(std::move(node_b));
 			break; }
@@ -71,8 +82,12 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			break; }
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			// Create a lexical scope. This is distinct from a runtime scope.
+			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
+			prepare_lambda_scope(scope_lexical, nullptr, dereference_nullable_pointer(params.parameters_opt), { });
+			// Bind the body onto this scope. Local references inside the lambda will not be affected.
 			Xptr<Statement> bound_body;
-			bind_statement(bound_body, params.body_opt, scope);
+			bind_statement(bound_body, params.body_opt, scope_lexical);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			nodes.emplace_back(std::move(node_l));
 			break; }
@@ -323,22 +338,23 @@ namespace {
 
 	class Function_instantiated_lambda : public Function_base {
 	private:
+		Sptr<const Scope> m_defined_in_scope;
 		Sptr<const std::vector<Function_parameter>> m_parameters_opt;
 		Xptr<Statement> m_bound_body_opt;
 
 	public:
-		Function_instantiated_lambda(Sptr<const std::vector<Function_parameter>> parameters_opt, Xptr<Statement> &&bound_body_opt)
-			: m_parameters_opt(std::move(parameters_opt)), m_bound_body_opt(std::move(bound_body_opt))
+		Function_instantiated_lambda(Sptr<const Scope> defined_in_scope, Sptr<const std::vector<Function_parameter>> parameters_opt, Xptr<Statement> &&bound_body_opt)
+			: m_defined_in_scope(std::move(defined_in_scope)), m_parameters_opt(std::move(parameters_opt)), m_bound_body_opt(std::move(bound_body_opt))
 		{ }
 
 	public:
 		const char *describe() const noexcept override {
 			return "instantiated lambda expression";
 		}
-		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override {
+		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			// Allocate a function scope.
-			const auto scope = std::make_shared<Scope>(Scope::type_function, nullptr);
-			prepare_function_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(this_opt), std::move(arguments_opt));
+			const auto scope = std::make_shared<Scope>(Scope::type_function, m_defined_in_scope);
+			prepare_lambda_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(arguments_opt));
 			// Execute the body.
 			Xptr<Reference> returned_ref;
 			const auto exec_result = execute_statement(returned_ref, recycler, m_bound_body_opt, scope);
@@ -375,20 +391,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Sptr<const Reference> local_ref;
-			auto scope_cur = scope;
-			for(;;){
-				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
-				}
-				local_ref = scope_cur->get_local_reference_opt(params.identifier);
-				if(local_ref){
-					break;
-				}
-				scope_cur = scope_cur->get_parent_opt();
-			}
+			const auto lookup_result = lookup_local_reference(scope, params.identifier);
 			Xptr<Reference> ref;
-			copy_reference(ref, local_ref);
+			copy_reference(ref, lookup_result.reference);
 			// Push the reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
 			break; }
@@ -410,12 +415,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			break; }
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
-			// Bind the body, a compound-statement, onto the current scope.
+			// Bind the body, a compound-statement, onto the current lexical scope. The runtime scope is created every time the lambda is invoked.
 			Xptr<Statement> bound_body;
 			bind_statement(bound_body, params.body_opt, scope);
-			auto func = std::make_shared<Function_instantiated_lambda>(params.parameters_opt, std::move(bound_body));
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
+			auto func = std::make_shared<Function_instantiated_lambda>(scope, params.parameters_opt, std::move(bound_body));
 			set_variable(var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(var) };
@@ -475,7 +480,6 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				auto &callee_params = callee_ref->get<Reference::S_object_member>();
 				this_ref = std::move(callee_params.parent_opt);
 			}
-			materialize_reference(this_ref, recycler, false);
 			// Call the function and push the result as-is.
 			callee->invoke(callee_ref, recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(callee_ref));
