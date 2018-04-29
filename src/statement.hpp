@@ -36,7 +36,7 @@ public:
 		Xptr<Expression> expression_opt;
 	};
 	struct S_compound_statement {
-		Xptr_vector<Statement> statements;
+		Xptr_vector<Statement> nested_statements_opt;
 	};
 	struct S_variable_definition {
 		std::string identifier;
@@ -44,11 +44,8 @@ public:
 		Xptr<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
-		struct Parameter {
-			std::string identifier;
-			Sptr<const Variable> default_argument_opt;
-		};
-		std::vector<Parameter> parameters;
+		std::string identifier;
+		Sptr<const std::vector<Function_parameter>> parameters_opt;
 		Xptr<Statement> body_opt;
 	};
 	struct S_if_statement {
@@ -57,7 +54,7 @@ public:
 		Xptr<Statement> branch_false_opt;
 	};
 	struct S_switch_statement {
-		Xptr<Expression> control_expression;
+		Xptr<Expression> control_expression_opt;
 		Xptr<Statement> body_opt;
 	};
 	struct S_do_while_statement {
@@ -81,9 +78,9 @@ public:
 		Xptr<Statement> body_opt;
 	};
 	struct S_try_statement {
-		Xptr<Statement> branch_try;
+		Xptr<Statement> branch_try_opt;
 		std::string exception_identifier;
-		Xptr<Statement> branch_catch;
+		Xptr<Statement> branch_catch_opt;
 	};
 	struct S_defer_statement {
 		Xptr<Statement> body_opt;
@@ -101,10 +98,10 @@ public:
 		// Nothing.
 	};
 	struct S_throw_statement {
-		Xptr<Expression> value_opt;
+		Xptr<Expression> operand_opt;
 	};
 	struct S_return_statement {
-		Xptr<Expression> value_opt;
+		Xptr<Expression> operand_opt;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_expression_statement    //  0
@@ -162,8 +159,9 @@ public:
 
 extern Statement::Type get_statement_type(Spcref<const Statement> statement_opt) noexcept;
 
+extern void bind_statement_reusing_scope(Xptr<Statement> &statement_out, Spcref<Scope> scope, Spcref<const Statement> source_opt);
 extern void bind_statement(Xptr<Statement> &statement_out, Spcref<const Statement> source_opt, Spcref<const Scope> scope);
-extern Statement::Execute_result execute_statement(Xptr<Reference> &returned_reference_out, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt, Spcref<const Scope> scope);
+extern Statement::Execute_result execute_statement(Xptr<Reference> &returned_reference_out, Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt);
 
 }
 

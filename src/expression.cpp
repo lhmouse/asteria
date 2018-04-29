@@ -85,9 +85,8 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
 			prepare_lambda_scope(scope_lexical, nullptr, dereference_nullable_pointer(params.parameters_opt), { });
-			// Bind the body onto this scope. Local references inside the lambda will not be affected.
 			Xptr<Statement> bound_body;
-			bind_statement(bound_body, params.body_opt, scope_lexical);
+			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			nodes.emplace_back(std::move(node_l));
 			break; }
@@ -357,7 +356,7 @@ namespace {
 			prepare_lambda_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(arguments_opt));
 			// Execute the body.
 			Xptr<Reference> returned_ref;
-			const auto exec_result = execute_statement(returned_ref, recycler, m_bound_body_opt, scope);
+			const auto exec_result = execute_statement(returned_ref, scope, recycler, m_bound_body_opt);
 			// If control flow reaches the end of the function, return `null`.
 			if(exec_result != Statement::execute_result_return){
 				return set_reference(result_out, nullptr);
@@ -415,9 +414,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			break; }
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
-			// Bind the body, a compound-statement, onto the current lexical scope. The runtime scope is created every time the lambda is invoked.
+			// Create a lexical scope. This is distinct from a runtime scope.
+			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
+			prepare_lambda_scope(scope_lexical, nullptr, dereference_nullable_pointer(params.parameters_opt), { });
 			Xptr<Statement> bound_body;
-			bind_statement(bound_body, params.body_opt, scope);
+			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
 			auto func = std::make_shared<Function_instantiated_lambda>(scope, params.parameters_opt, std::move(bound_body));
