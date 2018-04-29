@@ -45,7 +45,7 @@ void bind_statement_reusing_scope(Xptr<Statement> &statement_out, Spcref<Scope> 
 	case Statement::type_variable_definition: {
 		const auto &params = source_opt->get<Statement::S_variable_definition>();
 		// Declare a local reference in this lexical scope.
-		// This is necessary to prevent identifiers that designate references inside source statements from binding onto references outside them.
+		// This is necessary to prevent identifiers that designate references inside source statements from being bound onto references outside them.
 		const auto wref = scope->drill_for_local_reference(params.identifier);
 		set_reference(wref, nullptr);
 		// Bind the initializer recursively.
@@ -56,7 +56,7 @@ void bind_statement_reusing_scope(Xptr<Statement> &statement_out, Spcref<Scope> 
 	case Statement::type_function_definition: {
 		const auto &params = source_opt->get<Statement::S_function_definition>();
 		// Declare a local reference in this lexical scope.
-		// This is necessary to prevent identifiers that designate references inside source statements from binding onto references outside them.
+		// This is necessary to prevent identifiers that designate references inside source statements from being bound onto references outside them.
 		const auto wref = scope->drill_for_local_reference(params.identifier);
 		set_reference(wref, nullptr);
 		// Bind the function body recursively.
