@@ -39,7 +39,7 @@ public:
 	Type get_type() const noexcept {
 		return m_type;
 	}
-	Spcref<const Scope> get_parent_opt() const noexcept {
+	const Sptr<const Scope> &get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
