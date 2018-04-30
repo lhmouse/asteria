@@ -74,7 +74,7 @@ public:
 	};
 	struct S_lambda_definition {
 		Sptr<const std::vector<Function_parameter>> parameters_opt;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_pruning {
 		std::size_t count_to_pop;

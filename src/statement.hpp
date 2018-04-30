@@ -10,33 +10,30 @@
 namespace Asteria {
 
 class Statement {
+	friend Compound_statement;
+
 public:
 	enum Type : unsigned {
-		type_null                     = -1u,
 		type_expression_statement     =  0,
-		type_compound_statement       =  1,
-		type_variable_definition      =  2,
-		type_function_definition      =  3,
-		type_if_statement             =  4,
-		type_switch_statement         =  5,
-		type_do_while_statement       =  6,
-		type_while_statement          =  7,
-		type_for_statement            =  8,
-		type_foreach_statement        =  9,
-		type_try_statement            = 10,
-		type_defer_statement          = 11,
-		type_case_label_statement     = 12,
-		type_default_label_statement  = 13,
-		type_break_statement          = 14,
-		type_continue_statement       = 15,
-		type_throw_statement          = 16,
-		type_return_statement         = 17,
+		type_variable_definition      =  1,
+		type_function_definition      =  2,
+		type_if_statement             =  3,
+		type_switch_statement         =  4,
+		type_do_while_statement       =  5,
+		type_while_statement          =  6,
+		type_for_statement            =  7,
+		type_foreach_statement        =  8,
+		type_try_statement            =  9,
+		type_defer_statement          = 10,
+		type_case_label_statement     = 11,
+		type_default_label_statement  = 12,
+		type_break_statement          = 13,
+		type_continue_statement       = 14,
+		type_throw_statement          = 15,
+		type_return_statement         = 16,
 	};
 	struct S_expression_statement {
 		Xptr<Expression> expression_opt;
-	};
-	struct S_compound_statement {
-		Xptr_vector<Statement> nested_statements_opt;
 	};
 	struct S_variable_definition {
 		std::string identifier;
@@ -46,44 +43,44 @@ public:
 	struct S_function_definition {
 		std::string identifier;
 		Sptr<const std::vector<Function_parameter>> parameters_opt;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_if_statement {
 		Xptr<Expression> condition_opt;
-		Xptr<Statement> branch_true_opt;
-		Xptr<Statement> branch_false_opt;
+		Xptr<Compound_statement> branch_true_opt;
+		Xptr<Compound_statement> branch_false_opt;
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_expression_opt;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_do_while_statement {
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 		Xptr<Expression> condition_opt;
 	};
 	struct S_while_statement {
 		Xptr<Expression> condition_opt;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		Xptr<Initializer> range_initializer;
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_try_statement {
-		Xptr<Statement> branch_try_opt;
+		Xptr<Compound_statement> branch_try_opt;
 		std::string exception_identifier;
-		Xptr<Statement> branch_catch_opt;
+		Xptr<Compound_statement> branch_catch_opt;
 	};
 	struct S_defer_statement {
-		Xptr<Statement> body_opt;
+		Xptr<Compound_statement> body_opt;
 	};
 	struct S_case_label_statement {
 		Sptr<const Variable> value_opt;
@@ -105,31 +102,23 @@ public:
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_expression_statement    //  0
-		, S_compound_statement      //  1
-		, S_variable_definition     //  2
-		, S_function_definition     //  3
-		, S_if_statement            //  4
-		, S_switch_statement        //  5
-		, S_do_while_statement      //  6
-		, S_while_statement         //  7
-		, S_for_statement           //  8
-		, S_foreach_statement       //  9
-		, S_try_statement           // 10
-		, S_defer_statement         // 11
-		, S_case_label_statement    // 12
-		, S_default_label_statement // 13
-		, S_break_statement         // 14
-		, S_continue_statement      // 15
-		, S_throw_statement         // 16
-		, S_return_statement        // 17
+		, S_variable_definition     //  1
+		, S_function_definition     //  2
+		, S_if_statement            //  3
+		, S_switch_statement        //  4
+		, S_do_while_statement      //  5
+		, S_while_statement         //  6
+		, S_for_statement           //  7
+		, S_foreach_statement       //  8
+		, S_try_statement           //  9
+		, S_defer_statement         // 10
+		, S_case_label_statement    // 11
+		, S_default_label_statement // 12
+		, S_break_statement         // 13
+		, S_continue_statement      // 14
+		, S_throw_statement         // 15
+		, S_return_statement        // 16
 	)>;
-
-	enum Execute_result : unsigned {
-		execute_result_next      = 0,
-		execute_result_break     = 1,
-		execute_result_continue  = 2,
-		execute_result_return    = 3,
-	};
 
 private:
 	Variant m_variant;
@@ -156,12 +145,6 @@ public:
 		return m_variant.get<ExpectT>();
 	}
 };
-
-extern Statement::Type get_statement_type(Spcref<const Statement> statement_opt) noexcept;
-
-extern void bind_statement_reusing_scope(Xptr<Statement> &statement_out, Spcref<Scope> scope, Spcref<const Statement> source_opt);
-extern void bind_statement(Xptr<Statement> &statement_out, Spcref<const Statement> source_opt, Spcref<const Scope> scope);
-extern Statement::Execute_result execute_statement(Xptr<Reference> &reference_out, Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt);
 
 }
 

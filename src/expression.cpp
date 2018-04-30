@@ -10,7 +10,8 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "function_base.hpp"
-#include "statement.hpp"
+#include "compound_statement.hpp"
+#include "instantiated_function.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -83,10 +84,10 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
-			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_lexical, dereference_nullable_pointer(params.parameters_opt));
-			Xptr<Statement> bound_body;
-			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
+			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
+			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
+			Xptr<Compound_statement> bound_body;
+			bind_compound_statement(bound_body, params.body_opt, scope_with_args);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			nodes.emplace_back(std::move(node_l));
 			break; }
@@ -334,37 +335,6 @@ namespace {
 		}
 		return result;
 	}
-
-	class Function_instantiated_lambda : public Function_base {
-	private:
-		Sptr<const Scope> m_defined_in_scope;
-		Sptr<const std::vector<Function_parameter>> m_parameters_opt;
-		Xptr<Statement> m_bound_body_opt;
-
-	public:
-		Function_instantiated_lambda(Sptr<const Scope> defined_in_scope, Sptr<const std::vector<Function_parameter>> parameters_opt, Xptr<Statement> &&bound_body_opt)
-			: m_defined_in_scope(std::move(defined_in_scope)), m_parameters_opt(std::move(parameters_opt)), m_bound_body_opt(std::move(bound_body_opt))
-		{ }
-
-	public:
-		const char *describe() const noexcept override {
-			return "instantiated lambda expression";
-		}
-		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override {
-			// Allocate a function scope.
-			const auto scope = std::make_shared<Scope>(Scope::type_function, m_defined_in_scope);
-			prepare_function_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(this_opt), std::move(arguments_opt));
-			// Execute the body.
-			Xptr<Reference> returned_ref;
-			const auto exec_result = execute_statement(returned_ref, scope, recycler, m_bound_body_opt);
-			// If control flow reaches the end of the function, return `null`.
-			if(exec_result != Statement::execute_result_return){
-				return set_reference(result_out, nullptr);
-			}
-			// Forward the return value;
-			return move_reference(result_out, std::move(returned_ref));
-		}
-	};
 }
 
 void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Spcref<const Expression> expression_opt, Spcref<const Scope> scope){
@@ -415,13 +385,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
-			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_lexical, dereference_nullable_pointer(params.parameters_opt));
-			Xptr<Statement> bound_body;
-			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
+			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
+			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
+			Xptr<Compound_statement> bound_body;
+			bind_compound_statement(bound_body, params.body_opt, scope_with_args);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
-			auto func = std::make_shared<Function_instantiated_lambda>(scope, params.parameters_opt, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>(scope, params.parameters_opt, std::move(bound_body));
 			set_variable(var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(var) };

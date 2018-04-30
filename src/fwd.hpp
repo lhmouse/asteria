@@ -29,8 +29,10 @@ class Logger;
 
 // Lexical elements (movable only)
 class Initializer;
+class Expression_node;
 class Expression;
 class Statement;
+class Compound_statement;
 class Function_parameter;
 
 // Runtime objects (copyable and movable)
@@ -43,6 +45,7 @@ class Stored_reference;
 // Runtime objects (neither copyable nor movable)
 class Opaque_base;
 class Function_base;
+class Instantiated_function;
 class Variable;
 class Reference;
 class Local_variable;
