@@ -161,7 +161,7 @@ extern Statement::Type get_statement_type(Spcref<const Statement> statement_opt)
 
 extern void bind_statement_reusing_scope(Xptr<Statement> &statement_out, Spcref<Scope> scope, Spcref<const Statement> source_opt);
 extern void bind_statement(Xptr<Statement> &statement_out, Spcref<const Statement> source_opt, Spcref<const Scope> scope);
-extern Statement::Execute_result execute_statement(Xptr<Reference> &returned_reference_out, Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt);
+extern Statement::Execute_result execute_statement(Xptr<Reference> &reference_out, Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Statement> statement_opt);
 
 }
 
