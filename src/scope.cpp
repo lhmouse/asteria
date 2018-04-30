@@ -94,12 +94,10 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
-	if(recycler_opt){
-		materialize_reference(this_opt, recycler_opt, false);
-		std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_opt, false); });
-	}
+	materialize_reference(this_opt, recycler, false);
+	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, false); });
 
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
@@ -122,21 +120,18 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, 
 
 	// Set argument getter for variadic functions.
 	Xptr<Variable> va_arg_var;
-	if(recycler_opt){
-		auto va_arg_func = std::make_shared<Variadic_argument_getter>(std::move(arguments_opt));
-		set_variable(va_arg_var, recycler_opt, D_function(std::move(va_arg_func)));
-	}
+	auto va_arg_func = std::make_shared<Variadic_argument_getter>(std::move(arguments_opt));
+	set_variable(va_arg_var, recycler, D_function(std::move(va_arg_func)));
 	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
 }
-void prepare_lambda_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr_vector<Reference> &&arguments_opt){
-	// Materialize everything first.
-	if(recycler_opt){
-		std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_opt, false); });
-	}
+void prepare_lexical_scope(Spcref<Scope> scope, const std::vector<Function_parameter> &parameters){
+	// Set the `this` reference.
+	const auto this_wref = scope->drill_for_local_reference(g_id_this);
+	set_reference(this_wref, nullptr);
 
-	// Lambdas do not have the `va_arg` reference. We will have no use of `arguments_opt` any more, so it is safe to move the contents of it.
+	// Copy arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
 	for(std::size_t i = 0; i < parameters.size(); ++i){
 		const auto &param = parameters.at(i);
 		const auto &identifier = param.get_identifier();
@@ -144,12 +139,12 @@ void prepare_lambda_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, co
 			continue;
 		}
 		const auto param_wref = scope->drill_for_local_reference(identifier);
-		if(i < arguments_opt.size()){
-			move_reference(param_wref, std::move(arguments_opt.at(i)));
-		} else {
-			set_reference(param_wref, nullptr);
-		}
+		set_reference(param_wref, nullptr);
 	}
+
+	// Set argument getter for variadic functions.
+	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
+	set_reference(va_arg_wref, nullptr);
 }
 
 }

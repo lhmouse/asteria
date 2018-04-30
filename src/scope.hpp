@@ -49,8 +49,8 @@ public:
 	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
-extern void prepare_lambda_scope(Spcref<Scope> scope, Spcref<Recycler> recycler_opt, const std::vector<Function_parameter> &parameters, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_lexical_scope(Spcref<Scope> scope, const std::vector<Function_parameter> &parameters);
 
 }
 

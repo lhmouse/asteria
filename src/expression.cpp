@@ -84,7 +84,7 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lambda_scope(scope_lexical, nullptr, dereference_nullable_pointer(params.parameters_opt), { });
+			prepare_lexical_scope(scope_lexical, dereference_nullable_pointer(params.parameters_opt));
 			Xptr<Statement> bound_body;
 			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
@@ -350,10 +350,10 @@ namespace {
 		const char *describe() const noexcept override {
 			return "instantiated lambda expression";
 		}
-		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
+		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override {
 			// Allocate a function scope.
 			const auto scope = std::make_shared<Scope>(Scope::type_function, m_defined_in_scope);
-			prepare_lambda_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(arguments_opt));
+			prepare_function_scope(scope, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(this_opt), std::move(arguments_opt));
 			// Execute the body.
 			Xptr<Reference> returned_ref;
 			const auto exec_result = execute_statement(returned_ref, scope, recycler, m_bound_body_opt);
@@ -416,7 +416,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lambda_scope(scope_lexical, nullptr, dereference_nullable_pointer(params.parameters_opt), { });
+			prepare_lexical_scope(scope_lexical, dereference_nullable_pointer(params.parameters_opt));
 			Xptr<Statement> bound_body;
 			bind_statement_reusing_scope(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
