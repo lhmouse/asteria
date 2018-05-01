@@ -63,7 +63,7 @@ public:
 		Xptr<Block> body_opt;
 	};
 	struct S_for_statement {
-		Xptr<Statement> initialization_opt;
+		Xptr<Block> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
 		Xptr<Block> body_opt;
