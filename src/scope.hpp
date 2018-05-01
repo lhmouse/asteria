@@ -13,9 +13,7 @@ public:
 	enum Type : unsigned {
 		type_plain     = 0, // Created by a plain compound-statement.
 		type_function  = 1, // Created by a call to a plain function, a lambda function or to a deferred function.
-		type_switch    = 2, // Created by a switch-statement.
-		type_loop      = 3, // Created by a do-while-statement, a while-statement, a for-statement or a foreach-statement.
-		type_lexical   = 4, // Created by a lexical analyzer internally.
+		type_lexical   = 2, // Created by a lexical analyzer internally.
 	};
 
 private:
