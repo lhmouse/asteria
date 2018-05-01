@@ -26,14 +26,14 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	Xptr<Reference> returned_ref;
 	const auto exec_result = execute_block(returned_ref, recycler, m_bound_body_opt, scope_with_args);
 	switch(exec_result){
-	case Block::execute_result_next:
+	case Block::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.
 		return set_reference(result_out, nullptr);
-	case Block::execute_result_break:
+	case Block::execution_result_break:
 		ASTERIA_THROW_RUNTIME_ERROR("`break` statement encountered outside a `switch` or loop statement");
-	case Block::execute_result_continue:
+	case Block::execution_result_continue:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statement encountered outside a loop statement");
-	case Block::execute_result_return:
+	case Block::execution_result_return:
 		// Forward the return value;
 		return move_reference(result_out, std::move(returned_ref));
 	default:
