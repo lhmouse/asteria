@@ -5,8 +5,8 @@
 #include "instantiated_function.hpp"
 #include "reference.hpp"
 #include "stored_reference.hpp"
-#include "compound_statement.hpp"
-#include "function_parameter.hpp"
+#include "block.hpp"
+#include "parameter.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
 
@@ -23,16 +23,16 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	prepare_function_scope(scope_with_args, recycler, dereference_nullable_pointer(m_parameters_opt), std::move(this_opt), std::move(arguments_opt));
 	// Execute the body.
 	Xptr<Reference> returned_ref;
-	const auto exec_result = execute_compound_statement(returned_ref, recycler, m_bound_body_opt, scope_with_args);
+	const auto exec_result = execute_block(returned_ref, recycler, m_bound_body_opt, scope_with_args);
 	switch(exec_result){
-	case Compound_statement::execute_result_next:
+	case Block::execute_result_next:
 		// If control flow reaches the end of the function, return `null`.
 		return set_reference(result_out, nullptr);
-	case Compound_statement::execute_result_break:
+	case Block::execute_result_break:
 		ASTERIA_THROW_RUNTIME_ERROR("`break` statement encountered outside a `switch` or loop statement");
-	case Compound_statement::execute_result_continue:
+	case Block::execute_result_continue:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statement encountered outside a loop statement");
-	case Compound_statement::execute_result_return:
+	case Block::execute_result_return:
 		// Forward the return value;
 		return move_reference(result_out, std::move(returned_ref));
 	default:

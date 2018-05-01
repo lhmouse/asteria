@@ -32,8 +32,8 @@ class Initializer;
 class Expression_node;
 class Expression;
 class Statement;
-class Compound_statement;
-class Function_parameter;
+class Block;
+class Parameter;
 
 // Runtime objects (copyable and movable)
 class Exception;

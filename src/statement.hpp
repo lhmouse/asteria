@@ -10,7 +10,7 @@
 namespace Asteria {
 
 class Statement {
-	friend Compound_statement;
+	friend Block;
 
 public:
 	enum Type : unsigned {
@@ -42,45 +42,45 @@ public:
 	};
 	struct S_function_definition {
 		std::string identifier;
-		Sptr<const std::vector<Function_parameter>> parameters_opt;
-		Xptr<Compound_statement> body_opt;
+		Sptr<const std::vector<Parameter>> parameters_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_if_statement {
 		Xptr<Expression> condition_opt;
-		Xptr<Compound_statement> branch_true_opt;
-		Xptr<Compound_statement> branch_false_opt;
+		Xptr<Block> branch_true_opt;
+		Xptr<Block> branch_false_opt;
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_expression_opt;
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_do_while_statement {
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 		Xptr<Expression> condition_opt;
 	};
 	struct S_while_statement {
 		Xptr<Expression> condition_opt;
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_for_statement {
 		Xptr<Statement> initialization_opt;
 		Xptr<Expression> condition_opt;
 		Xptr<Expression> increment_opt;
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		Xptr<Initializer> range_initializer;
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_try_statement {
-		Xptr<Compound_statement> branch_try_opt;
+		Xptr<Block> branch_try_opt;
 		std::string exception_identifier;
-		Xptr<Compound_statement> branch_catch_opt;
+		Xptr<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
-		Xptr<Compound_statement> body_opt;
+		Xptr<Block> body_opt;
 	};
 	struct S_case_label_statement {
 		Sptr<const Variable> value_opt;

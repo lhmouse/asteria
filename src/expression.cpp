@@ -10,7 +10,7 @@
 #include "recycler.hpp"
 #include "scope.hpp"
 #include "function_base.hpp"
-#include "compound_statement.hpp"
+#include "block.hpp"
 #include "instantiated_function.hpp"
 #include "utilities.hpp"
 
@@ -86,8 +86,8 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
 			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
-			Xptr<Compound_statement> bound_body;
-			bind_compound_statement(bound_body, params.body_opt, scope_with_args);
+			Xptr<Block> bound_body;
+			bind_block(bound_body, params.body_opt, scope_with_args);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			nodes.emplace_back(std::move(node_l));
 			break; }
@@ -387,8 +387,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
 			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
-			Xptr<Compound_statement> bound_body;
-			bind_compound_statement(bound_body, params.body_opt, scope_with_args);
+			Xptr<Block> bound_body;
+			bind_block(bound_body, params.body_opt, scope_with_args);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
 			auto func = std::make_shared<Instantiated_function>(scope, params.parameters_opt, std::move(bound_body));

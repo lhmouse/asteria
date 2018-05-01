@@ -8,7 +8,7 @@
 #include "reference.hpp"
 #include "stored_reference.hpp"
 #include "function_base.hpp"
-#include "function_parameter.hpp"
+#include "parameter.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -94,7 +94,7 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Function_parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, false);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, false); });
@@ -126,7 +126,7 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, cons
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
 }
-void prepare_lexical_scope(Spcref<Scope> scope, const std::vector<Function_parameter> &parameters){
+void prepare_lexical_scope(Spcref<Scope> scope, const std::vector<Parameter> &parameters){
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	set_reference(this_wref, nullptr);

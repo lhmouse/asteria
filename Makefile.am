@@ -20,7 +20,7 @@ pkginclude_HEADERS =	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\
 	asteria/src/function_base.hpp	\
-	asteria/src/function_parameter.hpp	\
+	asteria/src/parameter.hpp	\
 	asteria/src/variable.hpp	\
 	asteria/src/stored_value.hpp	\
 	asteria/src/reference.hpp	\
@@ -30,7 +30,7 @@ pkginclude_HEADERS =	\
 	asteria/src/expression_node.hpp	\
 	asteria/src/expression.hpp	\
 	asteria/src/statement.hpp	\
-	asteria/src/compound_statement.hpp	\
+	asteria/src/block.hpp	\
 	asteria/src/instantiated_function.hpp	\
 	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
@@ -51,7 +51,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
-	asteria/src/function_parameter.cpp	\
+	asteria/src/parameter.cpp	\
 	asteria/src/variable.cpp	\
 	asteria/src/stored_value.cpp	\
 	asteria/src/reference.cpp	\
@@ -61,7 +61,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/expression_node.cpp	\
 	asteria/src/expression.cpp	\
 	asteria/src/statement.cpp	\
-	asteria/src/compound_statement.cpp	\
+	asteria/src/block.cpp	\
 	asteria/src/instantiated_function.cpp	\
 	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
