@@ -94,7 +94,7 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, const std::vector<Parameter> &parameters, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, false);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, false); });
@@ -104,17 +104,19 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, cons
 	move_reference(this_wref, std::move(this_opt));
 
 	// Copy arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
-	for(std::size_t i = 0; i < parameters.size(); ++i){
-		const auto &param = parameters.at(i);
-		const auto &identifier = param.get_identifier();
-		if(identifier.empty()){
-			continue;
-		}
-		const auto param_wref = scope->drill_for_local_reference(identifier);
-		if(i < arguments_opt.size()){
-			copy_reference(param_wref, arguments_opt.at(i));
-		} else {
-			set_reference(param_wref, nullptr);
+	if(parameters_opt){
+		for(std::size_t i = 0; i < parameters_opt->size(); ++i){
+			const auto &param = parameters_opt->at(i);
+			const auto &identifier = param.get_identifier();
+			if(identifier.empty()){
+				continue;
+			}
+			const auto param_wref = scope->drill_for_local_reference(identifier);
+			if(i < arguments_opt.size()){
+				copy_reference(param_wref, arguments_opt.at(i));
+			} else {
+				set_reference(param_wref, nullptr);
+			}
 		}
 	}
 
@@ -126,20 +128,22 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, cons
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
 }
-void prepare_lexical_scope(Spcref<Scope> scope, const std::vector<Parameter> &parameters){
+void prepare_lexical_scope(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	set_reference(this_wref, nullptr);
 
 	// Copy arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
-	for(std::size_t i = 0; i < parameters.size(); ++i){
-		const auto &param = parameters.at(i);
-		const auto &identifier = param.get_identifier();
-		if(identifier.empty()){
-			continue;
+	if(parameters_opt){
+		for(std::size_t i = 0; i < parameters_opt->size(); ++i){
+			const auto &param = parameters_opt->at(i);
+			const auto &identifier = param.get_identifier();
+			if(identifier.empty()){
+				continue;
+			}
+			const auto param_wref = scope->drill_for_local_reference(identifier);
+			set_reference(param_wref, nullptr);
 		}
-		const auto param_wref = scope->drill_for_local_reference(identifier);
-		set_reference(param_wref, nullptr);
 	}
 
 	// Set argument getter for variadic functions.

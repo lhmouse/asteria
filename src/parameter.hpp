@@ -30,7 +30,9 @@ public:
 	}
 };
 
-extern void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, const std::vector<Parameter> &parameters);
+using Parameter_vector = std::vector<Parameter>;
+
+extern void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Spcref<const Parameter_vector> parameters_opt);
 
 }
 

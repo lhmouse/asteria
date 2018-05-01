@@ -85,7 +85,7 @@ void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> 
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
+			prepare_lexical_scope(scope_with_args, params.parameters_opt);
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope_with_args);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
@@ -386,7 +386,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a lexical scope. This is distinct from a runtime scope.
 			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_with_args, dereference_nullable_pointer(params.parameters_opt));
+			prepare_lexical_scope(scope_with_args, params.parameters_opt);
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope_with_args);
 			// Create a temporary variable for the function.
