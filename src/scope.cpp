@@ -103,19 +103,18 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	move_reference(this_wref, std::move(this_opt));
 
-	// Copy arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
+	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
 	if(parameters_opt){
-		for(std::size_t i = 0; i < parameters_opt->size(); ++i){
-			const auto &param = parameters_opt->at(i);
-			const auto &identifier = param.get_identifier();
-			if(identifier.empty()){
-				continue;
+		for(const auto &param : *parameters_opt){
+			Xptr<Reference> arg;
+			if(arguments_opt.empty() == false){
+				move_reference(arg, std::move(arguments_opt.front()));
+				arguments_opt.erase(arguments_opt.begin());
 			}
-			const auto param_wref = scope->drill_for_local_reference(identifier);
-			if(i < arguments_opt.size()){
-				copy_reference(param_wref, arguments_opt.at(i));
-			} else {
-				set_reference(param_wref, nullptr);
+			const auto &identifier = param.get_identifier();
+			if(identifier.empty() == false){
+				const auto param_wref = scope->drill_for_local_reference(identifier);
+				move_reference(param_wref, std::move(arg));
 			}
 		}
 	}
@@ -127,28 +126,6 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
-}
-void prepare_lexical_scope(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
-	// Set the `this` reference.
-	const auto this_wref = scope->drill_for_local_reference(g_id_this);
-	set_reference(this_wref, nullptr);
-
-	// Copy arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
-	if(parameters_opt){
-		for(std::size_t i = 0; i < parameters_opt->size(); ++i){
-			const auto &param = parameters_opt->at(i);
-			const auto &identifier = param.get_identifier();
-			if(identifier.empty()){
-				continue;
-			}
-			const auto param_wref = scope->drill_for_local_reference(identifier);
-			set_reference(param_wref, nullptr);
-		}
-	}
-
-	// Set argument getter for variadic functions.
-	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
-	set_reference(va_arg_wref, nullptr);
 }
 
 }
