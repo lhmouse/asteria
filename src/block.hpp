@@ -44,7 +44,7 @@ public:
 	decltype(m_statements)::const_iterator end() const noexcept {
 		return m_statements.end();
 	}
-	const Statement &at(std::size_t n) const {
+	decltype(m_statements)::const_reference at(std::size_t n) const {
 		return m_statements.at(n);
 	}
 };

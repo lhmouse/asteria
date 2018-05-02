@@ -25,9 +25,7 @@ public:
 	~Exception() override;
 
 public:
-	const char *what() const noexcept override {
-		return "Asteria::Exception";
-	}
+	const char *what() const noexcept override;
 
 	Sptr<const Reference> get_reference_opt() const noexcept {
 		return m_reference_opt;
