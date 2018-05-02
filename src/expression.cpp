@@ -21,106 +21,6 @@ Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
 namespace {
-	struct Lookup_result {
-		Sptr<const Reference> reference;
-		Sptr<const Scope> scope;
-	};
-
-	Lookup_result lookup_local_reference(Spcref<const Scope> scope_opt, const std::string &identifier){
-		Lookup_result result = { nullptr, scope_opt };
-		for(;;){
-			if(result.scope == nullptr){
-				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", identifier, "`");
-			}
-			result.reference = result.scope->get_local_reference_opt(identifier);
-			if(result.reference != nullptr){
-				break;
-			}
-			result.scope = result.scope->get_parent_opt();
-		}
-		return result;
-	}
-}
-
-void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> source_opt, Spcref<const Scope> scope){
-	if(source_opt == nullptr){
-		return expression_out.reset();
-	}
-	std::vector<Expression_node> nodes;
-	nodes.reserve(source_opt->size());
-	for(const auto &node : *source_opt){
-		const auto type = node.get_type();
-		switch(type){
-		case Expression_node::type_literal: {
-			const auto &params = node.get<Expression_node::S_literal>();
-			nodes.emplace_back(params);
-			break; }
-		case Expression_node::type_named_reference: {
-			const auto &params = node.get<Expression_node::S_named_reference>();
-			// Look up the reference in the enclosing scope.
-			const auto lookup_result = lookup_local_reference(scope, params.identifier);
-			if(lookup_result.scope->get_type() == Scope::type_lexical){
-				// This identifier designates a local reference inside the function.
-				nodes.emplace_back(params);
-				break;
-			}
-			// Capture the reference outside the function.
-			Xptr<Reference> ref;
-			copy_reference(ref, lookup_result.reference);
-			Expression_node::S_bound_reference node_b = { std::move(ref) };
-			nodes.emplace_back(std::move(node_b));
-			break; }
-		case Expression_node::type_bound_reference: {
-			const auto &params = node.get<Expression_node::S_bound_reference>();
-			nodes.emplace_back(params);
-			break; }
-		case Expression_node::type_subexpression: {
-			const auto &params = node.get<Expression_node::S_subexpression>();
-			Xptr<Expression> bound_subexpr;
-			bind_expression(bound_subexpr, params.subexpression_opt, scope);
-			Expression_node::S_subexpression node_s = { std::move(bound_subexpr) };
-			nodes.emplace_back(std::move(node_s));
-			break; }
-		case Expression_node::type_lambda_definition: {
-			const auto &params = node.get<Expression_node::S_lambda_definition>();
-			// Create a lexical scope. This is distinct from a runtime scope.
-			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_with_args, params.parameters_opt);
-			Xptr<Block> bound_body;
-			bind_block(bound_body, params.body_opt, scope_with_args);
-			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
-			nodes.emplace_back(std::move(node_l));
-			break; }
-		case Expression_node::type_pruning: {
-			const auto &params = node.get<Expression_node::S_pruning>();
-			nodes.emplace_back(params);
-			break; }
-		case Expression_node::type_branch: {
-			const auto &params = node.get<Expression_node::S_branch>();
-			Xptr<Expression> bound_branch_true;
-			bind_expression(bound_branch_true, params.branch_true_opt, scope);
-			Xptr<Expression> bound_branch_false;
-			bind_expression(bound_branch_false, params.branch_false_opt, scope);
-			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
-			nodes.emplace_back(std::move(node_b));
-			break; }
-		case Expression_node::type_function_call: {
-			const auto &params = node.get<Expression_node::S_function_call>();
-			nodes.emplace_back(params);
-			break; }
-		case Expression_node::type_operator_rpn: {
-			const auto &params = node.get<Expression_node::S_operator_rpn>();
-			nodes.emplace_back(params);
-			break; }
-		default:
-			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
-			std::terminate();
-		}
-	}
-	return expression_out.reset(std::make_shared<Expression>(std::move(nodes)));
-}
-
-namespace {
 	const char *op_name_of(const Expression_node::S_operator_rpn &params){
 		return get_operator_name_generic(params.operator_generic);
 	}
@@ -360,9 +260,14 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			const auto lookup_result = lookup_local_reference(scope, params.identifier);
 			Xptr<Reference> ref;
-			copy_reference(ref, lookup_result.reference);
+			for(auto scope_cur = scope; scope_cur && (ref == nullptr); scope_cur = scope_cur->get_parent_opt()){
+				const auto ref_found = scope_cur->get_local_reference_opt(params.identifier);
+				copy_reference(ref, ref_found);
+			}
+			if(ref == nullptr){
+				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+			}
 			// Push the reference onto the stack as-is.
 			do_push_reference(stack, std::move(ref));
 			break; }
@@ -384,14 +289,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			break; }
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
-			// Create a lexical scope. This is distinct from a runtime scope.
-			const auto scope_with_args = std::make_shared<Scope>(Scope::type_lexical, scope);
-			prepare_lexical_scope(scope_with_args, params.parameters_opt);
-			Xptr<Block> bound_body;
-			bind_block(bound_body, params.body_opt, scope_with_args);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
-			auto func = std::make_shared<Instantiated_function>(scope, params.parameters_opt, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>(scope, params.parameters_opt, params.body_opt);
 			set_variable(var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(var) };

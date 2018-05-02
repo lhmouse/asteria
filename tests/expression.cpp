@@ -15,7 +15,7 @@ using namespace Asteria;
 
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
-	const auto scope = std::make_shared<Scope>(Scope::type_plain, nullptr);
+	const auto scope = std::make_shared<Scope>(nullptr);
 
 	auto dval = std::make_shared<Local_variable>();
 	set_variable(dval->drill_for_variable(), recycler, D_double(1.5));

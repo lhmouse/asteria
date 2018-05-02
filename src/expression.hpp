@@ -41,7 +41,6 @@ public:
 	}
 };
 
-extern void bind_expression(Xptr<Expression> &expression_out, Spcref<const Expression> source_opt, Spcref<const Scope> scope);
 extern void evaluate_expression(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Expression> expression_opt, Spcref<const Scope> scope);
 
 }

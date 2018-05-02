@@ -39,7 +39,7 @@ namespace {
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	auto scope = std::make_shared<Scope>(Scope::type_plain, nullptr);
+	auto scope = std::make_shared<Scope>(nullptr);
 	auto one = std::make_shared<Local_variable>();
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
 	one->set_immutable(true);

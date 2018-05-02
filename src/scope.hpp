@@ -9,23 +9,15 @@
 namespace Asteria {
 
 class Scope {
-public:
-	enum Type : unsigned {
-		type_plain     = 0, // Created by a plain compound-statement.
-		type_function  = 1, // Created by a call to a plain function, a lambda function or to a deferred function.
-		type_lexical   = 2, // Created by a lexical analyzer internally.
-	};
-
 private:
-	const Type m_type;
 	const Sptr<const Scope> m_parent_opt;
 
 	Xptr_map<std::string, Reference> m_local_references;
 	Sptr_vector<const Function_base> m_deferred_callbacks;
 
 public:
-	Scope(Type type, Sptr<const Scope> parent_opt)
-		: m_type(type), m_parent_opt(std::move(parent_opt))
+	explicit Scope(Sptr<const Scope> parent_opt)
+		: m_parent_opt(std::move(parent_opt))
 		, m_local_references(), m_deferred_callbacks()
 	{ }
 	~Scope();
@@ -34,9 +26,6 @@ public:
 	Scope &operator=(const Scope &) = delete;
 
 public:
-	Type get_type() const noexcept {
-		return m_type;
-	}
 	const Sptr<const Scope> &get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}

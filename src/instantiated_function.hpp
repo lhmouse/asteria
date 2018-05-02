@@ -13,11 +13,11 @@ class Instantiated_function : public Function_base {
 private:
 	Sptr<const Scope> m_defined_in_scope;
 	Sptr<const std::vector<Parameter>> m_parameters_opt;
-	Xptr<Block> m_bound_body_opt;
+	Sptr<const Block> m_body_opt;
 
 public:
-	Instantiated_function(Sptr<const Scope> defined_in_scope, Sptr<const std::vector<Parameter>> parameters_opt, Xptr<Block> &&bound_body_opt)
-		: m_defined_in_scope(std::move(defined_in_scope)), m_parameters_opt(std::move(parameters_opt)), m_bound_body_opt(std::move(bound_body_opt))
+	Instantiated_function(Sptr<const Scope> defined_in_scope, Sptr<const std::vector<Parameter>> parameters_opt, Sptr<const Block> body_opt)
+		: m_defined_in_scope(std::move(defined_in_scope)), m_parameters_opt(std::move(parameters_opt)), m_body_opt(std::move(body_opt))
 	{ }
 	~Instantiated_function();
 

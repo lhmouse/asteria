@@ -49,7 +49,6 @@ public:
 	}
 };
 
-extern void bind_block(Xptr<Block> &block_out, Spcref<const Block> source_opt, Spcref<const Scope> scope);
 extern Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope);
 
 }
