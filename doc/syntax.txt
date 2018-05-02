@@ -27,7 +27,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	expression-statement | compound-statement | variable-definition | function-definition |
+	expression-statement | block | variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
@@ -36,7 +36,7 @@ statement ::=
 
 expression-statement ::=
 	expression-opt ";"
-compound-statement ::=
+block ::=
 	"{" statement-list-opt "}"
 statement-list-opt ::=
 	statement-list | ""
@@ -57,7 +57,7 @@ key-value-list-opt ::=
 key-value-list ::=
 	( string-literal | identifier ) "=" initializer ( "," key-value-list-opt | "" )
 function-definition ::=
-	"function" identifier "(" parameter-list-opt ")" compound-statement
+	"function" identifier "(" parameter-list-opt ")" block
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
@@ -66,25 +66,25 @@ default-argument-initializer-opt ::=
 	"=" ( identifier | literal ) | ""
 
 if-statement ::=
-	"if" "(" expression ")" compound-statement ( "else" else-branch | "" )
+	"if" "(" expression ")" block ( "else" else-branch | "" )
 else-branch ::=
-	if-statement | compound-statement
+	if-statement | block
 switch-statement ::=
-	"switch" "(" expression ")" compound-statement
+	"switch" "(" expression ")" block
 
 do-while-statement ::=
-	"do" compound-statement "while" "(" expression ")" ";"
+	"do" block "while" "(" expression ")" ";"
 while-statement ::=
-	"while" "(" expression ")" compound-statement
+	"while" "(" expression ")" block
 for-statement ::=
-	"for" "(" statement expression-opt ";" expression-opt ")" compound-statement
+	"for" "(" statement expression-opt ";" expression-opt ")" block
 foreach-statement ::=
-	"foreach" "(" identifier "," identifier "in" initializer ")" compound-statement
+	"foreach" "(" identifier "," identifier "in" initializer ")" block
 
 try-statement ::=
-	"try" compound-statement "catch" "(" identifier ")" compound-statement
+	"try" block "catch" "(" identifier ")" block
 defer-statement ::=
-	"defer" compound-statement
+	"defer" block
 
 case-label-statement ::=
 	"case" ( null-literal | boolean-literal | string-literal | numeric-literal ) ":"
@@ -110,7 +110,7 @@ prefix-operator-expression ::=
 expression-initiator ::=
 	identifier | literal | lambda-expression | nested-expression
 lambda-expression ::=
-	"lambda" "(" parameter-list-opt ")" compound-statement
+	"lambda" "(" parameter-list-opt ")" block
 nested-expression ::=
 	"(" expression ")"
 
