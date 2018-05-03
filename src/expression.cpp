@@ -242,7 +242,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		// Return a null reference only when a null expression is given.
 		return move_reference(result_out, nullptr);
 	}
-	ASTERIA_DEBUG_LOG(">>>>>>> Beginning of evaluation of expression >>>>>>>");
+	ASTERIA_DEBUG_LOG("------ Beginning of evaluation of expression");
 	// Parameters are pushed from right to left, in lexical order.
 	Xptr_vector<Reference> stack;
 	// Evaluate nodes in reverse-polish order.
@@ -930,7 +930,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 	if(stack.size() != 1){
 		ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression, number of references remaining is `", stack.size(), "`");
 	}
-	ASTERIA_DEBUG_LOG("<<<<<<< End of evaluation of expression <<<<<<<<<<<<");
+	ASTERIA_DEBUG_LOG("------- End of evaluation of expression");
 	return move_reference(result_out, std::move(stack.front()));
 }
 
