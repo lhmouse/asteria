@@ -17,6 +17,11 @@ Block::Block(Block &&) noexcept = default;
 Block &Block::operator=(Block &&) = default;
 Block::~Block() = default;
 
+void bind_block(Xptr<Block> &bound_result_out, Spcref<const Block> block_opt, Spcref<const Scope> scope){
+	(void)block_opt;
+	(void)scope;
+	return bound_result_out.reset();
+}
 Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope){
 	(void)reference_out;
 	(void)recycler;
