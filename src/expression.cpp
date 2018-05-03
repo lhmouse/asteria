@@ -422,13 +422,14 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Pick a branch basing on the condition.
 			const auto condition_var = read_reference_opt(condition_ref);
 			const auto branch_taken = test_variable(condition_var) ? params.branch_true_opt.share() : params.branch_false_opt.share();
-			// If the branch exists, evaluate it. Otherwise, grab the condition instead.
-			Xptr<Reference> result_ref;
-			if(branch_taken){
-				evaluate_expression(result_ref, recycler, branch_taken, scope);
-			} else {
-				move_reference(result_ref, std::move(condition_ref));
+			// If the branch does not exist, push the condition instead.
+			if(!branch_taken){
+				do_push_reference(stack, std::move(condition_ref));
+				break;
 			}
+			// Evaluate the branch and push the result.
+			Xptr<Reference> result_ref;
+			evaluate_expression(result_ref, recycler, branch_taken, scope);
 			do_push_reference(stack, std::move(result_ref));
 			break; }
 		case Expression_node::type_function_call: {
