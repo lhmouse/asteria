@@ -98,27 +98,25 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, false);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, false); });
-
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	move_reference(this_wref, std::move(this_opt));
-
 	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
 	if(parameters_opt){
 		for(const auto &param : *parameters_opt){
 			Xptr<Reference> arg;
-			if(arguments_opt.empty() == false){
+			if(!(arguments_opt.empty())){
 				move_reference(arg, std::move(arguments_opt.front()));
 				arguments_opt.erase(arguments_opt.begin());
 			}
 			const auto &identifier = param.get_identifier();
-			if(identifier.empty() == false){
-				const auto param_wref = scope->drill_for_local_reference(identifier);
-				move_reference(param_wref, std::move(arg));
+			if(identifier.empty()){
+				continue;
 			}
+			const auto param_wref = scope->drill_for_local_reference(identifier);
+			move_reference(param_wref, std::move(arg));
 		}
 	}
-
 	// Set argument getter for variadic functions.
 	Xptr<Variable> va_arg_var;
 	auto va_arg_func = std::make_shared<Variadic_argument_getter>(std::move(arguments_opt));
@@ -126,6 +124,25 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
+}
+void prepare_function_scope_abstract(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
+	// Set the `this` reference.
+	const auto this_wref = scope->drill_for_local_reference(g_id_this);
+	set_reference(this_wref, nullptr);
+	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
+	if(parameters_opt){
+		for(const auto &param : *parameters_opt){
+			const auto &identifier = param.get_identifier();
+			if(identifier.empty()){
+				continue;
+			}
+			const auto param_wref = scope->drill_for_local_reference(identifier);
+			set_reference(param_wref, nullptr);
+		}
+	}
+	// Set argument getter for variadic functions.
+	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
+	set_reference(va_arg_wref, nullptr);
 }
 
 }

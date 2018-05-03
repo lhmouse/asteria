@@ -24,7 +24,7 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	prepare_function_scope(scope_with_args, recycler, m_parameters_opt, std::move(this_opt), std::move(arguments_opt));
 	// Execute the body.
 	Xptr<Reference> returned_ref;
-	const auto exec_result = execute_block(returned_ref, recycler, m_body_opt, scope_with_args);
+	const auto exec_result = execute_block(returned_ref, recycler, m_bound_body_opt, scope_with_args);
 	switch(exec_result){
 	case Block::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.

@@ -11,13 +11,14 @@ namespace Asteria {
 class Scope {
 private:
 	const Sptr<const Scope> m_parent_opt;
+	const bool m_abstract; // Is this a bind-time (abstract) scope or a run-time (concrete) scope?
 
 	Xptr_map<std::string, Reference> m_local_references;
 	Sptr_vector<const Function_base> m_deferred_callbacks;
 
 public:
-	explicit Scope(Sptr<const Scope> parent_opt)
-		: m_parent_opt(std::move(parent_opt))
+	explicit Scope(Sptr<const Scope> parent_opt, bool abstract = false)
+		: m_parent_opt(std::move(parent_opt)), m_abstract(abstract)
 		, m_local_references(), m_deferred_callbacks()
 	{ }
 	~Scope();
@@ -29,6 +30,9 @@ public:
 	const Sptr<const Scope> &get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
+	bool is_abstract() const noexcept {
+		return m_abstract;
+	}
 
 	Sptr<const Reference> get_local_reference_opt(const std::string &identifier) const noexcept;
 	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const std::string &identifier);
@@ -39,6 +43,7 @@ public:
 using Parameter_vector = std::vector<Parameter>;
 
 extern void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope_abstract(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt);
 
 }
 

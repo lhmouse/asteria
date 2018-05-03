@@ -19,6 +19,42 @@ Initializer::Type get_initializer_type(Spcref<const Initializer> initializer_opt
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
+void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope){
+	const auto type = get_initializer_type(initializer_opt);
+	switch(type){
+	case Initializer::type_null:
+		return bound_result_out.reset();
+	case Initializer::type_assignment_init: {
+		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
+		Xptr<Expression> bound_expr;
+		bind_expression(bound_expr, params.expression, scope);
+		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
+		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_a))); }
+	case Initializer::type_bracketed_init_list: {
+		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
+		Xptr_vector<Initializer> bound_elems;
+		bound_elems.reserve(params.elements.size());
+		for(const auto &elem : params.elements){
+			bind_initializer(bound_result_out, elem, scope);
+			bound_elems.emplace_back(std::move(bound_result_out));
+		}
+		Initializer::S_bracketed_init_list init_bracketed = { std::move(bound_elems) };
+		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_bracketed))); }
+	case Initializer::type_braced_init_list: {
+		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
+		Xptr_map<std::string, Initializer> bound_pairs;
+		bound_pairs.reserve(params.key_values.size());
+		for(const auto &pair : params.key_values){
+			bind_initializer(bound_result_out, pair.second, scope);
+			bound_pairs.emplace(pair.first, std::move(bound_result_out));
+		}
+		Initializer::S_braced_init_list init_braced = { std::move(bound_pairs) };
+		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_braced))); }
+	default:
+		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);
+		std::terminate();
+	}
+}
 void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){

@@ -20,6 +20,104 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression &Expression::operator=(Expression &&) = default;
 Expression::~Expression() = default;
 
+void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression> expression_opt, Spcref<const Scope> scope){
+	if(expression_opt == nullptr){
+		// Return a null expression.
+		return bound_result_out.reset();
+	}
+	// Bind nodes recursively.
+	std::vector<Expression_node> bound_nodes;
+	bound_nodes.reserve(expression_opt->size());
+	for(const auto &node : *expression_opt){
+		const auto type = node.get_type();
+		switch(type){
+		case Expression_node::type_literal: {
+			const auto &params = node.get<Expression_node::S_literal>();
+			// Copy it as is.
+			bound_nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_named_reference: {
+			const auto &params = node.get<Expression_node::S_named_reference>();
+			// Look up the reference in the enclosing scope.
+			Sptr<const Reference> source_ref;
+			auto scope_cur = scope;
+			for(;;){
+				if(!scope_cur){
+					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+				}
+				source_ref = scope_cur->get_local_reference_opt(params.identifier);
+				if(source_ref){
+					break;
+				}
+				scope_cur = scope_cur->get_parent_opt();
+			}
+			// If the reference is in an abstract scope, don't bind it.
+			if(scope_cur->is_abstract()){
+				bound_nodes.emplace_back(params);
+				break;
+			}
+			// Bind the reference.
+			Xptr<Reference> bound_ref;
+			copy_reference(bound_ref, source_ref);
+			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
+			bound_nodes.emplace_back(std::move(node_b));
+			break; }
+		case Expression_node::type_bound_reference: {
+			const auto &params = node.get<Expression_node::S_bound_reference>();
+			// Copy the reference bound.
+			Xptr<Reference> bound_ref;
+			copy_reference(bound_ref, params.reference_opt);
+			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
+			bound_nodes.emplace_back(std::move(node_b));
+			break; }
+		case Expression_node::type_subexpression: {
+			const auto &params = node.get<Expression_node::S_subexpression>();
+			// Bind the subexpression recursively.
+			Xptr<Expression> bound_expr;
+			bind_expression(bound_expr, params.subexpression_opt, scope);
+			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
+			bound_nodes.emplace_back(std::move(node_s));
+			break; }
+		case Expression_node::type_lambda_definition: {
+			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			// Bind the function body onto the current scope.
+			const auto scope_abstract = std::make_shared<Scope>(scope, true);
+			prepare_function_scope_abstract(scope_abstract, params.parameters_opt);
+			Xptr<Block> bound_body;
+			bind_block(bound_body, params.body_opt, scope_abstract);
+			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
+			bound_nodes.emplace_back(std::move(node_l));
+			break; }
+		case Expression_node::type_pruning: {
+			const auto &params = node.get<Expression_node::S_pruning>();
+			bound_nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_branch: {
+			const auto &params = node.get<Expression_node::S_branch>();
+			// Bind both branches recursively.
+			Xptr<Expression> bound_branch_true;
+			bind_expression(bound_branch_true, params.branch_true_opt, scope);
+			Xptr<Expression> bound_branch_false;
+			bind_expression(bound_branch_false, params.branch_false_opt, scope);
+			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
+			bound_nodes.emplace_back(std::move(node_b));
+			break; }
+		case Expression_node::type_function_call: {
+			const auto &params = node.get<Expression_node::S_function_call>();
+			bound_nodes.emplace_back(params);
+			break; }
+		case Expression_node::type_operator_rpn: {
+			const auto &params = node.get<Expression_node::S_operator_rpn>();
+			bound_nodes.emplace_back(params);
+			break; }
+		default:
+			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
+			std::terminate();
+		}
+	}
+	return bound_result_out.reset(std::make_shared<Expression>(std::move(bound_nodes)));
+}
+
 namespace {
 	const char *op_name_of(const Expression_node::S_operator_rpn &params){
 		return get_operator_name_generic(params.operator_generic);
@@ -252,46 +350,57 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_literal: {
 			const auto &params = node.get<Expression_node::S_literal>();
 			// Create an immutable reference to the constant.
-			Xptr<Reference> ref;
+			Xptr<Reference> result_ref;
 			Reference::S_constant ref_c = { params.source_opt };
-			set_reference(ref, std::move(ref_c));
-			do_push_reference(stack, std::move(ref));
+			set_reference(result_ref, std::move(ref_c));
+			do_push_reference(stack, std::move(result_ref));
 			break; }
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Xptr<Reference> ref;
-			for(auto scope_cur = scope; scope_cur && (ref == nullptr); scope_cur = scope_cur->get_parent_opt()){
-				const auto ref_found = scope_cur->get_local_reference_opt(params.identifier);
-				copy_reference(ref, ref_found);
+			Sptr<const Reference> source_ref;
+			auto scope_cur = scope;
+			for(;;){
+				if(!scope_cur){
+					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+				}
+				source_ref = scope_cur->get_local_reference_opt(params.identifier);
+				if(source_ref){
+					break;
+				}
+				scope_cur = scope_cur->get_parent_opt();
 			}
-			if(ref == nullptr){
-				ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
-			}
-			// Push the reference onto the stack as-is.
-			do_push_reference(stack, std::move(ref));
+			Xptr<Reference> result_ref;
+			copy_reference(result_ref, source_ref);
+			// Push the reference onto the stack as is.
+			do_push_reference(stack, std::move(result_ref));
 			break; }
 		case Expression_node::type_bound_reference: {
 			const auto &params = node.get<Expression_node::S_bound_reference>();
-			// Look up the reference in the enclosing scope.
-			Xptr<Reference> ref;
-			copy_reference(ref, params.reference_opt);
-			// Push the reference onto the stack as-is.
-			do_push_reference(stack, std::move(ref));
+			// Copy the reference bound.
+			Xptr<Reference> bound_ref;
+			copy_reference(bound_ref, params.reference_opt);
+			// Push the reference onto the stack as is.
+			do_push_reference(stack, std::move(bound_ref));
 			break; }
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
 			Xptr<Reference> result_ref;
 			evaluate_expression(result_ref, recycler, params.subexpression_opt, scope);
-			// Push the result reference onto the stack as-is.
+			// Push the result reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
 			break; }
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			// Bind the function body onto the current scope.
+			const auto scope_abstract = std::make_shared<Scope>(scope, true);
+			prepare_function_scope_abstract(scope_abstract, params.parameters_opt);
+			Xptr<Block> bound_body;
+			bind_block(bound_body, params.body_opt, scope_abstract);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
-			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, params.body_opt);
+			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, scope, std::move(bound_body));
 			set_variable(var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(var) };
@@ -351,7 +460,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				auto &callee_params = callee_ref->get<Reference::S_object_member>();
 				this_ref = std::move(callee_params.parent_opt);
 			}
-			// Call the function and push the result as-is.
+			// Call the function and push the result as is.
 			callee->invoke(callee_ref, recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(callee_ref));
 			break; }
