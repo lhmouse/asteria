@@ -291,7 +291,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
-			auto func = std::make_shared<Instantiated_function>(scope, params.parameters_opt, params.body_opt);
+			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, params.body_opt);
 			set_variable(var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(var) };

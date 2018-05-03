@@ -19,7 +19,7 @@ const char *Instantiated_function::describe() const noexcept {
 }
 void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
 	// Allocate a function scope.
-	const auto scope_with_args = std::make_shared<Scope>(m_defined_in_scope);
+	const auto scope_with_args = std::make_shared<Scope>(nullptr);
 	prepare_function_arguments(arguments_opt, m_parameters_opt);
 	prepare_function_scope(scope_with_args, recycler, m_parameters_opt, std::move(this_opt), std::move(arguments_opt));
 	// Execute the body.
