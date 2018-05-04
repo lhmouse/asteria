@@ -52,8 +52,8 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 				}
 				scope_cur = scope_cur->get_parent_opt();
 			}
-			// If the reference is in an abstract scope, don't bind it.
-			if(scope_cur->is_abstract()){
+			// If the reference is in a lexical scope rather than a run-time scope, don't bind it.
+			if(scope_cur->get_purpose() == Scope::purpose_lexical){
 				bound_nodes.emplace_back(params);
 				break;
 			}
@@ -82,10 +82,10 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
-			const auto scope_abstract = std::make_shared<Scope>(scope, true);
-			prepare_function_scope_abstract(scope_abstract, params.parameters_opt);
+			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
+			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
 			Xptr<Block> bound_body;
-			bind_block(bound_body, params.body_opt, scope_abstract);
+			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(node_l));
 			break; }
@@ -396,10 +396,10 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
-			const auto scope_abstract = std::make_shared<Scope>(scope, true);
-			prepare_function_scope_abstract(scope_abstract, params.parameters_opt);
+			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
+			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
 			Xptr<Block> bound_body;
-			bind_block(bound_body, params.body_opt, scope_abstract);
+			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
 			Xptr<Variable> var;
 			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, scope, std::move(bound_body));

@@ -57,9 +57,8 @@ public:
 		Xptr<Block> branch_false_opt;
 	};
 	struct S_switch_statement {
-		Xptr<Expression> control_expression_opt;
-		Xptr<Block> body_opt;
-		Sptr<const std::vector<std::pair<Xptr<Expression>, std::size_t>>> case_table;
+		Xptr<Expression> control_opt;
+		std::vector<std::pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Xptr<Block> body_opt;
@@ -78,7 +77,7 @@ public:
 	struct S_foreach_statement {
 		std::string key_identifier;
 		std::string value_identifier;
-		Xptr<Initializer> range_initializer;
+		Xptr<Initializer> range_initializer_opt;
 		Xptr<Block> body_opt;
 	};
 	struct S_try_statement {

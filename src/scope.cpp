@@ -125,7 +125,7 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	Reference::S_constant ref_c = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_c));
 }
-void prepare_function_scope_abstract(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
+void prepare_function_scope_lexical(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	set_reference(this_wref, nullptr);

@@ -19,12 +19,12 @@ const char *Instantiated_function::describe() const noexcept {
 }
 void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
 	// Allocate a function scope.
-	const auto scope_with_args = std::make_shared<Scope>(nullptr);
+	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
 	prepare_function_arguments(arguments_opt, m_parameters_opt);
 	prepare_function_scope(scope_with_args, recycler, m_parameters_opt, std::move(this_opt), std::move(arguments_opt));
 	// Execute the body.
 	Xptr<Reference> returned_ref;
-	const auto exec_result = execute_block(returned_ref, recycler, m_bound_body_opt, scope_with_args);
+	const auto exec_result = execute_block_in_place(returned_ref, scope_with_args, recycler, m_bound_body_opt);
 	switch(exec_result){
 	case Block::execution_result_end_of_block:
 		// If control flow reaches the end of the function, return `null`.
