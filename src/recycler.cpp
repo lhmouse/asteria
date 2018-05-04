@@ -9,8 +9,8 @@
 namespace Asteria {
 
 Recycler::~Recycler(){
-	for(auto it = m_weak_variables.begin(); it != m_weak_variables.end(); ++it){
-		dispose_variable(it->lock());
+	for(const auto &weak_var : m_weak_variables){
+		dispose_variable(weak_var.lock());
 	}
 }
 
