@@ -116,7 +116,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			break; }
 		case Statement::type_for_statement: {
 			const auto &params = stmt.get<Statement::S_for_statement>();
-			// The scope of the lopp initialization covers the scope of the loop body, which will be
+			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop initialization recursively.
@@ -134,7 +134,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			break; }
 		case Statement::type_foreach_statement: {
 			const auto &params = stmt.get<Statement::S_foreach_statement>();
-			// The scope of the lopp initialization covers the scope of the loop body, which will be
+			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop range initializer recursively.
