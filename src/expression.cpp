@@ -116,7 +116,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			std::terminate();
 		}
 	}
-	return bound_result_out.reset(std::make_shared<Expression>(std::move(bound_nodes)));
+	return bound_result_out.emplace(std::move(bound_nodes));
 }
 
 namespace {

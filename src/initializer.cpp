@@ -29,7 +29,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 		Xptr<Expression> bound_expr;
 		bind_expression(bound_expr, params.expression, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
-		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_a))); }
+		return bound_result_out.emplace(std::move(init_a)); }
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Xptr_vector<Initializer> bound_elems;
@@ -39,7 +39,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 			bound_elems.emplace_back(std::move(bound_result_out));
 		}
 		Initializer::S_bracketed_init_list init_bracketed = { std::move(bound_elems) };
-		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_bracketed))); }
+		return bound_result_out.emplace(std::move(init_bracketed)); }
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
 		Xptr_map<std::string, Initializer> bound_pairs;
@@ -49,7 +49,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 			bound_pairs.emplace(pair.first, std::move(bound_result_out));
 		}
 		Initializer::S_braced_init_list init_braced = { std::move(bound_pairs) };
-		return bound_result_out.reset(std::make_shared<Initializer>(std::move(init_braced))); }
+		return bound_result_out.emplace(std::move(init_braced)); }
 	default:
 		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);
 		std::terminate();
