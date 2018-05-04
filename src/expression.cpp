@@ -3,13 +3,10 @@
 
 #include "precompiled.hpp"
 #include "expression.hpp"
-#include "variable.hpp"
 #include "stored_value.hpp"
-#include "reference.hpp"
 #include "stored_reference.hpp"
 #include "recycler.hpp"
 #include "scope.hpp"
-#include "function_base.hpp"
 #include "block.hpp"
 #include "instantiated_function.hpp"
 #include "utilities.hpp"

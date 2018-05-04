@@ -4,10 +4,8 @@
 #include "test_init.hpp"
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
-#include "../src/reference.hpp"
-#include "../src/stored_reference.hpp"
-#include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
+#include "../src/stored_reference.hpp"
 #include "../src/local_variable.hpp"
 #include "../src/function_base.hpp"
 

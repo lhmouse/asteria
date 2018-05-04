@@ -3,10 +3,9 @@
 
 #include "precompiled.hpp"
 #include "initializer.hpp"
-#include "variable.hpp"
 #include "stored_value.hpp"
-#include "expression.hpp"
 #include "reference.hpp"
+#include "expression.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {

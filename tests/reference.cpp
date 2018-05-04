@@ -2,9 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_init.hpp"
-#include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
-#include "../src/reference.hpp"
 #include "../src/stored_reference.hpp"
 #include "../src/recycler.hpp"
 #include "../src/local_variable.hpp"

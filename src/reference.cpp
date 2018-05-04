@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "reference.hpp"
 #include "stored_reference.hpp"
-#include "variable.hpp"
 #include "stored_value.hpp"
 #include "local_variable.hpp"
 #include "utilities.hpp"

@@ -3,7 +3,6 @@
 
 #include "test_init.hpp"
 #include "../src/recycler.hpp"
-#include "../src/variable.hpp"
 #include "../src/stored_value.hpp"
 
 using namespace Asteria;

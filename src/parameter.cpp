@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "parameter.hpp"
-#include "reference.hpp"
 #include "stored_reference.hpp"
 #include "utilities.hpp"
 
