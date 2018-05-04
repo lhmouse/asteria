@@ -37,10 +37,10 @@ public:
 	Variable::Variant * get_opt() noexcept {
 		return m_value_opt.try_get<Variable::Variant>();
 	}
-	const Variable::Variant &get() const {
+	const Variable::Variant & get() const {
 		return m_value_opt.get<Variable::Variant>();
 	}
-	Variable::Variant &get(){
+	Variable::Variant & get(){
 		return m_value_opt.get<Variable::Variant>();
 	}
 	template<typename ValueT>

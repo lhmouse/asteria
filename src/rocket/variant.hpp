@@ -392,7 +392,7 @@ public:
 		return static_cast<elementT *>(visitor.result_ptr);
 	}
 	template<typename elementT>
-	const elementT &get() const {
+	const elementT & get() const {
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
 			throw invalid_argument("variant::get(): type mismatch");
@@ -400,7 +400,7 @@ public:
 		return *ptr;
 	}
 	template<typename elementT>
-	elementT &get(){
+	elementT & get(){
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
 			throw invalid_argument("variant::get(): type mismatch");

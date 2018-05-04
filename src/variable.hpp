@@ -80,7 +80,7 @@ public:
 		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT &get() const {
+	const ExpectT & get() const {
 		const auto ptr = m_variant.try_get<ExpectT>();
 		if(!ptr){
 			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
@@ -88,7 +88,7 @@ public:
 		return *ptr;
 	}
 	template<typename ExpectT>
-	ExpectT &get(){
+	ExpectT & get(){
 		const auto ptr = m_variant.try_get<ExpectT>();
 		if(!ptr){
 			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));

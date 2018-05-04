@@ -123,7 +123,7 @@ public:
 		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT &get() const {
+	const ExpectT & get() const {
 		return m_variant.get<ExpectT>();
 	}
 };
