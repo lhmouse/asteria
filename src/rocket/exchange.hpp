@@ -4,7 +4,8 @@
 #ifndef ROCKET_EXCHANGE_HPP_
 #define ROCKET_EXCHANGE_HPP_
 
-#include <type_traits> // std::decay<>, std::move(), std::forward()
+#include <type_traits> // std::decay<>
+#include <utility> // std::move(), std::forward()
 
 namespace rocket {
 
