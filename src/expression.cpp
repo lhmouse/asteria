@@ -28,7 +28,8 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 	// Bind nodes recursively.
 	std::vector<Expression_node> bound_nodes;
 	bound_nodes.reserve(expression_opt->size());
-	for(const auto &node : *expression_opt){
+	for(std::size_t node_index = 0; node_index < expression_opt->size(); ++node_index){
+		const auto &node = expression_opt->at(node_index);
 		const auto type = node.get_type();
 		switch(type){
 		case Expression_node::type_literal: {
@@ -111,7 +112,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			bound_nodes.emplace_back(params);
 			break; }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "` at index `", node_index, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
@@ -344,7 +345,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 	// Parameters are pushed from right to left, in lexical order.
 	Xptr_vector<Reference> stack;
 	// Evaluate nodes in reverse-polish order.
-	for(const auto &node : *expression_opt){
+	for(std::size_t node_index = 0; node_index < expression_opt->size(); ++node_index){
+		const auto &node = expression_opt->at(node_index);
 		const auto type = node.get_type();
 		switch(type){
 		case Expression_node::type_literal: {
@@ -1027,12 +1029,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 			default:
-				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "`. This is probably a bug, please report.");
+				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "` at index `", node_index, "`. This is probably a bug, please report.");
 				std::terminate();
 			}
 			break; }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "` at index `", node_index, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
 	}
