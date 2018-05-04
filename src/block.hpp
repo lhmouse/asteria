@@ -14,7 +14,7 @@ class Block {
 
 public:
 	enum Execution_result : unsigned {
-		execution_result_next                  =  0,
+		execution_result_end_of_block          =  0,
 		execution_result_break_unspecified     =  1,
 		execution_result_break_switch          =  2,
 		execution_result_break_while           =  3,
@@ -57,7 +57,7 @@ public:
 };
 
 extern void bind_block(Xptr<Block> &bound_result_out, Spcref<const Block> block_opt, Spcref<const Scope> scope);
-extern Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope);
+extern Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope, std::size_t offset = 0);
 
 }
 

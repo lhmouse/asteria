@@ -26,7 +26,7 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	Xptr<Reference> returned_ref;
 	const auto exec_result = execute_block(returned_ref, recycler, m_bound_body_opt, scope_with_args);
 	switch(exec_result){
-	case Block::execution_result_next:
+	case Block::execution_result_end_of_block:
 		// If control flow reaches the end of the function, return `null`.
 		return set_reference(result_out, nullptr);
 	case Block::execution_result_break_unspecified:

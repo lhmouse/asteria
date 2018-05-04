@@ -59,6 +59,7 @@ public:
 	struct S_switch_statement {
 		Xptr<Expression> control_expression_opt;
 		Xptr<Block> body_opt;
+		Sptr<const std::vector<std::pair<Xptr<Expression>, std::size_t>>> case_table;
 	};
 	struct S_do_while_statement {
 		Xptr<Block> body_opt;

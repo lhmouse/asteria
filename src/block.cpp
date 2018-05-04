@@ -22,12 +22,13 @@ void bind_block(Xptr<Block> &bound_result_out, Spcref<const Block> block_opt, Sp
 	(void)scope;
 	return bound_result_out.reset();
 }
-Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope){
+Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Block> block_opt, Spcref<const Scope> scope, std::size_t offset){
 	(void)reference_out;
 	(void)recycler;
 	(void)block_opt;
 	(void)scope;
-	return Block::execution_result_next;
+	(void)offset;
+	return Block::execution_result_end_of_block;
 }
 
 }

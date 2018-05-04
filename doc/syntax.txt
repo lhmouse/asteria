@@ -71,14 +71,14 @@ else-branch ::=
 switch-statement ::=
 	"switch" expression switch-block
 switch-block ::=
-	"{" swtich-entry-list-opt "}"
-switch-entry-list-opt ::=
-	switch-entry-list | ""
-switch-entry-list ::=
-	( switch-entry-case | switch-entry-default ) switch-entry-list-opt
-switch-entry-case ::=
+	"{" swtich-clause-list-opt "}"
+switch-clause-list-opt ::=
+	switch-clause-list | ""
+switch-clause-list ::=
+	( switch-clause-case | switch-clause-default ) switch-clause-list-opt
+switch-clause-case ::=
 	"case" expression ":" statement-list-opt
-switch-entry-default ::=
+switch-clause-default ::=
 	"default" ":" statement-list-opt
 
 do-while-statement ::=
