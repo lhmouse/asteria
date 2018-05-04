@@ -41,7 +41,8 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
-	asteria/src/rocket/nullptr_filler.hpp
+	asteria/src/rocket/nullptr_filler.hpp	\
+	asteria/src/rocket/exchange.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la

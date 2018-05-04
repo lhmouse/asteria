@@ -5,10 +5,11 @@
 #define ROCKET_VALUE_PTR_HPP_
 
 #include <cstddef> // std::nullptr_t
-#include <memory> // std::shared_ptr<>, std::weak_ptr<>
-#include <utility> // std::move(), std::swap()
+#include <memory> // std::shared_ptr<>, std::weak_ptr<>, std::make_shared()
+#include <utility> // std::move(), std::swap(), std::forward()
 #include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
 #include "assert.hpp"
+#include "exchange.hpp"
 
 namespace rocket {
 
@@ -66,10 +67,12 @@ public:
 	void reset(shared_ptr<otherT> &&other) noexcept {
 		this->m_ptr = ::std::move(other);
 	}
+	template<typename ...paramsT>
+	void emplace(paramsT &&...params){
+		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
+	}
 	shared_ptr<elementT> release() noexcept {
-		shared_ptr<elementT> ptr;
-		ptr.swap(this->m_ptr);
-		return ptr;
+		return exchange(this->m_ptr, nullptr);
 	}
 
 	void swap(value_ptr &rhs) noexcept {
