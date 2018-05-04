@@ -15,9 +15,10 @@ namespace Asteria {
 
 Scope::~Scope(){
 	for(auto it = m_deferred_callbacks.rbegin(); it != m_deferred_callbacks.rend(); ++it){
-		Xptr<Reference> result;
+		const auto &func = *it;
 		try {
-			it->get()->invoke(result, nullptr, nullptr, { });
+			Xptr<Reference> result;
+			func->invoke(result, nullptr, nullptr, { });
 		} catch(std::exception &e){
 			ASTERIA_DEBUG_LOG("`std::exception` thrown from a deferred callback has been ignored: ", e.what());
 		}
@@ -32,6 +33,9 @@ Sptr<const Reference> Scope::get_local_reference_opt(const std::string &identifi
 	return it->second;
 }
 std::reference_wrapper<Xptr<Reference>> Scope::drill_for_local_reference(const std::string &identifier){
+	if(identifier.empty()){
+		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of local references must not be empty");
+	}
 	auto it = m_local_references.find(identifier);
 	if(it == m_local_references.end()){
 		ASTERIA_DEBUG_LOG("Creating local reference: identifier = ", identifier);
