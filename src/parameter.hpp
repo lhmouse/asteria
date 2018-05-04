@@ -22,10 +22,10 @@ public:
 	~Parameter();
 
 public:
-	const std::string &get_identifier() const {
+	const std::string & get_identifier() const {
 		return m_identifier;
 	}
-	const Sptr<const Variable> &get_default_argument_opt() const {
+	const Sptr<const Variable> & get_default_argument_opt() const {
 		return m_default_argument_opt;
 	}
 };

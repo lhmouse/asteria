@@ -16,7 +16,7 @@ void Variable::do_throw_type_mismatch(Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
 }
 
-const char *get_type_name(Variable::Type type) noexcept {
+const char * get_type_name(Variable::Type type) noexcept {
 	switch(type){
 	case Variable::type_null:
 		return "null";
@@ -45,7 +45,7 @@ const char *get_type_name(Variable::Type type) noexcept {
 Variable::Type get_variable_type(Spcref<const Variable> variable_opt) noexcept {
 	return variable_opt ? variable_opt->get_type() : Variable::type_null;
 }
-const char *get_variable_type_name(Spcref<const Variable> variable_opt) noexcept {
+const char * get_variable_type_name(Spcref<const Variable> variable_opt) noexcept {
 	return get_type_name(get_variable_type(variable_opt));
 }
 

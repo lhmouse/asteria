@@ -24,7 +24,7 @@ protected:
 	std::streambuf::int_type overflow(std::streambuf::int_type c) override;
 
 public:
-	const std::string &get_string() const noexcept {
+	const std::string & get_string() const noexcept {
 		return m_string;
 	}
 	std::size_t get_caret() const noexcept {
@@ -58,7 +58,7 @@ public:
 		return const_cast<Insertable_streambuf *>(&m_sb);
 	}
 
-	const std::string &get_string() const noexcept {
+	const std::string & get_string() const noexcept {
 		return rdbuf()->get_string();
 	}
 	std::size_t get_caret() const noexcept {

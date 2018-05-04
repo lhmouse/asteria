@@ -72,11 +72,11 @@ public:
 		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT *get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept {
 		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT *get_opt() noexcept {
+	ExpectT * get_opt() noexcept {
 		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>
@@ -101,10 +101,10 @@ public:
 	}
 };
 
-extern const char *get_type_name(Variable::Type type) noexcept;
+extern const char * get_type_name(Variable::Type type) noexcept;
 
 extern Variable::Type get_variable_type(Spcref<const Variable> variable_opt) noexcept;
-extern const char *get_variable_type_name(Spcref<const Variable> variable_opt) noexcept;
+extern const char * get_variable_type_name(Spcref<const Variable> variable_opt) noexcept;
 
 extern bool test_variable(Spcref<const Variable> variable_opt) noexcept;
 extern void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);

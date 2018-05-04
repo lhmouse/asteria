@@ -135,7 +135,7 @@ public:
 		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT *get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept {
 		return m_variant.try_get<ExpectT>();
 	}
 	template<typename ExpectT>

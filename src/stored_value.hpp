@@ -31,10 +31,10 @@ public:
 	bool has_value() const noexcept {
 		return m_value_opt.index() == 1;
 	}
-	const Variable::Variant *get_opt() const noexcept {
+	const Variable::Variant * get_opt() const noexcept {
 		return m_value_opt.try_get<Variable::Variant>();
 	}
-	Variable::Variant *get_opt() noexcept {
+	Variable::Variant * get_opt() noexcept {
 		return m_value_opt.try_get<Variable::Variant>();
 	}
 	const Variable::Variant &get() const {

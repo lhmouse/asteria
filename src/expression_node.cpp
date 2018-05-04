@@ -11,7 +11,7 @@ Expression_node::Expression_node(Expression_node &&) noexcept = default;
 Expression_node &Expression_node::operator=(Expression_node &&) = default;
 Expression_node::~Expression_node() = default;
 
-const char *get_operator_name_generic(Expression_node::Operator_generic operator_generic) noexcept {
+const char * get_operator_name_generic(Expression_node::Operator_generic operator_generic) noexcept {
 	switch(operator_generic){
 	case Expression_node::operator_postfix_inc:
 		return "postfix increment";

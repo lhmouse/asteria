@@ -43,20 +43,20 @@ private:
 	void do_put(const void *value);
 
 public:
-	const char *get_file() const noexcept {
+	const char * get_file() const noexcept {
 		return m_file;
 	}
 	unsigned long get_line() const noexcept {
 		return m_line;
 	}
-	const char *get_func() const noexcept {
+	const char * get_func() const noexcept {
 		return m_func;
 	}
 
-	const Insertable_ostream &get_stream() const noexcept {
+	const Insertable_ostream & get_stream() const noexcept {
 		return m_stream;
 	}
-	Insertable_ostream &get_stream() noexcept {
+	Insertable_ostream & get_stream() noexcept {
 		return m_stream;
 	}
 

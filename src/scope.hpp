@@ -38,7 +38,7 @@ public:
 	Purpose get_purpose() const noexcept {
 		return m_purpose;
 	}
-	const Sptr<const Scope> &get_parent_opt() const noexcept {
+	const Sptr<const Scope> & get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
