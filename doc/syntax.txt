@@ -63,7 +63,7 @@ parameter-list-opt ::=
 parameter-list ::=
 	identifier default-argument-initializer-opt ( "," parameter-list-opt | "" )
 default-argument-initializer-opt ::=
-	"=" ( identifier | literal ) | ""
+	"=" literal | ""
 
 if-statement ::=
 	"if" expression block ( "else" else-branch | "" )
@@ -87,7 +87,7 @@ defer-statement ::=
 	"defer" block
 
 case-label-statement ::=
-	"case" ( null-literal | boolean-literal | string-literal | numeric-literal ) ":"
+	"case" expression ":"
 default-label-statement ::=
 	"default" ":"
 
