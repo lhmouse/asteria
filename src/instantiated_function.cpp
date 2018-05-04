@@ -29,9 +29,16 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	case Block::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.
 		return set_reference(result_out, nullptr);
-	case Block::execution_result_break:
+	case Block::execution_result_break_unspecified:
+	case Block::execution_result_break_switch:
+	case Block::execution_result_break_while:
+	case Block::execution_result_break_for:
+	case Block::execution_result_break_foreach:
 		ASTERIA_THROW_RUNTIME_ERROR("`break` statement encountered outside a `switch` or loop statement");
-	case Block::execution_result_continue:
+	case Block::execution_result_continue_unspecified:
+	case Block::execution_result_continue_while:
+	case Block::execution_result_continue_for:
+	case Block::execution_result_continue_foreach:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statement encountered outside a loop statement");
 	case Block::execution_result_return:
 		// Forward the return value;

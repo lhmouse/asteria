@@ -14,10 +14,17 @@ class Block {
 
 public:
 	enum Execution_result : unsigned {
-		execution_result_next      = 0,
-		execution_result_break     = 1,
-		execution_result_continue  = 2,
-		execution_result_return    = 3,
+		execution_result_next                  =  0,
+		execution_result_break_unspecified     =  1,
+		execution_result_break_switch          =  2,
+		execution_result_break_while           =  3,
+		execution_result_break_for             =  4,
+		execution_result_break_foreach         =  5,
+		execution_result_continue_unspecified  =  6,
+		execution_result_continue_while        =  7,
+		execution_result_continue_for          =  8,
+		execution_result_continue_foreach      =  9,
+		execution_result_return                = 10,
 	};
 
 private:

@@ -31,7 +31,6 @@ statement ::=
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | foreach-statement |
 	try-statement | defer-statement |
-	case-label-statement | default-label-statement |
 	break-statement | continue-statement | throw-statement | return-statement
 
 expression-statement ::=
@@ -70,7 +69,17 @@ if-statement ::=
 else-branch ::=
 	if-statement | block
 switch-statement ::=
-	"switch" expression block
+	"switch" expression switch-block
+switch-block ::=
+	"{" swtich-entry-list-opt "}"
+switch-entry-list-opt ::=
+	switch-entry-list | ""
+switch-entry-list ::=
+	( switch-entry-case | switch-entry-default ) switch-entry-list-opt
+switch-entry-case ::=
+	"case" expression ":" statement-list-opt
+switch-entry-default ::=
+	"default" ":" statement-list-opt
 
 do-while-statement ::=
 	"do" block "while" expression ";"
@@ -86,15 +95,10 @@ try-statement ::=
 defer-statement ::=
 	"defer" block
 
-case-label-statement ::=
-	"case" expression ":"
-default-label-statement ::=
-	"default" ":"
-
 break-statement ::=
-	"break" ";"
+	"break" ( "switch" | "while" | "for" | "foreach" ) ";"
 continue-statement ::=
-	"continue" ";"
+	"continue" ( "while" | "for" | "foreach" ) ";"
 throw-statement ::=
 	"throw" expression-opt ";"
 return-statement ::=

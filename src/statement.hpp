@@ -13,6 +13,14 @@ class Statement {
 	friend Block;
 
 public:
+	enum Target_scope {
+		target_scope_unspecified  = 0,
+		target_scope_switch       = 1,
+		target_scope_while        = 2,
+		target_scope_for          = 3,
+		target_scope_foreach      = 4,
+	};
+
 	enum Type : unsigned {
 		type_expression_statement     =  0,
 		type_variable_definition      =  1,
@@ -25,12 +33,10 @@ public:
 		type_foreach_statement        =  8,
 		type_try_statement            =  9,
 		type_defer_statement          = 10,
-		type_case_label_statement     = 11,
-		type_default_label_statement  = 12,
-		type_break_statement          = 13,
-		type_continue_statement       = 14,
-		type_throw_statement          = 15,
-		type_return_statement         = 16,
+		type_break_statement          = 11,
+		type_continue_statement       = 12,
+		type_throw_statement          = 13,
+		type_return_statement         = 14,
 	};
 	struct S_expression_statement {
 		Xptr<Expression> expression_opt;
@@ -82,17 +88,11 @@ public:
 	struct S_defer_statement {
 		Xptr<Block> body_opt;
 	};
-	struct S_case_label_statement {
-		Sptr<const Variable> value_opt;
-	};
-	struct S_default_label_statement {
-		// Nothing.
-	};
 	struct S_break_statement {
-		// Nothing.
+		Target_scope target_scope;
 	};
 	struct S_continue_statement {
-		// Nothing.
+		Target_scope target_scope;
 	};
 	struct S_throw_statement {
 		Xptr<Expression> operand_opt;
@@ -112,12 +112,10 @@ public:
 		, S_foreach_statement       //  8
 		, S_try_statement           //  9
 		, S_defer_statement         // 10
-		, S_case_label_statement    // 11
-		, S_default_label_statement // 12
-		, S_break_statement         // 13
-		, S_continue_statement      // 14
-		, S_throw_statement         // 15
-		, S_return_statement        // 16
+		, S_break_statement         // 11
+		, S_continue_statement      // 12
+		, S_throw_statement         // 13
+		, S_return_statement        // 14
 	)>;
 
 private:
