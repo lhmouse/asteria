@@ -1,4 +1,4 @@
-// This file is part of asteria.
+// This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_init.hpp"
