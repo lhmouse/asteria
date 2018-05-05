@@ -20,6 +20,19 @@ Block::Block(Block &&) noexcept = default;
 Block &Block::operator=(Block &&) = default;
 Block::~Block() = default;
 
+namespace {
+	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Expression> condition_opt, Spcref<const Scope> scope){
+		if(condition_opt == nullptr){
+			reference_out.reset();
+			return true;
+		} else {
+			evaluate_expression(reference_out, recycler, condition_opt, scope);
+			const auto condition_var = read_reference_opt(reference_out);
+			return test_variable(condition_var);
+		}
+	}
+}
+
 void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spcref<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
@@ -309,7 +322,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			break; }
 		case Statement::type_do_while_statement: {
 			const auto &params = stmt.get<Statement::S_do_while_statement>();
-			for(;;){
+			do {
 				// Execute the loop body recursively.
 				const auto result = execute_block(reference_out, recycler, params.body_opt, scope);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_while)){
@@ -321,22 +334,12 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					return result;
 				}
 				// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-				evaluate_expression(reference_out, recycler, params.condition_opt, scope);
-				const auto condition_var = read_reference_opt(reference_out);
-				if(!test_variable(condition_var)){
-					break;
-				}
-			}
+			} while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope));
 			break; }
 		case Statement::type_while_statement: {
 			const auto &params = stmt.get<Statement::S_while_statement>();
-			for(;;){
-				// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-				evaluate_expression(reference_out, recycler, params.condition_opt, scope);
-				const auto condition_var = read_reference_opt(reference_out);
-				if(!test_variable(condition_var)){
-					break;
-				}
+			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
+			while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope)){
 				// Execute the loop body recursively.
 				const auto result = execute_block(reference_out, recycler, params.body_opt, scope);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_while)){
@@ -361,13 +364,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
 				return result;
 			}
-			for(;;){
-				// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-				evaluate_expression(reference_out, recycler, params.condition_opt, scope_for);
-				const auto condition_var = read_reference_opt(reference_out);
-				if(!test_variable(condition_var)){
-					break;
-				}
+			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
+			while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope)){
 				// Execute the loop body recursively.
 				result = execute_block(reference_out, recycler, params.body_opt, scope_for);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_for)){
