@@ -388,7 +388,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				return result;
 			}
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-			while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope)){
+			while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope_for)){
 				// Execute the loop body recursively.
 				result = execute_block(reference_out, recycler, params.body_opt, scope_for);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_for)){
