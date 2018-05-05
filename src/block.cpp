@@ -322,7 +322,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					match_it = it;
 				}
 			}
-			// Iterate from the match clause to the end of the body, falling through clauses ends if any.
+			// Iterate from the match clause to the end of the body, falling through clause ends if any.
 			for(auto it = match_it; it != params.clauses_opt.end(); ++it){
 				// Execute the clause recursively.
 				const auto result = execute_block_in_place(reference_out, scope_switch, recycler, it->second);
