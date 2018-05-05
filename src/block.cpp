@@ -223,14 +223,14 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 
 namespace {
 	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Expression> condition_opt, Spcref<const Scope> scope){
-		if(condition_opt == nullptr){
-			reference_out.reset();
-			return true;
-		} else {
-			evaluate_expression(reference_out, recycler, condition_opt, scope);
+		// Overwrite `reference_out` unconditionally, even when `condition_opt` is null.
+		evaluate_expression(reference_out, recycler, condition_opt, scope);
+		bool result = true;
+		if(condition_opt != nullptr){
 			const auto condition_var = read_reference_opt(reference_out);
-			return test_variable(condition_var);
+			result = test_variable(condition_var);
 		}
+		return result;
 	}
 }
 
