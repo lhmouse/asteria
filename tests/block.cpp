@@ -28,7 +28,7 @@ int main(){
 	initzr.emplace(std::move(initzr_a));
 	Statement::S_variable_definition stmt_v = { "sum", false, std::move(initzr) };
 	stmts.emplace_back(std::move(stmt_v));
-	// for var i = 1; i <= 10; ++i {
+	// for var i = 1; i <= 10; ++i; {
 	//   sum += i;
 	// }
 	// >>> var i = 1

@@ -86,7 +86,7 @@ do-while-statement ::=
 while-statement ::=
 	"while" expression block
 for-statement ::=
-	"for" statement expression-opt ";" expression-opt block
+	"for" statement expression-opt ";" expression-opt ";" block
 for-each-statement ::=
 	"for" "each" identifier "," identifier "in" initializer block
 
