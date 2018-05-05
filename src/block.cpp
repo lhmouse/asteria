@@ -20,19 +20,6 @@ Block::Block(Block &&) noexcept = default;
 Block &Block::operator=(Block &&) = default;
 Block::~Block() = default;
 
-namespace {
-	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Expression> condition_opt, Spcref<const Scope> scope){
-		if(condition_opt == nullptr){
-			reference_out.reset();
-			return true;
-		} else {
-			evaluate_expression(reference_out, recycler, condition_opt, scope);
-			const auto condition_var = read_reference_opt(reference_out);
-			return test_variable(condition_var);
-		}
-	}
-}
-
 void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spcref<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
@@ -218,6 +205,20 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 	}
 	return bound_result_out.emplace(std::move(bound_statements));
 }
+
+namespace {
+	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Expression> condition_opt, Spcref<const Scope> scope){
+		if(condition_opt == nullptr){
+			reference_out.reset();
+			return true;
+		} else {
+			evaluate_expression(reference_out, recycler, condition_opt, scope);
+			const auto condition_var = read_reference_opt(reference_out);
+			return test_variable(condition_var);
+		}
+	}
+}
+
 Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Block> block_opt){
 	reference_out.reset();
 	if(block_opt == nullptr){
