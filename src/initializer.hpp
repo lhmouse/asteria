@@ -61,7 +61,7 @@ public:
 extern Initializer::Type get_initializer_type(Spcref<const Initializer> initializer_opt) noexcept;
 
 extern void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope);
-extern void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope);
+extern void evaluate_initializer(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope);
 
 }
 

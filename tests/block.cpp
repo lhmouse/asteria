@@ -14,7 +14,7 @@
 using namespace Asteria;
 
 int main(){
-	Xptr<Block> block, init;
+	Xptr<Block> block, init, body;
 	std::vector<Statement> stmts, stmts_nested;
 	std::vector<Expression_node> expr_nodes;
 	Xptr<Expression> expr, cond, inc;
@@ -28,7 +28,7 @@ int main(){
 	initzr.emplace(std::move(initzr_a));
 	Statement::S_variable_definition stmt_v = { "sum", false, std::move(initzr) };
 	stmts.emplace_back(std::move(stmt_v));
-	// for var i = 1; i <= 10; ++i; {
+	// for(var i = 1; i <= 10; ++i){
 	//   sum += i;
 	// }
 	// >>> var i = 1
@@ -69,9 +69,42 @@ int main(){
 	stmts_nested.clear();
 	Statement::S_expression_statement stmt_e = { std::move(expr) };
 	stmts_nested.emplace_back(std::move(stmt_e));
-	block.emplace(std::move(stmts_nested));
-	Statement::S_for_statement stmt_f = { std::move(init), std::move(cond), std::move(inc), std::move(block) };
+	body.emplace(std::move(stmts_nested));
+	Statement::S_for_statement stmt_f = { std::move(init), std::move(cond), std::move(inc), std::move(body) };
 	stmts.emplace_back(std::move(stmt_f));
+	// for each(key, value in [100,200,300]){
+	//   sum += key + value;
+	// }
+	// >>> array
+	expr_nodes.clear();
+	D_array array;
+	array.emplace_back(std::make_shared<Variable>(D_integer(100)));
+	array.emplace_back(std::make_shared<Variable>(D_integer(200)));
+	array.emplace_back(std::make_shared<Variable>(D_integer(300)));
+	expr_l = { std::make_shared<Variable>(std::move(array)) };
+	expr_nodes.emplace_back(std::move(expr_l));
+	expr.emplace(std::move(expr_nodes));
+	initzr_a = { std::move(expr) };
+	initzr.emplace(std::move(initzr_a));
+	// >>> sum += key + value;
+	expr_nodes.clear();
+	expr_n = { "value" };
+	expr_nodes.emplace_back(std::move(expr_n));
+	expr_n = { "key" };
+	expr_nodes.emplace_back(std::move(expr_n));
+	expr_op = { Expression_node::operator_infix_add, false };
+	expr_nodes.emplace_back(std::move(expr_op));
+	expr_n = { "sum" };
+	expr_nodes.emplace_back(std::move(expr_n));
+	expr_op = { Expression_node::operator_infix_add, true };
+	expr_nodes.emplace_back(std::move(expr_op));
+	expr.emplace(std::move(expr_nodes));
+	stmts_nested.clear();
+	stmt_e = { std::move(expr) };
+	stmts_nested.emplace_back(std::move(stmt_e));
+	body.emplace(std::move(stmts_nested));
+	Statement::S_for_each_statement stmt_fe = { "key", "value", std::move(initzr), std::move(body) };
+	stmts.emplace_back(std::move(stmt_fe));
 	// Finish it.
 	block.emplace(std::move(stmts));
 
@@ -84,5 +117,5 @@ int main(){
 	const auto sum_ref = scope->get_local_reference_opt("sum");
 	const auto sum_var = read_reference_opt(sum_ref);
 	ASTERIA_TEST_CHECK(sum_var);
-	ASTERIA_TEST_CHECK(sum_var->get<D_integer>() == 55);
+	ASTERIA_TEST_CHECK(sum_var->get<D_integer>() == 658);
 }

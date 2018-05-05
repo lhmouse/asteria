@@ -174,15 +174,11 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 	case Reference::type_null:
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
 
-	case Reference::type_constant: {
-		const auto &params = reference_opt->get<Reference::S_constant>();
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant `", params.source_opt, "`");
-		/*return;*/ }
+	case Reference::type_constant:
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant through `", reference_opt, "`");
 
-	case Reference::type_temporary_value: {
-		const auto &params = reference_opt->get<Reference::S_temporary_value>();
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a temporary value `", params.variable_opt, "`");
-		/*return;*/ }
+	case Reference::type_temporary_value:
+		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a temporary value through `", reference_opt, "`");
 
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
@@ -320,15 +316,15 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycl
 	return copy_variable(variable_out, recycler, rref);
 }
 void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool immutable){
-	Xptr<Variable> *wptr;
-	std::tie(std::ignore, wptr) = do_try_extract_variable(reference_inout_opt);
-	if(wptr){
-		Xptr<Variable> variable;
-		move_variable(variable, recycler, std::move(*wptr));
-		auto local_var = std::make_shared<Local_variable>(std::move(variable), immutable);
-		Reference::S_local_variable ref_l = { std::move(local_var) };
-		return set_reference(reference_inout_opt, std::move(ref_l));
+	const auto type = get_reference_type(reference_inout_opt);
+	if(type == Reference::type_local_variable){
+		return;
 	}
+	Xptr<Variable> variable;
+	extract_variable_from_reference(variable, recycler, std::move(reference_inout_opt));
+	auto local_var = std::make_shared<Local_variable>(std::move(variable), immutable);
+	Reference::S_local_variable ref_l = { std::move(local_var) };
+	return set_reference(reference_inout_opt, std::move(ref_l));
 }
 
 }

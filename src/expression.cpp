@@ -411,11 +411,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			Xptr<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
-			Xptr<Variable> var;
+			Xptr<Variable> func_var;
 			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, scope, std::move(bound_body));
-			set_variable(var, recycler, D_function(std::move(func)));
+			set_variable(func_var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
-			Reference::S_temporary_value ref_d = { std::move(var) };
+			Reference::S_temporary_value ref_d = { std::move(func_var) };
 			set_reference(result_ref, std::move(ref_d));
 			// Push the result onto the stack.
 			do_push_reference(stack, std::move(result_ref));
