@@ -54,27 +54,21 @@ bool test_variable(Spcref<const Variable> variable_opt) noexcept {
 	switch(type){
 	case Variable::type_null:
 		return false;
-	case Variable::type_boolean: {
-		const auto &value = variable_opt->get<D_boolean>();
-		return value; }
-	case Variable::type_integer: {
-		const auto &value = variable_opt->get<D_integer>();
-		return value != 0; }
-	case Variable::type_double: {
-		const auto &value = variable_opt->get<D_double>();
-		return std::fpclassify(value) != FP_ZERO; }
-	case Variable::type_string: {
-		const auto &value = variable_opt->get<D_string>();
-		return value.empty() == false; }
+	case Variable::type_boolean:
+		return variable_opt->get<D_boolean>();
+	case Variable::type_integer:
+		return variable_opt->get<D_integer>() != 0;
+	case Variable::type_double:
+		return std::fpclassify(variable_opt->get<D_double>()) != FP_ZERO;
+	case Variable::type_string:
+		return variable_opt->get<D_string>().empty() == false;
 	case Variable::type_opaque:
 	case Variable::type_function:
 		return true;
-	case Variable::type_array: {
-		const auto &value = variable_opt->get<D_array>();
-		return value.empty() == false; }
-	case Variable::type_object: {
-		const auto &value = variable_opt->get<D_object>();
-		return value.empty() == false; }
+	case Variable::type_array:
+		return variable_opt->get<D_array>().empty() == false;
+	case Variable::type_object:
+		return variable_opt->get<D_object>().empty() == false;
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
@@ -135,25 +129,30 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
-	case Variable::type_null: {
+	case Variable::type_null:
 		os <<"null";
-		return; }
+		return;
+
 	case Variable::type_boolean: {
 		const auto &value = variable_opt->get<D_boolean>();
 		os <<std::boolalpha <<std::nouppercase <<value;
 		return; }
+
 	case Variable::type_integer: {
 		const auto &value = variable_opt->get<D_integer>();
 		os <<std::dec <<value;
 		return; }
+
 	case Variable::type_double: {
 		const auto &value = variable_opt->get<D_double>();
 		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
 		return; }
+
 	case Variable::type_string: {
 		const auto &value = variable_opt->get<D_string>();
 		do_quote_string(os, value.data(), value.size());
 		return; }
+
 	case Variable::type_opaque: {
 		const auto &value = variable_opt->get<D_opaque>();
 		os <<"opaque(\"" <<typeid(*value).name() <<"\", ";
@@ -161,6 +160,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 		do_quote_string(os, desc, std::strlen(desc));
 		os << ')';
 		return; }
+
 	case Variable::type_function: {
 		const auto &value = variable_opt->get<D_opaque>();
 		os <<"function(\"" <<typeid(*value).name() <<"\", ";
@@ -168,6 +168,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 		do_quote_string(os, desc, std::strlen(desc));
 		os << ')';
 		return; }
+
 	case Variable::type_array: {
 		const auto &array = variable_opt->get<D_array>();
 		os <<'[';
@@ -185,6 +186,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 		}
 		os <<']';
 		return; }
+
 	case Variable::type_object: {
 		const auto &object = variable_opt->get<D_object>();
 		os <<'{';
@@ -202,6 +204,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 		}
 		os <<'}';
 		return; }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
@@ -220,25 +223,32 @@ std::ostream &operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
 void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
-	case Variable::type_null: {
-		return set_variable(variable_out, recycler, nullptr); }
+	case Variable::type_null:
+		return set_variable(variable_out, recycler, nullptr);
+
 	case Variable::type_boolean: {
 		const auto &source = source_opt->get<D_boolean>();
 		return set_variable(variable_out, recycler, source); }
+
 	case Variable::type_integer: {
 		const auto &source = source_opt->get<D_integer>();
 		return set_variable(variable_out, recycler, source); }
+
 	case Variable::type_double: {
 		const auto &source = source_opt->get<D_double>();
 		return set_variable(variable_out, recycler, source); }
+
 	case Variable::type_string: {
 		const auto &source = source_opt->get<D_string>();
 		return set_variable(variable_out, recycler, source); }
+
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
+
 	case Variable::type_function: {
 		const auto &source = source_opt->get<D_function>();
 		return set_variable(variable_out, recycler, source); }
+
 	case Variable::type_array: {
 		const auto &source = source_opt->get<D_array>();
 		D_array array;
@@ -248,6 +258,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcr
 			array.emplace_back(std::move(variable_out));
 		}
 		return set_variable(variable_out, recycler, std::move(array)); }
+
 	case Variable::type_object: {
 		const auto &source = source_opt->get<D_object>();
 		D_object object;
@@ -257,6 +268,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcr
 			object.emplace(pair.first, std::move(variable_out));
 		}
 		return set_variable(variable_out, recycler, std::move(object)); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
@@ -281,6 +293,7 @@ void dispose_variable(Spcref<Variable> variable_opt) noexcept {
 	case Variable::type_opaque:
 	case Variable::type_function:
 		return;
+
 	case Variable::type_array: {
 		auto &value = variable_opt->get<D_array>();
 		for(auto &elem : value){
@@ -288,6 +301,7 @@ void dispose_variable(Spcref<Variable> variable_opt) noexcept {
 			elem = nullptr;
 		}
 		return; }
+
 	case Variable::type_object: {
 		auto &value = variable_opt->get<D_object>();
 		for(auto &pair : value){
@@ -295,6 +309,7 @@ void dispose_variable(Spcref<Variable> variable_opt) noexcept {
 			pair.second = nullptr;
 		}
 		return; }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
 		std::terminate();
@@ -317,6 +332,7 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 	switch(type_lhs){
 	case Variable::type_null:
 		return Variable::comparison_result_equal;
+
 	case Variable::type_boolean: {
 		const auto &value_lhs = lhs_opt->get<D_boolean>();
 		const auto &value_rhs = rhs_opt->get<D_boolean>();
@@ -326,6 +342,7 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
+
 	case Variable::type_integer: {
 		const auto &value_lhs = lhs_opt->get<D_integer>();
 		const auto &value_rhs = rhs_opt->get<D_integer>();
@@ -335,6 +352,7 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
+
 	case Variable::type_double: {
 		const auto &value_lhs = lhs_opt->get<D_double>();
 		const auto &value_rhs = rhs_opt->get<D_double>();
@@ -346,6 +364,7 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
+
 	case Variable::type_string: {
 		const auto &value_lhs = lhs_opt->get<D_string>();
 		const auto &value_rhs = rhs_opt->get<D_string>();
@@ -356,9 +375,11 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
+
 	case Variable::type_opaque:
 	case Variable::type_function:
 		return Variable::comparison_result_unordered;
+
 	case Variable::type_array: {
 		const auto &array_lhs = lhs_opt->get<D_array>();
 		const auto &array_rhs = rhs_opt->get<D_array>();
@@ -376,8 +397,10 @@ Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Sp
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
+
 	case Variable::type_object:
 		return Variable::comparison_result_unordered;
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type_lhs, "`. This is probably a bug, please report.");
 		std::terminate();

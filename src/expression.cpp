@@ -34,6 +34,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			// Copy it as is.
 			bound_nodes.emplace_back(params);
 			break; }
+
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
@@ -60,6 +61,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(node_b));
 			break; }
+
 		case Expression_node::type_bound_reference: {
 			const auto &params = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
@@ -68,6 +70,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(node_b));
 			break; }
+
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Bind the subexpression recursively.
@@ -76,6 +79,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
 			bound_nodes.emplace_back(std::move(node_s));
 			break; }
+
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
@@ -86,10 +90,12 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(node_l));
 			break; }
+
 		case Expression_node::type_pruning: {
 			const auto &params = node.get<Expression_node::S_pruning>();
 			bound_nodes.emplace_back(params);
 			break; }
+
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
 			// Bind both branches recursively.
@@ -100,14 +106,17 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
 			bound_nodes.emplace_back(std::move(node_b));
 			break; }
+
 		case Expression_node::type_function_call: {
 			const auto &params = node.get<Expression_node::S_function_call>();
 			bound_nodes.emplace_back(params);
 			break; }
+
 		case Expression_node::type_operator_rpn: {
 			const auto &params = node.get<Expression_node::S_operator_rpn>();
 			bound_nodes.emplace_back(params);
 			break; }
+
 		default:
 			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "` at index `", node_index, "`. This is probably a bug, please report.");
 			std::terminate();
@@ -354,6 +363,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			set_reference(result_ref, std::move(ref_c));
 			do_push_reference(stack, std::move(result_ref));
 			break; }
+
 		case Expression_node::type_named_reference: {
 			const auto &params = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
@@ -374,6 +384,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
 			break; }
+
 		case Expression_node::type_bound_reference: {
 			const auto &params = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
@@ -382,6 +393,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(bound_ref));
 			break; }
+
 		case Expression_node::type_subexpression: {
 			const auto &params = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
@@ -390,6 +402,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Push the result reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
 			break; }
+
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
@@ -407,6 +420,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Push the result onto the stack.
 			do_push_reference(stack, std::move(result_ref));
 			break; }
+
 		case Expression_node::type_pruning: {
 			const auto &params = node.get<Expression_node::S_pruning>();
 			// Pop references requested.
@@ -414,6 +428,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_pop_reference(stack);
 			}
 			break; }
+
 		case Expression_node::type_branch: {
 			const auto &params = node.get<Expression_node::S_branch>();
 			// Pop the condition off the stack.
@@ -431,6 +446,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			evaluate_expression(result_ref, recycler, branch_taken, scope);
 			do_push_reference(stack, std::move(result_ref));
 			break; }
+
 		case Expression_node::type_function_call: {
 			const auto &params = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
@@ -464,6 +480,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			callee->invoke(callee_ref, recycler, std::move(this_ref), std::move(arguments));
 			do_push_reference(stack, std::move(callee_ref));
 			break; }
+
 		case Expression_node::type_operator_rpn: {
 			const auto &params = node.get<Expression_node::S_operator_rpn>();
 			switch(params.operator_generic){
@@ -487,6 +504,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_postfix_dec: {
 				// Pop the operand off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -507,6 +525,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_postfix_at: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -526,6 +545,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_pos: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -543,6 +563,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_neg: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -560,6 +581,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_not_b: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -577,6 +599,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_not_l: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -586,6 +609,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(test_variable(rhs_var)));
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_inc: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -604,6 +628,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_prefix_dec: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
@@ -622,6 +647,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_eq: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -638,6 +664,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_ne: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -654,6 +681,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_lt: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -672,6 +700,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_gt: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -690,6 +719,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_lte: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -708,6 +738,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_cmp_gte: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -726,6 +757,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_add: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -758,6 +790,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_sub: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -785,6 +818,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_mul: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -821,6 +855,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_div: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -843,6 +878,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_mod: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -865,6 +901,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_sll: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -885,6 +922,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_sla: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -906,6 +944,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_srl: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -926,6 +965,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_sra: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -946,6 +986,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_and_b: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -968,6 +1009,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_or_b: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -990,6 +1032,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_xor_b: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -1012,6 +1055,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			case Expression_node::operator_infix_assign: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -1025,11 +1069,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				move_variable(wref, recycler, std::move(var));
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
+
 			default:
 				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "` at index `", node_index, "`. This is probably a bug, please report.");
 				std::terminate();
 			}
 			break; }
+
 		default:
 			ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "` at index `", node_index, "`. This is probably a bug, please report.");
 			std::terminate();

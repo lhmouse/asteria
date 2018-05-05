@@ -23,12 +23,14 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 	switch(type){
 	case Initializer::type_null:
 		return bound_result_out.reset();
+
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
 		Xptr<Expression> bound_expr;
 		bind_expression(bound_expr, params.expression, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
 		return bound_result_out.emplace(std::move(init_a)); }
+
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Xptr_vector<Initializer> bound_elems;
@@ -39,6 +41,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 		}
 		Initializer::S_bracketed_init_list init_bracketed = { std::move(bound_elems) };
 		return bound_result_out.emplace(std::move(init_bracketed)); }
+
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
 		Xptr_map<std::string, Initializer> bound_pairs;
@@ -49,6 +52,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 		}
 		Initializer::S_braced_init_list init_braced = { std::move(bound_pairs) };
 		return bound_result_out.emplace(std::move(init_braced)); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);
 		std::terminate();
@@ -59,11 +63,13 @@ void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler
 	switch(type){
 	case Initializer::type_null:
 		return set_variable(variable_out, recycler, nullptr);
+
 	case Initializer::type_assignment_init: {
 		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
 		Xptr<Reference> result;
 		evaluate_expression(result, recycler, params.expression, scope);
 		return extract_variable_from_reference(variable_out, recycler, std::move(result)); }
+
 	case Initializer::type_bracketed_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		D_array array;
@@ -73,6 +79,7 @@ void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler
 			array.emplace_back(std::move(variable_out));
 		}
 		return set_variable(variable_out, recycler, std::move(array)); }
+
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
 		D_object object;
@@ -82,6 +89,7 @@ void initialize_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler
 			object.emplace(pair.first, std::move(variable_out));
 		}
 		return set_variable(variable_out, recycler, std::move(object)); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);
 		std::terminate();

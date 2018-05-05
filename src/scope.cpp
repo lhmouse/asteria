@@ -71,6 +71,7 @@ namespace {
 				set_variable(var, recycler, D_integer(static_cast<std::ptrdiff_t>(m_arguments_opt.size())));
 				Reference::S_temporary_value ref_t = { std::move(var) };
 				return set_reference(result_out, std::move(ref_t)); }
+
 			case 1: {
 				// Return the argument at the index specified.
 				const auto index_var = read_reference_opt(arguments_opt.at(0));
@@ -89,6 +90,7 @@ namespace {
 				}
 				const auto &arg = m_arguments_opt.at(static_cast<std::size_t>(normalized_index));
 				return copy_reference(result_out, arg); }
+
 			default:
 				ASTERIA_THROW_RUNTIME_ERROR("Too many arguments passed to `", g_id_va_arg, "`");
 			}

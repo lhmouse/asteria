@@ -40,6 +40,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
 			bound_statements.emplace_back(std::move(stmt_e));
 			break; }
+
 		case Statement::type_variable_definition: {
 			const auto &params = stmt.get<Statement::S_variable_definition>();
 			// Create a null local reference for the variable.
@@ -51,6 +52,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_variable_definition stmt_v = { params.identifier, params.immutable, std::move(bound_init) };
 			bound_statements.emplace_back(std::move(stmt_v));
 			break; }
+
 		case Statement::type_function_definition: {
 			const auto &params = stmt.get<Statement::S_function_definition>();
 			// Create a null local reference for the function.
@@ -64,6 +66,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_function_definition stmt_f = { params.identifier, params.parameters_opt, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
+
 		case Statement::type_if_statement: {
 			const auto &params = stmt.get<Statement::S_if_statement>();
 			// Bind the condition recursively.
@@ -77,6 +80,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_if_statement stmt_i = { std::move(bound_cond), std::move(bound_branch_true), std::move(bound_branch_false) };
 			bound_statements.emplace_back(std::move(stmt_i));
 			break; }
+
 		case Statement::type_switch_statement: {
 			const auto &params = stmt.get<Statement::S_switch_statement>();
 			// Bind the control expression recursively.
@@ -97,6 +101,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_switch_statement stmt_s = { std::move(bound_ctrl), std::move(bound_clauses) };
 			bound_statements.emplace_back(std::move(stmt_s));
 			break; }
+
 		case Statement::type_do_while_statement: {
 			const auto &params = stmt.get<Statement::S_do_while_statement>();
 			// Bind the body and the condition recursively.
@@ -107,6 +112,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_do_while_statement stmt_d = { std::move(bound_body), std::move(bound_cond) };
 			bound_statements.emplace_back(std::move(stmt_d));
 			break; }
+
 		case Statement::type_while_statement: {
 			const auto &params = stmt.get<Statement::S_while_statement>();
 			// Bind the condition and the body recursively.
@@ -117,6 +123,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_while_statement stmt_w = { std::move(bound_cond), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_w));
 			break; }
+
 		case Statement::type_for_statement: {
 			const auto &params = stmt.get<Statement::S_for_statement>();
 			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
@@ -135,6 +142,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_inc), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
+
 		case Statement::type_for_each_statement: {
 			const auto &params = stmt.get<Statement::S_for_each_statement>();
 			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
@@ -154,6 +162,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_for_each_statement stmt_f = { params.key_identifier, params.value_identifier, std::move(bound_range_init), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
+
 		case Statement::type_try_statement: {
 			const auto &params = stmt.get<Statement::S_try_statement>();
 			// Bind both branches recursively.
@@ -164,6 +173,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_try_statement stmt_t = { std::move(bound_branch_try), params.exception_identifier, std::move(bound_branch_catch) };
 			bound_statements.emplace_back(std::move(stmt_t));
 			break; }
+
 		case Statement::type_defer_statement: {
 			const auto &params = stmt.get<Statement::S_defer_statement>();
 			// Bind the body recursively.
@@ -172,16 +182,19 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_defer_statement stmt_d = { std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_d));
 			break; }
+
 		case Statement::type_break_statement: {
 			const auto &params = stmt.get<Statement::S_break_statement>();
 			// Copy it as is.
 			bound_statements.emplace_back(params);
 			break; }
+
 		case Statement::type_continue_statement: {
 			const auto &params = stmt.get<Statement::S_continue_statement>();
 			// Copy it as is.
 			bound_statements.emplace_back(params);
 			break; }
+
 		case Statement::type_throw_statement: {
 			const auto &params = stmt.get<Statement::S_throw_statement>();
 			// Bind the operand recursively.
@@ -190,6 +203,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_throw_statement stmt_t = { std::move(bound_operand) };
 			bound_statements.emplace_back(std::move(stmt_t));
 			break; }
+
 		case Statement::type_return_statement: {
 			const auto &params = stmt.get<Statement::S_return_statement>();
 			// Bind the operand recursively.
@@ -198,6 +212,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_return_statement stmt_r = { std::move(bound_operand) };
 			bound_statements.emplace_back(std::move(stmt_r));
 			break; }
+
 		default:
 			ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "` at index `", stmt_index, "`. This is probably a bug, please report.");
 			std::terminate();
@@ -235,6 +250,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			// Evaluate the expression, storing the result into `reference_out`.
 			evaluate_expression(reference_out, recycler, params.expression_opt, scope);
 			break; }
+
 		case Statement::type_variable_definition: {
 			const auto &params = stmt.get<Statement::S_variable_definition>();
 			// Create a local variable for the variable.
@@ -246,6 +262,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			set_reference(wref, std::move(ref_l));
 			copy_reference(reference_out, wref.get());
 			break; }
+
 		case Statement::type_function_definition: {
 			const auto &params = stmt.get<Statement::S_function_definition>();
 			// Bind the function body onto the current scope.
@@ -263,6 +280,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			set_reference(wref, std::move(ref_l));
 			copy_reference(reference_out, wref.get());
 			break; }
+
 		case Statement::type_if_statement: {
 			const auto &params = stmt.get<Statement::S_if_statement>();
 			// Evaluate the condition expression and select a branch basing on the result.
@@ -280,6 +298,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				return result;
 			}
 			break; }
+
 		case Statement::type_switch_statement: {
 			const auto &params = stmt.get<Statement::S_switch_statement>();
 			// Evaluate the control expression.
@@ -321,6 +340,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			}
 			break; }
+
 		case Statement::type_do_while_statement: {
 			const auto &params = stmt.get<Statement::S_do_while_statement>();
 			do {
@@ -337,6 +357,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				// Evaluate the condition expression and decide whether to start a new loop basing on the result.
 			} while(do_check_loop_condition(reference_out, recycler, params.condition_opt, scope));
 			break; }
+
 		case Statement::type_while_statement: {
 			const auto &params = stmt.get<Statement::S_while_statement>();
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
@@ -353,6 +374,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			}
 			break; }
+
 		case Statement::type_for_statement: {
 			const auto &params = stmt.get<Statement::S_for_statement>();
 			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
@@ -381,6 +403,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				evaluate_expression(reference_out, recycler, params.increment_opt, scope_for);
 			}
 			break; }
+
 		case Statement::type_for_each_statement: {
 			const auto &params = stmt.get<Statement::S_for_each_statement>();
 			// The scope of the loop initialization outlasts the scope of the loop body, which will be
@@ -462,6 +485,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				ASTERIA_THROW_RUNTIME_ERROR("Invalid ranged `for` statement on something having type `", get_type_name(range_type), "`");
 			}
 			break; }
+
 		case Statement::type_try_statement: {
 			const auto &params = stmt.get<Statement::S_try_statement>();
 			// Execute the try branch in a C++ `try...catch` statement.
@@ -499,6 +523,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			}
 			break; }
+
 		case Statement::type_defer_statement: {
 			const auto &params = stmt.get<Statement::S_defer_statement>();
 			// Bind the function body onto the current scope. There are no parameters.
@@ -508,6 +533,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			auto func = std::make_shared<Instantiated_function>(nullptr, scope, std::move(bound_body));
 			scope->defer_callback(std::move(func));
 			break; }
+
 		case Statement::type_break_statement: {
 			const auto &params = stmt.get<Statement::S_break_statement>();
 			switch(params.target_scope){
@@ -524,6 +550,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				std::terminate();
 			}
 			break; }
+
 		case Statement::type_continue_statement: {
 			const auto &params = stmt.get<Statement::S_continue_statement>();
 			switch(params.target_scope){
@@ -541,17 +568,20 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				std::terminate();
 			}
 			break; }
+
 		case Statement::type_throw_statement: {
 			const auto &params = stmt.get<Statement::S_throw_statement>();
 			// Evaluate the operand, then throw the exception constructed from the result of it.
 			evaluate_expression(reference_out, recycler, params.operand_opt, scope);
 			ASTERIA_DEBUG_LOG("Throwing exception: ", reference_out);
 			throw Exception(std::move(reference_out)); }
+
 		case Statement::type_return_statement: {
 			const auto &params = stmt.get<Statement::S_return_statement>();
 			// Evaluate the operand, then return because the value is stored outside this function.
 			evaluate_expression(reference_out, recycler, params.operand_opt, scope);
 			return Block::execution_result_return; }
+
 		default:
 			ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "` at index `", stmt_index, "`. This is probably a bug, please report.");
 			std::terminate();

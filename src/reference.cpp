@@ -22,14 +22,17 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 	case Reference::type_null: {
 		os <<"null ";
 		return dump_variable(os, nullptr, indent_next, indent_increment); }
+
 	case Reference::type_constant: {
 		const auto &value = reference_opt->get<Reference::S_constant>();
 		os <<"constant ";
 		return dump_variable(os, value.source_opt, indent_next, indent_increment); }
+
 	case Reference::type_temporary_value: {
 		const auto &value = reference_opt->get<Reference::S_temporary_value>();
 		os <<"temporary value ";
 		return dump_variable(os, value.variable_opt, indent_next, indent_increment); }
+
 	case Reference::type_local_variable: {
 		const auto &value = reference_opt->get<Reference::S_local_variable>();
 		if(value.local_variable->is_immutable()){
@@ -37,14 +40,17 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 		}
 		os <<"local variable ";
 		return dump_variable(os, value.local_variable->get_variable_opt(), indent_next, indent_increment); }
+
 	case Reference::type_array_element: {
 		const auto &value = reference_opt->get<Reference::S_array_element>();
 		os <<"the element at index [" <<value.index <<"] of ";
 		return dump_reference(os, value.parent_opt, indent_next, indent_increment); }
+
 	case Reference::type_object_member: {
 		const auto &value = reference_opt->get<Reference::S_object_member>();
 		os <<"the value having key \"" <<value.key <<"\"] in ";
 		return dump_reference(os, value.parent_opt, indent_next, indent_increment); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
@@ -65,24 +71,30 @@ void copy_reference(Xptr<Reference> &reference_out, Spcref<const Reference> sour
 	switch(type){
 	case Reference::type_null: {
 		return set_reference(reference_out, nullptr); }
+
 	case Reference::type_constant: {
 		const auto &source = source_opt->get<Reference::S_constant>();
 		return set_reference(reference_out, source); }
+
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
+
 	case Reference::type_local_variable: {
 		const auto &source = source_opt->get<Reference::S_local_variable>();
 		return set_reference(reference_out, source); }
+
 	case Reference::type_array_element: {
 		const auto &source = source_opt->get<Reference::S_array_element>();
 		copy_reference(reference_out, source.parent_opt);
 		Reference::S_array_element array_element = { std::move(reference_out), source.index };
 		return set_reference(reference_out, std::move(array_element)); }
+
 	case Reference::type_object_member: {
 		const auto &source = source_opt->get<Reference::S_object_member>();
 		copy_reference(reference_out, source.parent_opt);
 		Reference::S_object_member object_member = { std::move(reference_out), source.key };
 		return set_reference(reference_out, std::move(object_member)); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
@@ -101,15 +113,19 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 	switch(type){
 	case Reference::type_null:
 		return nullptr;
+
 	case Reference::type_constant: {
 		const auto &params = reference_opt->get<Reference::S_constant>();
 		return params.source_opt; }
+
 	case Reference::type_temporary_value: {
 		const auto &params = reference_opt->get<Reference::S_temporary_value>();
 		return params.variable_opt; }
+
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
 		return params.local_variable->get_variable_opt(); }
+
 	case Reference::type_array_element: {
 		const auto &params = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
@@ -129,6 +145,7 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 		}
 		const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return variable_opt; }
+
 	case Reference::type_object_member: {
 		const auto &params = reference_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
@@ -145,6 +162,7 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 		}
 		const auto &variable_opt = it->second;
 		return variable_opt; }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
@@ -155,17 +173,21 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 	switch(type){
 	case Reference::type_null:
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
+
 	case Reference::type_constant: {
 		const auto &params = reference_opt->get<Reference::S_constant>();
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant `", params.source_opt, "`");
 		/*return;*/ }
+
 	case Reference::type_temporary_value: {
 		const auto &params = reference_opt->get<Reference::S_temporary_value>();
 		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a temporary value `", params.variable_opt, "`");
 		/*return;*/ }
+
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
 		return params.local_variable->drill_for_variable(); }
+
 	case Reference::type_array_element: {
 		const auto &params = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
@@ -197,6 +219,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 		}
 		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return std::ref(variable_opt); }
+
 	case Reference::type_object_member: {
 		const auto &params = reference_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
@@ -213,6 +236,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 		}
 		auto &variable_opt = it->second;
 		return std::ref(variable_opt); }
+
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
@@ -225,15 +249,19 @@ namespace {
 		switch(type){
 		case Reference::type_null:
 			return std::forward_as_tuple(nullptr, nullptr);
+
 		case Reference::type_constant: {
 			auto &params = reference_opt->get<Reference::S_constant>();
 			return std::forward_as_tuple(params.source_opt, nullptr); }
+
 		case Reference::type_temporary_value: {
 			auto &params = reference_opt->get<Reference::S_temporary_value>();
 			return std::forward_as_tuple(params.variable_opt, &(params.variable_opt)); }
+
 		case Reference::type_local_variable: {
 			auto &params = reference_opt->get<Reference::S_local_variable>();
 			return std::forward_as_tuple(params.local_variable->get_variable_opt(), nullptr); }
+
 		case Reference::type_array_element: {
 			auto &params = reference_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
@@ -255,6 +283,7 @@ namespace {
 			}
 			const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 			return std::forward_as_tuple(variable_opt, parent_wptr ? const_cast<Xptr<Variable> *>(&variable_opt) : nullptr); }
+
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
@@ -273,6 +302,7 @@ namespace {
 			}
 			const auto &variable_opt = it->second;
 			return std::forward_as_tuple(variable_opt, parent_wptr ? const_cast<Xptr<Variable> *>(&variable_opt) : nullptr); }
+
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 			std::terminate();
