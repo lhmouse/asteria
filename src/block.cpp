@@ -20,16 +20,6 @@ Block::Block(Block &&) noexcept = default;
 Block &Block::operator=(Block &&) = default;
 Block::~Block() = default;
 
-namespace {
-	void do_create_null_reference(Spcref<Scope> scope, const std::string &identifier){
-		if(identifier.empty()){
-			return;
-		}
-		const auto wref = scope->drill_for_local_reference(identifier);
-		set_reference(wref, nullptr);
-	}
-}
-
 void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spcref<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
@@ -53,7 +43,8 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 		case Statement::type_variable_definition: {
 			const auto &params = stmt.get<Statement::S_variable_definition>();
 			// Create a null local reference for the variable.
-			do_create_null_reference(scope, params.identifier);
+			const auto wref = scope->drill_for_local_reference(params.identifier);
+			set_reference(wref, nullptr);
 			// Bind the initializer recursively.
 			Xptr<Initializer> bound_init;
 			bind_initializer(bound_init, params.initializer_opt, scope);
@@ -63,12 +54,13 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 		case Statement::type_function_definition: {
 			const auto &params = stmt.get<Statement::S_function_definition>();
 			// Create a null local reference for the function.
-			do_create_null_reference(scope, params.identifier);
+			const auto wref = scope->drill_for_local_reference(params.identifier);
+			set_reference(wref, nullptr);
 			// Bind the function body recursively.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
 			Xptr<Block> bound_body;
-			bind_block(bound_body, params.body_opt, scope_lexical);
+			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			Statement::S_function_definition stmt_f = { params.identifier, params.parameters_opt, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
@@ -152,8 +144,10 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Xptr<Initializer> bound_range_init;
 			bind_initializer(bound_range_init, params.range_initializer_opt, scope_for);
 			// Create null local references for the key and the value.
-			do_create_null_reference(scope, params.key_identifier);
-			do_create_null_reference(scope, params.value_identifier);
+			const auto key_wref = scope->drill_for_local_reference(params.key_identifier);
+			const auto value_wref = scope->drill_for_local_reference(params.value_identifier);
+			set_reference(key_wref, nullptr);
+			set_reference(value_wref, nullptr);
 			// Bind the body recursively.
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope);
