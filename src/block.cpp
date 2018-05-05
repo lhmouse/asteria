@@ -143,21 +143,21 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_inc), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
-		case Statement::type_foreach_statement: {
-			const auto &params = stmt.get<Statement::S_foreach_statement>();
+		case Statement::type_for_each_statement: {
+			const auto &params = stmt.get<Statement::S_for_each_statement>();
 			// The scope of the lopp initialization outlasts the scope of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
-			const auto scope_foreach = std::make_shared<Scope>(Scope::purpose_lexical, scope);
+			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop range initializer recursively.
 			Xptr<Initializer> bound_range_init;
-			bind_initializer(bound_range_init, params.range_initializer_opt, scope_foreach);
+			bind_initializer(bound_range_init, params.range_initializer_opt, scope_for);
 			// Create null local references for the key and the value.
 			do_create_null_reference(scope, params.key_identifier);
 			do_create_null_reference(scope, params.value_identifier);
 			// Bind the body recursively.
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope);
-			Statement::S_foreach_statement stmt_f = { params.key_identifier, params.value_identifier, std::move(bound_range_init), std::move(bound_body) };
+			Statement::S_for_each_statement stmt_f = { params.key_identifier, params.value_identifier, std::move(bound_range_init), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
 		case Statement::type_try_statement: {
@@ -388,14 +388,14 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				evaluate_expression(reference_out, recycler, params.increment_opt, scope_for);
 			}
 			break; }
-		case Statement::type_foreach_statement: {
-			const auto &params = stmt.get<Statement::S_foreach_statement>();
+		case Statement::type_for_each_statement: {
+			const auto &params = stmt.get<Statement::S_for_each_statement>();
 			// The scope of the loop initialization outlasts the scope of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
-			const auto scope_foreach = std::make_shared<Scope>(Scope::purpose_plain, scope);
+			const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope);
 			// Perform loop initialization.
 			Xptr<Variable> range_var;
-			initialize_variable(range_var, recycler, params.range_initializer_opt, scope_foreach);
+			initialize_variable(range_var, recycler, params.range_initializer_opt, scope_for);
 			const auto range_type = get_variable_type(range_var);
 			// Create the range reference that will be used to create references to values.
 			Xptr<Reference> range_ref_backup, range_ref;
@@ -410,8 +410,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					size = static_cast<std::ptrdiff_t>(range_array.size());
 				}
 				// Prepare the key and value references.
-				const auto key_wref = scope_foreach->drill_for_local_reference(params.key_identifier);
-				const auto value_wref = scope_foreach->drill_for_local_reference(params.value_identifier);
+				const auto key_wref = scope_for->drill_for_local_reference(params.key_identifier);
+				const auto value_wref = scope_for->drill_for_local_reference(params.value_identifier);
 				for(std::ptrdiff_t index = 0; index < size; ++index){
 					// Set the key, which is an integer.
 					set_variable(range_var, recycler, D_integer(index));
@@ -422,30 +422,30 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					Reference::S_array_element ref_v = { std::move(range_ref), index };
 					set_reference(value_wref, std::move(ref_v));
 					// Execute the loop body recursively.
-					const auto result = execute_block(reference_out, recycler, params.body_opt, scope_foreach);
-					if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_foreach)){
+					const auto result = execute_block(reference_out, recycler, params.body_opt, scope_for);
+					if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_for)){
 						// Break out of the body as requested.
 						break;
 					}
-					if((result != Block::execution_result_end_of_block) && (result != Block::execution_result_continue_unspecified) && (result != Block::execution_result_continue_foreach)){
+					if((result != Block::execution_result_end_of_block) && (result != Block::execution_result_continue_unspecified) && (result != Block::execution_result_continue_for)){
 						// Forward anything unexpected to the caller.
 						return result;
 					}
 				}
 			} else if(range_type == Variable::type_object){
 				// Save the keys. This is necessary because the object might be subsequently altered.
-				std::vector<std::string> keys;
+				std::vector<std::string> backup_keys;
 				{
 					const auto &range_object = range_var->get<D_object>();
-					keys.reserve(range_object.size());
+					backup_keys.reserve(range_object.size());
 					for(const auto &pair : range_object){
-						keys.emplace_back(pair.first);
+						backup_keys.emplace_back(pair.first);
 					}
 				}
 				// Prepare the key and value references.
-				const auto key_wref = scope_foreach->drill_for_local_reference(params.key_identifier);
-				const auto value_wref = scope_foreach->drill_for_local_reference(params.value_identifier);
-				for(auto &key : keys){
+				const auto key_wref = scope_for->drill_for_local_reference(params.key_identifier);
+				const auto value_wref = scope_for->drill_for_local_reference(params.value_identifier);
+				for(auto &key : backup_keys){
 					// Set the key, which is a string.
 					set_variable(range_var, recycler, D_string(key));
 					Reference::S_constant ref_k = { range_var };
@@ -455,18 +455,18 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					Reference::S_object_member ref_v = { std::move(range_ref), std::move(key) };
 					set_reference(value_wref, std::move(ref_v));
 					// Execute the loop body recursively.
-					const auto result = execute_block(reference_out, recycler, params.body_opt, scope_foreach);
-					if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_foreach)){
+					const auto result = execute_block(reference_out, recycler, params.body_opt, scope_for);
+					if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_for)){
 						// Break out of the body as requested.
 						break;
 					}
-					if((result != Block::execution_result_end_of_block) && (result != Block::execution_result_continue_unspecified) && (result != Block::execution_result_continue_foreach)){
+					if((result != Block::execution_result_end_of_block) && (result != Block::execution_result_continue_unspecified) && (result != Block::execution_result_continue_for)){
 						// Forward anything unexpected to the caller.
 						return result;
 					}
 				}
 			} else {
-				ASTERIA_THROW_RUNTIME_ERROR("Invalid `foreach` statement on something having type `", get_type_name(range_type), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("Invalid ranged `for` statement on something having type `", get_type_name(range_type), "`");
 			}
 			break; }
 		case Statement::type_try_statement: {
@@ -526,8 +526,6 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				return Block::execution_result_break_while;
 			case Statement::target_scope_for:
 				return Block::execution_result_break_for;
-			case Statement::target_scope_foreach:
-				return Block::execution_result_break_foreach;
 			default:
 				ASTERIA_DEBUG_LOG("Unsupported target scope enumeration `", params.target_scope, "` at index `", stmt_index, "`. This is probably a bug, please report.");
 				std::terminate();
@@ -545,8 +543,6 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				return Block::execution_result_continue_while;
 			case Statement::target_scope_for:
 				return Block::execution_result_continue_for;
-			case Statement::target_scope_foreach:
-				return Block::execution_result_continue_foreach;
 			default:
 				ASTERIA_DEBUG_LOG("Unsupported target scope enumeration `", params.target_scope, "` at index `", stmt_index, "`. This is probably a bug, please report.");
 				std::terminate();

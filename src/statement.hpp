@@ -18,7 +18,6 @@ public:
 		target_scope_switch       = 1,
 		target_scope_while        = 2,
 		target_scope_for          = 3,
-		target_scope_foreach      = 4,
 	};
 
 	enum Type : unsigned {
@@ -30,7 +29,7 @@ public:
 		type_do_while_statement       =  5,
 		type_while_statement          =  6,
 		type_for_statement            =  7,
-		type_foreach_statement        =  8,
+		type_for_each_statement       =  8,
 		type_try_statement            =  9,
 		type_defer_statement          = 10,
 		type_break_statement          = 11,
@@ -74,7 +73,7 @@ public:
 		Xptr<Expression> increment_opt;
 		Xptr<Block> body_opt;
 	};
-	struct S_foreach_statement {
+	struct S_for_each_statement {
 		std::string key_identifier;
 		std::string value_identifier;
 		Xptr<Initializer> range_initializer_opt;
@@ -109,7 +108,7 @@ public:
 		, S_do_while_statement      //  5
 		, S_while_statement         //  6
 		, S_for_statement           //  7
-		, S_foreach_statement       //  8
+		, S_for_each_statement      //  8
 		, S_try_statement           //  9
 		, S_defer_statement         // 10
 		, S_break_statement         // 11

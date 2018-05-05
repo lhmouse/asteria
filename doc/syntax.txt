@@ -29,7 +29,7 @@ infinity-literal ::=
 statement ::=
 	expression-statement | block | variable-definition | function-definition |
 	if-statement | switch-statement |
-	do-while-statement | while-statement | for-statement | foreach-statement |
+	do-while-statement | while-statement | for-statement | for-each-statement |
 	try-statement | defer-statement |
 	break-statement | continue-statement | throw-statement | return-statement
 
@@ -87,8 +87,8 @@ while-statement ::=
 	"while" expression block
 for-statement ::=
 	"for" statement expression-opt ";" expression-opt block
-foreach-statement ::=
-	"foreach" identifier "," identifier "in" initializer block
+for-each-statement ::=
+	"for" "each" identifier "," identifier "in" initializer block
 
 try-statement ::=
 	"try" block "catch" identifier block
@@ -96,9 +96,9 @@ defer-statement ::=
 	"defer" block
 
 break-statement ::=
-	"break" ( "switch" | "while" | "for" | "foreach" ) ";"
+	"break" ( "switch" | "while" | "for" ) ";"
 continue-statement ::=
-	"continue" ( "while" | "for" | "foreach" ) ";"
+	"continue" ( "while" | "for" ) ";"
 throw-statement ::=
 	"throw" expression-opt ";"
 return-statement ::=
