@@ -65,11 +65,11 @@ default-argument-initializer-opt ::=
 	"=" literal | ""
 
 if-statement ::=
-	"if" expression block ( "else" else-branch | "" )
+	"if" "(" expression ")" block ( "else" else-branch | "" )
 else-branch ::=
 	if-statement | block
 switch-statement ::=
-	"switch" expression switch-block
+	"switch" "(" expression ")" switch-block
 switch-block ::=
 	"{" swtich-clause-list-opt "}"
 switch-clause-list-opt ::=
@@ -82,16 +82,16 @@ switch-clause-default ::=
 	"default" block
 
 do-while-statement ::=
-	"do" block "while" expression ";"
+	"do" block "while" "(" expression ")" ";"
 while-statement ::=
-	"while" expression block
+	"while" "(" expression ")" block
 for-statement ::=
-	"for" statement expression-opt ";" expression-opt ";" block
+	"for" "(" statement expression-opt ";" expression-opt ")" block
 for-each-statement ::=
-	"for" "each" identifier "," identifier "in" initializer ";" block
+	"for" "each" "(" identifier "," identifier "in" initializer ")" block
 
 try-statement ::=
-	"try" block "catch" identifier block
+	"try" block "catch" "(" identifier ")" block
 defer-statement ::=
 	"defer" block
 
