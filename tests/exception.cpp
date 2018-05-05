@@ -22,7 +22,7 @@ int main(){
 		set_reference(ref, std::move(ref_l));
 		throw Exception(std::move(ref));
 	} catch(Exception &e){
-		const auto ref = e.get_reference_opt();
+		const auto ref = e.get_reference_opt().share();
 		ASTERIA_TEST_CHECK(ref);
 		set_variable(drill_reference(ref), recycler, D_string("hello"));
 	}

@@ -179,7 +179,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 			dump_variable(os, *it, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!(array.empty())){
+		if(!array.empty()){
 			os <<std::endl;
 			do_indent(os, indent_next);
 		}
@@ -196,7 +196,7 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 			dump_variable(os, it->second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(!(object.empty())){
+		if(!object.empty()){
 			os <<std::endl;
 			do_indent(os, indent_next);
 		}

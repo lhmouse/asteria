@@ -98,8 +98,8 @@ namespace {
 
 void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
-	materialize_reference(this_opt, recycler, false);
-	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, false); });
+	materialize_reference(this_opt, recycler, true);
+	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	move_reference(this_wref, std::move(this_opt));
@@ -107,7 +107,7 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	if(parameters_opt){
 		for(const auto &param : *parameters_opt){
 			Xptr<Reference> arg;
-			if(!(arguments_opt.empty())){
+			if(!arguments_opt.empty()){
 				move_reference(arg, std::move(arguments_opt.front()));
 				arguments_opt.erase(arguments_opt.begin());
 			}

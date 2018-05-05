@@ -12,14 +12,12 @@ namespace Asteria {
 
 class Exception : public std::exception {
 private:
-	Sptr<Reference> m_reference_opt;
+	Xptr<Reference> m_reference_opt;
 
 public:
-	explicit Exception(Sptr<Reference> reference_opt) noexcept
+	explicit Exception(Xptr<Reference> &&reference_opt) noexcept
 		: m_reference_opt(std::move(reference_opt))
 	{ }
-	Exception(const Exception &) noexcept;
-	Exception &operator=(const Exception &) noexcept;
 	Exception(Exception &&) noexcept;
 	Exception &operator=(Exception &&) noexcept;
 	~Exception() override;
@@ -27,10 +25,10 @@ public:
 public:
 	const char *what() const noexcept override;
 
-	Sptr<const Reference> get_reference_opt() const noexcept {
+	const Xptr<Reference> & get_reference_opt() const noexcept {
 		return m_reference_opt;
 	}
-	Sptr<Reference> get_reference_opt() noexcept {
+	Xptr<Reference> & get_reference_opt() noexcept {
 		return m_reference_opt;
 	}
 };
