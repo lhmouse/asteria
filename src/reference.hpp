@@ -39,11 +39,11 @@ public:
 		std::string key;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
-		, S_constant        //  0
-		, S_temporary_value //  1
-		, S_local_variable  //  2
-		, S_array_element   //  3
-		, S_object_member   //  4
+		, S_constant         //  0
+		, S_temporary_value  //  1
+		, S_local_variable   //  2
+		, S_array_element    //  3
+		, S_object_member    //  4
 	)>;
 
 private:
