@@ -310,14 +310,11 @@ namespace {
 				ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 				return nullptr;
 			}
+			const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 			if(parent_result.is_movable() == false){
-				const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 				return variable_opt.share();
 			}
-			auto &movable_array = parent_result.get_movable_pointer()->get<D_array>();
-			ROCKET_ASSERT(&array == &movable_array);
-			auto &variable_opt = movable_array.at(static_cast<std::size_t>(normalized_index));
-			return std::move(variable_opt); }
+			return const_cast<Xptr<Variable> &&>(variable_opt); }
 
 		case Reference::type_object_member: {
 			auto &params = reference_opt->get<Reference::S_object_member>();
@@ -334,14 +331,11 @@ namespace {
 				ASTERIA_DEBUG_LOG("Object member not found: key = ", params.key);
 				return nullptr;
 			}
+			const auto &variable_opt = it->second;
 			if(parent_result.is_movable() == false){
-				const auto &variable_opt = it->second;
 				return variable_opt.share();
 			}
-			auto &movable_object = parent_result.get_movable_pointer()->get<D_object>();
-			ROCKET_ASSERT(&object == &movable_object);
-			auto &variable_opt = movable_object.erase(it, it)->second;
-			return std::move(variable_opt); }
+			return const_cast<Xptr<Variable> &&>(variable_opt); }
 
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
