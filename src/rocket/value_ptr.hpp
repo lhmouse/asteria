@@ -72,7 +72,7 @@ public:
 		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
 	}
 	shared_ptr<elementT> release() noexcept {
-		return (exchange)(this->m_ptr, nullptr);
+		return ((exchange))(this->m_ptr, nullptr);
 	}
 
 	void swap(value_ptr &rhs) noexcept {
