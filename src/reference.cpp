@@ -74,7 +74,7 @@ void copy_reference(Xptr<Reference> &reference_out, Spcref<const Reference> sour
 		return set_reference(reference_out, source); }
 
 	case Reference::type_temporary_value:
-		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied");
+		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied.");
 
 	case Reference::type_local_variable: {
 		const auto &source = source_opt->get<Reference::S_local_variable>();
@@ -128,7 +128,7 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 		// Get the parent, which has to be an array.
 		const auto parent = read_reference_opt(params.parent_opt);
 		if(get_variable_type(parent) != Variable::type_array){
-			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`.");
 		}
 		const auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -148,7 +148,7 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 		// Get the parent, which has to be an object.
 		const auto parent = read_reference_opt(params.parent_opt);
 		if(get_variable_type(parent) != Variable::type_object){
-			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`.");
 		}
 		const auto &object = parent->get<D_object>();
 		// Find the element.
@@ -169,13 +169,9 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to write through a null reference");
-
 	case Reference::type_constant:
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a constant through `", reference_opt, "`");
-
 	case Reference::type_temporary_value:
-		ASTERIA_THROW_RUNTIME_ERROR("Attempting to modify a temporary value through `", reference_opt, "`");
+		ASTERIA_THROW_RUNTIME_ERROR("Writing through `", reference_opt, "` is not allowed.");
 
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();
@@ -196,7 +192,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
 			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
 			if(count_to_prepend > array.max_size() - array.size()){
-				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_prepend = ", count_to_prepend);
+				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
 			array.insert(array.begin(), rocket::nullptr_filler(0), rocket::nullptr_filler(static_cast<std::ptrdiff_t>(count_to_prepend)));
 			normalized_index = 0;
@@ -205,7 +201,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
 			const auto count_to_append = static_cast<std::uint64_t>(normalized_index) - array.size() + 1;
 			if(count_to_append > array.max_size() - array.size()){
-				ASTERIA_THROW_RUNTIME_ERROR("Cannot allocate such a large array: count_to_append = ", count_to_append);
+				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
 			array.insert(array.end(), rocket::nullptr_filler(0), rocket::nullptr_filler(static_cast<std::ptrdiff_t>(count_to_append)));
 			normalized_index = static_cast<std::int64_t>(array.size() - 1);

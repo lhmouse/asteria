@@ -32,11 +32,11 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler>
 	case Block::execution_result_break_switch:
 	case Block::execution_result_break_while:
 	case Block::execution_result_break_for:
-		ASTERIA_THROW_RUNTIME_ERROR("`break` statement encountered outside a `switch` or loop statement");
+		ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
 	case Block::execution_result_continue_unspecified:
 	case Block::execution_result_continue_while:
 	case Block::execution_result_continue_for:
-		ASTERIA_THROW_RUNTIME_ERROR("`continue` statement encountered outside a loop statement");
+		ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
 	case Block::execution_result_return:
 		// Forward the return value;
 		return move_reference(result_out, std::move(returned_ref));

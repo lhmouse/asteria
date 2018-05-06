@@ -42,7 +42,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", params.identifier, "` has not been declared yet.");
 				}
 				source_ref = scope_cur->get_local_reference_opt(params.identifier);
 				if(source_ref){
@@ -139,7 +139,7 @@ namespace {
 	}
 	Xptr<Reference> do_pop_reference(Xptr_vector<Reference> &stack){
 		if(stack.empty()){
-			ASTERIA_THROW_RUNTIME_ERROR("The reference stack is empty (this is probably due to an unbalanced expression)");
+			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
 		auto ref = std::move(stack.back());
 		ASTERIA_DEBUG_LOG("Popping: ", ref);
@@ -164,7 +164,7 @@ namespace {
 
 	std::int64_t do_negate(std::int64_t rhs){
 		if(rhs == INT64_MIN){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral negation would result in overflow: rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
 		}
 		return -rhs;
 	}
@@ -174,7 +174,7 @@ namespace {
 
 	std::int64_t do_add(std::int64_t lhs, std::int64_t rhs){
 		if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral addition would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs + rhs;
 	}
@@ -184,7 +184,7 @@ namespace {
 
 	std::int64_t do_subtract(std::int64_t lhs, std::int64_t rhs){
 		if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs - rhs;
 	}
@@ -200,7 +200,7 @@ namespace {
 			return lhs ^ rhs ^ 1;
 		}
 		if((lhs == INT64_MIN) || (rhs == INT64_MIN)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		if((lhs == -1) || (rhs == -1)){
 			return -(lhs ^ rhs ^ -1);
@@ -209,7 +209,7 @@ namespace {
 		const auto arhs = std::abs(rhs);
 		const auto srhs = ((lhs >= 0) == (rhs >= 0)) ? arhs : -arhs;
 		if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return alhs * srhs;
 	}
@@ -219,10 +219,10 @@ namespace {
 
 	std::int64_t do_divide(std::int64_t lhs, std::int64_t rhs){
 		if(rhs == 0){
-			ASTERIA_THROW_RUNTIME_ERROR("The divisor was zero: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
 		}
 		if((lhs == INT64_MIN) && (rhs == -1)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral division would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs / rhs;
 	}
@@ -232,10 +232,10 @@ namespace {
 
 	std::int64_t do_modulo(std::int64_t lhs, std::int64_t rhs){
 		if(rhs == 0){
-			ASTERIA_THROW_RUNTIME_ERROR("The divisor was zero: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
 		}
 		if((lhs == INT64_MIN) && (rhs == -1)){
-			ASTERIA_THROW_RUNTIME_ERROR("Integral division would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs % rhs;
 	}
@@ -245,7 +245,7 @@ namespace {
 
 	std::int64_t do_shift_left_logical(std::int64_t lhs, std::int64_t rhs){
 		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
 		if(rhs >= 64){
 			return 0;
@@ -254,20 +254,20 @@ namespace {
 	}
 	std::int64_t do_shift_left_arithmetic(std::int64_t lhs, std::int64_t rhs){
 		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
 		if(rhs >= 64){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count must be less than 64: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
 		const auto mask = INT64_MIN >> rhs;
 		if(((lhs & mask) != 0) && ((lhs & mask) != mask)){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift would result in overflow: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
 		}
 		return static_cast<std::int64_t>(static_cast<std::uint64_t>(lhs) << rhs);
 	}
 	std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs){
 		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
 		if(rhs >= 64){
 			return 0;
@@ -276,10 +276,10 @@ namespace {
 	}
 	std::int64_t do_shift_right_arithmetic(std::int64_t lhs, std::int64_t rhs){
 		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count was negative: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
 		if(rhs >= 64){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count must be less than 64: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
 		return lhs >> rhs;
 	}
@@ -321,7 +321,7 @@ namespace {
 	}
 	std::string do_duplicate(const std::string &lhs, std::int64_t rhs){
 		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("String duplication count was negative: lhs = ", lhs, ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
 		}
 		std::string result;
 		if(rhs == 0){
@@ -329,7 +329,7 @@ namespace {
 		}
 		const auto count = static_cast<std::uint64_t>(rhs);
 		if(lhs.size() > result.max_size() / count){
-			ASTERIA_THROW_RUNTIME_ERROR("The result string would be too long and could not be allocated: lhs.length() = ", lhs.length(), ", rhs = ", rhs);
+			ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` time(s) would result in an overlong string that cannot be allocated.");
 		}
 		result.reserve(lhs.size() * static_cast<std::size_t>(count));
 		for(auto mask = UINT64_C(1) << 63; mask != 0; mask >>= 1){
@@ -371,7 +371,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("Undeclared identifier `", params.identifier, "`");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", params.identifier, "` has not been declared yet.");
 				}
 				source_ref = scope_cur->get_local_reference_opt(params.identifier);
 				if(source_ref){
@@ -455,7 +455,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			// Make sure it is really a function.
 			const auto callee_type = get_variable_type(callee_var);
 			if(callee_type != Variable::type_function){
-				ASTERIA_THROW_RUNTIME_ERROR("Attempting to call something having type `", type_name_of(callee_type), "`, which is not a function");
+				ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", type_name_of(callee_type), "`.");
 			}
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
@@ -500,7 +500,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -521,7 +521,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -541,7 +541,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->get<D_string>() };
 					rhs_ref->set(std::move(ref_o));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined subscript type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Values having type `", type_name_of(rhs_type), "` cannot be used as subscripts.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -559,7 +559,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, rhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -577,7 +577,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, do_negate(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -595,7 +595,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -624,7 +624,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -643,7 +643,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -691,7 +691,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -710,7 +710,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -729,7 +729,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -748,7 +748,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_variables(lhs_var, rhs_var);
 				if(comparison_result == Variable::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("Unordered operands for ", op_name_of(params));
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -786,7 +786,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -814,7 +814,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_subtract(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -851,7 +851,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(rhs, lhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -874,7 +874,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_divide(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -897,7 +897,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_modulo(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -918,7 +918,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -940,7 +940,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -961,7 +961,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -982,7 +982,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1005,7 +1005,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1028,7 +1028,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1051,7 +1051,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Undefined ", op_name_of(params), " operation on type `", type_name_of(lhs_type), "` and `", type_name_of(rhs_type), "`");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1083,7 +1083,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 	}
 	// Get the result. If the stack is empty or has more than one elements, the expression is unbalanced.
 	if(stack.size() != 1){
-		ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression, number of references remaining is `", stack.size(), "`");
+		ASTERIA_THROW_RUNTIME_ERROR("There were `", stack.size(), "` elements in the evaluation stack due to imbalance of the expression.");
 	}
 	ASTERIA_DEBUG_LOG("------- End of evaluation of expression");
 	return move_reference(result_out, std::move(stack.front()));

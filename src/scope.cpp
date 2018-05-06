@@ -32,7 +32,7 @@ Sptr<const Reference> Scope::get_local_reference_opt(const std::string &identifi
 }
 std::reference_wrapper<Xptr<Reference>> Scope::drill_for_local_reference(const std::string &identifier){
 	if(identifier.empty()){
-		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of local references must not be empty");
+		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of local variables or constants must not be empty.");
 	}
 	auto it = m_local_references.find(identifier);
 	if(it == m_local_references.end()){
@@ -76,7 +76,7 @@ namespace {
 				// Return the argument at the index specified.
 				const auto index_var = read_reference_opt(arguments_opt.at(0));
 				if(get_variable_type(index_var) != Variable::type_integer){
-					ASTERIA_THROW_RUNTIME_ERROR("Non-integer argument passed to `", g_id_va_arg, "`");
+					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", g_id_va_arg, "` must be an `integer`.");
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 				const auto index = index_var->get<D_integer>();
@@ -92,7 +92,7 @@ namespace {
 				return copy_reference(result_out, arg); }
 
 			default:
-				ASTERIA_THROW_RUNTIME_ERROR("Too many arguments passed to `", g_id_va_arg, "`");
+				ASTERIA_THROW_RUNTIME_ERROR("`", g_id_va_arg, "` accepts no more than one argument.");
 			}
 		}
 	};

@@ -13,7 +13,7 @@ namespace Asteria {
 Variable::~Variable() = default;
 
 void Variable::do_throw_type_mismatch(Type expect) const {
-	ASTERIA_THROW_RUNTIME_ERROR("Runtime type mismatch, expecting type `", get_type_name(expect), "` but got `", get_type_name(get_type()), "`");
+	ASTERIA_THROW_RUNTIME_ERROR("The expected type `", get_type_name(expect), "` did not match the stored type `", get_type_name(get_type()), "` of this variable.");
 }
 
 const char * get_type_name(Variable::Type type) noexcept {
@@ -38,7 +38,7 @@ const char * get_type_name(Variable::Type type) noexcept {
 		return "object";
 	default:
 		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
-		return "<unknown>";
+		std::terminate();
 	}
 }
 
@@ -243,7 +243,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcr
 		return set_variable(variable_out, recycler, source); }
 
 	case Variable::type_opaque:
-		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied");
+		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied.");
 
 	case Variable::type_function: {
 		const auto &source = source_opt->get<D_function>();

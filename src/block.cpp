@@ -317,7 +317,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				} else {
 					// Deal with a `default` label.
 					if(match_it != params.clauses_opt.end()){
-						ASTERIA_THROW_RUNTIME_ERROR("More than one `default` labels found in this `switch` statement");
+						ASTERIA_THROW_RUNTIME_ERROR("More than one `default` labels have been found in this `switch` statement.");
 					}
 					match_it = it;
 				}
@@ -478,7 +478,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					}
 				}
 			} else {
-				ASTERIA_THROW_RUNTIME_ERROR("Invalid ranged `for` statement on something having type `", get_type_name(range_type), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("`for each` statements do not accept something having type `", get_type_name(range_type), "`.");
 			}
 			break; }
 
