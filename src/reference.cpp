@@ -35,10 +35,7 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 
 	case Reference::type_local_variable: {
 		const auto &value = reference_opt->get<Reference::S_local_variable>();
-		if(value.local_variable->is_immutable()){
-			os <<"immutable ";
-		}
-		os <<"local variable ";
+		os <<(value.local_variable->is_constant() ? "local constant " : "local variable ");
 		return dump_variable(os, value.local_variable->get_variable_opt(), indent_next, indent_increment); }
 
 	case Reference::type_array_element: {
@@ -48,7 +45,7 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 
 	case Reference::type_object_member: {
 		const auto &value = reference_opt->get<Reference::S_object_member>();
-		os <<"the value having key \"" <<value.key <<"\"] in ";
+		os <<"the value having key \"" <<value.key <<"\" in ";
 		return dump_reference(os, value.parent_opt, indent_next, indent_increment); }
 
 	default:
@@ -351,14 +348,14 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycl
 	}
 	return move_variable(variable_out, recycler, std::move(result.get_movable_pointer()));
 }
-void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool immutable){
+void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool constant){
 	const auto type = get_reference_type(reference_inout_opt);
 	if(type == Reference::type_local_variable){
 		return;
 	}
 	Xptr<Variable> variable;
 	extract_variable_from_reference(variable, recycler, std::move(reference_inout_opt));
-	auto local_var = std::make_shared<Local_variable>(std::move(variable), immutable);
+	auto local_var = std::make_shared<Local_variable>(std::move(variable), constant);
 	Reference::S_local_variable ref_l = { std::move(local_var) };
 	return set_reference(reference_inout_opt, std::move(ref_l));
 }

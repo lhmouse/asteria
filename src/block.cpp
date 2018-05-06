@@ -48,7 +48,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spc
 			// Bind the initializer recursively.
 			Xptr<Initializer> bound_init;
 			bind_initializer(bound_init, params.initializer_opt, scope);
-			Statement::S_variable_definition stmt_v = { params.identifier, params.immutable, std::move(bound_init) };
+			Statement::S_variable_definition stmt_v = { params.identifier, params.constant, std::move(bound_init) };
 			bound_statements.emplace_back(std::move(stmt_v));
 			break; }
 
@@ -254,7 +254,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			const auto &params = stmt.get<Statement::S_variable_definition>();
 			// Create a local reference for the variable.
 			evaluate_initializer(reference_out, recycler, params.initializer_opt, scope);
-			materialize_reference(reference_out, recycler, params.immutable);
+			materialize_reference(reference_out, recycler, params.constant);
 			const auto wref = scope->drill_for_local_reference(params.identifier);
 			copy_reference(wref, reference_out);
 			break; }

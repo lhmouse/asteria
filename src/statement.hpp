@@ -42,7 +42,7 @@ public:
 	};
 	struct S_variable_definition {
 		std::string identifier;
-		bool immutable;
+		bool constant;
 		Xptr<Initializer> initializer_opt;
 	};
 	struct S_function_definition {

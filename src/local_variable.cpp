@@ -10,8 +10,8 @@ namespace Asteria {
 
 Local_variable::~Local_variable() = default;
 
-void Local_variable::do_throw_immutable_local_variable() const {
-	ASTERIA_THROW_RUNTIME_ERROR("Immutable local variable: ", m_variable_opt);
+void Local_variable::do_throw_local_constant() const {
+	ASTERIA_THROW_RUNTIME_ERROR("The local constant `", m_variable_opt, "` cannot be modified");
 }
 
 }

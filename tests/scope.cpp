@@ -40,7 +40,7 @@ int main(){
 	auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	auto one = std::make_shared<Local_variable>();
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
-	one->set_immutable(true);
+	one->set_constant(true);
 	Reference::S_local_variable lref = { one };
 	auto wref = scope->drill_for_local_reference("one");
 	set_reference(wref, std::move(lref));
