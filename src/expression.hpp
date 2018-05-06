@@ -20,7 +20,7 @@ public:
 		: m_nodes(std::move(nodes))
 	{ }
 	Expression(Expression &&) noexcept;
-	Expression &operator=(Expression &&);
+	Expression & operator=(Expression &&);
 	~Expression();
 
 public:

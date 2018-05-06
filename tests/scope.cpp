@@ -25,7 +25,7 @@ namespace {
 		{ }
 
 	public:
-		const char *describe() const noexcept override {
+		const char * describe() const noexcept override {
 			return "fancy deferred callback";
 		}
 		void invoke(Xptr<Reference> &/*result_out*/, Spcref<Recycler> /*recycler*/, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&/*arguments_opt*/) const override {

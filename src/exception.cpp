@@ -10,7 +10,7 @@ Exception::Exception(Exception &&) noexcept = default;
 Exception &Exception::operator=(Exception &&) noexcept = default;
 Exception::~Exception() = default;
 
-const char *Exception::what() const noexcept {
+const char * Exception::what() const noexcept {
 	return "Asteria::Exception";
 }
 

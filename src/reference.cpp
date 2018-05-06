@@ -54,11 +54,11 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 	}
 }
 
-std::ostream &operator<<(std::ostream &os, Spcref<const Reference> reference_opt){
+std::ostream & operator<<(std::ostream &os, Spcref<const Reference> reference_opt){
 	dump_reference(os, reference_opt);
 	return os;
 }
-std::ostream &operator<<(std::ostream &os, const Xptr<Reference> &reference_opt){
+std::ostream & operator<<(std::ostream &os, const Xptr<Reference> &reference_opt){
 	dump_reference(os, reference_opt);
 	return os;
 }

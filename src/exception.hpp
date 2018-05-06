@@ -19,11 +19,11 @@ public:
 		: m_reference_opt(std::move(reference_opt))
 	{ }
 	Exception(Exception &&) noexcept;
-	Exception &operator=(Exception &&) noexcept;
+	Exception & operator=(Exception &&) noexcept;
 	~Exception() override;
 
 public:
-	const char *what() const noexcept override;
+	const char * what() const noexcept override;
 
 	const Xptr<Reference> & get_reference_opt() const noexcept {
 		return m_reference_opt;

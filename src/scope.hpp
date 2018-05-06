@@ -32,7 +32,7 @@ public:
 	~Scope();
 
 	Scope(const Scope &) = delete;
-	Scope &operator=(const Scope &) = delete;
+	Scope & operator=(const Scope &) = delete;
 
 public:
 	Purpose get_purpose() const noexcept {

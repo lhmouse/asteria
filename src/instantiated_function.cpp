@@ -13,7 +13,7 @@ namespace Asteria {
 
 Instantiated_function::~Instantiated_function() = default;
 
-const char *Instantiated_function::describe() const noexcept {
+const char * Instantiated_function::describe() const noexcept {
 	return "instantiated function";
 }
 void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {

@@ -23,7 +23,7 @@ public:
 	~Local_variable();
 
 	Local_variable(const Local_variable &) = delete;
-	Local_variable &operator=(const Local_variable &) = delete;
+	Local_variable & operator=(const Local_variable &) = delete;
 
 private:
 	__attribute__((__noreturn__)) void do_throw_local_constant() const;

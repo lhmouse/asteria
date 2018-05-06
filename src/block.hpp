@@ -33,7 +33,7 @@ public:
 		: m_statements(std::move(statements))
 	{ }
 	Block(Block &&) noexcept;
-	Block &operator=(Block &&);
+	Block & operator=(Block &&);
 	~Block();
 
 public:

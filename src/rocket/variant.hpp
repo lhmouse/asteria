@@ -110,11 +110,11 @@ namespace details {
 	struct storage_for {
 		alignas(elementT) char data[sizeof(elementT)];
 
-		const elementT *get() const {
+		const elementT * get() const {
 			const auto ptr = static_cast<const void *>(this->data);
 			return static_cast<const elementT *>(ptr);
 		}
-		elementT *get(){
+		elementT * get(){
 			const auto ptr = static_cast<void *>(this->data);
 			return static_cast<elementT *>(ptr);
 		}
@@ -315,7 +315,7 @@ public:
 		this->m_index = rhs.m_index;
 	}
 	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
-	variant &operator=(elementT &&element) noexcept(details::is_nothrow_forward_assignable<elementT>::value && details::is_nothrow_forward_constructible<elementT>::value) {
+	variant & operator=(elementT &&element) noexcept(details::is_nothrow_forward_assignable<elementT>::value && details::is_nothrow_forward_constructible<elementT>::value) {
 		enum : size_t { eindex = details::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
@@ -332,7 +332,7 @@ public:
 		this->m_index = eindex;
 		return *this;
 	}
-	variant &operator=(const variant &rhs) noexcept(details::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
+	variant & operator=(const variant &rhs) noexcept(details::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
 		details::visitor_get_pointer<const void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
@@ -347,7 +347,7 @@ public:
 		this->m_index = rhs.m_index;
 		return *this;
 	}
-	variant &operator=(variant &&rhs) noexcept(details::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
+	variant & operator=(variant &&rhs) noexcept(details::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		details::visitor_get_pointer<void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
@@ -372,7 +372,7 @@ public:
 		return this->m_index;
 	}
 	template<typename elementT>
-	const elementT *try_get() const noexcept {
+	const elementT * try_get() const noexcept {
 		enum : size_t { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		if(this->m_index != eindex){
 			return nullptr;
@@ -382,7 +382,7 @@ public:
 		return static_cast<const elementT *>(visitor.result_ptr);
 	}
 	template<typename elementT>
-	elementT *try_get() noexcept {
+	elementT * try_get() noexcept {
 		enum : size_t { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		if(this->m_index != eindex){
 			return nullptr;

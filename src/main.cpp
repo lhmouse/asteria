@@ -13,7 +13,7 @@ using namespace Asteria;
 namespace {
 	class My_opaque : public Opaque_base {
 	public:
-		const char *describe() const noexcept override {
+		const char * describe() const noexcept override {
 			return "my fancy opaque class";
 		}
 	};

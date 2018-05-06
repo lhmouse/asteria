@@ -37,13 +37,13 @@ public:
 		: m_ptr(::std::move(other))
 	{ }
 	value_ptr(value_ptr &&rhs) = default;
-	value_ptr &operator=(value_ptr &&rhs) = default;
+	value_ptr & operator=(value_ptr &&rhs) = default;
 
 public:
-	const elementT *get() const noexcept {
+	const elementT * get() const noexcept {
 		return this->m_ptr.get();
 	}
-	elementT *get() noexcept {
+	elementT * get() noexcept {
 		return this->m_ptr.get();
 	}
 
@@ -97,19 +97,19 @@ public:
 	explicit operator bool() const noexcept {
 		return this->m_ptr.operator bool();
 	}
-	const elementT &operator*() const {
+	const elementT & operator*() const {
 		ROCKET_ASSERT(this->m_ptr != nullptr);
 		return this->m_ptr.operator*();
 	}
-	elementT &operator*(){
+	elementT & operator*(){
 		ROCKET_ASSERT(this->m_ptr != nullptr);
 		return this->m_ptr.operator*();
 	}
-	const elementT *operator->() const {
+	const elementT * operator->() const {
 		ROCKET_ASSERT(this->m_ptr != nullptr);
 		return this->m_ptr.operator->();
 	}
-	elementT *operator->(){
+	elementT * operator->(){
 		ROCKET_ASSERT(this->m_ptr != nullptr);
 		return this->m_ptr.operator->();
 	}

@@ -54,7 +54,7 @@ public:
 	~Insertable_ostream() override;
 
 public:
-	Insertable_streambuf *rdbuf() const noexcept {
+	Insertable_streambuf * rdbuf() const noexcept {
 		return const_cast<Insertable_streambuf *>(&m_sb);
 	}
 

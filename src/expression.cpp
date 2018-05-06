@@ -126,10 +126,10 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression
 }
 
 namespace {
-	const char *op_name_of(const Expression_node::S_operator_rpn &params){
+	const char * op_name_of(const Expression_node::S_operator_rpn &params){
 		return get_operator_name_generic(params.operator_generic);
 	}
-	const char *type_name_of(Variable::Type type){
+	const char * type_name_of(Variable::Type type){
 		return get_type_name(type);
 	}
 

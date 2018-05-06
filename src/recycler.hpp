@@ -26,7 +26,7 @@ public:
 	~Recycler();
 
 	Recycler(const Recycler &) = delete;
-	Recycler &operator=(const Recycler &) = delete;
+	Recycler & operator=(const Recycler &) = delete;
 
 public:
 	void adopt_variable(Spcref<Variable> variable_opt);
