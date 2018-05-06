@@ -126,8 +126,8 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	auto va_arg_func = std::make_shared<Variadic_argument_getter>(std::move(arguments_opt));
 	set_variable(va_arg_var, recycler, D_function(std::move(va_arg_func)));
 	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
-	Reference::S_constant ref_c = { std::move(va_arg_var) };
-	set_reference(va_arg_wref, std::move(ref_c));
+	Reference::S_constant ref_k = { std::move(va_arg_var) };
+	set_reference(va_arg_wref, std::move(ref_k));
 }
 void prepare_function_scope_lexical(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
 	// Set the `this` reference.

@@ -359,8 +359,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spcref<Recycler> recycler,
 			const auto &params = node.get<Expression_node::S_literal>();
 			// Create an immutable reference to the constant.
 			Xptr<Reference> result_ref;
-			Reference::S_constant ref_c = { params.source_opt };
-			set_reference(result_ref, std::move(ref_c));
+			Reference::S_constant ref_k = { params.source_opt };
+			set_reference(result_ref, std::move(ref_k));
 			do_push_reference(stack, std::move(result_ref));
 			break; }
 
