@@ -32,6 +32,7 @@ pkginclude_HEADERS =	\
 	asteria/src/statement.hpp	\
 	asteria/src/block.hpp	\
 	asteria/src/instantiated_function.hpp	\
+	asteria/src/simple_function.hpp	\
 	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp
@@ -64,6 +65,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/statement.cpp	\
 	asteria/src/block.cpp	\
 	asteria/src/instantiated_function.cpp	\
+	asteria/src/simple_function.cpp	\
 	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/recycler.cpp

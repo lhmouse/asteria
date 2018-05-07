@@ -44,6 +44,7 @@ class Stored_reference;
 class Opaque_base;
 class Function_base;
 class Instantiated_function;
+class Simple_function;
 class Variable;
 class Reference;
 class Local_variable;
