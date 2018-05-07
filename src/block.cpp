@@ -533,7 +533,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					copy_reference(wref, reference_out);
 					throw;
 				}
-			} catch(...){
+			} catch(std::exception &){
 				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
 				if(result != Block::execution_result_end_of_block){
 					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
