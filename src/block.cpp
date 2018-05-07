@@ -485,54 +485,55 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 		case Statement::type_try_statement: {
 			const auto &params = stmt.get<Statement::S_try_statement>();
 			// Execute the `try` branch in a C++ `try...catch` statement.
+			Sptr<Scope> scope_catch;
 			try {
-				const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope);
-				const auto result = execute_block_in_place(reference_out, scope_try, recycler, params.branch_try_opt);
-				if(result != Block::execution_result_end_of_block){
-					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
-					return result;
+				try {
+					const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope);
+					const auto result = execute_block_in_place(reference_out, scope_try, recycler, params.branch_try_opt);
+					if(result != Block::execution_result_end_of_block){
+						// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
+						return result;
+					}
+				} catch(Exception &e){
+					ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
+					// Print exceptions nested, if any.
+					auto nested_eptr = e.nested_ptr();
+					if(nested_eptr){
+						std::string prefix = "which contains a nested ";
+						do {
+							prefix.insert(0, "  ");
+							try {
+								std::rethrow_exception(nested_eptr);
+							} catch(Exception &ne){
+								ASTERIA_DEBUG_LOG(prefix, "`Asteria::Exception`: ", ne.get_reference_opt());
+								nested_eptr = ne.nested_ptr();
+							} catch(std::exception &ne){
+								ASTERIA_DEBUG_LOG(prefix, "`std::exception`: ", ne.what());
+								nested_eptr = nullptr;
+							}
+						} while(nested_eptr);
+					}
+					// Move the reference into the `catch` scope, then execute the `catch` branch.
+					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
+					move_reference(reference_out, std::move(e.get_reference_opt()));
+					materialize_reference(reference_out, recycler, true);
+					const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
+					copy_reference(wref, reference_out);
+					throw;
+				} catch(std::exception &e){
+					ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
+					// Create a string containing the error message in the `catch` scope, then execute the `catch` branch.
+					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
+					Xptr<Variable> what_var;
+					set_variable(what_var, recycler, D_string(e.what()));
+					Reference::S_temporary_value ref_t = { std::move(what_var) };
+					set_reference(reference_out, std::move(ref_t));
+					materialize_reference(reference_out, recycler, true);
+					const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
+					copy_reference(wref, reference_out);
+					throw;
 				}
-			} catch(Exception &e){
-				ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
-				// Print exceptions nested, if any.
-				auto nested_eptr = e.nested_ptr();
-				if(nested_eptr){
-					std::string prefix = "which contains a nested ";
-					do {
-						prefix.insert(0, "  ");
-						try {
-							std::rethrow_exception(nested_eptr);
-						} catch(Exception &ne){
-							ASTERIA_DEBUG_LOG(prefix, "`Asteria::Exception`: ", ne.get_reference_opt());
-							nested_eptr = ne.nested_ptr();
-						} catch(std::exception &ne){
-							ASTERIA_DEBUG_LOG(prefix, "`std::exception`: ", ne.what());
-							nested_eptr = nullptr;
-						}
-					} while(nested_eptr);
-				}
-				// Move the reference into the `catch` scope, then execute the `catch` branch.
-				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-				move_reference(reference_out, std::move(e.get_reference_opt()));
-				materialize_reference(reference_out, recycler, true);
-				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
-				copy_reference(wref, reference_out);
-				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
-				if(result != Block::execution_result_end_of_block){
-					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
-					return result;
-				}
-			} catch(std::exception &e){
-				ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
-				// Create a string containing the error message in the `catch` scope, then execute the `catch` branch.
-				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-				Xptr<Variable> what_var;
-				set_variable(what_var, recycler, D_string(e.what()));
-				Reference::S_temporary_value ref_t = { std::move(what_var) };
-				set_reference(reference_out, std::move(ref_t));
-				materialize_reference(reference_out, recycler, true);
-				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
-				copy_reference(wref, reference_out);
+			} catch(...){
 				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
 				if(result != Block::execution_result_end_of_block){
 					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
