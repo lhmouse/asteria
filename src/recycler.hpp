@@ -28,6 +28,9 @@ public:
 	Recycler(const Recycler &) = delete;
 	Recycler & operator=(const Recycler &) = delete;
 
+private:
+	void do_purge_variables() noexcept;
+
 public:
 	void adopt_variable(Spcref<Variable> variable_opt);
 	void defragment(bool aggressive = false) noexcept;

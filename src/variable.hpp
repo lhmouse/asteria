@@ -116,7 +116,7 @@ extern void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycle
 extern void move_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Variable> &&source_opt);
 
 // This function is useful for breaking dependency circles.
-extern void dispose_variable(Spcref<Variable> variable_opt) noexcept;
+extern void purge_variable(Spcref<Variable> variable_opt) noexcept;
 
 extern Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Spcref<const Variable> rhs_opt) noexcept;
 

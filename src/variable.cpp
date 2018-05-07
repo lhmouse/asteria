@@ -283,7 +283,7 @@ void move_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr
 	}
 }
 
-void dispose_variable(Spcref<Variable> variable_opt) noexcept {
+void purge_variable(Spcref<Variable> variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
 	case Variable::type_null:
@@ -298,7 +298,7 @@ void dispose_variable(Spcref<Variable> variable_opt) noexcept {
 	case Variable::type_array: {
 		auto &value = variable_opt->get<D_array>();
 		for(auto &elem : value){
-			dispose_variable(elem);
+			purge_variable(elem);
 			elem = nullptr;
 		}
 		return; }
@@ -306,7 +306,7 @@ void dispose_variable(Spcref<Variable> variable_opt) noexcept {
 	case Variable::type_object: {
 		auto &value = variable_opt->get<D_object>();
 		for(auto &pair : value){
-			dispose_variable(pair.second);
+			purge_variable(pair.second);
 			pair.second = nullptr;
 		}
 		return; }

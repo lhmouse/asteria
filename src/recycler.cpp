@@ -10,8 +10,13 @@
 namespace Asteria {
 
 Recycler::~Recycler(){
-	for(const auto &weak_var : m_weak_variables){
-		dispose_variable(weak_var.lock());
+	do_purge_variables();
+}
+
+void Recycler::do_purge_variables() noexcept {
+	while(m_weak_variables.empty() == false){
+		purge_variable(m_weak_variables.back().lock());
+		m_weak_variables.pop_back();
 	}
 }
 

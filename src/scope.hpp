@@ -34,6 +34,9 @@ public:
 	Scope(const Scope &) = delete;
 	Scope & operator=(const Scope &) = delete;
 
+private:
+	void do_dispose_deferred_callbacks() noexcept;
+
 public:
 	Purpose get_purpose() const noexcept {
 		return m_purpose;

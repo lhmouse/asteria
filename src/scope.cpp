@@ -13,15 +13,18 @@
 namespace Asteria {
 
 Scope::~Scope(){
-	for(auto it = m_deferred_callbacks.rbegin(); it != m_deferred_callbacks.rend(); ++it){
-		const auto &func = *it;
-		try {
-			Xptr<Reference> result;
-			func->invoke(result, nullptr, nullptr, { });
-		} catch(std::exception &e){
-			ASTERIA_DEBUG_LOG("`std::exception` thrown from a deferred callback has been ignored: ", e.what());
-		}
+	do_dispose_deferred_callbacks();
+}
+
+void Scope::do_dispose_deferred_callbacks() noexcept
+try {
+	Xptr<Reference> unused_result;
+	while(m_deferred_callbacks.empty() == false){
+		m_deferred_callbacks.back()->invoke(unused_result, nullptr, nullptr, { });
+		m_deferred_callbacks.pop_back();
 	}
+} catch(std::exception &e){
+	ASTERIA_DEBUG_LOG("Ignoring `std::exception` thrown from deferred callbacks: ", e.what());
 }
 
 Sptr<const Reference> Scope::get_local_reference_opt(const std::string &identifier) const noexcept {
