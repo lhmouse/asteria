@@ -7,6 +7,7 @@
 #include "opaque_base.hpp"
 #include "function_base.hpp"
 #include "utilities.hpp"
+#include <cmath>
 
 namespace Asteria {
 

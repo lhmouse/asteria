@@ -10,7 +10,6 @@
 
 #include <string>
 #include <iterator>
-#include <algorithm>
 #include <utility>
 #include <stdexcept>
 #include <iosfwd>
@@ -23,10 +22,8 @@
 #include <unordered_map>
 
 #include <cstring>
-#include <cstdlib>
 #include <cstddef>
 #include <climits>
-#include <cmath>
 
 #include "rocket/value_ptr.hpp"
 #include "rocket/variant.hpp"

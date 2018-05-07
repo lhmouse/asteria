@@ -8,6 +8,7 @@
 #include "function_base.hpp"
 #include "parameter.hpp"
 #include "utilities.hpp"
+#include <algorithm>
 
 namespace Asteria {
 

@@ -10,6 +10,7 @@
 #include "block.hpp"
 #include "instantiated_function.hpp"
 #include "utilities.hpp"
+#include <cmath>
 
 namespace Asteria {
 
