@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Simple_function : public Function_base {
 private:
-	void (*m_fptr)(Xptr<Reference> &, Spcref<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+	Function_base_prototype *m_fptr;
 
 public:
-	explicit Simple_function(void (*fptr)(Xptr<Reference> &, Spcref<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&))
+	explicit Simple_function(Function_base_prototype *fptr)
 		: m_fptr(fptr)
 	{ }
 	~Simple_function();

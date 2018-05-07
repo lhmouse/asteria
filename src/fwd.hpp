@@ -82,6 +82,8 @@ using Xptr_vector = std::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = std::unordered_map<KeyT, Xptr<ValueT>>;
 
+using Function_base_prototype = void (Xptr<Reference> &, Spcref<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
