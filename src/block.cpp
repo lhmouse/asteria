@@ -484,7 +484,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 
 		case Statement::type_try_statement: {
 			const auto &params = stmt.get<Statement::S_try_statement>();
-			// Execute the try branch in a C++ `try...catch` statement.
+			// Execute the `try` branch in a C++ `try...catch` statement.
 			try {
 				const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope);
 				const auto result = execute_block_in_place(reference_out, scope_try, recycler, params.branch_try_opt);
@@ -494,8 +494,25 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			} catch(Exception &e){
 				ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
+				// Print exceptions nested, if any.
+				auto nested_eptr = e.nested_ptr();
+				if(nested_eptr){
+					std::string prefix = "which contains a nested ";
+					do {
+						prefix.insert(0, "  ");
+						try {
+							std::rethrow_exception(nested_eptr);
+						} catch(Exception &ne){
+							ASTERIA_DEBUG_LOG(prefix, "`Asteria::Exception`: ", ne.get_reference_opt());
+							nested_eptr = ne.nested_ptr();
+						} catch(std::exception &ne){
+							ASTERIA_DEBUG_LOG(prefix, "`std::exception`: ", ne.what());
+							nested_eptr = nullptr;
+						}
+					} while(nested_eptr);
+				}
+				// Move the reference into the catch scope, then execute the `catch` branch.
 				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-				// Move the reference into the catch scope, then execute the handler.
 				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
 				move_reference(wref, std::move(e.get_reference_opt()));
 				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
@@ -505,8 +522,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			} catch(std::exception &e){
 				ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
+				// Create a string containing the error message in the catch scope, then execute the `catch` branch.
 				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-				// Create a string containing the error message in the catch scope, then execute the handler.
 				Xptr<Variable> what_var;
 				set_variable(what_var, recycler, D_string(e.what()));
 				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);

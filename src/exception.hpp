@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Exception : public std::exception {
+class Exception : public std::exception, public std::nested_exception {
 private:
 	Xptr<Reference> m_reference_opt;
 
