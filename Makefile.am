@@ -35,7 +35,8 @@ pkginclude_HEADERS =	\
 	asteria/src/simple_function.hpp	\
 	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
-	asteria/src/recycler.hpp
+	asteria/src/recycler.hpp	\
+	asteria/src/executor.hpp
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
@@ -68,7 +69,8 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/simple_function.cpp	\
 	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
-	asteria/src/recycler.cpp
+	asteria/src/recycler.cpp	\
+	asteria/src/executor.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -version-info 0:0:0
