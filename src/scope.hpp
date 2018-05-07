@@ -27,7 +27,6 @@ private:
 public:
 	Scope(Purpose purpose, Sptr<const Scope> parent_opt)
 		: m_purpose(std::move(purpose)), m_parent_opt(std::move(parent_opt))
-		, m_local_references(), m_deferred_callbacks()
 	{ }
 	~Scope();
 

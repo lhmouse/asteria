@@ -17,11 +17,11 @@ public:
 
 private:
 	Wptr_vector<Variable> m_weak_variables;
-	std::size_t m_defragmentation_threshold;
+	std::size_t m_defragmentation_threshold = defragmentation_threshold_initial;
 
 public:
 	Recycler()
-		: m_weak_variables(), m_defragmentation_threshold(defragmentation_threshold_initial)
+		//
 	{ }
 	~Recycler();
 
