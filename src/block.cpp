@@ -513,9 +513,10 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 				// Move the reference into the `catch` scope, then execute the `catch` branch.
 				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
+				move_reference(reference_out, std::move(e.get_reference_opt()));
+				materialize_reference(reference_out, recycler, true);
 				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
-				move_reference(wref, std::move(e.get_reference_opt()));
-				materialize_reference(wref);
+				copy_reference(wref, reference_out);
 				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
 				if(result != Block::execution_result_end_of_block){
 					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
@@ -527,10 +528,11 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
 				Xptr<Variable> what_var;
 				set_variable(what_var, recycler, D_string(e.what()));
-				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
 				Reference::S_temporary_value ref_t = { std::move(what_var) };
-				set_reference(wref, std::move(ref_t));
-				materialize_reference(wref);
+				set_reference(reference_out, std::move(ref_t));
+				materialize_reference(reference_out, recycler, true);
+				const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
+				copy_reference(wref, reference_out);
 				const auto result = execute_block_in_place(reference_out, scope_catch, recycler, params.branch_catch_opt);
 				if(result != Block::execution_result_end_of_block){
 					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
