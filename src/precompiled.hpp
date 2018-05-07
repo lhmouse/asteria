@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <utility>
 #include <stdexcept>
+#include <functional>
 #include <iosfwd>
 #include <iomanip>
 #include <ostream>
