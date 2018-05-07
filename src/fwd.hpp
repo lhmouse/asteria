@@ -35,10 +35,8 @@ class Statement;
 class Block;
 class Parameter;
 
-// Runtime objects (copyable and movable)
-class Exception;
-
 // Runtime objects (movable only)
+class Exception;
 class Stored_value;
 class Stored_reference;
 
