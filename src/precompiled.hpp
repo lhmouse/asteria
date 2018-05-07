@@ -8,27 +8,24 @@
 #  include <config.h>
 #endif
 
-#include <array>
 #include <string>
 #include <iterator>
 #include <algorithm>
 #include <utility>
 #include <stdexcept>
-#include <functional>
 #include <iosfwd>
 #include <iomanip>
 #include <ostream>
 #include <memory>
 #include <type_traits>
+#include <array>
 #include <vector>
 #include <unordered_map>
 
-#include <cassert>
 #include <cstring>
 #include <cstdlib>
 #include <cstddef>
 #include <climits>
-#include <cctype>
 #include <cmath>
 
 #include "rocket/value_ptr.hpp"
