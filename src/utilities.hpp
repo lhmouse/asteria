@@ -5,6 +5,7 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "insertable_ostream.hpp"
+#include "sptr_fmt.hpp"
 
 namespace Asteria {
 

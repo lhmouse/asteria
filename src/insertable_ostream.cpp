@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-Insertable_streambuf::Insertable_streambuf()
+Insertable_streambuf::Insertable_streambuf() noexcept
 	: std::streambuf()
 	, m_string(), m_caret(0)
 { }

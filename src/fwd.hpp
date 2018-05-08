@@ -27,6 +27,9 @@ class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
+template<typename ElementT>
+class Sptr_fmt;
+
 // Lexical elements (movable only)
 class Initializer;
 class Expression_node;

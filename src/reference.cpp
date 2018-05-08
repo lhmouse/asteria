@@ -53,13 +53,8 @@ void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, uns
 		std::terminate();
 	}
 }
-
-std::ostream & operator<<(std::ostream &os, Spcref<const Reference> reference_opt){
-	dump_reference(os, reference_opt);
-	return os;
-}
-std::ostream & operator<<(std::ostream &os, const Xptr<Reference> &reference_opt){
-	dump_reference(os, reference_opt);
+std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Reference> &reference_fmt){
+	dump_reference(os, reference_fmt.get());
 	return os;
 }
 
@@ -169,9 +164,15 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> r
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
-	case Reference::type_constant:
-	case Reference::type_temporary_value:
-		ASTERIA_THROW_RUNTIME_ERROR("Writing through `", reference_opt, "` is not allowed.");
+		ASTERIA_THROW_RUNTIME_ERROR("Writing through a null reference is not allowed.");
+
+	case Reference::type_constant: {
+		const auto &params = reference_opt->get<Reference::S_constant>();
+		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sptr_fmt(params.source_opt), "` cannot be modified."); }
+
+	case Reference::type_temporary_value: {
+		const auto &params = reference_opt->get<Reference::S_temporary_value>();
+		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sptr_fmt(params.variable_opt), "` is likely to be an error hence is not allowed."); }
 
 	case Reference::type_local_variable: {
 		const auto &params = reference_opt->get<Reference::S_local_variable>();

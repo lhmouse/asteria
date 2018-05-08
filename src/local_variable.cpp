@@ -11,7 +11,7 @@ namespace Asteria {
 Local_variable::~Local_variable() = default;
 
 void Local_variable::do_throw_local_constant() const {
-	ASTERIA_THROW_RUNTIME_ERROR("The local constant `", m_variable_opt, "` cannot be modified.");
+	ASTERIA_THROW_RUNTIME_ERROR("The local constant `", sptr_fmt(m_variable_opt), "` cannot be modified.");
 }
 
 }

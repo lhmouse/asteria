@@ -65,10 +65,10 @@ int main(){
 	set_variable(temp, backup, std::move(opaque));
 	copy->get<D_object>().emplace("opaque", std::move(temp));
 
-	std::cerr <<root <<std::endl;
+	std::cerr <<sptr_fmt(root) <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	recycler.reset();
-	std::cerr <<copy <<std::endl;
+	std::cerr <<sptr_fmt(copy) <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
-	std::cerr <<root <<std::endl;
+	std::cerr <<sptr_fmt(root) <<std::endl;
 }

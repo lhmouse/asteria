@@ -6,6 +6,7 @@
 #include "stored_value.hpp"
 #include "opaque_base.hpp"
 #include "function_base.hpp"
+#include "sptr_fmt.hpp"
 #include "utilities.hpp"
 #include <cmath>
 
@@ -211,13 +212,8 @@ void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsign
 		std::terminate();
 	}
 }
-
-std::ostream & operator<<(std::ostream &os, Spcref<const Variable> variable_opt){
-	dump_variable(os, variable_opt);
-	return os;
-}
-std::ostream & operator<<(std::ostream &os, const Xptr<Variable> &variable_opt){
-	dump_variable(os, variable_opt);
+std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Variable> &variable_fmt){
+	dump_variable(os, variable_fmt.get());
 	return os;
 }
 

@@ -7,7 +7,7 @@
 #include <cstddef> // std::nullptr_t
 #include <memory> // std::shared_ptr<>, std::weak_ptr<>, std::make_shared()
 #include <utility> // std::move(), std::swap(), std::forward()
-#include <ostream> // std::ostream
+#include <ostream> // std::basic_ostream
 #include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
 #include "assert.hpp"
 #include "exchange.hpp"
@@ -17,7 +17,7 @@ namespace rocket {
 using ::std::nullptr_t;
 using ::std::shared_ptr;
 using ::std::weak_ptr;
-using ::std::ostream;
+using ::std::basic_ostream;
 using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::remove_cv;
@@ -247,8 +247,8 @@ void swap(value_ptr<elementT> &lhs, value_ptr<elementT> &rhs) noexcept {
 	lhs.swap(rhs);
 }
 
-template<typename elementT>
-ostream & operator<<(ostream &os, const value_ptr<elementT> &rhs){
+template<typename charT, typename traitsT, typename elementT>
+basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const value_ptr<elementT> &rhs){
 	return os <<rhs.get();
 }
 

@@ -31,7 +31,7 @@ using ::std::invalid_argument;
 template<typename ...elementsT>
 class variant;
 
-namespace details {
+namespace details_variant {
 	template<size_t indexT, typename ...typesT>
 	struct type_getter {
 		static_assert(indexT && false, "type index out of range");
@@ -261,15 +261,15 @@ namespace details {
 template<typename ...elementsT>
 class variant {
 public:
-	static_assert(details::conjunction<is_nothrow_destructible<elementsT>...>::value, "destructors of candidates are not allowed to throw exceptions");
+	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "destructors of candidates are not allowed to throw exceptions");
 
 	template<size_t indexT>
 	struct at {
-		using type = typename details::type_getter<indexT, elementsT...>::type;
+		using type = typename details_variant::type_getter<indexT, elementsT...>::type;
 	};
 	template<typename expectT>
 	struct index_of {
-		enum : size_t { value = details::type_finder<0, expectT, elementsT...>::value };
+		enum : size_t { value = details_variant::type_finder<0, expectT, elementsT...>::value };
 	};
 
 	template<typename ...addT>
@@ -282,88 +282,88 @@ public:
 	};
 
 private:
-	details::variant_buffer<0, elementsT...> m_buffer;
+	details_variant::variant_buffer<0, elementsT...> m_buffer;
 	size_t m_index;
 
 public:
-	variant() noexcept(is_nothrow_constructible<typename details::type_getter<0, elementsT...>::type>::value) {
-		details::visitor_value_initialize visitor = { };
+	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value) {
+		details_variant::visitor_value_initialize visitor = { };
 		this->m_buffer.apply_visitor(0, visitor);
 		this->m_index = 0;
 	}
 	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
-	variant(elementT &&element) noexcept(details::is_nothrow_forward_constructible<elementT>::value) {
-		enum : size_t { eindex = details::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
-		using etype = typename details::type_getter<eindex, elementsT...>::type;
-		details::visitor_get_pointer<void> visitor = { nullptr };
+	variant(elementT &&element) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value) {
+		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+		details_variant::visitor_get_pointer<void> visitor = { nullptr };
 		this->m_buffer.apply_visitor(eindex, visitor);
 		new(visitor.result_ptr) etype(::std::forward<elementT>(element));
 		this->m_index = eindex;
 	}
-	variant(const variant &rhs) noexcept(details::conjunction<is_nothrow_copy_constructible<elementsT>...>::value) {
-		details::visitor_get_pointer<const void> visitor_rhs = { nullptr };
+	variant(const variant &rhs) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value) {
+		details_variant::visitor_get_pointer<const void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
-		details::visitor_copy_construct_from visitor = { visitor_rhs.result_ptr };
+		details_variant::visitor_copy_construct_from visitor = { visitor_rhs.result_ptr };
 		this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		this->m_index = rhs.m_index;
 	}
-	variant(variant &&rhs) noexcept(details::conjunction<is_nothrow_move_constructible<elementsT>...>::value) {
-		details::visitor_get_pointer<void> visitor_rhs = { nullptr };
+	variant(variant &&rhs) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value) {
+		details_variant::visitor_get_pointer<void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
-		details::visitor_move_construct_from visitor = { visitor_rhs.result_ptr };
+		details_variant::visitor_move_construct_from visitor = { visitor_rhs.result_ptr };
 		this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		this->m_index = rhs.m_index;
 	}
 	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
-	variant & operator=(elementT &&element) noexcept(details::is_nothrow_forward_assignable<elementT>::value && details::is_nothrow_forward_constructible<elementT>::value) {
-		enum : size_t { eindex = details::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
-		using etype = typename details::type_getter<eindex, elementsT...>::type;
+	variant & operator=(elementT &&element) noexcept(details_variant::is_nothrow_forward_assignable<elementT>::value && details_variant::is_nothrow_forward_constructible<elementT>::value) {
+		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
-			details::visitor_get_pointer<void> visitor = { nullptr };
+			details_variant::visitor_get_pointer<void> visitor = { nullptr };
 			this->m_buffer.apply_visitor(eindex, visitor);
 			*static_cast<etype *>(visitor.result_ptr) = ::std::forward<elementT>(element);
 		} else {
-			details::visitor_get_pointer<void> visitor = { nullptr };
+			details_variant::visitor_get_pointer<void> visitor = { nullptr };
 			this->m_buffer.apply_visitor(eindex, visitor);
 			new(visitor.result_ptr) etype(::std::forward<elementT>(element));
-			details::visitor_destroy cleaner = { };
+			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
 		}
 		this->m_index = eindex;
 		return *this;
 	}
-	variant & operator=(const variant &rhs) noexcept(details::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
-		details::visitor_get_pointer<const void> visitor_rhs = { nullptr };
+	variant & operator=(const variant &rhs) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
+		details_variant::visitor_get_pointer<const void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
-			details::visitor_copy_assign_from visitor = { visitor_rhs.result_ptr };
+			details_variant::visitor_copy_assign_from visitor = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		} else {
-			details::visitor_copy_construct_from visitor = { visitor_rhs.result_ptr };
+			details_variant::visitor_copy_construct_from visitor = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
-			details::visitor_destroy cleaner = { };
+			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
 		}
 		this->m_index = rhs.m_index;
 		return *this;
 	}
-	variant & operator=(variant &&rhs) noexcept(details::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
-		details::visitor_get_pointer<void> visitor_rhs = { nullptr };
+	variant & operator=(variant &&rhs) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
+		details_variant::visitor_get_pointer<void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
-			details::visitor_move_assign_from visitor = { visitor_rhs.result_ptr };
+			details_variant::visitor_move_assign_from visitor = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		} else {
-			details::visitor_move_construct_from visitor = { visitor_rhs.result_ptr };
+			details_variant::visitor_move_construct_from visitor = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
-			details::visitor_destroy cleaner = { };
+			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
 		}
 		this->m_index = rhs.m_index;
 		return *this;
 	}
 	~variant(){
-		details::visitor_destroy cleaner = { };
+		details_variant::visitor_destroy cleaner = { };
 		this->m_buffer.apply_visitor(this->m_index, cleaner);
 	}
 
@@ -377,7 +377,7 @@ public:
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		details::visitor_get_pointer<const void> visitor = { nullptr };
+		details_variant::visitor_get_pointer<const void> visitor = { nullptr };
 		this->m_buffer.apply_visitor(eindex, visitor);
 		return static_cast<const elementT *>(visitor.result_ptr);
 	}
@@ -387,7 +387,7 @@ public:
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		details::visitor_get_pointer<void> visitor = { nullptr };
+		details_variant::visitor_get_pointer<void> visitor = { nullptr };
 		this->m_buffer.apply_visitor(eindex, visitor);
 		return static_cast<elementT *>(visitor.result_ptr);
 	}
@@ -414,35 +414,35 @@ public:
 
 	template<typename fvisitorT>
 	void visit(fvisitorT &&fvisitor) const {
-		details::visitor_forward<fvisitorT> visitor = { fvisitor };
+		details_variant::visitor_forward<fvisitorT> visitor = { fvisitor };
 		this->m_buffer.apply_visitor(this->m_index, visitor);
 	}
 	template<typename fvisitorT>
 	void visit(fvisitorT &&fvisitor){
-		details::visitor_forward<fvisitorT> visitor = { fvisitor };
+		details_variant::visitor_forward<fvisitorT> visitor = { fvisitor };
 		this->m_buffer.apply_visitor(this->m_index, visitor);
 	}
 
-	void swap(variant &rhs) noexcept(details::conjunction<details::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
-		details::visitor_get_pointer<void> visitor_rhs = { nullptr };
+	void swap(variant &rhs) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
+		details_variant::visitor_get_pointer<void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
 		if(this->m_index == rhs.m_index){
-			details::visitor_swap visitor = { visitor_rhs.result_ptr };
+			details_variant::visitor_swap visitor = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		} else {
-			details::visitor_move_construct_from visitor_s1 = { visitor_rhs.result_ptr };
+			details_variant::visitor_move_construct_from visitor_s1 = { visitor_rhs.result_ptr };
 			this->m_buffer.apply_visitor(rhs.m_index, visitor_s1);
 			try {
-				details::visitor_get_pointer<void> visitor_lhs = { nullptr };
+				details_variant::visitor_get_pointer<void> visitor_lhs = { nullptr };
 				this->m_buffer.apply_visitor(this->m_index, visitor_lhs);
-				details::visitor_move_construct_from visitor_s2 = { visitor_lhs.result_ptr };
+				details_variant::visitor_move_construct_from visitor_s2 = { visitor_lhs.result_ptr };
 				rhs.m_buffer.apply_visitor(this->m_index, visitor_s2);
 			} catch(...){
-				details::visitor_destroy cleaner = { };
+				details_variant::visitor_destroy cleaner = { };
 				this->m_buffer.apply_visitor(rhs.m_index, cleaner);
-				details::rethrow_current_exception();
+				details_variant::rethrow_current_exception();
 			}
-			details::visitor_destroy cleaner = { };
+			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
 			rhs.m_buffer.apply_visitor(rhs.m_index, cleaner);
 		}

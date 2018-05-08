@@ -16,7 +16,7 @@ private:
 	std::size_t m_caret;
 
 public:
-	Insertable_streambuf();
+	Insertable_streambuf() noexcept;
 	~Insertable_streambuf() override;
 
 protected:
