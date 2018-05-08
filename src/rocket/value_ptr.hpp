@@ -7,7 +7,7 @@
 #include <cstddef> // std::nullptr_t
 #include <memory> // std::shared_ptr<>, std::weak_ptr<>, std::make_shared()
 #include <utility> // std::move(), std::swap(), std::forward()
-#include <ostream> // std::basic_ostream
+#include <ostream> // std::basic_ostream<>
 #include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
 #include "assert.hpp"
 #include "exchange.hpp"
