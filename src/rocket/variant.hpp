@@ -13,20 +13,20 @@
 
 namespace rocket {
 
-using std::size_t;
-using std::is_convertible;
-using std::decay;
-using std::enable_if;
-using std::is_base_of;
-using std::remove_cv;
-using std::is_nothrow_constructible;
-using std::is_nothrow_assignable;
-using std::is_nothrow_copy_constructible;
-using std::is_nothrow_move_constructible;
-using std::is_nothrow_copy_assignable;
-using std::is_nothrow_move_assignable;
-using std::is_nothrow_destructible;
-using std::invalid_argument;
+using ::std::size_t;
+using ::std::is_convertible;
+using ::std::decay;
+using ::std::enable_if;
+using ::std::is_base_of;
+using ::std::remove_cv;
+using ::std::is_nothrow_constructible;
+using ::std::is_nothrow_assignable;
+using ::std::is_nothrow_copy_constructible;
+using ::std::is_nothrow_move_constructible;
+using ::std::is_nothrow_copy_assignable;
+using ::std::is_nothrow_move_assignable;
+using ::std::is_nothrow_destructible;
+using ::std::invalid_argument;
 
 template<typename ...elementsT>
 class variant;

@@ -9,7 +9,7 @@
 
 namespace rocket {
 
-using std::decay;
+using ::std::decay;
 
 template<typename elementT>
 inline typename decay<elementT>::type exchange(elementT &element_old, const elementT &element_new){

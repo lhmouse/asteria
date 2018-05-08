@@ -13,13 +13,13 @@
 
 namespace rocket {
 
-using std::nullptr_t;
-using std::shared_ptr;
-using std::weak_ptr;
-using std::enable_if;
-using std::is_convertible;
-using std::remove_cv;
-using std::is_same;
+using ::std::nullptr_t;
+using ::std::shared_ptr;
+using ::std::weak_ptr;
+using ::std::enable_if;
+using ::std::is_convertible;
+using ::std::remove_cv;
+using ::std::is_same;
 
 template<typename elementT>
 class value_ptr {

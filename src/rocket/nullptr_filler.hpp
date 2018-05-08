@@ -9,9 +9,9 @@
 
 namespace rocket {
 
-using std::iterator;
-using std::random_access_iterator_tag;
-using std::nullptr_t;
+using ::std::iterator;
+using ::std::random_access_iterator_tag;
+using ::std::nullptr_t;
 
 class nullptr_filler : public iterator<random_access_iterator_tag, const nullptr_t> {
 private:
