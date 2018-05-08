@@ -248,7 +248,7 @@ void swap(value_ptr<elementT> &lhs, value_ptr<elementT> &rhs) noexcept {
 }
 
 template<typename elementT>
-ostream & operator<<(ostream &os, const vlaue_ptr<elementT> &rhs){
+ostream & operator<<(ostream &os, const value_ptr<elementT> &rhs){
 	return os <<rhs.get();
 }
 
