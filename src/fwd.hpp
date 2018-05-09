@@ -13,7 +13,6 @@
 #include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
 #include "rocket/value_ptr.hpp"
-#include "rocket/variant.hpp"
 
 #define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)     typename ::std::enable_if<!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)>::type * = nullptr
 
