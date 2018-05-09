@@ -103,7 +103,7 @@ namespace details_variant {
 	};
 	template<typename firstT, typename ...remainingT>
 	struct conjunction<firstT, remainingT...> {
-		enum : bool { value = firstT::value ? conjunction<remainingT...>::value : 0 };
+		enum : bool { value = firstT::value ? conjunction<remainingT...>::value : false };
 	};
 
 	template<size_t indexT, typename elementT>
