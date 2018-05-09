@@ -7,6 +7,7 @@
 #include "insertable_ostream.hpp"
 #include "sptr_fmt.hpp"
 #include "rocket/compatibility.hpp"
+#include <iomanip>
 
 namespace Asteria {
 
