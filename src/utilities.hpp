@@ -6,6 +6,7 @@
 
 #include "insertable_ostream.hpp"
 #include "sptr_fmt.hpp"
+#include "rocket/compatibility.hpp"
 
 namespace Asteria {
 
@@ -73,7 +74,7 @@ public:
 };
 
 extern bool write_log_to_stderr(Logger &&logger) noexcept;
-__attribute__((__noreturn__)) extern bool throw_runtime_error(Logger &&logger);
+ROCKET_NORETURN extern bool throw_runtime_error(Logger &&logger);
 
 }
 

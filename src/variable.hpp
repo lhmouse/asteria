@@ -61,7 +61,7 @@ public:
 	Variable & operator=(const Variable &) = delete;
 
 private:
-	__attribute__((__noreturn__)) void do_throw_type_mismatch(Type expect) const;
+	ROCKET_NORETURN void do_throw_type_mismatch(Type expect) const;
 
 public:
 	Sptr<Recycler> get_recycler_opt() const noexcept {

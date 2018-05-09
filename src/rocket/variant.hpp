@@ -252,10 +252,6 @@ namespace details_variant {
 	struct is_nothrow_swappable {
 		enum : bool { value = noexcept(nothrow_swappable_helper::check<paramT>()) };
 	};
-
-	__attribute__((__noreturn__)) inline void rethrow_current_exception(){
-		throw;
-	}
 }
 
 template<typename ...elementsT>
@@ -440,7 +436,7 @@ public:
 			} catch(...){
 				details_variant::visitor_destroy cleaner = { };
 				this->m_buffer.apply_visitor(rhs.m_index, cleaner);
-				details_variant::rethrow_current_exception();
+				noexcept(swap(rhs)) ? static_cast<void>(0) : throw;
 			}
 			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);

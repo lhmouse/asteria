@@ -41,6 +41,7 @@ pkginclude_HEADERS =	\
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
+	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\

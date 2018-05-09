@@ -26,7 +26,7 @@ public:
 	Local_variable & operator=(const Local_variable &) = delete;
 
 private:
-	__attribute__((__noreturn__)) void do_throw_local_constant() const;
+	ROCKET_NORETURN void do_throw_local_constant() const;
 
 public:
 	Sptr<const Variable> get_variable_opt() const noexcept {
