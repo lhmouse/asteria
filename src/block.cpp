@@ -16,7 +16,7 @@
 namespace Asteria {
 
 Block::Block(Block &&) noexcept = default;
-Block &Block::operator=(Block &&) = default;
+Block &Block::operator=(Block &&) noexcept = default;
 Block::~Block() = default;
 
 void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spcref<const Block> block_opt){
@@ -515,8 +515,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					}
 					// Move the reference into the `catch` scope, then execute the `catch` branch.
 					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-					move_reference(reference_out, std::move(e.get_reference_opt()));
-					materialize_reference(reference_out, recycler, true);
+					copy_reference(reference_out, e.get_reference_opt());
 					const auto wref = scope_catch->drill_for_local_reference(params.exception_identifier);
 					copy_reference(wref, reference_out);
 					throw;
@@ -592,7 +591,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			// Evaluate the operand, then throw the exception constructed from the result of it.
 			evaluate_expression(reference_out, recycler, params.operand_opt, scope);
 			ASTERIA_DEBUG_LOG("Throwing exception: ", reference_out);
-			throw Exception(std::move(reference_out)); }
+			materialize_reference(reference_out, recycler, true);
+			throw Exception(reference_out.share()); }
 
 		case Statement::type_return_statement: {
 			const auto &params = stmt.get<Statement::S_return_statement>();

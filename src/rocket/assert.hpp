@@ -4,35 +4,28 @@
 #ifndef ROCKET_ASSERT_HPP_
 #define ROCKET_ASSERT_HPP_
 
-#include <exception> // std::terminate()
-#include <cstdio> // std::cerr, std::fprintf()
 #include "compatibility.hpp"
 
 namespace rocket {
 
-ROCKET_NORETURN inline int on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg){
-	::std::fprintf(stderr, "===============================================================================\n"
-	                       "ASSERTION FAILED !!\n"
-	                       "  Expression: %s\n"
-	                       "  File:       %s\n"
-	                       "  Line:       %lu\n"
-	                       "  Message:    %s\n"
-	                       "===============================================================================\n"
-	                       , expr, file, line, msg);
-	::std::terminate();
-}
+ROCKET_NORETURN extern void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
 
 }
-
-#endif
 
 #undef ROCKET_ASSERT
 #undef ROCKET_ASSERT_MSG
 
+#define ROCKET_ASSERT(expr_)              (static_cast<void>(	\
+                                            (expr_) ? 1 : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, ("")), 0)	\
+                                          ))
+#define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(	\
+                                            (expr_) ? 1 : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, (m_)), 0)	\
+                                          ))
+
+#endif // ROCKET_ASSERT_HPP_
+
 #ifdef ROCKET_DEBUG
-#  define ROCKET_ASSERT(expr_)              (static_cast<void>(((expr_) ? 1 : 0) || ::rocket::on_assert_fail(#expr_, __FILE__, __LINE__, (""))))
-#  define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(((expr_) ? 1 : 0) || ::rocket::on_assert_fail(#expr_, __FILE__, __LINE__, (m_))))
+#  define ROCKET_DETAILS_ON_ASSERT_FAIL(...)      (::rocket::on_assert_fail(__VA_ARGS__))
 #else
-#  define ROCKET_ASSERT(expr_)              (static_cast<void>(((expr_) ? 1 : 0) || (ROCKET_UNREACHABLE, 1)))
-#  define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(((expr_) ? 1 : 0) || (ROCKET_UNREACHABLE, 1)))
+#  define ROCKET_DETAILS_ON_ASSERT_FAIL(...)      (ROCKET_UNREACHABLE)
 #endif

@@ -7,7 +7,7 @@
 namespace Asteria {
 
 Stored_reference::Stored_reference(Stored_reference &&) noexcept = default;
-Stored_reference &Stored_reference::operator=(Stored_reference &&) = default;
+Stored_reference &Stored_reference::operator=(Stored_reference &&) noexcept = default;
 Stored_reference::~Stored_reference() = default;
 
 void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt){

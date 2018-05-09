@@ -126,7 +126,7 @@ public:
 		: m_variant(std::forward<ValueT>(value))
 	{ }
 	Statement(Statement &&) noexcept;
-	Statement & operator=(Statement &&);
+	Statement & operator=(Statement &&) noexcept;
 	~Statement();
 
 public:

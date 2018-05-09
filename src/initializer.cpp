@@ -12,7 +12,7 @@
 namespace Asteria {
 
 Initializer::Initializer(Initializer &&) noexcept = default;
-Initializer &Initializer::operator=(Initializer &&) = default;
+Initializer &Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
 Initializer::Type get_initializer_type(Spcref<const Initializer> initializer_opt) noexcept {

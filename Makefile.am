@@ -14,6 +14,15 @@ BUILT_SOURCES =	\
 CLEANFILES =	\
 	asteria/src/precompiled.hpp.gch
 
+pkginclude_rocketdir = ${pkgincludedir}/rocket
+pkginclude_rocket_HEADERS = \
+	asteria/src/rocket/compatibility.hpp	\
+	asteria/src/rocket/assert.hpp	\
+	asteria/src/rocket/value_ptr.hpp	\
+	asteria/src/rocket/variant.hpp	\
+	asteria/src/rocket/nullptr_filler.hpp	\
+	asteria/src/rocket/exchange.hpp
+
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
 	asteria/src/insertable_ostream.hpp	\
@@ -39,19 +48,11 @@ pkginclude_HEADERS =	\
 	asteria/src/recycler.hpp	\
 	asteria/src/executor.hpp
 
-pkginclude_rocketdir = ${pkgincludedir}/rocket
-pkginclude_rocket_HEADERS = \
-	asteria/src/rocket/compatibility.hpp	\
-	asteria/src/rocket/assert.hpp	\
-	asteria/src/rocket/value_ptr.hpp	\
-	asteria/src/rocket/variant.hpp	\
-	asteria/src/rocket/nullptr_filler.hpp	\
-	asteria/src/rocket/exchange.hpp
-
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
 
 lib_libasteria_la_SOURCES =	\
+	asteria/src/rocket/assert.cpp	\
 	asteria/src/insertable_ostream.cpp	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\

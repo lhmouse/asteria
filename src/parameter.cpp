@@ -10,7 +10,7 @@
 namespace Asteria {
 
 Parameter::Parameter(Parameter &&) noexcept = default;
-Parameter &Parameter::operator=(Parameter &&) = default;
+Parameter &Parameter::operator=(Parameter &&) noexcept = default;
 Parameter::~Parameter() = default;
 
 void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Spcref<const Parameter_vector> parameters_opt){

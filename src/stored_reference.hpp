@@ -24,7 +24,7 @@ public:
 		: m_value_opt(std::forward<ValueT>(value_opt))
 	{ }
 	Stored_reference(Stored_reference &&) noexcept;
-	Stored_reference & operator=(Stored_reference &&);
+	Stored_reference & operator=(Stored_reference &&) noexcept;
 	~Stored_reference();
 
 public:

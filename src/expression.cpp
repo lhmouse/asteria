@@ -15,7 +15,7 @@
 namespace Asteria {
 
 Expression::Expression(Expression &&) noexcept = default;
-Expression &Expression::operator=(Expression &&) = default;
+Expression &Expression::operator=(Expression &&) noexcept = default;
 Expression::~Expression() = default;
 
 void bind_expression(Xptr<Expression> &bound_result_out, Spcref<const Expression> expression_opt, Spcref<const Scope> scope){

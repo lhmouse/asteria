@@ -34,7 +34,7 @@ class variant;
 namespace details_variant {
 	template<size_t indexT, typename ...typesT>
 	struct type_getter {
-		static_assert(indexT && false, "type index out of range");
+		static_assert(indexT && false, "`indexT` was out of range.");
 	};
 	template<typename firstT, typename ...remainingT>
 	struct type_getter<0, firstT, remainingT...> {
@@ -47,7 +47,7 @@ namespace details_variant {
 
 	template<size_t indexT, typename expectT, typename ...typesT>
 	struct type_finder {
-		static_assert(indexT && false, "type not found");
+		static_assert(indexT && false, "`expectT` could not be found.");
 	};
 	template<size_t indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct type_finder<indexT, expectT, firstT, remainingT...> {
@@ -90,7 +90,7 @@ namespace details_variant {
 
 	template<size_t indexT, typename expectT, typename ...typesT>
 	struct recursive_type_finder {
-		static_assert(indexT && false, "type not found");
+		static_assert(indexT && false, "`expectT` could not be found.");
 	};
 	template<size_t indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct recursive_type_finder<indexT, expectT, firstT, remainingT...> {
@@ -257,7 +257,7 @@ namespace details_variant {
 template<typename ...elementsT>
 class variant {
 public:
-	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "destructors of candidates are not allowed to throw exceptions");
+	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidates are not allowed to throw exceptions.");
 
 	template<size_t indexT>
 	struct at {
@@ -391,7 +391,7 @@ public:
 	const elementT & get() const {
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw invalid_argument("variant::get(): type mismatch");
+			throw invalid_argument("variant::get(): `elementT` does not match the type of the element that is currently active.");
 		}
 		return *ptr;
 	}
@@ -399,7 +399,7 @@ public:
 	elementT & get(){
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw invalid_argument("variant::get(): type mismatch");
+			throw invalid_argument("variant::get(): `elementT` does not match the type of the element that is currently active.");
 		}
 		return *ptr;
 	}

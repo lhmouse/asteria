@@ -8,7 +8,7 @@
 namespace Asteria {
 
 Statement::Statement(Statement &&) noexcept = default;
-Statement &Statement::operator=(Statement &&) = default;
+Statement &Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
 }

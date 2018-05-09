@@ -18,7 +18,7 @@ public:
 		: m_identifier(std::move(identifier)), m_default_argument_opt(std::move(default_argument_opt))
 	{ }
 	Parameter(Parameter &&) noexcept;
-	Parameter & operator=(Parameter &&);
+	Parameter & operator=(Parameter &&) noexcept;
 	~Parameter();
 
 public:
