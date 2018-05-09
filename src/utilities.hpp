@@ -79,11 +79,11 @@ ROCKET_NORETURN extern bool throw_runtime_error(Logger &&logger);
 }
 
 #ifdef ENABLE_DEBUG_LOGS
-#  define ASTERIA_DEBUG_LOG(...)    (::Asteria::write_log_to_stderr(::std::move((::Asteria::Logger(__FILE__, __LINE__, __PRETTY_FUNCTION__), __VA_ARGS__))))
+#  define ASTERIA_DEBUG_LOG(...)    (::Asteria::write_log_to_stderr(::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__))))
 #else
 #  define ASTERIA_DEBUG_LOG(...)    (static_cast<void>(0), true)
 #endif
 
-#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(::std::move((::Asteria::Logger(__FILE__, __LINE__, __PRETTY_FUNCTION__), __VA_ARGS__))))
+#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__))))
 
 #endif

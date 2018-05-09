@@ -33,6 +33,6 @@ ROCKET_NORETURN inline int on_assert_fail(const char *expr, const char *file, un
 #  define ROCKET_ASSERT(expr_)              (static_cast<void>(((expr_) ? 1 : 0) || ::rocket::on_assert_fail(#expr_, __FILE__, __LINE__, (""))))
 #  define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(((expr_) ? 1 : 0) || ::rocket::on_assert_fail(#expr_, __FILE__, __LINE__, (m_))))
 #else
-#  define ROCKET_ASSERT(expr_)              (static_cast<void>(((expr_) ? 1 : 0) || (__builtin_unreachable(), 1)))
-#  define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(((expr_) ? 1 : 0) || (__builtin_unreachable(), 1)))
+#  define ROCKET_ASSERT(expr_)              (static_cast<void>(((expr_) ? 1 : 0) || (ROCKET_UNREACHABLE, 1)))
+#  define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(((expr_) ? 1 : 0) || (ROCKET_UNREACHABLE, 1)))
 #endif
