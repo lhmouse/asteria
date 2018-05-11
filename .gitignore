@@ -29,6 +29,7 @@ Makefile.in
 m4
 missing
 stamp-h1
+test-driver
 
 *.tar
 *.tar.*
@@ -43,3 +44,4 @@ tmp
 *.save*
 *.swp
 *.*~
+*.trs
