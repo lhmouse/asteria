@@ -16,7 +16,7 @@
 namespace Asteria {
 
 Block::Block(Block &&) noexcept = default;
-Block &Block::operator=(Block &&) noexcept = default;
+Block & Block::operator=(Block &&) noexcept = default;
 Block::~Block() = default;
 
 void bind_block_in_place(Xptr<Block> &bound_result_out, Spcref<Scope> scope, Spcref<const Block> block_opt){

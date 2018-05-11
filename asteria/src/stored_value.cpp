@@ -8,7 +8,7 @@
 namespace Asteria {
 
 Stored_value::Stored_value(Stored_value &&) noexcept = default;
-Stored_value &Stored_value::operator=(Stored_value &&) noexcept = default;
+Stored_value & Stored_value::operator=(Stored_value &&) noexcept = default;
 Stored_value::~Stored_value() = default;
 
 void set_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Stored_value &&value_opt){

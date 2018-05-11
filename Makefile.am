@@ -20,6 +20,7 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/exchange.hpp	\
+	asteria/src/rocket/insertable_streambuf.hpp	\
 	asteria/src/rocket/insertable_ostream.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
@@ -54,6 +55,7 @@ lib_LTLIBRARIES =	\
 
 lib_libasteria_la_SOURCES =	\
 	asteria/src/rocket/assert.cpp	\
+	asteria/src/rocket/insertable_streambuf.cpp	\
 	asteria/src/rocket/insertable_ostream.cpp	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\

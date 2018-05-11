@@ -4,88 +4,59 @@
 #ifndef ROCKET_INSERTABLE_OSTREAM_HPP_
 #define ROCKET_INSERTABLE_OSTREAM_HPP_
 
-#include <string> // std::string
-#include <ostream> // std::streambuf, std::ostream, std::streamsize
-#include <utility> // std::move()
-#include <cstddef> // std::size_t
+#include "insertable_streambuf.hpp"
 
 namespace rocket {
 
-using ::std::string;
-using ::std::streambuf;
-using ::std::ostream;
-using ::std::streamsize;
-using ::std::size_t;
+template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
+class basic_insertable_ostream : public basic_ostream<charT, traitsT> {
+public:
+	using string_type  = typename basic_insertable_streambuf<charT, traitsT>::string_type;
+	using value_type   = typename basic_insertable_streambuf<charT, traitsT>::value_type;
+	using traits_type  = typename basic_insertable_streambuf<charT, traitsT>::traits_type;
+	using size_type    = typename basic_insertable_streambuf<charT, traitsT>::size_type;
+	using char_type    = typename basic_insertable_streambuf<charT, traitsT>::char_type;
+	using int_type     = typename basic_insertable_streambuf<charT, traitsT>::int_type;
 
-class insertable_streambuf : public streambuf {
 private:
-	string m_str;
-	size_t m_caret;
+	basic_insertable_streambuf<charT, traitsT> m_sb[1];
 
 public:
-	insertable_streambuf() noexcept
-		: streambuf()
-		, m_str(), m_caret()
+	basic_insertable_ostream() noexcept
+		: basic_ostream<charT, traitsT>(this->m_sb)
 	{ }
-	~insertable_streambuf() override;
-
-protected:
-	streamsize xsputn(const streambuf::char_type *s, streamsize n) override;
-	streambuf::int_type overflow(streambuf::int_type c) override;
+	~basic_insertable_ostream() override;
 
 public:
-	const string & get_string() const noexcept {
-		return this->m_str;
-	}
-	size_t get_caret() const noexcept {
-		return this->m_caret;
-	}
-	void set_string(string str) noexcept {
-		this->m_str = ::std::move(str);
-		this->m_caret = this->m_str.size();
-	}
-	void set_caret(size_t caret) noexcept {
-		this->m_caret = caret;
-	}
-	string extract_string() noexcept {
-		string result;
-		result.swap(this->m_str);
-		this->m_caret = 0;
-		return result;
-	}
-};
-
-class insertable_ostream : public ostream {
-private:
-	insertable_streambuf m_sb[1];
-
-public:
-	insertable_ostream() noexcept
-		: ostream(this->m_sb)
-	{ }
-	~insertable_ostream() override;
-
-public:
-	insertable_streambuf * rdbuf() const noexcept {
-		return const_cast<insertable_streambuf *>(this->m_sb);
+	basic_insertable_streambuf<charT, traitsT> * rdbuf() const noexcept {
+		return const_cast<basic_insertable_streambuf<charT, traitsT> *>(this->m_sb);
 	}
 
-	const string & get_string() const noexcept {
+	const string_type & get_string() const noexcept {
 		return this->rdbuf()->get_string();
 	}
-	size_t get_caret() const noexcept {
+	size_type get_caret() const noexcept {
 		return this->rdbuf()->get_caret();
 	}
-	void set_string(string str) noexcept {
+	void set_string(string_type str) noexcept {
 		return this->rdbuf()->set_string(::std::move(str));
 	}
-	void set_caret(size_t caret) noexcept {
+	void set_caret(size_type caret) noexcept {
 		return this->rdbuf()->set_caret(caret);
 	}
-	string extract_string() noexcept {
+	string_type extract_string() noexcept {
 		return this->rdbuf()->extract_string();
 	}
 };
+
+template<typename charT, typename traitsT, typename allocatorT>
+basic_insertable_ostream<charT, traitsT, allocatorT>::~basic_insertable_ostream() = default;
+
+extern template class basic_insertable_ostream<char>;
+extern template class basic_insertable_ostream<wchar_t>;
+
+using insertable_ostream  = basic_insertable_ostream<char>;
+using insertable_wostream = basic_insertable_ostream<wchar_t>;
 
 }
 
