@@ -19,10 +19,10 @@ pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
+	asteria/src/rocket/exchange.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
-	asteria/src/rocket/nullptr_filler.hpp	\
-	asteria/src/rocket/exchange.hpp
+	asteria/src/rocket/nullptr_filler.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
