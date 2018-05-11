@@ -22,6 +22,7 @@ install:
 
 script:
   - "make check"
+  - "./check_includes.sh"
 
 notifications:
   irc:
