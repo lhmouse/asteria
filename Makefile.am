@@ -4,6 +4,7 @@ AM_CPPFLAGS = -Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wno-error=un
 	-Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas -Wswitch-enum	\
 	-pipe -fPIC -DPIC
 AM_CXXFLAGS = -Wnon-virtual-dtor -pedantic -pedantic-errors -std=c++11
+LDADD = lib/libasteria.la
 
 %.hpp.gch: %.hpp
 	${CXX} -x c++-header ${DEFS} -I. ${AM_CPPFLAGS} ${CPPFLAGS} ${AM_CXXFLAGS} ${CXXFLAGS} -Wno-error $< -o $@
@@ -78,14 +79,30 @@ lib_libasteria_la_SOURCES =	\
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -version-info 0:0:0
 
-lib_libasteria_la_LIBADD =	\
-	${AM_LIBS}
-
 bin_PROGRAMS =	\
 	bin/asteria
 
-bin_asteria_SOURCES =	\
-	asteria/src/main.cpp
+bin_asteria_SOURCES = asteria/src/main.cpp
 
-bin_asteria_LDADD =	\
-	lib/libasteria.la
+check_PROGRAMS = \
+	tmp/block	\
+	tmp/exception	\
+	tmp/expression	\
+	tmp/insertable_ostream	\
+	tmp/recycler	\
+	tmp/reference	\
+	tmp/scope	\
+	tmp/utilities	\
+	tmp/variable
+
+tmp_block_SOURCES               = test/block.cpp
+tmp_exception_SOURCES           = test/exception.cpp
+tmp_expression_SOURCES          = test/expression.cpp
+tmp_insertable_ostream_SOURCES  = test/insertable_ostream.cpp
+tmp_recycler_SOURCES            = test/recycler.cpp
+tmp_reference_SOURCES           = test/reference.cpp
+tmp_scope_SOURCES               = test/scope.cpp
+tmp_utilities_SOURCES           = test/utilities.cpp
+tmp_variable_SOURCES            = test/variable.cpp
+
+TESTS = ${check_PROGRAMS}
