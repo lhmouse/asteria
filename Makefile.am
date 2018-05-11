@@ -77,7 +77,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/executor.cpp
 
 lib_libasteria_la_LDFLAGS =	\
-	-Wl,--no-undefined -version-info 0:0:0
+	-Wl,--no-undefined -no-undefined -version-info 0:0:0
 
 bin_PROGRAMS =	\
 	bin/asteria
