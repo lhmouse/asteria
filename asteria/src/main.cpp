@@ -28,21 +28,21 @@ int main(){
 	Xptr<Variable> temp;
 
 	D_array arr;
-	set_variable(temp, recycler, nullptr);
+	set_variable(temp, recycler, D_null());
 	arr.emplace_back(std::move(temp));
-	set_variable(temp, recycler, true);
+	set_variable(temp, recycler, D_boolean(true));
 	arr.emplace_back(std::move(temp));
 	set_variable(first, recycler, std::move(arr));
 
 	arr.clear();
-	set_variable(temp, recycler, INT64_C(42));
+	set_variable(temp, recycler, D_integer(42));
 	arr.emplace_back(std::move(temp));
-	set_variable(temp, recycler, 123.456);
+	set_variable(temp, recycler, D_double(123.456));
 	arr.emplace_back(std::move(temp));
 	set_variable(second, recycler, std::move(arr));
 
 	arr.clear();
-	set_variable(temp, recycler, std::string("hello"));
+	set_variable(temp, recycler, D_string("hello"));
 	arr.emplace_back(std::move(temp));
 	set_variable(third, recycler, std::move(arr));
 
@@ -54,15 +54,13 @@ int main(){
 	obj.clear();
 	obj.emplace("third", std::move(third));
 	obj.emplace("route", std::move(route));
-	set_variable(temp, recycler, std::string("世界"));
+	set_variable(temp, recycler, D_string("世界"));
 	obj.emplace("world", std::move(temp));
 
 	set_variable(root, recycler, std::move(obj));
 	copy_variable(copy, backup, root);
 
-	D_opaque opaque;
-	opaque.reset(std::make_shared<My_opaque>());
-	set_variable(temp, backup, std::move(opaque));
+	set_variable(temp, backup, D_opaque(std::make_shared<My_opaque>()));
 	copy->get<D_object>().emplace("opaque", std::move(temp));
 
 	std::cerr <<sptr_fmt(root) <<std::endl;
