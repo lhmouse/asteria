@@ -499,16 +499,17 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					// Print exceptions nested, if any.
 					auto nested_eptr = e.nested_ptr();
 					if(nested_eptr){
-						std::string prefix = "which contains a nested ";
+						static constexpr char s_prefix[] = "which contains a nested ";
+						auto prefix_width = static_cast<int>(sizeof(s_prefix) - 1);
 						do {
-							prefix.insert(0, "  ");
+							prefix_width += 2;
 							try {
 								std::rethrow_exception(nested_eptr);
 							} catch(Exception &ne){
-								ASTERIA_DEBUG_LOG(prefix, "`Asteria::Exception`: ", sptr_fmt(ne.get_reference_opt()));
+								ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`Asteria::Exception`: ", sptr_fmt(ne.get_reference_opt()));
 								nested_eptr = ne.nested_ptr();
 							} catch(std::exception &ne){
-								ASTERIA_DEBUG_LOG(prefix, "`std::exception`: ", ne.what());
+								ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`std::exception`: ", ne.what());
 								nested_eptr = nullptr;
 							}
 						} while(nested_eptr);
