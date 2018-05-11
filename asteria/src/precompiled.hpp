@@ -26,10 +26,12 @@
 #include <climits>
 
 #include "rocket/compatibility.hpp"
+#include "rocket/assert.hpp"
+#include "rocket/exchange.hpp"
+#include "rocket/insertable_ostream.hpp"
 #include "rocket/value_ptr.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/nullptr_filler.hpp"
-#include "rocket/exchange.hpp"
 
 namespace Asteria {
 	//

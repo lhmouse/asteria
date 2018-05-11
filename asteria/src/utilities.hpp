@@ -4,8 +4,8 @@
 #ifndef ASTERIA_UTILITIES_HPP_
 #define ASTERIA_UTILITIES_HPP_
 
-#include "insertable_ostream.hpp"
 #include "sptr_fmt.hpp"
+#include "rocket/insertable_ostream.hpp"
 #include "rocket/compatibility.hpp"
 #include <iomanip>
 
@@ -17,7 +17,7 @@ private:
 	const unsigned long m_line;
 	const char *const m_func;
 
-	Insertable_ostream m_stream;
+	rocket::insertable_ostream m_stream;
 
 public:
 	Logger(const char *file, unsigned long line, const char *func) noexcept;
@@ -56,10 +56,10 @@ public:
 		return m_func;
 	}
 
-	const Insertable_ostream & get_stream() const noexcept {
+	const rocket::insertable_ostream & get_stream() const noexcept {
 		return m_stream;
 	}
-	Insertable_ostream & get_stream() noexcept {
+	rocket::insertable_ostream & get_stream() noexcept {
 		return m_stream;
 	}
 

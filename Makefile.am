@@ -20,13 +20,13 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/exchange.hpp	\
+	asteria/src/rocket/insertable_ostream.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
 	asteria/src/rocket/nullptr_filler.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
-	asteria/src/insertable_ostream.hpp	\
 	asteria/src/sptr_fmt.hpp	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\
@@ -54,7 +54,7 @@ lib_LTLIBRARIES =	\
 
 lib_libasteria_la_SOURCES =	\
 	asteria/src/rocket/assert.cpp	\
-	asteria/src/insertable_ostream.cpp	\
+	asteria/src/rocket/insertable_ostream.cpp	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
@@ -88,21 +88,19 @@ check_PROGRAMS = \
 	tmp/block	\
 	tmp/exception	\
 	tmp/expression	\
-	tmp/insertable_ostream	\
 	tmp/recycler	\
 	tmp/reference	\
 	tmp/scope	\
 	tmp/utilities	\
 	tmp/variable
 
-tmp_block_SOURCES               = test/block.cpp
-tmp_exception_SOURCES           = test/exception.cpp
-tmp_expression_SOURCES          = test/expression.cpp
-tmp_insertable_ostream_SOURCES  = test/insertable_ostream.cpp
-tmp_recycler_SOURCES            = test/recycler.cpp
-tmp_reference_SOURCES           = test/reference.cpp
-tmp_scope_SOURCES               = test/scope.cpp
-tmp_utilities_SOURCES           = test/utilities.cpp
-tmp_variable_SOURCES            = test/variable.cpp
+tmp_block_SOURCES        = test/block.cpp
+tmp_exception_SOURCES    = test/exception.cpp
+tmp_expression_SOURCES   = test/expression.cpp
+tmp_recycler_SOURCES     = test/recycler.cpp
+tmp_reference_SOURCES    = test/reference.cpp
+tmp_scope_SOURCES        = test/scope.cpp
+tmp_utilities_SOURCES    = test/utilities.cpp
+tmp_variable_SOURCES     = test/variable.cpp
 
 TESTS = ${check_PROGRAMS}
