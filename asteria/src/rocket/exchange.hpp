@@ -26,7 +26,7 @@ typename decay<elementT>::type exchange(elementT &element_old, elementT &&elemen
 template<typename elementT, typename valueT>
 typename decay<elementT>::type exchange(elementT &element_old, valueT &&value_new){
 	auto old = ::std::move(element_old);
-	element_old = std::forward<valueT>(value_new);
+	element_old = ::std::forward<valueT>(value_new);
 	return old;
 }
 
