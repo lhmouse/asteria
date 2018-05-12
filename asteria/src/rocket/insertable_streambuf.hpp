@@ -5,7 +5,7 @@
 #define ROCKET_INSERTABLE_STREAMBUF_HPP_
 
 #include <string> // std::basic_string<>, std::char_traits<>, std::allocator<>
-#include <ostream> // std::ios_base, std::basic_streambuf<>, std::basic_ostream<>, std::streamsize
+#include <streambuf> // std::ios_base, std::basic_streambuf<>, std::streamsize
 #include <utility> // std::move()
 
 namespace rocket {
@@ -15,7 +15,6 @@ using ::std::char_traits;
 using ::std::allocator;
 using ::std::ios_base;
 using ::std::basic_streambuf;
-using ::std::basic_ostream;
 using ::std::streamsize;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
@@ -23,19 +22,21 @@ class basic_insertable_streambuf : public basic_streambuf<charT, traitsT> {
 public:
 	using string_type  = basic_string<charT, traitsT, allocatorT>;
 	using size_type    = typename string_type::size_type;
-	using value_type   = typename string_type::value_type;
-	using traits_type  = typename string_type::traits_type;
-	using char_type    = typename traits_type::char_type;
-	using int_type     = typename traits_type::int_type;
+	using traits_type  = typename basic_streambuf<charT, traitsT>::traits_type;
+	using char_type    = typename basic_streambuf<charT, traitsT>::char_type;
+	using int_type     = typename basic_streambuf<charT, traitsT>::int_type;
 
 private:
+	string_type m_str;
 	ios_base::open_mode m_which;
-	basic_string<charT, traitsT, allocatorT> m_str;
 	size_type m_caret;
 
 public:
-	basic_insertable_streambuf(ios_base::open_mode which = ios_base::in | ios_base::out) noexcept
-		: m_which(which), m_str(), m_caret(string_type::npos)
+	explicit basic_insertable_streambuf(ios_base::open_mode which = ios_base::in | ios_base::out)
+		: m_str(), m_which(which), m_caret(string_type::npos)
+	{ }
+	explicit basic_insertable_streambuf(string_type str, ios_base::open_mode which = ios_base::in | ios_base::out)
+		: m_str(::std::move(str)), m_which(which), m_caret(string_type::npos)
 	{ }
 	~basic_insertable_streambuf() override;
 
@@ -52,13 +53,15 @@ protected:
 	int_type overflow(int_type c) override;
 
 public:
-	const string_type & get_string() const noexcept {
+	string_type & get_string(){
+		this->basic_insertable_streambuf::sync();
 		return this->m_str;
 	}
 	size_type get_caret() const noexcept {
 		return this->m_caret;
 	}
 	void set_string(string_type str, size_type caret = string_type::npos) noexcept(noexcept(m_str = ::std::move(m_str))) {
+		this->basic_insertable_streambuf::sync();
 		this->m_str = ::std::move(str);
 		this->m_caret = caret;
 	}
@@ -67,6 +70,7 @@ public:
 	}
 	string_type extract_string() noexcept(noexcept(m_str.swap(m_str))) {
 		string_type str;
+		this->basic_insertable_streambuf::sync();
 		this->m_str.swap(str);
 		this->m_caret = string_type::npos;
 		return str;
