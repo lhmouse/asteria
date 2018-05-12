@@ -11,15 +11,15 @@ namespace Asteria {
 template<typename ElementT>
 class Sptr_fmt {
 private:
-	std::shared_ptr<const ElementT> m_ptr;
+	Sptr<const ElementT> m_ptr;
 
 public:
-	Sptr_fmt(const std::shared_ptr<const ElementT> &ptr) noexcept
+	Sptr_fmt(const Sptr<const ElementT> &ptr) noexcept
 		: m_ptr(ptr)
 	{ }
 
 public:
-	const std::shared_ptr<const ElementT> & get() const noexcept {
+	const Sptr<const ElementT> & get() const noexcept {
 		return m_ptr;
 	}
 };

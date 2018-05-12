@@ -425,7 +425,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					// Set the key, which is an integer.
 					set_variable(key_var, recycler, D_integer(index));
 					const auto key_wref = scope_for->drill_for_local_reference(params.key_identifier);
-					Reference::S_constant ref_k = { key_var.share() };
+					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
 					// Set the value, which is an array element.
 					copy_reference(temp_ref, range_ref);
@@ -459,7 +459,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					// Set the key, which is an integer.
 					set_variable(key_var, recycler, D_string(key));
 					const auto key_wref = scope_for->drill_for_local_reference(params.key_identifier);
-					Reference::S_constant ref_k = { key_var.share() };
+					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
 					// Set the value, which is an object member.
 					copy_reference(temp_ref, range_ref);
@@ -593,7 +593,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			evaluate_expression(reference_out, recycler, params.operand_opt, scope);
 			ASTERIA_DEBUG_LOG("Throwing exception: ", reference_out);
 			materialize_reference(reference_out, recycler, true);
-			throw Exception(reference_out.share()); }
+			throw Exception(reference_out.share_c()); }
 
 		case Statement::type_return_statement: {
 			const auto &params = stmt.get<Statement::S_return_statement>();

@@ -306,7 +306,7 @@ namespace {
 			}
 			const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 			if(parent_result.is_movable() == false){
-				return variable_opt.share();
+				return variable_opt.share_c();
 			}
 			return const_cast<Xptr<Variable> &&>(variable_opt); }
 
@@ -327,7 +327,7 @@ namespace {
 			}
 			const auto &variable_opt = it->second;
 			if(parent_result.is_movable() == false){
-				return variable_opt.share();
+				return variable_opt.share_c();
 			}
 			return const_cast<Xptr<Variable> &&>(variable_opt); }
 

@@ -49,17 +49,30 @@ public:
 		return this->m_ptr.get();
 	}
 
-	shared_ptr<const elementT> share() const noexcept {
+	template<typename otherT = elementT>
+	shared_ptr<const otherT> share() const noexcept {
 		return this->m_ptr;
 	}
-	shared_ptr<elementT> share() noexcept {
+	template<typename otherT = elementT>
+	shared_ptr<otherT> share() noexcept {
 		return this->m_ptr;
 	}
-	weak_ptr<const elementT> weaken() const noexcept {
+	template<typename otherT = elementT>
+	shared_ptr<const otherT> share_c() const noexcept {
+		return this->share();
+	}
+
+	template<typename otherT = elementT>
+	weak_ptr<const otherT> weaken() const noexcept {
 		return this->m_ptr;
 	}
-	weak_ptr<elementT> weaken() noexcept {
+	template<typename otherT = elementT>
+	weak_ptr<otherT> weaken() noexcept {
 		return this->m_ptr;
+	}
+	template<typename otherT = elementT>
+	weak_ptr<const otherT> weaken_c() const noexcept {
+		return this->weaken();
 	}
 
 	void reset(nullptr_t = nullptr) noexcept {
