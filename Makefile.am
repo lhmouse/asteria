@@ -96,13 +96,13 @@ check_PROGRAMS = \
 	tmp/utilities	\
 	tmp/variable
 
-tmp_block_SOURCES        = test/block.cpp
-tmp_exception_SOURCES    = test/exception.cpp
-tmp_expression_SOURCES   = test/expression.cpp
-tmp_recycler_SOURCES     = test/recycler.cpp
-tmp_reference_SOURCES    = test/reference.cpp
-tmp_scope_SOURCES        = test/scope.cpp
-tmp_utilities_SOURCES    = test/utilities.cpp
-tmp_variable_SOURCES     = test/variable.cpp
+tmp_block_SOURCES       = test/block.cpp
+tmp_exception_SOURCES   = test/exception.cpp
+tmp_expression_SOURCES  = test/expression.cpp
+tmp_recycler_SOURCES    = test/recycler.cpp
+tmp_reference_SOURCES   = test/reference.cpp
+tmp_scope_SOURCES       = test/scope.cpp
+tmp_utilities_SOURCES   = test/utilities.cpp
+tmp_variable_SOURCES    = test/variable.cpp
 
 TESTS = ${check_PROGRAMS}
