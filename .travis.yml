@@ -22,8 +22,8 @@ install:
   - "make -j$(nproc)"
 
 script:
-  - "make check"
   - "./check_includes.sh"
+  - "make -j$(nproc) check"
 
 notifications:
   irc:

@@ -15,8 +15,8 @@ build:
     - "autoreconf -ifv"
     - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" $${options}"
     - "make -j$(nproc)"
-    - "make check"
     - "./check_includes.sh"
+    - "make -j$(nproc) check"
 
 notify:
   irc:
