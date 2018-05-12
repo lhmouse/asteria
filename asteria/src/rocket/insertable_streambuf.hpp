@@ -5,7 +5,7 @@
 #define ROCKET_INSERTABLE_STREAMBUF_HPP_
 
 #include <string> // std::basic_string<>, std::char_traits<>, std::allocator<>
-#include <ostream> // std::basic_streambuf<>, std::basic_ostream<>, std::streamsize
+#include <ostream> // std::ios_base, std::basic_streambuf<>, std::basic_ostream<>, std::streamsize
 #include <utility> // std::move()
 
 namespace rocket {
@@ -13,6 +13,7 @@ namespace rocket {
 using ::std::basic_string;
 using ::std::char_traits;
 using ::std::allocator;
+using ::std::ios_base;
 using ::std::basic_streambuf;
 using ::std::basic_ostream;
 using ::std::streamsize;
@@ -28,12 +29,13 @@ public:
 	using int_type     = typename traits_type::int_type;
 
 private:
+	ios_base::open_mode m_which;
 	basic_string<charT, traitsT, allocatorT> m_str;
 	size_type m_caret;
 
 public:
-	basic_insertable_streambuf() noexcept
-		: m_str(), m_caret(string_type::npos)
+	basic_insertable_streambuf(ios_base::open_mode which = ios_base::in | ios_base::out) noexcept
+		: m_which(which), m_str(), m_caret(string_type::npos)
 	{ }
 	~basic_insertable_streambuf() override;
 
@@ -68,27 +70,35 @@ basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_stream
 
 template<typename charT, typename traitsT, typename allocatorT>
 streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n){
-	const auto n_put = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
-	if(this->m_caret == string_type::npos){
-		this->m_str.insert(this->m_str.size(), s, n_put);
+	if(this->m_which & std::ios_base::out){
+		const auto n_put = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
+		if(this->m_caret == string_type::npos){
+			this->m_str.insert(this->m_str.size(), s, n_put);
+		} else {
+			this->m_str.insert(this->m_caret, s, n_put);
+			this->m_caret += n_put;
+		}
+		return static_cast<streamsize>(n_put);
 	} else {
-		this->m_str.insert(this->m_caret, s, n_put);
-		this->m_caret += n_put;
+		return 0;
 	}
-	return static_cast<streamsize>(n_put);
 }
 template<typename charT, typename traitsT, typename allocatorT>
 typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c){
-	if(traits_type::eq_int_type(c, traits_type::eof())){
-		return traits_type::not_eof(c);
-	}
-	if(this->m_caret == string_type::npos){
-		this->m_str.push_back(traits_type::to_char_type(c));
+	if(this->m_which & std::ios_base::out){
+		if(traits_type::eq_int_type(c, traits_type::eof())){
+			return traits_type::not_eof(c);
+		}
+		if(this->m_caret == string_type::npos){
+			this->m_str.push_back(traits_type::to_char_type(c));
+		} else {
+			this->m_str.insert(this->m_caret, static_cast<size_type>(1), traits_type::to_char_type(c));
+			this->m_caret += 1;
+		}
+		return c;
 	} else {
-		this->m_str.insert(this->m_caret, static_cast<size_type>(1), traits_type::to_char_type(c));
-		this->m_caret += 1;
+		return traits_type::eof();
 	}
-	return c;
 }
 
 extern template class basic_insertable_streambuf<char>;
