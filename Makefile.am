@@ -1,8 +1,11 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -Wall -Wextra -Werror -Wconversion -Wsign-conversion -Wno-error=unused	\
+AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion -Wno-error=unused	\
 	-Winvalid-pch -Wwrite-strings -Wsuggest-attribute=noreturn	\
 	-Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas -Wswitch-enum	\
 	-pipe -fPIC -DPIC -pedantic -pedantic-errors
+if ENABLE_WERROR
+AM_CPPFLAGS += -Werror
+endif
 AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
 LDADD = lib/libasteria.la
 
