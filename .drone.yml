@@ -13,7 +13,7 @@ build:
   commands:
     - "mkdir -p m4"
     - "autoreconf -ifv"
-    - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" $${options}"
+    - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" --disable-werror $${options}"
     - "make -j$(nproc)"
     - "./check_includes.sh"
     - "make -j$(nproc) check"

@@ -9,6 +9,9 @@ AC_LANG([C++])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_INIT([disable-static])
 
+AC_ARG_ENABLE([werror], AS_HELP_STRING([--disable-werror], [disable -Werror]))
+AM_CONDITIONAL([ENABLE_WERROR], [test "${enable_werror}" != "no"])
+
 AC_ARG_ENABLE([debug-logs], AS_HELP_STRING([--enable-debug-logs], [output debug logs to stderr]))
 AM_CONDITIONAL([ENABLE_DEBUG_LOGS], [test "${enable_debug_logs}" == "yes"])
 AM_COND_IF([ENABLE_DEBUG_LOGS], [
