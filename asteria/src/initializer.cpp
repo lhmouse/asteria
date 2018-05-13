@@ -15,11 +15,11 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer & Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
-Initializer::Type get_initializer_type(Spcref<const Initializer> initializer_opt) noexcept {
+Initializer::Type get_initializer_type(Sparg<const Initializer> initializer_opt) noexcept {
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope){
+void bind_initializer(Xptr<Initializer> &bound_result_out, Sparg<const Initializer> initializer_opt, Sparg<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:
@@ -59,7 +59,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spcref<const Initiali
 		std::terminate();
 	}
 }
-void evaluate_initializer(Xptr<Reference> &reference_out, Spcref<Recycler> recycler, Spcref<const Initializer> initializer_opt, Spcref<const Scope> scope){
+void evaluate_initializer(Xptr<Reference> &reference_out, Sparg<Recycler> recycler, Sparg<const Initializer> initializer_opt, Sparg<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:

@@ -16,7 +16,7 @@ Instantiated_function::~Instantiated_function() = default;
 const char * Instantiated_function::describe() const noexcept {
 	return "instantiated function";
 }
-void Instantiated_function::invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
+void Instantiated_function::invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
 	// Allocate a function scope.
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
 	prepare_function_arguments(arguments_opt, m_parameters_opt);

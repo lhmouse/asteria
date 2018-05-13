@@ -44,14 +44,14 @@ const char * get_type_name(Variable::Type type) noexcept {
 	}
 }
 
-Variable::Type get_variable_type(Spcref<const Variable> variable_opt) noexcept {
+Variable::Type get_variable_type(Sparg<const Variable> variable_opt) noexcept {
 	return variable_opt ? variable_opt->get_type() : Variable::type_null;
 }
-const char * get_variable_type_name(Spcref<const Variable> variable_opt) noexcept {
+const char * get_variable_type_name(Sparg<const Variable> variable_opt) noexcept {
 	return get_type_name(get_variable_type(variable_opt));
 }
 
-bool test_variable(Spcref<const Variable> variable_opt) noexcept {
+bool test_variable(Sparg<const Variable> variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
 	case Variable::type_null:
@@ -127,7 +127,7 @@ namespace {
 	}
 }
 
-void dump_variable(std::ostream &os, Spcref<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
+void dump_variable(std::ostream &os, Sparg<const Variable> variable_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_variable_type(variable_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
@@ -217,7 +217,7 @@ std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Variable> &variable_f
 	return os;
 }
 
-void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcref<const Variable> source_opt){
+void copy_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Sparg<const Variable> source_opt){
 	const auto type = get_variable_type(source_opt);
 	switch(type){
 	case Variable::type_null:
@@ -271,7 +271,7 @@ void copy_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Spcr
 		std::terminate();
 	}
 }
-void move_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Variable> &&source_opt){
+void move_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Xptr<Variable> &&source_opt){
 	if(source_opt && (source_opt->get_recycler_opt() == recycler)){
 		return variable_out.reset(source_opt.release());
 	} else {
@@ -279,7 +279,7 @@ void move_variable(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr
 	}
 }
 
-void purge_variable(Spcref<Variable> variable_opt) noexcept {
+void purge_variable(Sparg<Variable> variable_opt) noexcept {
 	const auto type = get_variable_type(variable_opt);
 	switch(type){
 	case Variable::type_null:
@@ -313,7 +313,7 @@ void purge_variable(Spcref<Variable> variable_opt) noexcept {
 	}
 }
 
-Variable::Comparison_result compare_variables(Spcref<const Variable> lhs_opt, Spcref<const Variable> rhs_opt) noexcept {
+Variable::Comparison_result compare_variables(Sparg<const Variable> lhs_opt, Sparg<const Variable> rhs_opt) noexcept {
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = get_variable_type(lhs_opt);
 	const auto type_rhs = get_variable_type(rhs_opt);

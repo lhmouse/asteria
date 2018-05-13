@@ -12,11 +12,11 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Spcref<const Reference> reference_opt) noexcept {
+Reference::Type get_reference_type(Sparg<const Reference> reference_opt) noexcept {
 	return reference_opt ? reference_opt->get_type() : Reference::type_null;
 }
 
-void dump_reference(std::ostream &os, Spcref<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
+void dump_reference(std::ostream &os, Sparg<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -58,7 +58,7 @@ std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Reference> &reference
 	return os;
 }
 
-void copy_reference(Xptr<Reference> &reference_out, Spcref<const Reference> source_opt){
+void copy_reference(Xptr<Reference> &reference_out, Sparg<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
 	case Reference::type_null:
@@ -100,7 +100,7 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
+Sptr<const Variable> read_reference_opt(Sparg<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -160,7 +160,7 @@ Sptr<const Variable> read_reference_opt(Spcref<const Reference> reference_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Reference> reference_opt){
+std::reference_wrapper<Xptr<Variable>> drill_reference(Sparg<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -268,7 +268,7 @@ namespace {
 		}
 	};
 
-	Extract_variable_result do_try_extract_variable(Spcref<Reference> reference_opt){
+	Extract_variable_result do_try_extract_variable(Sparg<Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -338,7 +338,7 @@ namespace {
 	}
 }
 
-void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Reference> &&reference_opt){
+void extract_variable_from_reference(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Xptr<Reference> &&reference_opt){
 	auto result = do_try_extract_variable(reference_opt);
 	if(result.is_movable() == false){
 		return copy_variable(variable_out, recycler, result.get_copyable_pointer());
@@ -347,7 +347,7 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycl
 }
 
 namespace {
-	bool do_check_materializability(Spcref<const Reference> reference_opt){
+	bool do_check_materializability(Sparg<const Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -371,7 +371,7 @@ namespace {
 	}
 }
 
-void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool constant){
+void materialize_reference(Xptr<Reference> &reference_inout_opt, Sparg<Recycler> recycler, bool constant){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}

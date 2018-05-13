@@ -32,7 +32,7 @@ public:
 
 using Parameter_vector = std::vector<Parameter>;
 
-extern void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Spcref<const Parameter_vector> parameters_opt);
+extern void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Sparg<const Parameter_vector> parameters_opt);
 
 }
 

@@ -58,7 +58,7 @@ class Executor;
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Spcref = const std::shared_ptr<ElementT> &;
+using Sparg = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
 using Sptr_vector = std::vector<Sptr<ElementT>>;
@@ -85,7 +85,7 @@ using Xptr_vector = std::vector<Xptr<ElementT>>;
 template<typename KeyT, typename ValueT>
 using Xptr_map = std::unordered_map<KeyT, Xptr<ValueT>>;
 
-using Function_base_prototype = void (Xptr<Reference> &, Spcref<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+using Function_base_prototype = void (Xptr<Reference> &, Sparg<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;

@@ -67,7 +67,7 @@ namespace {
 		const char * describe() const noexcept override {
 			return "variadic argument getter";
 		}
-		void invoke(Xptr<Reference> &result_out, Spcref<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
+		void invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
 			case 0: {
 				// Return the number of arguments.
@@ -102,7 +102,7 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcref<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, Sparg<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
@@ -133,7 +133,7 @@ void prepare_function_scope(Spcref<Scope> scope, Spcref<Recycler> recycler, Spcr
 	Reference::S_constant ref_k = { std::move(va_arg_var) };
 	set_reference(va_arg_wref, std::move(ref_k));
 }
-void prepare_function_scope_lexical(Spcref<Scope> scope, Spcref<const Parameter_vector> parameters_opt){
+void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const Parameter_vector> parameters_opt){
 	// Set the `this` reference.
 	const auto this_wref = scope->drill_for_local_reference(g_id_this);
 	set_reference(this_wref, nullptr);
