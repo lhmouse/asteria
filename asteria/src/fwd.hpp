@@ -68,7 +68,7 @@ using Sptr_map = std::unordered_map<KeyT, Sptr<ValueT>>;
 template<typename ElementT>
 using Wptr = std::weak_ptr<ElementT>;
 template<typename ElementT>
-using Wpcref = const std::weak_ptr<ElementT> &;
+using Wparg = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Wptr_vector = std::vector<Wptr<ElementT>>;
@@ -78,7 +78,7 @@ using Wptr_map = std::unordered_map<KeyT, Wptr<ValueT>>;
 template<typename ElementT>
 using Xptr = rocket::value_ptr<ElementT>;
 //template<typename ElementT>
-//using Xpcref = const rocket::value_ptr<ElementT> &;
+//using Xparg = const rocket::value_ptr<ElementT> &;
 
 template<typename ElementT>
 using Xptr_vector = std::vector<Xptr<ElementT>>;
