@@ -345,9 +345,34 @@ void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycl
 	}
 	return move_variable(variable_out, recycler, std::move(result.get_movable_pointer()));
 }
+
+namespace {
+	bool do_check_materializability(Spcref<const Reference> reference_opt){
+		const auto type = get_reference_type(reference_opt);
+		switch(type){
+		case Reference::type_null:
+			return false;
+		case Reference::type_constant:
+			return false;
+		case Reference::type_temporary_value:
+			return true;
+		case Reference::type_local_variable:
+			return false;
+		case Reference::type_array_element: {
+			const auto &params = reference_opt->get<Reference::S_array_element>();
+			return do_check_materializability(params.parent_opt); }
+		case Reference::type_object_member: {
+			const auto &params = reference_opt->get<Reference::S_object_member>();
+			return do_check_materializability(params.parent_opt); }
+		default:
+			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+			std::terminate();
+		}
+	}
+}
+
 void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool constant){
-	const auto type = get_reference_type(reference_inout_opt);
-	if(type == Reference::type_local_variable){
+	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
 	Xptr<Variable> variable;

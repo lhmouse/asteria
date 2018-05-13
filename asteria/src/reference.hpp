@@ -99,6 +99,7 @@ extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spcref<const Refer
 // If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the variable through the reference:
 //   `copy_variable(variable_out, recycler, read_reference_opt(reference_opt))`
 extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spcref<Recycler> recycler, Xptr<Reference> &&reference_opt);
+
 // If the reference is a temporary value, convert it to an unnamed local variable, allowing further modification to it.
 extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spcref<Recycler> recycler, bool constant);
 

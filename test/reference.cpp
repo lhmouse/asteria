@@ -23,8 +23,8 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, D_integer(42)));
 	ASTERIA_TEST_CHECK(ptr.get() == var.get());
 
-	Reference::S_temporary_value rdref = { Xptr<Variable>(var.share()) };
-	set_reference(ref, std::move(rdref));
+	Reference::S_temporary_value tmpref = { Xptr<Variable>(var.share()) };
+	set_reference(ref, std::move(tmpref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr->get<D_string>() == "meow");
@@ -140,8 +140,8 @@ int main(){
 	set_variable(var, recycler, D_string("third"));
 	array.emplace_back(std::move(var));
 	set_variable(var, recycler, std::move(array));
-	rdref = { std::move(var) };
-	set_reference(ref, std::move(rdref));
+	tmpref = { std::move(var) };
+	set_reference(ref, std::move(tmpref));
 	aref = { std::move(ref), 2 };
 	set_reference(ref, std::move(aref));
 	ASTERIA_TEST_CHECK_CATCH(set_variable(drill_reference(ref), recycler, D_string("meow")));

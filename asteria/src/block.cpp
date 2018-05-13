@@ -252,8 +252,14 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 
 		case Statement::type_variable_definition: {
 			const auto &params = stmt.get<Statement::S_variable_definition>();
-			// Create a local reference for the variable.
+			// Evaluate the initializer and move the result into a variable.
 			evaluate_initializer(reference_out, recycler, params.initializer_opt, scope);
+			Xptr<Variable> var;
+			extract_variable_from_reference(var, recycler, std::move(reference_out));
+			// Create a reference to a temporary value, then materialize it.
+			// This results in a local variable.
+			Reference::S_temporary_value ref_t = { std::move(var) };
+			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, params.constant);
 			const auto wref = scope->drill_for_local_reference(params.identifier);
 			copy_reference(wref, reference_out);
