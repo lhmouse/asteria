@@ -10,4 +10,4 @@ function check_one(){
 }
 
 export -f check_one
-find -L "asteria/src/" -name "*.hpp" -print0 | xargs -0 -I {} bash -c 'check_one "$@"' _ {}
+find -L "asteria/src/" -name "*.hpp" -print0 | xargs -0 -I {} bash -c 'check_one "$@"' "$0" {}
