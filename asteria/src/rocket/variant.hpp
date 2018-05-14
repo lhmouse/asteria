@@ -256,9 +256,9 @@ namespace details_variant {
 
 template<typename ...elementsT>
 class variant {
-public:
 	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidates are not allowed to throw exceptions.");
 
+public:
 	template<size_t indexT>
 	struct at {
 		using type = typename details_variant::type_getter<indexT, elementsT...>::type;
