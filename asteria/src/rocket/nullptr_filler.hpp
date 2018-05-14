@@ -15,14 +15,19 @@ using ::std::nullptr_t;
 
 class nullptr_filler : public iterator<random_access_iterator_tag, const nullptr_t> {
 private:
+	const nullptr_t m_ptr;
 	difference_type m_pos;
 
 public:
 	explicit constexpr nullptr_filler(difference_type pos) noexcept
-		: m_pos(pos)
+		: m_ptr(nullptr), m_pos(pos)
 	{ }
 
 public:
+	constexpr reference operator*() noexcept {
+		return this->m_ptr;
+	}
+
 	constexpr difference_type tell() const noexcept {
 		return this->m_pos;
 	}
@@ -30,11 +35,6 @@ public:
 		this->m_pos = pos;
 	}
 };
-
-inline nullptr_filler::reference operator*(const nullptr_filler &) noexcept {
-	static constexpr nullptr_filler::value_type s_value = nullptr;
-	return s_value;
-}
 
 inline nullptr_filler & operator++(nullptr_filler &rhs) noexcept {
 	rhs.seek(rhs.tell() + 1);
