@@ -24,7 +24,7 @@ public:
 	{ }
 
 public:
-	constexpr reference operator*() noexcept {
+	constexpr reference operator*() const noexcept {
 		return this->m_ptr;
 	}
 
