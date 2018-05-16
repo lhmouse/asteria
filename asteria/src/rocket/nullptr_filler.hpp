@@ -21,18 +21,14 @@ public:
 	using iterator_category  = ::std::random_access_iterator_tag;
 
 private:
-	value_type m_ptr;
 	difference_type m_pos;
 
 public:
 	explicit constexpr nullptr_filler(difference_type pos) noexcept
-		: m_ptr(nullptr), m_pos(pos)
+		: m_pos(pos)
 	{ }
 
 public:
-	constexpr reference dereference() const noexcept {
-		return this->m_ptr;
-	}
 	constexpr difference_type tell() const noexcept {
 		return this->m_pos;
 	}
@@ -41,8 +37,9 @@ public:
 	}
 };
 
-constexpr nullptr_filler::reference operator*(const nullptr_filler &rhs) noexcept {
-	return rhs.dereference();
+inline nullptr_filler::reference operator*(const nullptr_filler &) noexcept {
+	static constexpr nullptr_filler::value_type s_null = nullptr;
+	return s_null;
 }
 
 inline nullptr_filler & operator++(nullptr_filler &rhs) noexcept {
