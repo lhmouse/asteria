@@ -29,11 +29,13 @@ public:
 	{ }
 
 public:
-	constexpr difference_type tell() const noexcept {
-		return this->m_pos;
+	difference_type tell() const noexcept {
+		const auto pos = this->m_pos;
+		return pos;
 	}
-	void seek(difference_type pos) noexcept {
+	nullptr_filler & seek(difference_type pos) noexcept {
 		this->m_pos = pos;
+		return *this;
 	}
 };
 
@@ -43,64 +45,64 @@ inline nullptr_filler::reference operator*(const nullptr_filler &) noexcept {
 }
 
 inline nullptr_filler & operator++(nullptr_filler &rhs) noexcept {
-	rhs.seek(rhs.tell() + 1);
-	return rhs;
+	return rhs.seek(rhs.tell() + 1);
 }
 inline nullptr_filler & operator--(nullptr_filler &rhs) noexcept {
-	rhs.seek(rhs.tell() - 1);
-	return rhs;
+	return rhs.seek(rhs.tell() - 1);
 }
 
 inline nullptr_filler operator++(nullptr_filler &lhs, int) noexcept {
-	auto old = lhs;
-	lhs.seek(lhs.tell() + 1);
-	return old;
+	auto res = lhs;
+	++lhs;
+	return res;
 }
 inline nullptr_filler operator--(nullptr_filler &lhs, int) noexcept {
-	auto old = lhs;
-	lhs.seek(lhs.tell() - 1);
-	return old;
+	auto res = lhs;
+	--lhs;
+	return res;
 }
 
 inline nullptr_filler & operator+=(nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
-	lhs.seek(lhs.tell() + rhs);
-	return lhs;
+	return lhs.seek(lhs.tell() + rhs);
 }
 inline nullptr_filler & operator-=(nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
-	lhs.seek(lhs.tell() - rhs);
-	return lhs;
+	return lhs.seek(lhs.tell() - rhs);
 }
 
-constexpr nullptr_filler operator+(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
-	return nullptr_filler(lhs.tell() + rhs);
+inline nullptr_filler operator+(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
+	auto res = lhs;
+	res += rhs;
+	return res;
 }
-constexpr nullptr_filler operator-(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
-	return nullptr_filler(lhs.tell() - rhs);
+inline nullptr_filler operator-(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
+	auto res = lhs;
+	res -= rhs;
+	return res;
 }
 
-constexpr nullptr_filler operator+(nullptr_filler::difference_type lhs, const nullptr_filler &rhs) noexcept {
-	return nullptr_filler(lhs + rhs.tell());
+inline nullptr_filler operator+(nullptr_filler::difference_type lhs, const nullptr_filler &rhs) noexcept {
+	return rhs + lhs;
 }
-constexpr nullptr_filler::difference_type operator-(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline nullptr_filler::difference_type operator-(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() - rhs.tell();
 }
 
-constexpr bool operator==(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator==(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() == rhs.tell();
 }
-constexpr bool operator!=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator!=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() != rhs.tell();
 }
-constexpr bool operator<(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator<(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() < rhs.tell();
 }
-constexpr bool operator>(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator>(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() > rhs.tell();
 }
-constexpr bool operator<=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator<=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() <= rhs.tell();
 }
-constexpr bool operator>=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
+inline bool operator>=(const nullptr_filler &lhs, const nullptr_filler &rhs) noexcept {
 	return lhs.tell() >= rhs.tell();
 }
 
