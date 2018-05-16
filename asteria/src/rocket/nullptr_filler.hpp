@@ -53,12 +53,12 @@ inline nullptr_filler & operator--(nullptr_filler &rhs) noexcept {
 
 inline nullptr_filler operator++(nullptr_filler &lhs, int) noexcept {
 	auto res = lhs;
-	++lhs;
+	lhs.seek(lhs.tell() + 1);
 	return res;
 }
 inline nullptr_filler operator--(nullptr_filler &lhs, int) noexcept {
 	auto res = lhs;
-	--lhs;
+	lhs.seek(lhs.tell() - 1);
 	return res;
 }
 
@@ -71,12 +71,12 @@ inline nullptr_filler & operator-=(nullptr_filler &lhs, nullptr_filler::differen
 
 inline nullptr_filler operator+(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
 	auto res = lhs;
-	res += rhs;
+	res.seek(res.tell() + rhs);
 	return res;
 }
 inline nullptr_filler operator-(const nullptr_filler &lhs, nullptr_filler::difference_type rhs) noexcept {
 	auto res = lhs;
-	res -= rhs;
+	res.seek(res.tell() - rhs);
 	return res;
 }
 
