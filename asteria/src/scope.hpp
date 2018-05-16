@@ -21,7 +21,7 @@ private:
 	const Purpose m_purpose;
 	const Sptr<const Scope> m_parent_opt;
 
-	Xptr_map<std::string, Reference> m_local_references;
+	Xptr_string_map<Reference> m_local_references;
 	Sptr_vector<const Function_base> m_deferred_callbacks;
 
 public:

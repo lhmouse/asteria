@@ -45,7 +45,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Sparg<const Initializ
 
 	case Initializer::type_braced_init_list: {
 		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
-		Xptr_map<std::string, Initializer> bound_pairs;
+		Xptr_string_map<Initializer> bound_pairs;
 		bound_pairs.reserve(params.key_values.size());
 		for(const auto &pair : params.key_values){
 			bind_initializer(bound_result_out, pair.second, scope);

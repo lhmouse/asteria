@@ -14,7 +14,8 @@
 #include <unordered_map> // std::unordered_map<>
 #include "rocket/value_ptr.hpp"
 
-#define ASTERIA_UNLESS_IS_BASE_OF(Base_, ParamT_)     typename ::std::enable_if<!(::std::is_base_of<Base_, typename ::std::decay<ParamT_>::type>::value)>::type * = nullptr
+#define ASTERIA_ENABLE_IF(...)              typename ::std::enable_if<__VA_ARGS__>::type * = nullptr
+#define ASTERIA_UNLESS_IS_BASE_OF(B_, T_)   ASTERIA_ENABLE_IF(::std::is_base_of<B_, typename ::std::decay<T_>::type>::value == false)
 
 #define ASTERIA_CAR(x_, ...)    x_
 #define ASTERIA_CDR(x_, ...)    __VA_ARGS__
@@ -72,8 +73,8 @@ using Wparg = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Wptr_vector = std::vector<Wptr<ElementT>>;
-template<typename KeyT, typename ValueT>
-using Wptr_map = std::unordered_map<KeyT, Wptr<ValueT>>;
+template<typename ValueT>
+using Wptr_string_map = std::unordered_map<std::string, Wptr<ValueT>>;
 
 template<typename ElementT>
 using Xptr = rocket::value_ptr<ElementT>;
@@ -82,8 +83,8 @@ using Xptr = rocket::value_ptr<ElementT>;
 
 template<typename ElementT>
 using Xptr_vector = std::vector<Xptr<ElementT>>;
-template<typename KeyT, typename ValueT>
-using Xptr_map = std::unordered_map<KeyT, Xptr<ValueT>>;
+template<typename ValueT>
+using Xptr_string_map = std::unordered_map<std::string, Xptr<ValueT>>;
 
 using Function_base_prototype = void (Xptr<Reference> &, Sparg<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
@@ -95,7 +96,7 @@ using D_string    = std::string;
 using D_opaque    = Xptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
 using D_array     = Xptr_vector<Variable>;
-using D_object    = Xptr_map<std::string, Variable>;
+using D_object    = Xptr_string_map<Variable>;
 
 }
 

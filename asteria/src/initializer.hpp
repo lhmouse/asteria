@@ -24,7 +24,7 @@ public:
 		Xptr_vector<Initializer> elements;
 	};
 	struct S_braced_init_list {
-		Xptr_map<std::string, Initializer> key_values;
+		Xptr_string_map<Initializer> key_values;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_assignment_init     // 0
