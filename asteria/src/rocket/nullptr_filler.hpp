@@ -4,18 +4,24 @@
 #ifndef ROCKET_NULLPTR_FILLER_HPP_
 #define ROCKET_NULLPTR_FILLER_HPP_
 
-#include <iterator> // std::iterator<>, std::random_access_iterator_tag
-#include <cstddef> // std::nullptr_t
+#include <iterator> // std::random_access_iterator_tag
+#include <cstddef> // std::ptrdiff_t, std::nullptr_t
 
 namespace rocket {
 
-using ::std::iterator;
-using ::std::random_access_iterator_tag;
+using ::std::ptrdiff_t;
 using ::std::nullptr_t;
 
-class nullptr_filler : public iterator<random_access_iterator_tag, const nullptr_t> {
+class nullptr_filler {
+public:
+	using value_type         = const nullptr_t;
+	using pointer            = value_type *;
+	using reference          = value_type &;
+	using difference_type    = ptrdiff_t;
+	using iterator_category  = ::std::random_access_iterator_tag;
+
 private:
-	const nullptr_t m_ptr;
+	value_type m_ptr;
 	difference_type m_pos;
 
 public:
@@ -24,10 +30,9 @@ public:
 	{ }
 
 public:
-	constexpr reference operator*() const noexcept {
+	constexpr reference dereference() const noexcept {
 		return this->m_ptr;
 	}
-
 	constexpr difference_type tell() const noexcept {
 		return this->m_pos;
 	}
@@ -35,6 +40,10 @@ public:
 		this->m_pos = pos;
 	}
 };
+
+constexpr nullptr_filler::reference operator*(const nullptr_filler &rhs) noexcept {
+	return rhs.dereference();
+}
 
 inline nullptr_filler & operator++(nullptr_filler &rhs) noexcept {
 	rhs.seek(rhs.tell() + 1);
