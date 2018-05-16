@@ -63,8 +63,8 @@ using Sparg = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
 using Sptr_vector = std::vector<Sptr<ElementT>>;
-template<typename KeyT, typename ValueT>
-using Sptr_map = std::unordered_map<KeyT, Sptr<ValueT>>;
+template<typename ValueT>
+using Sptr_string_map = std::unordered_map<std::string, Sptr<ValueT>>;
 
 template<typename ElementT>
 using Wptr = std::weak_ptr<ElementT>;
