@@ -241,16 +241,15 @@ namespace details_variant {
 		enum : bool { value = is_nothrow_assignable<typename decay<paramT>::type, paramT &&>::value };
 	};
 
-	namespace nothrow_swappable_helper {
+	template<typename paramT>
+	constexpr bool check_nothrow_swappable() noexcept {
 		using ::std::swap;
-
-		template<typename paramT>
-		void check() noexcept(noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>())));
+		return noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()));
 	}
 
 	template<typename paramT>
 	struct is_nothrow_swappable {
-		enum : bool { value = noexcept(nothrow_swappable_helper::check<paramT>()) };
+		enum : bool { value = check_nothrow_swappable<paramT>() };
 	};
 }
 

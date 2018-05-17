@@ -10,7 +10,6 @@
 #include <ostream> // std::basic_ostream<>
 #include <type_traits> // std::enable_if<>, std::is_convertible<>, std::remove_cv<>, std::is_same<>
 #include "assert.hpp"
-#include "exchange.hpp"
 
 namespace rocket {
 
@@ -87,12 +86,13 @@ public:
 		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
 	}
 	shared_ptr<elementT> release() noexcept {
-		return ((exchange))(this->m_ptr, nullptr);
+		shared_ptr<elementT> ptr;
+		ptr.swap(this->m_ptr);
+		return ptr;
 	}
 
 	void swap(value_ptr &rhs) noexcept {
-		using ::std::swap;
-		swap(this->m_ptr, rhs.m_ptr);
+		this->m_ptr.swap(rhs.m_ptr);
 	}
 
 public:

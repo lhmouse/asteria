@@ -22,7 +22,6 @@ pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
-	asteria/src/rocket/exchange.hpp	\
 	asteria/src/rocket/insertable_streambuf.hpp	\
 	asteria/src/rocket/insertable_istream.hpp	\
 	asteria/src/rocket/insertable_ostream.hpp	\
