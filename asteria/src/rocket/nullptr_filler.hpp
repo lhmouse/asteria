@@ -30,8 +30,7 @@ public:
 
 public:
 	difference_type tell() const noexcept {
-		const auto pos = this->m_pos;
-		return pos;
+		return this->m_pos;
 	}
 	nullptr_filler & seek(difference_type pos) noexcept {
 		this->m_pos = pos;
