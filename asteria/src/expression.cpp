@@ -163,36 +163,37 @@ namespace {
 		}
 	}
 
+	D_boolean do_logical_not(D_boolean rhs){
+		return !rhs;
+	}
+	D_boolean do_logical_and(D_boolean lhs, D_boolean rhs){
+		return lhs & rhs;
+	}
+	D_boolean do_logical_or(D_boolean lhs, D_boolean rhs){
+		return lhs | rhs;
+	}
+	D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs){
+		return lhs ^ rhs;
+	}
+
 	D_integer do_negate(D_integer rhs){
 		if(rhs == INT64_MIN){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
 		}
 		return -rhs;
 	}
-	D_double do_negate(D_double rhs){
-		return -rhs;
-	}
-
 	D_integer do_add(D_integer lhs, D_integer rhs){
 		if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs + rhs;
 	}
-	D_double do_add(D_double lhs, D_double rhs){
-		return lhs + rhs;
-	}
-
 	D_integer do_subtract(D_integer lhs, D_integer rhs){
 		if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs - rhs;
 	}
-	D_double do_subtract(D_double lhs, D_double rhs){
-		return lhs - rhs;
-	}
-
 	D_integer do_multiply(D_integer lhs, D_integer rhs){
 		if((lhs == 0) || (rhs == 0)){
 			return 0;
@@ -214,10 +215,6 @@ namespace {
 		}
 		return alhs * srhs;
 	}
-	D_double do_multiply(D_double lhs, D_double rhs){
-		return lhs * rhs;
-	}
-
 	D_integer do_divide(D_integer lhs, D_integer rhs){
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -227,10 +224,6 @@ namespace {
 		}
 		return lhs / rhs;
 	}
-	D_double do_divide(D_double lhs, D_double rhs){
-		return lhs / rhs;
-	}
-
 	D_integer do_modulo(D_integer lhs, D_integer rhs){
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -239,9 +232,6 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs % rhs;
-	}
-	D_double do_modulo(D_double lhs, D_double rhs){
-		return std::fmod(lhs, rhs);
 	}
 
 	D_integer do_shift_left_logical(D_integer lhs, D_integer rhs){
@@ -285,32 +275,36 @@ namespace {
 		return lhs >> rhs;
 	}
 
-	D_boolean do_bitwise_not(D_boolean rhs){
-		return !rhs;
-	}
 	D_integer do_bitwise_not(D_integer rhs){
 		return ~rhs;
-	}
-
-	D_boolean do_bitwise_and(D_boolean lhs, D_boolean rhs){
-		return lhs & rhs;
 	}
 	D_integer do_bitwise_and(D_integer lhs, D_integer rhs){
 		return lhs & rhs;
 	}
-
-	D_boolean do_bitwise_or(D_boolean lhs, D_boolean rhs){
-		return lhs | rhs;
-	}
 	D_integer do_bitwise_or(D_integer lhs, D_integer rhs){
 		return lhs | rhs;
 	}
-
-	D_boolean do_bitwise_xor(D_boolean lhs, D_boolean rhs){
-		return lhs ^ rhs;
-	}
 	D_integer do_bitwise_xor(D_integer lhs, D_integer rhs){
 		return lhs ^ rhs;
+	}
+
+	D_double do_negate(D_double rhs){
+		return -rhs;
+	}
+	D_double do_add(D_double lhs, D_double rhs){
+		return lhs + rhs;
+	}
+	D_double do_subtract(D_double lhs, D_double rhs){
+		return lhs - rhs;
+	}
+	D_double do_multiply(D_double lhs, D_double rhs){
+		return lhs * rhs;
+	}
+	D_double do_divide(D_double lhs, D_double rhs){
+		return lhs / rhs;
+	}
+	D_double do_modulo(D_double lhs, D_double rhs){
+		return std::fmod(lhs, rhs);
 	}
 
 	D_string do_concatenate(const D_string &lhs, const D_string &rhs){
@@ -591,7 +585,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				const auto rhs_type = get_variable_type(rhs_var);
 				if(rhs_type == Variable::type_boolean){
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(rhs));
+					do_set_result(rhs_ref, recycler, params.compound_assignment, do_logical_not(rhs));
 				} else if(rhs_type == Variable::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(rhs));
@@ -607,7 +601,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
 				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(test_variable(rhs_var)));
+				do_set_result(rhs_ref, recycler, params.compound_assignment, do_logical_not(test_variable(rhs_var)));
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
@@ -773,7 +767,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
@@ -805,7 +799,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
@@ -834,7 +828,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
@@ -1000,7 +994,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
@@ -1023,7 +1017,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
@@ -1046,7 +1040,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
