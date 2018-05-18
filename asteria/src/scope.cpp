@@ -52,21 +52,20 @@ void Scope::defer_callback(Sptr<const Function_base> &&callback){
 
 namespace {
 	const std::string g_id_this    = "this";
-	const std::string g_id_va_arg  = "va_arg";
+	const std::string g_id_va_arg  = "__va_arg";
+	const std::string g_id_func    = "__func";
 
 	class Variadic_argument_getter : public Function_base {
 	private:
 		Xptr_vector<Reference> m_arguments_opt;
 
 	public:
-		explicit Variadic_argument_getter(Xptr_vector<Reference> arguments_opt)
-			: m_arguments_opt(std::move(arguments_opt))
+		Variadic_argument_getter(std::string description, Xptr_vector<Reference> arguments_opt)
+			: Function_base(std::move(description))
+			, m_arguments_opt(std::move(arguments_opt))
 		{ }
 
 	public:
-		const char * describe() const noexcept override {
-			return "variadic argument getter";
-		}
 		void invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
 			case 0: {
@@ -102,13 +101,15 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, Sparg<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, const std::string &description, Sparg<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
+
 	// Set the `this` reference.
-	const auto this_wref = scope->drill_for_local_reference(g_id_this);
-	move_reference(this_wref, std::move(this_opt));
+	auto wref = scope->drill_for_local_reference(g_id_this);
+	move_reference(wref, std::move(this_opt));
+
 	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
 	if(parameters_opt){
 		for(const auto &param : *parameters_opt){
@@ -121,22 +122,32 @@ void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, Sparg<
 			if(identifier.empty()){
 				continue;
 			}
-			const auto param_wref = scope->drill_for_local_reference(identifier);
-			move_reference(param_wref, std::move(arg));
+			wref = scope->drill_for_local_reference(identifier);
+			move_reference(wref, std::move(arg));
 		}
 	}
+
 	// Set argument getter for variadic functions.
-	Xptr<Variable> va_arg_var;
-	auto va_arg_func = std::make_shared<Variadic_argument_getter>(std::move(arguments_opt));
-	set_variable(va_arg_var, recycler, D_function(std::move(va_arg_func)));
-	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
-	Reference::S_constant ref_k = { std::move(va_arg_var) };
-	set_reference(va_arg_wref, std::move(ref_k));
+	rocket::insertable_ostream desc_os;
+	desc_os <<"variadic argument getter for " <<description;
+	Xptr<Variable> var;
+	auto va_arg_func = std::make_shared<Variadic_argument_getter>(desc_os.extract_string(), std::move(arguments_opt));
+	set_variable(var, recycler, D_function(std::move(va_arg_func)));
+	wref = scope->drill_for_local_reference(g_id_va_arg);
+	Reference::S_constant ref_kv = { std::move(var) };
+	set_reference(wref, std::move(ref_kv));
+
+	// Set predefined variables.
+	set_variable(var, recycler, D_string(description));
+	wref = scope->drill_for_local_reference(g_id_func);
+	Reference::S_constant ref_kf = { std::move(var) };
+	set_reference(wref, std::move(ref_kf));
 }
 void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const Parameter_vector> parameters_opt){
 	// Set the `this` reference.
-	const auto this_wref = scope->drill_for_local_reference(g_id_this);
-	set_reference(this_wref, nullptr);
+	auto wref = scope->drill_for_local_reference(g_id_this);
+	set_reference(wref, nullptr);
+
 	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
 	if(parameters_opt){
 		for(const auto &param : *parameters_opt){
@@ -144,13 +155,18 @@ void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const Parameter_ve
 			if(identifier.empty()){
 				continue;
 			}
-			const auto param_wref = scope->drill_for_local_reference(identifier);
-			set_reference(param_wref, nullptr);
+			wref = scope->drill_for_local_reference(identifier);
+			set_reference(wref, nullptr);
 		}
 	}
+
 	// Set argument getter for variadic functions.
-	const auto va_arg_wref = scope->drill_for_local_reference(g_id_va_arg);
-	set_reference(va_arg_wref, nullptr);
+	wref = scope->drill_for_local_reference(g_id_va_arg);
+	set_reference(wref, nullptr);
+
+	// Set predefined variables.
+	wref = scope->drill_for_local_reference(g_id_func);
+	set_reference(wref, nullptr);
 }
 
 }

@@ -21,13 +21,11 @@ namespace {
 
 	public:
 		Fancy_deferred_callback(int multiplier, int addend)
-			: m_multiplier(multiplier), m_addend(addend)
+			: Function_base("fancy deferred callback")
+			, m_multiplier(multiplier), m_addend(addend)
 		{ }
 
 	public:
-		const char * describe() const noexcept override {
-			return "fancy deferred callback";
-		}
 		void invoke(Xptr<Reference> &/*result_out*/, Sparg<Recycler> /*recycler*/, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&/*arguments_opt*/) const override {
 			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
 		}

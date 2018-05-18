@@ -11,11 +11,12 @@ namespace Asteria {
 
 class Simple_function : public Function_base {
 private:
-	Function_base_prototype *m_fptr;
+	Function_base_prototype *m_target;
 
 public:
-	explicit Simple_function(Function_base_prototype *fptr)
-		: m_fptr(fptr)
+	Simple_function(std::string description, Function_base_prototype *target)
+		: Function_base(std::move(description))
+		, m_target(target)
 	{ }
 	~Simple_function();
 
@@ -23,7 +24,6 @@ public:
 	Simple_function & operator=(const Simple_function &) = delete;
 
 public:
-	const char * describe() const noexcept override;
 	void invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override;
 };
 

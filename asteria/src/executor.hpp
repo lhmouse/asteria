@@ -33,7 +33,7 @@ public:
 	void set_root_variable(const std::string &identifier, Stored_value &&value, bool constant = false);
 	void set_root_constant(const std::string &identifier, Stored_value &&value);
 	void set_root_function(const std::string &identifier, Sptr<const Function_base> &&func);
-	void set_root_function(const std::string &identifier, Function_base_prototype *fptr);
+	void set_root_function(const std::string &identifier, std::string description, Function_base_prototype *target);
 
 	
 };

@@ -88,7 +88,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Sparg<const Expression>
 			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
 			Xptr<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
-			Expression_node::S_lambda_definition node_l = { params.parameters_opt, std::move(bound_body) };
+			Expression_node::S_lambda_definition node_l = { params.source_location, params.parameters_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(node_l));
 			break; }
 
@@ -400,6 +400,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			// Make a descriptive name.
+			rocket::insertable_ostream desc_os;
+			desc_os <<"lambda defined at '" <<params.source_location <<"'";
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
@@ -407,7 +410,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, 
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
 			Xptr<Variable> func_var;
-			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>(desc_os.extract_string(), params.parameters_opt, scope, std::move(bound_body));
 			set_variable(func_var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };

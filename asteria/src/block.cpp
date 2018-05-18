@@ -62,7 +62,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Spar
 			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
 			Xptr<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
-			Statement::S_function_definition stmt_f = { params.identifier, params.parameters_opt, std::move(bound_body) };
+			Statement::S_function_definition stmt_f = { params.identifier, params.source_location, params.parameters_opt, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
 
@@ -178,7 +178,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Spar
 			// Bind the body recursively.
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope);
-			Statement::S_defer_statement stmt_d = { std::move(bound_body) };
+			Statement::S_defer_statement stmt_d = { params.source_location, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_d));
 			break; }
 
@@ -267,6 +267,9 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 
 		case Statement::type_function_definition: {
 			const auto &params = stmt.get<Statement::S_function_definition>();
+			// Make a descriptive name.
+			rocket::insertable_ostream desc_os;
+			desc_os <<"function defined at '" <<params.source_location <<"'";
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, params.parameters_opt);
@@ -274,7 +277,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a local reference for the function.
 			Xptr<Variable> func_var;
-			auto func = std::make_shared<Instantiated_function>(params.parameters_opt, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>(desc_os.extract_string(), params.parameters_opt, scope, std::move(bound_body));
 			set_variable(func_var, recycler, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(reference_out, std::move(ref_t));
@@ -550,11 +553,14 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 
 		case Statement::type_defer_statement: {
 			const auto &params = stmt.get<Statement::S_defer_statement>();
+			// Make a descriptive name.
+			rocket::insertable_ostream desc_os;
+			desc_os <<"defer block defined at '" <<params.source_location <<"'";
 			// Bind the function body onto the current scope. There are no parameters.
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope);
 			// Register the function as a deferred callback of the current scope.
-			auto func = std::make_shared<Instantiated_function>(nullptr, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>(desc_os.extract_string(), nullptr, scope, std::move(bound_body));
 			scope->defer_callback(std::move(func));
 			break; }
 

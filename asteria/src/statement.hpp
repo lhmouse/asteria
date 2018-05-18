@@ -47,6 +47,7 @@ public:
 	};
 	struct S_function_definition {
 		std::string identifier;
+		std::string source_location;
 		Sptr<const std::vector<Parameter>> parameters_opt;
 		Xptr<Block> body_opt;
 	};
@@ -85,6 +86,7 @@ public:
 		Xptr<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
+		std::string source_location;
 		Xptr<Block> body_opt;
 	};
 	struct S_break_statement {

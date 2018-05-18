@@ -73,6 +73,7 @@ public:
 		Xptr<Expression> subexpression_opt;
 	};
 	struct S_lambda_definition {
+		std::string source_location;
 		Sptr<const std::vector<Parameter>> parameters_opt;
 		Xptr<Block> body_opt;
 	};

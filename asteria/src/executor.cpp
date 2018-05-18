@@ -52,8 +52,8 @@ void Executor::set_root_constant(const std::string &identifier, Stored_value &&v
 void Executor::set_root_function(const std::string &identifier, Sptr<const Function_base> &&func){
 	return set_root_constant(identifier, std::move(func));
 }
-void Executor::set_root_function(const std::string &identifier, Function_base_prototype *fptr){
-	return set_root_function(identifier, std::make_shared<Simple_function>(fptr));
+void Executor::set_root_function(const std::string &identifier, std::string description, Function_base_prototype *target){
+	return set_root_function(identifier, std::make_shared<Simple_function>(std::move(description), target));
 }
 
 }
