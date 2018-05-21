@@ -28,7 +28,7 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/insertable_iostream.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
-	asteria/src/rocket/nullptr_filler.hpp
+	asteria/src/rocket/fill_iterator.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\

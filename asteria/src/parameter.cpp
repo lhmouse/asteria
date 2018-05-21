@@ -17,7 +17,7 @@ void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Sparg<c
 	if(parameters_opt){
 		const auto delta_size = static_cast<std::ptrdiff_t>(arguments_inout.size() - parameters_opt->size());
 		if(delta_size < 0){
-			arguments_inout.insert(arguments_inout.end(), rocket::nullptr_filler(delta_size), rocket::nullptr_filler(0));
+			arguments_inout.insert(arguments_inout.end(), rocket::fill_iterator<std::nullptr_t>(delta_size), rocket::fill_iterator<std::nullptr_t>(0));
 		}
 		for(std::size_t i = 0; i < parameters_opt->size(); ++i){
 			const auto &param = parameters_opt->at(i);

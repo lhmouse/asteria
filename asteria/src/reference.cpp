@@ -195,7 +195,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Sparg<const Reference> re
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
-			array.insert(array.begin(), rocket::nullptr_filler(0), rocket::nullptr_filler(static_cast<std::ptrdiff_t>(count_to_prepend)));
+			array.insert(array.begin(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_prepend)));
 			normalized_index = 0;
 		} else if(normalized_index >= static_cast<std::int64_t>(array.size())){
 			// Append `null`s until the subscript designates the end.
@@ -204,7 +204,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Sparg<const Reference> re
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
-			array.insert(array.end(), rocket::nullptr_filler(0), rocket::nullptr_filler(static_cast<std::ptrdiff_t>(count_to_append)));
+			array.insert(array.end(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_append)));
 			normalized_index = static_cast<std::int64_t>(array.size() - 1);
 		}
 		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
