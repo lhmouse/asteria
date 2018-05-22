@@ -17,9 +17,9 @@ using ::std::ptrdiff_t;
 template<typename elementT>
 class fill_iterator {
 public:
-	using value_type         = const elementT;
-	using pointer            = value_type *;
-	using reference          = value_type &;
+	using value_type         = elementT;
+	using pointer            = const value_type *;
+	using reference          = const value_type &;
 	using difference_type    = ptrdiff_t;
 	using iterator_category  = ::std::random_access_iterator_tag;
 
