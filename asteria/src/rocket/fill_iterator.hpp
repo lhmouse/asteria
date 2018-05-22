@@ -96,7 +96,9 @@ inline fill_iterator<elementT> operator-(const fill_iterator<elementT> &lhs, typ
 
 template<typename elementT>
 inline fill_iterator<elementT> operator+(typename fill_iterator<elementT>::difference_type lhs, const fill_iterator<elementT> &rhs) noexcept {
-	return rhs + lhs;
+	auto res = rhs;
+	res.seek(res.tell() + lhs);
+	return res;
 }
 template<typename elementT>
 inline typename fill_iterator<elementT>::difference_type operator-(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
