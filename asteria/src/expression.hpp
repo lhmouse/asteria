@@ -13,10 +13,10 @@ class Expression {
 	friend Expression_node;
 
 private:
-	std::vector<Expression_node> m_nodes;
+	T_vector<Expression_node> m_nodes;
 
 public:
-	Expression(std::vector<Expression_node> nodes)
+	Expression(T_vector<Expression_node> nodes)
 		: m_nodes(std::move(nodes))
 	{ }
 	Expression(Expression &&) noexcept;

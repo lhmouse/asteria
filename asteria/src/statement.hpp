@@ -48,7 +48,7 @@ public:
 	struct S_function_definition {
 		String identifier;
 		String source_location;
-		Sptr<const std::vector<Parameter>> parameters_opt;
+		Sptr<const T_vector<Parameter>> parameters_opt;
 		Xptr<Block> body_opt;
 	};
 	struct S_if_statement {
@@ -58,7 +58,7 @@ public:
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_opt;
-		std::vector<std::pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
+		T_vector<std::pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Xptr<Block> body_opt;

@@ -50,7 +50,7 @@ public:
 	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
-using Parameter_vector = std::vector<Parameter>;
+using Parameter_vector = T_vector<Parameter>;
 
 extern void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, const String &description, Sparg<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
 extern void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const Parameter_vector> parameters_opt);

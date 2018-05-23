@@ -26,10 +26,10 @@ public:
 	};
 
 private:
-	std::vector<Statement> m_statements;
+	T_vector<Statement> m_statements;
 
 public:
-	Block(std::vector<Statement> statements)
+	Block(T_vector<Statement> statements)
 		: m_statements(std::move(statements))
 	{ }
 	Block(Block &&) noexcept;

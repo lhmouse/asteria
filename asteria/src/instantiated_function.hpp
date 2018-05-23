@@ -11,12 +11,12 @@ namespace Asteria {
 
 class Instantiated_function : public Function_base {
 private:
-	Sptr<const std::vector<Parameter>> m_parameters_opt;
+	Sptr<const T_vector<Parameter>> m_parameters_opt;
 	Sptr<const Scope> m_bound_scope;
 	Xptr<Block> m_bound_body_opt;
 
 public:
-	Instantiated_function(String description, Sptr<const std::vector<Parameter>> parameters_opt, Sptr<const Scope> bound_scope, Xptr<Block> &&bound_body_opt)
+	Instantiated_function(String description, Sptr<const T_vector<Parameter>> parameters_opt, Sptr<const Scope> bound_scope, Xptr<Block> &&bound_body_opt)
 		: Function_base(std::move(description))
 		, m_parameters_opt(std::move(parameters_opt)), m_bound_scope(std::move(bound_scope)), m_bound_body_opt(std::move(bound_body_opt))
 	{ }

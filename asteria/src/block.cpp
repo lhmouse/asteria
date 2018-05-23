@@ -25,7 +25,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Spar
 		return bound_result_out.reset();
 	}
 	// Bind statements recursively.
-	std::vector<Statement> bound_statements;
+	T_vector<Statement> bound_statements;
 	bound_statements.reserve(block_opt->size());
 	for(std::size_t stmt_index = 0; stmt_index < block_opt->size(); ++stmt_index){
 		const auto &stmt = block_opt->at(stmt_index);
@@ -88,7 +88,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Spar
 			// Bind clauses recursively. A clause consists of a label expression and a body block.
 			// Notice that clauses in a `switch` statement share the same scope.
 			const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			std::vector<std::pair<Xptr<Expression>, Xptr<Block>>> bound_clauses;
+			T_vector<std::pair<Xptr<Expression>, Xptr<Block>>> bound_clauses;
 			bound_clauses.reserve(params.clauses_opt.size());
 			for(const auto &pair : params.clauses_opt){
 				Xptr<Expression> bound_label;
@@ -454,7 +454,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			} else if(range_type == Variable::type_object){
 				// Save the keys. This is necessary because the object might be subsequently altered.
-				std::vector<String> backup_keys;
+				T_vector<String> backup_keys;
 				{
 					const auto &range_object = range_var->get<D_object>();
 					backup_keys.reserve(range_object.size());

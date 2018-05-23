@@ -30,7 +30,7 @@ public:
 	}
 };
 
-using Parameter_vector = std::vector<Parameter>;
+using Parameter_vector = T_vector<Parameter>;
 
 extern void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Sparg<const Parameter_vector> parameters_opt);
 

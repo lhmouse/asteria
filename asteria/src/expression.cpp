@@ -24,7 +24,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Sparg<const Expression>
 		return bound_result_out.reset();
 	}
 	// Bind nodes recursively.
-	std::vector<Expression_node> bound_nodes;
+	T_vector<Expression_node> bound_nodes;
 	bound_nodes.reserve(expression_opt->size());
 	for(std::size_t node_index = 0; node_index < expression_opt->size(); ++node_index){
 		const auto &node = expression_opt->at(node_index);
