@@ -4,7 +4,6 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
-#include <string> // std::string
 #include <type_traits> // std::enable_if<>, std::decay<>, std::is_base_of<>
 #include <utility> // std::move(), std::forward(), std::pair<>
 #include <memory> // std::shared_ptr<>
@@ -12,6 +11,7 @@
 #include <cstdint> // std::int64_t
 #include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
+#include "rocket/cow_string.hpp"
 #include "rocket/value_ptr.hpp"
 
 #define ASTERIA_ENABLE_IF(...)              typename ::std::enable_if<__VA_ARGS__>::type * = nullptr
@@ -56,35 +56,39 @@ class Recycler;
 class Executor;
 
 // Aliases.
+using String = rocket::cow_string;
+
+template<typename ElementT>
+using T_vector = std::vector<ElementT>;
+template<typename ElementT>
+using T_string_map = std::unordered_map<String, ElementT, String::hash, String::equal_to>;
+
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
 using Sparg = const std::shared_ptr<ElementT> &;
-
 template<typename ElementT>
-using Sptr_vector = std::vector<Sptr<ElementT>>;
+using Sptr_vector = T_vector<Sptr<ElementT>>;
 template<typename ValueT>
-using Sptr_string_map = std::unordered_map<std::string, Sptr<ValueT>>;
+using Sptr_string_map = T_string_map<Sptr<ValueT>>;
 
 template<typename ElementT>
 using Wptr = std::weak_ptr<ElementT>;
 template<typename ElementT>
 using Wparg = const std::weak_ptr<ElementT> &;
-
 template<typename ElementT>
-using Wptr_vector = std::vector<Wptr<ElementT>>;
+using Wptr_vector = T_vector<Wptr<ElementT>>;
 template<typename ValueT>
-using Wptr_string_map = std::unordered_map<std::string, Wptr<ValueT>>;
+using Wptr_string_map = T_string_map<Wptr<ValueT>>;
 
 template<typename ElementT>
 using Xptr = rocket::value_ptr<ElementT>;
 //template<typename ElementT>
 //using Xparg = const rocket::value_ptr<ElementT> &;
-
 template<typename ElementT>
-using Xptr_vector = std::vector<Xptr<ElementT>>;
+using Xptr_vector = T_vector<Xptr<ElementT>>;
 template<typename ValueT>
-using Xptr_string_map = std::unordered_map<std::string, Xptr<ValueT>>;
+using Xptr_string_map = T_string_map<Xptr<ValueT>>;
 
 using Function_base_prototype = void (Xptr<Reference> &, Sparg<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
@@ -92,7 +96,7 @@ using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_double    = double;
-using D_string    = std::string;
+using D_string    = String;
 using D_opaque    = Xptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
 using D_array     = Xptr_vector<Variable>;

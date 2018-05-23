@@ -64,7 +64,7 @@ public:
 		Sptr<const Variable> source_opt;
 	};
 	struct S_named_reference {
-		std::string identifier;
+		String identifier;
 	};
 	struct S_bound_reference {
 		Sptr<const Reference> reference_opt;
@@ -73,7 +73,7 @@ public:
 		Xptr<Expression> subexpression_opt;
 	};
 	struct S_lambda_definition {
-		std::string source_location;
+		String source_location;
 		Sptr<const std::vector<Parameter>> parameters_opt;
 		Xptr<Block> body_opt;
 	};

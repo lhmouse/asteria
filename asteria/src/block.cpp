@@ -454,7 +454,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 				}
 			} else if(range_type == Variable::type_object){
 				// Save the keys. This is necessary because the object might be subsequently altered.
-				std::vector<std::string> backup_keys;
+				std::vector<String> backup_keys;
 				{
 					const auto &range_object = range_var->get<D_object>();
 					backup_keys.reserve(range_object.size());

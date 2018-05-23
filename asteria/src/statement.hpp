@@ -41,13 +41,13 @@ public:
 		Xptr<Expression> expression_opt;
 	};
 	struct S_variable_definition {
-		std::string identifier;
+		String identifier;
 		bool constant;
 		Xptr<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
-		std::string identifier;
-		std::string source_location;
+		String identifier;
+		String source_location;
 		Sptr<const std::vector<Parameter>> parameters_opt;
 		Xptr<Block> body_opt;
 	};
@@ -75,18 +75,18 @@ public:
 		Xptr<Block> body_opt;
 	};
 	struct S_for_each_statement {
-		std::string key_identifier;
-		std::string value_identifier;
+		String key_identifier;
+		String value_identifier;
 		Xptr<Initializer> range_initializer_opt;
 		Xptr<Block> body_opt;
 	};
 	struct S_try_statement {
 		Xptr<Block> branch_try_opt;
-		std::string exception_identifier;
+		String exception_identifier;
 		Xptr<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
-		std::string source_location;
+		String source_location;
 		Xptr<Block> body_opt;
 	};
 	struct S_break_statement {

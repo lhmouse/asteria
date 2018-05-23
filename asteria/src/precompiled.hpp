@@ -8,7 +8,6 @@
 #  include <config.h>
 #endif
 
-#include <string>
 #include <iterator>
 #include <utility>
 #include <stdexcept>
@@ -32,6 +31,7 @@
 #include "rocket/value_ptr.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/fill_iterator.hpp"
+#include "rocket/cow_string.hpp"
 
 namespace Asteria {
 	//

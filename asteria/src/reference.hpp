@@ -36,7 +36,7 @@ public:
 	};
 	struct S_object_member {
 		Xptr<Reference> parent_opt;
-		std::string key;
+		String key;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_constant         //  0

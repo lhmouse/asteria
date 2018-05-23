@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Function_base : public Opaque_base {
 public:
-	explicit Function_base(std::string description)
+	explicit Function_base(String description)
 		: Opaque_base(std::move(description))
 	{ }
 	virtual ~Function_base();

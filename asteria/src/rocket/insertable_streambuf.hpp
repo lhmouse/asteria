@@ -4,15 +4,12 @@
 #ifndef ROCKET_INSERTABLE_STREAMBUF_HPP_
 #define ROCKET_INSERTABLE_STREAMBUF_HPP_
 
-#include <string> // std::basic_string<>, std::char_traits<>, std::allocator<>
 #include <streambuf> // std::ios_base, std::basic_streambuf<>, std::streamsize
 #include <utility> // std::move()
+#include "cow_string.hpp"
 
 namespace rocket {
 
-using ::std::basic_string;
-using ::std::char_traits;
-using ::std::allocator;
 using ::std::ios_base;
 using ::std::basic_streambuf;
 using ::std::streamsize;
@@ -20,8 +17,11 @@ using ::std::streamsize;
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
 class basic_insertable_streambuf : public basic_streambuf<charT, traitsT> {
 public:
-	using string_type  = basic_string<charT, traitsT, allocatorT>;
-	using size_type    = typename string_type::size_type;
+	using string_type      = basic_cow_string<charT, traitsT, allocatorT>;
+	using allocator_type   = typename string_type::allocator_type;
+	using size_type        = typename string_type::size_type;
+	using difference_type  = typename string_type::difference_type;
+
 	using traits_type  = typename basic_streambuf<charT, traitsT>::traits_type;
 	using char_type    = typename basic_streambuf<charT, traitsT>::char_type;
 	using int_type     = typename basic_streambuf<charT, traitsT>::int_type;
@@ -127,7 +127,7 @@ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_
 		if(this->m_str.empty()){
 			return traits_type::eof();
 		}
-		const auto gp = &(this->m_str.front());
+		const auto gp = this->m_str.mut_data();
 		this->setg(gp, gp, gp + this->m_str.size());
 		return traits_type::to_int_type(*gp);
 	} else {

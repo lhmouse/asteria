@@ -84,7 +84,7 @@ namespace {
 		}
 		os <<std::setfill(' ') <<std::setw(static_cast<int>(indent)) <<"";
 	}
-	void do_quote_string(std::ostream &os, const std::string &str){
+	void do_quote_string(std::ostream &os, const String &str){
 		os <<'\"';
 		for(auto it = str.begin(); it != str.end(); ++it){
 			const unsigned value = static_cast<unsigned char>(*it);

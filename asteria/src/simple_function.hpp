@@ -14,7 +14,7 @@ private:
 	Function_base_prototype *m_target;
 
 public:
-	Simple_function(std::string description, Function_base_prototype *target)
+	Simple_function(String description, Function_base_prototype *target)
 		: Function_base(std::move(description))
 		, m_target(target)
 	{ }

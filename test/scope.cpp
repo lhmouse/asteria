@@ -21,7 +21,7 @@ namespace {
 
 	public:
 		Fancy_deferred_callback(int multiplier, int addend)
-			: Function_base("fancy deferred callback")
+			: Function_base(String::shallow("fancy deferred callback"))
 			, m_multiplier(multiplier), m_addend(addend)
 		{ }
 
@@ -40,16 +40,16 @@ int main(){
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
 	one->set_constant(true);
 	Reference::S_local_variable lref = { one };
-	auto wref = scope->drill_for_local_reference("one");
+	auto wref = scope->drill_for_local_reference(String::shallow("one"));
 	set_reference(wref, std::move(lref));
 
-	auto ref = scope->get_local_reference_opt("one");
+	auto ref = scope->get_local_reference_opt(String::shallow("one"));
 	ASTERIA_TEST_CHECK(ref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->get_variable_opt().get());
 
-	ref = scope->get_local_reference_opt("nonexistent");
+	ref = scope->get_local_reference_opt(String::shallow("nonexistent"));
 	ASTERIA_TEST_CHECK(ref == nullptr);
 
 	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14

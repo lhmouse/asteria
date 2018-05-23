@@ -27,29 +27,29 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_double);
 	ASTERIA_TEST_CHECK(var->get<D_double>() == 1.5);
 
-	set_variable(var, recycler, D_string("hello"));
+	set_variable(var, recycler, D_string(String::shallow("hello")));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_string);
-	ASTERIA_TEST_CHECK(var->get<D_string>() == "hello");
+	ASTERIA_TEST_CHECK(var->get<D_string>() == String::shallow("hello"));
 
 	D_array array;
 	set_variable(var, recycler, D_boolean(true));
 	array.emplace_back(std::move(var));
-	set_variable(var, recycler, D_string("world"));
+	set_variable(var, recycler, D_string(String::shallow("world")));
 	array.emplace_back(std::move(var));
 	set_variable(var, recycler, std::move(array));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_array);
 	ASTERIA_TEST_CHECK(var->get<D_array>().at(0)->get<D_boolean>() == true);
-	ASTERIA_TEST_CHECK(var->get<D_array>().at(1)->get<D_string>() == "world");
+	ASTERIA_TEST_CHECK(var->get<D_array>().at(1)->get<D_string>() == String::shallow("world"));
 
 	D_object object;
 	set_variable(var, recycler, D_boolean(true));
-	object.emplace("one", std::move(var));
-	set_variable(var, recycler, D_string("world"));
-	object.emplace("two", std::move(var));
+	object.emplace(String::shallow("one"), std::move(var));
+	set_variable(var, recycler, D_string(String::shallow("world")));
+	object.emplace(String::shallow("two"), std::move(var));
 	set_variable(var, recycler, std::move(object));
 	ASTERIA_TEST_CHECK(var->get_type() == Variable::type_object);
-	ASTERIA_TEST_CHECK(var->get<D_object>().at("one")->get<D_boolean>() == true);
-	ASTERIA_TEST_CHECK(var->get<D_object>().at("two")->get<D_string>() == "world");
+	ASTERIA_TEST_CHECK(var->get<D_object>().at(String::shallow("one"))->get<D_boolean>() == true);
+	ASTERIA_TEST_CHECK(var->get<D_object>().at(String::shallow("two"))->get<D_string>() == String::shallow("world"));
 
 	Xptr<Variable> cmp;
 	set_variable(var, recycler, D_null());
@@ -106,8 +106,8 @@ int main(){
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
 
-	set_variable(var, recycler, D_string("hello"));
-	set_variable(cmp, recycler, D_string("world"));
+	set_variable(var, recycler, D_string(String::shallow("hello")));
+	set_variable(cmp, recycler, D_string(String::shallow("world")));
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
@@ -115,7 +115,7 @@ int main(){
 	array.clear();
 	set_variable(var, recycler, D_boolean(true));
 	array.emplace_back(std::move(var));
-	set_variable(var, recycler, D_string("world"));
+	set_variable(var, recycler, D_string(String::shallow("world")));
 	array.emplace_back(std::move(var));
 	set_variable(var, recycler, std::move(array));
 	copy_variable(cmp, recycler, var);
@@ -123,7 +123,7 @@ int main(){
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_equal);
 
-	var->get<D_array>().at(1)->set(D_string("hello"));
+	var->get<D_array>().at(1)->set(D_string(String::shallow("hello")));
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_less);
 	swap(var, cmp);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_greater);
@@ -137,9 +137,9 @@ int main(){
 
 	object.clear();
 	set_variable(var, recycler, D_boolean(true));
-	object.emplace("one", std::move(var));
-	set_variable(var, recycler, D_string("world"));
-	object.emplace("two", std::move(var));
+	object.emplace(String::shallow("one"), std::move(var));
+	set_variable(var, recycler, D_string(String::shallow("world")));
+	object.emplace(String::shallow("two"), std::move(var));
 	set_variable(var, recycler, std::move(object));
 	copy_variable(cmp, recycler, var);
 	ASTERIA_TEST_CHECK(compare_variables(var, cmp) == Variable::comparison_result_unordered);
