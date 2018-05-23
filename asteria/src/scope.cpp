@@ -53,12 +53,13 @@ void Scope::defer_callback(Sptr<const Function_base> &&callback){
 namespace {
 	class Argument_getter : public Function_base {
 	private:
+		String m_self_id;
 		Xptr_vector<Reference> m_arguments_opt;
 
 	public:
-		Argument_getter(String description, Xptr_vector<Reference> arguments_opt)
+		Argument_getter(String description, String self_id, Xptr_vector<Reference> arguments_opt)
 			: Function_base(std::move(description))
-			, m_arguments_opt(std::move(arguments_opt))
+			, m_self_id(std::move(self_id)), m_arguments_opt(std::move(arguments_opt))
 		{ }
 
 	public:
@@ -75,7 +76,7 @@ namespace {
 				// Return the argument at the index specified.
 				const auto index_var = read_reference_opt(arguments_opt.at(0));
 				if(get_variable_type(index_var) != Variable::type_integer){
-					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__va_arg` must be an `integer`.");
+					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", m_self_id, "` must be an `integer`.");
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 				const auto index = index_var->get<D_integer>();
@@ -91,7 +92,7 @@ namespace {
 				return copy_reference(result_out, arg); }
 
 			default:
-				ASTERIA_THROW_RUNTIME_ERROR("`__va_arg` accepts no more than one argument.");
+				ASTERIA_THROW_RUNTIME_ERROR("`", m_self_id, "` accepts no more than one argument.");
 			}
 		}
 	};
@@ -122,7 +123,7 @@ namespace {
 	void do_create_argument_getter(Spparam<Scope> scope, const String &identifier, const String &description, Xptr_vector<Reference> &&arguments_opt){
 		rocket::insertable_ostream desc_os;
 		desc_os <<"variadic argument getter for " <<description;
-		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(desc_os.extract_string(), std::move(arguments_opt))));
+		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(desc_os.extract_string(), identifier, std::move(arguments_opt))));
 		Xptr<Reference> arg;
 		Reference::S_constant ref_k = { std::move(var) };
 		set_reference(arg, std::move(ref_k));
