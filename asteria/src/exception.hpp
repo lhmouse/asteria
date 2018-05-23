@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Exception : public std::exception, public std::nested_exception {
+class Exception : public virtual std::exception, public virtual std::nested_exception {
 private:
 	Sptr<const Reference> m_reference_opt;
 
@@ -28,7 +28,6 @@ public:
 	const Sptr<const Reference> & get_reference_opt() const noexcept {
 		return m_reference_opt;
 	}
-
 	const char * what() const noexcept override;
 };
 
