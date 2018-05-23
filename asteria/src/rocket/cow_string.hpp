@@ -1883,7 +1883,7 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 				break;
 			}
 			const auto ch = traits_type::to_char_type(ich);
-			if(::std::isspace(ch, loc)){
+			if(::std::isspace<charT>(ch, loc)){
 				break;
 			}
 			str.push_back(ch);
@@ -1974,7 +1974,7 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 			const auto ch = traits_type::to_char_type(ich);
 			if(traits_type::eq(ch, delim)){
 				// Discard the delimiter.
-				is.rdbuf()->snextc();
+				ich = is.rdbuf()->snextc();
 				break;
 			}
 			if(str.size() >= str.max_size()){
