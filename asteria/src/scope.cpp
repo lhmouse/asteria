@@ -97,7 +97,7 @@ namespace {
 	};
 }
 
-void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, const String &description, Sparg<const Parameter_vector> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, const String &description, Sparg<const T_vector<Parameter>> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything first.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
@@ -139,7 +139,7 @@ void prepare_function_scope(Sparg<Scope> scope, Sparg<Recycler> recycler, const 
 	Reference::S_constant ref_kf = { std::move(var) };
 	set_reference(wref, std::move(ref_kf));
 }
-void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const Parameter_vector> parameters_opt){
+void prepare_function_scope_lexical(Sparg<Scope> scope, Sparg<const T_vector<Parameter>> parameters_opt){
 	// Set the `this` reference.
 	auto wref = scope->drill_for_local_reference(String::shallow("this"));
 	set_reference(wref, nullptr);
