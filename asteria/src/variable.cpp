@@ -318,7 +318,8 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 	if(type_lhs != type_rhs){
 		if(type_lhs == Variable::type_null){
 			return Variable::comparison_result_less;
-		} else if(type_rhs == Variable::type_null){
+		}
+		if(type_rhs == Variable::type_null){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_unordered;
@@ -333,7 +334,8 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 		const auto &value_rhs = rhs_opt->get<D_boolean>();
 		if(value_lhs < value_rhs){
 			return Variable::comparison_result_less;
-		} else if(value_lhs > value_rhs){
+		}
+		if(value_lhs > value_rhs){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
@@ -343,7 +345,8 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 		const auto &value_rhs = rhs_opt->get<D_integer>();
 		if(value_lhs < value_rhs){
 			return Variable::comparison_result_less;
-		} else if(value_lhs > value_rhs){
+		}
+		if(value_lhs > value_rhs){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
@@ -353,9 +356,11 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 		const auto &value_rhs = rhs_opt->get<D_double>();
 		if(std::isunordered(value_lhs, value_rhs)){
 			return Variable::comparison_result_unordered;
-		} else if(std::isless(value_lhs, value_rhs)){
+		}
+		if(std::isless(value_lhs, value_rhs)){
 			return Variable::comparison_result_less;
-		} else if(std::isgreater(value_lhs, value_rhs)){
+		}
+		if(std::isgreater(value_lhs, value_rhs)){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
@@ -366,7 +371,8 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 		const int cmp = value_lhs.compare(value_rhs);
 		if(cmp < 0){
 			return Variable::comparison_result_less;
-		} else if(cmp > 0){
+		}
+		if(cmp > 0){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
@@ -378,17 +384,17 @@ Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, S
 	case Variable::type_array: {
 		const auto &array_lhs = lhs_opt->get<D_array>();
 		const auto &array_rhs = rhs_opt->get<D_array>();
-		auto lhs_it = array_lhs.begin(), rhs_it = array_rhs.begin();
-		while((lhs_it != array_lhs.end()) && (rhs_it != array_rhs.end())){
-			auto result = compare_variables(*lhs_it, *rhs_it);
-			if(result != Variable::comparison_result_equal){
-				return result;
+		const auto len_min = std::min(array_lhs.size(), array_rhs.size());
+		for(std::size_t i = 0; i < len_min; ++i){
+			const auto res = compare_variables(array_lhs.at(i), array_rhs.at(i));
+			if(res != Variable::comparison_result_equal){
+				return res;
 			}
-			++lhs_it, ++rhs_it;
 		}
-		if(rhs_it != array_rhs.end()){
+		if(array_lhs.size() < array_rhs.size()){
 			return Variable::comparison_result_less;
-		} else if(lhs_it != array_lhs.end()){
+		}
+		if(array_lhs.size() > array_rhs.size()){
 			return Variable::comparison_result_greater;
 		}
 		return Variable::comparison_result_equal; }
