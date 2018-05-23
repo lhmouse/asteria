@@ -74,7 +74,7 @@ public:
 	};
 	struct S_lambda_definition {
 		String source_location;
-		Sptr<const T_vector<Parameter>> parameters_opt;
+		Sptr_vector<const Parameter> parameters_opt;
 		Xptr<Block> body_opt;
 	};
 	struct S_pruning {

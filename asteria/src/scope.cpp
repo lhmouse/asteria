@@ -51,12 +51,12 @@ void Scope::defer_callback(Sptr<const Function_base> &&callback){
 }
 
 namespace {
-	class Variadic_argument_getter : public Function_base {
+	class Argument_getter : public Function_base {
 	private:
 		Xptr_vector<Reference> m_arguments_opt;
 
 	public:
-		Variadic_argument_getter(String description, Xptr_vector<Reference> arguments_opt)
+		Argument_getter(String description, Xptr_vector<Reference> arguments_opt)
 			: Function_base(std::move(description))
 			, m_arguments_opt(std::move(arguments_opt))
 		{ }
@@ -95,74 +95,66 @@ namespace {
 			}
 		}
 	};
+
+	void do_set_argument(Spparam<Scope> scope, const String &identifier, Xptr<Reference> &&arg_opt){
+		if(identifier.empty()){
+			return;
+		}
+		const auto wref = scope->drill_for_local_reference(identifier);
+		move_reference(wref, std::move(arg_opt));
+	}
+	void do_set_argument(Spparam<Scope> scope, Spparam<const Parameter> param_opt, Xptr<Reference> &&arg_opt){
+		if(param_opt == nullptr){
+			return;
+		}
+		do_set_argument(scope, param_opt->get_identifier(), std::move(arg_opt));
+	}
+
+	void do_shift_argument(Spparam<Scope> scope, Xptr_vector<Reference> &arguments_inout_opt, Spparam<const Parameter> param_opt){
+		Xptr<Reference> arg_opt;
+		if(arguments_inout_opt.empty() == false){
+			arg_opt = std::move(arguments_inout_opt.front());
+			arguments_inout_opt.erase(arguments_inout_opt.begin());
+		}
+		do_set_argument(scope, param_opt, std::move(arg_opt));
+	}
+
+	void do_create_argument_getter(Spparam<Scope> scope, const String &identifier, const String &description, Xptr_vector<Reference> &&arguments_opt){
+		rocket::insertable_ostream desc_os;
+		desc_os <<"variadic argument getter for " <<description;
+		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(desc_os.extract_string(), std::move(arguments_opt))));
+		Xptr<Reference> arg;
+		Reference::S_constant ref_k = { std::move(var) };
+		set_reference(arg, std::move(ref_k));
+		do_set_argument(scope, identifier, std::move(arg));
+	}
+	void do_create_description(Spparam<Scope> scope, const String &identifier, const String &description){
+		auto var = std::make_shared<Variable>(D_string(description));
+		Xptr<Reference> arg;
+		Reference::S_constant ref_k = { std::move(var) };
+		set_reference(arg, std::move(ref_k));
+		do_set_argument(scope, identifier, std::move(arg));
+	}
 }
 
-void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &description, Spparam<const T_vector<Parameter>> parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
-	// Materialize everything first.
+void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &description, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
-
-	// Set the `this` reference.
-	auto wref = scope->drill_for_local_reference(String::shallow("this"));
-	move_reference(wref, std::move(this_opt));
-
-	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
-	if(parameters_opt){
-		for(const auto &param : *parameters_opt){
-			Xptr<Reference> arg;
-			if(!arguments_opt.empty()){
-				move_reference(arg, std::move(arguments_opt.front()));
-				arguments_opt.erase(arguments_opt.begin());
-			}
-			const auto &identifier = param.get_identifier();
-			if(identifier.empty()){
-				continue;
-			}
-			wref = scope->drill_for_local_reference(identifier);
-			move_reference(wref, std::move(arg));
-		}
-	}
-
-	// Set argument getter for variadic functions.
-	rocket::insertable_ostream desc_os;
-	desc_os <<"variadic argument getter for " <<description;
-	Xptr<Variable> var;
-	auto va_arg_func = std::make_shared<Variadic_argument_getter>(desc_os.extract_string(), std::move(arguments_opt));
-	set_variable(var, recycler, D_function(std::move(va_arg_func)));
-	wref = scope->drill_for_local_reference(String::shallow("__va_arg"));
-	Reference::S_constant ref_kv = { std::move(var) };
-	set_reference(wref, std::move(ref_kv));
-
-	// Set predefined variables.
-	set_variable(var, recycler, D_string(description));
-	wref = scope->drill_for_local_reference(String::shallow("__func"));
-	Reference::S_constant ref_kf = { std::move(var) };
-	set_reference(wref, std::move(ref_kf));
+	// Move arguments into the local scope.
+	do_set_argument(scope, String::shallow("this"), std::move(this_opt));
+	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spparam<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });
+	// Create pre-defined variables.
+	do_create_argument_getter(scope, String::shallow("__va_arg"), description, std::move(arguments_opt));
+	do_create_description(scope, String::shallow("__func"), description);
 }
-void prepare_function_scope_lexical(Spparam<Scope> scope, Spparam<const T_vector<Parameter>> parameters_opt){
-	// Set the `this` reference.
-	auto wref = scope->drill_for_local_reference(String::shallow("this"));
-	set_reference(wref, nullptr);
-
-	// Move arguments into local scope. Unlike the `this` reference, a named argument has to exist even when it is not provided.
-	if(parameters_opt){
-		for(const auto &param : *parameters_opt){
-			const auto &identifier = param.get_identifier();
-			if(identifier.empty()){
-				continue;
-			}
-			wref = scope->drill_for_local_reference(identifier);
-			set_reference(wref, nullptr);
-		}
-	}
-
-	// Set argument getter for variadic functions.
-	wref = scope->drill_for_local_reference(String::shallow("__va_arg"));
-	set_reference(wref, nullptr);
-
-	// Set predefined variables.
-	wref = scope->drill_for_local_reference(String::shallow("__func"));
-	set_reference(wref, nullptr);
+void prepare_function_scope_lexical(Spparam<Scope> scope, const String &description, const Sptr_vector<const Parameter> &parameters_opt){
+	// Create null arguments in the local scope.
+	do_set_argument(scope, String::shallow("this"), nullptr);
+	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spparam<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });
+	// Create pre-defined variables.
+	do_set_argument(scope, String::shallow("__va_arg"), nullptr);
+	do_create_description(scope, String::shallow("__func"), description);
 }
 
 }
