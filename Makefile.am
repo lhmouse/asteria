@@ -28,7 +28,8 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/insertable_iostream.hpp	\
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
-	asteria/src/rocket/fill_iterator.hpp
+	asteria/src/rocket/fill_iterator.hpp	\
+	asteria/src/rocket/cow_string.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
@@ -63,6 +64,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/rocket/insertable_istream.cpp	\
 	asteria/src/rocket/insertable_ostream.cpp	\
 	asteria/src/rocket/insertable_iostream.cpp	\
+	asteria/src/rocket/cow_string.cpp	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
