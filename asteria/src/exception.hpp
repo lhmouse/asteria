@@ -25,11 +25,11 @@ public:
 	~Exception() override;
 
 public:
-	const char * what() const noexcept override;
-
 	const Sptr<const Reference> & get_reference_opt() const noexcept {
 		return m_reference_opt;
 	}
+
+	const char * what() const noexcept override;
 };
 
 }
