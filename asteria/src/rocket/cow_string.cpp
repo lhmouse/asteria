@@ -33,8 +33,8 @@ namespace details_cow_string {
 		throw ::std::length_error(str.data());
 	}
 
-	template void handle_io_exception(::std::ios  &);
-	template void handle_io_exception(::std::wios &);
+	template void handle_io_exception(::std::ios  &ios);
+	template void handle_io_exception(::std::wios &ios);
 
 	template class storage_handle<char>;
 	template class storage_handle<wchar_t>;
@@ -57,5 +57,10 @@ template ::std::wistream & operator>>(::std::wistream &is, cow_wstring &str);
 
 template ::std::ostream  & operator<<(::std::ostream  &os, const cow_string  &str);
 template ::std::wostream & operator<<(::std::wostream &os, const cow_wstring &str);
+
+template ::std::istream  & getline(::std::istream  &is, cow_string  &str, char    delim);
+template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_t delim);
+template ::std::istream  & getline(::std::istream  &is, cow_string  &str);
+template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
 
 }

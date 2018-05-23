@@ -94,8 +94,8 @@ namespace details_cow_string {
 		}
 	}
 
-	extern template void handle_io_exception(::std::ios  &);
-	extern template void handle_io_exception(::std::wios &);
+	extern template void handle_io_exception(::std::ios  &ios);
+	extern template void handle_io_exception(::std::wios &ios);
 
 	// TODO: Add `final` allocator support for C++14.
 	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
@@ -1879,11 +1879,11 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 				is.setstate(ios_base::eofbit);
 				break;
 			}
-			const auto ch = traits_type::to_char_type(ich);
-			if(::std::isspace(ch, loc)){
+			if(static_cast<streamsize>(str.size()) >= len_max){
 				break;
 			}
-			if(static_cast<streamsize>(str.size()) >= len_max){
+			const auto ch = traits_type::to_char_type(ich);
+			if(::std::isspace(ch, loc)){
 				break;
 			}
 			str.push_back(ch);
@@ -1893,13 +1893,15 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 		if(str.empty()){
 			is.setstate(ios_base::failbit);
 		}
-		// Reset the width before exit.
 		is.width(0);
 	} catch(...){
 		details_cow_string::handle_io_exception(is);
 	}
 	return is;
 }
+
+extern template ::std::istream  & operator>>(::std::istream  &is, cow_string  &str);
+extern template ::std::wistream & operator>>(::std::wistream &is, cow_wstring &str);
 
 template<typename charT, typename traitsT, typename allocatorT>
 basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const basic_cow_string<charT, traitsT, allocatorT> &str){
@@ -1941,7 +1943,6 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 			len_rem -= written;
 			offset += written;
 		}
-		// Reset the width before exit.
 		os.width(0);
 	} catch(...){
 		details_cow_string::handle_io_exception(os);
@@ -1949,11 +1950,62 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 	return os;
 }
 
-extern template ::std::istream  & operator>>(::std::istream  &is, cow_string  &str);
-extern template ::std::wistream & operator>>(::std::wistream &is, cow_wstring &str);
-
 extern template ::std::ostream  & operator<<(::std::ostream  &os, const cow_string  &str);
 extern template ::std::wostream & operator<<(::std::wostream &os, const cow_wstring &str);
+
+template<typename charT, typename traitsT, typename allocatorT>
+basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str, charT delim){
+	// Initiate this UnformattedInputFunction.
+	const typename basic_istream<charT, traitsT>::sentry sentry(is, true);
+	if(!sentry){
+		return is;
+	}
+	try {
+		using traits_type = typename basic_istream<charT, traitsT>::traits_type;
+		// Clear the contents of `str`.
+		str.erase();
+		// Extract characters and append them to `str`.
+		auto ich = is.rdbuf()->sgetc();
+		for(;;){
+			if(traits_type::eq_int_type(ich, traits_type::eof())){
+				is.setstate(ios_base::eofbit);
+				break;
+			}
+			const auto ch = traits_type::to_char_type(ich);
+			if(traits_type::eq(ch, delim)){
+				// Discard the delimiter.
+				is.rdbuf()->snextc();
+				break;
+			}
+			if(str.size() >= str.max_size()){
+				is.setstate(ios_base::failbit);
+				break;
+			}
+			str.push_back(ch);
+			ich = is.rdbuf()->snextc();
+		}
+	} catch(...){
+		details_cow_string::handle_io_exception(is);
+	}
+	return is;
+}
+template<typename charT, typename traitsT, typename allocatorT>
+basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &&is, basic_cow_string<charT, traitsT, allocatorT> &str, charT delim){
+	return ((getline))(is, str, delim);
+}
+template<typename charT, typename traitsT, typename allocatorT>
+basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str){
+	return ((getline))(is, str, is.widen('\n'));
+}
+template<typename charT, typename traitsT, typename allocatorT>
+basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &&is, basic_cow_string<charT, traitsT, allocatorT> &str){
+	return ((getline))(is, str);
+}
+
+extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str, char    delim);
+extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_t delim);
+extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str);
+extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
 
 }
 
