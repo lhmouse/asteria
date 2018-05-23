@@ -66,7 +66,7 @@ using T_string_map = std::unordered_map<String, ElementT, String::hash, String::
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Sparg = const std::shared_ptr<ElementT> &;
+using Spparam = const std::shared_ptr<ElementT> &;
 template<typename ElementT>
 using Sptr_vector = T_vector<Sptr<ElementT>>;
 template<typename ValueT>
@@ -90,7 +90,7 @@ using Xptr_vector = T_vector<Xptr<ElementT>>;
 template<typename ValueT>
 using Xptr_string_map = T_string_map<Xptr<ValueT>>;
 
-using Function_base_prototype = void (Xptr<Reference> &, Sparg<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+using Function_base_prototype = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;

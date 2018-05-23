@@ -13,7 +13,7 @@ Parameter::Parameter(Parameter &&) noexcept = default;
 Parameter & Parameter::operator=(Parameter &&) noexcept = default;
 Parameter::~Parameter() = default;
 
-void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Sparg<const Parameter_vector> parameters_opt){
+void prepare_function_arguments(Xptr_vector<Reference> &arguments_inout, Spparam<const Parameter_vector> parameters_opt){
 	if(parameters_opt){
 		const auto delta_size = static_cast<std::ptrdiff_t>(arguments_inout.size() - parameters_opt->size());
 		if(delta_size < 0){

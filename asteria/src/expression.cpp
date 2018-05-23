@@ -18,7 +18,7 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression & Expression::operator=(Expression &&) noexcept = default;
 Expression::~Expression() = default;
 
-void bind_expression(Xptr<Expression> &bound_result_out, Sparg<const Expression> expression_opt, Sparg<const Scope> scope){
+void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expression> expression_opt, Spparam<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null expression.
 		return bound_result_out.reset();
@@ -149,7 +149,7 @@ namespace {
 	}
 
 	template<typename ResultT>
-	void do_set_result(Xptr<Reference> &ref_inout_opt, Sparg<Recycler> recycler, bool compound_assignment, ResultT &&result){
+	void do_set_result(Xptr<Reference> &ref_inout_opt, Spparam<Recycler> recycler, bool compound_assignment, ResultT &&result){
 		if(compound_assignment){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
@@ -342,7 +342,7 @@ namespace {
 	}
 }
 
-void evaluate_expression(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Sparg<const Expression> expression_opt, Sparg<const Scope> scope){
+void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Spparam<const Expression> expression_opt, Spparam<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
 		return move_reference(result_out, nullptr);

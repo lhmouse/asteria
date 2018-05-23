@@ -26,7 +26,7 @@ public:
 	Instantiated_function & operator=(const Instantiated_function &) = delete;
 
 public:
-	void invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override;
+	void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override;
 };
 
 }

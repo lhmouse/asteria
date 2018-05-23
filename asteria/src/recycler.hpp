@@ -32,7 +32,7 @@ private:
 	void do_purge_variables() noexcept;
 
 public:
-	void adopt_variable(Sparg<Variable> variable_opt);
+	void adopt_variable(Spparam<Variable> variable_opt);
 	void defragment(bool aggressive = false) noexcept;
 };
 

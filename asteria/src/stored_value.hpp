@@ -49,7 +49,7 @@ public:
 	}
 };
 
-extern void set_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Stored_value &&value_opt);
+extern void set_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Stored_value &&value_opt);
 
 }
 

@@ -20,7 +20,7 @@ void Recycler::do_purge_variables() noexcept {
 	}
 }
 
-void Recycler::adopt_variable(Sparg<Variable> variable_opt){
+void Recycler::adopt_variable(Spparam<Variable> variable_opt){
 	if(!variable_opt){
 		return;
 	}

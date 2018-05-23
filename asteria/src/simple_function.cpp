@@ -9,7 +9,7 @@ namespace Asteria {
 
 Simple_function::~Simple_function() = default;
 
-void Simple_function::invoke(Xptr<Reference> &result_out, Sparg<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
+void Simple_function::invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
 	return (*m_target)(result_out, recycler, std::move(this_opt), std::move(arguments_opt));
 }
 

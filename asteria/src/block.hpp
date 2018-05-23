@@ -54,11 +54,11 @@ public:
 	}
 };
 
-extern void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Sparg<const Block> block_opt);
-extern Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Sparg<Scope> scope, Sparg<Recycler> recycler, Sparg<const Block> block_opt);
+extern void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Spparam<const Block> block_opt);
+extern Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Spparam<Scope> scope, Spparam<Recycler> recycler, Spparam<const Block> block_opt);
 
-extern void bind_block(Xptr<Block> &bound_result_out, Sparg<const Block> block_opt, Sparg<const Scope> scope);
-extern Block::Execution_result execute_block(Xptr<Reference> &reference_out, Sparg<Recycler> recycler, Sparg<const Block> block_opt, Sparg<const Scope> scope);
+extern void bind_block(Xptr<Block> &bound_result_out, Spparam<const Block> block_opt, Spparam<const Scope> scope);
+extern Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Block> block_opt, Spparam<const Scope> scope);
 
 }
 

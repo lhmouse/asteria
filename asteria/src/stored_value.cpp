@@ -11,7 +11,7 @@ Stored_value::Stored_value(Stored_value &&) noexcept = default;
 Stored_value & Stored_value::operator=(Stored_value &&) noexcept = default;
 Stored_value::~Stored_value() = default;
 
-void set_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Stored_value &&value_opt){
+void set_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Stored_value &&value_opt){
 	const auto value = value_opt.get_opt();
 	if(value == nullptr){
 		return variable_out.reset();

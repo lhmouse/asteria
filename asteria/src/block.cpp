@@ -19,7 +19,7 @@ Block::Block(Block &&) noexcept = default;
 Block & Block::operator=(Block &&) noexcept = default;
 Block::~Block() = default;
 
-void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Sparg<const Block> block_opt){
+void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Spparam<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
 		return bound_result_out.reset();
@@ -221,7 +221,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Sparg<Scope> scope, Spar
 }
 
 namespace {
-	bool do_check_loop_condition(Xptr<Reference> &reference_out, Sparg<Recycler> recycler, Sparg<const Expression> condition_opt, Sparg<const Scope> scope){
+	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Expression> condition_opt, Spparam<const Scope> scope){
 		// Overwrite `reference_out` unconditionally, even when `condition_opt` is null.
 		evaluate_expression(reference_out, recycler, condition_opt, scope);
 		bool result = true;
@@ -233,7 +233,7 @@ namespace {
 	}
 }
 
-Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Sparg<Scope> scope, Sparg<Recycler> recycler, Sparg<const Block> block_opt){
+Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Spparam<Scope> scope, Spparam<Recycler> recycler, Spparam<const Block> block_opt){
 	reference_out.reset();
 	if(block_opt == nullptr){
 		// Nothing to do.
@@ -621,14 +621,14 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 	return Block::execution_result_end_of_block;
 }
 
-void bind_block(Xptr<Block> &bound_result_out, Sparg<const Block> block_opt, Sparg<const Scope> scope){
+void bind_block(Xptr<Block> &bound_result_out, Spparam<const Block> block_opt, Spparam<const Scope> scope){
 	if(block_opt == nullptr){
 		return bound_result_out.reset();
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 	return bind_block_in_place(bound_result_out, scope_working, block_opt);
 }
-Block::Execution_result execute_block(Xptr<Reference> &reference_out, Sparg<Recycler> recycler, Sparg<const Block> block_opt, Sparg<const Scope> scope){
+Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Block> block_opt, Spparam<const Scope> scope){
 	if(block_opt == nullptr){
 		return Block::execution_result_end_of_block;
 	}

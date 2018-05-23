@@ -103,20 +103,20 @@ public:
 
 extern const char * get_type_name(Variable::Type type) noexcept;
 
-extern Variable::Type get_variable_type(Sparg<const Variable> variable_opt) noexcept;
-extern const char * get_variable_type_name(Sparg<const Variable> variable_opt) noexcept;
+extern Variable::Type get_variable_type(Spparam<const Variable> variable_opt) noexcept;
+extern const char * get_variable_type_name(Spparam<const Variable> variable_opt) noexcept;
 
-extern bool test_variable(Sparg<const Variable> variable_opt) noexcept;
-extern void dump_variable(std::ostream &os, Sparg<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern bool test_variable(Spparam<const Variable> variable_opt) noexcept;
+extern void dump_variable(std::ostream &os, Spparam<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Variable> &variable_fmt);
 
-extern void copy_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Sparg<const Variable> source_opt);
-extern void move_variable(Xptr<Variable> &variable_out, Sparg<Recycler> recycler, Xptr<Variable> &&source_opt);
+extern void copy_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Spparam<const Variable> source_opt);
+extern void move_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Xptr<Variable> &&source_opt);
 
 // This function is useful for breaking dependency circles.
-extern void purge_variable(Sparg<Variable> variable_opt) noexcept;
+extern void purge_variable(Spparam<Variable> variable_opt) noexcept;
 
-extern Variable::Comparison_result compare_variables(Sparg<const Variable> lhs_opt, Sparg<const Variable> rhs_opt) noexcept;
+extern Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, Spparam<const Variable> rhs_opt) noexcept;
 
 }
 

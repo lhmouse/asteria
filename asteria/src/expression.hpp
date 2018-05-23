@@ -41,8 +41,8 @@ public:
 	}
 };
 
-extern void bind_expression(Xptr<Expression> &bound_result_out, Sparg<const Expression> expression_opt, Sparg<const Scope> scope);
-extern void evaluate_expression(Xptr<Reference> &reference_out, Sparg<Recycler> recycler, Sparg<const Expression> expression_opt, Sparg<const Scope> scope);
+extern void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expression> expression_opt, Spparam<const Scope> scope);
+extern void evaluate_expression(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Expression> expression_opt, Spparam<const Scope> scope);
 
 }
 
