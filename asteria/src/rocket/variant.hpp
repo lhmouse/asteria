@@ -109,15 +109,6 @@ namespace details_variant {
 	template<size_t indexT, typename elementT>
 	struct storage_for {
 		alignas(elementT) char data[sizeof(elementT)];
-
-		const elementT * get() const {
-			const auto ptr = static_cast<const void *>(this->data);
-			return static_cast<const elementT *>(ptr);
-		}
-		elementT * get(){
-			const auto ptr = static_cast<void *>(this->data);
-			return static_cast<elementT *>(ptr);
-		}
 	};
 
 	template<size_t indexT, typename ...elementsT>
@@ -137,7 +128,9 @@ namespace details_variant {
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor) const {
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(this->storage_for<indexT, firstT>::get());
+				const auto storage = static_cast<const void *>(static_cast<const storage_for<indexT, firstT> *>(this));
+				const auto ptr = static_cast<const firstT *>(storage);
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(ptr);
 			} else {
 				this->variant_buffer<indexT + 1, remainingT...>::apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
@@ -145,7 +138,9 @@ namespace details_variant {
 		template<typename visitorT>
 		void apply_visitor(size_t expect, visitorT &&visitor){
 			if(expect == indexT){
-				::std::forward<visitorT>(visitor).template dispatch<indexT>(this->storage_for<indexT, firstT>::get());
+				const auto storage = static_cast<void *>(static_cast<storage_for<indexT, firstT> *>(this));
+				const auto ptr = static_cast<firstT *>(storage);
+				::std::forward<visitorT>(visitor).template dispatch<indexT>(ptr);
 			} else {
 				this->variant_buffer<indexT + 1, remainingT...>::apply_visitor(expect, ::std::forward<visitorT>(visitor));
 			}
