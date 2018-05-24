@@ -21,11 +21,13 @@ namespace {
 
 	public:
 		Fancy_deferred_callback(int multiplier, int addend)
-			: Function_base(String::shallow("fancy deferred callback"))
-			, m_multiplier(multiplier), m_addend(addend)
+			: m_multiplier(multiplier), m_addend(addend)
 		{ }
 
 	public:
+		String describe() const override {
+			return String::shallow("fancy deferred callback");
+		}
 		void invoke(Xptr<Reference> &/*result_out*/, Spparam<Recycler> /*recycler*/, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&/*arguments_opt*/) const override {
 			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
 		}

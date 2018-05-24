@@ -50,8 +50,8 @@ public:
 	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &description, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
-extern void prepare_function_scope_lexical(Spparam<Scope> scope, const String &description, const Sptr_vector<const Parameter> &parameters_opt);
+extern void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &source_location, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope_lexical(Spparam<Scope> scope, const String &source_location, const Sptr_vector<const Parameter> &parameters_opt);
 
 }
 

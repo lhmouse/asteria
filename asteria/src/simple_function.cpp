@@ -9,8 +9,8 @@ namespace Asteria {
 
 Simple_function::~Simple_function() = default;
 
-const String & Simple_function::describe() const noexcept {
-	return m_description;
+String Simple_function::describe() const {
+	return ASTERIA_FORMAT_STRING(m_description, " @ ", reinterpret_cast<void *>(m_target));
 }
 void Simple_function::invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {
 	return (*m_target)(result_out, recycler, std::move(this_opt), std::move(arguments_opt));

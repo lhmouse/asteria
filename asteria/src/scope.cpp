@@ -53,18 +53,18 @@ void Scope::defer_callback(Sptr<const Function_base> &&callback){
 namespace {
 	class Argument_getter : public Function_base {
 	private:
-		String m_self_id;
-		String m_description;
+		String m_self_identifier;
+		String m_source_location;
 		Xptr_vector<Reference> m_arguments_opt;
 
 	public:
-		Argument_getter(const String &self_id, const String &parent_description, Xptr_vector<Reference> &&arguments_opt)
-			: m_self_id(self_id), m_description(ASTERIA_FORMAT_STRING("variadic argument getter for ", parent_description)), m_arguments_opt(std::move(arguments_opt))
+		Argument_getter(const String &self_identifier, const String &source_location, Xptr_vector<Reference> &&arguments_opt)
+			: m_self_identifier(self_identifier), m_source_location(source_location), m_arguments_opt(std::move(arguments_opt))
 		{ }
 
 	public:
-		const String & describe() const noexcept override {
-			return m_description;
+		String describe() const override {
+			return ASTERIA_FORMAT_STRING(m_self_identifier, " @ ", m_source_location);
 		}
 		void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
@@ -79,7 +79,7 @@ namespace {
 				// Return the argument at the index specified.
 				const auto index_var = read_reference_opt(arguments_opt.at(0));
 				if(get_variable_type(index_var) != Variable::type_integer){
-					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", m_self_id, "` must be an `integer`.");
+					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", m_self_identifier, "` must be an `integer`.");
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 				const auto index = index_var->get<D_integer>();
@@ -95,7 +95,7 @@ namespace {
 				return copy_reference(result_out, arg); }
 
 			default:
-				ASTERIA_THROW_RUNTIME_ERROR("`", m_self_id, "` accepts no more than one argument.");
+				ASTERIA_THROW_RUNTIME_ERROR("`", m_self_identifier, "` accepts no more than one argument.");
 			}
 		}
 	};
@@ -130,7 +130,7 @@ namespace {
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, identifier, std::move(arg));
 	}
-	void do_create_description(Spparam<Scope> scope, const String &identifier, const String &description){
+	void do_create_source_reference(Spparam<Scope> scope, const String &identifier, const String &description){
 		auto var = std::make_shared<Variable>(D_string(description));
 		Xptr<Reference> arg;
 		Reference::S_constant ref_k = { std::move(var) };
@@ -139,7 +139,7 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &description, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const String &source_location, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt){
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Xptr<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
@@ -147,16 +147,16 @@ void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, co
 	do_set_argument(scope, String::shallow("this"), std::move(this_opt));
 	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spparam<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });
 	// Create pre-defined variables.
-	do_create_argument_getter(scope, String::shallow("__va_arg"), description, std::move(arguments_opt));
-	do_create_description(scope, String::shallow("__func"), description);
+	do_create_source_reference(scope, String::shallow("__source"), source_location);
+	do_create_argument_getter(scope, String::shallow("__va_arg"), source_location, std::move(arguments_opt));
 }
-void prepare_function_scope_lexical(Spparam<Scope> scope, const String &description, const Sptr_vector<const Parameter> &parameters_opt){
+void prepare_function_scope_lexical(Spparam<Scope> scope, const String &source_location, const Sptr_vector<const Parameter> &parameters_opt){
 	// Create null arguments in the local scope.
 	do_set_argument(scope, String::shallow("this"), nullptr);
 	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spparam<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });
 	// Create pre-defined variables.
+	do_create_source_reference(scope, String::shallow("__source"), source_location);
 	do_set_argument(scope, String::shallow("__va_arg"), nullptr);
-	do_create_description(scope, String::shallow("__func"), description);
 }
 
 }
