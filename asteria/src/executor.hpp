@@ -10,13 +10,15 @@ namespace Asteria {
 
 class Executor {
 private:
+	// These are created as needed.
 	Sptr<Recycler> m_recycler_opt;
 	Sptr<Scope> m_root_scope_opt;
+
 	Xptr<Block> m_code_opt;
 
 public:
 	Executor()
-		//
+		: m_recycler_opt(), m_root_scope_opt()
 	{ }
 	~Executor();
 
@@ -28,14 +30,12 @@ private:
 	const Sptr<Scope> & do_get_root_scope();
 
 public:
-	void reset() noexcept;
-
 	std::shared_ptr<Local_variable> set_root_variable(const String &identifier, Stored_value &&value, bool constant = false);
 	std::shared_ptr<Local_variable> set_root_constant(const String &identifier, Stored_value &&value);
 	std::shared_ptr<Local_variable> set_root_function(const String &identifier, Sptr<const Function_base> &&func);
-	std::shared_ptr<Local_variable> set_root_function(const String &identifier, String description, Function_base_prototype *target);
+	std::shared_ptr<Local_variable> set_root_slim_function(const String &identifier, String description, Function_base_prototype *target);
 
-	
+	void reset() noexcept;
 };
 
 }

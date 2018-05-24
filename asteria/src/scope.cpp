@@ -64,7 +64,7 @@ namespace {
 
 	public:
 		String describe() const override {
-			return ASTERIA_FORMAT_STRING(m_self_identifier, " @ ", m_source_location);
+			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source_location, "'");
 		}
 		void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){

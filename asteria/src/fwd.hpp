@@ -46,8 +46,8 @@ class Stored_reference;
 // Runtime objects (neither copyable nor movable)
 class Opaque_base;
 class Function_base;
+class Slim_function;
 class Instantiated_function;
-class Simple_function;
 class Variable;
 class Reference;
 class Local_variable;

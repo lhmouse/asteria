@@ -10,7 +10,7 @@
 #include "stored_reference.hpp"
 #include "local_variable.hpp"
 #include "function_base.hpp"
-#include "simple_function.hpp"
+#include "slim_function.hpp"
 
 namespace Asteria {
 
@@ -55,8 +55,8 @@ std::shared_ptr<Local_variable> Executor::set_root_constant(const String &identi
 std::shared_ptr<Local_variable> Executor::set_root_function(const String &identifier, Sptr<const Function_base> &&func){
 	return set_root_constant(identifier, std::move(func));
 }
-std::shared_ptr<Local_variable> Executor::set_root_function(const String &identifier, String description, Function_base_prototype *target){
-	return set_root_function(identifier, std::make_shared<Simple_function>(std::move(description), target));
+std::shared_ptr<Local_variable> Executor::set_root_slim_function(const String &identifier, String description, Function_base_prototype *target){
+	return set_root_function(identifier, std::make_shared<Slim_function>(std::move(description), target));
 }
 
 }
