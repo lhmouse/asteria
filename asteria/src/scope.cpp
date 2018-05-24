@@ -54,15 +54,18 @@ namespace {
 	class Argument_getter : public Function_base {
 	private:
 		String m_self_id;
+		String m_description;
 		Xptr_vector<Reference> m_arguments_opt;
 
 	public:
-		Argument_getter(String description, String self_id, Xptr_vector<Reference> arguments_opt)
-			: Function_base(std::move(description))
-			, m_self_id(std::move(self_id)), m_arguments_opt(std::move(arguments_opt))
+		Argument_getter(const String &self_id, const String &parent_description, Xptr_vector<Reference> &&arguments_opt)
+			: m_self_id(self_id), m_description(ASTERIA_FORMAT_STRING("variadic argument getter for ", parent_description)), m_arguments_opt(std::move(arguments_opt))
 		{ }
 
 	public:
+		const String & describe() const noexcept override {
+			return m_description;
+		}
 		void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
 			case 0: {
@@ -121,8 +124,7 @@ namespace {
 	}
 
 	void do_create_argument_getter(Spparam<Scope> scope, const String &identifier, const String &description, Xptr_vector<Reference> &&arguments_opt){
-		auto getter_description = ASTERIA_FORMAT_STRING("variadic argument getter for ", description);
-		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(std::move(getter_description), identifier, std::move(arguments_opt))));
+		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(identifier, description, std::move(arguments_opt))));
 		Xptr<Reference> arg;
 		Reference::S_constant ref_k = { std::move(var) };
 		set_reference(arg, std::move(ref_k));

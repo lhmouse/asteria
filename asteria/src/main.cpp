@@ -10,14 +10,6 @@
 
 using namespace Asteria;
 
-namespace {
-	struct My_opaque : public Opaque_base {
-		My_opaque()
-			: Opaque_base(String::shallow("my fancy opaque class"))
-		{ }
-	};
-}
-
 int main(){
 	auto recycler = std::make_shared<Recycler>();
 	auto backup = std::make_shared<Recycler>();
@@ -59,8 +51,8 @@ int main(){
 	set_variable(root, recycler, std::move(obj));
 	copy_variable(copy, backup, root);
 
-	set_variable(temp, backup, D_opaque(std::make_shared<My_opaque>()));
-	copy->get<D_object>().emplace(String::shallow("opaque"), std::move(temp));
+	set_variable(temp, recycler, D_string("my string"));
+	copy->get<D_object>().emplace(String::shallow("new"), std::move(temp));
 
 	std::cerr <<sptr_fmt(root) <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

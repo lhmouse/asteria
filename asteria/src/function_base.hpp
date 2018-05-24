@@ -4,14 +4,14 @@
 #ifndef ASTERIA_FUNCTION_BASE_HPP_
 #define ASTERIA_FUNCTION_BASE_HPP_
 
-#include "opaque_base.hpp"
+#include "fwd.hpp"
 
 namespace Asteria {
 
-class Function_base : public Opaque_base {
+class Function_base {
 public:
-	explicit Function_base(String description)
-		: Opaque_base(std::move(description))
+	Function_base() noexcept
+		// :
 	{ }
 	virtual ~Function_base();
 
@@ -19,6 +19,7 @@ public:
 	Function_base & operator=(const Function_base &) = delete;
 
 public:
+	virtual const String & describe() const noexcept = 0;
 	virtual void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const = 0;
 };
 

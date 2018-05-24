@@ -274,8 +274,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a local reference for the function.
 			Xptr<Variable> func_var;
-			auto description = ASTERIA_FORMAT_STRING("function defined at \'", params.source_location, "\'");
-			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(std::move(description), params.parameters_opt, scope, std::move(bound_body))));
+			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(
+				ASTERIA_FORMAT_STRING("function defined at \'", params.source_location, "\'"), params.parameters_opt, scope, std::move(bound_body))));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, true);
@@ -554,9 +554,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			Xptr<Block> bound_body;
 			bind_block(bound_body, params.body_opt, scope);
 			// Register the function as a deferred callback of the current scope.
-			auto description = ASTERIA_FORMAT_STRING("defer block defined at \'", params.source_location, "\'");
-			auto func = std::make_shared<Instantiated_function>(std::move(description), Sptr_vector<const Parameter>(), scope, std::move(bound_body));
-			scope->defer_callback(std::move(func));
+			scope->defer_callback(std::make_shared<Instantiated_function>(
+				ASTERIA_FORMAT_STRING("defer block defined at \'", params.source_location, "\'"), Sptr_vector<const Parameter>(), scope, std::move(bound_body)));
 			break; }
 
 		case Statement::type_break_statement: {

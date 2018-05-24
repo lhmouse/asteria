@@ -9,12 +9,9 @@
 namespace Asteria {
 
 class Opaque_base {
-private:
-	const String m_description;
-
 public:
-	explicit Opaque_base(String description)
-		: m_description(std::move(description))
+	Opaque_base() noexcept
+		// :
 	{ }
 	virtual ~Opaque_base();
 
@@ -22,9 +19,7 @@ public:
 	Opaque_base & operator=(const Opaque_base &) = delete;
 
 public:
-	const String & describe() const noexcept {
-		return m_description;
-	}
+	virtual const String & describe() const noexcept = 0;
 };
 
 }

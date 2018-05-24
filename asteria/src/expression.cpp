@@ -412,8 +412,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
 			Xptr<Variable> func_var;
-			auto description = ASTERIA_FORMAT_STRING("lambda defined at \'", params.source_location, "\'");
-			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(std::move(description), params.parameters_opt, scope, std::move(bound_body))));
+			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(
+				ASTERIA_FORMAT_STRING("lambda defined at \'", params.source_location, "\'"), params.parameters_opt, scope, std::move(bound_body))));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };
 			set_reference(result_ref, std::move(ref_d));
