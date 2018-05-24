@@ -30,14 +30,14 @@ public:
 	std::size_t size() const noexcept {
 		return m_nodes.size();
 	}
-	decltype(m_nodes)::const_iterator begin() const noexcept {
-		return m_nodes.begin();
-	}
-	decltype(m_nodes)::const_iterator end() const noexcept {
-		return m_nodes.end();
-	}
-	decltype(m_nodes)::const_reference at(std::size_t n) const {
+	const Expression_node & at(std::size_t n) const {
 		return m_nodes.at(n);
+	}
+	const Expression_node * begin() const noexcept {
+		return m_nodes.data();
+	}
+	const Expression_node * end() const noexcept {
+		return m_nodes.data() + m_nodes.size();
 	}
 };
 

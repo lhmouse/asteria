@@ -43,14 +43,14 @@ public:
 	std::size_t size() const noexcept {
 		return m_statements.size();
 	}
-	decltype(m_statements)::const_iterator begin() const noexcept {
-		return m_statements.begin();
-	}
-	decltype(m_statements)::const_iterator end() const noexcept {
-		return m_statements.end();
-	}
-	decltype(m_statements)::const_reference at(std::size_t n) const {
+	const Statement & at(std::size_t n) const {
 		return m_statements.at(n);
+	}
+	const Statement * begin() const noexcept {
+		return m_statements.data();
+	}
+	const Statement * end() const noexcept {
+		return m_statements.data() + m_statements.size();
 	}
 };
 
