@@ -10,7 +10,6 @@ namespace Asteria {
 
 class Executor {
 private:
-	// These are created as needed.
 	Sptr<Recycler> m_recycler_opt;
 	Sptr<Scope> m_root_scope_opt;
 
