@@ -8,6 +8,7 @@
 #include "block.hpp"
 #include "stored_value.hpp"
 #include "stored_reference.hpp"
+#include "local_variable.hpp"
 #include "function_base.hpp"
 #include "simple_function.hpp"
 
@@ -34,25 +35,27 @@ void Executor::reset() noexcept {
 	m_code_opt.reset();
 }
 
-void Executor::set_root_variable(const String &identifier, Stored_value &&value, bool constant){
-	// Create a reference.
+std::shared_ptr<Local_variable> Executor::set_root_variable(const String &identifier, Stored_value &&value, bool constant){
 	Xptr<Variable> var;
 	set_variable(var, do_get_recycler(), std::move(value));
+	auto local_var = std::make_shared<Local_variable>(std::move(var), constant);
+	// Create a reference.
 	Xptr<Reference> ref;
-	Reference::S_temporary_value ref_t = { std::move(var) };
-	set_reference(ref, std::move(ref_t));
-	materialize_reference(ref, do_get_recycler(), constant);
+	Reference::S_local_variable ref_l = { local_var };
+	set_reference(ref, std::move(ref_l));
 	// Insert it into the root scope.
 	const auto wref = do_get_root_scope()->drill_for_local_reference(identifier);
-	return move_reference(wref, std::move(ref));
+	move_reference(wref, std::move(ref));
+	// Return a pointer to the original local variable, allowing subsequent access to it.
+	return local_var;
 }
-void Executor::set_root_constant(const String &identifier, Stored_value &&value){
+std::shared_ptr<Local_variable> Executor::set_root_constant(const String &identifier, Stored_value &&value){
 	return set_root_variable(identifier, std::move(value), true);
 }
-void Executor::set_root_function(const String &identifier, Sptr<const Function_base> &&func){
+std::shared_ptr<Local_variable> Executor::set_root_function(const String &identifier, Sptr<const Function_base> &&func){
 	return set_root_constant(identifier, std::move(func));
 }
-void Executor::set_root_function(const String &identifier, String description, Function_base_prototype *target){
+std::shared_ptr<Local_variable> Executor::set_root_function(const String &identifier, String description, Function_base_prototype *target){
 	return set_root_function(identifier, std::make_shared<Simple_function>(std::move(description), target));
 }
 

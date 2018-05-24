@@ -30,10 +30,10 @@ private:
 public:
 	void reset() noexcept;
 
-	void set_root_variable(const String &identifier, Stored_value &&value, bool constant = false);
-	void set_root_constant(const String &identifier, Stored_value &&value);
-	void set_root_function(const String &identifier, Sptr<const Function_base> &&func);
-	void set_root_function(const String &identifier, String description, Function_base_prototype *target);
+	std::shared_ptr<Local_variable> set_root_variable(const String &identifier, Stored_value &&value, bool constant = false);
+	std::shared_ptr<Local_variable> set_root_constant(const String &identifier, Stored_value &&value);
+	std::shared_ptr<Local_variable> set_root_function(const String &identifier, Sptr<const Function_base> &&func);
+	std::shared_ptr<Local_variable> set_root_function(const String &identifier, String description, Function_base_prototype *target);
 
 	
 };
