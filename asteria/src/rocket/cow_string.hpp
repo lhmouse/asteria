@@ -309,10 +309,14 @@ namespace details_cow_string {
 
 	protected:
 		template<typename pointerT>
-		pointerT do_assert_valid_pointer(pointerT ptr) const noexcept {
+		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept {
 			const auto str = this->m_str;
 			ROCKET_ASSERT_MSG(str, "This iterator has not been initialized.");
-			ROCKET_ASSERT_MSG(static_cast<typename stringT::size_type>(ptr - str->data()) <= str->size(), "This iterator has been invalidated.");
+			const auto dist = static_cast<typename stringT::size_type>(ptr - str->data());
+			ROCKET_ASSERT_MSG(dist <= str->size(), "This iterator has been invalidated.");
+			if(to_dereference){
+				ROCKET_ASSERT_MSG(dist < str->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
+			}
 			return ptr;
 		}
 
@@ -341,7 +345,7 @@ namespace details_cow_string {
 	private:
 		string_iterator(const stringT *str, pointer ptr) noexcept
 			: string_iterator_base<stringT>(str)
-			, m_ptr(this->do_assert_valid_pointer(ptr))
+			, m_ptr(this->do_assert_valid_pointer(ptr, false))
 		{ }
 
 	public:
@@ -352,22 +356,22 @@ namespace details_cow_string {
 
 	public:
 		pointer tell() const noexcept {
-			return this->do_assert_valid_pointer(this->m_ptr);
+			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
 		pointer tell_owned_by(const stringT *str) const noexcept {
 			ROCKET_ASSERT(this->parent() == str);
 			return this->tell();
 		}
 		string_iterator & seek(pointer ptr) noexcept {
-			this->m_ptr = this->do_assert_valid_pointer(ptr);
+			this->m_ptr = this->do_assert_valid_pointer(ptr, false);
 			return *this;
 		}
 
 		reference operator*() const noexcept {
-			return *(this->tell());
+			return *(this->do_assert_valid_pointer(this->m_ptr, true));
 		}
 		reference operator[](difference_type off) const noexcept {
-			return *(this->do_assert_valid_pointer(this->tell() + off));
+			return *(this->do_assert_valid_pointer(this->m_ptr + off, true));
 		}
 	};
 
@@ -390,7 +394,7 @@ namespace details_cow_string {
 	private:
 		string_iterator(const stringT *str, pointer ptr) noexcept
 			: string_iterator_base<stringT>(str)
-			, m_ptr(this->do_assert_valid_pointer(ptr))
+			, m_ptr(this->do_assert_valid_pointer(ptr, false))
 		{ }
 
 	public:
@@ -405,22 +409,22 @@ namespace details_cow_string {
 
 	public:
 		pointer tell() const noexcept {
-			return this->do_assert_valid_pointer(this->m_ptr);
+			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
 		pointer tell_owned_by(const stringT *str) const noexcept {
 			ROCKET_ASSERT(this->parent() == str);
 			return this->tell();
 		}
 		string_iterator & seek(pointer ptr) noexcept {
-			this->m_ptr = this->do_assert_valid_pointer(ptr);
+			this->m_ptr = this->do_assert_valid_pointer(ptr, false);
 			return *this;
 		}
 
 		reference operator*() const noexcept {
-			return *(this->tell());
+			return *(this->do_assert_valid_pointer(this->m_ptr, true));
 		}
 		reference operator[](difference_type off) const noexcept {
-			return *(this->do_assert_valid_pointer(this->tell() + off));
+			return *(this->do_assert_valid_pointer(this->m_ptr + off, true));
 		}
 	};
 
