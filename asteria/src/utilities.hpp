@@ -74,24 +74,16 @@ public:
 	}
 };
 
-constexpr bool are_debug_logs_enabled() noexcept {
-#ifdef ENABLE_DEBUG_LOGS
-	return true;
-#else
-	return false;
-#endif
-}
-
+extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(Logger &&logger) noexcept;
-ROCKET_NORETURN extern bool throw_runtime_error(Logger &&logger);
+
+ROCKET_NORETURN extern void throw_runtime_error(Logger &&logger);
 
 }
 
-#define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(	\
-                                                ::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__))	\
-                                              ))
-#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(	\
-                                                ::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__))	\
-                                              ))
+#define ASTERIA_CREATE_LOGGER(...)            (::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__)))
+#define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_LOGGER(__VA_ARGS__).get_stream().extract_string())
+#define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(ASTERIA_CREATE_LOGGER(__VA_ARGS__)))
+#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(ASTERIA_CREATE_LOGGER(__VA_ARGS__)))
 
 #endif

@@ -121,9 +121,8 @@ namespace {
 	}
 
 	void do_create_argument_getter(Spparam<Scope> scope, const String &identifier, const String &description, Xptr_vector<Reference> &&arguments_opt){
-		rocket::insertable_ostream desc_os;
-		desc_os <<"variadic argument getter for " <<description;
-		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(desc_os.extract_string(), identifier, std::move(arguments_opt))));
+		auto getter_description = ASTERIA_FORMAT_STRING("variadic argument getter for ", description);
+		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(std::move(getter_description), identifier, std::move(arguments_opt))));
 		Xptr<Reference> arg;
 		Reference::S_constant ref_k = { std::move(var) };
 		set_reference(arg, std::move(ref_k));

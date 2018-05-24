@@ -405,9 +405,6 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 
 		case Expression_node::type_lambda_definition: {
 			const auto &params = node.get<Expression_node::S_lambda_definition>();
-			// Make a descriptive name.
-			rocket::insertable_ostream desc_os;
-			desc_os <<"lambda defined at '" <<params.source_location <<"'";
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, params.source_location, params.parameters_opt);
@@ -415,7 +412,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
 			// Create a temporary variable for the function.
 			Xptr<Variable> func_var;
-			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(desc_os.extract_string(), params.parameters_opt, scope, std::move(bound_body))));
+			auto description = ASTERIA_FORMAT_STRING("lambda defined at \'", params.source_location, "\'");
+			set_variable(func_var, recycler, D_function(std::make_shared<Instantiated_function>(std::move(description), params.parameters_opt, scope, std::move(bound_body))));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };
 			set_reference(result_ref, std::move(ref_d));

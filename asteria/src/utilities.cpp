@@ -64,6 +64,13 @@ void Logger::do_put(const void *value){
 	m_stream <<value;
 }
 
+bool are_debug_logs_enabled() noexcept {
+#ifdef ENABLE_DEBUG_LOGS
+	return true;
+#else
+	return false;
+#endif
+}
 bool write_log_to_stderr(Logger &&logger) noexcept
 try {
 	auto &stream = logger.get_stream();
@@ -83,7 +90,8 @@ try {
 } catch(...){
 	return false;
 }
-bool throw_runtime_error(Logger &&logger){
+
+void throw_runtime_error(Logger &&logger){
 	auto &stream = logger.get_stream();
 	stream.set_caret(0);
 	stream <<logger.get_func() <<": ";
