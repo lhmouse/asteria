@@ -108,7 +108,10 @@ namespace details_variant {
 
 	template<size_t indexT, typename elementT>
 	struct storage_for {
-		alignas(elementT) char data[sizeof(elementT)];
+		union {
+			char size [sizeof(elementT)];
+			alignas(elementT) char align;
+		} un;
 	};
 
 	template<size_t indexT, typename ...elementsT>
@@ -122,7 +125,6 @@ namespace details_variant {
 			ROCKET_ASSERT_MSG(false, "type index expected is out of range");
 		}
 	};
-
 	template<size_t indexT, typename firstT, typename ...remainingT>
 	struct variant_buffer<indexT, firstT, remainingT...> : private storage_for<indexT, firstT>, public variant_buffer<indexT + 1, remainingT...> {
 		template<typename visitorT>
