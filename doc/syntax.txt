@@ -126,12 +126,12 @@ expression-trailer ::=
 postifix-operator-trailer ::=
 	( "++" | "--" ) expression-trailer-opt
 infix-operator-trailer ::=
-	( "+" | "-" | "*" | "/"  | "%"  | "<<" | ">>" | ">>>" |
-	  "&" | "|" | "^" | "&&" | "||" | "==" | "!=" | "<"   | ">" | "<=" | ">=" ) expression
+	( "+" | "-" | "*" | "/"  | "%"  | "<<" | ">>" | "<<<" | ">>>" |
+	  "&" | "|" | "^" | "&&" | "||" | "==" | "!=" | "<"   | ">"   | "<=" | ">=" ) expression
 ternary-trailer ::=
 	"?" expression-opt ":" expression
 assignment-trailer ::=
-	( "+=" | "-=" | "*=" | "/="  | "%="  | "<<=" | ">>=" | ">>>=" |
+	( "+=" | "-=" | "*=" | "/="  | "%="  | "<<=" | ">>=" | "<<<=" | ">>>=" |
 	  "&=" | "|=" | "^=" | "&&=" | "||=" | "="   ) expression
 
 function-call-trailer ::=

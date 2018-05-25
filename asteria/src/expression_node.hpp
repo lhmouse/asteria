@@ -40,8 +40,8 @@ public:
 		operator_infix_div      = 63, // /
 		operator_infix_mod      = 64, // %
 		operator_infix_sll      = 65, // <<<
-		operator_infix_sla      = 66, // <<
-		operator_infix_srl      = 67, // >>>
+		operator_infix_srl      = 66, // >>>
+		operator_infix_sla      = 67, // <<
 		operator_infix_sra      = 68, // >>
 		operator_infix_and_b    = 69, // &
 		operator_infix_or_b     = 70, // |

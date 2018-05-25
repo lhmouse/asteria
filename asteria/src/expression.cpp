@@ -241,20 +241,9 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		return D_integer(N_unsigned(lhs) << rhs);
-	}
-	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs){
-		if(rhs < 0){
-			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
-		}
-		if(rhs >= 64){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
-		}
-		const auto mask = INT64_MIN >> rhs;
-		if(((lhs & mask) != 0) && ((lhs & mask) != mask)){
-			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
-		}
-		return D_integer(N_unsigned(lhs) << rhs);
+		auto reg = N_unsigned(lhs);
+		reg <<= rhs;
+		return D_integer(reg);
 	}
 	D_integer do_shift_right_logical(D_integer lhs, D_integer rhs){
 		if(rhs < 0){
@@ -263,7 +252,25 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		return D_integer(N_unsigned(lhs) >> rhs);
+		auto reg = N_unsigned(lhs);
+		reg >>= rhs;
+		return D_integer(reg);
+	}
+	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs){
+		if(rhs < 0){
+			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+		}
+		if(rhs >= 64){
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
+		}
+		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
+		auto reg = N_unsigned(lhs);
+		const auto out_mask = -(reg >> bits_rem) << bits_rem;
+		if((reg & out_mask) != out_mask){
+			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
+		}
+		reg <<= rhs;
+		return D_integer(reg);
 	}
 	D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs){
 		if(rhs < 0){
@@ -272,7 +279,12 @@ namespace {
 		if(rhs >= 64){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
-		return lhs >> rhs;
+		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
+		auto reg = N_unsigned(lhs);
+		const auto in_mask = -(reg >> 63) << bits_rem;
+		reg >>= rhs;
+		reg |= in_mask;
+		return D_integer(reg);
 	}
 
 	D_integer do_bitwise_not(D_integer rhs){
@@ -923,6 +935,27 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
+			case Expression_node::operator_infix_srl: {
+				// Pop two operands off the stack.
+				auto lhs_ref = do_pop_reference(stack);
+				auto rhs_ref = do_pop_reference(stack);
+				// Shift the first operand to the right by the number of bits specified by the second operand
+				// Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+				// Both operands have to be integers.
+				const auto lhs_var = read_reference_opt(lhs_ref);
+				const auto rhs_var = read_reference_opt(rhs_ref);
+				const auto lhs_type = get_variable_type(lhs_var);
+				const auto rhs_type = get_variable_type(rhs_var);
+				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+					const auto lhs = lhs_var->get<D_integer>();
+					const auto rhs = rhs_var->get<D_integer>();
+					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_logical(lhs, rhs));
+				} else {
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+				}
+				do_push_reference(stack, std::move(lhs_ref));
+				break; }
+
 			case Expression_node::operator_infix_sla: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -939,27 +972,6 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
-				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
-				}
-				do_push_reference(stack, std::move(lhs_ref));
-				break; }
-
-			case Expression_node::operator_infix_srl: {
-				// Pop two operands off the stack.
-				auto lhs_ref = do_pop_reference(stack);
-				auto rhs_ref = do_pop_reference(stack);
-				// Shift the first operand to the right by the number of bits specified by the second operand
-				// Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-				// Both operands have to be integers.
-				const auto lhs_var = read_reference_opt(lhs_ref);
-				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_logical(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
