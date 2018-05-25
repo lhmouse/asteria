@@ -8,7 +8,7 @@
 #include <utility> // std::move(), std::forward(), std::pair<>
 #include <memory> // std::shared_ptr<>
 #include <cstddef> // std::nullptr_t
-#include <cstdint> // std::int64_t
+#include <cstdint> // std::int64_t, std::uint64_t
 #include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
 #include "rocket/cow_string.hpp"
@@ -90,8 +90,11 @@ using Xptr_vector = T_vector<Xptr<ElementT>>;
 template<typename ValueT>
 using Xptr_string_map = T_string_map<Xptr<ValueT>>;
 
-using Function_base_prototype = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+// Data types used internally
+using N_unsigned            = std::uint64_t;
+using N_function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
+// Data types exposed to users
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;

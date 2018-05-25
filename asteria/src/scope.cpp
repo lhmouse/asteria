@@ -83,11 +83,11 @@ namespace {
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 				const auto index = index_var->get<D_integer>();
-				auto normalized_index = (index >= 0) ? index : static_cast<D_integer>(static_cast<std::uint64_t>(index) + m_arguments_opt.size());
+				auto normalized_index = (index >= 0) ? index : D_integer(N_unsigned(index) + m_arguments_opt.size());
 				if(normalized_index < 0){
 					ASTERIA_DEBUG_LOG("Argument subscript falls before the front: index = ", index, ", size = ", m_arguments_opt.size());
 					return set_reference(result_out, nullptr);
-				} else if(normalized_index >= static_cast<D_integer>(m_arguments_opt.size())){
+				} else if(normalized_index >= D_integer(m_arguments_opt.size())){
 					ASTERIA_DEBUG_LOG("Argument subscript falls after the back: index = ", index, ", size = ", m_arguments_opt.size());
 					return set_reference(result_out, nullptr);
 				}

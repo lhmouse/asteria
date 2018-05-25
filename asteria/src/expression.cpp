@@ -241,7 +241,7 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
+		return D_integer(N_unsigned(lhs) << rhs);
 	}
 	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs){
 		if(rhs < 0){
@@ -254,7 +254,7 @@ namespace {
 		if(((lhs & mask) != 0) && ((lhs & mask) != mask)){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
 		}
-		return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
+		return D_integer(N_unsigned(lhs) << rhs);
 	}
 	D_integer do_shift_right_logical(D_integer lhs, D_integer rhs){
 		if(rhs < 0){
@@ -263,7 +263,7 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) >> rhs);
+		return D_integer(N_unsigned(lhs) >> rhs);
 	}
 	D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs){
 		if(rhs < 0){
@@ -322,12 +322,12 @@ namespace {
 		if(rhs == 0){
 			return res;
 		}
-		const auto count = static_cast<std::uint64_t>(rhs);
+		const auto count = N_unsigned(rhs);
 		if(lhs.size() > res.max_size() / count){
 			ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` time(s) would result in an overlong string that cannot be allocated.");
 		}
 		res.reserve(lhs.size() * static_cast<std::size_t>(count));
-		auto mask = static_cast<std::uint64_t>(1) << 63;
+		auto mask = N_unsigned(1) << 63;
 		for(;;){
 			if(count & mask){
 				res.append(lhs);

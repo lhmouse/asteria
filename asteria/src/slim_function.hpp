@@ -12,10 +12,10 @@ namespace Asteria {
 class Slim_function : public Function_base {
 private:
 	D_string m_description;
-	Function_base_prototype *m_target;
+	N_function_prototype *m_target;
 
 public:
-	Slim_function(D_string description, Function_base_prototype *target)
+	Slim_function(D_string description, N_function_prototype *target)
 		: m_description(std::move(description)), m_target(target)
 	{ }
 	~Slim_function() override;

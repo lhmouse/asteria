@@ -127,11 +127,11 @@ Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
 		}
 		const auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-		auto normalized_index = (params.index >= 0) ? params.index : static_cast<D_integer>(static_cast<std::uint64_t>(params.index) + array.size());
+		auto normalized_index = (params.index >= 0) ? params.index : D_integer(N_unsigned(params.index) + array.size());
 		if(normalized_index < 0){
 			ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", params.index, ", size = ", array.size());
 			return nullptr;
-		} else if(normalized_index >= static_cast<D_integer>(array.size())){
+		} else if(normalized_index >= D_integer(array.size())){
 			ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 			return nullptr;
 		}
@@ -187,25 +187,25 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 		}
 		auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-		auto normalized_index = (params.index >= 0) ? params.index : static_cast<D_integer>(static_cast<std::uint64_t>(params.index) + array.size());
+		auto normalized_index = (params.index >= 0) ? params.index : D_integer(N_unsigned(params.index) + array.size());
 		if(normalized_index < 0){
 			// Prepend `null`s until the subscript designates the beginning.
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
-			const auto count_to_prepend = 0 - static_cast<std::uint64_t>(normalized_index);
+			const auto count_to_prepend = 0 - N_unsigned(normalized_index);
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
 			array.insert(array.begin(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_prepend)));
 			normalized_index = 0;
-		} else if(normalized_index >= static_cast<D_integer>(array.size())){
+		} else if(normalized_index >= D_integer(array.size())){
 			// Append `null`s until the subscript designates the end.
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
-			const auto count_to_append = static_cast<std::uint64_t>(normalized_index) - array.size() + 1;
+			const auto count_to_append = N_unsigned(normalized_index) - array.size() + 1;
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
 			array.insert(array.end(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_append)));
-			normalized_index = static_cast<D_integer>(array.size() - 1);
+			normalized_index = D_integer(array.size() - 1);
 		}
 		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return std::ref(variable_opt); }
@@ -296,11 +296,11 @@ namespace {
 			}
 			const auto &array = parent->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-			auto normalized_index = (params.index >= 0) ? params.index : static_cast<D_integer>(static_cast<std::uint64_t>(params.index) + array.size());
+			auto normalized_index = (params.index >= 0) ? params.index : D_integer(N_unsigned(params.index) + array.size());
 			if(normalized_index < 0){
 				ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", params.index, ", size = ", array.size());
 				return nullptr;
-			} else if(normalized_index >= static_cast<D_integer>(array.size())){
+			} else if(normalized_index >= D_integer(array.size())){
 				ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", params.index, ", size = ", array.size());
 				return nullptr;
 			}
