@@ -56,12 +56,10 @@ class Recycler;
 class Executor;
 
 // Aliases.
-using Cow_string = rocket::cow_string;
-
 template<typename ElementT>
 using T_vector = std::vector<ElementT>;
 template<typename ElementT>
-using T_string_map = std::unordered_map<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
+using T_string_map = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
 
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
@@ -91,13 +89,15 @@ template<typename ValueT>
 using Xptr_string_map = T_string_map<Xptr<ValueT>>;
 
 // Data types used internally
-using N_unsigned            = std::uint64_t;
-using N_function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+using Signed_integer      = std::int64_t;
+using Unsigned_integer    = std::uint64_t;
+using Cow_string          = rocket::cow_string;
+using Function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
 // Data types exposed to users
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
-using D_integer   = std::int64_t;
+using D_integer   = Signed_integer;
 using D_double    = double;
 using D_string    = Cow_string;
 using D_opaque    = Xptr<Opaque_base>;

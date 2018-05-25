@@ -44,14 +44,14 @@ public:
 		return m_parent_opt;
 	}
 
-	Sptr<const Reference> get_local_reference_opt(const D_string &identifier) const noexcept;
-	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const D_string &identifier);
+	Sptr<const Reference> get_local_reference_opt(const Cow_string &identifier) const noexcept;
+	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const Cow_string &identifier);
 
 	void defer_callback(Sptr<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const D_string &source_location, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
-extern void prepare_function_scope_lexical(Spparam<Scope> scope, const D_string &source_location, const Sptr_vector<const Parameter> &parameters_opt);
+extern void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const Cow_string &source_location, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope_lexical(Spparam<Scope> scope, const Cow_string &source_location, const Sptr_vector<const Parameter> &parameters_opt);
 
 }
 

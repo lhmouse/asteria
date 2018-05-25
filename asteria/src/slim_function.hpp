@@ -11,17 +11,17 @@ namespace Asteria {
 
 class Slim_function : public Function_base {
 private:
-	D_string m_description;
-	N_function_prototype *m_target;
+	Cow_string m_description;
+	Function_prototype *m_target;
 
 public:
-	Slim_function(D_string description, N_function_prototype *target)
+	Slim_function(Cow_string description, Function_prototype *target)
 		: m_description(std::move(description)), m_target(target)
 	{ }
 	~Slim_function() override;
 
 public:
-	D_string describe() const override;
+	Cow_string describe() const override;
 	void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const override;
 };
 

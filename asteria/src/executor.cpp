@@ -55,7 +55,7 @@ std::shared_ptr<Local_variable> Executor::set_root_constant(const D_string &iden
 std::shared_ptr<Local_variable> Executor::set_root_function(const D_string &identifier, Sptr<const Function_base> &&func){
 	return set_root_constant(identifier, std::move(func));
 }
-std::shared_ptr<Local_variable> Executor::set_root_slim_function(const D_string &identifier, D_string description, N_function_prototype *target){
+std::shared_ptr<Local_variable> Executor::set_root_slim_function(const D_string &identifier, D_string description, Function_prototype *target){
 	return set_root_function(identifier, std::make_shared<Slim_function>(std::move(description), target));
 }
 
