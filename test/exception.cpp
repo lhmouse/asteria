@@ -24,8 +24,8 @@ int main(){
 	} catch(Exception &e){
 		const auto ref = e.get_reference_opt();
 		ASTERIA_TEST_CHECK(ref);
-		set_variable(drill_reference(ref), recycler, D_string(String::shallow("hello")));
+		set_variable(drill_reference(ref), recycler, D_string(D_string::shallow("hello")));
 	}
 	ASTERIA_TEST_CHECK(local_var->get_variable_opt()->get_type() == Variable::type_string);
-	ASTERIA_TEST_CHECK(local_var->get_variable_opt()->get<D_string>() == String::shallow("hello"));
+	ASTERIA_TEST_CHECK(local_var->get_variable_opt()->get<D_string>() == D_string::shallow("hello"));
 }

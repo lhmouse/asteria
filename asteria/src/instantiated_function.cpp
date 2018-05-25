@@ -13,7 +13,7 @@ namespace Asteria {
 
 Instantiated_function::~Instantiated_function() = default;
 
-String Instantiated_function::describe() const {
+D_string Instantiated_function::describe() const {
 	return ASTERIA_FORMAT_STRING(m_category, " @ '", m_source_location, "'");
 }
 void Instantiated_function::invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const {

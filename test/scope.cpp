@@ -25,8 +25,8 @@ namespace {
 		{ }
 
 	public:
-		String describe() const override {
-			return String::shallow("fancy deferred callback");
+		D_string describe() const override {
+			return D_string::shallow("fancy deferred callback");
 		}
 		void invoke(Xptr<Reference> &/*result_out*/, Spparam<Recycler> /*recycler*/, Xptr<Reference> &&/*this_opt*/, Xptr_vector<Reference> &&/*arguments_opt*/) const override {
 			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
@@ -42,16 +42,16 @@ int main(){
 	set_variable(one->drill_for_variable(), recycler, D_integer(42));
 	one->set_constant(true);
 	Reference::S_local_variable lref = { one };
-	auto wref = scope->drill_for_local_reference(String::shallow("one"));
+	auto wref = scope->drill_for_local_reference(D_string::shallow("one"));
 	set_reference(wref, std::move(lref));
 
-	auto ref = scope->get_local_reference_opt(String::shallow("one"));
+	auto ref = scope->get_local_reference_opt(D_string::shallow("one"));
 	ASTERIA_TEST_CHECK(ref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->get_variable_opt().get());
 
-	ref = scope->get_local_reference_opt(String::shallow("nonexistent"));
+	ref = scope->get_local_reference_opt(D_string::shallow("nonexistent"));
 	ASTERIA_TEST_CHECK(ref == nullptr);
 
 	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14

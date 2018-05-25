@@ -56,12 +56,12 @@ class Recycler;
 class Executor;
 
 // Aliases.
-using String = rocket::cow_string;
+using Cow_string = rocket::cow_string;
 
 template<typename ElementT>
 using T_vector = std::vector<ElementT>;
 template<typename ElementT>
-using T_string_map = std::unordered_map<String, ElementT, String::hash, String::equal_to>;
+using T_string_map = std::unordered_map<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
 
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
@@ -96,7 +96,7 @@ using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_double    = double;
-using D_string    = String;
+using D_string    = Cow_string;
 using D_opaque    = Xptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
 using D_array     = Xptr_vector<Variable>;

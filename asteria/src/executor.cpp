@@ -35,7 +35,7 @@ void Executor::reset() noexcept {
 	m_code_opt.reset();
 }
 
-std::shared_ptr<Local_variable> Executor::set_root_variable(const String &identifier, Stored_value &&value, bool constant){
+std::shared_ptr<Local_variable> Executor::set_root_variable(const D_string &identifier, Stored_value &&value, bool constant){
 	Xptr<Variable> var;
 	set_variable(var, do_get_recycler(), std::move(value));
 	auto local_var = std::make_shared<Local_variable>(std::move(var), constant);
@@ -49,13 +49,13 @@ std::shared_ptr<Local_variable> Executor::set_root_variable(const String &identi
 	// Return a pointer to the original local variable, allowing subsequent access to it.
 	return local_var;
 }
-std::shared_ptr<Local_variable> Executor::set_root_constant(const String &identifier, Stored_value &&value){
+std::shared_ptr<Local_variable> Executor::set_root_constant(const D_string &identifier, Stored_value &&value){
 	return set_root_variable(identifier, std::move(value), true);
 }
-std::shared_ptr<Local_variable> Executor::set_root_function(const String &identifier, Sptr<const Function_base> &&func){
+std::shared_ptr<Local_variable> Executor::set_root_function(const D_string &identifier, Sptr<const Function_base> &&func){
 	return set_root_constant(identifier, std::move(func));
 }
-std::shared_ptr<Local_variable> Executor::set_root_slim_function(const String &identifier, String description, Function_base_prototype *target){
+std::shared_ptr<Local_variable> Executor::set_root_slim_function(const D_string &identifier, D_string description, Function_base_prototype *target){
 	return set_root_function(identifier, std::make_shared<Slim_function>(std::move(description), target));
 }
 

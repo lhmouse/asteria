@@ -13,10 +13,10 @@ int main(){
 	Xptr<Variable> obj, var;
 	set_variable(obj, recycler, D_object());
 	set_variable(var, recycler, D_integer(42));
-	auto pair = obj->get<D_object>().emplace(String::shallow("int"), std::move(var));
+	auto pair = obj->get<D_object>().emplace(D_string::shallow("int"), std::move(var));
 	auto weak_int = std::weak_ptr<Variable>(pair.first->second);
-	set_variable(var, recycler, D_string(String::shallow("hello")));
-	pair = obj->get<D_object>().emplace(String::shallow("str"), std::move(var));
+	set_variable(var, recycler, D_string(D_string::shallow("hello")));
+	pair = obj->get<D_object>().emplace(D_string::shallow("str"), std::move(var));
 	auto weak_str = std::weak_ptr<Variable>(pair.first->second);
 
 	ASTERIA_TEST_CHECK(weak_int.expired() == false);

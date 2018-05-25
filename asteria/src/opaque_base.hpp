@@ -19,7 +19,7 @@ public:
 	Opaque_base & operator=(const Opaque_base &) = delete;
 
 public:
-	virtual String describe() const = 0;
+	virtual D_string describe() const = 0;
 };
 
 }

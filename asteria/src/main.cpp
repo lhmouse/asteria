@@ -38,21 +38,21 @@ int main(){
 	set_variable(third, recycler, std::move(arr));
 
 	D_object obj;
-	obj.emplace(String::shallow("first"), std::move(first));
-	obj.emplace(String::shallow("second"), std::move(second));
+	obj.emplace(D_string::shallow("first"), std::move(first));
+	obj.emplace(D_string::shallow("second"), std::move(second));
 	set_variable(route, recycler, std::move(obj));
 
 	obj.clear();
-	obj.emplace(String::shallow("third"), std::move(third));
-	obj.emplace(String::shallow("route"), std::move(route));
+	obj.emplace(D_string::shallow("third"), std::move(third));
+	obj.emplace(D_string::shallow("route"), std::move(route));
 	set_variable(temp, recycler, D_string("世界"));
-	obj.emplace(String::shallow("world"), std::move(temp));
+	obj.emplace(D_string::shallow("world"), std::move(temp));
 
 	set_variable(root, recycler, std::move(obj));
 	copy_variable(copy, backup, root);
 
 	set_variable(temp, recycler, D_string("my string"));
-	copy->get<D_object>().emplace(String::shallow("new"), std::move(temp));
+	copy->get<D_object>().emplace(D_string::shallow("new"), std::move(temp));
 
 	std::cerr <<sptr_fmt(root) <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
