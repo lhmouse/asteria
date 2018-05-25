@@ -29,10 +29,10 @@ private:
 	const Sptr<Scope> & do_get_root_scope();
 
 public:
-	std::shared_ptr<Local_variable> set_root_variable(const Cow_string &identifier, Stored_value &&value, bool constant = false);
-	std::shared_ptr<Local_variable> set_root_constant(const Cow_string &identifier, Stored_value &&value);
-	std::shared_ptr<Local_variable> set_root_function(const Cow_string &identifier, Sptr<const Function_base> &&func);
-	std::shared_ptr<Local_variable> set_root_slim_function(const Cow_string &identifier, Cow_string description, Function_prototype *target);
+	std::shared_ptr<Local_variable> set_root_variable(const C_cow_string &identifier, Stored_value &&value, bool constant = false);
+	std::shared_ptr<Local_variable> set_root_constant(const C_cow_string &identifier, Stored_value &&value);
+	std::shared_ptr<Local_variable> set_root_function(const C_cow_string &identifier, Sptr<const Function_base> &&func);
+	std::shared_ptr<Local_variable> set_root_slim_function(const C_cow_string &identifier, C_cow_string description, C_function_prototype *target);
 
 	void reset() noexcept;
 };

@@ -32,11 +32,11 @@ public:
 	};
 	struct S_array_element {
 		Xptr<Reference> parent_opt;
-		Signed_integer index;
+		C_signed_integer index;
 	};
 	struct S_object_member {
 		Xptr<Reference> parent_opt;
-		Cow_string key;
+		C_cow_string key;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_constant         //  0

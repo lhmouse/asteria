@@ -88,18 +88,21 @@ using Xptr_vector = T_vector<Xptr<ElementT>>;
 template<typename ValueT>
 using Xptr_string_map = T_string_map<Xptr<ValueT>>;
 
-// Data types used internally
-using Signed_integer      = std::int64_t;
-using Unsigned_integer    = std::uint64_t;
-using Cow_string          = rocket::cow_string;
-using Function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+// Complementary data types used internally
+using C_nullptr             = std::nullptr_t;
+using C_boolean             = bool;
+using C_signed_integer      = std::int64_t;
+using C_unsigned_integer    = std::uint64_t;
+using C_double_precision    = double;
+using C_cow_string          = rocket::cow_string;
+using C_function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
 
 // Data types exposed to users
-using D_null      = std::nullptr_t;
-using D_boolean   = bool;
-using D_integer   = Signed_integer;
-using D_double    = double;
-using D_string    = Cow_string;
+using D_null      = C_nullptr;
+using D_boolean   = C_boolean;
+using D_integer   = C_signed_integer;
+using D_double    = C_double_precision;
+using D_string    = C_cow_string;
 using D_opaque    = Xptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
 using D_array     = Xptr_vector<Variable>;

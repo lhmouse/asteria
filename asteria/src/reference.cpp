@@ -127,7 +127,7 @@ Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
 		}
 		const auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-		auto normalized_index = (params.index >= 0) ? params.index : D_integer(Unsigned_integer(params.index) + array.size());
+		auto normalized_index = (params.index >= 0) ? params.index : D_integer(C_unsigned_integer(params.index) + array.size());
 		if(normalized_index < 0){
 			ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", params.index, ", size = ", array.size());
 			return nullptr;
@@ -187,11 +187,11 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 		}
 		auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-		auto normalized_index = (params.index >= 0) ? params.index : D_integer(Unsigned_integer(params.index) + array.size());
+		auto normalized_index = (params.index >= 0) ? params.index : D_integer(C_unsigned_integer(params.index) + array.size());
 		if(normalized_index < 0){
 			// Prepend `null`s until the subscript designates the beginning.
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", params.index, ", size = ", array.size());
-			const auto count_to_prepend = 0 - Unsigned_integer(normalized_index);
+			const auto count_to_prepend = 0 - C_unsigned_integer(normalized_index);
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
@@ -200,7 +200,7 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 		} else if(normalized_index >= D_integer(array.size())){
 			// Append `null`s until the subscript designates the end.
 			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", params.index, ", size = ", array.size());
-			const auto count_to_append = Unsigned_integer(normalized_index) - array.size() + 1;
+			const auto count_to_append = C_unsigned_integer(normalized_index) - array.size() + 1;
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
@@ -296,7 +296,7 @@ namespace {
 			}
 			const auto &array = parent->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-			auto normalized_index = (params.index >= 0) ? params.index : D_integer(Unsigned_integer(params.index) + array.size());
+			auto normalized_index = (params.index >= 0) ? params.index : D_integer(C_unsigned_integer(params.index) + array.size());
 			if(normalized_index < 0){
 				ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", params.index, ", size = ", array.size());
 				return nullptr;

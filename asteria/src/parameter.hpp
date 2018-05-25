@@ -10,11 +10,11 @@ namespace Asteria {
 
 class Parameter {
 private:
-	Cow_string m_identifier;
+	C_cow_string m_identifier;
 	Sptr<const Variable> m_default_argument_opt;
 
 public:
-	Parameter(Cow_string identifier, Sptr<const Variable> default_argument_opt)
+	Parameter(C_cow_string identifier, Sptr<const Variable> default_argument_opt)
 		: m_identifier(std::move(identifier)), m_default_argument_opt(std::move(default_argument_opt))
 	{ }
 	Parameter(Parameter &&) noexcept;
@@ -22,7 +22,7 @@ public:
 	~Parameter();
 
 public:
-	const Cow_string & get_identifier() const {
+	const C_cow_string & get_identifier() const {
 		return m_identifier;
 	}
 	const Sptr<const Variable> & get_default_argument_opt() const {

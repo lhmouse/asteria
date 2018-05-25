@@ -64,7 +64,7 @@ public:
 		Sptr<const Variable> source_opt;
 	};
 	struct S_named_reference {
-		Cow_string identifier;
+		C_cow_string identifier;
 	};
 	struct S_bound_reference {
 		Sptr<const Reference> reference_opt;
@@ -73,7 +73,7 @@ public:
 		Xptr<Expression> subexpression_opt;
 	};
 	struct S_lambda_definition {
-		Cow_string source_location;
+		C_cow_string source_location;
 		Sptr_vector<const Parameter> parameters_opt;
 		Xptr<Block> body_opt;
 	};
