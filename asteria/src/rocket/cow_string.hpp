@@ -2011,6 +2011,7 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 		str.erase();
 		// Extract characters and append them to `str`.
 		auto ich = is.rdbuf()->sgetc();
+		bool eol = false;
 		for(;;){
 			if(traits_type::eq_int_type(ich, traits_type::eof())){
 				is.setstate(ios_base::eofbit);
@@ -2020,6 +2021,7 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 			if(traits_type::eq(ch, delim)){
 				// Discard the delimiter.
 				ich = is.rdbuf()->snextc();
+				eol = true;
 				break;
 			}
 			if(str.size() >= str.max_size()){
@@ -2028,6 +2030,10 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 			}
 			str.push_back(ch);
 			ich = is.rdbuf()->snextc();
+		}
+		// If this function extracts no characters, set `std::ios_base::failbit`.
+		if(!eol && str.empty()){
+			is.setstate(ios_base::failbit);
 		}
 	} catch(...){
 		details_cow_string::handle_io_exception(is);
