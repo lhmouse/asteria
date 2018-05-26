@@ -12,7 +12,6 @@ class Executor {
 private:
 	Sptr<Recycler> m_recycler_opt;
 	Sptr<Scope> m_root_scope_opt;
-
 	Xptr<Block> m_code_opt;
 
 public:
@@ -33,8 +32,7 @@ public:
 	std::shared_ptr<Local_variable> set_root_constant(const C_cow_string &identifier, Stored_value &&value);
 	std::shared_ptr<Local_variable> set_root_function(const C_cow_string &identifier, Sptr<const Function_base> &&func);
 	std::shared_ptr<Local_variable> set_root_slim_function(const C_cow_string &identifier, C_cow_string description, C_function_prototype *target);
-
-	void reset() noexcept;
+	void clear_root_scope() noexcept;
 };
 
 }

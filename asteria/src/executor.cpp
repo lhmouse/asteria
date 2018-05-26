@@ -29,12 +29,6 @@ const Sptr<Scope> & Executor::do_get_root_scope(){
 	return m_root_scope_opt;
 }
 
-void Executor::reset() noexcept {
-	m_recycler_opt.reset();
-	m_root_scope_opt.reset();
-	m_code_opt.reset();
-}
-
 std::shared_ptr<Local_variable> Executor::set_root_variable(const D_string &identifier, Stored_value &&value, bool constant){
 	Xptr<Variable> var;
 	set_variable(var, do_get_recycler(), std::move(value));
@@ -57,6 +51,10 @@ std::shared_ptr<Local_variable> Executor::set_root_function(const D_string &iden
 }
 std::shared_ptr<Local_variable> Executor::set_root_slim_function(const D_string &identifier, D_string description, C_function_prototype *target){
 	return set_root_function(identifier, std::make_shared<Slim_function>(std::move(description), target));
+}
+void Executor::clear_root_scope() noexcept {
+	m_recycler_opt.reset();
+	m_root_scope_opt.reset();
 }
 
 }
