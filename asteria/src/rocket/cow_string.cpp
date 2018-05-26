@@ -2,6 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "cow_string.hpp"
+#include <array>
 #include <stdexcept>
 #include <cstdarg>
 #include <cstdio>
