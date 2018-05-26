@@ -1733,7 +1733,7 @@ basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<ch
 }
 template<typename charT, typename traitsT, typename allocatorT>
 basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs){
-	return (lhs.size() + rhs.size() <= lhs.capacity()) ? ((operator+))(::std::move(lhs), rhs) : ((operator+))(rhs, ::std::move(lhs));
+	return (lhs.size() + rhs.size() <= lhs.capacity()) ? ((operator+))(::std::move(lhs), rhs) : ((operator+))(lhs, ::std::move(rhs));
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
