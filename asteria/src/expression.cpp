@@ -265,8 +265,9 @@ namespace {
 		}
 		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
 		auto reg = C_unsigned_integer(lhs);
-		const auto out_mask = -(reg >> bits_rem) << bits_rem;
-		if((reg & out_mask) != out_mask){
+		const auto mask_out = (reg >> bits_rem) << bits_rem;
+		const auto mask_sign = -(reg >> 63) << bits_rem;
+		if(mask_out != mask_sign){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
 		}
 		reg <<= rhs;
@@ -281,9 +282,9 @@ namespace {
 		}
 		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
 		auto reg = C_unsigned_integer(lhs);
-		const auto in_mask = -(reg >> 63) << bits_rem;
+		const auto mask_in = -(reg >> 63) << bits_rem;
 		reg >>= rhs;
-		reg |= in_mask;
+		reg |= mask_in;
 		return D_integer(reg);
 	}
 
