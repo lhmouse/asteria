@@ -59,12 +59,15 @@ public:
 private:
 	std::size_t m_source_line;
 	std::size_t m_source_column;
+	std::size_t m_source_length;
+
 	Variant m_variant;
 
 public:
 	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Token, ValueT)>
-	Token(std::size_t source_line, std::size_t source_column, ValueT &&value)
-		: m_source_line(source_line), m_source_column(source_column), m_variant(std::forward<ValueT>(value))
+	Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, ValueT &&value)
+		: m_source_line(source_line), m_source_column(source_column), m_source_length(source_length)
+		, m_variant(std::forward<ValueT>(value))
 	{ }
 	Token(Token &&) noexcept;
 	Token & operator=(Token &&) noexcept;
@@ -77,6 +80,10 @@ public:
 	std::size_t get_source_column() const noexcept {
 		return m_source_column;
 	}
+	std::size_t get_source_length() const noexcept {
+		return m_source_length;
+	}
+
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.index());
 	}
