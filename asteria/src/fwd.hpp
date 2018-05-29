@@ -53,7 +53,6 @@ class Reference;
 class Local_variable;
 class Scope;
 class Recycler;
-class Executor;
 
 // Aliases.
 template<typename ElementT>
