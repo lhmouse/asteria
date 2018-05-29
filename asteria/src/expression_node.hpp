@@ -11,8 +11,6 @@
 namespace Asteria {
 
 class Expression_node {
-	friend Expression;
-
 public:
 	enum Operator_generic : unsigned {
 		// Postfix operators

@@ -10,8 +10,6 @@
 namespace Asteria {
 
 class Statement {
-	friend Block;
-
 public:
 	enum Target_scope {
 		target_scope_unspecified  = 0,

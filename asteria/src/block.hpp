@@ -10,8 +10,6 @@
 namespace Asteria {
 
 class Block {
-	friend Statement;
-
 public:
 	enum Execution_result : unsigned {
 		execution_result_end_of_block          = 0,

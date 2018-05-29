@@ -10,8 +10,6 @@
 namespace Asteria {
 
 class Expression {
-	friend Expression_node;
-
 private:
 	T_vector<Expression_node> m_nodes;
 
