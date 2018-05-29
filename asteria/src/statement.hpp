@@ -58,7 +58,7 @@ public:
 	};
 	struct S_switch_statement {
 		Xptr<Expression> control_opt;
-		T_vector<std::pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
+		T_vector<T_pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Xptr<Block> body_opt;

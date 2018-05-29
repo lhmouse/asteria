@@ -88,7 +88,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			// Bind clauses recursively. A clause consists of a label expression and a body block.
 			// Notice that clauses in a `switch` statement share the same scope.
 			const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			T_vector<std::pair<Xptr<Expression>, Xptr<Block>>> bound_clauses;
+			T_vector<T_pair<Xptr<Expression>, Xptr<Block>>> bound_clauses;
 			bound_clauses.reserve(params.clauses_opt.size());
 			for(const auto &pair : params.clauses_opt){
 				Xptr<Expression> bound_label;

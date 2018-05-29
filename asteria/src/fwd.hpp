@@ -59,6 +59,8 @@ template<typename ElementT>
 using T_vector = std::vector<ElementT>;
 template<typename ElementT>
 using T_string_map = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
+template<typename FirstT, typename SecondT>
+using T_pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
 using Sptr = std::shared_ptr<ElementT>;
