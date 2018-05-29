@@ -52,7 +52,8 @@ pkginclude_HEADERS =	\
 	asteria/src/slim_function.hpp	\
 	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
-	asteria/src/recycler.hpp
+	asteria/src/recycler.hpp	\
+	asteria/src/token.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
@@ -82,7 +83,8 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/slim_function.cpp	\
 	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
-	asteria/src/recycler.cpp
+	asteria/src/recycler.cpp	\
+	asteria/src/token.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -no-undefined -version-info 0:0:0
