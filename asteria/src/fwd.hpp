@@ -17,8 +17,12 @@
 #define ASTERIA_ENABLE_IF(...)              typename ::std::enable_if<__VA_ARGS__>::type * = nullptr
 #define ASTERIA_UNLESS_IS_BASE_OF(B_, T_)   ASTERIA_ENABLE_IF(::std::is_base_of<B_, typename ::std::decay<T_>::type>::value == false)
 
-#define ASTERIA_CAR(x_, ...)    x_
-#define ASTERIA_CDR(x_, ...)    __VA_ARGS__
+#define ASTERIA_CAR(x_, ...)       x_
+#define ASTERIA_CDR(x_, ...)       __VA_ARGS__
+#define ASTERIA_QUOTE(...)         #__VA_ARGS__
+#define ASTERIA_CAT2(x_, y_)       x_##y_
+#define ASTERIA_CAT3(x_, y_, z_)   x_##y_##z_
+#define ASTERIA_LAZY(f_, ...)      f_(__VA_ARGS__)
 
 namespace Asteria {
 
@@ -37,6 +41,7 @@ class Expression;
 class Statement;
 class Block;
 class Parameter;
+class Token;
 
 // Runtime objects (movable only)
 class Exception;
