@@ -19,7 +19,7 @@ public:
 	Function_base & operator=(const Function_base &) = delete;
 
 public:
-	virtual C_cow_string describe() const = 0;
+	virtual Cow_string describe() const = 0;
 	virtual void invoke(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt) const = 0;
 };
 

@@ -39,13 +39,13 @@ public:
 		Xptr<Expression> expression_opt;
 	};
 	struct S_variable_definition {
-		C_cow_string identifier;
+		Cow_string identifier;
 		bool constant;
 		Xptr<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
-		C_cow_string identifier;
-		C_cow_string source_location;
+		Cow_string identifier;
+		Cow_string source_location;
 		Sptr_vector<const Parameter> parameters_opt;
 		Xptr<Block> body_opt;
 	};
@@ -73,18 +73,18 @@ public:
 		Xptr<Block> body_opt;
 	};
 	struct S_for_each_statement {
-		C_cow_string key_identifier;
-		C_cow_string value_identifier;
+		Cow_string key_identifier;
+		Cow_string value_identifier;
 		Xptr<Initializer> range_initializer_opt;
 		Xptr<Block> body_opt;
 	};
 	struct S_try_statement {
 		Xptr<Block> branch_try_opt;
-		C_cow_string exception_identifier;
+		Cow_string exception_identifier;
 		Xptr<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
-		C_cow_string source_location;
+		Cow_string source_location;
 		Xptr<Block> body_opt;
 	};
 	struct S_break_statement {

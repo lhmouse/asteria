@@ -241,7 +241,7 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		auto reg = C_unsigned_integer(lhs);
+		auto reg = Unsigned_integer(lhs);
 		reg <<= rhs;
 		return D_integer(reg);
 	}
@@ -252,7 +252,7 @@ namespace {
 		if(rhs >= 64){
 			return 0;
 		}
-		auto reg = C_unsigned_integer(lhs);
+		auto reg = Unsigned_integer(lhs);
 		reg >>= rhs;
 		return D_integer(reg);
 	}
@@ -264,7 +264,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
 		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-		auto reg = C_unsigned_integer(lhs);
+		auto reg = Unsigned_integer(lhs);
 		const auto mask_out = (reg >> bits_rem) << bits_rem;
 		const auto mask_sign = -(reg >> 63) << bits_rem;
 		if(mask_out != mask_sign){
@@ -281,7 +281,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
 		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-		auto reg = C_unsigned_integer(lhs);
+		auto reg = Unsigned_integer(lhs);
 		const auto mask_in = -(reg >> 63) << bits_rem;
 		reg >>= rhs;
 		reg |= mask_in;
@@ -335,12 +335,12 @@ namespace {
 		if(rhs == 0){
 			return res;
 		}
-		const auto count = C_unsigned_integer(rhs);
+		const auto count = Unsigned_integer(rhs);
 		if(lhs.size() > res.max_size() / count){
 			ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` time(s) would result in an overlong string that cannot be allocated.");
 		}
 		res.reserve(lhs.size() * static_cast<std::size_t>(count));
-		auto mask = C_unsigned_integer(1) << 63;
+		auto mask = Unsigned_integer(1) << 63;
 		for(;;){
 			if(count & mask){
 				res.append(lhs);
