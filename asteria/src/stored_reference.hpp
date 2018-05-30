@@ -13,7 +13,7 @@ class Stored_reference {
 	friend Reference;
 
 public:
-	using Variant = rocket::variant<D_null, Reference::Variant>;
+	using Variant = rocket::variant<Nullptr, Reference::Variant>;
 
 private:
 	Variant m_value_opt;
