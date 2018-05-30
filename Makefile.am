@@ -7,6 +7,7 @@ if ENABLE_WERROR
 AM_CPPFLAGS += -Werror
 endif
 AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
+AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
 %.hpp.gch: %.hpp
@@ -53,8 +54,7 @@ pkginclude_HEADERS =	\
 	asteria/src/slim_function.hpp	\
 	asteria/src/local_variable.hpp	\
 	asteria/src/scope.hpp	\
-	asteria/src/recycler.hpp	\
-	asteria/src/token.hpp
+	asteria/src/recycler.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
@@ -84,8 +84,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/slim_function.cpp	\
 	asteria/src/local_variable.cpp	\
 	asteria/src/scope.cpp	\
-	asteria/src/recycler.cpp	\
-	asteria/src/token.cpp
+	asteria/src/recycler.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -no-undefined -version-info 0:0:0
@@ -93,25 +92,17 @@ lib_libasteria_la_LDFLAGS =	\
 bin_PROGRAMS =	\
 	bin/asteria
 
-bin_asteria_SOURCES = asteria/src/main.cpp
+bin_asteria_SOURCES =	\
+	asteria/src/main.cpp
 
 check_PROGRAMS = \
-	tmp/block	\
-	tmp/exception	\
-	tmp/expression	\
-	tmp/recycler	\
-	tmp/reference	\
-	tmp/scope	\
-	tmp/utilities	\
-	tmp/variable
-
-tmp_block_SOURCES       = test/block.cpp
-tmp_exception_SOURCES   = test/exception.cpp
-tmp_expression_SOURCES  = test/expression.cpp
-tmp_recycler_SOURCES    = test/recycler.cpp
-tmp_reference_SOURCES   = test/reference.cpp
-tmp_scope_SOURCES       = test/scope.cpp
-tmp_utilities_SOURCES   = test/utilities.cpp
-tmp_variable_SOURCES    = test/variable.cpp
+	test/block.test	\
+	test/exception.test	\
+	test/expression.test	\
+	test/recycler.test	\
+	test/reference.test	\
+	test/scope.test	\
+	test/utilities.test	\
+	test/variable.test
 
 TESTS = ${check_PROGRAMS}

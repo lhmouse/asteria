@@ -3,8 +3,12 @@
 *.so
 *.la
 *.a
+*.trs
+*.test
 *.log
 *.gch
+*.exe
+*.dll
 
 .dirstamp
 .libs
@@ -44,4 +48,3 @@ tmp
 *.save*
 *.swp
 *.*~
-*.trs
