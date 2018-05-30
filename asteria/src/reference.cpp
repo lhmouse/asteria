@@ -53,7 +53,7 @@ void dump_reference(std::ostream &os, Spparam<const Reference> reference_opt, un
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Reference> &reference_fmt){
+std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Reference> &reference_fmt){
 	dump_reference(os, reference_fmt.get());
 	return os;
 }

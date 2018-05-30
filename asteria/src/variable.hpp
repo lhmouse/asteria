@@ -108,7 +108,7 @@ extern const char * get_variable_type_name(Spparam<const Variable> variable_opt)
 
 extern bool test_variable(Spparam<const Variable> variable_opt) noexcept;
 extern void dump_variable(std::ostream &os, Spparam<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Sptr_fmt<Variable> &variable_fmt);
+extern std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Variable> &variable_fmt);
 
 extern void copy_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Spparam<const Variable> source_opt);
 extern void move_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Xptr<Variable> &&source_opt);
