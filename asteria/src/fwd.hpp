@@ -41,6 +41,7 @@ class Expression;
 class Statement;
 class Block;
 class Parameter;
+class Parser_result;
 class Token;
 
 // Runtime objects (movable only)
