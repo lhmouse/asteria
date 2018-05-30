@@ -33,7 +33,7 @@ pkginclude_rocket_HEADERS = \
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
-	asteria/src/sptr_fmt.hpp	\
+	asteria/src/sptr_formatter.hpp	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\
 	asteria/src/function_base.hpp	\
