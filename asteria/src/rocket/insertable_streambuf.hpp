@@ -15,6 +15,9 @@ using ::std::basic_streambuf;
 using ::std::streamsize;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
+class basic_insertable_streambuf;
+
+template<typename charT, typename traitsT, typename allocatorT>
 class basic_insertable_streambuf : public basic_streambuf<charT, traitsT> {
 public:
 	using string_type      = basic_cow_string<charT, traitsT, allocatorT>;

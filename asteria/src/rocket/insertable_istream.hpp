@@ -12,6 +12,9 @@ namespace rocket {
 using ::std::basic_istream;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
+class basic_insertable_istream;
+
+template<typename charT, typename traitsT, typename allocatorT>
 class basic_insertable_istream : public basic_istream<charT, traitsT> {
 public:
 	using string_type  = typename basic_insertable_streambuf<charT, traitsT>::string_type;

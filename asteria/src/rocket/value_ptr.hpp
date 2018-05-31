@@ -23,6 +23,9 @@ using ::std::remove_cv;
 using ::std::is_same;
 
 template<typename elementT>
+class value_ptr;
+
+template<typename elementT>
 class value_ptr {
 	static_assert(is_same<typename remove_cv<elementT>::type, elementT>::value, "Top-level cv-qualifiers are not allowed.");
 
