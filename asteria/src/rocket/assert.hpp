@@ -15,12 +15,8 @@ ROCKET_NORETURN extern void on_assert_fail(const char *expr, const char *file, u
 #undef ROCKET_ASSERT
 #undef ROCKET_ASSERT_MSG
 
-#define ROCKET_ASSERT(expr_)              (static_cast<void>(	\
-                                            (expr_) ? 1 : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, ("")), 0)	\
-                                          ))
-#define ROCKET_ASSERT_MSG(expr_, m_)      (static_cast<void>(	\
-                                            (expr_) ? 1 : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, (m_)), 0)	\
-                                          ))
+#define ROCKET_ASSERT(expr_)              ((expr_) ? true : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, ("")), false))
+#define ROCKET_ASSERT_MSG(expr_, m_)      ((expr_) ? true : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, (m_)), false))
 
 #endif // ROCKET_ASSERT_HPP_
 
