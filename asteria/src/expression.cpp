@@ -10,6 +10,7 @@
 #include "block.hpp"
 #include "instantiated_function.hpp"
 #include "utilities.hpp"
+#include <limits>
 #include <cmath>
 
 namespace Asteria {
@@ -177,68 +178,74 @@ namespace {
 	}
 
 	D_integer do_negate(D_integer rhs){
-		if(rhs == INT64_MIN){
+		using limits = std::numeric_limits<D_integer>;
+		if(rhs == limits::min()){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
 		}
 		return -rhs;
 	}
 	D_integer do_add(D_integer lhs, D_integer rhs){
-		if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)){
+		using limits = std::numeric_limits<D_integer>;
+		if((rhs >= 0) ? (lhs > limits::max() - rhs) : (lhs < limits::min() - rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs + rhs;
 	}
 	D_integer do_subtract(D_integer lhs, D_integer rhs){
-		if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)){
+		using limits = std::numeric_limits<D_integer>;
+		if((rhs >= 0) ? (lhs < limits::min() + rhs) : (lhs > limits::max() + rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs - rhs;
 	}
 	D_integer do_multiply(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if((lhs == 0) || (rhs == 0)){
 			return 0;
 		}
 		if((lhs == 1) || (rhs == 1)){
 			return lhs ^ rhs ^ 1;
 		}
-		if((lhs == INT64_MIN) || (rhs == INT64_MIN)){
+		if((lhs == limits::min()) || (rhs == limits::min())){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		if((lhs == -1) || (rhs == -1)){
 			return -(lhs ^ rhs ^ -1);
 		}
-		const auto alhs = std::abs(lhs);
+		const auto slhs = (rhs >= 0) ? lhs : -lhs;
 		const auto arhs = std::abs(rhs);
-		const auto srhs = ((lhs >= 0) == (rhs >= 0)) ? arhs : -arhs;
-		if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)){
+		if((slhs >= 0) ? (slhs > limits::max() / arhs) : (slhs < limits::min() / arhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
-		return alhs * srhs;
+		return slhs * arhs;
 	}
 	D_integer do_divide(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
 		}
-		if((lhs == INT64_MIN) && (rhs == -1)){
+		if((lhs == limits::min()) && (rhs == -1)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs / rhs;
 	}
 	D_integer do_modulo(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
 		}
-		if((lhs == INT64_MIN) && (rhs == -1)){
+		if((lhs == limits::min()) && (rhs == -1)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs % rhs;
 	}
 
 	D_integer do_shift_left_logical(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
-		if(rhs >= 64){
+		if(rhs > limits::digits){
 			return 0;
 		}
 		auto reg = Unsigned_integer(lhs);
@@ -246,10 +253,11 @@ namespace {
 		return D_integer(reg);
 	}
 	D_integer do_shift_right_logical(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
-		if(rhs >= 64){
+		if(rhs > limits::digits){
 			return 0;
 		}
 		auto reg = Unsigned_integer(lhs);
@@ -257,16 +265,17 @@ namespace {
 		return D_integer(reg);
 	}
 	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
-		if(rhs >= 64){
+		if(rhs > limits::digits){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
-		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
+		const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
 		auto reg = Unsigned_integer(lhs);
 		const auto mask_out = (reg >> bits_rem) << bits_rem;
-		const auto mask_sign = -(reg >> 63) << bits_rem;
+		const auto mask_sign = -(reg >> limits::digits) << bits_rem;
 		if(mask_out != mask_sign){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
 		}
@@ -274,15 +283,16 @@ namespace {
 		return D_integer(reg);
 	}
 	D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs){
+		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
 		}
-		if(rhs >= 64){
+		if(rhs > limits::digits){
 			ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` was larger than the width of an `integer`.");
 		}
-		const auto bits_rem = static_cast<unsigned char>(63 - rhs);
+		const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
 		auto reg = Unsigned_integer(lhs);
-		const auto mask_in = -(reg >> 63) << bits_rem;
+		const auto mask_in = -(reg >> limits::digits) << bits_rem;
 		reg >>= rhs;
 		reg |= mask_in;
 		return D_integer(reg);
@@ -340,7 +350,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` time(s) would result in an overlong string that cannot be allocated.");
 		}
 		res.reserve(lhs.size() * static_cast<std::size_t>(count));
-		auto mask = Unsigned_integer(1) << 63;
+		auto mask = Unsigned_integer(1) << (std::numeric_limits<Unsigned_integer>::digits - 1);
 		for(;;){
 			if(count & mask){
 				res.append(lhs);
