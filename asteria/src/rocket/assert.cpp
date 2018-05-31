@@ -8,13 +8,13 @@
 namespace rocket {
 
 void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept {
-	::std::fprintf(stderr, "===============================================================================\n"
+	::std::fprintf(stderr, "========================================\n"
 	                       "ASSERTION FAILED !!\n"
 	                       "  Expression: %s\n"
 	                       "  File:       %s\n"
 	                       "  Line:       %lu\n"
 	                       "  Message:    %s\n"
-	                       "===============================================================================\n"
+	                       "========================================\n"
 	                       , expr, file, line, msg);
 	::std::terminate();
 }

@@ -12,16 +12,13 @@ ROCKET_NORETURN extern void on_assert_fail(const char *expr, const char *file, u
 
 }
 
-#undef ROCKET_ASSERT
-#undef ROCKET_ASSERT_MSG
+#ifdef ROCKET_DEBUG
+#  define ROCKET_DETAILS_ASSERT(expr_, str_, m_)    ((expr_) ? (void)0 : ::rocket::on_assert_fail(str_, __FILE__, __LINE__, m_))
+#else
+#  define ROCKET_DETAILS_ASSERT(expr_, str_, m_)    ((expr_) ? (void)0 : ROCKET_UNREACHABLE())
+#endif
 
-#define ROCKET_ASSERT(expr_)              ((expr_) ? true : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, ("")), false))
-#define ROCKET_ASSERT_MSG(expr_, m_)      ((expr_) ? true : (ROCKET_DETAILS_ON_ASSERT_FAIL(#expr_, __FILE__, __LINE__, (m_)), false))
+#define ROCKET_ASSERT(expr_)              ROCKET_DETAILS_ASSERT(expr_, #expr_, "")
+#define ROCKET_ASSERT_MSG(expr_, m_)      ROCKET_DETAILS_ASSERT(expr_, #expr_, m_)
 
 #endif // ROCKET_ASSERT_HPP_
-
-#ifdef ROCKET_DEBUG
-#  define ROCKET_DETAILS_ON_ASSERT_FAIL(...)      (::rocket::on_assert_fail(__VA_ARGS__))
-#else
-#  define ROCKET_DETAILS_ON_ASSERT_FAIL(...)      (ROCKET_UNREACHABLE)
-#endif

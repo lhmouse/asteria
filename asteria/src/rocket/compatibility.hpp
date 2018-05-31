@@ -5,11 +5,11 @@
 #define ROCKET_COMPATIBILITY_HPP_
 
 #if defined(_MSC_VER)
-#  define ROCKET_MSVC          1
+#  define ROCKET_MSVC            1
 #elif defined(__clang__)
-#  define ROCKET_CLANG         1
+#  define ROCKET_CLANG           1
 #elif defined(__GNUC__)
-#  define ROCKET_GCC           1
+#  define ROCKET_GCC             1
 #else
 #  error This compiler is not supported.
 #endif
@@ -20,11 +20,11 @@
 #ifdef ROCKET_MSVC
 
 #ifdef _DEBUG
-#  define ROCKET_DEBUG       1
+#  define ROCKET_DEBUG           1
 #endif
-#define ROCKET_NORETURN      __declspec(noreturn)
-#define ROCKET_FUNCSIG       __FUNCSIG__
-#define ROCKET_UNREACHABLE   __assume(0)
+#define ROCKET_NORETURN          __declspec(noreturn)
+#define ROCKET_FUNCSIG           __FUNCSIG__
+#define ROCKET_UNREACHABLE()     __assume(0)
 
 #endif // ROCKET_MSVC
 
@@ -34,11 +34,11 @@
 #ifdef ROCKET_CLANG
 
 #ifdef _LIBCPP_DEBUG
-#  define ROCKET_DEBUG       1
+#  define ROCKET_DEBUG           1
 #endif
-#define ROCKET_NORETURN      __attribute__((__noreturn__))
-#define ROCKET_FUNCSIG       __PRETTY_FUNCTION__
-#define ROCKET_UNREACHABLE   __builtin_unreachable()
+#define ROCKET_NORETURN          __attribute__((__noreturn__))
+#define ROCKET_FUNCSIG           __PRETTY_FUNCTION__
+#define ROCKET_UNREACHABLE()     __builtin_unreachable()
 
 #endif // ROCKET_CLANG
 
@@ -48,11 +48,11 @@
 #ifdef ROCKET_GCC
 
 #ifdef _GLIBCXX_DEBUG
-#  define ROCKET_DEBUG       1
+#  define ROCKET_DEBUG           1
 #endif
-#define ROCKET_NORETURN      __attribute__((__noreturn__))
-#define ROCKET_FUNCSIG       __PRETTY_FUNCTION__
-#define ROCKET_UNREACHABLE   __builtin_unreachable()
+#define ROCKET_NORETURN          __attribute__((__noreturn__))
+#define ROCKET_FUNCSIG           __PRETTY_FUNCTION__
+#define ROCKET_UNREACHABLE()     __builtin_unreachable()
 
 #endif // ROCKET_GCC
 
