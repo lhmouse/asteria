@@ -677,33 +677,33 @@ public:
 		this->assign(::std::move(other));
 	}
 	basic_cow_string(const basic_cow_string &other, size_type pos, size_type n = npos, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(other, pos, n);
 	}
 	basic_cow_string(const_pointer s, size_type n, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(s, n);
 	}
 	explicit basic_cow_string(const_pointer s, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(s);
 	}
 	basic_cow_string(size_type n, value_type ch, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(n, ch);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	basic_cow_string(inputT first, inputT last, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(::std::move(first), ::std::move(last));
 	}
 	basic_cow_string(initializer_list<value_type> init, const allocator_type &alloc = allocator_type())
-		: basic_cow_string(alloc)
+		: m_sth(alloc)
 	{
 		this->assign(init);
 	}
