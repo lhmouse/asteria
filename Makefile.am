@@ -30,7 +30,8 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
 	asteria/src/rocket/fill_iterator.hpp	\
-	asteria/src/rocket/cow_string.hpp
+	asteria/src/rocket/cow_string.hpp	\
+	asteria/src/rocket/unique_handle.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
