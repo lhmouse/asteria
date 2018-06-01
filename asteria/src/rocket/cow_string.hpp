@@ -160,7 +160,7 @@ namespace details_cow_string {
 			return this->as_allocator();
 		}
 		void do_reset(storage *ptr_new) noexcept {
-			const auto ptr = xchg(this->m_ptr, ptr_new);
+			const auto ptr = ((xchg))(this->m_ptr, ptr_new);
 			if(ptr == nullptr){
 				return;
 			}
@@ -262,7 +262,7 @@ namespace details_cow_string {
 			this->do_reset(ptr);
 		}
 		void assign(storage_handle &&other) noexcept {
-			const auto ptr = xchg(other.m_ptr, nullptr);
+			const auto ptr = ((xchg))(other.m_ptr, nullptr);
 			this->do_reset(ptr);
 		}
 		void swap(storage_handle &other) noexcept {
@@ -574,11 +574,11 @@ namespace details_cow_string {
 			if(s1 == s2){
 				return 0;
 			}
-			const int res = traits_type::compare(s1, s2, xmin(n1, n2));
+			const int res = traits_type::compare(s1, s2, ((xmin))(n1, n2));
 			return res;
 		}
 		static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept {
-			const int res = traits_type::compare(s1, s2, xmin(n1, n2));
+			const int res = traits_type::compare(s1, s2, ((xmin))(n1, n2));
 			if(res != 0){
 				return res;
 			}
