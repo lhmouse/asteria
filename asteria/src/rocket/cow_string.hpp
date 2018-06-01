@@ -1362,7 +1362,11 @@ public:
 	const_pointer c_str() const noexcept {
 		return this->data();
 	}
-	allocator_type get_allocator() const noexcept {
+	// N.B. The return type differs from `std::basic_string`.
+	const allocator_type & get_allocator() const noexcept {
+		return this->m_sth.as_allocator();
+	}
+	allocator_type & get_allocator() noexcept {
 		return this->m_sth.as_allocator();
 	}
 
