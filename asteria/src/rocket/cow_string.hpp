@@ -641,7 +641,7 @@ public:
 	{
 		this->assign(shallow());
 	}
-	basic_cow_string(const allocator_type &alloc) noexcept
+	explicit basic_cow_string(const allocator_type &alloc) noexcept
 		: m_sth(alloc)
 	{
 		this->assign(shallow());
