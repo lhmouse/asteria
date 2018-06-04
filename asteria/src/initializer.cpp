@@ -71,30 +71,30 @@ void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recy
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_bracketed_init_list>();
-		Xptr<Variable> var;
+		Xptr<Value> value;
 		D_array array;
 		array.reserve(candidate.elements.size());
 		for(const auto &elem : candidate.elements){
 			evaluate_initializer(reference_out, recycler, elem, scope);
-			extract_variable_from_reference(var, recycler, std::move(reference_out));
-			array.emplace_back(std::move(var));
+			extract_value_from_reference(value, recycler, std::move(reference_out));
+			array.emplace_back(std::move(value));
 		}
-		set_variable(var, recycler, std::move(array));
-		Reference::S_temporary_value ref_t = { std::move(var) };
+		set_value(value, recycler, std::move(array));
+		Reference::S_temporary_value ref_t = { std::move(value) };
 		return set_reference(reference_out, std::move(ref_t)); }
 
 	case Initializer::type_braced_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_braced_init_list>();
-		Xptr<Variable> var;
+		Xptr<Value> value;
 		D_object object;
 		object.reserve(candidate.key_values.size());
 		for(const auto &pair : candidate.key_values){
 			evaluate_initializer(reference_out, recycler, pair.second, scope);
-			extract_variable_from_reference(var, recycler, std::move(reference_out));
-			object.emplace(pair.first, std::move(var));
+			extract_value_from_reference(value, recycler, std::move(reference_out));
+			object.emplace(pair.first, std::move(value));
 		}
-		set_variable(var, recycler, std::move(object));
-		Reference::S_temporary_value ref_t = { std::move(var) };
+		set_value(value, recycler, std::move(object));
+		Reference::S_temporary_value ref_t = { std::move(value) };
 		return set_reference(reference_out, std::move(ref_t)); }
 
 	default:

@@ -70,15 +70,15 @@ namespace {
 			switch(arguments_opt.size()){
 			case 0: {
 				// Return the number of arguments.
-				Xptr<Variable> var;
-				set_variable(var, recycler, D_integer(static_cast<std::ptrdiff_t>(m_arguments_opt.size())));
-				Reference::S_temporary_value ref_t = { std::move(var) };
+				Xptr<Value> value;
+				set_value(value, recycler, D_integer(static_cast<std::ptrdiff_t>(m_arguments_opt.size())));
+				Reference::S_temporary_value ref_t = { std::move(value) };
 				return set_reference(result_out, std::move(ref_t)); }
 
 			case 1: {
 				// Return the argument at the index specified.
 				const auto index_var = read_reference_opt(arguments_opt.at(0));
-				if(get_variable_type(index_var) != Variable::type_integer){
+				if(get_value_type(index_var) != Value::type_integer){
 					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", m_self_identifier, "` must be an `integer`.");
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -124,16 +124,16 @@ namespace {
 	}
 
 	void do_create_argument_getter(Spparam<Scope> scope, const D_string &identifier, const D_string &description, Xptr_vector<Reference> &&arguments_opt){
-		auto var = std::make_shared<Variable>(D_function(std::make_shared<Argument_getter>(identifier, description, std::move(arguments_opt))));
+		auto value = std::make_shared<Value>(D_function(std::make_shared<Argument_getter>(identifier, description, std::move(arguments_opt))));
 		Xptr<Reference> arg;
-		Reference::S_constant ref_k = { std::move(var) };
+		Reference::S_constant ref_k = { std::move(value) };
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, identifier, std::move(arg));
 	}
 	void do_create_source_reference(Spparam<Scope> scope, const D_string &identifier, const D_string &description){
-		auto var = std::make_shared<Variable>(D_string(description));
+		auto value = std::make_shared<Value>(D_string(description));
 		Xptr<Reference> arg;
-		Reference::S_constant ref_k = { std::move(var) };
+		Reference::S_constant ref_k = { std::move(value) };
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, identifier, std::move(arg));
 	}

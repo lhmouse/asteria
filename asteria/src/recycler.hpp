@@ -16,12 +16,12 @@ public:
 	};
 
 private:
-	Wptr_vector<Variable> m_weak_variables;
+	Wptr_vector<Value> m_weak_values;
 	std::size_t m_defragmentation_threshold;
 
 public:
 	Recycler()
-		: m_weak_variables(), m_defragmentation_threshold(defragmentation_threshold_initial)
+		: m_weak_values(), m_defragmentation_threshold(defragmentation_threshold_initial)
 	{ }
 	~Recycler();
 
@@ -29,10 +29,10 @@ public:
 	Recycler & operator=(const Recycler &) = delete;
 
 private:
-	void do_purge_variables() noexcept;
+	void do_purge_values() noexcept;
 
 public:
-	void adopt_variable(Spparam<Variable> variable_opt);
+	void adopt_value(Spparam<Value> value_opt);
 	void defragment(bool aggressive = false) noexcept;
 };
 

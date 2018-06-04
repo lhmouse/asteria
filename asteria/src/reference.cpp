@@ -5,7 +5,7 @@
 #include "reference.hpp"
 #include "stored_reference.hpp"
 #include "stored_value.hpp"
-#include "local_variable.hpp"
+#include "variable.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -21,22 +21,22 @@ void dump_reference(std::ostream &os, Spparam<const Reference> reference_opt, un
 	switch(type){
 	case Reference::type_null:
 		os <<"null ";
-		return dump_variable(os, nullptr, indent_next, indent_increment);
+		return dump_value(os, nullptr, indent_next, indent_increment);
 
 	case Reference::type_constant: {
 		const auto &candidate = reference_opt->get<Reference::S_constant>();
 		os <<"constant ";
-		return dump_variable(os, candidate.source_opt, indent_next, indent_increment); }
+		return dump_value(os, candidate.source_opt, indent_next, indent_increment); }
 
 	case Reference::type_temporary_value: {
 		const auto &candidate = reference_opt->get<Reference::S_temporary_value>();
 		os <<"temporary candidate ";
-		return dump_variable(os, candidate.variable_opt, indent_next, indent_increment); }
+		return dump_value(os, candidate.value_opt, indent_next, indent_increment); }
 
-	case Reference::type_local_variable: {
-		const auto &candidate = reference_opt->get<Reference::S_local_variable>();
-		os <<(candidate.local_variable->is_constant() ? "local constant " : "local variable ");
-		return dump_variable(os, candidate.local_variable->get_variable_opt(), indent_next, indent_increment); }
+	case Reference::type_variable: {
+		const auto &candidate = reference_opt->get<Reference::S_variable>();
+		os <<(candidate.variable->is_constant() ? "named constant " : "named variable ");
+		return dump_value(os, candidate.variable->get_value_opt(), indent_next, indent_increment); }
 
 	case Reference::type_array_element: {
 		const auto &candidate = reference_opt->get<Reference::S_array_element>();
@@ -71,8 +71,8 @@ void copy_reference(Xptr<Reference> &reference_out, Spparam<const Reference> sou
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied.");
 
-	case Reference::type_local_variable: {
-		const auto &candidate = source_opt->get<Reference::S_local_variable>();
+	case Reference::type_variable: {
+		const auto &candidate = source_opt->get<Reference::S_variable>();
 		return set_reference(reference_out, candidate); }
 
 	case Reference::type_array_element: {
@@ -100,7 +100,7 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 	}
 }
 
-Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
+Sptr<const Value> read_reference_opt(Spparam<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -112,18 +112,18 @@ Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
 
 	case Reference::type_temporary_value: {
 		const auto &candidate = reference_opt->get<Reference::S_temporary_value>();
-		return candidate.variable_opt; }
+		return candidate.value_opt; }
 
-	case Reference::type_local_variable: {
-		const auto &candidate = reference_opt->get<Reference::S_local_variable>();
-		return candidate.local_variable->get_variable_opt(); }
+	case Reference::type_variable: {
+		const auto &candidate = reference_opt->get<Reference::S_variable>();
+		return candidate.variable->get_value_opt(); }
 
 	case Reference::type_array_element: {
 		const auto &candidate = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = read_reference_opt(candidate.parent_opt);
-		if(get_variable_type(parent) != Variable::type_array){
-			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`.");
+		if(get_value_type(parent) != Value::type_array){
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 		}
 		const auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -135,15 +135,15 @@ Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
 			ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", candidate.index, ", size = ", array.size());
 			return nullptr;
 		}
-		const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
-		return variable_opt; }
+		const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
+		return value_opt; }
 
 	case Reference::type_object_member: {
 		const auto &candidate = reference_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = read_reference_opt(candidate.parent_opt);
-		if(get_variable_type(parent) != Variable::type_object){
-			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`.");
+		if(get_value_type(parent) != Value::type_object){
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 		}
 		const auto &object = parent->get<D_object>();
 		// Find the element.
@@ -152,15 +152,15 @@ Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt){
 			ASTERIA_DEBUG_LOG("D_object member not found: key = ", candidate.key);
 			return nullptr;
 		}
-		const auto &variable_opt = it->second;
-		return variable_opt; }
+		const auto &value_opt = it->second;
+		return value_opt; }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
-std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> reference_opt){
+std::reference_wrapper<Xptr<Value>> drill_reference(Spparam<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -172,18 +172,18 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 
 	case Reference::type_temporary_value: {
 		const auto &candidate = reference_opt->get<Reference::S_temporary_value>();
-		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sptr_fmt(candidate.variable_opt), "` is likely to be an error hence is not allowed."); }
+		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sptr_fmt(candidate.value_opt), "` is likely to be an error hence is not allowed."); }
 
-	case Reference::type_local_variable: {
-		const auto &candidate = reference_opt->get<Reference::S_local_variable>();
-		return candidate.local_variable->drill_for_variable(); }
+	case Reference::type_variable: {
+		const auto &candidate = reference_opt->get<Reference::S_variable>();
+		return candidate.variable->drill_for_value(); }
 
 	case Reference::type_array_element: {
 		const auto &candidate = reference_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = drill_reference(candidate.parent_opt).get().share();
-		if(get_variable_type(parent) != Variable::type_array){
-			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
+		if(get_value_type(parent) != Value::type_array){
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`");
 		}
 		auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -207,15 +207,15 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 			array.insert(array.end(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_append)));
 			normalized_index = D_integer(array.size() - 1);
 		}
-		auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
-		return std::ref(variable_opt); }
+		auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
+		return std::ref(value_opt); }
 
 	case Reference::type_object_member: {
 		const auto &candidate = reference_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = drill_reference(candidate.parent_opt).get().share();
-		if(get_variable_type(parent) != Variable::type_object){
-			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
+		if(get_value_type(parent) != Value::type_object){
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`");
 		}
 		auto &object = parent->get<D_object>();
 		// Find the element.
@@ -224,8 +224,8 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 			ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", candidate.key);
 			it = object.emplace(candidate.key, nullptr).first;
 		}
-		auto &variable_opt = it->second;
-		return std::ref(variable_opt); }
+		auto &value_opt = it->second;
+		return std::ref(value_opt); }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
@@ -234,41 +234,41 @@ std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> 
 }
 
 namespace {
-	class Extract_variable_result {
+	class Extract_value_result {
 	private:
-		rocket::variant<std::nullptr_t, Sptr<const Variable>, Xptr<Variable>> m_variant;
+		rocket::variant<std::nullptr_t, Sptr<const Value>, Xptr<Value>> m_variant;
 
 	public:
-		Extract_variable_result(std::nullptr_t = nullptr) noexcept
+		Extract_value_result(std::nullptr_t = nullptr) noexcept
 			: m_variant(nullptr)
 		{ }
-		Extract_variable_result(Sptr<const Variable> copyable_pointer) noexcept
+		Extract_value_result(Sptr<const Value> copyable_pointer) noexcept
 			: m_variant(std::move(copyable_pointer))
 		{ }
-		Extract_variable_result(Xptr<Variable> &&movable_pointer) noexcept
+		Extract_value_result(Xptr<Value> &&movable_pointer) noexcept
 			: m_variant(std::move(movable_pointer))
 		{ }
 
 	public:
-		Sptr<const Variable> get_copyable_pointer() const noexcept {
+		Sptr<const Value> get_copyable_pointer() const noexcept {
 			switch(m_variant.index()){
 			default:
 				return nullptr;
 			case 1:
-				return m_variant.get<Sptr<const Variable>>();
+				return m_variant.get<Sptr<const Value>>();
 			case 2:
-				return m_variant.get<Xptr<Variable>>();
+				return m_variant.get<Xptr<Value>>();
 			}
 		}
 		bool is_movable() const noexcept {
 			return m_variant.index() == 2;
 		}
-		Xptr<Variable> & get_movable_pointer(){
-			return m_variant.get<Xptr<Variable>>();
+		Xptr<Value> & get_movable_pointer(){
+			return m_variant.get<Xptr<Value>>();
 		}
 	};
 
-	Extract_variable_result do_try_extract_variable(Spparam<Reference> reference_opt){
+	Extract_value_result do_try_extract_value(Spparam<Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -280,19 +280,19 @@ namespace {
 
 		case Reference::type_temporary_value: {
 			auto &candidate = reference_opt->get<Reference::S_temporary_value>();
-			return std::move(candidate.variable_opt); }
+			return std::move(candidate.value_opt); }
 
-		case Reference::type_local_variable: {
-			auto &candidate = reference_opt->get<Reference::S_local_variable>();
-			return candidate.local_variable->get_variable_opt(); }
+		case Reference::type_variable: {
+			auto &candidate = reference_opt->get<Reference::S_variable>();
+			return candidate.variable->get_value_opt(); }
 
 		case Reference::type_array_element: {
 			auto &candidate = reference_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
-			auto parent_result = do_try_extract_variable(candidate.parent_opt);
+			auto parent_result = do_try_extract_value(candidate.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
-			if(get_variable_type(parent) != Variable::type_array){
-				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_variable_type_name(parent), "`");
+			if(get_value_type(parent) != Value::type_array){
+				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`");
 			}
 			const auto &array = parent->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -304,19 +304,19 @@ namespace {
 				ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", candidate.index, ", size = ", array.size());
 				return nullptr;
 			}
-			const auto &variable_opt = array.at(static_cast<std::size_t>(normalized_index));
+			const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
 			if(parent_result.is_movable() == false){
-				return variable_opt.share_c();
+				return value_opt.share_c();
 			}
-			return const_cast<Xptr<Variable> &&>(variable_opt); }
+			return const_cast<Xptr<Value> &&>(value_opt); }
 
 		case Reference::type_object_member: {
 			auto &candidate = reference_opt->get<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
-			auto parent_result = do_try_extract_variable(candidate.parent_opt);
+			auto parent_result = do_try_extract_value(candidate.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
-			if(get_variable_type(parent) != Variable::type_object){
-				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_variable_type_name(parent), "`");
+			if(get_value_type(parent) != Value::type_object){
+				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`");
 			}
 			const auto &object = parent->get<D_object>();
 			// Find the element.
@@ -325,11 +325,11 @@ namespace {
 				ASTERIA_DEBUG_LOG("D_object member not found: key = ", candidate.key);
 				return nullptr;
 			}
-			const auto &variable_opt = it->second;
+			const auto &value_opt = it->second;
 			if(parent_result.is_movable() == false){
-				return variable_opt.share_c();
+				return value_opt.share_c();
 			}
-			return const_cast<Xptr<Variable> &&>(variable_opt); }
+			return const_cast<Xptr<Value> &&>(value_opt); }
 
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
@@ -338,12 +338,12 @@ namespace {
 	}
 }
 
-void extract_variable_from_reference(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Xptr<Reference> &&reference_opt){
-	auto result = do_try_extract_variable(reference_opt);
+void extract_value_from_reference(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Reference> &&reference_opt){
+	auto result = do_try_extract_value(reference_opt);
 	if(result.is_movable() == false){
-		return copy_variable(variable_out, recycler, result.get_copyable_pointer());
+		return copy_value(value_out, recycler, result.get_copyable_pointer());
 	}
-	return move_variable(variable_out, recycler, std::move(result.get_movable_pointer()));
+	return move_value(value_out, recycler, std::move(result.get_movable_pointer()));
 }
 
 namespace {
@@ -356,7 +356,7 @@ namespace {
 			return false;
 		case Reference::type_temporary_value:
 			return true;
-		case Reference::type_local_variable:
+		case Reference::type_variable:
 			return false;
 		case Reference::type_array_element: {
 			const auto &candidate = reference_opt->get<Reference::S_array_element>();
@@ -375,10 +375,10 @@ void materialize_reference(Xptr<Reference> &reference_inout_opt, Spparam<Recycle
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
-	Xptr<Variable> variable;
-	extract_variable_from_reference(variable, recycler, std::move(reference_inout_opt));
-	auto local_var = std::make_shared<Local_variable>(std::move(variable), constant);
-	Reference::S_local_variable ref_l = { std::move(local_var) };
+	Xptr<Value> value;
+	extract_value_from_reference(value, recycler, std::move(reference_inout_opt));
+	auto var = std::make_shared<Variable>(std::move(value), constant);
+	Reference::S_variable ref_l = { std::move(var) };
 	return set_reference(reference_inout_opt, std::move(ref_l));
 }
 

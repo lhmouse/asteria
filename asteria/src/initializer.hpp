@@ -36,9 +36,9 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Initializer, ValueT)>
-	Initializer(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Initializer, CandidateT)>
+	Initializer(CandidateT &&candidate)
+		: m_variant(std::forward<CandidateT>(candidate))
 	{ }
 	Initializer(Initializer &&) noexcept;
 	Initializer & operator=(Initializer &&) noexcept;

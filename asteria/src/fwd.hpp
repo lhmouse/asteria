@@ -54,9 +54,9 @@ class Opaque_base;
 class Function_base;
 class Slim_function;
 class Instantiated_function;
-class Variable;
+class Value;
 class Reference;
-class Local_variable;
+class Variable;
 class Scope;
 class Recycler;
 
@@ -112,8 +112,8 @@ using D_double    = Double_precision;
 using D_string    = Cow_string;
 using D_opaque    = Xptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
-using D_array     = Xptr_vector<Variable>;
-using D_object    = Xptr_string_map<Variable>;
+using D_array     = Xptr_vector<Value>;
+using D_object    = Xptr_string_map<Value>;
 
 }
 

@@ -41,7 +41,7 @@ pkginclude_HEADERS =	\
 	asteria/src/opaque_base.hpp	\
 	asteria/src/function_base.hpp	\
 	asteria/src/parameter.hpp	\
-	asteria/src/variable.hpp	\
+	asteria/src/value.hpp	\
 	asteria/src/stored_value.hpp	\
 	asteria/src/reference.hpp	\
 	asteria/src/stored_reference.hpp	\
@@ -53,7 +53,7 @@ pkginclude_HEADERS =	\
 	asteria/src/block.hpp	\
 	asteria/src/instantiated_function.hpp	\
 	asteria/src/slim_function.hpp	\
-	asteria/src/local_variable.hpp	\
+	asteria/src/variable.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp
 
@@ -71,7 +71,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
 	asteria/src/parameter.cpp	\
-	asteria/src/variable.cpp	\
+	asteria/src/value.cpp	\
 	asteria/src/stored_value.cpp	\
 	asteria/src/reference.cpp	\
 	asteria/src/stored_reference.cpp	\
@@ -83,7 +83,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/block.cpp	\
 	asteria/src/instantiated_function.cpp	\
 	asteria/src/slim_function.cpp	\
-	asteria/src/local_variable.cpp	\
+	asteria/src/variable.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/recycler.cpp
 
@@ -97,13 +97,13 @@ bin_asteria_SOURCES =	\
 	asteria/src/main.cpp
 
 check_PROGRAMS = \
-	test/block.test	\
+	test/utilities.test	\
+	test/value.test	\
+	test/reference.test	\
 	test/exception.test	\
 	test/expression.test	\
+	test/block.test	\
 	test/recycler.test	\
-	test/reference.test	\
-	test/scope.test	\
-	test/utilities.test	\
-	test/variable.test
+	test/scope.test
 
 TESTS = ${check_PROGRAMS}

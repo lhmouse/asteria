@@ -59,7 +59,7 @@ public:
 		type_operator_rpn       = 8, // -X, +1
 	};
 	struct S_literal {
-		Sptr<const Variable> source_opt;
+		Sptr<const Value> source_opt;
 	};
 	struct S_named_reference {
 		Cow_string identifier;
@@ -105,9 +105,9 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Expression_node, ValueT)>
-	Expression_node(ValueT &&variant)
-		: m_variant(std::forward<ValueT>(variant))
+	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Expression_node, CandidateT)>
+	Expression_node(CandidateT &&variant)
+		: m_variant(std::forward<CandidateT>(variant))
 	{ }
 	Expression_node(Expression_node &&) noexcept;
 	Expression_node & operator=(Expression_node &&) noexcept;

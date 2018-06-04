@@ -9,7 +9,7 @@
 #include "../src/initializer.hpp"
 #include "../src/stored_value.hpp"
 #include "../src/stored_reference.hpp"
-#include "../src/local_variable.hpp"
+#include "../src/variable.hpp"
 
 using namespace Asteria;
 
@@ -19,21 +19,21 @@ int main(){
 	std::vector<Expression_node> expr_nodes;
 	Xptr<Expression> expr, cond, inc;
 	Xptr<Initializer> initzr;
-	// var sum = 0;
+	// value sum = 0;
 	expr_nodes.clear();
-	Expression_node::S_literal expr_l = { std::make_shared<Variable>(D_integer(0)) };
+	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	Initializer::S_assignment_init initzr_a = { std::move(expr) };
 	initzr.emplace(std::move(initzr_a));
 	Statement::S_variable_definition stmt_v = { D_string::shallow("sum"), false, std::move(initzr) };
 	stmts.emplace_back(std::move(stmt_v));
-	// for(var i = 1; i <= 10; ++i){
+	// for(value i = 1; i <= 10; ++i){
 	//   sum += i;
 	// }
-	// >>> var i = 1
+	// >>> value i = 1
 	expr_nodes.clear();
-	expr_l = { std::make_shared<Variable>(D_integer(1)) };
+	expr_l = { std::make_shared<Value>(D_integer(1)) };
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	initzr_a = { std::move(expr) };
@@ -43,7 +43,7 @@ int main(){
 	init.emplace(std::move(stmts_nested));
 	// >>> i <= 10
 	expr_nodes.clear();
-	expr_l = { std::make_shared<Variable>(D_integer(10)) };
+	expr_l = { std::make_shared<Value>(D_integer(10)) };
 	expr_nodes.emplace_back(std::move(expr_l));
 	Expression_node::S_named_reference expr_n = { D_string::shallow("i") };
 	expr_nodes.emplace_back(std::move(expr_n));
@@ -78,10 +78,10 @@ int main(){
 	// >>> array
 	expr_nodes.clear();
 	D_array array;
-	array.emplace_back(std::make_shared<Variable>(D_integer(100)));
-	array.emplace_back(std::make_shared<Variable>(D_integer(200)));
-	array.emplace_back(std::make_shared<Variable>(D_integer(300)));
-	expr_l = { std::make_shared<Variable>(std::move(array)) };
+	array.emplace_back(std::make_shared<Value>(D_integer(100)));
+	array.emplace_back(std::make_shared<Value>(D_integer(200)));
+	array.emplace_back(std::make_shared<Value>(D_integer(300)));
+	expr_l = { std::make_shared<Value>(std::move(array)) };
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	initzr_a = { std::move(expr) };

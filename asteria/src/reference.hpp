@@ -17,18 +17,18 @@ public:
 		type_null             = -1u,
 		type_constant         =  0,
 		type_temporary_value  =  1,
-		type_local_variable   =  2,
+		type_variable         =  2,
 		type_array_element    =  3,
 		type_object_member    =  4,
 	};
 	struct S_constant {
-		Sptr<const Variable> source_opt;
+		Sptr<const Value> source_opt;
 	};
 	struct S_temporary_value {
-		Xptr<Variable> variable_opt;
+		Xptr<Value> value_opt;
 	};
-	struct S_local_variable {
-		Sptr<Local_variable> local_variable;
+	struct S_variable {
+		Sptr<Variable> variable;
 	};
 	struct S_array_element {
 		Xptr<Reference> parent_opt;
@@ -41,7 +41,7 @@ public:
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_constant         //  0
 		, S_temporary_value  //  1
-		, S_local_variable   //  2
+		, S_variable         //  2
 		, S_array_element    //  3
 		, S_object_member    //  4
 	)>;
@@ -50,9 +50,9 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Reference, ValueT)>
-	Reference(ValueT &&value)
-		: m_variant(std::forward<ValueT>(value))
+	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Reference, CandidateT)>
+	Reference(CandidateT &&candidate)
+		: m_variant(std::forward<CandidateT>(candidate))
 	{ }
 	~Reference();
 
@@ -79,9 +79,9 @@ public:
 	ExpectT & get(){
 		return m_variant.get<ExpectT>();
 	}
-	template<typename ValueT>
-	void set(ValueT &&value){
-		m_variant = std::forward<ValueT>(value);
+	template<typename CandidateT>
+	void set(CandidateT &&candidate){
+		m_variant = std::forward<CandidateT>(candidate);
 	}
 };
 
@@ -93,14 +93,14 @@ extern std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Referenc
 extern void copy_reference(Xptr<Reference> &reference_out, Spparam<const Reference> source_opt);
 extern void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt);
 
-extern Sptr<const Variable> read_reference_opt(Spparam<const Reference> reference_opt);
-extern std::reference_wrapper<Xptr<Variable>> drill_reference(Spparam<const Reference> reference_opt);
+extern Sptr<const Value> read_reference_opt(Spparam<const Reference> reference_opt);
+extern std::reference_wrapper<Xptr<Value>> drill_reference(Spparam<const Reference> reference_opt);
 
-// If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the variable through the reference:
-//   `copy_variable(variable_out, recycler, read_reference_opt(reference_opt))`
-extern void extract_variable_from_reference(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Xptr<Reference> &&reference_opt);
+// If you do not have an `Xptr<Reference>` but an `Sptr<const Reference>`, use the following code to copy the value through the reference:
+//   `copy_value(value_out, recycler, read_reference_opt(reference_opt))`
+extern void extract_value_from_reference(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Reference> &&reference_opt);
 
-// If the reference is a temporary value, convert it to an unnamed local variable, allowing further modification to it.
+// If the reference is a temporary value, convert it to a value, allowing further modification to it.
 extern void materialize_reference(Xptr<Reference> &reference_inout_opt, Spparam<Recycler> recycler, bool constant);
 
 }

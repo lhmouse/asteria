@@ -64,10 +64,10 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Token, ValueT)>
-	Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, ValueT &&value)
+	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Token, CandidateT)>
+	Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, CandidateT &&candidate)
 		: m_source_line(source_line), m_source_column(source_column), m_source_length(source_length)
-		, m_variant(std::forward<ValueT>(value))
+		, m_variant(std::forward<CandidateT>(candidate))
 	{ }
 	Token(Token &&) noexcept;
 	Token & operator=(Token &&) noexcept;

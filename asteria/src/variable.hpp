@@ -5,55 +5,20 @@
 #define ASTERIA_VARIABLE_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
 
 namespace Asteria {
 
 class Variable {
-	friend Stored_value;
-
-public:
-	enum Type : unsigned {
-		type_null      = -1u,
-		type_boolean   =  0,
-		type_integer   =  1,
-		type_double    =  2,
-		type_string    =  3,
-		type_opaque    =  4,
-		type_function  =  5,
-		type_array     =  6,
-		type_object    =  7,
-	};
-	using Variant = rocket::variant<ASTERIA_CDR(void
-		, D_boolean   //  0
-		, D_integer   //  1
-		, D_double    //  2
-		, D_string    //  3
-		, D_opaque    //  4
-		, D_function  //  5
-		, D_array     //  6
-		, D_object    //  7
-	)>;
-
-	enum Comparison_result : unsigned {
-		comparison_result_unordered  = 0,
-		comparison_result_less       = 1,
-		comparison_result_equal      = 2,
-		comparison_result_greater    = 3,
-	};
-
 private:
-	const Wptr<Recycler> m_weak_recycler;
-	Variant m_variant;
+	Xptr<Value> m_value_opt;
+	bool m_constant;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Variable, ValueT)>
-	Variable(ValueT &&value)
-		: m_weak_recycler(), m_variant(std::forward<ValueT>(value))
+	explicit Variable(bool constant = false)
+		: m_value_opt(), m_constant(constant)
 	{ }
-	template<typename ValueT>
-	Variable(Wptr<Recycler> weak_recycler, ValueT &&value)
-		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<ValueT>(value))
+	Variable(Xptr<Value> &&value_opt, bool constant = false)
+		: m_value_opt(std::move(value_opt)), m_constant(constant)
 	{ }
 	~Variable();
 
@@ -61,62 +26,27 @@ public:
 	Variable & operator=(const Variable &) = delete;
 
 private:
-	ROCKET_NORETURN void do_throw_type_mismatch(Type expect) const;
+	ROCKET_NORETURN void do_throw_constant() const;
 
 public:
-	Sptr<Recycler> get_recycler_opt() const noexcept {
-		return m_weak_recycler.lock();
+	Sptr<const Value> get_value_opt() const noexcept {
+		return m_value_opt;
+	}
+	std::reference_wrapper<Xptr<Value>> drill_for_value(){
+		const auto constant = is_constant();
+		if(constant){
+			do_throw_constant();
+		}
+		return std::ref(m_value_opt);
 	}
 
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+	bool is_constant() const noexcept {
+		return m_constant;
 	}
-	template<typename ExpectT>
-	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
-	}
-	template<typename ExpectT>
-	ExpectT * get_opt() noexcept {
-		return m_variant.try_get<ExpectT>();
-	}
-	template<typename ExpectT>
-	const ExpectT & get() const {
-		const auto ptr = m_variant.try_get<ExpectT>();
-		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
-		}
-		return *ptr;
-	}
-	template<typename ExpectT>
-	ExpectT & get(){
-		const auto ptr = m_variant.try_get<ExpectT>();
-		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
-		}
-		return *ptr;
-	}
-	template<typename ValueT>
-	void set(ValueT &&value){
-		m_variant = std::forward<ValueT>(value);
+	void set_constant(bool constant = true) noexcept {
+		m_constant = constant;
 	}
 };
-
-extern const char * get_type_name(Variable::Type type) noexcept;
-
-extern Variable::Type get_variable_type(Spparam<const Variable> variable_opt) noexcept;
-extern const char * get_variable_type_name(Spparam<const Variable> variable_opt) noexcept;
-
-extern bool test_variable(Spparam<const Variable> variable_opt) noexcept;
-extern void dump_variable(std::ostream &os, Spparam<const Variable> variable_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Variable> &variable_fmt);
-
-extern void copy_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Spparam<const Variable> source_opt);
-extern void move_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Xptr<Variable> &&source_opt);
-
-// This function is useful for breaking dependency circles.
-extern void purge_variable(Spparam<Variable> variable_opt) noexcept;
-
-extern Variable::Comparison_result compare_variables(Spparam<const Variable> lhs_opt, Spparam<const Variable> rhs_opt) noexcept;
 
 }
 

@@ -5,23 +5,23 @@
 #define ASTERIA_STORED_VALUE_HPP_
 
 #include "fwd.hpp"
-#include "variable.hpp"
+#include "value.hpp"
 
 namespace Asteria {
 
 class Stored_value {
-	friend Variable;
+	friend Value;
 
 public:
-	using Variant = rocket::variant<D_null, Variable::Variant>;
+	using Variant = rocket::variant<D_null, Value::Variant>;
 
 private:
 	Variant m_value_opt;
 
 public:
-	template<typename ValueT, ASTERIA_UNLESS_IS_BASE_OF(Stored_value, ValueT)>
-	Stored_value(ValueT &&value_opt)
-		: m_value_opt(std::forward<ValueT>(value_opt))
+	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Stored_value, CandidateT)>
+	Stored_value(CandidateT &&value_opt)
+		: m_value_opt(std::forward<CandidateT>(value_opt))
 	{ }
 	Stored_value(Stored_value &&) noexcept;
 	Stored_value & operator=(Stored_value &&) noexcept;
@@ -31,25 +31,25 @@ public:
 	bool has_value() const noexcept {
 		return m_value_opt.index() == 1;
 	}
-	const Variable::Variant * get_opt() const noexcept {
-		return m_value_opt.try_get<Variable::Variant>();
+	const Value::Variant * get_opt() const noexcept {
+		return m_value_opt.try_get<Value::Variant>();
 	}
-	Variable::Variant * get_opt() noexcept {
-		return m_value_opt.try_get<Variable::Variant>();
+	Value::Variant * get_opt() noexcept {
+		return m_value_opt.try_get<Value::Variant>();
 	}
-	const Variable::Variant & get() const {
-		return m_value_opt.get<Variable::Variant>();
+	const Value::Variant & get() const {
+		return m_value_opt.get<Value::Variant>();
 	}
-	Variable::Variant & get(){
-		return m_value_opt.get<Variable::Variant>();
+	Value::Variant & get(){
+		return m_value_opt.get<Value::Variant>();
 	}
-	template<typename ValueT>
-	void set(ValueT &&value){
-		m_value_opt = std::forward<ValueT>(value);
+	template<typename CandidateT>
+	void set(CandidateT &&candidate){
+		m_value_opt = std::forward<CandidateT>(candidate);
 	}
 };
 
-extern void set_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Stored_value &&value_opt);
+extern void set_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Stored_value &&value_opt);
 
 }
 

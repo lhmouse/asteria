@@ -7,7 +7,7 @@
 #include "../src/recycler.hpp"
 #include "../src/stored_value.hpp"
 #include "../src/stored_reference.hpp"
-#include "../src/local_variable.hpp"
+#include "../src/variable.hpp"
 
 using namespace Asteria;
 
@@ -15,20 +15,20 @@ int main(){
 	const auto recycler = std::make_shared<Recycler>();
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 
-	auto dval = std::make_shared<Local_variable>();
-	set_variable(dval->drill_for_variable(), recycler, D_double(1.5));
-	Reference::S_local_variable lref = { dval };
+	auto dval = std::make_shared<Variable>();
+	set_value(dval->drill_for_value(), recycler, D_double(1.5));
+	Reference::S_variable lref = { dval };
 	auto lrwref = scope->drill_for_local_reference(D_string::shallow("dval"));
 	set_reference(lrwref, std::move(lref));
 
-	auto cval = std::make_shared<Local_variable>();
-	set_variable(cval->drill_for_variable(), recycler, D_integer(10));
+	auto cval = std::make_shared<Variable>();
+	set_value(cval->drill_for_value(), recycler, D_integer(10));
 	lref = { cval };
 	lrwref = scope->drill_for_local_reference(D_string::shallow("cval"));
 	set_reference(lrwref, std::move(lref));
 
-	auto rval = std::make_shared<Local_variable>();
-	set_variable(rval->drill_for_variable(), recycler, D_array());
+	auto rval = std::make_shared<Variable>();
+	set_value(rval->drill_for_value(), recycler, D_array());
 	lref = { rval };
 	lrwref = scope->drill_for_local_reference(D_string::shallow("rval"));
 	set_reference(lrwref, std::move(lref));
@@ -39,7 +39,7 @@ int main(){
 	//                     \-- "hello," cval *    ::= branch_false
 
 	std::vector<Expression_node> nodes;
-	Expression_node::S_literal s_lit = { std::make_shared<Variable>(D_double(0.25)) };
+	Expression_node::S_literal s_lit = { std::make_shared<Value>(D_double(0.25)) };
 	nodes.emplace_back(std::move(s_lit)); // 0.25
 	Expression_node::S_named_reference s_nref = { D_string::shallow("dval") };
 	nodes.emplace_back(std::move(s_nref)); // dval
@@ -50,7 +50,7 @@ int main(){
 	auto branch_true = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
 
 	nodes.clear();
-	s_lit = { std::make_shared<Variable>(D_string("hello,")) };
+	s_lit = { std::make_shared<Value>(D_string("hello,")) };
 	nodes.emplace_back(std::move(s_lit)); // "hello,"
 	s_nref = { D_string::shallow("cval") };
 	nodes.emplace_back(std::move(s_nref)); // cval
@@ -65,7 +65,7 @@ int main(){
 	nodes.emplace_back(std::move(s_opr)); // !
 	Expression_node::S_branch s_br = { std::move(branch_true), std::move(branch_false) };
 	nodes.emplace_back(std::move(s_br)); // ?:
-	s_lit = { std::make_shared<Variable>(D_integer(1)) };
+	s_lit = { std::make_shared<Value>(D_integer(1)) };
 	nodes.emplace_back(std::move(s_lit)); // 1
 	s_nref = { D_string::shallow("rval") };
 	nodes.emplace_back(std::move(s_nref)); // rval
@@ -75,25 +75,25 @@ int main(){
 	nodes.emplace_back(std::move(s_opr)); // =
 	auto expr = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
 
-	auto condition = std::make_shared<Local_variable>();
+	auto condition = std::make_shared<Variable>();
 	lref = { condition };
 	lrwref = scope->drill_for_local_reference(D_string::shallow("condition"));
 	set_reference(lrwref, std::move(lref));
 
-	set_variable(condition->drill_for_variable(), recycler, D_boolean(false));
+	set_value(condition->drill_for_value(), recycler, D_boolean(false));
 	Xptr<Reference> result;
 	evaluate_expression(result, recycler, expr, scope);
-	ASTERIA_TEST_CHECK(dval->get_variable_opt()->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->get_variable_opt()->get<D_integer>() == 10);
+	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
+	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);
 	auto rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rval->get_variable_opt()->get<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rval->get_value_opt()->get<D_array>().at(1).get() == rptr.get());
 	ASTERIA_TEST_CHECK(rptr->get<D_double>() == 1.75);
 
-	set_variable(condition->drill_for_variable(), recycler, D_boolean(true));
+	set_value(condition->drill_for_value(), recycler, D_boolean(true));
 	evaluate_expression(result, recycler, expr, scope);
-	ASTERIA_TEST_CHECK(dval->get_variable_opt()->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->get_variable_opt()->get<D_integer>() == 10);
+	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
+	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);
 	rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rval->get_variable_opt()->get<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rval->get_value_opt()->get<D_array>().at(1).get() == rptr.get());
 	ASTERIA_TEST_CHECK(rptr->get<D_string>() == "hello,hello,hello,hello,hello,hello,hello,hello,hello,hello,");
 }

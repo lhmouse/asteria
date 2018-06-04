@@ -227,7 +227,7 @@ namespace {
 		bool result = true;
 		if(condition_opt != nullptr){
 			const auto condition_var = read_reference_opt(reference_out);
-			result = test_variable(condition_var);
+			result = test_value(condition_var);
 		}
 		return result;
 	}
@@ -254,11 +254,11 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			const auto &candidate = stmt.get<Statement::S_variable_definition>();
 			// Evaluate the initializer and move the result into a variable.
 			evaluate_initializer(reference_out, recycler, candidate.initializer_opt, scope);
-			Xptr<Variable> var;
-			extract_variable_from_reference(var, recycler, std::move(reference_out));
+			Xptr<Value> value;
+			extract_value_from_reference(value, recycler, std::move(reference_out));
 			// Create a reference to a temporary value, then materialize it.
 			// This results in a local variable.
-			Reference::S_temporary_value ref_t = { std::move(var) };
+			Reference::S_temporary_value ref_t = { std::move(value) };
 			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, candidate.constant);
 			const auto wref = scope->drill_for_local_reference(candidate.identifier);
@@ -274,8 +274,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			// Create a local reference for the function.
 			auto func = std::make_shared<Instantiated_function>("function", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
-			Xptr<Variable> func_var;
-			set_variable(func_var, recycler, D_function(std::move(func)));
+			Xptr<Value> func_var;
+			set_value(func_var, recycler, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, true);
@@ -288,7 +288,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			// Evaluate the condition expression and select a branch basing on the result.
 			evaluate_expression(reference_out, recycler, candidate.condition_opt, scope);
 			const auto condition_var = read_reference_opt(reference_out);
-			const auto branch_taken = test_variable(condition_var) ? candidate.branch_true_opt.share() : candidate.branch_false_opt.share();
+			const auto branch_taken = test_value(condition_var) ? candidate.branch_true_opt.share() : candidate.branch_false_opt.share();
 			if(!branch_taken){
 				// If the branch is absent, don't execute anything further.
 				break;
@@ -316,7 +316,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					// Deal with a `case` label.
 					evaluate_expression(reference_out, recycler, it->first, scope_switch);
 					const auto case_var = read_reference_opt(reference_out);
-					if(compare_variables(control_var, case_var) == Variable::comparison_result_equal){
+					if(compare_values(control_var, case_var) == Value::comparison_result_equal){
 						match_it = it;
 						break;
 					}
@@ -417,19 +417,19 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			Xptr<Reference> range_ref;
 			move_reference(range_ref, std::move(reference_out));
 			const auto range_var = read_reference_opt(range_ref);
-			const auto range_type = get_variable_type(range_var);
-			if(range_type == Variable::type_array){
+			const auto range_type = get_value_type(range_var);
+			if(range_type == Value::type_array){
 				// Save the size. This is necessary because the array might be subsequently altered.
 				std::ptrdiff_t size;
 				{
 					const auto &range_array = range_var->get<D_array>();
 					size = static_cast<std::ptrdiff_t>(range_array.size());
 				}
-				Xptr<Variable> key_var;
+				Xptr<Value> key_var;
 				Xptr<Reference> temp_ref;
 				for(std::ptrdiff_t index = 0; index < size; ++index){
 					// Set the key, which is an integer.
-					set_variable(key_var, recycler, D_integer(index));
+					set_value(key_var, recycler, D_integer(index));
 					const auto key_wref = scope_for->drill_for_local_reference(candidate.key_identifier);
 					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
@@ -449,7 +449,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 						return result;
 					}
 				}
-			} else if(range_type == Variable::type_object){
+			} else if(range_type == Value::type_object){
 				// Save the keys. This is necessary because the object might be subsequently altered.
 				T_vector<D_string> backup_keys;
 				{
@@ -459,11 +459,11 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 						backup_keys.emplace_back(pair.first);
 					}
 				}
-				Xptr<Variable> key_var;
+				Xptr<Value> key_var;
 				Xptr<Reference> temp_ref;
 				for(auto &key : backup_keys){
 					// Set the key, which is an integer.
-					set_variable(key_var, recycler, D_string(key));
+					set_value(key_var, recycler, D_string(key));
 					const auto key_wref = scope_for->drill_for_local_reference(candidate.key_identifier);
 					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
@@ -530,8 +530,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
 					// Create a string containing the error message in the `catch` scope, then execute the `catch` branch.
 					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-					Xptr<Variable> what_var;
-					set_variable(what_var, recycler, D_string(e.what()));
+					Xptr<Value> what_var;
+					set_value(what_var, recycler, D_string(e.what()));
 					Reference::S_temporary_value ref_t = { std::move(what_var) };
 					set_reference(reference_out, std::move(ref_t));
 					materialize_reference(reference_out, recycler, true);

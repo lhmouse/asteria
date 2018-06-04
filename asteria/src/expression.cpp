@@ -131,7 +131,7 @@ namespace {
 	const char * op_name_of(const Expression_node::S_operator_rpn &candidate){
 		return get_operator_name_generic(candidate.operator_generic);
 	}
-	const char * type_name_of(Variable::Type type){
+	const char * type_name_of(Value::Type type){
 		return get_type_name(type);
 	}
 
@@ -154,12 +154,12 @@ namespace {
 		if(compound_assignment){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
-			return set_variable(wref, recycler, std::forward<ResultT>(result));
+			return set_value(wref, recycler, std::forward<ResultT>(result));
 		} else {
 			// Create a new variable for the result, then replace `lhs_ref` with an rvalue reference to it.
-			Xptr<Variable> var;
-			set_variable(var, recycler, std::forward<ResultT>(result));
-			Reference::S_temporary_value ref_d = { std::move(var) };
+			Xptr<Value> value;
+			set_value(value, recycler, std::forward<ResultT>(result));
+			Reference::S_temporary_value ref_d = { std::move(value) };
 			return set_reference(ref_inout_opt, std::move(ref_d));
 		}
 	}
@@ -435,8 +435,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			// Create a temporary variable for the function.
 			auto func = std::make_shared<Instantiated_function>("lambda", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
-			Xptr<Variable> func_var;
-			set_variable(func_var, recycler, D_function(std::move(func)));
+			Xptr<Value> func_var;
+			set_value(func_var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };
 			set_reference(result_ref, std::move(ref_d));
@@ -458,7 +458,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			auto condition_ref = do_pop_reference(stack);
 			// Pick a branch basing on the condition.
 			const auto condition_var = read_reference_opt(condition_ref);
-			const auto branch_taken = test_variable(condition_var) ? candidate.branch_true_opt.share() : candidate.branch_false_opt.share();
+			const auto branch_taken = test_value(condition_var) ? candidate.branch_true_opt.share() : candidate.branch_false_opt.share();
 			if(!branch_taken){
 				// If the branch does not exist, push the condition instead.
 				do_push_reference(stack, std::move(condition_ref));
@@ -476,8 +476,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			auto callee_ref = do_pop_reference(stack);
 			const auto callee_var = read_reference_opt(callee_ref);
 			// Make sure it is really a function.
-			const auto callee_type = get_variable_type(callee_var);
-			if(callee_type != Variable::type_function){
+			const auto callee_type = get_value_type(callee_var);
+			if(callee_type != Value::type_function){
 				ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", type_name_of(callee_type), "`.");
 			}
 			const auto &callee = callee_var->get<D_function>();
@@ -513,12 +513,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Increment the operand and return the old value.
 				// `compound_assignment` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				if(lhs_type == Variable::type_integer){
+				const auto lhs_type = get_value_type(lhs_var);
+				if(lhs_type == Value::type_integer){
 					const auto lhs = lhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, D_integer(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
-				} else if(lhs_type == Variable::type_double){
+				} else if(lhs_type == Value::type_double){
 					const auto lhs = lhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
@@ -534,12 +534,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Decrement the operand and return the old value.
 				// `compound_assignment` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				if(lhs_type == Variable::type_integer){
+				const auto lhs_type = get_value_type(lhs_var);
+				if(lhs_type == Value::type_integer){
 					const auto lhs = lhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_integer(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
-				} else if(lhs_type == Variable::type_double){
+				} else if(lhs_type == Value::type_double){
 					const auto lhs = lhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
@@ -556,11 +556,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// The subscript operand shall have type `integer` or `string`. In neither case will `rhs_ref` be null, hence it can be safely reused.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_integer){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_integer){
 					Reference::S_array_element ref_a = { std::move(lhs_ref), rhs_var->get<D_integer>() };
 					rhs_ref->set(std::move(ref_a));
-				} else if(rhs_type == Variable::type_string){
+				} else if(rhs_type == Value::type_string){
 					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->get<D_string>() };
 					rhs_ref->set(std::move(ref_o));
 				} else {
@@ -574,11 +574,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				auto rhs_ref = do_pop_reference(stack);
 				// Copy the referenced variable to create an rvalue, then return it.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_integer){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, rhs);
-				} else if(rhs_type == Variable::type_double){
+				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, rhs);
 				} else {
@@ -592,11 +592,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				auto rhs_ref = do_pop_reference(stack);
 				// Negate the operand.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_integer){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_negate(rhs));
-				} else if(rhs_type == Variable::type_double){
+				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_negate(rhs));
 				} else {
@@ -610,11 +610,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				auto rhs_ref = do_pop_reference(stack);
 				// Bitwise NOT the operand.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_boolean){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_boolean){
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_logical_not(rhs));
-				} else if(rhs_type == Variable::type_integer){
+				} else if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_bitwise_not(rhs));
 				} else {
@@ -629,7 +629,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
 				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_logical_not(test_variable(rhs_var)));
+				do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_logical_not(test_value(rhs_var)));
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
@@ -639,11 +639,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Increment the operand and return it.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_integer){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, D_integer(1)));
-				} else if(rhs_type == Variable::type_double){
+				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, D_double(1)));
 				} else {
@@ -658,11 +658,11 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Decrement the operand and return it.
 				// `compound_assignment` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if(rhs_type == Variable::type_integer){
+				const auto rhs_type = get_value_type(rhs_var);
+				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_integer(1)));
-				} else if(rhs_type == Variable::type_double){
+				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_double(1)));
 				} else {
@@ -679,12 +679,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_equal);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -696,12 +696,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_equal);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_equal);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -712,15 +712,15 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == Variable::comparison_result_unordered){
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				if(comparison_result == Value::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_less);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -731,15 +731,15 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == Variable::comparison_result_unordered){
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				if(comparison_result == Value::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result == Variable::comparison_result_greater);
+				do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -750,15 +750,15 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == Variable::comparison_result_unordered){
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				if(comparison_result == Value::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_greater);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_greater);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -769,15 +769,15 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_variables(lhs_var, rhs_var);
-				if(comparison_result == Variable::comparison_result_unordered){
+				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				if(comparison_result == Value::comparison_result_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, recycler, false, comparison_result != Variable::comparison_result_less);
+				do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_less);
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
@@ -790,21 +790,21 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// For the string type, concatenate the operands in lexical order to create a new string, then return it.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_or(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_add(lhs, rhs));
-				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_add(lhs, rhs));
-				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_string)){
+				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_string)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_concatenate(lhs, rhs));
@@ -822,17 +822,17 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// For the integer and double types, return the difference of both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_xor(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_subtract(lhs, rhs));
-				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_subtract(lhs, rhs));
@@ -851,25 +851,25 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_and(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_multiply(lhs, rhs));
-				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_multiply(lhs, rhs));
-				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_duplicate(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_string)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_string)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_duplicate(rhs, lhs));
@@ -886,13 +886,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Divide the first operand by the second operand and return the quotient.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_divide(lhs, rhs));
-				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_divide(lhs, rhs));
@@ -909,13 +909,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Divide the first operand by the second operand and return the remainder.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_modulo(lhs, rhs));
-				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
+				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_modulo(lhs, rhs));
@@ -934,9 +934,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Both operands have to be integers.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_logical(lhs, rhs));
@@ -955,9 +955,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Both operands have to be integers.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_logical(lhs, rhs));
@@ -977,9 +977,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Both operands have to be integers.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
@@ -998,9 +998,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Both operands have to be integers.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
@@ -1017,13 +1017,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Perform bitwise and on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_and(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_and(lhs, rhs));
@@ -1040,13 +1040,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Perform bitwise or on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_or(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_or(lhs, rhs));
@@ -1063,13 +1063,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Perform bitwise xor on both operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto lhs_type = get_variable_type(lhs_var);
-				const auto rhs_type = get_variable_type(rhs_var);
-				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
+				const auto lhs_type = get_value_type(lhs_var);
+				const auto rhs_type = get_value_type(rhs_var);
+				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_xor(lhs, rhs));
-				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
+				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_xor(lhs, rhs));
@@ -1086,10 +1086,10 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Copy the variable referenced by `rhs_ref` into `lhs_ref`, then return it.
 				// `compound_assignment` is ignored.
 				// N.B. This is one of the few operators that work on all types.
-				Xptr<Variable> var;
-				extract_variable_from_reference(var, recycler, std::move(rhs_ref));
+				Xptr<Value> value;
+				extract_value_from_reference(value, recycler, std::move(rhs_ref));
 				const auto wref = drill_reference(lhs_ref);
-				move_variable(wref, recycler, std::move(var));
+				move_value(wref, recycler, std::move(value));
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
