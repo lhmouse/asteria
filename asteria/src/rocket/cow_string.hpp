@@ -599,7 +599,7 @@ namespace details_cow_string {
 
 	template<typename funcT, typename ...argsT>
 	struct is_nothrow_invocable {
-		enum : bool { value = noexcept(::std::declval<funcT>(::std::declval<argsT>...)) };
+		enum : bool { value = noexcept(::std::declval<funcT>()(::std::declval<argsT>()...)) };
 	};
 }
 
