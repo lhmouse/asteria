@@ -38,7 +38,7 @@ void Instantiated_function::invoke(Xptr<Reference> &result_out, Spparam<Recycler
 	case Block::execution_result_continue_for:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
 	case Block::execution_result_return:
-		// Forward the return value;
+		// Forward the returned reference;
 		return move_reference(result_out, std::move(returned_ref));
 	default:
 		ASTERIA_DEBUG_LOG("Unknown compound statement execution result enumeration `", exec_result, "`. This is probably a bug, please report.");
