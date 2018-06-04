@@ -14,9 +14,9 @@ int main(){
 	auto recycler = std::make_shared<Recycler>();
 	auto backup = std::make_shared<Recycler>();
 
-	Xptr<Value> root, copy;
-	Xptr<Value> first, second, third, route;
-	Xptr<Value> temp;
+	Vp<Value> root, copy;
+	Vp<Value> first, second, third, route;
+	Vp<Value> temp;
 
 	D_array arr;
 	set_value(temp, recycler, D_null());

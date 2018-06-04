@@ -19,7 +19,7 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression & Expression::operator=(Expression &&) noexcept = default;
 Expression::~Expression() = default;
 
-void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expression> expression_opt, Spparam<const Scope> scope){
+void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null expression.
 		return bound_result_out.reset();
@@ -40,7 +40,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 		case Expression_node::type_named_reference: {
 			const auto &candidate = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Sptr<const Reference> source_ref;
+			Sp<const Reference> source_ref;
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
@@ -58,7 +58,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 				break;
 			}
 			// Bind the reference.
-			Xptr<Reference> bound_ref;
+			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, source_ref);
 			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(node_b));
@@ -67,7 +67,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 		case Expression_node::type_bound_reference: {
 			const auto &candidate = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
-			Xptr<Reference> bound_ref;
+			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, candidate.reference_opt);
 			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(node_b));
@@ -76,7 +76,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 		case Expression_node::type_subexpression: {
 			const auto &candidate = node.get<Expression_node::S_subexpression>();
 			// Bind the subexpression recursively.
-			Xptr<Expression> bound_expr;
+			Vp<Expression> bound_expr;
 			bind_expression(bound_expr, candidate.subexpression_opt, scope);
 			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
 			bound_nodes.emplace_back(std::move(node_s));
@@ -87,7 +87,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			Expression_node::S_lambda_definition node_l = { candidate.source_location, candidate.parameters_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(node_l));
@@ -101,9 +101,9 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 		case Expression_node::type_branch: {
 			const auto &candidate = node.get<Expression_node::S_branch>();
 			// Bind both branches recursively.
-			Xptr<Expression> bound_branch_true;
+			Vp<Expression> bound_branch_true;
 			bind_expression(bound_branch_true, candidate.branch_true_opt, scope);
-			Xptr<Expression> bound_branch_false;
+			Vp<Expression> bound_branch_false;
 			bind_expression(bound_branch_false, candidate.branch_false_opt, scope);
 			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
 			bound_nodes.emplace_back(std::move(node_b));
@@ -135,11 +135,11 @@ namespace {
 		return get_type_name(type);
 	}
 
-	void do_push_reference(Xptr_vector<Reference> &stack, Xptr<Reference> &&ref){
+	void do_push_reference(Vp_vector<Reference> &stack, Vp<Reference> &&ref){
 		ASTERIA_DEBUG_LOG("Pushing: ", sptr_fmt(ref));
 		stack.emplace_back(std::move(ref));
 	}
-	Xptr<Reference> do_pop_reference(Xptr_vector<Reference> &stack){
+	Vp<Reference> do_pop_reference(Vp_vector<Reference> &stack){
 		if(stack.empty()){
 			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
@@ -150,14 +150,14 @@ namespace {
 	}
 
 	template<typename ResultT>
-	void do_set_result(Xptr<Reference> &ref_inout_opt, Spparam<Recycler> recycler, bool compound_assignment, ResultT &&result){
+	void do_set_result(Vp<Reference> &ref_inout_opt, Spr<Recycler> recycler, bool compound_assignment, ResultT &&result){
 		if(compound_assignment){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
 			return set_value(wref, recycler, std::forward<ResultT>(result));
 		} else {
 			// Create a new variable for the result, then replace `lhs_ref` with an rvalue reference to it.
-			Xptr<Value> value;
+			Vp<Value> value;
 			set_value(value, recycler, std::forward<ResultT>(result));
 			Reference::S_temporary_value ref_d = { std::move(value) };
 			return set_reference(ref_inout_opt, std::move(ref_d));
@@ -365,14 +365,14 @@ namespace {
 	}
 }
 
-void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler, Spparam<const Expression> expression_opt, Spparam<const Scope> scope){
+void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
 		return move_reference(result_out, nullptr);
 	}
 	ASTERIA_DEBUG_LOG("------ Beginning of evaluation of expression");
 	// Parameters are pushed from right to left, in lexical order.
-	Xptr_vector<Reference> stack;
+	Vp_vector<Reference> stack;
 	// Evaluate nodes in reverse-polish order.
 	for(std::size_t node_index = 0; node_index < expression_opt->size(); ++node_index){
 		const auto &node = expression_opt->at(node_index);
@@ -381,7 +381,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 		case Expression_node::type_literal: {
 			const auto &candidate = node.get<Expression_node::S_literal>();
 			// Create an constant reference to the constant.
-			Xptr<Reference> result_ref;
+			Vp<Reference> result_ref;
 			Reference::S_constant ref_k = { candidate.source_opt };
 			set_reference(result_ref, std::move(ref_k));
 			do_push_reference(stack, std::move(result_ref));
@@ -390,7 +390,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 		case Expression_node::type_named_reference: {
 			const auto &candidate = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
-			Sptr<const Reference> source_ref;
+			Sp<const Reference> source_ref;
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
@@ -402,7 +402,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				}
 				scope_cur = scope_cur->get_parent_opt();
 			}
-			Xptr<Reference> result_ref;
+			Vp<Reference> result_ref;
 			copy_reference(result_ref, source_ref);
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
@@ -411,7 +411,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 		case Expression_node::type_bound_reference: {
 			const auto &candidate = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
-			Xptr<Reference> bound_ref;
+			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, candidate.reference_opt);
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(bound_ref));
@@ -420,7 +420,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 		case Expression_node::type_subexpression: {
 			const auto &candidate = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
-			Xptr<Reference> result_ref;
+			Vp<Reference> result_ref;
 			evaluate_expression(result_ref, recycler, candidate.subexpression_opt, scope);
 			// Push the result reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
@@ -431,13 +431,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			// Create a temporary variable for the function.
 			auto func = std::make_shared<Instantiated_function>("lambda", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
-			Xptr<Value> func_var;
+			Vp<Value> func_var;
 			set_value(func_var, recycler, D_function(std::move(func)));
-			Xptr<Reference> result_ref;
+			Vp<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };
 			set_reference(result_ref, std::move(ref_d));
 			// Push the result onto the stack.
@@ -465,7 +465,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				break;
 			}
 			// Evaluate the branch and push the result.
-			Xptr<Reference> result_ref;
+			Vp<Reference> result_ref;
 			evaluate_expression(result_ref, recycler, branch_taken, scope);
 			do_push_reference(stack, std::move(result_ref));
 			break; }
@@ -482,7 +482,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			}
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
-			Xptr_vector<Reference> arguments;
+			Vp_vector<Reference> arguments;
 			arguments.reserve(32);
 			// Pop arguments off the stack.
 			for(std::size_t i = 0; i < candidate.argument_count; ++i){
@@ -490,7 +490,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				arguments.emplace_back(std::move(arg_ref));
 			}
 			// Get the `this` reference.
-			Xptr<Reference> this_ref;
+			Vp<Reference> this_ref;
 			const auto callee_ref_type = get_reference_type(callee_ref);
 			if(callee_ref_type == Reference::type_array_element){
 				auto &callee_params = callee_ref->get<Reference::S_array_element>();
@@ -1086,7 +1086,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Copy the variable referenced by `rhs_ref` into `lhs_ref`, then return it.
 				// `compound_assignment` is ignored.
 				// N.B. This is one of the few operators that work on all types.
-				Xptr<Value> value;
+				Vp<Value> value;
 				extract_value_from_reference(value, recycler, std::move(rhs_ref));
 				const auto wref = drill_reference(lhs_ref);
 				move_value(wref, recycler, std::move(value));

@@ -43,7 +43,7 @@ public:
 	};
 
 private:
-	const Wptr<Recycler> m_weak_recycler;
+	const Wp<Recycler> m_weak_recycler;
 	Variant m_variant;
 
 public:
@@ -52,7 +52,7 @@ public:
 		: m_weak_recycler(), m_variant(std::forward<CandidateT>(candidate))
 	{ }
 	template<typename CandidateT>
-	Value(Wptr<Recycler> weak_recycler, CandidateT &&candidate)
+	Value(Wp<Recycler> weak_recycler, CandidateT &&candidate)
 		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<CandidateT>(candidate))
 	{ }
 	~Value();
@@ -64,7 +64,7 @@ private:
 	ROCKET_NORETURN void do_throw_type_mismatch(Type expect) const;
 
 public:
-	Sptr<Recycler> get_recycler_opt() const noexcept {
+	Sp<Recycler> get_recycler_opt() const noexcept {
 		return m_weak_recycler.lock();
 	}
 
@@ -103,20 +103,20 @@ public:
 
 extern const char * get_type_name(Value::Type type) noexcept;
 
-extern Value::Type get_value_type(Spparam<const Value> value_opt) noexcept;
-extern const char * get_value_type_name(Spparam<const Value> value_opt) noexcept;
+extern Value::Type get_value_type(Spr<const Value> value_opt) noexcept;
+extern const char * get_value_type_name(Spr<const Value> value_opt) noexcept;
 
-extern bool test_value(Spparam<const Value> value_opt) noexcept;
-extern void dump_value(std::ostream &os, Spparam<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Value> &value_fmt);
+extern bool test_value(Spr<const Value> value_opt) noexcept;
+extern void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt);
 
-extern void copy_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Spparam<const Value> source_opt);
-extern void move_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Value> &&source_opt);
+extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> source_opt);
+extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&source_opt);
 
 // This function is useful for breaking dependency circles.
-extern void purge_value(Spparam<Value> value_opt) noexcept;
+extern void purge_value(Spr<Value> value_opt) noexcept;
 
-extern Value::Comparison_result compare_values(Spparam<const Value> lhs_opt, Spparam<const Value> rhs_opt) noexcept;
+extern Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Value> rhs_opt) noexcept;
 
 }
 

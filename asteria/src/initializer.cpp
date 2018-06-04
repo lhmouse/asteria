@@ -15,11 +15,11 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer & Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
-Initializer::Type get_initializer_type(Spparam<const Initializer> initializer_opt) noexcept {
+Initializer::Type get_initializer_type(Spr<const Initializer> initializer_opt) noexcept {
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initializer> initializer_opt, Spparam<const Scope> scope){
+void bind_initializer(Vp<Initializer> &bound_result_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:
@@ -27,14 +27,14 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initial
 
 	case Initializer::type_assignment_init: {
 		const auto &candidate = initializer_opt->get<Initializer::S_assignment_init>();
-		Xptr<Expression> bound_expr;
+		Vp<Expression> bound_expr;
 		bind_expression(bound_expr, candidate.expression, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
 		return bound_result_out.emplace(std::move(init_a)); }
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_bracketed_init_list>();
-		Xptr_vector<Initializer> bound_elems;
+		Vp_vector<Initializer> bound_elems;
 		bound_elems.reserve(candidate.elements.size());
 		for(const auto &elem : candidate.elements){
 			bind_initializer(bound_result_out, elem, scope);
@@ -45,7 +45,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initial
 
 	case Initializer::type_braced_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_braced_init_list>();
-		Xptr_string_map<Initializer> bound_pairs;
+		Vp_string_map<Initializer> bound_pairs;
 		bound_pairs.reserve(candidate.key_values.size());
 		for(const auto &pair : candidate.key_values){
 			bind_initializer(bound_result_out, pair.second, scope);
@@ -59,7 +59,7 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initial
 		std::terminate();
 	}
 }
-void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Initializer> initializer_opt, Spparam<const Scope> scope){
+void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:
@@ -71,7 +71,7 @@ void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recy
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_bracketed_init_list>();
-		Xptr<Value> value;
+		Vp<Value> value;
 		D_array array;
 		array.reserve(candidate.elements.size());
 		for(const auto &elem : candidate.elements){
@@ -85,7 +85,7 @@ void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recy
 
 	case Initializer::type_braced_init_list: {
 		const auto &candidate = initializer_opt->get<Initializer::S_braced_init_list>();
-		Xptr<Value> value;
+		Vp<Value> value;
 		D_object object;
 		object.reserve(candidate.key_values.size());
 		for(const auto &pair : candidate.key_values){

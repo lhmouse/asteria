@@ -16,7 +16,7 @@ public:
 	};
 
 private:
-	Wptr_vector<Value> m_weak_values;
+	Wp_vector<Value> m_weak_values;
 	std::size_t m_defragmentation_threshold;
 
 public:
@@ -32,7 +32,7 @@ private:
 	void do_purge_values() noexcept;
 
 public:
-	void adopt_value(Spparam<Value> value_opt);
+	void adopt_value(Spr<Value> value_opt);
 	void defragment(bool aggressive = false) noexcept;
 };
 

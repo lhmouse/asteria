@@ -59,28 +59,28 @@ public:
 		type_operator_rpn       = 8, // -X, +1
 	};
 	struct S_literal {
-		Sptr<const Value> source_opt;
+		Sp<const Value> source_opt;
 	};
 	struct S_named_reference {
 		Cow_string identifier;
 	};
 	struct S_bound_reference {
-		Sptr<const Reference> reference_opt;
+		Sp<const Reference> reference_opt;
 	};
 	struct S_subexpression {
-		Xptr<Expression> subexpression_opt;
+		Vp<Expression> subexpression_opt;
 	};
 	struct S_lambda_definition {
 		Cow_string source_location;
-		Sptr_vector<const Parameter> parameters_opt;
-		Xptr<Block> body_opt;
+		Sp_vector<const Parameter> parameters_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_pruning {
 		std::size_t count_to_pop;
 	};
 	struct S_branch {
-		Xptr<Expression> branch_true_opt;
-		Xptr<Expression> branch_false_opt;
+		Vp<Expression> branch_true_opt;
+		Vp<Expression> branch_false_opt;
 	};
 	struct S_function_call {
 		std::size_t argument_count;

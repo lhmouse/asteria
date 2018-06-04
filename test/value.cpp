@@ -12,7 +12,7 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	Xptr<Value> value;
+	Vp<Value> value;
 	set_value(value, recycler, true);
 	ASTERIA_TEST_CHECK(value->get_type() == Value::type_boolean);
 	ASTERIA_TEST_CHECK(value->get<D_boolean>() == true);
@@ -51,7 +51,7 @@ int main(){
 	ASTERIA_TEST_CHECK(value->get<D_object>().at(D_string::shallow("one"))->get<D_boolean>() == true);
 	ASTERIA_TEST_CHECK(value->get<D_object>().at(D_string::shallow("two"))->get<D_string>() == D_string::shallow("world"));
 
-	Xptr<Value> cmp;
+	Vp<Value> cmp;
 	set_value(value, recycler, D_null());
 	set_value(cmp, recycler, D_null());
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_result_equal);

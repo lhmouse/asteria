@@ -12,11 +12,11 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Spparam<const Reference> reference_opt) noexcept {
+Reference::Type get_reference_type(Spr<const Reference> reference_opt) noexcept {
 	return reference_opt ? reference_opt->get_type() : Reference::type_null;
 }
 
-void dump_reference(std::ostream &os, Spparam<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
+void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -53,12 +53,12 @@ void dump_reference(std::ostream &os, Spparam<const Reference> reference_opt, un
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Reference> &reference_fmt){
+std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt){
 	dump_reference(os, reference_fmt.get());
 	return os;
 }
 
-void copy_reference(Xptr<Reference> &reference_out, Spparam<const Reference> source_opt){
+void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> source_opt){
 	const auto type = get_reference_type(source_opt);
 	switch(type){
 	case Reference::type_null:
@@ -92,7 +92,7 @@ void copy_reference(Xptr<Reference> &reference_out, Spparam<const Reference> sou
 		std::terminate();
 	}
 }
-void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt){
+void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&source_opt){
 	if(source_opt == nullptr){
 		return reference_out.reset();
 	} else {
@@ -100,7 +100,7 @@ void move_reference(Xptr<Reference> &reference_out, Xptr<Reference> &&source_opt
 	}
 }
 
-Sptr<const Value> read_reference_opt(Spparam<const Reference> reference_opt){
+Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -160,7 +160,7 @@ Sptr<const Value> read_reference_opt(Spparam<const Reference> reference_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Xptr<Value>> drill_reference(Spparam<const Reference> reference_opt){
+std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference_opt){
 	const auto type = get_reference_type(reference_opt);
 	switch(type){
 	case Reference::type_null:
@@ -236,39 +236,39 @@ std::reference_wrapper<Xptr<Value>> drill_reference(Spparam<const Reference> ref
 namespace {
 	class Extract_value_result {
 	private:
-		rocket::variant<std::nullptr_t, Sptr<const Value>, Xptr<Value>> m_variant;
+		rocket::variant<std::nullptr_t, Sp<const Value>, Vp<Value>> m_variant;
 
 	public:
 		Extract_value_result(std::nullptr_t = nullptr) noexcept
 			: m_variant(nullptr)
 		{ }
-		Extract_value_result(Sptr<const Value> copyable_pointer) noexcept
+		Extract_value_result(Sp<const Value> copyable_pointer) noexcept
 			: m_variant(std::move(copyable_pointer))
 		{ }
-		Extract_value_result(Xptr<Value> &&movable_pointer) noexcept
+		Extract_value_result(Vp<Value> &&movable_pointer) noexcept
 			: m_variant(std::move(movable_pointer))
 		{ }
 
 	public:
-		Sptr<const Value> get_copyable_pointer() const noexcept {
+		Sp<const Value> get_copyable_pointer() const noexcept {
 			switch(m_variant.index()){
 			default:
 				return nullptr;
 			case 1:
-				return m_variant.get<Sptr<const Value>>();
+				return m_variant.get<Sp<const Value>>();
 			case 2:
-				return m_variant.get<Xptr<Value>>();
+				return m_variant.get<Vp<Value>>();
 			}
 		}
 		bool is_movable() const noexcept {
 			return m_variant.index() == 2;
 		}
-		Xptr<Value> & get_movable_pointer(){
-			return m_variant.get<Xptr<Value>>();
+		Vp<Value> & get_movable_pointer(){
+			return m_variant.get<Vp<Value>>();
 		}
 	};
 
-	Extract_value_result do_try_extract_value(Spparam<Reference> reference_opt){
+	Extract_value_result do_try_extract_value(Spr<Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -308,7 +308,7 @@ namespace {
 			if(parent_result.is_movable() == false){
 				return value_opt.share_c();
 			}
-			return const_cast<Xptr<Value> &&>(value_opt); }
+			return const_cast<Vp<Value> &&>(value_opt); }
 
 		case Reference::type_object_member: {
 			auto &candidate = reference_opt->get<Reference::S_object_member>();
@@ -329,7 +329,7 @@ namespace {
 			if(parent_result.is_movable() == false){
 				return value_opt.share_c();
 			}
-			return const_cast<Xptr<Value> &&>(value_opt); }
+			return const_cast<Vp<Value> &&>(value_opt); }
 
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
@@ -338,7 +338,7 @@ namespace {
 	}
 }
 
-void extract_value_from_reference(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Reference> &&reference_opt){
+void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Reference> &&reference_opt){
 	auto result = do_try_extract_value(reference_opt);
 	if(result.is_movable() == false){
 		return copy_value(value_out, recycler, result.get_copyable_pointer());
@@ -347,7 +347,7 @@ void extract_value_from_reference(Xptr<Value> &value_out, Spparam<Recycler> recy
 }
 
 namespace {
-	bool do_check_materializability(Spparam<const Reference> reference_opt){
+	bool do_check_materializability(Spr<const Reference> reference_opt){
 		const auto type = get_reference_type(reference_opt);
 		switch(type){
 		case Reference::type_null:
@@ -371,11 +371,11 @@ namespace {
 	}
 }
 
-void materialize_reference(Xptr<Reference> &reference_inout_opt, Spparam<Recycler> recycler, bool constant){
+void materialize_reference(Vp<Reference> &reference_inout_opt, Spr<Recycler> recycler, bool constant){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
-	Xptr<Value> value;
+	Vp<Value> value;
 	extract_value_from_reference(value, recycler, std::move(reference_inout_opt));
 	auto var = std::make_shared<Variable>(std::move(value), constant);
 	Reference::S_variable ref_l = { std::move(var) };

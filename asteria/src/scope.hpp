@@ -19,13 +19,13 @@ public:
 
 private:
 	const Purpose m_purpose;
-	const Sptr<const Scope> m_parent_opt;
+	const Sp<const Scope> m_parent_opt;
 
-	Xptr_string_map<Reference> m_local_references;
-	Sptr_vector<const Function_base> m_deferred_callbacks;
+	Vp_string_map<Reference> m_local_references;
+	Sp_vector<const Function_base> m_deferred_callbacks;
 
 public:
-	Scope(Purpose purpose, Sptr<const Scope> parent_opt)
+	Scope(Purpose purpose, Sp<const Scope> parent_opt)
 		: m_purpose(std::move(purpose)), m_parent_opt(std::move(parent_opt))
 		, m_local_references(), m_deferred_callbacks()
 	{ }
@@ -41,18 +41,18 @@ public:
 	Purpose get_purpose() const noexcept {
 		return m_purpose;
 	}
-	const Sptr<const Scope> & get_parent_opt() const noexcept {
+	const Sp<const Scope> & get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
-	Sptr<const Reference> get_local_reference_opt(const Cow_string &identifier) const noexcept;
-	std::reference_wrapper<Xptr<Reference>> drill_for_local_reference(const Cow_string &identifier);
+	Sp<const Reference> get_local_reference_opt(const Cow_string &identifier) const noexcept;
+	std::reference_wrapper<Vp<Reference>> drill_for_local_reference(const Cow_string &identifier);
 
-	void defer_callback(Sptr<const Function_base> &&callback);
+	void defer_callback(Sp<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spparam<Scope> scope, Spparam<Recycler> recycler, const Cow_string &source_location, const Sptr_vector<const Parameter> &parameters_opt, Xptr<Reference> &&this_opt, Xptr_vector<Reference> &&arguments_opt);
-extern void prepare_function_scope_lexical(Spparam<Scope> scope, const Cow_string &source_location, const Sptr_vector<const Parameter> &parameters_opt);
+extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope_lexical(Spr<Scope> scope, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt);
 
 }
 

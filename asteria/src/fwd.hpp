@@ -32,7 +32,7 @@ class Insertable_ostream;
 class Logger;
 
 template<typename ElementT>
-class Sptr_formatter;
+class Sp_formatter;
 
 // Lexical elements (movable only)
 class Initializer;
@@ -69,31 +69,31 @@ template<typename FirstT, typename SecondT>
 using T_pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
-using Sptr = std::shared_ptr<ElementT>;
+using Sp = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Spparam = const std::shared_ptr<ElementT> &;
+using Spr = const std::shared_ptr<ElementT> &;
 template<typename ElementT>
-using Sptr_vector = T_vector<Sptr<ElementT>>;
+using Sp_vector = T_vector<Sp<ElementT>>;
 template<typename ValueT>
-using Sptr_string_map = T_string_map<Sptr<ValueT>>;
+using Sp_string_map = T_string_map<Sp<ValueT>>;
 
 template<typename ElementT>
-using Wptr = std::weak_ptr<ElementT>;
+using Wp = std::weak_ptr<ElementT>;
 template<typename ElementT>
-using Wparg = const std::weak_ptr<ElementT> &;
+using Wpr = const std::weak_ptr<ElementT> &;
 template<typename ElementT>
-using Wptr_vector = T_vector<Wptr<ElementT>>;
+using Wp_vector = T_vector<Wp<ElementT>>;
 template<typename ValueT>
-using Wptr_string_map = T_string_map<Wptr<ValueT>>;
+using Wp_string_map = T_string_map<Wp<ValueT>>;
 
 template<typename ElementT>
-using Xptr = rocket::value_ptr<ElementT>;
+using Vp = rocket::value_ptr<ElementT>;
 //template<typename ElementT>
-//using Xparg = const rocket::value_ptr<ElementT> &;
+//using Vpr = const rocket::value_ptr<ElementT> &;
 template<typename ElementT>
-using Xptr_vector = T_vector<Xptr<ElementT>>;
+using Vp_vector = T_vector<Vp<ElementT>>;
 template<typename ValueT>
-using Xptr_string_map = T_string_map<Xptr<ValueT>>;
+using Vp_string_map = T_string_map<Vp<ValueT>>;
 
 // Complementary data types used internally
 using Nullptr             = std::nullptr_t;
@@ -102,7 +102,7 @@ using Signed_integer      = std::int64_t;
 using Unsigned_integer    = std::uint64_t;
 using Double_precision    = double;
 using Cow_string          = rocket::cow_string;
-using Function_prototype  = void (Xptr<Reference> &, Spparam<Recycler>, Xptr<Reference> &&, Xptr_vector<Reference> &&);
+using Function_prototype  = void (Vp<Reference> &, Spr<Recycler>, Vp<Reference> &&, Vp_vector<Reference> &&);
 
 // Data types exposed to users
 using D_null      = Nullptr;
@@ -110,10 +110,10 @@ using D_boolean   = Boolean;
 using D_integer   = Signed_integer;
 using D_double    = Double_precision;
 using D_string    = Cow_string;
-using D_opaque    = Xptr<Opaque_base>;
-using D_function  = Sptr<const Function_base>;
-using D_array     = Xptr_vector<Value>;
-using D_object    = Xptr_string_map<Value>;
+using D_opaque    = Vp<Opaque_base>;
+using D_function  = Sp<const Function_base>;
+using D_array     = Vp_vector<Value>;
+using D_object    = Vp_string_map<Value>;
 
 }
 

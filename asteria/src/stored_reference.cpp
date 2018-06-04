@@ -10,7 +10,7 @@ Stored_reference::Stored_reference(Stored_reference &&) noexcept = default;
 Stored_reference & Stored_reference::operator=(Stored_reference &&) noexcept = default;
 Stored_reference::~Stored_reference() = default;
 
-void set_reference(Xptr<Reference> &reference_out, Stored_reference &&value_opt){
+void set_reference(Vp<Reference> &reference_out, Stored_reference &&value_opt){
 	const auto value = value_opt.get_opt();
 	if(value == nullptr){
 		return reference_out.reset();

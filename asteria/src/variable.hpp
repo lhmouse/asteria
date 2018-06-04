@@ -10,14 +10,14 @@ namespace Asteria {
 
 class Variable {
 private:
-	Xptr<Value> m_value_opt;
+	Vp<Value> m_value_opt;
 	bool m_constant;
 
 public:
 	explicit Variable(bool constant = false)
 		: m_value_opt(), m_constant(constant)
 	{ }
-	Variable(Xptr<Value> &&value_opt, bool constant = false)
+	Variable(Vp<Value> &&value_opt, bool constant = false)
 		: m_value_opt(std::move(value_opt)), m_constant(constant)
 	{ }
 	~Variable();
@@ -29,10 +29,10 @@ private:
 	ROCKET_NORETURN void do_throw_constant() const;
 
 public:
-	Sptr<const Value> get_value_opt() const noexcept {
+	Sp<const Value> get_value_opt() const noexcept {
 		return m_value_opt;
 	}
-	std::reference_wrapper<Xptr<Value>> drill_for_value(){
+	std::reference_wrapper<Vp<Value>> drill_for_value(){
 		const auto constant = is_constant();
 		if(constant){
 			do_throw_constant();

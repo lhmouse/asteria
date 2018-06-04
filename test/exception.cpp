@@ -18,7 +18,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_integer>() == 42);
 	try {
 		Reference::S_variable ref_l = { var };
-		Xptr<Reference> ref;
+		Vp<Reference> ref;
 		set_reference(ref, std::move(ref_l));
 		throw Exception(std::move(ref));
 	} catch(Exception &e){

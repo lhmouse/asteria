@@ -43,14 +43,14 @@ const char * get_type_name(Value::Type type) noexcept {
 	}
 }
 
-Value::Type get_value_type(Spparam<const Value> value_opt) noexcept {
+Value::Type get_value_type(Spr<const Value> value_opt) noexcept {
 	return value_opt ? value_opt->get_type() : Value::type_null;
 }
-const char * get_value_type_name(Spparam<const Value> value_opt) noexcept {
+const char * get_value_type_name(Spr<const Value> value_opt) noexcept {
 	return get_type_name(get_value_type(value_opt));
 }
 
-bool test_value(Spparam<const Value> value_opt) noexcept {
+bool test_value(Spr<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
@@ -126,7 +126,7 @@ namespace {
 	}
 }
 
-void dump_value(std::ostream &os, Spparam<const Value> value_opt, unsigned indent_next, unsigned indent_increment){
+void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_value_type(value_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
@@ -209,12 +209,12 @@ void dump_value(std::ostream &os, Spparam<const Value> value_opt, unsigned inden
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sptr_formatter<Value> &value_fmt){
+std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt){
 	dump_value(os, value_fmt.get());
 	return os;
 }
 
-void copy_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Spparam<const Value> source_opt){
+void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> source_opt){
 	const auto type = get_value_type(source_opt);
 	switch(type){
 	case Value::type_null:
@@ -268,7 +268,7 @@ void copy_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Spparam<cons
 		std::terminate();
 	}
 }
-void move_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Value> &&source_opt){
+void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&source_opt){
 	if(source_opt && (source_opt->get_recycler_opt() == recycler)){
 		return value_out.reset(source_opt.release());
 	} else {
@@ -276,7 +276,7 @@ void move_value(Xptr<Value> &value_out, Spparam<Recycler> recycler, Xptr<Value> 
 	}
 }
 
-void purge_value(Spparam<Value> value_opt) noexcept {
+void purge_value(Spr<Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
@@ -310,7 +310,7 @@ void purge_value(Spparam<Value> value_opt) noexcept {
 	}
 }
 
-Value::Comparison_result compare_values(Spparam<const Value> lhs_opt, Spparam<const Value> rhs_opt) noexcept {
+Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Value> rhs_opt) noexcept {
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = get_value_type(lhs_opt);
 	const auto type_rhs = get_value_type(rhs_opt);

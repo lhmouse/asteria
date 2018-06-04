@@ -19,7 +19,7 @@ Block::Block(Block &&) noexcept = default;
 Block & Block::operator=(Block &&) noexcept = default;
 Block::~Block() = default;
 
-void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Spparam<const Block> block_opt){
+void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
 		return bound_result_out.reset();
@@ -34,7 +34,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_expression_statement: {
 			const auto &candidate = stmt.get<Statement::S_expression_statement>();
 			// Bind the expression recursively.
-			Xptr<Expression> bound_expr;
+			Vp<Expression> bound_expr;
 			bind_expression(bound_expr, candidate.expression_opt, scope);
 			Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
 			bound_statements.emplace_back(std::move(stmt_e));
@@ -46,7 +46,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			const auto wref = scope->drill_for_local_reference(candidate.identifier);
 			set_reference(wref, nullptr);
 			// Bind the initializer recursively.
-			Xptr<Initializer> bound_init;
+			Vp<Initializer> bound_init;
 			bind_initializer(bound_init, candidate.initializer_opt, scope);
 			Statement::S_variable_definition stmt_v = { candidate.identifier, candidate.constant, std::move(bound_init) };
 			bound_statements.emplace_back(std::move(stmt_v));
@@ -60,7 +60,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			// Bind the function body recursively.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			Statement::S_function_definition stmt_f = { candidate.identifier, candidate.source_location, candidate.parameters_opt, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
@@ -69,12 +69,12 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_if_statement: {
 			const auto &candidate = stmt.get<Statement::S_if_statement>();
 			// Bind the condition recursively.
-			Xptr<Expression> bound_cond;
+			Vp<Expression> bound_cond;
 			bind_expression(bound_cond, candidate.condition_opt, scope);
 			// Bind both branches recursively.
-			Xptr<Block> bound_branch_true;
+			Vp<Block> bound_branch_true;
 			bind_block(bound_branch_true, candidate.branch_true_opt, scope);
-			Xptr<Block> bound_branch_false;
+			Vp<Block> bound_branch_false;
 			bind_block(bound_branch_false, candidate.branch_false_opt, scope);
 			Statement::S_if_statement stmt_i = { std::move(bound_cond), std::move(bound_branch_true), std::move(bound_branch_false) };
 			bound_statements.emplace_back(std::move(stmt_i));
@@ -83,17 +83,17 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_switch_statement: {
 			const auto &candidate = stmt.get<Statement::S_switch_statement>();
 			// Bind the control expression recursively.
-			Xptr<Expression> bound_ctrl;
+			Vp<Expression> bound_ctrl;
 			bind_expression(bound_ctrl, candidate.control_opt, scope);
 			// Bind clauses recursively. A clause consists of a label expression and a body block.
 			// Notice that clauses in a `switch` statement share the same scope.
 			const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			T_vector<T_pair<Xptr<Expression>, Xptr<Block>>> bound_clauses;
+			T_vector<T_pair<Vp<Expression>, Vp<Block>>> bound_clauses;
 			bound_clauses.reserve(candidate.clauses_opt.size());
 			for(const auto &pair : candidate.clauses_opt){
-				Xptr<Expression> bound_label;
+				Vp<Expression> bound_label;
 				bind_expression(bound_label, pair.first, scope_switch);
-				Xptr<Block> bound_body;
+				Vp<Block> bound_body;
 				bind_block_in_place(bound_body, scope_switch, pair.second);
 				bound_clauses.emplace_back(std::move(bound_label), std::move(bound_body));
 			}
@@ -104,9 +104,9 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_do_while_statement: {
 			const auto &candidate = stmt.get<Statement::S_do_while_statement>();
 			// Bind the body and the condition recursively.
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope);
-			Xptr<Expression> bound_cond;
+			Vp<Expression> bound_cond;
 			bind_expression(bound_cond, candidate.condition_opt, scope);
 			Statement::S_do_while_statement stmt_d = { std::move(bound_body), std::move(bound_cond) };
 			bound_statements.emplace_back(std::move(stmt_d));
@@ -115,9 +115,9 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_while_statement: {
 			const auto &candidate = stmt.get<Statement::S_while_statement>();
 			// Bind the condition and the body recursively.
-			Xptr<Expression> bound_cond;
+			Vp<Expression> bound_cond;
 			bind_expression(bound_cond, candidate.condition_opt, scope);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope);
 			Statement::S_while_statement stmt_w = { std::move(bound_cond), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_w));
@@ -129,14 +129,14 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop initialization recursively.
-			Xptr<Block> bound_init;
+			Vp<Block> bound_init;
 			bind_block_in_place(bound_init, scope_for, candidate.initialization_opt);
 			// Bind the condition, the increment and the body recursively.
-			Xptr<Expression> bound_cond;
+			Vp<Expression> bound_cond;
 			bind_expression(bound_cond, candidate.condition_opt, scope_for);
-			Xptr<Expression> bound_inc;
+			Vp<Expression> bound_inc;
 			bind_expression(bound_inc, candidate.increment_opt, scope_for);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope_for);
 			Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_inc), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
@@ -148,7 +148,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop range initializer recursively.
-			Xptr<Initializer> bound_range_init;
+			Vp<Initializer> bound_range_init;
 			bind_initializer(bound_range_init, candidate.range_initializer_opt, scope_for);
 			// Create null local references for the key and the value.
 			const auto key_wref = scope->drill_for_local_reference(candidate.key_identifier);
@@ -156,7 +156,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 			set_reference(key_wref, nullptr);
 			set_reference(value_wref, nullptr);
 			// Bind the body recursively.
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope);
 			Statement::S_for_each_statement stmt_f = { candidate.key_identifier, candidate.value_identifier, std::move(bound_range_init), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
@@ -165,9 +165,9 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_try_statement: {
 			const auto &candidate = stmt.get<Statement::S_try_statement>();
 			// Bind both branches recursively.
-			Xptr<Block> bound_branch_try;
+			Vp<Block> bound_branch_try;
 			bind_block(bound_branch_try, candidate.branch_try_opt, scope);
-			Xptr<Block> bound_branch_catch;
+			Vp<Block> bound_branch_catch;
 			bind_block(bound_branch_catch, candidate.branch_catch_opt, scope);
 			Statement::S_try_statement stmt_t = { std::move(bound_branch_try), candidate.exception_identifier, std::move(bound_branch_catch) };
 			bound_statements.emplace_back(std::move(stmt_t));
@@ -176,7 +176,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_defer_statement: {
 			const auto &candidate = stmt.get<Statement::S_defer_statement>();
 			// Bind the body recursively.
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope);
 			Statement::S_defer_statement stmt_d = { candidate.source_location, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_d));
@@ -197,7 +197,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_throw_statement: {
 			const auto &candidate = stmt.get<Statement::S_throw_statement>();
 			// Bind the operand recursively.
-			Xptr<Expression> bound_operand;
+			Vp<Expression> bound_operand;
 			bind_expression(bound_operand, candidate.operand_opt, scope);
 			Statement::S_throw_statement stmt_t = { std::move(bound_operand) };
 			bound_statements.emplace_back(std::move(stmt_t));
@@ -206,7 +206,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 		case Statement::type_return_statement: {
 			const auto &candidate = stmt.get<Statement::S_return_statement>();
 			// Bind the operand recursively.
-			Xptr<Expression> bound_operand;
+			Vp<Expression> bound_operand;
 			bind_expression(bound_operand, candidate.operand_opt, scope);
 			Statement::S_return_statement stmt_r = { std::move(bound_operand) };
 			bound_statements.emplace_back(std::move(stmt_r));
@@ -221,7 +221,7 @@ void bind_block_in_place(Xptr<Block> &bound_result_out, Spparam<Scope> scope, Sp
 }
 
 namespace {
-	bool do_check_loop_condition(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Expression> condition_opt, Spparam<const Scope> scope){
+	bool do_check_loop_condition(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Expression> condition_opt, Spr<const Scope> scope){
 		// Overwrite `reference_out` unconditionally, even when `condition_opt` is null.
 		evaluate_expression(reference_out, recycler, condition_opt, scope);
 		bool result = true;
@@ -233,7 +233,7 @@ namespace {
 	}
 }
 
-Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, Spparam<Scope> scope, Spparam<Recycler> recycler, Spparam<const Block> block_opt){
+Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope, Spr<Recycler> recycler, Spr<const Block> block_opt){
 	reference_out.reset();
 	if(block_opt == nullptr){
 		// Nothing to do.
@@ -254,7 +254,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			const auto &candidate = stmt.get<Statement::S_variable_definition>();
 			// Evaluate the initializer and move the result into a variable.
 			evaluate_initializer(reference_out, recycler, candidate.initializer_opt, scope);
-			Xptr<Value> value;
+			Vp<Value> value;
 			extract_value_from_reference(value, recycler, std::move(reference_out));
 			// Create a reference to a temporary value, then materialize it.
 			// This results in a local variable.
@@ -270,11 +270,11 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			// Create a local reference for the function.
 			auto func = std::make_shared<Instantiated_function>("function", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
-			Xptr<Value> func_var;
+			Vp<Value> func_var;
 			set_value(func_var, recycler, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(reference_out, std::move(ref_t));
@@ -414,7 +414,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 			// Perform loop initialization.
 			evaluate_initializer(reference_out, recycler, candidate.range_initializer_opt, scope_for);
 			materialize_reference(reference_out, recycler, true);
-			Xptr<Reference> range_ref;
+			Vp<Reference> range_ref;
 			move_reference(range_ref, std::move(reference_out));
 			const auto range_var = read_reference_opt(range_ref);
 			const auto range_type = get_value_type(range_var);
@@ -425,8 +425,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					const auto &range_array = range_var->get<D_array>();
 					size = static_cast<std::ptrdiff_t>(range_array.size());
 				}
-				Xptr<Value> key_var;
-				Xptr<Reference> temp_ref;
+				Vp<Value> key_var;
+				Vp<Reference> temp_ref;
 				for(std::ptrdiff_t index = 0; index < size; ++index){
 					// Set the key, which is an integer.
 					set_value(key_var, recycler, D_integer(index));
@@ -459,8 +459,8 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 						backup_keys.emplace_back(pair.first);
 					}
 				}
-				Xptr<Value> key_var;
-				Xptr<Reference> temp_ref;
+				Vp<Value> key_var;
+				Vp<Reference> temp_ref;
 				for(auto &key : backup_keys){
 					// Set the key, which is an integer.
 					set_value(key_var, recycler, D_string(key));
@@ -491,7 +491,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 		case Statement::type_try_statement: {
 			const auto &candidate = stmt.get<Statement::S_try_statement>();
 			// Execute the `try` branch in a C++ `try...catch` statement.
-			Sptr<Scope> scope_catch;
+			Sp<Scope> scope_catch;
 			try {
 				try {
 					const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope);
@@ -530,7 +530,7 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 					ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
 					// Create a string containing the error message in the `catch` scope, then execute the `catch` branch.
 					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
-					Xptr<Value> what_var;
+					Vp<Value> what_var;
 					set_value(what_var, recycler, D_string(e.what()));
 					Reference::S_temporary_value ref_t = { std::move(what_var) };
 					set_reference(reference_out, std::move(ref_t));
@@ -551,10 +551,10 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 		case Statement::type_defer_statement: {
 			const auto &candidate = stmt.get<Statement::S_defer_statement>();
 			// Bind the function body onto the current scope. There are no parameters.
-			Xptr<Block> bound_body;
+			Vp<Block> bound_body;
 			bind_block(bound_body, candidate.body_opt, scope);
 			// Register the function as a deferred callback of the current scope.
-			auto func = std::make_shared<Instantiated_function>("deferred block", candidate.source_location, Sptr_vector<const Parameter>(), scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("deferred block", candidate.source_location, Sp_vector<const Parameter>(), scope, std::move(bound_body));
 			scope->defer_callback(std::move(func));
 			break; }
 
@@ -615,14 +615,14 @@ Block::Execution_result execute_block_in_place(Xptr<Reference> &reference_out, S
 	return Block::execution_result_end_of_block;
 }
 
-void bind_block(Xptr<Block> &bound_result_out, Spparam<const Block> block_opt, Spparam<const Scope> scope){
+void bind_block(Vp<Block> &bound_result_out, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){
 		return bound_result_out.reset();
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 	return bind_block_in_place(bound_result_out, scope_working, block_opt);
 }
-Block::Execution_result execute_block(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Block> block_opt, Spparam<const Scope> scope){
+Block::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){
 		return Block::execution_result_end_of_block;
 	}

@@ -36,56 +36,56 @@ public:
 		type_return_statement         = 14,
 	};
 	struct S_expression_statement {
-		Xptr<Expression> expression_opt;
+		Vp<Expression> expression_opt;
 	};
 	struct S_variable_definition {
 		Cow_string identifier;
 		bool constant;
-		Xptr<Initializer> initializer_opt;
+		Vp<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
 		Cow_string identifier;
 		Cow_string source_location;
-		Sptr_vector<const Parameter> parameters_opt;
-		Xptr<Block> body_opt;
+		Sp_vector<const Parameter> parameters_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_if_statement {
-		Xptr<Expression> condition_opt;
-		Xptr<Block> branch_true_opt;
-		Xptr<Block> branch_false_opt;
+		Vp<Expression> condition_opt;
+		Vp<Block> branch_true_opt;
+		Vp<Block> branch_false_opt;
 	};
 	struct S_switch_statement {
-		Xptr<Expression> control_opt;
-		T_vector<T_pair<Xptr<Expression>, Xptr<Block>>> clauses_opt;
+		Vp<Expression> control_opt;
+		T_vector<T_pair<Vp<Expression>, Vp<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
-		Xptr<Block> body_opt;
-		Xptr<Expression> condition_opt;
+		Vp<Block> body_opt;
+		Vp<Expression> condition_opt;
 	};
 	struct S_while_statement {
-		Xptr<Expression> condition_opt;
-		Xptr<Block> body_opt;
+		Vp<Expression> condition_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_for_statement {
-		Xptr<Block> initialization_opt;
-		Xptr<Expression> condition_opt;
-		Xptr<Expression> increment_opt;
-		Xptr<Block> body_opt;
+		Vp<Block> initialization_opt;
+		Vp<Expression> condition_opt;
+		Vp<Expression> increment_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_for_each_statement {
 		Cow_string key_identifier;
 		Cow_string value_identifier;
-		Xptr<Initializer> range_initializer_opt;
-		Xptr<Block> body_opt;
+		Vp<Initializer> range_initializer_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_try_statement {
-		Xptr<Block> branch_try_opt;
+		Vp<Block> branch_try_opt;
 		Cow_string exception_identifier;
-		Xptr<Block> branch_catch_opt;
+		Vp<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
 		Cow_string source_location;
-		Xptr<Block> body_opt;
+		Vp<Block> body_opt;
 	};
 	struct S_break_statement {
 		Target_scope target_scope;
@@ -94,10 +94,10 @@ public:
 		Target_scope target_scope;
 	};
 	struct S_throw_statement {
-		Xptr<Expression> operand_opt;
+		Vp<Expression> operand_opt;
 	};
 	struct S_return_statement {
-		Xptr<Expression> operand_opt;
+		Vp<Expression> operand_opt;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_expression_statement    //  0

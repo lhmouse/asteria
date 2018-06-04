@@ -10,7 +10,7 @@ using namespace Asteria;
 int main(){
 	auto recycler = std::make_shared<Recycler>();
 
-	Xptr<Value> obj, value;
+	Vp<Value> obj, value;
 	set_value(obj, recycler, D_object());
 	set_value(value, recycler, D_integer(42));
 	auto pair = obj->get<D_object>().emplace(D_string::shallow("int"), std::move(value));

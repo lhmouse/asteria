@@ -12,9 +12,9 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 
-	Xptr<Value> value;
+	Vp<Value> value;
 	set_value(value, recycler, D_string(D_string::shallow("meow")));
-	Xptr<Reference> ref;
+	Vp<Reference> ref;
 	Reference::S_constant rsref = { value };
 	set_reference(ref, std::move(rsref));
 	auto ptr = read_reference_opt(ref);
@@ -23,7 +23,7 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), recycler, D_integer(42)));
 	ASTERIA_TEST_CHECK(ptr.get() == value.get());
 
-	Reference::S_temporary_value tmpref = { Xptr<Value>(value.share()) };
+	Reference::S_temporary_value tmpref = { Vp<Value>(value.share()) };
 	set_reference(ref, std::move(tmpref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
@@ -38,12 +38,12 @@ int main(){
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr.get() == var->get_value_opt().get());
 
-	Xptr<Reference> ref_local;
+	Vp<Reference> ref_local;
 	copy_reference(ref_local, ref);
 
 	set_value(var->drill_for_value(), recycler, true);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_boolean);
-	Reference::S_array_element aref = { Xptr<Reference>(ref_local.share()), 9 };
+	Reference::S_array_element aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_array array;
@@ -52,7 +52,7 @@ int main(){
 		array.emplace_back(std::move(value));
 	}
 	set_value(var->drill_for_value(), recycler, std::move(array));
-	aref = { Xptr<Reference>(ref_local.share()), 9 };
+	aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	var->set_constant(true);
 	ptr = read_reference_opt(ref);
@@ -65,12 +65,12 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().size() == 10);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(8) == nullptr);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(9)->get<D_integer>() == 67);
-	aref = { Xptr<Reference>(ref_local.share()), 9 };
+	aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	var->set_constant(true);
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), recycler, D_integer(43)));
 
-	aref = { Xptr<Reference>(ref_local.share()), -7 };
+	aref = { Vp<Reference>(ref_local.share()), -7 };
 	set_reference(ref, std::move(aref));
 	var->set_constant(false);
 	ptr = read_reference_opt(ref);
@@ -79,7 +79,7 @@ int main(){
 	set_value(drill_reference(ref), recycler, D_integer(65));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(3)->get<D_integer>() == 65);
 
-	aref = { Xptr<Reference>(ref_local.share()), 1 };
+	aref = { Vp<Reference>(ref_local.share()), 1 };
 	set_reference(ref, std::move(aref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
@@ -87,7 +87,7 @@ int main(){
 	set_value(drill_reference(ref), recycler, D_integer(26));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(1)->get<D_integer>() == 26);
 
-	aref = { Xptr<Reference>(ref_local.share()), -12 };
+	aref = { Vp<Reference>(ref_local.share()), -12 };
 	set_reference(ref, std::move(aref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
@@ -96,7 +96,7 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(0)->get<D_integer>() == 37);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(3)->get<D_integer>() == 26);
 
-	Reference::S_object_member oref = { Xptr<Reference>(ref_local.share()), D_string::shallow("three") };
+	Reference::S_object_member oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
 	D_object object;
@@ -105,7 +105,7 @@ int main(){
 	set_value(value, recycler, D_integer(2));
 	object.emplace(D_string::shallow("two"), std::move(value));
 	set_value(var->drill_for_value(), recycler, std::move(object));
-	oref = { Xptr<Reference>(ref_local.share()), D_string::shallow("three") };
+	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_constant(true);
 	ptr = read_reference_opt(ref);
@@ -113,17 +113,17 @@ int main(){
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 2);
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), recycler, D_integer(92)));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 2);
-	oref = { Xptr<Reference>(ref_local.share()), D_string::shallow("three") };
+	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_constant(false);
 	set_value(drill_reference(ref), recycler, D_integer(92));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 3);
-	oref = { Xptr<Reference>(ref_local.share()), D_string::shallow("three") };
+	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_constant(true);
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), recycler, D_integer(43)));
 
-	oref = { Xptr<Reference>(ref_local.share()), D_string::shallow("one") };
+	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("one") };
 	set_reference(ref, std::move(oref));
 	var->set_constant(false);
 	ptr = read_reference_opt(ref);

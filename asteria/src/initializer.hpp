@@ -18,13 +18,13 @@ public:
 		type_braced_init_list     =  2,
 	};
 	struct S_assignment_init {
-		Xptr<Expression> expression;
+		Vp<Expression> expression;
 	};
 	struct S_bracketed_init_list {
-		Xptr_vector<Initializer> elements;
+		Vp_vector<Initializer> elements;
 	};
 	struct S_braced_init_list {
-		Xptr_string_map<Initializer> key_values;
+		Vp_string_map<Initializer> key_values;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_assignment_init     // 0
@@ -58,10 +58,10 @@ public:
 	}
 };
 
-extern Initializer::Type get_initializer_type(Spparam<const Initializer> initializer_opt) noexcept;
+extern Initializer::Type get_initializer_type(Spr<const Initializer> initializer_opt) noexcept;
 
-extern void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initializer> initializer_opt, Spparam<const Scope> scope);
-extern void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recycler, Spparam<const Initializer> initializer_opt, Spparam<const Scope> scope);
+extern void bind_initializer(Vp<Initializer> &bound_result_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
 
 }
 

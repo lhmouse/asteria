@@ -14,11 +14,11 @@
 using namespace Asteria;
 
 int main(){
-	Xptr<Block> block, init, body;
+	Vp<Block> block, init, body;
 	std::vector<Statement> stmts, stmts_nested;
 	std::vector<Expression_node> expr_nodes;
-	Xptr<Expression> expr, cond, inc;
-	Xptr<Initializer> initzr;
+	Vp<Expression> expr, cond, inc;
+	Vp<Initializer> initzr;
 	// value sum = 0;
 	expr_nodes.clear();
 	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
@@ -110,7 +110,7 @@ int main(){
 
 	const auto recycler = std::make_shared<Recycler>();
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
-	Xptr<Reference> reference;
+	Vp<Reference> reference;
 	const auto result = execute_block_in_place(reference, scope, recycler, block);
 	ASTERIA_TEST_CHECK(result == Block::execution_result_end_of_block);
 	ASTERIA_TEST_CHECK(scope->get_local_reference_opt(D_string::shallow("i")) == nullptr);

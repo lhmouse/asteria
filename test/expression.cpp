@@ -47,7 +47,7 @@ int main(){
 	nodes.emplace_back(std::move(s_opr)); // ++
 	s_opr = { Expression_node::operator_infix_add, false };
 	nodes.emplace_back(std::move(s_opr)); // +
-	auto branch_true = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	auto branch_true = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
 
 	nodes.clear();
 	s_lit = { std::make_shared<Value>(D_string("hello,")) };
@@ -56,7 +56,7 @@ int main(){
 	nodes.emplace_back(std::move(s_nref)); // cval
 	s_opr = { Expression_node::operator_infix_mul, false };
 	nodes.emplace_back(std::move(s_opr)); // *
-	auto branch_false = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	auto branch_false = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
 
 	nodes.clear();
 	s_nref = { D_string::shallow("condition") };
@@ -73,7 +73,7 @@ int main(){
 	nodes.emplace_back(std::move(s_opr)); // []
 	s_opr = { Expression_node::operator_infix_assign, false };
 	nodes.emplace_back(std::move(s_opr)); // =
-	auto expr = Xptr<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	auto expr = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
 
 	auto condition = std::make_shared<Variable>();
 	lref = { condition };
@@ -81,7 +81,7 @@ int main(){
 	set_reference(lrwref, std::move(lref));
 
 	set_value(condition->drill_for_value(), recycler, D_boolean(false));
-	Xptr<Reference> result;
+	Vp<Reference> result;
 	evaluate_expression(result, recycler, expr, scope);
 	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
 	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);
