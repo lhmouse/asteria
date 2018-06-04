@@ -1489,13 +1489,13 @@ public:
 
 	// N.B. This is a non-standard extension.
 	template<typename predT>
-	size_type find_first_if(size_type from, size_type n, predT pred) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
-		return this->do_find_forwards_if(from, n, ::std::move(pred));
+	size_type find_first_if(predT pred, size_type from = 0) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+		return this->do_find_forwards_if(from, 1, [&](const char *p){ return pred(*p); });
 	}
 	// N.B. This is a non-standard extension.
 	template<typename predT>
-	size_type find_last_if(size_type to, size_type n, predT pred) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
-		return this->do_find_backwards_if(to, n, ::std::move(pred));
+	size_type find_last_if(predT pred, size_type to = npos) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+		return this->do_find_backwards_if(to, 1, [&](const char *p){ return pred(*p); });
 	}
 
 	basic_cow_string substr(size_type pos = 0, size_type n = npos) const {
