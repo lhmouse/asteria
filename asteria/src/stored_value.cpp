@@ -16,9 +16,9 @@ void set_value(Vp<Value> &value_out, Spr<Recycler> recycler, Stored_value &&valu
 	if(value == nullptr){
 		return value_out.reset();
 	} else if(value_out == nullptr){
-		auto sptr = std::make_shared<Value>(recycler, std::move(*value));
-		recycler->adopt_value(sptr);
-		return value_out.reset(std::move(sptr));
+		auto sp = std::make_shared<Value>(recycler, std::move(*value));
+		recycler->adopt_value(sp);
+		return value_out.reset(std::move(sp));
 	} else {
 		return value_out->set(std::move(*value));
 	}

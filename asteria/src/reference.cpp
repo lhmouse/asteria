@@ -171,11 +171,11 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference
 
 	case Reference::type_constant: {
 		const auto &candidate = reference_opt->get<Reference::S_constant>();
-		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sptr_fmt(candidate.source_opt), "` cannot be modified."); }
+		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sp_fmt(candidate.source_opt), "` cannot be modified."); }
 
 	case Reference::type_temporary_value: {
 		const auto &candidate = reference_opt->get<Reference::S_temporary_value>();
-		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sptr_fmt(candidate.value_opt), "` is likely to be an error hence is not allowed."); }
+		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sp_fmt(candidate.value_opt), "` is likely to be an error hence is not allowed."); }
 
 	case Reference::type_variable: {
 		const auto &candidate = reference_opt->get<Reference::S_variable>();

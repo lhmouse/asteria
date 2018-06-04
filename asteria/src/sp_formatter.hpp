@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_SPTR_FORMATTER_HPP_
-#define ASTERIA_SPTR_FORMATTER_HPP_
+#ifndef ASTERIA_SP_FORMATTER_HPP_
+#define ASTERIA_SP_FORMATTER_HPP_
 
 #include "fwd.hpp"
 
@@ -25,15 +25,15 @@ public:
 };
 
 template<typename ElementT>
-Sp_formatter<typename std::remove_cv<ElementT>::type> sptr_fmt(const Sp<ElementT> &ptr){
+Sp_formatter<typename std::remove_cv<ElementT>::type> sp_fmt(const Sp<ElementT> &ptr){
 	return ptr;
 }
 template<typename ElementT>
-Sp_formatter<typename std::remove_cv<ElementT>::type> sptr_fmt(const Wp<ElementT> &ptr){
+Sp_formatter<typename std::remove_cv<ElementT>::type> sp_fmt(const Wp<ElementT> &ptr){
 	return ptr.lock();
 }
 template<typename ElementT>
-Sp_formatter<typename std::remove_cv<ElementT>::type> sptr_fmt(const Vp<ElementT> &ptr){
+Sp_formatter<typename std::remove_cv<ElementT>::type> sp_fmt(const Vp<ElementT> &ptr){
 	return ptr.share();
 }
 

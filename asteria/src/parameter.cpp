@@ -28,7 +28,7 @@ void prepare_function_arguments(Vp_vector<Reference> &arguments_inout, const Sp_
 		if(!default_arg){
 			continue;
 		}
-		ASTERIA_DEBUG_LOG("Setting default argument: i = ", i, ", default_arg = ", sptr_fmt(default_arg));
+		ASTERIA_DEBUG_LOG("Setting default argument: i = ", i, ", default_arg = ", sp_fmt(default_arg));
 		Reference::S_constant ref_k = { default_arg };
 		set_reference(arg, std::move(ref_k));
 	}

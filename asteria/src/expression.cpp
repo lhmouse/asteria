@@ -136,7 +136,7 @@ namespace {
 	}
 
 	void do_push_reference(Vp_vector<Reference> &stack, Vp<Reference> &&ref){
-		ASTERIA_DEBUG_LOG("Pushing: ", sptr_fmt(ref));
+		ASTERIA_DEBUG_LOG("Pushing: ", sp_fmt(ref));
 		stack.emplace_back(std::move(ref));
 	}
 	Vp<Reference> do_pop_reference(Vp_vector<Reference> &stack){
@@ -144,7 +144,7 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
 		auto ref = std::move(stack.back());
-		ASTERIA_DEBUG_LOG("Popping: ", sptr_fmt(ref));
+		ASTERIA_DEBUG_LOG("Popping: ", sp_fmt(ref));
 		stack.pop_back();
 		return ref;
 	}
@@ -714,7 +714,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				if(comparison_result == Value::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -733,7 +733,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				if(comparison_result == Value::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -752,7 +752,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				if(comparison_result == Value::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
@@ -771,7 +771,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto comparison_result = compare_values(lhs_var, rhs_var);
 				if(comparison_result == Value::comparison_result_unordered){
-					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sptr_fmt(lhs_var), "` and `", sptr_fmt(rhs_var), "` are unordered.");
+					ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){

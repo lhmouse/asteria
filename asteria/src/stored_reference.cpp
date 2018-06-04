@@ -15,8 +15,8 @@ void set_reference(Vp<Reference> &reference_out, Stored_reference &&value_opt){
 	if(value == nullptr){
 		return reference_out.reset();
 	} else if(reference_out == nullptr){
-		auto sptr = std::make_shared<Reference>(std::move(*value));
-		return reference_out.reset(std::move(sptr));
+		auto sp = std::make_shared<Reference>(std::move(*value));
+		return reference_out.reset(std::move(sp));
 	} else {
 		return reference_out->set(std::move(*value));
 	}
