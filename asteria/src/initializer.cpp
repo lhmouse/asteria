@@ -26,17 +26,17 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initial
 		return bound_result_out.reset();
 
 	case Initializer::type_assignment_init: {
-		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
+		const auto &candidate = initializer_opt->get<Initializer::S_assignment_init>();
 		Xptr<Expression> bound_expr;
-		bind_expression(bound_expr, params.expression, scope);
+		bind_expression(bound_expr, candidate.expression, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
 		return bound_result_out.emplace(std::move(init_a)); }
 
 	case Initializer::type_bracketed_init_list: {
-		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
+		const auto &candidate = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Xptr_vector<Initializer> bound_elems;
-		bound_elems.reserve(params.elements.size());
-		for(const auto &elem : params.elements){
+		bound_elems.reserve(candidate.elements.size());
+		for(const auto &elem : candidate.elements){
 			bind_initializer(bound_result_out, elem, scope);
 			bound_elems.emplace_back(std::move(bound_result_out));
 		}
@@ -44,10 +44,10 @@ void bind_initializer(Xptr<Initializer> &bound_result_out, Spparam<const Initial
 		return bound_result_out.emplace(std::move(init_bracketed)); }
 
 	case Initializer::type_braced_init_list: {
-		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
+		const auto &candidate = initializer_opt->get<Initializer::S_braced_init_list>();
 		Xptr_string_map<Initializer> bound_pairs;
-		bound_pairs.reserve(params.key_values.size());
-		for(const auto &pair : params.key_values){
+		bound_pairs.reserve(candidate.key_values.size());
+		for(const auto &pair : candidate.key_values){
 			bind_initializer(bound_result_out, pair.second, scope);
 			bound_pairs.emplace(pair.first, std::move(bound_result_out));
 		}
@@ -66,15 +66,15 @@ void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recy
 		return set_reference(reference_out, nullptr);
 
 	case Initializer::type_assignment_init: {
-		const auto &params = initializer_opt->get<Initializer::S_assignment_init>();
-		return evaluate_expression(reference_out, recycler, params.expression, scope); }
+		const auto &candidate = initializer_opt->get<Initializer::S_assignment_init>();
+		return evaluate_expression(reference_out, recycler, candidate.expression, scope); }
 
 	case Initializer::type_bracketed_init_list: {
-		const auto &params = initializer_opt->get<Initializer::S_bracketed_init_list>();
+		const auto &candidate = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Xptr<Variable> var;
 		D_array array;
-		array.reserve(params.elements.size());
-		for(const auto &elem : params.elements){
+		array.reserve(candidate.elements.size());
+		for(const auto &elem : candidate.elements){
 			evaluate_initializer(reference_out, recycler, elem, scope);
 			extract_variable_from_reference(var, recycler, std::move(reference_out));
 			array.emplace_back(std::move(var));
@@ -84,11 +84,11 @@ void evaluate_initializer(Xptr<Reference> &reference_out, Spparam<Recycler> recy
 		return set_reference(reference_out, std::move(ref_t)); }
 
 	case Initializer::type_braced_init_list: {
-		const auto &params = initializer_opt->get<Initializer::S_braced_init_list>();
+		const auto &candidate = initializer_opt->get<Initializer::S_braced_init_list>();
 		Xptr<Variable> var;
 		D_object object;
-		object.reserve(params.key_values.size());
-		for(const auto &pair : params.key_values){
+		object.reserve(candidate.key_values.size());
+		for(const auto &pair : candidate.key_values){
 			evaluate_initializer(reference_out, recycler, pair.second, scope);
 			extract_variable_from_reference(var, recycler, std::move(reference_out));
 			object.emplace(pair.first, std::move(var));

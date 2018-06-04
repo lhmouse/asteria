@@ -32,21 +32,21 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 		const auto type = node.get_type();
 		switch(type){
 		case Expression_node::type_literal: {
-			const auto &params = node.get<Expression_node::S_literal>();
+			const auto &candidate = node.get<Expression_node::S_literal>();
 			// Copy it as is.
-			bound_nodes.emplace_back(params);
+			bound_nodes.emplace_back(candidate);
 			break; }
 
 		case Expression_node::type_named_reference: {
-			const auto &params = node.get<Expression_node::S_named_reference>();
+			const auto &candidate = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
 			Sptr<const Reference> source_ref;
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", params.identifier, "` has not been declared yet.");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", candidate.identifier, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_local_reference_opt(params.identifier);
+				source_ref = scope_cur->get_local_reference_opt(candidate.identifier);
 				if(source_ref){
 					break;
 				}
@@ -54,7 +54,7 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 			}
 			// If the reference is in a lexical scope rather than a run-time scope, don't bind it.
 			if(scope_cur->get_purpose() == Scope::purpose_lexical){
-				bound_nodes.emplace_back(params);
+				bound_nodes.emplace_back(candidate);
 				break;
 			}
 			// Bind the reference.
@@ -65,58 +65,58 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 			break; }
 
 		case Expression_node::type_bound_reference: {
-			const auto &params = node.get<Expression_node::S_bound_reference>();
+			const auto &candidate = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Xptr<Reference> bound_ref;
-			copy_reference(bound_ref, params.reference_opt);
+			copy_reference(bound_ref, candidate.reference_opt);
 			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(node_b));
 			break; }
 
 		case Expression_node::type_subexpression: {
-			const auto &params = node.get<Expression_node::S_subexpression>();
+			const auto &candidate = node.get<Expression_node::S_subexpression>();
 			// Bind the subexpression recursively.
 			Xptr<Expression> bound_expr;
-			bind_expression(bound_expr, params.subexpression_opt, scope);
+			bind_expression(bound_expr, candidate.subexpression_opt, scope);
 			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
 			bound_nodes.emplace_back(std::move(node_s));
 			break; }
 
 		case Expression_node::type_lambda_definition: {
-			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			const auto &candidate = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, params.source_location, params.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
 			Xptr<Block> bound_body;
-			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
-			Expression_node::S_lambda_definition node_l = { params.source_location, params.parameters_opt, std::move(bound_body) };
+			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
+			Expression_node::S_lambda_definition node_l = { candidate.source_location, candidate.parameters_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(node_l));
 			break; }
 
 		case Expression_node::type_pruning: {
-			const auto &params = node.get<Expression_node::S_pruning>();
-			bound_nodes.emplace_back(params);
+			const auto &candidate = node.get<Expression_node::S_pruning>();
+			bound_nodes.emplace_back(candidate);
 			break; }
 
 		case Expression_node::type_branch: {
-			const auto &params = node.get<Expression_node::S_branch>();
+			const auto &candidate = node.get<Expression_node::S_branch>();
 			// Bind both branches recursively.
 			Xptr<Expression> bound_branch_true;
-			bind_expression(bound_branch_true, params.branch_true_opt, scope);
+			bind_expression(bound_branch_true, candidate.branch_true_opt, scope);
 			Xptr<Expression> bound_branch_false;
-			bind_expression(bound_branch_false, params.branch_false_opt, scope);
+			bind_expression(bound_branch_false, candidate.branch_false_opt, scope);
 			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
 			bound_nodes.emplace_back(std::move(node_b));
 			break; }
 
 		case Expression_node::type_function_call: {
-			const auto &params = node.get<Expression_node::S_function_call>();
-			bound_nodes.emplace_back(params);
+			const auto &candidate = node.get<Expression_node::S_function_call>();
+			bound_nodes.emplace_back(candidate);
 			break; }
 
 		case Expression_node::type_operator_rpn: {
-			const auto &params = node.get<Expression_node::S_operator_rpn>();
-			bound_nodes.emplace_back(params);
+			const auto &candidate = node.get<Expression_node::S_operator_rpn>();
+			bound_nodes.emplace_back(candidate);
 			break; }
 
 		default:
@@ -128,8 +128,8 @@ void bind_expression(Xptr<Expression> &bound_result_out, Spparam<const Expressio
 }
 
 namespace {
-	const char * op_name_of(const Expression_node::S_operator_rpn &params){
-		return get_operator_name_generic(params.operator_generic);
+	const char * op_name_of(const Expression_node::S_operator_rpn &candidate){
+		return get_operator_name_generic(candidate.operator_generic);
 	}
 	const char * type_name_of(Variable::Type type){
 		return get_type_name(type);
@@ -379,24 +379,24 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 		const auto type = node.get_type();
 		switch(type){
 		case Expression_node::type_literal: {
-			const auto &params = node.get<Expression_node::S_literal>();
+			const auto &candidate = node.get<Expression_node::S_literal>();
 			// Create an constant reference to the constant.
 			Xptr<Reference> result_ref;
-			Reference::S_constant ref_k = { params.source_opt };
+			Reference::S_constant ref_k = { candidate.source_opt };
 			set_reference(result_ref, std::move(ref_k));
 			do_push_reference(stack, std::move(result_ref));
 			break; }
 
 		case Expression_node::type_named_reference: {
-			const auto &params = node.get<Expression_node::S_named_reference>();
+			const auto &candidate = node.get<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
 			Sptr<const Reference> source_ref;
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", params.identifier, "` has not been declared yet.");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", candidate.identifier, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_local_reference_opt(params.identifier);
+				source_ref = scope_cur->get_local_reference_opt(candidate.identifier);
 				if(source_ref){
 					break;
 				}
@@ -409,32 +409,32 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			break; }
 
 		case Expression_node::type_bound_reference: {
-			const auto &params = node.get<Expression_node::S_bound_reference>();
+			const auto &candidate = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Xptr<Reference> bound_ref;
-			copy_reference(bound_ref, params.reference_opt);
+			copy_reference(bound_ref, candidate.reference_opt);
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(bound_ref));
 			break; }
 
 		case Expression_node::type_subexpression: {
-			const auto &params = node.get<Expression_node::S_subexpression>();
+			const auto &candidate = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
 			Xptr<Reference> result_ref;
-			evaluate_expression(result_ref, recycler, params.subexpression_opt, scope);
+			evaluate_expression(result_ref, recycler, candidate.subexpression_opt, scope);
 			// Push the result reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
 			break; }
 
 		case Expression_node::type_lambda_definition: {
-			const auto &params = node.get<Expression_node::S_lambda_definition>();
+			const auto &candidate = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, params.source_location, params.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
 			Xptr<Block> bound_body;
-			bind_block_in_place(bound_body, scope_lexical, params.body_opt);
+			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
 			// Create a temporary variable for the function.
-			auto func = std::make_shared<Instantiated_function>("lambda", params.source_location, params.parameters_opt, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("lambda", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
 			Xptr<Variable> func_var;
 			set_variable(func_var, recycler, D_function(std::move(func)));
 			Xptr<Reference> result_ref;
@@ -445,20 +445,20 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			break; }
 
 		case Expression_node::type_pruning: {
-			const auto &params = node.get<Expression_node::S_pruning>();
+			const auto &candidate = node.get<Expression_node::S_pruning>();
 			// Pop references requested.
-			for(std::size_t i = 0; i < params.count_to_pop; ++i){
+			for(std::size_t i = 0; i < candidate.count_to_pop; ++i){
 				do_pop_reference(stack);
 			}
 			break; }
 
 		case Expression_node::type_branch: {
-			const auto &params = node.get<Expression_node::S_branch>();
+			const auto &candidate = node.get<Expression_node::S_branch>();
 			// Pop the condition off the stack.
 			auto condition_ref = do_pop_reference(stack);
 			// Pick a branch basing on the condition.
 			const auto condition_var = read_reference_opt(condition_ref);
-			const auto branch_taken = test_variable(condition_var) ? params.branch_true_opt.share() : params.branch_false_opt.share();
+			const auto branch_taken = test_variable(condition_var) ? candidate.branch_true_opt.share() : candidate.branch_false_opt.share();
 			if(!branch_taken){
 				// If the branch does not exist, push the condition instead.
 				do_push_reference(stack, std::move(condition_ref));
@@ -471,7 +471,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			break; }
 
 		case Expression_node::type_function_call: {
-			const auto &params = node.get<Expression_node::S_function_call>();
+			const auto &candidate = node.get<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			auto callee_ref = do_pop_reference(stack);
 			const auto callee_var = read_reference_opt(callee_ref);
@@ -485,7 +485,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			Xptr_vector<Reference> arguments;
 			arguments.reserve(32);
 			// Pop arguments off the stack.
-			for(std::size_t i = 0; i < params.argument_count; ++i){
+			for(std::size_t i = 0; i < candidate.argument_count; ++i){
 				auto arg_ref = do_pop_reference(stack);
 				arguments.emplace_back(std::move(arg_ref));
 			}
@@ -505,8 +505,8 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 			break; }
 
 		case Expression_node::type_operator_rpn: {
-			const auto &params = node.get<Expression_node::S_operator_rpn>();
-			switch(params.operator_generic){
+			const auto &candidate = node.get<Expression_node::S_operator_rpn>();
+			switch(candidate.operator_generic){
 			case Expression_node::operator_postfix_inc: {
 				// Pop the operand off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -523,7 +523,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -544,7 +544,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -577,12 +577,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				const auto rhs_type = get_variable_type(rhs_var);
 				if(rhs_type == Variable::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, rhs);
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, rhs);
 				} else if(rhs_type == Variable::type_double){
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, rhs);
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, rhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -595,12 +595,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				const auto rhs_type = get_variable_type(rhs_var);
 				if(rhs_type == Variable::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, do_negate(rhs));
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_negate(rhs));
 				} else if(rhs_type == Variable::type_double){
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, do_negate(rhs));
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_negate(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -613,12 +613,12 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				const auto rhs_type = get_variable_type(rhs_var);
 				if(rhs_type == Variable::type_boolean){
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, do_logical_not(rhs));
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_logical_not(rhs));
 				} else if(rhs_type == Variable::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, params.compound_assignment, do_bitwise_not(rhs));
+					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_bitwise_not(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -629,7 +629,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
 				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				do_set_result(rhs_ref, recycler, params.compound_assignment, do_logical_not(test_variable(rhs_var)));
+				do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_logical_not(test_variable(rhs_var)));
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
@@ -647,7 +647,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -666,7 +666,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -795,21 +795,21 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_add(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_add(lhs, rhs));
 				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_add(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_add(lhs, rhs));
 				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_string)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_concatenate(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_concatenate(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -827,17 +827,17 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_subtract(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_subtract(lhs, rhs));
 				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_subtract(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_subtract(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -856,25 +856,25 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_multiply(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_multiply(lhs, rhs));
 				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_multiply(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_multiply(lhs, rhs));
 				} else if((lhs_type == Variable::type_string) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_duplicate(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_string)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_duplicate(rhs, lhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_duplicate(rhs, lhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -891,13 +891,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_divide(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_divide(lhs, rhs));
 				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_divide(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_divide(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -914,13 +914,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_modulo(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_modulo(lhs, rhs));
 				} else if((lhs_type == Variable::type_double) && (rhs_type == Variable::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_modulo(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_modulo(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -939,9 +939,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_logical(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -960,9 +960,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_logical(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -982,9 +982,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1003,9 +1003,9 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1022,13 +1022,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_and(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1045,13 +1045,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_or(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1068,13 +1068,13 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				if((lhs_type == Variable::type_boolean) && (rhs_type == Variable::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_logical_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Variable::type_integer) && (rhs_type == Variable::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, params.compound_assignment, do_bitwise_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_xor(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(params), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1094,7 +1094,7 @@ void evaluate_expression(Xptr<Reference> &result_out, Spparam<Recycler> recycler
 				break; }
 
 			default:
-				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", params.operator_generic, "` at index `", node_index, "`. This is probably a bug, please report.");
+				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", candidate.operator_generic, "` at index `", node_index, "`. This is probably a bug, please report.");
 				std::terminate();
 			}
 			break; }

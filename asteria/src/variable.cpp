@@ -135,36 +135,36 @@ void dump_variable(std::ostream &os, Spparam<const Variable> variable_opt, unsig
 		return;
 
 	case Variable::type_boolean: {
-		const auto &value = variable_opt->get<D_boolean>();
-		os <<std::boolalpha <<std::nouppercase <<value;
+		const auto &candidate = variable_opt->get<D_boolean>();
+		os <<std::boolalpha <<std::nouppercase <<candidate;
 		return; }
 
 	case Variable::type_integer: {
-		const auto &value = variable_opt->get<D_integer>();
-		os <<std::dec <<value;
+		const auto &candidate = variable_opt->get<D_integer>();
+		os <<std::dec <<candidate;
 		return; }
 
 	case Variable::type_double: {
-		const auto &value = variable_opt->get<D_double>();
-		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<value;
+		const auto &candidate = variable_opt->get<D_double>();
+		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<candidate;
 		return; }
 
 	case Variable::type_string: {
-		const auto &value = variable_opt->get<D_string>();
-		do_quote_string(os, value);
+		const auto &candidate = variable_opt->get<D_string>();
+		do_quote_string(os, candidate);
 		return; }
 
 	case Variable::type_opaque: {
-		const auto &value = variable_opt->get<D_opaque>();
-		os <<"opaque(\"" <<typeid(*value).name() <<"\", ";
-		do_quote_string(os, value->describe());
+		const auto &candidate = variable_opt->get<D_opaque>();
+		os <<"opaque(\"" <<typeid(*candidate).name() <<"\", ";
+		do_quote_string(os, candidate->describe());
 		os << ')';
 		return; }
 
 	case Variable::type_function: {
-		const auto &value = variable_opt->get<D_opaque>();
-		os <<"function(\"" <<typeid(*value).name() <<"\", ";
-		do_quote_string(os, value->describe());
+		const auto &candidate = variable_opt->get<D_opaque>();
+		os <<"function(\"" <<typeid(*candidate).name() <<"\", ";
+		do_quote_string(os, candidate->describe());
 		os << ')';
 		return; }
 
@@ -221,43 +221,43 @@ void copy_variable(Xptr<Variable> &variable_out, Spparam<Recycler> recycler, Spp
 		return set_variable(variable_out, recycler, nullptr);
 
 	case Variable::type_boolean: {
-		const auto &source = source_opt->get<D_boolean>();
-		return set_variable(variable_out, recycler, source); }
+		const auto &candidate = source_opt->get<D_boolean>();
+		return set_variable(variable_out, recycler, candidate); }
 
 	case Variable::type_integer: {
-		const auto &source = source_opt->get<D_integer>();
-		return set_variable(variable_out, recycler, source); }
+		const auto &candidate = source_opt->get<D_integer>();
+		return set_variable(variable_out, recycler, candidate); }
 
 	case Variable::type_double: {
-		const auto &source = source_opt->get<D_double>();
-		return set_variable(variable_out, recycler, source); }
+		const auto &candidate = source_opt->get<D_double>();
+		return set_variable(variable_out, recycler, candidate); }
 
 	case Variable::type_string: {
-		const auto &source = source_opt->get<D_string>();
-		return set_variable(variable_out, recycler, source); }
+		const auto &candidate = source_opt->get<D_string>();
+		return set_variable(variable_out, recycler, candidate); }
 
 	case Variable::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Variables having opaque types cannot be copied.");
 
 	case Variable::type_function: {
-		const auto &source = source_opt->get<D_function>();
-		return set_variable(variable_out, recycler, source); }
+		const auto &candidate = source_opt->get<D_function>();
+		return set_variable(variable_out, recycler, candidate); }
 
 	case Variable::type_array: {
-		const auto &source = source_opt->get<D_array>();
+		const auto &candidate = source_opt->get<D_array>();
 		D_array array;
-		array.reserve(source.size());
-		for(const auto &elem : source){
+		array.reserve(candidate.size());
+		for(const auto &elem : candidate){
 			copy_variable(variable_out, recycler, elem);
 			array.emplace_back(std::move(variable_out));
 		}
 		return set_variable(variable_out, recycler, std::move(array)); }
 
 	case Variable::type_object: {
-		const auto &source = source_opt->get<D_object>();
+		const auto &candidate = source_opt->get<D_object>();
 		D_object object;
-		object.reserve(source.size());
-		for(const auto &pair : source){
+		object.reserve(candidate.size());
+		for(const auto &pair : candidate){
 			copy_variable(variable_out, recycler, pair.second);
 			object.emplace(pair.first, std::move(variable_out));
 		}
@@ -289,16 +289,16 @@ void purge_variable(Spparam<Variable> variable_opt) noexcept {
 		return;
 
 	case Variable::type_array: {
-		auto &value = variable_opt->get<D_array>();
-		for(auto &elem : value){
+		auto &candidate = variable_opt->get<D_array>();
+		for(auto &elem : candidate){
 			purge_variable(elem);
 			elem = nullptr;
 		}
 		return; }
 
 	case Variable::type_object: {
-		auto &value = variable_opt->get<D_object>();
-		for(auto &pair : value){
+		auto &candidate = variable_opt->get<D_object>();
+		for(auto &pair : candidate){
 			purge_variable(pair.second);
 			pair.second = nullptr;
 		}
