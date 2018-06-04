@@ -13,7 +13,7 @@
 #include <type_traits> // std::true_type, std::false_type, std::is_same<>, std::decay<>, std::is_array<>, std::is_trivial<>, std::enable_if<>, std::is_convertible<>
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
 #include <initializer_list> // std::initializer_list<>
-#include <utility> // std::move(), std::forward()
+#include <utility> // std::move(), std::forward(), std::declval()
 #include <cstdint> // std::uint_fast32_t
 #include <cstddef> // std::size_t
 #include "compatibility.hpp"
@@ -595,6 +595,11 @@ namespace details_cow_string {
 			}
 			return 0;
 		}
+	};
+
+	template<typename funcT, typename ...argsT>
+	struct is_nothrow_invocable {
+		enum : bool { value = noexcept(::std::declval<funcT>(::std::declval<argsT>...)) };
 	};
 }
 
@@ -1480,6 +1485,17 @@ public:
 	}
 	size_type find_last_not_of(value_type ch, size_type to = npos) const noexcept {
 		return this->do_find_backwards_if(to, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) == false; });
+	}
+
+	// N.B. This is a non-standard extension.
+	template<typename predT>
+	size_type find_first_if(size_type from, size_type n, predT pred) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+		return this->do_find_forwards_if(from, n, ::std::move(pred));
+	}
+	// N.B. This is a non-standard extension.
+	template<typename predT>
+	size_type find_last_if(size_type to, size_type n, predT pred) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+		return this->do_find_backwards_if(to, n, ::std::move(pred));
 	}
 
 	basic_cow_string substr(size_type pos = 0, size_type n = npos) const {
