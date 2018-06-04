@@ -10,8 +10,8 @@ namespace Asteria {
 
 Variable::~Variable() = default;
 
-void Variable::do_throw_constant() const {
-	ASTERIA_THROW_RUNTIME_ERROR("The constant `", sptr_fmt(m_value_opt), "` cannot be modified.");
+void Variable::do_throw_immutable() const {
+	ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", sptr_fmt(m_value_opt), "` is immutable.");
 }
 
 }

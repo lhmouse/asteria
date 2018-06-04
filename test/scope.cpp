@@ -40,18 +40,18 @@ int main(){
 	auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	auto one = std::make_shared<Variable>();
 	set_value(one->drill_for_value(), recycler, D_integer(42));
-	one->set_constant(true);
+	one->set_immutable(true);
 	Reference::S_variable lref = { one };
-	auto wref = scope->drill_for_local_reference(D_string::shallow("one"));
+	auto wref = scope->drill_for_named_reference(D_string::shallow("one"));
 	set_reference(wref, std::move(lref));
 
-	auto ref = scope->get_local_reference_opt(D_string::shallow("one"));
+	auto ref = scope->get_named_reference_opt(D_string::shallow("one"));
 	ASTERIA_TEST_CHECK(ref);
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
 	ASTERIA_TEST_CHECK(ptr.get() == one->get_value_opt().get());
 
-	ref = scope->get_local_reference_opt(D_string::shallow("nonexistent"));
+	ref = scope->get_named_reference_opt(D_string::shallow("nonexistent"));
 	ASTERIA_TEST_CHECK(ref == nullptr);
 
 	scope->defer_callback(std::make_shared<Fancy_deferred_callback>(3, -220)); // 78 * 3 - 220 = 14

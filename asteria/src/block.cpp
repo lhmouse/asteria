@@ -42,8 +42,8 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 
 		case Statement::type_variable_definition: {
 			const auto &candidate = stmt.get<Statement::S_variable_definition>();
-			// Create a null local reference for the variable.
-			const auto wref = scope->drill_for_local_reference(candidate.identifier);
+			// Create a null named reference for the variable.
+			const auto wref = scope->drill_for_named_reference(candidate.identifier);
 			set_reference(wref, nullptr);
 			// Bind the initializer recursively.
 			Vp<Initializer> bound_init;
@@ -54,8 +54,8 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 
 		case Statement::type_function_definition: {
 			const auto &candidate = stmt.get<Statement::S_function_definition>();
-			// Create a null local reference for the function.
-			const auto wref = scope->drill_for_local_reference(candidate.identifier);
+			// Create a null named reference for the function.
+			const auto wref = scope->drill_for_named_reference(candidate.identifier);
 			set_reference(wref, nullptr);
 			// Bind the function body recursively.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
@@ -150,9 +150,9 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			// Bind the loop range initializer recursively.
 			Vp<Initializer> bound_range_init;
 			bind_initializer(bound_range_init, candidate.range_initializer_opt, scope_for);
-			// Create null local references for the key and the value.
-			const auto key_wref = scope->drill_for_local_reference(candidate.key_identifier);
-			const auto value_wref = scope->drill_for_local_reference(candidate.value_identifier);
+			// Create null named references for the key and the value.
+			const auto key_wref = scope->drill_for_named_reference(candidate.key_identifier);
+			const auto value_wref = scope->drill_for_named_reference(candidate.value_identifier);
 			set_reference(key_wref, nullptr);
 			set_reference(value_wref, nullptr);
 			// Bind the body recursively.
@@ -257,11 +257,11 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			Vp<Value> value;
 			extract_value_from_reference(value, recycler, std::move(reference_out));
 			// Create a reference to a temporary value, then materialize it.
-			// This results in a local variable.
+			// This results in a variable.
 			Reference::S_temporary_value ref_t = { std::move(value) };
 			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, candidate.constant);
-			const auto wref = scope->drill_for_local_reference(candidate.identifier);
+			const auto wref = scope->drill_for_named_reference(candidate.identifier);
 			copy_reference(wref, reference_out);
 			break; }
 
@@ -272,14 +272,14 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			prepare_function_scope_lexical(scope_lexical, candidate.source_location, candidate.parameters_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, candidate.body_opt);
-			// Create a local reference for the function.
+			// Create a named reference for the function.
 			auto func = std::make_shared<Instantiated_function>("function", candidate.source_location, candidate.parameters_opt, scope, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, recycler, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(reference_out, std::move(ref_t));
 			materialize_reference(reference_out, recycler, true);
-			const auto wref = scope->drill_for_local_reference(candidate.identifier);
+			const auto wref = scope->drill_for_named_reference(candidate.identifier);
 			copy_reference(wref, reference_out);
 			break; }
 
@@ -430,12 +430,12 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 				for(std::ptrdiff_t index = 0; index < size; ++index){
 					// Set the key, which is an integer.
 					set_value(key_var, recycler, D_integer(index));
-					const auto key_wref = scope_for->drill_for_local_reference(candidate.key_identifier);
+					const auto key_wref = scope_for->drill_for_named_reference(candidate.key_identifier);
 					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
 					// Set the value, which is an array element.
 					copy_reference(temp_ref, range_ref);
-					const auto value_wref = scope_for->drill_for_local_reference(candidate.value_identifier);
+					const auto value_wref = scope_for->drill_for_named_reference(candidate.value_identifier);
 					Reference::S_array_element ref_v = { std::move(temp_ref), index };
 					set_reference(value_wref, std::move(ref_v));
 					// Execute the loop body recursively.
@@ -464,12 +464,12 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 				for(auto &key : backup_keys){
 					// Set the key, which is an integer.
 					set_value(key_var, recycler, D_string(key));
-					const auto key_wref = scope_for->drill_for_local_reference(candidate.key_identifier);
+					const auto key_wref = scope_for->drill_for_named_reference(candidate.key_identifier);
 					Reference::S_constant ref_k = { key_var.share_c() };
 					set_reference(key_wref, std::move(ref_k));
 					// Set the value, which is an object member.
 					copy_reference(temp_ref, range_ref);
-					const auto value_wref = scope_for->drill_for_local_reference(candidate.value_identifier);
+					const auto value_wref = scope_for->drill_for_named_reference(candidate.value_identifier);
 					Reference::S_object_member ref_v = { std::move(temp_ref), std::move(key) };
 					set_reference(value_wref, std::move(ref_v));
 					// Execute the loop body recursively.
@@ -523,7 +523,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					// Move the reference into the `catch` scope, then execute the `catch` branch.
 					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
 					copy_reference(reference_out, e.get_reference_opt());
-					const auto wref = scope_catch->drill_for_local_reference(candidate.exception_identifier);
+					const auto wref = scope_catch->drill_for_named_reference(candidate.exception_identifier);
 					copy_reference(wref, reference_out);
 					throw;
 				} catch(std::exception &e){
@@ -535,7 +535,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					Reference::S_temporary_value ref_t = { std::move(what_var) };
 					set_reference(reference_out, std::move(ref_t));
 					materialize_reference(reference_out, recycler, true);
-					const auto wref = scope_catch->drill_for_local_reference(candidate.exception_identifier);
+					const auto wref = scope_catch->drill_for_named_reference(candidate.exception_identifier);
 					copy_reference(wref, reference_out);
 					throw;
 				}

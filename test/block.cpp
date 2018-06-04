@@ -113,8 +113,8 @@ int main(){
 	Vp<Reference> reference;
 	const auto result = execute_block_in_place(reference, scope, recycler, block);
 	ASTERIA_TEST_CHECK(result == Block::execution_result_end_of_block);
-	ASTERIA_TEST_CHECK(scope->get_local_reference_opt(D_string::shallow("i")) == nullptr);
-	const auto sum_ref = scope->get_local_reference_opt(D_string::shallow("sum"));
+	ASTERIA_TEST_CHECK(scope->get_named_reference_opt(D_string::shallow("i")) == nullptr);
+	const auto sum_ref = scope->get_named_reference_opt(D_string::shallow("sum"));
 	const auto sum_var = read_reference_opt(sum_ref);
 	ASTERIA_TEST_CHECK(sum_var);
 	ASTERIA_TEST_CHECK(sum_var->get<D_integer>() == 658);

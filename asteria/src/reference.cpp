@@ -30,12 +30,15 @@ void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsign
 
 	case Reference::type_temporary_value: {
 		const auto &candidate = reference_opt->get<Reference::S_temporary_value>();
-		os <<"temporary candidate ";
+		os <<"temporary value ";
 		return dump_value(os, candidate.value_opt, indent_next, indent_increment); }
 
 	case Reference::type_variable: {
 		const auto &candidate = reference_opt->get<Reference::S_variable>();
-		os <<(candidate.variable->is_constant() ? "named constant " : "named variable ");
+		if(candidate.variable->is_immutable()){
+			os <<"immutable ";
+		}
+		os <<"variable ";
 		return dump_value(os, candidate.variable->get_value_opt(), indent_next, indent_increment); }
 
 	case Reference::type_array_element: {
@@ -371,13 +374,13 @@ namespace {
 	}
 }
 
-void materialize_reference(Vp<Reference> &reference_inout_opt, Spr<Recycler> recycler, bool constant){
+void materialize_reference(Vp<Reference> &reference_inout_opt, Spr<Recycler> recycler, bool immutable){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
 	Vp<Value> value;
 	extract_value_from_reference(value, recycler, std::move(reference_inout_opt));
-	auto var = std::make_shared<Variable>(std::move(value), constant);
+	auto var = std::make_shared<Variable>(std::move(value), immutable);
 	Reference::S_variable ref_l = { std::move(var) };
 	return set_reference(reference_inout_opt, std::move(ref_l));
 }

@@ -27,21 +27,21 @@ try {
 	ASTERIA_DEBUG_LOG("Ignoring `std::exception` thrown from deferred callbacks: ", e.what());
 }
 
-Sp<const Reference> Scope::get_local_reference_opt(const D_string &identifier) const noexcept {
-	auto it = m_local_references.find(identifier);
-	if(it == m_local_references.end()){
+Sp<const Reference> Scope::get_named_reference_opt(const D_string &identifier) const noexcept {
+	auto it = m_named_references.find(identifier);
+	if(it == m_named_references.end()){
 		return nullptr;
 	}
 	return it->second;
 }
-std::reference_wrapper<Vp<Reference>> Scope::drill_for_local_reference(const D_string &identifier){
+std::reference_wrapper<Vp<Reference>> Scope::drill_for_named_reference(const D_string &identifier){
 	if(identifier.empty()){
-		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of local variables or constants must not be empty.");
+		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of variables must not be empty.");
 	}
-	auto it = m_local_references.find(identifier);
-	if(it == m_local_references.end()){
-		ASTERIA_DEBUG_LOG("Creating local reference: identifier = ", identifier);
-		it = m_local_references.emplace(identifier, nullptr).first;
+	auto it = m_named_references.find(identifier);
+	if(it == m_named_references.end()){
+		ASTERIA_DEBUG_LOG("Creating named reference: identifier = ", identifier);
+		it = m_named_references.emplace(identifier, nullptr).first;
 	}
 	return it->second;
 }
@@ -104,7 +104,7 @@ namespace {
 		if(identifier.empty()){
 			return;
 		}
-		const auto wref = scope->drill_for_local_reference(identifier);
+		const auto wref = scope->drill_for_named_reference(identifier);
 		move_reference(wref, std::move(arg_opt));
 	}
 	void do_set_argument(Spr<Scope> scope, Spr<const Parameter> param_opt, Vp<Reference> &&arg_opt){
@@ -143,7 +143,7 @@ void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const D_st
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
-	// Move arguments into the local scope.
+	// Move arguments into the scope.
 	do_set_argument(scope, D_string::shallow("this"), std::move(this_opt));
 	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spr<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });
 	// Create pre-defined variables.
@@ -151,7 +151,7 @@ void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const D_st
 	do_create_argument_getter(scope, D_string::shallow("__va_arg"), source_location, std::move(arguments_opt));
 }
 void prepare_function_scope_lexical(Spr<Scope> scope, const D_string &source_location, const Sp_vector<const Parameter> &parameters_opt){
-	// Create null arguments in the local scope.
+	// Create null arguments in the scope.
 	do_set_argument(scope, D_string::shallow("this"), nullptr);
 	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spr<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });
 	// Create pre-defined variables.

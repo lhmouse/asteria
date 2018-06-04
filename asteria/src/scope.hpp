@@ -21,13 +21,13 @@ private:
 	const Purpose m_purpose;
 	const Sp<const Scope> m_parent_opt;
 
-	Vp_string_map<Reference> m_local_references;
+	Vp_string_map<Reference> m_named_references;
 	Sp_vector<const Function_base> m_deferred_callbacks;
 
 public:
 	Scope(Purpose purpose, Sp<const Scope> parent_opt)
 		: m_purpose(std::move(purpose)), m_parent_opt(std::move(parent_opt))
-		, m_local_references(), m_deferred_callbacks()
+		, m_named_references(), m_deferred_callbacks()
 	{ }
 	~Scope();
 
@@ -45,8 +45,8 @@ public:
 		return m_parent_opt;
 	}
 
-	Sp<const Reference> get_local_reference_opt(const Cow_string &identifier) const noexcept;
-	std::reference_wrapper<Vp<Reference>> drill_for_local_reference(const Cow_string &identifier);
+	Sp<const Reference> get_named_reference_opt(const Cow_string &identifier) const noexcept;
+	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(const Cow_string &identifier);
 
 	void defer_callback(Sp<const Function_base> &&callback);
 };

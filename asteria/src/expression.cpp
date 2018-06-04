@@ -46,7 +46,7 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 				if(!scope_cur){
 					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", candidate.identifier, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_local_reference_opt(candidate.identifier);
+				source_ref = scope_cur->get_named_reference_opt(candidate.identifier);
 				if(source_ref){
 					break;
 				}
@@ -396,7 +396,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if(!scope_cur){
 					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", candidate.identifier, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_local_reference_opt(candidate.identifier);
+				source_ref = scope_cur->get_named_reference_opt(candidate.identifier);
 				if(source_ref){
 					break;
 				}

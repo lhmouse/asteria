@@ -18,19 +18,19 @@ int main(){
 	auto dval = std::make_shared<Variable>();
 	set_value(dval->drill_for_value(), recycler, D_double(1.5));
 	Reference::S_variable lref = { dval };
-	auto lrwref = scope->drill_for_local_reference(D_string::shallow("dval"));
+	auto lrwref = scope->drill_for_named_reference(D_string::shallow("dval"));
 	set_reference(lrwref, std::move(lref));
 
 	auto cval = std::make_shared<Variable>();
 	set_value(cval->drill_for_value(), recycler, D_integer(10));
 	lref = { cval };
-	lrwref = scope->drill_for_local_reference(D_string::shallow("cval"));
+	lrwref = scope->drill_for_named_reference(D_string::shallow("cval"));
 	set_reference(lrwref, std::move(lref));
 
 	auto rval = std::make_shared<Variable>();
 	set_value(rval->drill_for_value(), recycler, D_array());
 	lref = { rval };
-	lrwref = scope->drill_for_local_reference(D_string::shallow("rval"));
+	lrwref = scope->drill_for_named_reference(D_string::shallow("rval"));
 	set_reference(lrwref, std::move(lref));
 
 	// Plain: rval[1] = !condition ? (dval++ + 0.25) : (cval * "hello,");
@@ -77,7 +77,7 @@ int main(){
 
 	auto condition = std::make_shared<Variable>();
 	lref = { condition };
-	lrwref = scope->drill_for_local_reference(D_string::shallow("condition"));
+	lrwref = scope->drill_for_named_reference(D_string::shallow("condition"));
 	set_reference(lrwref, std::move(lref));
 
 	set_value(condition->drill_for_value(), recycler, D_boolean(false));
