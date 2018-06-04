@@ -71,6 +71,12 @@ namespace details_cow_string {
 	}
 
 	template<typename valueT>
+	inline void adl_swap(valueT &lhs, valueT &rhs) noexcept {
+		using ::std::swap;
+		swap(lhs, rhs);
+	}
+
+	template<typename valueT>
 	inline valueT xmin(valueT lhs, valueT rhs){
 		return ::std::move((lhs <= rhs) ? lhs : rhs);
 	}
@@ -293,8 +299,7 @@ namespace details_cow_string {
 	}
 	template<typename allocatorT>
 	inline void manipulate_allocator(true_type, swap_tag, allocatorT &lhs, allocatorT &rhs) noexcept {
-		using ::std::swap;
-		swap(lhs, rhs);
+		((adl_swap))(lhs, rhs);
 	}
 
 	template<typename stringT>
