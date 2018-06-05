@@ -792,15 +792,6 @@ private:
 		this->m_cap = 0;
 	}
 
-	// Check whether new characters can be inserted at the position.
-	size_type do_check_caret(size_type tpos) const {
-		const auto tlen = this->size();
-		if(tpos > tlen){
-			details_cow_string::throw_out_of_range("basic_cow_string::do_check_caret(): The subscript `%lld` is out of range for a string of length `%lld`.",
-			                                       static_cast<long long>(tpos), static_cast<long long>(tlen));
-		}
-		return tpos;
-	}
 	// This function works the same way as `substr()`.
 	// Ensure `tpos` is in `[0, size()]` and return `min(n, size() - tpos)`.
 	size_type do_clamp_substr(size_type tpos, size_type n) const {
@@ -809,7 +800,7 @@ private:
 			details_cow_string::throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
 			                                       static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
-		return details_cow_string::xmin(n, tlen - tpos);
+		return details_cow_string::xmin(tlen - tpos, n);
 	}
 
 	// This has to be generic to allow construction of a string from an array of integers... This is a nasty trick anyway.
@@ -1207,28 +1198,28 @@ public:
 	}
 
 	basic_cow_string & insert(size_type tpos, shallow sh){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, sh);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), sh);
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const basic_cow_string & other, size_type pos = 0, size_type n = npos){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, other, pos, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), other, pos, n);
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const_pointer s, size_type n){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, s, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), s, n);
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const_pointer s){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, s);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), s);
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, size_type n, value_type ch){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, n, ch);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), n, ch);
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
 	basic_cow_string & insert(size_type tpos, initializer_list<value_type> init){
-		this->do_replace_no_bound_check(this->do_check_caret(tpos), 0, init);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), init);
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
