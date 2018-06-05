@@ -1379,8 +1379,11 @@ public:
 	size_type find(shallow sh, size_type from = 0) const noexcept {
 		return this->find(sh.data(), from, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type find(const basic_cow_string &other, size_type from = 0, size_type pos = 0, size_type n = npos) const noexcept {
+	size_type find(const basic_cow_string &other, size_type from = 0) const noexcept {
+		return this->find(other.data(), from, other.size());
+	}
+	// N.B. This is a non-standard extension.
+	size_type find(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const {
 		return this->find(other.data() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find(const_pointer s, size_type from, size_type n) const noexcept {
@@ -1396,8 +1399,11 @@ public:
 	size_type rfind(shallow sh, size_type to = npos) const noexcept {
 		return this->rfind(sh.data(), to, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type rfind(const basic_cow_string &other, size_type to = npos, size_type pos = 0, size_type n = npos) const noexcept {
+	// N.B. This is a non-standard extension.
+	size_type rfind(const basic_cow_string &other, size_type to = npos) const noexcept {
+		return this->rfind(other.data(), to, other.size());
+	}
+	size_type rfind(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const {
 		return this->rfind(other.data() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type rfind(const_pointer s, size_type to, size_type n) const noexcept {
@@ -1413,8 +1419,11 @@ public:
 	size_type find_first_of(shallow sh, size_type from = 0) const noexcept {
 		return this->find_first_of(sh.data(), from, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type find_first_of(const basic_cow_string &other, size_type from = 0, size_type pos = 0, size_type n = npos) const noexcept {
+	// N.B. This is a non-standard extension.
+	size_type find_first_of(const basic_cow_string &other, size_type from = 0) const noexcept {
+		return this->find_first_of(other.data(), from, other.size());
+	}
+	size_type find_first_of(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const {
 		return this->find_first_of(other.data() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find_first_of(const_pointer s, size_type from, size_type n) const noexcept {
@@ -1430,8 +1439,11 @@ public:
 	size_type find_last_of(shallow sh, size_type to = npos) const noexcept {
 		return this->find_last_of(sh.data(), to, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type find_last_of(const basic_cow_string &other, size_type to = npos, size_type pos = 0, size_type n = npos) const noexcept {
+	// N.B. This is a non-standard extension.
+	size_type find_last_of(const basic_cow_string &other, size_type to = npos) const noexcept {
+		return this->find_last_of(other.data(), to, other.size());
+	}
+	size_type find_last_of(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const {
 		return this->find_last_of(other.data() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type find_last_of(const_pointer s, size_type to, size_type n) const noexcept {
@@ -1447,8 +1459,11 @@ public:
 	size_type find_first_not_of(shallow sh, size_type from = 0) const noexcept {
 		return this->find_first_not_of(sh.data(), from, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type find_first_not_of(const basic_cow_string &other, size_type from = 0, size_type pos = 0, size_type n = npos) const noexcept {
+	// N.B. This is a non-standard extension.
+	size_type find_first_not_of(const basic_cow_string &other, size_type from = 0) const noexcept {
+		return this->find_first_not_of(other.data(), from, other.size());
+	}
+	size_type find_first_not_of(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const {
 		return this->find_first_not_of(other.data() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find_first_not_of(const_pointer s, size_type from, size_type n) const noexcept {
@@ -1464,8 +1479,11 @@ public:
 	size_type find_last_not_of(shallow sh, size_type to = npos) const noexcept {
 		return this->find_last_not_of(sh.data(), to, sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	size_type find_last_not_of(const basic_cow_string &other, size_type to = npos, size_type pos = 0, size_type n = npos) const noexcept {
+	// N.B. This is a non-standard extension.
+	size_type find_last_not_of(const basic_cow_string &other, size_type to = npos) const noexcept {
+		return this->find_last_not_of(other.data(), to, other.size());
+	}
+	size_type find_last_not_of(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const {
 		return this->find_last_not_of(other.data() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type find_last_not_of(const_pointer s, size_type to, size_type n) const noexcept {
