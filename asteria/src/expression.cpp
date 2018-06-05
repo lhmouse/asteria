@@ -493,11 +493,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			Vp<Reference> this_ref;
 			const auto callee_ref_type = get_reference_type(callee_ref);
 			if(callee_ref_type == Reference::type_array_element){
-				auto &callee_params = callee_ref->get<Reference::S_array_element>();
-				this_ref = std::move(callee_params.parent_opt);
+				auto &array = callee_ref->get<Reference::S_array_element>();
+				this_ref = std::move(array.parent_opt);
 			} else if(callee_ref_type == Reference::type_object_member){
-				auto &callee_params = callee_ref->get<Reference::S_object_member>();
-				this_ref = std::move(callee_params.parent_opt);
+				auto &object = callee_ref->get<Reference::S_object_member>();
+				this_ref = std::move(object.parent_opt);
 			}
 			// Call the function and push the result as is.
 			callee->invoke(callee_ref, recycler, std::move(this_ref), std::move(arguments));
