@@ -1548,8 +1548,11 @@ public:
 	bool starts_with(shallow sh) const noexcept {
 		return this->starts_with(sh.data(), sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	bool starts_with(const basic_cow_string &other, size_type pos = 0, size_type n = npos) const noexcept {
+	bool starts_with(const basic_cow_string &other) const noexcept {
+		return this->starts_with(other.data(), other.size());
+	}
+	// N.B. This is a non-standard extension.
+	bool starts_with(const basic_cow_string &other, size_type pos, size_type n = npos) const {
 		return this->starts_with(other.data() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool starts_with(const_pointer s, size_type n) const noexcept {
@@ -1565,8 +1568,11 @@ public:
 	bool ends_with(shallow sh) const noexcept {
 		return this->ends_with(sh.data(), sh.size());
 	}
-	// N.B. The last two parameters are non-standard extensions.
-	bool ends_with(const basic_cow_string &other, size_type pos = 0, size_type n = npos) const noexcept {
+	bool ends_with(const basic_cow_string &other) const noexcept {
+		return this->ends_with(other.data(), other.size());
+	}
+	// N.B. This is a non-standard extension.
+	bool ends_with(const basic_cow_string &other, size_type pos, size_type n = npos) const {
 		return this->ends_with(other.data() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool ends_with(const_pointer s, size_type n) const noexcept {
