@@ -1553,13 +1553,13 @@ public:
 		return this->starts_with(other.data() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool starts_with(const_pointer s, size_type n) const noexcept {
-		return (n == 0) || ((n <= this->size()) && (traits_type::compare(this->data(), s, n) == 0));
+		return (n <= this->size()) && (traits_type::compare(this->data(), s, n) == 0);
 	}
 	bool starts_with(const_pointer s) const noexcept {
 		return this->starts_with(s, traits_type::length(s));
 	}
 	bool starts_with(value_type ch) const noexcept {
-		return (1 <= this->size()) && (traits_type::eq(this->front(), ch) != false);
+		return (1 <= this->size()) && traits_type::eq(this->front(), ch);
 	}
 
 	bool ends_with(shallow sh) const noexcept {
@@ -1570,16 +1570,13 @@ public:
 		return this->ends_with(other.data() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool ends_with(const_pointer s, size_type n) const noexcept {
-		if(n == 0){
-			return true;
-		}
-		return (n == 0) || ((n <= this->size()) && (traits_type::compare(this->data() + this->size() - n, s, n) == 0));
+		return (n <= this->size()) && (traits_type::compare(this->data() + this->size() - n, s, n) == 0);
 	}
 	bool ends_with(const_pointer s) const noexcept {
 		return this->ends_with(s, traits_type::length(s));
 	}
 	bool ends_with(value_type ch) const noexcept {
-		return (1 <= this->size()) && (traits_type::eq(this->back(), ch) != false);
+		return (1 <= this->size()) && traits_type::eq(this->back(), ch);
 	}
 };
 
