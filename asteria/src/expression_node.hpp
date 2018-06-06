@@ -12,7 +12,7 @@ namespace Asteria {
 
 class Expression_node {
 public:
-	enum Operator_generic : unsigned {
+	enum Operator : unsigned {
 		// Postfix operators
 		operator_postfix_inc    = 10, // ++
 		operator_postfix_dec    = 11, // --
@@ -86,7 +86,7 @@ public:
 		std::size_t argument_count;
 	};
 	struct S_operator_rpn {
-		Operator_generic operator_generic;
+		Operator op;
 		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
@@ -127,7 +127,7 @@ public:
 	}
 };
 
-extern const char * get_operator_name_generic(Expression_node::Operator_generic operator_generic) noexcept;
+extern const char * get_operator_name(Expression_node::Operator op) noexcept;
 
 }
 

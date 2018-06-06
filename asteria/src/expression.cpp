@@ -129,7 +129,7 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 
 namespace {
 	const char * op_name_of(const Expression_node::S_operator_rpn &candidate){
-		return get_operator_name_generic(candidate.operator_generic);
+		return get_operator_name(candidate.op);
 	}
 	const char * type_name_of(Value::Type type){
 		return get_type_name(type);
@@ -506,7 +506,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 
 		case Expression_node::type_operator_rpn: {
 			const auto &candidate = node.get<Expression_node::S_operator_rpn>();
-			switch(candidate.operator_generic){
+			switch(candidate.op){
 			case Expression_node::operator_postfix_inc: {
 				// Pop the operand off the stack.
 				auto lhs_ref = do_pop_reference(stack);
@@ -1094,7 +1094,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				break; }
 
 			default:
-				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", candidate.operator_generic, "` at index `", node_index, "`. This is probably a bug, please report.");
+				ASTERIA_DEBUG_LOG("Unknown operator enumeration `", candidate.op, "` at index `", node_index, "`. This is probably a bug, please report.");
 				std::terminate();
 			}
 			break; }

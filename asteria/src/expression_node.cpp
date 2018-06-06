@@ -11,8 +11,8 @@ Expression_node::Expression_node(Expression_node &&) noexcept = default;
 Expression_node & Expression_node::operator=(Expression_node &&) noexcept = default;
 Expression_node::~Expression_node() = default;
 
-const char * get_operator_name_generic(Expression_node::Operator_generic operator_generic) noexcept {
-	switch(operator_generic){
+const char * get_operator_name(Expression_node::Operator op) noexcept {
+	switch(op){
 	case Expression_node::operator_postfix_inc:
 		return "postfix increment";
 	case Expression_node::operator_postfix_dec:
@@ -70,7 +70,7 @@ const char * get_operator_name_generic(Expression_node::Operator_generic operato
 	case Expression_node::operator_infix_assign:
 		return "assginment";
 	default:
-		ASTERIA_DEBUG_LOG("Unknown operator enumeration `", operator_generic, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown operator enumeration `", op, "`. This is probably a bug, please report.");
 		return "<unknown>";
 	}
 }
