@@ -11,14 +11,24 @@ namespace Asteria {
 class Parser_result {
 public:
 	enum Error_code : std::uint32_t {
-		error_code_success                  =  0,
-		error_code_comment_not_closed       =  1,
-		error_code_invalid_token_character  =  2,
-		error_code_invalid_numeric_literal  =  3,
-		error_code_unclosed_string_literal  =  4,
-		error_code_unknown_escape_sequence  =  5,
-		error_code_escqpe_no_enough_digits  =  6,
-		error_code_invalid_utf_code_point   =  7,
+		error_code_success                              =   0,
+		error_code_utf8_code_unit_invalid               = 101,
+		error_code_utf8_code_point_truncated            = 102,
+		error_code_utf8_surrogates_disallowed           = 103,
+		error_code_code_point_value_too_large           = 104,
+		error_code_utf8_encoding_overlong               = 105,
+		error_code_token_character_unrecognized         = 201,
+		error_code_string_literal_unclosed              = 202,
+		error_code_escape_sequence_incomplete           = 203,
+		error_code_escape_sequence_unknown              = 204,
+		error_code_escape_sequence_invalid_hex          = 205,
+		error_code_numeric_literal_incomplete           = 206,
+		error_code_numeric_literal_suffixes_disallowed  = 207,
+		error_code_numeric_literal_exponent_overflow    = 208,
+		error_code_integer_literal_overflow             = 209,
+		error_code_integer_literal_exponent_negative    = 210,
+		error_code_double_literal_overflow              = 211,
+		error_code_double_literal_underflow             = 212,
 	};
 
 private:
