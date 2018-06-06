@@ -44,8 +44,8 @@ public:
 		return m_value_opt.get<Reference::Variant>();
 	}
 	template<typename CandidateT>
-	void set(CandidateT &&candidate){
-		m_value_opt = std::forward<CandidateT>(candidate);
+	void set(CandidateT &&cand){
+		m_value_opt = std::forward<CandidateT>(cand);
 	}
 };
 

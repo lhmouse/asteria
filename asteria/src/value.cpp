@@ -135,36 +135,36 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		return;
 
 	case Value::type_boolean: {
-		const auto &candidate = value_opt->get<D_boolean>();
-		os <<std::boolalpha <<std::nouppercase <<candidate;
+		const auto &cand = value_opt->get<D_boolean>();
+		os <<std::boolalpha <<std::nouppercase <<cand;
 		return; }
 
 	case Value::type_integer: {
-		const auto &candidate = value_opt->get<D_integer>();
-		os <<std::dec <<candidate;
+		const auto &cand = value_opt->get<D_integer>();
+		os <<std::dec <<cand;
 		return; }
 
 	case Value::type_double: {
-		const auto &candidate = value_opt->get<D_double>();
-		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<candidate;
+		const auto &cand = value_opt->get<D_double>();
+		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<cand;
 		return; }
 
 	case Value::type_string: {
-		const auto &candidate = value_opt->get<D_string>();
-		do_quote_string(os, candidate);
+		const auto &cand = value_opt->get<D_string>();
+		do_quote_string(os, cand);
 		return; }
 
 	case Value::type_opaque: {
-		const auto &candidate = value_opt->get<D_opaque>();
-		os <<"opaque(\"" <<typeid(*candidate).name() <<"\", ";
-		do_quote_string(os, candidate->describe());
+		const auto &cand = value_opt->get<D_opaque>();
+		os <<"opaque(\"" <<typeid(*cand).name() <<"\", ";
+		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
 
 	case Value::type_function: {
-		const auto &candidate = value_opt->get<D_opaque>();
-		os <<"function(\"" <<typeid(*candidate).name() <<"\", ";
-		do_quote_string(os, candidate->describe());
+		const auto &cand = value_opt->get<D_opaque>();
+		os <<"function(\"" <<typeid(*cand).name() <<"\", ";
+		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
 
@@ -221,43 +221,43 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> s
 		return set_value(value_out, recycler, nullptr);
 
 	case Value::type_boolean: {
-		const auto &candidate = source_opt->get<D_boolean>();
-		return set_value(value_out, recycler, candidate); }
+		const auto &cand = source_opt->get<D_boolean>();
+		return set_value(value_out, recycler, cand); }
 
 	case Value::type_integer: {
-		const auto &candidate = source_opt->get<D_integer>();
-		return set_value(value_out, recycler, candidate); }
+		const auto &cand = source_opt->get<D_integer>();
+		return set_value(value_out, recycler, cand); }
 
 	case Value::type_double: {
-		const auto &candidate = source_opt->get<D_double>();
-		return set_value(value_out, recycler, candidate); }
+		const auto &cand = source_opt->get<D_double>();
+		return set_value(value_out, recycler, cand); }
 
 	case Value::type_string: {
-		const auto &candidate = source_opt->get<D_string>();
-		return set_value(value_out, recycler, candidate); }
+		const auto &cand = source_opt->get<D_string>();
+		return set_value(value_out, recycler, cand); }
 
 	case Value::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Values having opaque types cannot be copied.");
 
 	case Value::type_function: {
-		const auto &candidate = source_opt->get<D_function>();
-		return set_value(value_out, recycler, candidate); }
+		const auto &cand = source_opt->get<D_function>();
+		return set_value(value_out, recycler, cand); }
 
 	case Value::type_array: {
-		const auto &candidate = source_opt->get<D_array>();
+		const auto &cand = source_opt->get<D_array>();
 		D_array array;
-		array.reserve(candidate.size());
-		for(const auto &elem : candidate){
+		array.reserve(cand.size());
+		for(const auto &elem : cand){
 			copy_value(value_out, recycler, elem);
 			array.emplace_back(std::move(value_out));
 		}
 		return set_value(value_out, recycler, std::move(array)); }
 
 	case Value::type_object: {
-		const auto &candidate = source_opt->get<D_object>();
+		const auto &cand = source_opt->get<D_object>();
 		D_object object;
-		object.reserve(candidate.size());
-		for(const auto &pair : candidate){
+		object.reserve(cand.size());
+		for(const auto &pair : cand){
 			copy_value(value_out, recycler, pair.second);
 			object.emplace(pair.first, std::move(value_out));
 		}
@@ -289,16 +289,16 @@ void purge_value(Spr<Value> value_opt) noexcept {
 		return;
 
 	case Value::type_array: {
-		auto &candidate = value_opt->get<D_array>();
-		for(auto &elem : candidate){
+		auto &cand = value_opt->get<D_array>();
+		for(auto &elem : cand){
 			purge_value(elem);
 			elem = nullptr;
 		}
 		return; }
 
 	case Value::type_object: {
-		auto &candidate = value_opt->get<D_object>();
-		for(auto &pair : candidate){
+		auto &cand = value_opt->get<D_object>();
+		for(auto &pair : cand){
 			purge_value(pair.second);
 			pair.second = nullptr;
 		}

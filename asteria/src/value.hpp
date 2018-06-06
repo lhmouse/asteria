@@ -48,12 +48,12 @@ private:
 
 public:
 	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Value, CandidateT)>
-	Value(CandidateT &&candidate)
-		: m_weak_recycler(), m_variant(std::forward<CandidateT>(candidate))
+	Value(CandidateT &&cand)
+		: m_weak_recycler(), m_variant(std::forward<CandidateT>(cand))
 	{ }
 	template<typename CandidateT>
-	Value(Wp<Recycler> weak_recycler, CandidateT &&candidate)
-		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<CandidateT>(candidate))
+	Value(Wp<Recycler> weak_recycler, CandidateT &&cand)
+		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<CandidateT>(cand))
 	{ }
 	~Value();
 
@@ -96,8 +96,8 @@ public:
 		return *ptr;
 	}
 	template<typename CandidateT>
-	void set(CandidateT &&candidate){
-		m_variant = std::forward<CandidateT>(candidate);
+	void set(CandidateT &&cand){
+		m_variant = std::forward<CandidateT>(cand);
 	}
 };
 

@@ -122,8 +122,8 @@ private:
 
 public:
 	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Statement, CandidateT)>
-	Statement(CandidateT &&candidate)
-		: m_variant(std::forward<CandidateT>(candidate))
+	Statement(CandidateT &&cand)
+		: m_variant(std::forward<CandidateT>(cand))
 	{ }
 	Statement(Statement &&) noexcept;
 	Statement & operator=(Statement &&) noexcept;

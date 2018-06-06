@@ -252,7 +252,7 @@ namespace details_variant {
 
 template<typename ...elementsT>
 class variant {
-	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidates are not allowed to throw exceptions.");
+	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidate types are not allowed to throw exceptions.");
 
 public:
 	template<size_t indexT>

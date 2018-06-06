@@ -51,8 +51,8 @@ private:
 
 public:
 	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Reference, CandidateT)>
-	Reference(CandidateT &&candidate)
-		: m_variant(std::forward<CandidateT>(candidate))
+	Reference(CandidateT &&cand)
+		: m_variant(std::forward<CandidateT>(cand))
 	{ }
 	~Reference();
 
@@ -80,8 +80,8 @@ public:
 		return m_variant.get<ExpectT>();
 	}
 	template<typename CandidateT>
-	void set(CandidateT &&candidate){
-		m_variant = std::forward<CandidateT>(candidate);
+	void set(CandidateT &&cand){
+		m_variant = std::forward<CandidateT>(cand);
 	}
 };
 
