@@ -39,12 +39,12 @@ public:
 		Vp<Expression> expression_opt;
 	};
 	struct S_variable_definition {
-		Cow_string identifier;
+		Cow_string id;
 		bool constant;
 		Vp<Initializer> initializer_opt;
 	};
 	struct S_function_definition {
-		Cow_string identifier;
+		Cow_string id;
 		Cow_string source_location;
 		Sp_vector<const Parameter> parameters_opt;
 		Vp<Block> body_opt;
@@ -73,14 +73,14 @@ public:
 		Vp<Block> body_opt;
 	};
 	struct S_for_each_statement {
-		Cow_string key_identifier;
-		Cow_string value_identifier;
+		Cow_string key_id;
+		Cow_string value_id;
 		Vp<Initializer> range_initializer_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_try_statement {
 		Vp<Block> branch_try_opt;
-		Cow_string exception_identifier;
+		Cow_string exception_id;
 		Vp<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {

@@ -45,8 +45,8 @@ public:
 		return m_parent_opt;
 	}
 
-	Sp<const Reference> get_named_reference_opt(const Cow_string &identifier) const noexcept;
-	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(const Cow_string &identifier);
+	Sp<const Reference> get_named_reference_opt(const Cow_string &id) const noexcept;
+	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(const Cow_string &id);
 
 	void defer_callback(Sp<const Function_base> &&callback);
 };

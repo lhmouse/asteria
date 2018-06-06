@@ -44,9 +44,9 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", cand.identifier, "` has not been declared yet.");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", cand.id, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_named_reference_opt(cand.identifier);
+				source_ref = scope_cur->get_named_reference_opt(cand.id);
 				if(source_ref){
 					break;
 				}
@@ -77,7 +77,7 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			const auto &cand = node.get<Expression_node::S_subexpression>();
 			// Bind the subexpression recursively.
 			Vp<Expression> bound_expr;
-			bind_expression(bound_expr, cand.subexpression_opt, scope);
+			bind_expression(bound_expr, cand.subexpr_opt, scope);
 			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
 			bound_nodes.emplace_back(std::move(node_s));
 			break; }
@@ -387,9 +387,9 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			auto scope_cur = scope;
 			for(;;){
 				if(!scope_cur){
-					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", cand.identifier, "` has not been declared yet.");
+					ASTERIA_THROW_RUNTIME_ERROR("The identifier `", cand.id, "` has not been declared yet.");
 				}
-				source_ref = scope_cur->get_named_reference_opt(cand.identifier);
+				source_ref = scope_cur->get_named_reference_opt(cand.id);
 				if(source_ref){
 					break;
 				}
@@ -414,7 +414,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			const auto &cand = node.get<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
 			Vp<Reference> result_ref;
-			evaluate_expression(result_ref, recycler, cand.subexpression_opt, scope);
+			evaluate_expression(result_ref, recycler, cand.subexpr_opt, scope);
 			// Push the result reference onto the stack as is.
 			do_push_reference(stack, std::move(result_ref));
 			break; }

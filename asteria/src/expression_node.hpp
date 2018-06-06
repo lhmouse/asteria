@@ -62,13 +62,13 @@ public:
 		Sp<const Value> source_opt;
 	};
 	struct S_named_reference {
-		Cow_string identifier;
+		Cow_string id;
 	};
 	struct S_bound_reference {
 		Sp<const Reference> reference_opt;
 	};
 	struct S_subexpression {
-		Vp<Expression> subexpression_opt;
+		Vp<Expression> subexpr_opt;
 	};
 	struct S_lambda_definition {
 		Cow_string source_location;
