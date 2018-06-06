@@ -198,7 +198,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
-			array.insert(array.begin(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_prepend)));
+			array.insert(array.begin(), rocket::fill_iterator<Nullptr>(0), rocket::fill_iterator<Nullptr>(static_cast<std::ptrdiff_t>(count_to_prepend)));
 			normalized_index = 0;
 		} else if(normalized_index >= D_integer(array.size())){
 			// Append `null`s until the subscript designates the end.
@@ -207,7 +207,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
-			array.insert(array.end(), rocket::fill_iterator<std::nullptr_t>(0), rocket::fill_iterator<std::nullptr_t>(static_cast<std::ptrdiff_t>(count_to_append)));
+			array.insert(array.end(), rocket::fill_iterator<Nullptr>(0), rocket::fill_iterator<Nullptr>(static_cast<std::ptrdiff_t>(count_to_append)));
 			normalized_index = D_integer(array.size() - 1);
 		}
 		auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
@@ -239,10 +239,10 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 namespace {
 	class Extract_value_result {
 	private:
-		rocket::variant<std::nullptr_t, Sp<const Value>, Vp<Value>> m_variant;
+		rocket::variant<Nullptr, Sp<const Value>, Vp<Value>> m_variant;
 
 	public:
-		Extract_value_result(std::nullptr_t = nullptr) noexcept
+		Extract_value_result(Nullptr = nullptr) noexcept
 			: m_variant(nullptr)
 		{ }
 		Extract_value_result(Sp<const Value> copyable_pointer) noexcept

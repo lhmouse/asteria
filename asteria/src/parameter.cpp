@@ -16,7 +16,7 @@ Parameter::~Parameter() = default;
 void prepare_function_arguments(Vp_vector<Reference> &arguments_inout, const Sp_vector<const Parameter> &params_opt){
 	const auto delta_size = static_cast<std::ptrdiff_t>(arguments_inout.size() - params_opt.size());
 	if(delta_size < 0){
-		arguments_inout.insert(arguments_inout.end(), rocket::fill_iterator<std::nullptr_t>(delta_size), rocket::fill_iterator<std::nullptr_t>(0));
+		arguments_inout.insert(arguments_inout.end(), rocket::fill_iterator<Nullptr>(delta_size), rocket::fill_iterator<Nullptr>(0));
 	}
 	for(std::size_t i = 0; i < params_opt.size(); ++i){
 		const auto &param = params_opt.at(i);
