@@ -61,7 +61,7 @@ int main(){
 	nodes.clear();
 	s_nref = { D_string::shallow("condition") };
 	nodes.emplace_back(std::move(s_nref)); // condition
-	s_opr = { Expression_node::operator_prefix_not_l, false };
+	s_opr = { Expression_node::operator_prefix_notl, false };
 	nodes.emplace_back(std::move(s_opr)); // !
 	Expression_node::S_branch s_br = { std::move(branch_true), std::move(branch_false) };
 	nodes.emplace_back(std::move(s_br)); // ?:

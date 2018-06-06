@@ -20,8 +20,8 @@ public:
 		// Prefix operators.
 		operator_prefix_pos     = 30, // +
 		operator_prefix_neg     = 31, // -
-		operator_prefix_not_b   = 32, // ~
-		operator_prefix_not_l   = 33, // !
+		operator_prefix_notb    = 32, // ~
+		operator_prefix_notl    = 33, // !
 		operator_prefix_inc     = 34, // ++
 		operator_prefix_dec     = 35, // --
 		// Infix relational operators.
@@ -41,9 +41,9 @@ public:
 		operator_infix_srl      = 66, // >>>
 		operator_infix_sla      = 67, // <<
 		operator_infix_sra      = 68, // >>
-		operator_infix_and_b    = 69, // &
-		operator_infix_or_b     = 70, // |
-		operator_infix_xor_b    = 71, // ^
+		operator_infix_andb     = 69, // &
+		operator_infix_orb      = 70, // |
+		operator_infix_xorb     = 71, // ^
 		operator_infix_assign   = 72, // =
 	};
 

@@ -60,8 +60,8 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			// Bind the reference.
 			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, source_ref);
-			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
-			bound_nodes.emplace_back(std::move(node_b));
+			Expression_node::S_bound_reference nodeb = { std::move(bound_ref) };
+			bound_nodes.emplace_back(std::move(nodeb));
 			break; }
 
 		case Expression_node::type_bound_reference: {
@@ -69,8 +69,8 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			// Copy the reference bound.
 			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, cand.reference_opt);
-			Expression_node::S_bound_reference node_b = { std::move(bound_ref) };
-			bound_nodes.emplace_back(std::move(node_b));
+			Expression_node::S_bound_reference nodeb = { std::move(bound_ref) };
+			bound_nodes.emplace_back(std::move(nodeb));
 			break; }
 
 		case Expression_node::type_subexpression: {
@@ -89,8 +89,8 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			prepare_function_scope_lexical(scope_lexical, cand.source_location, cand.parameters_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
-			Expression_node::S_lambda_definition node_l = { cand.source_location, cand.parameters_opt, std::move(bound_body) };
-			bound_nodes.emplace_back(std::move(node_l));
+			Expression_node::S_lambda_definition nodel = { cand.source_location, cand.parameters_opt, std::move(bound_body) };
+			bound_nodes.emplace_back(std::move(nodel));
 			break; }
 
 		case Expression_node::type_pruning: {
@@ -105,8 +105,8 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			bind_expression(bound_branch_true, cand.branch_true_opt, scope);
 			Vp<Expression> bound_branch_false;
 			bind_expression(bound_branch_false, cand.branch_false_opt, scope);
-			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
-			bound_nodes.emplace_back(std::move(node_b));
+			Expression_node::S_branch nodeb = { std::move(bound_branch_true), std::move(bound_branch_false) };
+			bound_nodes.emplace_back(std::move(nodeb));
 			break; }
 
 		case Expression_node::type_function_call: {
@@ -598,7 +598,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
-			case Expression_node::operator_prefix_not_b: {
+			case Expression_node::operator_prefix_notb: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
 				// Bitwise NOT the operand.
@@ -616,7 +616,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
-			case Expression_node::operator_prefix_not_l: {
+			case Expression_node::operator_prefix_notl: {
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
@@ -1003,7 +1003,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
-			case Expression_node::operator_infix_and_b: {
+			case Expression_node::operator_infix_andb: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
 				auto rhs_ref = do_pop_reference(stack);
@@ -1026,7 +1026,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
-			case Expression_node::operator_infix_or_b: {
+			case Expression_node::operator_infix_orb: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
 				auto rhs_ref = do_pop_reference(stack);
@@ -1049,7 +1049,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
 
-			case Expression_node::operator_infix_xor_b: {
+			case Expression_node::operator_infix_xorb: {
 				// Pop two operands off the stack.
 				auto lhs_ref = do_pop_reference(stack);
 				auto rhs_ref = do_pop_reference(stack);

@@ -23,9 +23,9 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 		return "unary plus";
 	case Expression_node::operator_prefix_neg:
 		return "negation";
-	case Expression_node::operator_prefix_not_b:
+	case Expression_node::operator_prefix_notb:
 		return "bitwise not";
-	case Expression_node::operator_prefix_not_l:
+	case Expression_node::operator_prefix_notl:
 		return "logical not";
 	case Expression_node::operator_prefix_inc:
 		return "prefix increment";
@@ -61,11 +61,11 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 		return "logical right shift";
 	case Expression_node::operator_infix_sra:
 		return "arithmetic right shift";
-	case Expression_node::operator_infix_and_b:
+	case Expression_node::operator_infix_andb:
 		return "bitwise and";
-	case Expression_node::operator_infix_or_b:
+	case Expression_node::operator_infix_orb:
 		return "bitwise or";
-	case Expression_node::operator_infix_xor_b:
+	case Expression_node::operator_infix_xorb:
 		return "bitwise xor";
 	case Expression_node::operator_infix_assign:
 		return "assginment";
