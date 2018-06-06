@@ -128,13 +128,6 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 }
 
 namespace {
-	const char * op_name_of(const Expression_node::S_operator_rpn &candidate){
-		return get_operator_name(candidate.op);
-	}
-	const char * type_name_of(Value::Type type){
-		return get_type_name(type);
-	}
-
 	void do_push_reference(Vp_vector<Reference> &stack, Vp<Reference> &&ref){
 		ASTERIA_DEBUG_LOG("Pushing: ", sp_fmt(ref));
 		stack.emplace_back(std::move(ref));
@@ -478,7 +471,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			// Make sure it is really a function.
 			const auto callee_type = get_value_type(callee_var);
 			if(callee_type != Value::type_function){
-				ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", type_name_of(callee_type), "`.");
+				ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", get_type_name(callee_type), "`.");
 			}
 			const auto &callee = callee_var->get<D_function>();
 			// Allocate the argument vector. There will be no fewer arguments than parameters.
@@ -523,7 +516,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					do_set_result(lhs_ref, recycler, true, do_add(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -544,7 +537,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					do_set_result(lhs_ref, recycler, true, do_subtract(lhs, D_double(1)));
 					do_set_result(lhs_ref, recycler, false, lhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -564,7 +557,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->get<D_string>() };
 					rhs_ref->set(std::move(ref_o));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Values having type `", type_name_of(rhs_type), "` cannot be used as subscripts.");
+					ASTERIA_THROW_RUNTIME_ERROR("Values having type `", get_type_name(rhs_type), "` cannot be used as subscripts.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -582,7 +575,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, rhs);
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -600,7 +593,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_negate(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -618,7 +611,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(rhs_ref, recycler, candidate.compound_assignment, do_bitwise_not(rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -647,7 +640,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_add(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -666,7 +659,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(rhs_ref, recycler, true, do_subtract(rhs, D_double(1)));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
@@ -809,7 +802,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_concatenate(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -837,7 +830,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_subtract(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -874,7 +867,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_string>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_duplicate(rhs, lhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -897,7 +890,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_divide(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -920,7 +913,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_double>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_modulo(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -941,7 +934,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -962,7 +955,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_logical(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -984,7 +977,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1005,7 +998,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1028,7 +1021,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_and(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1051,7 +1044,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_or(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
@@ -1074,7 +1067,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 					const auto rhs = rhs_var->get<D_integer>();
 					do_set_result(lhs_ref, recycler, candidate.compound_assignment, do_bitwise_xor(lhs, rhs));
 				} else {
-					ASTERIA_THROW_RUNTIME_ERROR("Operation `", op_name_of(candidate), "` on type `", type_name_of(lhs_type), "` and type `", type_name_of(rhs_type), "` is undefined.");
+					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(candidate.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
 				do_push_reference(stack, std::move(lhs_ref));
 				break; }
