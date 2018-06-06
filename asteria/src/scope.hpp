@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Scope {
 public:
-	enum Purpose : signed char {
+	enum Purpose : std::uint8_t {
 		purpose_lexical   = 0,
 		purpose_plain     = 1,
 		purpose_function  = 2,

@@ -35,7 +35,7 @@ public:
 		, D_object    //  7
 	)>;
 
-	enum Comparison_result : signed char {
+	enum Comparison_result : std::uint8_t {
 		comparison_result_unordered  = 0,
 		comparison_result_less       = 1,
 		comparison_result_equal      = 2,

@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Statement {
 public:
-	enum Target_scope : signed char {
+	enum Target_scope : std::uint8_t {
 		target_scope_unspecified  = 0,
 		target_scope_switch       = 1,
 		target_scope_while        = 2,

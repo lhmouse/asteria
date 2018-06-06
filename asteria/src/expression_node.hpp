@@ -12,7 +12,7 @@ namespace Asteria {
 
 class Expression_node {
 public:
-	enum Operator : signed char {
+	enum Operator : std::uint8_t {
 		// Postfix operators
 		operator_postfix_inc    = 10, // ++
 		operator_postfix_dec    = 11, // --
