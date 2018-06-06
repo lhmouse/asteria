@@ -110,8 +110,8 @@ extern bool test_value(Spr<const Value> value_opt) noexcept;
 extern void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt);
 
-extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> source_opt);
-extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&source_opt);
+extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> src_opt);
+extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&src_opt);
 
 // This function is useful for breaking dependency circles.
 extern void purge_value(Spr<Value> value_opt) noexcept;

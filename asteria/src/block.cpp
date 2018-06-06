@@ -35,7 +35,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto &cand = stmt.get<Statement::S_expression_statement>();
 			// Bind the expression recursively.
 			Vp<Expression> bound_expr;
-			bind_expression(bound_expr, cand.expression_opt, scope);
+			bind_expression(bound_expr, cand.expr_opt, scope);
 			Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
 			bound_statements.emplace_back(std::move(stmt_e));
 			break; }
@@ -47,7 +47,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			set_reference(wref, nullptr);
 			// Bind the initializer recursively.
 			Vp<Initializer> bound_init;
-			bind_initializer(bound_init, cand.initializer_opt, scope);
+			bind_initializer(bound_init, cand.init_opt, scope);
 			Statement::S_variable_definition stmt_v = { cand.id, cand.constant, std::move(bound_init) };
 			bound_statements.emplace_back(std::move(stmt_v));
 			break; }
@@ -59,10 +59,10 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			set_reference(wref, nullptr);
 			// Bind the function body recursively.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, cand.source_location, cand.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
-			Statement::S_function_definition stmt_f = { cand.id, cand.source_location, cand.parameters_opt, std::move(bound_body) };
+			Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params_opt, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
 
@@ -70,7 +70,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto &cand = stmt.get<Statement::S_if_statement>();
 			// Bind the condition recursively.
 			Vp<Expression> bound_cond;
-			bind_expression(bound_cond, cand.condition_opt, scope);
+			bind_expression(bound_cond, cand.cond_opt, scope);
 			// Bind both branches recursively.
 			Vp<Block> bound_branch_true;
 			bind_block(bound_branch_true, cand.branch_true_opt, scope);
@@ -84,7 +84,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto &cand = stmt.get<Statement::S_switch_statement>();
 			// Bind the control expression recursively.
 			Vp<Expression> bound_ctrl;
-			bind_expression(bound_ctrl, cand.control_opt, scope);
+			bind_expression(bound_ctrl, cand.ctrl_opt, scope);
 			// Bind clauses recursively. A clause consists of a label expression and a body block.
 			// Notice that clauses in a `switch` statement share the same scope.
 			const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope);
@@ -107,7 +107,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			Vp<Block> bound_body;
 			bind_block(bound_body, cand.body_opt, scope);
 			Vp<Expression> bound_cond;
-			bind_expression(bound_cond, cand.condition_opt, scope);
+			bind_expression(bound_cond, cand.cond_opt, scope);
 			Statement::S_do_while_statement stmt_d = { std::move(bound_body), std::move(bound_cond) };
 			bound_statements.emplace_back(std::move(stmt_d));
 			break; }
@@ -116,7 +116,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto &cand = stmt.get<Statement::S_while_statement>();
 			// Bind the condition and the body recursively.
 			Vp<Expression> bound_cond;
-			bind_expression(bound_cond, cand.condition_opt, scope);
+			bind_expression(bound_cond, cand.cond_opt, scope);
 			Vp<Block> bound_body;
 			bind_block(bound_body, cand.body_opt, scope);
 			Statement::S_while_statement stmt_w = { std::move(bound_cond), std::move(bound_body) };
@@ -130,15 +130,15 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop initialization recursively.
 			Vp<Block> bound_init;
-			bind_block_in_place(bound_init, scope_for, cand.initialization_opt);
-			// Bind the condition, the increment and the body recursively.
+			bind_block_in_place(bound_init, scope_for, cand.init_opt);
+			// Bind the condition, step and body recursively.
 			Vp<Expression> bound_cond;
-			bind_expression(bound_cond, cand.condition_opt, scope_for);
-			Vp<Expression> bound_inc;
-			bind_expression(bound_inc, cand.increment_opt, scope_for);
+			bind_expression(bound_cond, cand.cond_opt, scope_for);
+			Vp<Expression> bound_step;
+			bind_expression(bound_step, cand.step_opt, scope_for);
 			Vp<Block> bound_body;
 			bind_block(bound_body, cand.body_opt, scope_for);
-			Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_inc), std::move(bound_body) };
+			Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_step), std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_f));
 			break; }
 
@@ -149,7 +149,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			// Bind the loop range initializer recursively.
 			Vp<Initializer> bound_range_init;
-			bind_initializer(bound_range_init, cand.range_initializer_opt, scope_for);
+			bind_initializer(bound_range_init, cand.range_init_opt, scope_for);
 			// Create null named references for the key and the value.
 			const auto key_wref = scope->drill_for_named_reference(cand.key_id);
 			const auto value_wref = scope->drill_for_named_reference(cand.value_id);
@@ -169,7 +169,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			bind_block(bound_branch_try, cand.branch_try_opt, scope);
 			Vp<Block> bound_branch_catch;
 			bind_block(bound_branch_catch, cand.branch_catch_opt, scope);
-			Statement::S_try_statement stmt_t = { std::move(bound_branch_try), cand.exception_id, std::move(bound_branch_catch) };
+			Statement::S_try_statement stmt_t = { std::move(bound_branch_try), cand.except_id, std::move(bound_branch_catch) };
 			bound_statements.emplace_back(std::move(stmt_t));
 			break; }
 
@@ -178,7 +178,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			// Bind the body recursively.
 			Vp<Block> bound_body;
 			bind_block(bound_body, cand.body_opt, scope);
-			Statement::S_defer_statement stmt_d = { cand.source_location, std::move(bound_body) };
+			Statement::S_defer_statement stmt_d = { cand.location, std::move(bound_body) };
 			bound_statements.emplace_back(std::move(stmt_d));
 			break; }
 
@@ -221,11 +221,11 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 }
 
 namespace {
-	bool do_check_loop_condition(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Expression> condition_opt, Spr<const Scope> scope){
-		// Overwrite `reference_out` unconditionally, even when `condition_opt` is null.
-		evaluate_expression(reference_out, recycler, condition_opt, scope);
+	bool do_check_loop_condition(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Expression> cond_opt, Spr<const Scope> scope){
+		// Overwrite `reference_out` unconditionally, even when `cond_opt` is null.
+		evaluate_expression(reference_out, recycler, cond_opt, scope);
 		bool result = true;
-		if(condition_opt != nullptr){
+		if(cond_opt != nullptr){
 			const auto condition_var = read_reference_opt(reference_out);
 			result = test_value(condition_var);
 		}
@@ -247,13 +247,13 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 		case Statement::type_expression_statement: {
 			const auto &cand = stmt.get<Statement::S_expression_statement>();
 			// Evaluate the expression, storing the result into `reference_out`.
-			evaluate_expression(reference_out, recycler, cand.expression_opt, scope);
+			evaluate_expression(reference_out, recycler, cand.expr_opt, scope);
 			break; }
 
 		case Statement::type_variable_definition: {
 			const auto &cand = stmt.get<Statement::S_variable_definition>();
 			// Evaluate the initializer and move the result into a variable.
-			evaluate_initializer(reference_out, recycler, cand.initializer_opt, scope);
+			evaluate_initializer(reference_out, recycler, cand.init_opt, scope);
 			Vp<Value> value;
 			extract_value_from_reference(value, recycler, std::move(reference_out));
 			// Create a reference to a temporary value, then materialize it.
@@ -269,11 +269,11 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			const auto &cand = stmt.get<Statement::S_function_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, cand.source_location, cand.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
 			// Create a named reference for the function.
-			auto func = std::make_shared<Instantiated_function>("function", cand.source_location, cand.parameters_opt, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("function", cand.location, cand.params_opt, scope, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, recycler, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
@@ -286,7 +286,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 		case Statement::type_if_statement: {
 			const auto &cand = stmt.get<Statement::S_if_statement>();
 			// Evaluate the condition expression and select a branch basing on the result.
-			evaluate_expression(reference_out, recycler, cand.condition_opt, scope);
+			evaluate_expression(reference_out, recycler, cand.cond_opt, scope);
 			const auto condition_var = read_reference_opt(reference_out);
 			const auto branch_taken = test_value(condition_var) ? cand.branch_true_opt.share() : cand.branch_false_opt.share();
 			if(!branch_taken){
@@ -304,7 +304,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 		case Statement::type_switch_statement: {
 			const auto &cand = stmt.get<Statement::S_switch_statement>();
 			// Evaluate the control expression.
-			evaluate_expression(reference_out, recycler, cand.control_opt, scope);
+			evaluate_expression(reference_out, recycler, cand.ctrl_opt, scope);
 			const auto control_var = read_reference_opt(reference_out);
 			ASTERIA_DEBUG_LOG("Switching on `", sp_fmt(control_var), "`...");
 			// Traverse the clause list to find one that matches the result.
@@ -357,13 +357,13 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					return result;
 				}
 				// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-			} while(do_check_loop_condition(reference_out, recycler, cand.condition_opt, scope));
+			} while(do_check_loop_condition(reference_out, recycler, cand.cond_opt, scope));
 			break; }
 
 		case Statement::type_while_statement: {
 			const auto &cand = stmt.get<Statement::S_while_statement>();
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-			while(do_check_loop_condition(reference_out, recycler, cand.condition_opt, scope)){
+			while(do_check_loop_condition(reference_out, recycler, cand.cond_opt, scope)){
 				// Execute the loop body recursively.
 				const auto result = execute_block(reference_out, recycler, cand.body_opt, scope);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_while)){
@@ -383,14 +383,14 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope);
 			// Perform loop initialization.
-			auto result = execute_block_in_place(reference_out, scope_for, recycler, cand.initialization_opt);
+			auto result = execute_block_in_place(reference_out, scope_for, recycler, cand.init_opt);
 			if(result != Block::execution_result_end_of_block){
 				// The initialization is considered to be outside the loop body.
 				// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
 				return result;
 			}
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-			while(do_check_loop_condition(reference_out, recycler, cand.condition_opt, scope_for)){
+			while(do_check_loop_condition(reference_out, recycler, cand.cond_opt, scope_for)){
 				// Execute the loop body recursively.
 				result = execute_block(reference_out, recycler, cand.body_opt, scope_for);
 				if((result == Block::execution_result_break_unspecified) || (result == Block::execution_result_break_for)){
@@ -401,8 +401,8 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					// Forward anything unexpected to the caller.
 					return result;
 				}
-				// Perform loop increment.
-				evaluate_expression(reference_out, recycler, cand.increment_opt, scope_for);
+				// Step to the next iteration.
+				evaluate_expression(reference_out, recycler, cand.step_opt, scope_for);
 			}
 			break; }
 
@@ -412,7 +412,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope);
 			// Perform loop initialization.
-			evaluate_initializer(reference_out, recycler, cand.range_initializer_opt, scope_for);
+			evaluate_initializer(reference_out, recycler, cand.range_init_opt, scope_for);
 			materialize_reference(reference_out, recycler, true);
 			Vp<Reference> range_ref;
 			move_reference(range_ref, std::move(reference_out));
@@ -523,7 +523,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					// Move the reference into the `catch` scope, then execute the `catch` branch.
 					scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope);
 					copy_reference(reference_out, e.get_reference_opt());
-					const auto wref = scope_catch->drill_for_named_reference(cand.exception_id);
+					const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
 					copy_reference(wref, reference_out);
 					throw;
 				} catch(std::exception &e){
@@ -535,7 +535,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 					Reference::S_temporary_value ref_t = { std::move(what_var) };
 					set_reference(reference_out, std::move(ref_t));
 					materialize_reference(reference_out, recycler, true);
-					const auto wref = scope_catch->drill_for_named_reference(cand.exception_id);
+					const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
 					copy_reference(wref, reference_out);
 					throw;
 				}
@@ -554,7 +554,7 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 			Vp<Block> bound_body;
 			bind_block(bound_body, cand.body_opt, scope);
 			// Register the function as a deferred callback of the current scope.
-			auto func = std::make_shared<Instantiated_function>("deferred block", cand.source_location, Sp_vector<const Parameter>(), scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Sp_vector<const Parameter>(), scope, std::move(bound_body));
 			scope->defer_callback(std::move(func));
 			break; }
 

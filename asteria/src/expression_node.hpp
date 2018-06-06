@@ -59,20 +59,20 @@ public:
 		type_operator_rpn       = 8, // -X, +1
 	};
 	struct S_literal {
-		Sp<const Value> source_opt;
+		Sp<const Value> src_opt;
 	};
 	struct S_named_reference {
 		Cow_string id;
 	};
 	struct S_bound_reference {
-		Sp<const Reference> reference_opt;
+		Sp<const Reference> ref_opt;
 	};
 	struct S_subexpression {
 		Vp<Expression> subexpr_opt;
 	};
 	struct S_lambda_definition {
-		Cow_string source_location;
-		Sp_vector<const Parameter> parameters_opt;
+		Cow_string location;
+		Sp_vector<const Parameter> params_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_pruning {
@@ -87,7 +87,7 @@ public:
 	};
 	struct S_operator_rpn {
 		Operator op;
-		bool compound_assignment; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
+		bool assign; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_literal            // 0

@@ -28,15 +28,15 @@ void bind_initializer(Vp<Initializer> &bound_result_out, Spr<const Initializer> 
 	case Initializer::type_assignment_init: {
 		const auto &cand = initializer_opt->get<Initializer::S_assignment_init>();
 		Vp<Expression> bound_expr;
-		bind_expression(bound_expr, cand.expression, scope);
+		bind_expression(bound_expr, cand.expr, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
 		return bound_result_out.emplace(std::move(init_a)); }
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &cand = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Vp_vector<Initializer> bound_elems;
-		bound_elems.reserve(cand.elements.size());
-		for(const auto &elem : cand.elements){
+		bound_elems.reserve(cand.elems.size());
+		for(const auto &elem : cand.elems){
 			bind_initializer(bound_result_out, elem, scope);
 			bound_elems.emplace_back(std::move(bound_result_out));
 		}
@@ -67,14 +67,14 @@ void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, 
 
 	case Initializer::type_assignment_init: {
 		const auto &cand = initializer_opt->get<Initializer::S_assignment_init>();
-		return evaluate_expression(reference_out, recycler, cand.expression, scope); }
+		return evaluate_expression(reference_out, recycler, cand.expr, scope); }
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &cand = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Vp<Value> value;
 		D_array array;
-		array.reserve(cand.elements.size());
-		for(const auto &elem : cand.elements){
+		array.reserve(cand.elems.size());
+		for(const auto &elem : cand.elems){
 			evaluate_initializer(reference_out, recycler, elem, scope);
 			extract_value_from_reference(value, recycler, std::move(reference_out));
 			array.emplace_back(std::move(value));

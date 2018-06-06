@@ -12,29 +12,29 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Spr<const Reference> reference_opt) noexcept {
-	return reference_opt ? reference_opt->get_type() : Reference::type_null;
+Reference::Type get_reference_type(Spr<const Reference> ref_opt) noexcept {
+	return ref_opt ? ref_opt->get_type() : Reference::type_null;
 }
 
-void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsigned indent_next, unsigned indent_increment){
-	const auto type = get_reference_type(reference_opt);
+void dump_reference(std::ostream &os, Spr<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment){
+	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
 		os <<"null ";
 		return dump_value(os, nullptr, indent_next, indent_increment);
 
 	case Reference::type_constant: {
-		const auto &cand = reference_opt->get<Reference::S_constant>();
+		const auto &cand = ref_opt->get<Reference::S_constant>();
 		os <<"constant ";
-		return dump_value(os, cand.source_opt, indent_next, indent_increment); }
+		return dump_value(os, cand.src_opt, indent_next, indent_increment); }
 
 	case Reference::type_temporary_value: {
-		const auto &cand = reference_opt->get<Reference::S_temporary_value>();
+		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
 		os <<"temporary value ";
 		return dump_value(os, cand.value_opt, indent_next, indent_increment); }
 
 	case Reference::type_variable: {
-		const auto &cand = reference_opt->get<Reference::S_variable>();
+		const auto &cand = ref_opt->get<Reference::S_variable>();
 		if(cand.variable->is_immutable()){
 			os <<"immutable ";
 		}
@@ -42,12 +42,12 @@ void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsign
 		return dump_value(os, cand.variable->get_value_opt(), indent_next, indent_increment); }
 
 	case Reference::type_array_element: {
-		const auto &cand = reference_opt->get<Reference::S_array_element>();
+		const auto &cand = ref_opt->get<Reference::S_array_element>();
 		os <<"the element at index [" <<cand.index <<"] of ";
 		return dump_reference(os, cand.parent_opt, indent_next, indent_increment); }
 
 	case Reference::type_object_member: {
-		const auto &cand = reference_opt->get<Reference::S_object_member>();
+		const auto &cand = ref_opt->get<Reference::S_object_member>();
 		os <<"the cand having key \"" <<cand.key <<"\" in ";
 		return dump_reference(os, cand.parent_opt, indent_next, indent_increment); }
 
@@ -61,31 +61,31 @@ std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &refer
 	return os;
 }
 
-void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> source_opt){
-	const auto type = get_reference_type(source_opt);
+void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> src_opt){
+	const auto type = get_reference_type(src_opt);
 	switch(type){
 	case Reference::type_null:
 		return set_reference(reference_out, nullptr);
 
 	case Reference::type_constant: {
-		const auto &cand = source_opt->get<Reference::S_constant>();
+		const auto &cand = src_opt->get<Reference::S_constant>();
 		return set_reference(reference_out, cand); }
 
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied.");
 
 	case Reference::type_variable: {
-		const auto &cand = source_opt->get<Reference::S_variable>();
+		const auto &cand = src_opt->get<Reference::S_variable>();
 		return set_reference(reference_out, cand); }
 
 	case Reference::type_array_element: {
-		const auto &cand = source_opt->get<Reference::S_array_element>();
+		const auto &cand = src_opt->get<Reference::S_array_element>();
 		copy_reference(reference_out, cand.parent_opt);
 		Reference::S_array_element array_element = { std::move(reference_out), cand.index };
 		return set_reference(reference_out, std::move(array_element)); }
 
 	case Reference::type_object_member: {
-		const auto &cand = source_opt->get<Reference::S_object_member>();
+		const auto &cand = src_opt->get<Reference::S_object_member>();
 		copy_reference(reference_out, cand.parent_opt);
 		Reference::S_object_member object_member = { std::move(reference_out), cand.key };
 		return set_reference(reference_out, std::move(object_member)); }
@@ -95,34 +95,34 @@ void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> source_op
 		std::terminate();
 	}
 }
-void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&source_opt){
-	if(source_opt == nullptr){
+void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&src_opt){
+	if(src_opt == nullptr){
 		return reference_out.reset();
 	} else {
-		return reference_out.reset(source_opt.release());
+		return reference_out.reset(src_opt.release());
 	}
 }
 
-Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt){
-	const auto type = get_reference_type(reference_opt);
+Sp<const Value> read_reference_opt(Spr<const Reference> ref_opt){
+	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
 		return nullptr;
 
 	case Reference::type_constant: {
-		const auto &cand = reference_opt->get<Reference::S_constant>();
-		return cand.source_opt; }
+		const auto &cand = ref_opt->get<Reference::S_constant>();
+		return cand.src_opt; }
 
 	case Reference::type_temporary_value: {
-		const auto &cand = reference_opt->get<Reference::S_temporary_value>();
+		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
 		return cand.value_opt; }
 
 	case Reference::type_variable: {
-		const auto &cand = reference_opt->get<Reference::S_variable>();
+		const auto &cand = ref_opt->get<Reference::S_variable>();
 		return cand.variable->get_value_opt(); }
 
 	case Reference::type_array_element: {
-		const auto &cand = reference_opt->get<Reference::S_array_element>();
+		const auto &cand = ref_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = read_reference_opt(cand.parent_opt);
 		if(get_value_type(parent) != Value::type_array){
@@ -142,7 +142,7 @@ Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt){
 		return value_opt; }
 
 	case Reference::type_object_member: {
-		const auto &cand = reference_opt->get<Reference::S_object_member>();
+		const auto &cand = ref_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = read_reference_opt(cand.parent_opt);
 		if(get_value_type(parent) != Value::type_object){
@@ -163,26 +163,26 @@ Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference_opt){
-	const auto type = get_reference_type(reference_opt);
+std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
+	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
 		ASTERIA_THROW_RUNTIME_ERROR("Writing through a null reference is not allowed.");
 
 	case Reference::type_constant: {
-		const auto &cand = reference_opt->get<Reference::S_constant>();
-		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sp_fmt(cand.source_opt), "` cannot be modified."); }
+		const auto &cand = ref_opt->get<Reference::S_constant>();
+		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sp_fmt(cand.src_opt), "` cannot be modified."); }
 
 	case Reference::type_temporary_value: {
-		const auto &cand = reference_opt->get<Reference::S_temporary_value>();
+		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
 		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sp_fmt(cand.value_opt), "` is likely to be an error hence is not allowed."); }
 
 	case Reference::type_variable: {
-		const auto &cand = reference_opt->get<Reference::S_variable>();
+		const auto &cand = ref_opt->get<Reference::S_variable>();
 		return cand.variable->drill_for_value(); }
 
 	case Reference::type_array_element: {
-		const auto &cand = reference_opt->get<Reference::S_array_element>();
+		const auto &cand = ref_opt->get<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_array){
@@ -214,7 +214,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference
 		return std::ref(value_opt); }
 
 	case Reference::type_object_member: {
-		const auto &cand = reference_opt->get<Reference::S_object_member>();
+		const auto &cand = ref_opt->get<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_object){
@@ -271,26 +271,26 @@ namespace {
 		}
 	};
 
-	Extract_value_result do_try_extract_value(Spr<Reference> reference_opt){
-		const auto type = get_reference_type(reference_opt);
+	Extract_value_result do_try_extract_value(Spr<Reference> ref_opt){
+		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::type_null:
 			return nullptr;
 
 		case Reference::type_constant: {
-			auto &cand = reference_opt->get<Reference::S_constant>();
-			return cand.source_opt; }
+			auto &cand = ref_opt->get<Reference::S_constant>();
+			return cand.src_opt; }
 
 		case Reference::type_temporary_value: {
-			auto &cand = reference_opt->get<Reference::S_temporary_value>();
+			auto &cand = ref_opt->get<Reference::S_temporary_value>();
 			return std::move(cand.value_opt); }
 
 		case Reference::type_variable: {
-			auto &cand = reference_opt->get<Reference::S_variable>();
+			auto &cand = ref_opt->get<Reference::S_variable>();
 			return cand.variable->get_value_opt(); }
 
 		case Reference::type_array_element: {
-			auto &cand = reference_opt->get<Reference::S_array_element>();
+			auto &cand = ref_opt->get<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
@@ -314,7 +314,7 @@ namespace {
 			return const_cast<Vp<Value> &&>(value_opt); }
 
 		case Reference::type_object_member: {
-			auto &cand = reference_opt->get<Reference::S_object_member>();
+			auto &cand = ref_opt->get<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
@@ -341,8 +341,8 @@ namespace {
 	}
 }
 
-void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Reference> &&reference_opt){
-	auto result = do_try_extract_value(reference_opt);
+void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Reference> &&ref_opt){
+	auto result = do_try_extract_value(ref_opt);
 	if(result.is_movable() == false){
 		return copy_value(value_out, recycler, result.get_copyable_pointer());
 	}
@@ -350,8 +350,8 @@ void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler, 
 }
 
 namespace {
-	bool do_check_materializability(Spr<const Reference> reference_opt){
-		const auto type = get_reference_type(reference_opt);
+	bool do_check_materializability(Spr<const Reference> ref_opt){
+		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::type_null:
 			return false;
@@ -362,10 +362,10 @@ namespace {
 		case Reference::type_variable:
 			return false;
 		case Reference::type_array_element: {
-			const auto &cand = reference_opt->get<Reference::S_array_element>();
+			const auto &cand = ref_opt->get<Reference::S_array_element>();
 			return do_check_materializability(cand.parent_opt); }
 		case Reference::type_object_member: {
-			const auto &cand = reference_opt->get<Reference::S_object_member>();
+			const auto &cand = ref_opt->get<Reference::S_object_member>();
 			return do_check_materializability(cand.parent_opt); }
 		default:
 			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);

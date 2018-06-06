@@ -58,8 +58,8 @@ namespace {
 		Vp_vector<Reference> m_arguments_opt;
 
 	public:
-		Argument_getter(const D_string &self_id, const D_string &source_location, Vp_vector<Reference> &&arguments_opt)
-			: m_self_id(self_id), m_source_location(source_location), m_arguments_opt(std::move(arguments_opt))
+		Argument_getter(const D_string &self_id, const D_string &location, Vp_vector<Reference> &&arguments_opt)
+			: m_self_id(self_id), m_source_location(location), m_arguments_opt(std::move(arguments_opt))
 		{ }
 
 	public:
@@ -139,23 +139,23 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const D_string &source_location, const Sp_vector<const Parameter> &parameters_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const D_string &location, const Sp_vector<const Parameter> &params_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt){
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
 	// Move arguments into the scope.
 	do_set_argument(scope, D_string::shallow("this"), std::move(this_opt));
-	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spr<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });
+	std::for_each(params_opt.begin(), params_opt.end(), [&](Spr<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });
 	// Create pre-defined variables.
-	do_create_source_reference(scope, D_string::shallow("__source"), source_location);
-	do_create_argument_getter(scope, D_string::shallow("__va_arg"), source_location, std::move(arguments_opt));
+	do_create_source_reference(scope, D_string::shallow("__source"), location);
+	do_create_argument_getter(scope, D_string::shallow("__va_arg"), location, std::move(arguments_opt));
 }
-void prepare_function_scope_lexical(Spr<Scope> scope, const D_string &source_location, const Sp_vector<const Parameter> &parameters_opt){
+void prepare_function_scope_lexical(Spr<Scope> scope, const D_string &location, const Sp_vector<const Parameter> &params_opt){
 	// Create null arguments in the scope.
 	do_set_argument(scope, D_string::shallow("this"), nullptr);
-	std::for_each(parameters_opt.begin(), parameters_opt.end(), [&](Spr<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });
+	std::for_each(params_opt.begin(), params_opt.end(), [&](Spr<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });
 	// Create pre-defined variables.
-	do_create_source_reference(scope, D_string::shallow("__source"), source_location);
+	do_create_source_reference(scope, D_string::shallow("__source"), location);
 	do_set_argument(scope, D_string::shallow("__va_arg"), nullptr);
 }
 

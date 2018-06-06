@@ -68,7 +68,7 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			const auto &cand = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Vp<Reference> bound_ref;
-			copy_reference(bound_ref, cand.reference_opt);
+			copy_reference(bound_ref, cand.ref_opt);
 			Expression_node::S_bound_reference nodeb = { std::move(bound_ref) };
 			bound_nodes.emplace_back(std::move(nodeb));
 			break; }
@@ -86,10 +86,10 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 			const auto &cand = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, cand.source_location, cand.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
-			Expression_node::S_lambda_definition nodel = { cand.source_location, cand.parameters_opt, std::move(bound_body) };
+			Expression_node::S_lambda_definition nodel = { cand.location, cand.params_opt, std::move(bound_body) };
 			bound_nodes.emplace_back(std::move(nodel));
 			break; }
 
@@ -143,8 +143,8 @@ namespace {
 	}
 
 	template<typename ResultT>
-	void do_set_result(Vp<Reference> &ref_inout_opt, Spr<Recycler> recycler, bool compound_assignment, ResultT &&result){
-		if(compound_assignment){
+	void do_set_result(Vp<Reference> &ref_inout_opt, Spr<Recycler> recycler, bool assign, ResultT &&result){
+		if(assign){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
 			return set_value(wref, recycler, std::forward<ResultT>(result));
@@ -375,7 +375,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			const auto &cand = node.get<Expression_node::S_literal>();
 			// Create an constant reference to the constant.
 			Vp<Reference> result_ref;
-			Reference::S_constant ref_k = { cand.source_opt };
+			Reference::S_constant ref_k = { cand.src_opt };
 			set_reference(result_ref, std::move(ref_k));
 			do_push_reference(stack, std::move(result_ref));
 			break; }
@@ -405,7 +405,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			const auto &cand = node.get<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Vp<Reference> bound_ref;
-			copy_reference(bound_ref, cand.reference_opt);
+			copy_reference(bound_ref, cand.ref_opt);
 			// Push the reference onto the stack as is.
 			do_push_reference(stack, std::move(bound_ref));
 			break; }
@@ -423,11 +423,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 			const auto &cand = node.get<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-			prepare_function_scope_lexical(scope_lexical, cand.source_location, cand.parameters_opt);
+			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
 			// Create a temporary variable for the function.
-			auto func = std::make_shared<Instantiated_function>("lambda", cand.source_location, cand.parameters_opt, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("lambda", cand.location, cand.params_opt, scope, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, recycler, D_function(std::move(func)));
 			Vp<Reference> result_ref;
@@ -504,7 +504,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				// Pop the operand off the stack.
 				auto lhs_ref = do_pop_reference(stack);
 				// Increment the operand and return the old value.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto lhs_type = get_value_type(lhs_var);
 				if(lhs_type == Value::type_integer){
@@ -525,7 +525,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				// Pop the operand off the stack.
 				auto lhs_ref = do_pop_reference(stack);
 				// Decrement the operand and return the old value.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto lhs_type = get_value_type(lhs_var);
 				if(lhs_type == Value::type_integer){
@@ -547,7 +547,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				auto lhs_ref = do_pop_reference(stack);
 				auto rhs_ref = do_pop_reference(stack);
 				// The subscript operand shall have type `integer` or `string`. In neither case will `rhs_ref` be null, hence it can be safely reused.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
@@ -570,10 +570,10 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, rhs);
+					do_set_result(rhs_ref, recycler, cand.assign, rhs);
 				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, rhs);
+					do_set_result(rhs_ref, recycler, cand.assign, rhs);
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -588,10 +588,10 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, do_negate(rhs));
+					do_set_result(rhs_ref, recycler, cand.assign, do_negate(rhs));
 				} else if(rhs_type == Value::type_double){
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, do_negate(rhs));
+					do_set_result(rhs_ref, recycler, cand.assign, do_negate(rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -606,10 +606,10 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_boolean){
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, do_logical_not(rhs));
+					do_set_result(rhs_ref, recycler, cand.assign, do_logical_not(rhs));
 				} else if(rhs_type == Value::type_integer){
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(rhs_ref, recycler, cand.compound_assignment, do_bitwise_not(rhs));
+					do_set_result(rhs_ref, recycler, cand.assign, do_bitwise_not(rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -622,7 +622,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				// Convert the operand to a `boolean` value, which is an rvalue, negate it, then return it.
 				// N.B. This is one of the few operators that work on all types.
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				do_set_result(rhs_ref, recycler, cand.compound_assignment, do_logical_not(test_value(rhs_var)));
+				do_set_result(rhs_ref, recycler, cand.assign, do_logical_not(test_value(rhs_var)));
 				do_push_reference(stack, std::move(rhs_ref));
 				break; }
 
@@ -630,7 +630,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
 				// Increment the operand and return it.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
@@ -649,7 +649,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				// Pop the operand off the stack.
 				auto rhs_ref = do_pop_reference(stack);
 				// Decrement the operand and return it.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
@@ -788,19 +788,19 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_add(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_add(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_add(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_add(lhs, rhs));
 				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_string)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_concatenate(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_concatenate(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -820,15 +820,15 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_subtract(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_subtract(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_subtract(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_subtract(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -849,23 +849,23 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_multiply(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_multiply(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_multiply(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_multiply(lhs, rhs));
 				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_string>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_duplicate(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_duplicate(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_string)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_string>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_duplicate(rhs, lhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_duplicate(rhs, lhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -884,11 +884,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_divide(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_divide(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_divide(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_divide(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -907,11 +907,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_modulo(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_modulo(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
 					const auto lhs = lhs_var->get<D_double>();
 					const auto rhs = rhs_var->get<D_double>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_modulo(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_modulo(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -932,7 +932,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_shift_left_logical(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_shift_left_logical(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -953,7 +953,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_shift_right_logical(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_shift_right_logical(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -975,7 +975,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_shift_left_arithmetic(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_shift_left_arithmetic(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -996,7 +996,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_shift_right_arithmetic(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_shift_right_arithmetic(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -1015,11 +1015,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_bitwise_and(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_bitwise_and(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -1038,11 +1038,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_bitwise_or(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_bitwise_or(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -1061,11 +1061,11 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
 					const auto lhs = lhs_var->get<D_boolean>();
 					const auto rhs = rhs_var->get<D_boolean>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_logical_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
 					const auto lhs = lhs_var->get<D_integer>();
 					const auto rhs = rhs_var->get<D_integer>();
-					do_set_result(lhs_ref, recycler, cand.compound_assignment, do_bitwise_xor(lhs, rhs));
+					do_set_result(lhs_ref, recycler, cand.assign, do_bitwise_xor(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 				}
@@ -1077,7 +1077,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 				auto lhs_ref = do_pop_reference(stack);
 				auto rhs_ref = do_pop_reference(stack);
 				// Copy the variable referenced by `rhs_ref` into `lhs_ref`, then return it.
-				// `compound_assignment` is ignored.
+				// `assign` is ignored.
 				// N.B. This is one of the few operators that work on all types.
 				Vp<Value> value;
 				extract_value_from_reference(value, recycler, std::move(rhs_ref));

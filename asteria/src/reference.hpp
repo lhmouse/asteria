@@ -22,7 +22,7 @@ public:
 		type_object_member    =  4,
 	};
 	struct S_constant {
-		Sp<const Value> source_opt;
+		Sp<const Value> src_opt;
 	};
 	struct S_temporary_value {
 		Vp<Value> value_opt;
@@ -90,8 +90,8 @@ extern Reference::Type get_reference_type(Spr<const Reference> reference_opt) no
 extern void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt);
 
-extern void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> source_opt);
-extern void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&source_opt);
+extern void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> src_opt);
+extern void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&src_opt);
 
 extern Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt);
 extern std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference_opt);

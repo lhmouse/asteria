@@ -36,55 +36,55 @@ public:
 		type_return_statement         = 14,
 	};
 	struct S_expression_statement {
-		Vp<Expression> expression_opt;
+		Vp<Expression> expr_opt;
 	};
 	struct S_variable_definition {
 		Cow_string id;
 		bool constant;
-		Vp<Initializer> initializer_opt;
+		Vp<Initializer> init_opt;
 	};
 	struct S_function_definition {
 		Cow_string id;
-		Cow_string source_location;
-		Sp_vector<const Parameter> parameters_opt;
+		Cow_string location;
+		Sp_vector<const Parameter> params_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_if_statement {
-		Vp<Expression> condition_opt;
+		Vp<Expression> cond_opt;
 		Vp<Block> branch_true_opt;
 		Vp<Block> branch_false_opt;
 	};
 	struct S_switch_statement {
-		Vp<Expression> control_opt;
+		Vp<Expression> ctrl_opt;
 		T_vector<T_pair<Vp<Expression>, Vp<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Vp<Block> body_opt;
-		Vp<Expression> condition_opt;
+		Vp<Expression> cond_opt;
 	};
 	struct S_while_statement {
-		Vp<Expression> condition_opt;
+		Vp<Expression> cond_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_for_statement {
-		Vp<Block> initialization_opt;
-		Vp<Expression> condition_opt;
-		Vp<Expression> increment_opt;
+		Vp<Block> init_opt;
+		Vp<Expression> cond_opt;
+		Vp<Expression> step_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_for_each_statement {
 		Cow_string key_id;
 		Cow_string value_id;
-		Vp<Initializer> range_initializer_opt;
+		Vp<Initializer> range_init_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_try_statement {
 		Vp<Block> branch_try_opt;
-		Cow_string exception_id;
+		Cow_string except_id;
 		Vp<Block> branch_catch_opt;
 	};
 	struct S_defer_statement {
-		Cow_string source_location;
+		Cow_string location;
 		Vp<Block> body_opt;
 	};
 	struct S_break_statement {

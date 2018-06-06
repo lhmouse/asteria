@@ -14,7 +14,7 @@ public:
 	enum Type : unsigned {
 		type_keyword          = 0,
 		type_operator         = 1,
-		type_id       = 2,
+		type_identifier       = 2,
 		type_literal_null     = 3,
 		type_literal_boolean  = 4,
 		type_literal_integer  = 5,
@@ -27,7 +27,7 @@ public:
 	struct S_operator {
 		char cstr[8];
 	};
-	struct S_id {
+	struct S_identifier {
 		Cow_string str;
 	};
 	struct S_literal_null {
@@ -48,7 +48,7 @@ public:
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_keyword          // 0
 		, S_operator         // 1
-		, S_id       // 2
+		, S_identifier       // 2
 		, S_literal_null     // 3
 		, S_literal_boolean  // 4
 		, S_literal_integer  // 5

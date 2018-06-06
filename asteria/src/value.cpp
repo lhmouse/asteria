@@ -214,37 +214,37 @@ std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt
 	return os;
 }
 
-void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> source_opt){
-	const auto type = get_value_type(source_opt);
+void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> src_opt){
+	const auto type = get_value_type(src_opt);
 	switch(type){
 	case Value::type_null:
 		return set_value(value_out, recycler, nullptr);
 
 	case Value::type_boolean: {
-		const auto &cand = source_opt->get<D_boolean>();
+		const auto &cand = src_opt->get<D_boolean>();
 		return set_value(value_out, recycler, cand); }
 
 	case Value::type_integer: {
-		const auto &cand = source_opt->get<D_integer>();
+		const auto &cand = src_opt->get<D_integer>();
 		return set_value(value_out, recycler, cand); }
 
 	case Value::type_double: {
-		const auto &cand = source_opt->get<D_double>();
+		const auto &cand = src_opt->get<D_double>();
 		return set_value(value_out, recycler, cand); }
 
 	case Value::type_string: {
-		const auto &cand = source_opt->get<D_string>();
+		const auto &cand = src_opt->get<D_string>();
 		return set_value(value_out, recycler, cand); }
 
 	case Value::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Values having opaque types cannot be copied.");
 
 	case Value::type_function: {
-		const auto &cand = source_opt->get<D_function>();
+		const auto &cand = src_opt->get<D_function>();
 		return set_value(value_out, recycler, cand); }
 
 	case Value::type_array: {
-		const auto &cand = source_opt->get<D_array>();
+		const auto &cand = src_opt->get<D_array>();
 		D_array array;
 		array.reserve(cand.size());
 		for(const auto &elem : cand){
@@ -254,7 +254,7 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> s
 		return set_value(value_out, recycler, std::move(array)); }
 
 	case Value::type_object: {
-		const auto &cand = source_opt->get<D_object>();
+		const auto &cand = src_opt->get<D_object>();
 		D_object object;
 		object.reserve(cand.size());
 		for(const auto &pair : cand){
@@ -268,11 +268,11 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler, Spr<const Value> s
 		std::terminate();
 	}
 }
-void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&source_opt){
-	if(source_opt && (source_opt->get_recycler_opt() == recycler)){
-		return value_out.reset(source_opt.release());
+void move_value(Vp<Value> &value_out, Spr<Recycler> recycler, Vp<Value> &&src_opt){
+	if(src_opt && (src_opt->get_recycler_opt() == recycler)){
+		return value_out.reset(src_opt.release());
 	} else {
-		return copy_value(value_out, recycler, source_opt);
+		return copy_value(value_out, recycler, src_opt);
 	}
 }
 
