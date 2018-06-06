@@ -11,14 +11,14 @@ namespace Asteria {
 
 class Statement {
 public:
-	enum Target_scope : unsigned {
+	enum Target_scope : signed char {
 		target_scope_unspecified  = 0,
 		target_scope_switch       = 1,
 		target_scope_while        = 2,
 		target_scope_for          = 3,
 	};
 
-	enum Type : unsigned {
+	enum Type : signed char {
 		type_expression_statement     =  0,
 		type_variable_definition      =  1,
 		type_function_definition      =  2,

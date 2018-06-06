@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Block {
 public:
-	enum Execution_result : unsigned {
+	enum Execution_result : signed char {
 		execution_result_end_of_block          = 0,
 		execution_result_break_unspecified     = 1,
 		execution_result_break_switch          = 2,

@@ -12,7 +12,7 @@ namespace Asteria {
 
 class Expression_node {
 public:
-	enum Operator : unsigned {
+	enum Operator : signed char {
 		// Postfix operators
 		operator_postfix_inc    = 10, // ++
 		operator_postfix_dec    = 11, // --
@@ -47,7 +47,7 @@ public:
 		operator_infix_assign   = 72, // =
 	};
 
-	enum Type : unsigned {
+	enum Type : signed char {
 		type_literal            = 0, // +1
 		type_named_reference    = 1, // +1
 		type_bound_reference    = 2, // +1

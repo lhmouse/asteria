@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Token {
 public:
-	enum Type : unsigned {
+	enum Type : signed char {
 		type_keyword          = 0,
 		type_operator         = 1,
 		type_identifier       = 2,

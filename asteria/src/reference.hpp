@@ -13,8 +13,8 @@ class Reference {
 	friend Stored_reference;
 
 public:
-	enum Type : unsigned {
-		type_null             = -1u,
+	enum Type : signed char {
+		type_null             = -1,
 		type_constant         =  0,
 		type_temporary_value  =  1,
 		type_variable         =  2,

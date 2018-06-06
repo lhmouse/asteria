@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Scope {
 public:
-	enum Purpose : unsigned {
+	enum Purpose : signed char {
 		purpose_lexical   = 0,
 		purpose_plain     = 1,
 		purpose_function  = 2,

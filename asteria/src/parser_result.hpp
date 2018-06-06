@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Parser_result {
 public:
-	enum Error_code : unsigned {
+	enum Error_code : signed char {
 		error_success             =  0,
 		error_comment_not_closed  =  1,
 		error_invalid_character   =  2,

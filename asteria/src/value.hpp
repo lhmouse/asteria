@@ -13,8 +13,8 @@ class Value {
 	friend Stored_value;
 
 public:
-	enum Type : unsigned {
-		type_null      = -1u,
+	enum Type : signed char {
+		type_null      = -1,
 		type_boolean   =  0,
 		type_integer   =  1,
 		type_double    =  2,
@@ -35,7 +35,7 @@ public:
 		, D_object    //  7
 	)>;
 
-	enum Comparison_result : unsigned {
+	enum Comparison_result : signed char {
 		comparison_result_unordered  = 0,
 		comparison_result_less       = 1,
 		comparison_result_equal      = 2,
