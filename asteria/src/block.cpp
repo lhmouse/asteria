@@ -23,7 +23,7 @@ void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr
 	T_vector<Statement> bound_stmts;
 	bound_stmts.reserve(block_opt->size());
 	for(const auto &stmt : *block_opt){
-		bind_statement(bound_stmts, scope_inout, stmt);
+		bind_statement_in_place(bound_stmts, scope_inout, stmt);
 	}
 	return bound_block_out.emplace(std::move(bound_stmts));
 }
@@ -35,7 +35,7 @@ Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out,
 	}
 	// Execute statements one by one.
 	for(const auto &stmt : *block_opt){
-		const auto result = execute_statement(reference_out, scope_inout, recycler, stmt);
+		const auto result = execute_statement_in_place(reference_out, scope_inout, recycler, stmt);
 		if(result != Statement::execution_result_next){
 			// Forward anything unexpected to the caller.
 			return result;

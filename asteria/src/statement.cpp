@@ -19,7 +19,7 @@ Statement::Statement(Statement &&) noexcept = default;
 Statement & Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
-void bind_statement(T_vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt){
+void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement: {
@@ -207,7 +207,7 @@ namespace {
 	}
 }
 
-Statement::Execution_result execute_statement(Vp<Reference> &result_out, Spr<Scope> scope_inout, Spr<Recycler> recycler, const Statement &stmt){
+Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Spr<Scope> scope_inout, Spr<Recycler> recycler, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement: {
