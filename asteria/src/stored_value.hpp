@@ -49,7 +49,7 @@ public:
 	}
 };
 
-extern void set_value(Vp<Value> &value_out, Spr<Recycler> recycler, Stored_value &&value_opt);
+extern void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Stored_value &&value_opt);
 
 }
 

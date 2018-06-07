@@ -61,7 +61,7 @@ public:
 extern Initializer::Type get_initializer_type(Spr<const Initializer> initializer_opt) noexcept;
 
 extern void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
-extern void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
 
 }
 

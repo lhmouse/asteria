@@ -66,12 +66,12 @@ namespace {
 		D_string describe() const override {
 			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source_location, "'");
 		}
-		void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler, Vp<Reference> &&/*this_opt*/, Vp_vector<Reference> &&arguments_opt) const override {
+		void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&/*this_opt*/, Vp_vector<Reference> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
 			case 0: {
 				// Return the number of arguments.
 				Vp<Value> value;
-				set_value(value, recycler, D_integer(static_cast<std::ptrdiff_t>(m_arguments_opt.size())));
+				set_value(value, recycler_inout, D_integer(static_cast<std::ptrdiff_t>(m_arguments_opt.size())));
 				Reference::S_temporary_value ref_t = { std::move(value) };
 				return set_reference(result_out, std::move(ref_t)); }
 
@@ -139,10 +139,10 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const D_string &location, const Sp_vector<const Parameter> &params_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const D_string &location, const Sp_vector<const Parameter> &params_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt){
 	// Materialize everything, as function parameters should be modifiable.
-	materialize_reference(this_opt, recycler, true);
-	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler, true); });
+	materialize_reference(this_opt, recycler_inout, true);
+	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_inout, true); });
 	// Move arguments into the scope.
 	do_set_argument(scope, D_string::shallow("this"), std::move(this_opt));
 	std::for_each(params_opt.begin(), params_opt.end(), [&](Spr<const Parameter> param_opt){ do_shift_argument(scope, arguments_opt, param_opt); });

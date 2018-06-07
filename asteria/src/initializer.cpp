@@ -59,7 +59,7 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> in
 		std::terminate();
 	}
 }
-void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
+void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:
@@ -67,7 +67,7 @@ void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, 
 
 	case Initializer::type_assignment_init: {
 		const auto &cand = initializer_opt->get<Initializer::S_assignment_init>();
-		return evaluate_expression(reference_out, recycler, cand.expr, scope); }
+		return evaluate_expression(reference_out, recycler_inout, cand.expr, scope); }
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &cand = initializer_opt->get<Initializer::S_bracketed_init_list>();
@@ -75,11 +75,11 @@ void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, 
 		D_array array;
 		array.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
-			evaluate_initializer(reference_out, recycler, elem, scope);
-			extract_value_from_reference(value, recycler, std::move(reference_out));
+			evaluate_initializer(reference_out, recycler_inout, elem, scope);
+			extract_value_from_reference(value, recycler_inout, std::move(reference_out));
 			array.emplace_back(std::move(value));
 		}
-		set_value(value, recycler, std::move(array));
+		set_value(value, recycler_inout, std::move(array));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		return set_reference(reference_out, std::move(ref_t)); }
 
@@ -89,11 +89,11 @@ void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler, 
 		D_object object;
 		object.reserve(cand.key_values.size());
 		for(const auto &pair : cand.key_values){
-			evaluate_initializer(reference_out, recycler, pair.second, scope);
-			extract_value_from_reference(value, recycler, std::move(reference_out));
+			evaluate_initializer(reference_out, recycler_inout, pair.second, scope);
+			extract_value_from_reference(value, recycler_inout, std::move(reference_out));
 			object.emplace(pair.first, std::move(value));
 		}
-		set_value(value, recycler, std::move(object));
+		set_value(value, recycler_inout, std::move(object));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		return set_reference(reference_out, std::move(ref_t)); }
 

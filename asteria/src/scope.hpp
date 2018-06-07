@@ -51,7 +51,7 @@ public:
 	void defer_callback(Sp<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt);
+extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt);
 extern void prepare_function_scope_lexical(Spr<Scope> scope, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt);
 
 }

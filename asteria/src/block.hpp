@@ -40,10 +40,10 @@ public:
 };
 
 extern void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr<const Block> block_opt);
-extern Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler, Spr<const Block> block_opt);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_inout, Spr<const Block> block_opt);
 
 extern void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope);
-extern Statement::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Block> block_opt, Spr<const Scope> scope);
 
 }
 

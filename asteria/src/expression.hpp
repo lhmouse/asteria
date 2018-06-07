@@ -40,7 +40,7 @@ public:
 };
 
 extern void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expression_opt, Spr<const Scope> scope);
-extern void evaluate_expression(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Expression> expression_opt, Spr<const Scope> scope);
+extern void evaluate_expression(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Expression> expression_opt, Spr<const Scope> scope);
 
 }
 
