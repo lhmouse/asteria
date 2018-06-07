@@ -132,7 +132,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
 	Statement(CandidateT &&cand)
 		: m_variant(std::forward<CandidateT>(cand))
 	{ }

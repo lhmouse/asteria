@@ -22,7 +22,7 @@
 #define ASTERIA_CAT3(x_, y_, z_)   x_##y_##z_
 #define ASTERIA_LAZY(f_, ...)      f_(__VA_ARGS__)
 
-#define ASTERIA_ACCEPTABLE_BY_VARIANT(C_, V_)	\
+#define ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(C_, V_)	\
 	typename ::std::enable_if<	\
 		(::std::is_same<typename ::std::decay<C_>::type, V_>::value) || (V_::is_candidate<typename ::std::decay<C_>::type>::value)	\
 		>::type * = nullptr
