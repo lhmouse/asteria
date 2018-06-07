@@ -411,7 +411,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		Vp<Reference> result_ref;
 		Reference::S_constant ref_k = { cand.src_opt };
 		set_reference(result_ref, std::move(ref_k));
-		return do_push_reference(stack_inout, std::move(result_ref)); }
+		do_push_reference(stack_inout, std::move(result_ref));
+		break; }
 
 	case Expression_node::type_named_reference: {
 		const auto &cand = node.get<Expression_node::S_named_reference>();
@@ -431,7 +432,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		Vp<Reference> result_ref;
 		copy_reference(result_ref, source_ref);
 		// Push the reference onto the stack as is.
-		return do_push_reference(stack_inout, std::move(result_ref)); }
+		do_push_reference(stack_inout, std::move(result_ref));
+		break; }
 
 	case Expression_node::type_bound_reference: {
 		const auto &cand = node.get<Expression_node::S_bound_reference>();
@@ -439,7 +441,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		Vp<Reference> bound_ref;
 		copy_reference(bound_ref, cand.ref_opt);
 		// Push the reference onto the stack as is.
-		return do_push_reference(stack_inout, std::move(bound_ref)); }
+		do_push_reference(stack_inout, std::move(bound_ref));
+		break; }
 
 	case Expression_node::type_subexpression: {
 		const auto &cand = node.get<Expression_node::S_subexpression>();
@@ -447,7 +450,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		Vp<Reference> result_ref;
 		evaluate_expression(result_ref, recycler, cand.subexpr_opt, scope);
 		// Push the result reference onto the stack as is.
-		return do_push_reference(stack_inout, std::move(result_ref)); }
+		do_push_reference(stack_inout, std::move(result_ref));
+		break; }
 
 	case Expression_node::type_lambda_definition: {
 		const auto &cand = node.get<Expression_node::S_lambda_definition>();
@@ -464,7 +468,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		Reference::S_temporary_value ref_d = { std::move(func_var) };
 		set_reference(result_ref, std::move(ref_d));
 		// Push the result onto the stack.
-		return do_push_reference(stack_inout, std::move(result_ref)); }
+		do_push_reference(stack_inout, std::move(result_ref));
+		break; }
 
 	case Expression_node::type_pruning: {
 		const auto &cand = node.get<Expression_node::S_pruning>();
@@ -472,7 +477,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		for(std::size_t i = 0; i < cand.count_to_pop; ++i){
 			do_pop_reference(stack_inout);
 		}
-		return; }
+		break; }
 
 	case Expression_node::type_branch: {
 		const auto &cand = node.get<Expression_node::S_branch>();
@@ -483,12 +488,14 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		const auto branch_taken = test_value(condition_var) ? cand.branch_true_opt.share() : cand.branch_false_opt.share();
 		if(!branch_taken){
 			// If the branch does not exist, push the condition instead.
-			return do_push_reference(stack_inout, std::move(condition_ref));
+			do_push_reference(stack_inout, std::move(condition_ref));
+			break;
 		}
 		// Evaluate the branch and push the result.
 		Vp<Reference> result_ref;
 		evaluate_expression(result_ref, recycler, branch_taken, scope);
-		return do_push_reference(stack_inout, std::move(result_ref)); }
+		do_push_reference(stack_inout, std::move(result_ref));
+		break; }
 
 	case Expression_node::type_function_call: {
 		const auto &cand = node.get<Expression_node::S_function_call>();
@@ -521,7 +528,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		}
 		// Call the function and push the result as is.
 		callee->invoke(callee_ref, recycler, std::move(this_ref), std::move(arguments));
-		return do_push_reference(stack_inout, std::move(callee_ref)); }
+		do_push_reference(stack_inout, std::move(callee_ref));
+		break; }
 
 	case Expression_node::type_operator_rpn: {
 		const auto &cand = node.get<Expression_node::S_operator_rpn>();
@@ -544,7 +552,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_postfix_dec: {
 			// Pop the operand off the stack.
@@ -564,7 +573,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_postfix_at: {
 			// Pop two operands off the stack.
@@ -583,7 +593,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Values having type `", get_type_name(rhs_type), "` cannot be used as subscripts.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_pos: {
 			// Pop the operand off the stack.
@@ -600,7 +611,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_neg: {
 			// Pop the operand off the stack.
@@ -617,7 +629,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_notb: {
 			// Pop the operand off the stack.
@@ -634,7 +647,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_notl: {
 			// Pop the operand off the stack.
@@ -643,7 +657,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			// N.B. This is one of the few operators that work on all types.
 			const auto rhs_var = read_reference_opt(rhs_ref);
 			do_set_result(rhs_ref, recycler, cand.assign, do_logical_not(test_value(rhs_var)));
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_inc: {
 			// Pop the operand off the stack.
@@ -661,7 +676,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_prefix_dec: {
 			// Pop the operand off the stack.
@@ -679,7 +695,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(rhs_ref)); }
+			do_push_reference(stack_inout, std::move(rhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_eq: {
 			// Pop two operands off the stack.
@@ -695,7 +712,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_equal);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_ne: {
 			// Pop two operands off the stack.
@@ -711,7 +729,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_equal);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_lt: {
 			// Pop two operands off the stack.
@@ -729,7 +748,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_less);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_gt: {
 			// Pop two operands off the stack.
@@ -747,7 +767,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result == Value::comparison_result_greater);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_lte: {
 			// Pop two operands off the stack.
@@ -765,7 +786,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_greater);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_cmp_gte: {
 			// Pop two operands off the stack.
@@ -783,7 +805,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 				lhs_ref = std::move(rhs_ref);
 			}
 			do_set_result(lhs_ref, recycler, false, comparison_result != Value::comparison_result_less);
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_add: {
 			// Pop two operands off the stack.
@@ -815,7 +838,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_sub: {
 			// Pop two operands off the stack.
@@ -842,7 +866,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_mul: {
 			// Pop two operands off the stack.
@@ -878,7 +903,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_div: {
 			// Pop two operands off the stack.
@@ -900,7 +926,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_mod: {
 			// Pop two operands off the stack.
@@ -922,7 +949,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_sll: {
 			// Pop two operands off the stack.
@@ -942,7 +970,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_srl: {
 			// Pop two operands off the stack.
@@ -962,7 +991,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_sla: {
 			// Pop two operands off the stack.
@@ -983,7 +1013,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_sra: {
 			// Pop two operands off the stack.
@@ -1003,7 +1034,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_andb: {
 			// Pop two operands off the stack.
@@ -1025,7 +1057,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_orb: {
 			// Pop two operands off the stack.
@@ -1047,7 +1080,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_xorb: {
 			// Pop two operands off the stack.
@@ -1069,7 +1103,8 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			} else {
 				ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
 			}
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		case Expression_node::operator_infix_assign: {
 			// Pop two operands off the stack.
@@ -1082,13 +1117,14 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			extract_value_from_reference(value, recycler, std::move(rhs_ref));
 			const auto wref = drill_reference(lhs_ref);
 			move_value(wref, recycler, std::move(value));
-			return do_push_reference(stack_inout, std::move(lhs_ref)); }
+			do_push_reference(stack_inout, std::move(lhs_ref));
+			break; }
 
 		default:
 			ASTERIA_DEBUG_LOG("Unknown operator enumeration `", cand.op, "`. This is probably a bug, please report.");
 			std::terminate();
 		}
-		std::terminate(); }
+		break; }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");

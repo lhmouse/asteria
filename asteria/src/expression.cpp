@@ -30,7 +30,6 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 		// Return a null reference only when a null expression is given.
 		return move_reference(result_out, nullptr);
 	}
-	ASTERIA_DEBUG_LOG("------ Beginning of evaluation of expression");
 	// Parameters are pushed from right to left, in lexical order.
 	Vp_vector<Reference> stack;
 	for(const auto &node : *expression_opt){
@@ -38,9 +37,8 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<
 	}
 	// Get the result. If the stack is empty or has more than one elements, the expression is unbalanced.
 	if(stack.size() != 1){
-		ASTERIA_THROW_RUNTIME_ERROR("There were `", stack.size(), "` elements in the evaluation stack due to imbalance of the expression.");
+		ASTERIA_THROW_RUNTIME_ERROR("The expression was unbalanced. There should be exactly one reference left in the evaluation stack, but there were `", stack.size(), "`.");
 	}
-	ASTERIA_DEBUG_LOG("------- End of evaluation of expression");
 	return move_reference(result_out, std::move(stack.front()));
 }
 
