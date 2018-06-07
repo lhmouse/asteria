@@ -17,7 +17,6 @@ using ::std::size_t;
 using ::std::is_convertible;
 using ::std::decay;
 using ::std::enable_if;
-using ::std::is_base_of;
 using ::std::remove_cv;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_assignable;
@@ -259,9 +258,13 @@ public:
 	struct at {
 		using type = typename details_variant::type_getter<indexT, elementsT...>::type;
 	};
-	template<typename expectT>
+	template<typename elementT>
 	struct index_of {
-		enum : size_t { value = details_variant::type_finder<0, expectT, elementsT...>::value };
+		enum : size_t { value = details_variant::type_finder<0, elementT, elementsT...>::value };
+	};
+	template<typename elementT>
+	struct is_candidate {
+		enum : bool { value = details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value };
 	};
 
 	template<typename ...addT>
@@ -283,7 +286,7 @@ public:
 		this->m_buffer.apply_visitor(0, visitor);
 		this->m_index = 0;
 	}
-	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
+	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
 	variant(elementT &&element) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value) {
 		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
@@ -306,7 +309,7 @@ public:
 		this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		this->m_index = rhs.m_index;
 	}
-	template<typename elementT, typename enable_if<is_base_of<variant, typename decay<elementT>::type>::value == false>::type * = nullptr>
+	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
 	variant & operator=(elementT &&element) noexcept(details_variant::is_nothrow_forward_assignable<elementT>::value && details_variant::is_nothrow_forward_constructible<elementT>::value) {
 		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
