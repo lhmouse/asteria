@@ -19,10 +19,10 @@ Block::Block(Block &&) noexcept = default;
 Block & Block::operator=(Block &&) noexcept = default;
 Block::~Block() = default;
 
-void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<const Block> block_opt){
+void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
-		return bound_result_out.reset();
+		return bound_block_out.reset();
 	}
 	// Bind statements recursively.
 	T_vector<Statement> bound_statements;
@@ -217,7 +217,7 @@ void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<cons
 			std::terminate();
 		}
 	}
-	return bound_result_out.emplace(std::move(bound_statements));
+	return bound_block_out.emplace(std::move(bound_statements));
 }
 
 namespace {
@@ -615,12 +615,12 @@ Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr
 	return Block::execution_result_end_of_block;
 }
 
-void bind_block(Vp<Block> &bound_result_out, Spr<const Block> block_opt, Spr<const Scope> scope){
+void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){
-		return bound_result_out.reset();
+		return bound_block_out.reset();
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-	return bind_block_in_place(bound_result_out, scope_working, block_opt);
+	return bind_block_in_place(bound_block_out, scope_working, block_opt);
 }
 Block::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){

@@ -12,10 +12,10 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression & Expression::operator=(Expression &&) noexcept = default;
 Expression::~Expression() = default;
 
-void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
+void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null expression.
-		return bound_result_out.reset();
+		return bound_expr_out.reset();
 	}
 	// Bind nodes recursively.
 	T_vector<Expression_node> bound_nodes;
@@ -23,7 +23,7 @@ void bind_expression(Vp<Expression> &bound_result_out, Spr<const Expression> exp
 	for(const auto &node : *expression_opt){
 		bind_expression_node(bound_nodes, node, scope);
 	}
-	return bound_result_out.emplace(std::move(bound_nodes));
+	return bound_expr_out.emplace(std::move(bound_nodes));
 }
 void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){

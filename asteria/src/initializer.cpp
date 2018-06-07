@@ -19,40 +19,40 @@ Initializer::Type get_initializer_type(Spr<const Initializer> initializer_opt) n
 	return initializer_opt ? initializer_opt->get_type() : Initializer::type_null;
 }
 
-void bind_initializer(Vp<Initializer> &bound_result_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
+void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope){
 	const auto type = get_initializer_type(initializer_opt);
 	switch(type){
 	case Initializer::type_null:
-		return bound_result_out.reset();
+		return bound_init_out.reset();
 
 	case Initializer::type_assignment_init: {
 		const auto &cand = initializer_opt->get<Initializer::S_assignment_init>();
 		Vp<Expression> bound_expr;
 		bind_expression(bound_expr, cand.expr, scope);
 		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
-		return bound_result_out.emplace(std::move(init_a)); }
+		return bound_init_out.emplace(std::move(init_a)); }
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &cand = initializer_opt->get<Initializer::S_bracketed_init_list>();
 		Vp_vector<Initializer> bound_elems;
 		bound_elems.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
-			bind_initializer(bound_result_out, elem, scope);
-			bound_elems.emplace_back(std::move(bound_result_out));
+			bind_initializer(bound_init_out, elem, scope);
+			bound_elems.emplace_back(std::move(bound_init_out));
 		}
 		Initializer::S_bracketed_init_list init_bracketed = { std::move(bound_elems) };
-		return bound_result_out.emplace(std::move(init_bracketed)); }
+		return bound_init_out.emplace(std::move(init_bracketed)); }
 
 	case Initializer::type_braced_init_list: {
 		const auto &cand = initializer_opt->get<Initializer::S_braced_init_list>();
 		Vp_string_map<Initializer> bound_pairs;
 		bound_pairs.reserve(cand.key_values.size());
 		for(const auto &pair : cand.key_values){
-			bind_initializer(bound_result_out, pair.second, scope);
-			bound_pairs.emplace(pair.first, std::move(bound_result_out));
+			bind_initializer(bound_init_out, pair.second, scope);
+			bound_pairs.emplace(pair.first, std::move(bound_init_out));
 		}
 		Initializer::S_braced_init_list init_braced = { std::move(bound_pairs) };
-		return bound_result_out.emplace(std::move(init_braced)); }
+		return bound_init_out.emplace(std::move(init_braced)); }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown initializer type enumeration: type = ", type);

@@ -52,10 +52,10 @@ public:
 	}
 };
 
-extern void bind_block_in_place(Vp<Block> &bound_result_out, Spr<Scope> scope, Spr<const Block> block_opt);
+extern void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope, Spr<const Block> block_opt);
 extern Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope, Spr<Recycler> recycler, Spr<const Block> block_opt);
 
-extern void bind_block(Vp<Block> &bound_result_out, Spr<const Block> block_opt, Spr<const Scope> scope);
+extern void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope);
 extern Block::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope);
 
 }
