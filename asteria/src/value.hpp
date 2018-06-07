@@ -47,7 +47,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Value, CandidateT)>
+	template<typename CandidateT, ASTERIA_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
 	Value(CandidateT &&cand)
 		: m_weak_recycler(), m_variant(std::forward<CandidateT>(cand))
 	{ }

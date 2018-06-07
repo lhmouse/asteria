@@ -64,7 +64,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Token, CandidateT)>
+	template<typename CandidateT, ASTERIA_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
 	Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, CandidateT &&cand)
 		: m_source_line(source_line), m_source_column(source_column), m_source_length(source_length)
 		, m_variant(std::forward<CandidateT>(cand))

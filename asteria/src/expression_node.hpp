@@ -105,7 +105,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Expression_node, CandidateT)>
+	template<typename CandidateT, ASTERIA_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
 	Expression_node(CandidateT &&variant)
 		: m_variant(std::forward<CandidateT>(variant))
 	{ }

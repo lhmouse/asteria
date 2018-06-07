@@ -19,7 +19,7 @@ private:
 	Variant m_value_opt;
 
 public:
-	template<typename CandidateT, ASTERIA_UNLESS_IS_BASE_OF(Stored_value, CandidateT)>
+	template<typename CandidateT, ASTERIA_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
 	Stored_value(CandidateT &&value_opt)
 		: m_value_opt(std::forward<CandidateT>(value_opt))
 	{ }

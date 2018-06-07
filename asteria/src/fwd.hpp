@@ -4,7 +4,7 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
-#include <type_traits> // std::enable_if<>, std::decay<>, std::is_base_of<>
+#include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::pair<>
 #include <memory> // std::shared_ptr<>
 #include <cstddef> // std::nullptr_t
@@ -14,9 +14,7 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/value_ptr.hpp"
 
-#define ASTERIA_ENABLE_IF(...)              typename ::std::enable_if<__VA_ARGS__>::type * = nullptr
-#define ASTERIA_UNLESS_IS_BASE_OF(B_, T_)   ASTERIA_ENABLE_IF(::std::is_base_of<B_, typename ::std::decay<T_>::type>::value == false)
-
+// Preprocessor utilities
 #define ASTERIA_CAR(x_, ...)       x_
 #define ASTERIA_CDR(x_, ...)       __VA_ARGS__
 #define ASTERIA_QUOTE(...)         #__VA_ARGS__
@@ -24,9 +22,14 @@
 #define ASTERIA_CAT3(x_, y_, z_)   x_##y_##z_
 #define ASTERIA_LAZY(f_, ...)      f_(__VA_ARGS__)
 
+#define ASTERIA_ACCEPTABLE_BY_VARIANT(C_, V_)	\
+	typename ::std::enable_if<	\
+		(::std::is_same<typename ::std::decay<C_>::type, V_>::value) || (V_::is_candidate<typename ::std::decay<C_>::type>::value)	\
+		>::type * = nullptr
+
 namespace Asteria {
 
-// General utilities.
+// General utilities
 class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
