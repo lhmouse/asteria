@@ -25,19 +25,19 @@ void Instantiated_function::invoke(Vp<Reference> &result_out, Spr<Recycler> recy
 	Vp<Reference> returned_ref;
 	const auto exec_result = execute_block_in_place(returned_ref, scope_with_args, recycler, m_bound_body_opt);
 	switch(exec_result){
-	case Block::execution_result_end_of_block:
+	case Statement::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.
 		return set_reference(result_out, nullptr);
-	case Block::execution_result_break_unspecified:
-	case Block::execution_result_break_switch:
-	case Block::execution_result_break_while:
-	case Block::execution_result_break_for:
+	case Statement::execution_result_break_unspecified:
+	case Statement::execution_result_break_switch:
+	case Statement::execution_result_break_while:
+	case Statement::execution_result_break_for:
 		ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
-	case Block::execution_result_continue_unspecified:
-	case Block::execution_result_continue_while:
-	case Block::execution_result_continue_for:
+	case Statement::execution_result_continue_unspecified:
+	case Statement::execution_result_continue_while:
+	case Statement::execution_result_continue_for:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
-	case Block::execution_result_return:
+	case Statement::execution_result_return:
 		// Forward the returned reference;
 		return move_reference(result_out, std::move(returned_ref));
 	default:

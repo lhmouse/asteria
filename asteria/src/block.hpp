@@ -10,19 +10,6 @@
 namespace Asteria {
 
 class Block {
-public:
-	enum Execution_result : std::uint8_t {
-		execution_result_end_of_block          = 0,
-		execution_result_break_unspecified     = 1,
-		execution_result_break_switch          = 2,
-		execution_result_break_while           = 3,
-		execution_result_break_for             = 4,
-		execution_result_continue_unspecified  = 5,
-		execution_result_continue_while        = 6,
-		execution_result_continue_for          = 7,
-		execution_result_return                = 8,
-	};
-
 private:
 	T_vector<Statement> m_statements;
 
@@ -52,11 +39,11 @@ public:
 	}
 };
 
-extern void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope, Spr<const Block> block_opt);
-extern Block::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope, Spr<Recycler> recycler, Spr<const Block> block_opt);
+extern void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr<const Block> block_opt);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler, Spr<const Block> block_opt);
 
 extern void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope);
-extern Block::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler, Spr<const Block> block_opt, Spr<const Scope> scope);
 
 }
 

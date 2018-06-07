@@ -112,7 +112,7 @@ int main(){
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	Vp<Reference> reference;
 	const auto result = execute_block_in_place(reference, scope, recycler, block);
-	ASTERIA_TEST_CHECK(result == Block::execution_result_end_of_block);
+	ASTERIA_TEST_CHECK(result == Statement::execution_result_next);
 	ASTERIA_TEST_CHECK(scope->get_named_reference_opt(D_string::shallow("i")) == nullptr);
 	const auto sum_ref = scope->get_named_reference_opt(D_string::shallow("sum"));
 	const auto sum_var = read_reference_opt(sum_ref);
