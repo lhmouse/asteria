@@ -6,7 +6,6 @@
 #include "expression.hpp"
 #include "stored_value.hpp"
 #include "stored_reference.hpp"
-#include "recycler.hpp"
 #include "scope.hpp"
 #include "block.hpp"
 #include "instantiated_function.hpp"
