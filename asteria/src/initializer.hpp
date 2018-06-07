@@ -12,10 +12,9 @@ namespace Asteria {
 class Initializer {
 public:
 	enum Type : signed char {
-		type_null                 = -1,
-		type_assignment_init      =  0,
-		type_bracketed_init_list  =  1,
-		type_braced_init_list     =  2,
+		type_assignment_init      = 0,
+		type_bracketed_init_list  = 1,
+		type_braced_init_list     = 2,
 	};
 	struct S_assignment_init {
 		Vp<Expression> expr;
@@ -58,10 +57,8 @@ public:
 	}
 };
 
-extern Initializer::Type get_initializer_type(Spr<const Initializer> initializer_opt) noexcept;
-
-extern void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
-extern void evaluate_initializer(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Initializer> initializer_opt, Spr<const Scope> scope);
+extern void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> init_opt, Spr<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Spr<const Initializer> init_opt, Spr<const Scope> scope);
 
 }
 

@@ -15,7 +15,8 @@ Expression::~Expression() = default;
 void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null expression.
-		return bound_expr_out.reset();
+		bound_expr_out.reset();
+		return;
 	}
 	// Bind nodes recursively.
 	T_vector<Expression_node> bound_nodes;
@@ -23,12 +24,13 @@ void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expre
 	for(const auto &node : *expression_opt){
 		bind_expression_node(bound_nodes, node, scope);
 	}
-	return bound_expr_out.emplace(std::move(bound_nodes));
+	bound_expr_out.emplace(std::move(bound_nodes));
 }
 void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
-		return move_reference(result_out, nullptr);
+		move_reference(result_out, nullptr);
+		return;
 	}
 	// Parameters are pushed from right to left, in lexical order.
 	Vp_vector<Reference> stack;
@@ -39,7 +41,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout
 	if(stack.size() != 1){
 		ASTERIA_THROW_RUNTIME_ERROR("The expression was unbalanced. There should be exactly one reference left in the evaluation stack, but there were `", stack.size(), "`.");
 	}
-	return move_reference(result_out, std::move(stack.front()));
+	move_reference(result_out, std::move(stack.front()));
 }
 
 }

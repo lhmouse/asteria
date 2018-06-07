@@ -17,7 +17,8 @@ Block::~Block() = default;
 void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Return a null block.
-		return bound_block_out.reset();
+		bound_block_out.reset();
+		return;
 	}
 	// Bind statements recursively.
 	T_vector<Statement> bound_stmts;
@@ -25,7 +26,7 @@ void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr
 	for(const auto &stmt : *block_opt){
 		bind_statement_in_place(bound_stmts, scope_inout, stmt);
 	}
-	return bound_block_out.emplace(std::move(bound_stmts));
+	bound_block_out.emplace(std::move(bound_stmts));
 }
 Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_inout, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
@@ -47,10 +48,11 @@ Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out,
 void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){
 		// Return a null block.
-		return bound_block_out.reset();
+		bound_block_out.reset();
+		return;
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
-	return bind_block_in_place(bound_block_out, scope_working, block_opt);
+	bind_block_in_place(bound_block_out, scope_working, block_opt);
 }
 Statement::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler_inout, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){

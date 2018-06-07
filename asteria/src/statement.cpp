@@ -28,7 +28,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Expression> bound_expr;
 		bind_expression(bound_expr, cand.expr_opt, scope_inout);
 		Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
-		return bound_stmts_out.emplace_back(std::move(stmt_e)); }
+		bound_stmts_out.emplace_back(std::move(stmt_e));
+		break; }
 
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
@@ -39,7 +40,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Initializer> bound_init;
 		bind_initializer(bound_init, cand.init_opt, scope_inout);
 		Statement::S_variable_definition stmt_v = { cand.id, cand.constant, std::move(bound_init) };
-		return bound_stmts_out.emplace_back(std::move(stmt_v)); }
+		bound_stmts_out.emplace_back(std::move(stmt_v));
+		break; }
 
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
@@ -52,7 +54,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_body;
 		bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
 		Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params_opt, std::move(bound_body) };
-		return bound_stmts_out.emplace_back(std::move(stmt_f)); }
+		bound_stmts_out.emplace_back(std::move(stmt_f));
+		break; }
 
 	case Statement::type_if_statement: {
 		const auto &cand = stmt.get<Statement::S_if_statement>();
@@ -65,7 +68,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_branch_false;
 		bind_block(bound_branch_false, cand.branch_false_opt, scope_inout);
 		Statement::S_if_statement stmt_i = { std::move(bound_cond), std::move(bound_branch_true), std::move(bound_branch_false) };
-		return bound_stmts_out.emplace_back(std::move(stmt_i)); }
+		bound_stmts_out.emplace_back(std::move(stmt_i));
+		break; }
 
 	case Statement::type_switch_statement: {
 		const auto &cand = stmt.get<Statement::S_switch_statement>();
@@ -85,7 +89,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 			bound_clauses.emplace_back(std::move(bound_label), std::move(bound_body));
 		}
 		Statement::S_switch_statement stmt_s = { std::move(bound_ctrl), std::move(bound_clauses) };
-		return bound_stmts_out.emplace_back(std::move(stmt_s)); }
+		bound_stmts_out.emplace_back(std::move(stmt_s));
+		break; }
 
 	case Statement::type_do_while_statement: {
 		const auto &cand = stmt.get<Statement::S_do_while_statement>();
@@ -95,7 +100,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Expression> bound_cond;
 		bind_expression(bound_cond, cand.cond_opt, scope_inout);
 		Statement::S_do_while_statement stmt_d = { std::move(bound_body), std::move(bound_cond) };
-		return bound_stmts_out.emplace_back(std::move(stmt_d)); }
+		bound_stmts_out.emplace_back(std::move(stmt_d));
+		break; }
 
 	case Statement::type_while_statement: {
 		const auto &cand = stmt.get<Statement::S_while_statement>();
@@ -105,7 +111,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		Statement::S_while_statement stmt_w = { std::move(bound_cond), std::move(bound_body) };
-		return bound_stmts_out.emplace_back(std::move(stmt_w)); }
+		bound_stmts_out.emplace_back(std::move(stmt_w));
+		break; }
 
 	case Statement::type_for_statement: {
 		const auto &cand = stmt.get<Statement::S_for_statement>();
@@ -123,7 +130,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_for);
 		Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_step), std::move(bound_body) };
-		return bound_stmts_out.emplace_back(std::move(stmt_f)); }
+		bound_stmts_out.emplace_back(std::move(stmt_f));
+		break; }
 
 	case Statement::type_for_each_statement: {
 		const auto &cand = stmt.get<Statement::S_for_each_statement>();
@@ -142,7 +150,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		Statement::S_for_each_statement stmt_f = { cand.key_id, cand.value_id, std::move(bound_range_init), std::move(bound_body) };
-		return bound_stmts_out.emplace_back(std::move(stmt_f)); }
+		bound_stmts_out.emplace_back(std::move(stmt_f));
+		break; }
 
 	case Statement::type_try_statement: {
 		const auto &cand = stmt.get<Statement::S_try_statement>();
@@ -152,7 +161,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_branch_catch;
 		bind_block(bound_branch_catch, cand.branch_catch_opt, scope_inout);
 		Statement::S_try_statement stmt_t = { std::move(bound_branch_try), cand.except_id, std::move(bound_branch_catch) };
-		return bound_stmts_out.emplace_back(std::move(stmt_t)); }
+		bound_stmts_out.emplace_back(std::move(stmt_t));
+		break; }
 
 	case Statement::type_defer_statement: {
 		const auto &cand = stmt.get<Statement::S_defer_statement>();
@@ -160,17 +170,20 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		Statement::S_defer_statement stmt_d = { cand.location, std::move(bound_body) };
-		return bound_stmts_out.emplace_back(std::move(stmt_d)); }
+		bound_stmts_out.emplace_back(std::move(stmt_d));
+		break; }
 
 	case Statement::type_break_statement: {
 		const auto &cand = stmt.get<Statement::S_break_statement>();
 		// Copy it as is.
-		return bound_stmts_out.emplace_back(cand); }
+		bound_stmts_out.emplace_back(cand);
+		break; }
 
 	case Statement::type_continue_statement: {
 		const auto &cand = stmt.get<Statement::S_continue_statement>();
 		// Copy it as is.
-		return bound_stmts_out.emplace_back(cand); }
+		bound_stmts_out.emplace_back(cand);
+		break; }
 
 	case Statement::type_throw_statement: {
 		const auto &cand = stmt.get<Statement::S_throw_statement>();
@@ -178,7 +191,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Expression> bound_operand;
 		bind_expression(bound_operand, cand.operand_opt, scope_inout);
 		Statement::S_throw_statement stmt_t = { std::move(bound_operand) };
-		return bound_stmts_out.emplace_back(std::move(stmt_t)); }
+		bound_stmts_out.emplace_back(std::move(stmt_t));
+		break; }
 
 	case Statement::type_return_statement: {
 		const auto &cand = stmt.get<Statement::S_return_statement>();
@@ -186,7 +200,8 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Expression> bound_operand;
 		bind_expression(bound_operand, cand.operand_opt, scope_inout);
 		Statement::S_return_statement stmt_r = { std::move(bound_operand) };
-		return bound_stmts_out.emplace_back(std::move(stmt_r)); }
+		bound_stmts_out.emplace_back(std::move(stmt_r));
+		break; }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug, please report.");

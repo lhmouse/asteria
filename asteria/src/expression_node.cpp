@@ -89,7 +89,8 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 	case Expression_node::type_literal: {
 		const auto &cand = node.get<Expression_node::S_literal>();
 		// Copy it as is.
-		return bound_nodes_out.emplace_back(cand); }
+		bound_nodes_out.emplace_back(cand);
+		break; }
 
 	case Expression_node::type_named_reference: {
 		const auto &cand = node.get<Expression_node::S_named_reference>();
@@ -108,13 +109,15 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 		}
 		// If the reference is in a lexical scope rather than a run-time scope, don't bind it.
 		if(scope_cur->get_purpose() == Scope::purpose_lexical){
-			return bound_nodes_out.emplace_back(cand);
+			bound_nodes_out.emplace_back(cand);
+			break;
 		}
 		// Bind the reference.
 		Vp<Reference> bound_ref;
 		copy_reference(bound_ref, source_ref);
 		Expression_node::S_bound_reference node_br = { std::move(bound_ref) };
-		return bound_nodes_out.emplace_back(std::move(node_br)); }
+		bound_nodes_out.emplace_back(std::move(node_br));
+		break; }
 
 	case Expression_node::type_bound_reference: {
 		const auto &cand = node.get<Expression_node::S_bound_reference>();
@@ -122,7 +125,8 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 		Vp<Reference> bound_ref;
 		copy_reference(bound_ref, cand.ref_opt);
 		Expression_node::S_bound_reference node_br = { std::move(bound_ref) };
-		return bound_nodes_out.emplace_back(std::move(node_br)); }
+		bound_nodes_out.emplace_back(std::move(node_br));
+		break; }
 
 	case Expression_node::type_subexpression: {
 		const auto &cand = node.get<Expression_node::S_subexpression>();
@@ -130,7 +134,8 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 		Vp<Expression> bound_expr;
 		bind_expression(bound_expr, cand.subexpr_opt, scope);
 		Expression_node::S_subexpression node_s = { std::move(bound_expr) };
-		return bound_nodes_out.emplace_back(std::move(node_s)); }
+		bound_nodes_out.emplace_back(std::move(node_s));
+		break; }
 
 	case Expression_node::type_lambda_definition: {
 		const auto &cand = node.get<Expression_node::S_lambda_definition>();
@@ -140,11 +145,13 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 		Vp<Block> bound_body;
 		bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
 		Expression_node::S_lambda_definition nodel = { cand.location, cand.params_opt, std::move(bound_body) };
-		return bound_nodes_out.emplace_back(std::move(nodel)); }
+		bound_nodes_out.emplace_back(std::move(nodel));
+		break; }
 
 	case Expression_node::type_pruning: {
 		const auto &cand = node.get<Expression_node::S_pruning>();
-		return bound_nodes_out.emplace_back(cand); }
+		bound_nodes_out.emplace_back(cand);
+		break; }
 
 	case Expression_node::type_branch: {
 		const auto &cand = node.get<Expression_node::S_branch>();
@@ -154,15 +161,18 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 		Vp<Expression> bound_branch_false;
 		bind_expression(bound_branch_false, cand.branch_false_opt, scope);
 		Expression_node::S_branch node_br = { std::move(bound_branch_true), std::move(bound_branch_false) };
-		return bound_nodes_out.emplace_back(std::move(node_br)); }
+		bound_nodes_out.emplace_back(std::move(node_br));
+		break; }
 
 	case Expression_node::type_function_call: {
 		const auto &cand = node.get<Expression_node::S_function_call>();
-		return bound_nodes_out.emplace_back(cand); }
+		bound_nodes_out.emplace_back(cand);
+		break; }
 
 	case Expression_node::type_operator_rpn: {
 		const auto &cand = node.get<Expression_node::S_operator_rpn>();
-		return bound_nodes_out.emplace_back(cand); }
+		bound_nodes_out.emplace_back(cand);
+		break; }
 
 	default:
 		ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug, please report.");
