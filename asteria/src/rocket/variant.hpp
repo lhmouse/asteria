@@ -364,6 +364,7 @@ public:
 
 public:
 	size_t index() const noexcept {
+		ROCKET_ASSERT(this->m_index < sizeof...(elementsT));
 		return this->m_index;
 	}
 	template<typename elementT>
