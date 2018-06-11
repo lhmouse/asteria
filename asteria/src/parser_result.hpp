@@ -15,7 +15,10 @@ public:
 		error_code_comment_not_closed       =  1,
 		error_code_invalid_token_character  =  2,
 		error_code_invalid_numeric_literal  =  3,
-		error_code_invalid_string_literal   =  4,
+		error_code_unclosed_string_literal  =  4,
+		error_code_unknown_escape_sequence  =  5,
+		error_code_escqpe_no_enough_digits  =  6,
+		error_code_invalid_utf_code_point   =  7,
 	};
 
 private:
