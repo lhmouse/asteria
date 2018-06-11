@@ -866,6 +866,7 @@ private:
 		}
 		for(auto i = from; i < len - n + 1; ++i){
 			if(pred(this->data() + i)){
+				ROCKET_ASSERT(i != npos);
 				return i;
 			}
 		}
@@ -879,6 +880,7 @@ private:
 		}
 		for(auto i = details_cow_string::xmin(len - n, to); i + 1 > 0; --i){
 			if(pred(this->data() + i)){
+				ROCKET_ASSERT(i != npos);
 				return i;
 			}
 		}
@@ -1393,7 +1395,9 @@ public:
 		if(ptr == nullptr){
 			return npos;
 		}
-		return static_cast<size_type>(ptr - this->data());
+		auto res = static_cast<size_type>(ptr - this->data());
+		ROCKET_ASSERT(res != npos);
+		return res;
 	}
 
 	size_type rfind(shallow sh, size_type to = npos) const noexcept {
@@ -1418,13 +1422,14 @@ public:
 			return npos;
 		}
 		const auto find_end = details_cow_string::xmin(this->size() - 1, to) + 1;
-		size_type res = npos;
+		auto res = size_type(npos);
 		for(;;){
 			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
 			if(ptr == nullptr){
 				break;
 			}
 			res = static_cast<size_type>(ptr - this->data());
+			ROCKET_ASSERT(res != npos);
 			if(res + 1 >= find_end){
 				break;
 			}
