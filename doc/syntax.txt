@@ -4,13 +4,15 @@ document ::=
 identifier ::=
 	PCRE([A-Za-z_][0-9A-Za-z_]*)
 literal ::=
-	null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
+	null-literal | boolean-literal | string-literal | noescape-string-literal | numeric-literal | nan-literal | infinity-literal
 null-literal ::=
 	"null"
 boolean-litearl ::=
 	"false" | "true"
 string-literal ::=
-	PCRE("([^\\]|(\\([abfnrtv'"\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+	PCRE("([^\\]|(\\([abfnrtv'"0\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+noescape-string-literal ::=
+	PCRE('[^']*?')
 numeric-literal ::=
 	( binary-literal | octal-literal | decimal-literal | hexadecimal-literal ) ( decimal-exponent-suffix | binary-exponent-suffix | "" )
 binary-literal ::=
@@ -92,7 +94,7 @@ while-statement ::=
 for-statement ::=
 	"for" "(" statement expression-opt ";" expression-opt ")" block
 for-each-statement ::=
-	"for" "each" "(" identifier "," identifier "in" initializer ")" block
+	"for" "each" "(" identifier "," identifier ":" initializer ")" block
 
 try-statement ::=
 	"try" block "catch" "(" identifier ")" block
