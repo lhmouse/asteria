@@ -11,26 +11,25 @@ namespace Asteria {
 class Parser_result {
 public:
 	enum Error_code : std::uint32_t {
-		error_success             =  0,
-		error_comment_not_closed  =  1,
-		error_invalid_character   =  2,
+		error_code_success                  =  0,
+		error_code_comment_not_closed       =  1,
+		error_code_invalid_token_character  =  2,
+		error_code_invalid_numeric_literal  =  3,
+		error_code_invalid_string_literal   =  4,
 	};
 
 private:
-	Error_code m_error_code;
 	std::size_t m_line;
 	std::size_t m_column;
 	std::size_t m_length;
+	Error_code m_error_code;
 
 public:
-	Parser_result(Error_code error_code, std::size_t line, std::size_t column, std::size_t length)
-		: m_error_code(error_code), m_line(line), m_column(column), m_length(length)
+	constexpr Parser_result(std::size_t line, std::size_t column, std::size_t length, Error_code error_code) noexcept
+		: m_line(line), m_column(column), m_length(length), m_error_code(error_code)
 	{ }
 
 public:
-	Error_code get_error_code() const noexcept {
-		return m_error_code;
-	}
 	std::size_t get_line() const noexcept {
 		return m_line;
 	}
@@ -39,6 +38,14 @@ public:
 	}
 	std::size_t get_length() const noexcept {
 		return m_length;
+	}
+	Error_code get_error_code() const noexcept {
+		return m_error_code;
+	}
+
+public:
+	explicit operator bool() const noexcept {
+		return m_error_code == error_code_success;
 	}
 };
 
