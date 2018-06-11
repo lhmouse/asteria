@@ -204,7 +204,7 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -551,7 +551,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		case Statement::target_scope_for:
 			return Statement::execution_result_break_for;
 		default:
-			ASTERIA_DEBUG_LOG("Unsupported target scope_inout enumeration `", cand.target_scope, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unsupported target scope_inout enumeration `", cand.target_scope, "`. This is probably a bug. Please report.");
 			std::terminate();
 		}
 		break; }
@@ -562,14 +562,14 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		case Statement::target_scope_unspecified:
 			return Statement::execution_result_continue_unspecified;
 		case Statement::target_scope_switch:
-			ASTERIA_DEBUG_LOG("`switch` is not allowed to follow `continue`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("`switch` is not allowed to follow `continue`. This is probably a bug. Please report.");
 			std::terminate();
 		case Statement::target_scope_while:
 			return Statement::execution_result_continue_while;
 		case Statement::target_scope_for:
 			return Statement::execution_result_continue_for;
 		default:
-			ASTERIA_DEBUG_LOG("Unsupported target scope_inout enumeration `", cand.target_scope, "`. This is probably a bug, please report.");
+			ASTERIA_DEBUG_LOG("Unsupported target scope_inout enumeration `", cand.target_scope, "`. This is probably a bug. Please report.");
 			std::terminate();
 		}
 		break; }
@@ -589,7 +589,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		return Statement::execution_result_return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 	return Statement::execution_result_next;

@@ -38,7 +38,7 @@ const char * get_type_name(Value::Type type) noexcept {
 	case Value::type_object:
 		return "object";
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -71,7 +71,7 @@ bool test_value(Spr<const Value> value_opt) noexcept {
 	case Value::type_object:
 		return value_opt->get<D_object>().empty() == false;
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -205,7 +205,7 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -264,7 +264,7 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Spr<const Va
 		return set_value(value_out, recycler_inout, std::move(object)); }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -305,7 +305,7 @@ void purge_value(Spr<Value> value_opt) noexcept {
 		return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -402,7 +402,7 @@ Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Valu
 		return Value::comparison_result_unordered;
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type_lhs, "`. This is probably a bug, please report.");
+		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type_lhs, "`. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
