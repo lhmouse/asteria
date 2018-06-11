@@ -647,73 +647,65 @@ private:
 public:
 	// 24.3.2.2, construct/copy/destroy
 	basic_cow_string() noexcept(noexcept(allocator_type()))
-		: m_sth(allocator_type())
-	{
-		this->assign(shallow());
-	}
+		: basic_cow_string(shallow(), allocator_type())
+	{ }
 	explicit basic_cow_string(const allocator_type &alloc) noexcept
-		: m_sth(alloc)
-	{
-		this->assign(shallow());
-	}
+		: basic_cow_string(shallow(), alloc)
+	{ }
 	basic_cow_string(shallow sh) noexcept(noexcept(allocator_type()))
-		: m_sth(allocator_type())
-	{
-		this->assign(sh);
-	}
+		: basic_cow_string(sh, allocator_type())
+	{ }
 	basic_cow_string(shallow sh, const allocator_type &alloc) noexcept
-		: m_sth(alloc)
-	{
-		this->assign(sh);
-	}
+		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size()), m_cap(sh.size())
+	{ }
 	basic_cow_string(const basic_cow_string &other) noexcept
-		: m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+		: basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
 	{
 		this->assign(other);
 	}
 	basic_cow_string(const basic_cow_string &other, const allocator_type &alloc) noexcept
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(other);
 	}
 	basic_cow_string(basic_cow_string &&other) noexcept
-		: m_sth(::std::move(other.m_sth.as_allocator()))
+		: basic_cow_string(::std::move(other.m_sth.as_allocator()))
 	{
 		this->assign(::std::move(other));
 	}
 	basic_cow_string(basic_cow_string &&other, const allocator_type &alloc) noexcept
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(::std::move(other));
 	}
 	basic_cow_string(const basic_cow_string &other, size_type pos, size_type n = npos, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(other, pos, n);
 	}
 	basic_cow_string(const_pointer s, size_type n, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(s, n);
 	}
 	explicit basic_cow_string(const_pointer s, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(s);
 	}
 	basic_cow_string(size_type n, value_type ch, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(n, ch);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	basic_cow_string(inputT first, inputT last, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(::std::move(first), ::std::move(last));
 	}
 	basic_cow_string(initializer_list<value_type> init, const allocator_type &alloc = allocator_type())
-		: m_sth(alloc)
+		: basic_cow_string(alloc)
 	{
 		this->assign(init);
 	}
@@ -1393,7 +1385,15 @@ public:
 		return this->find(s, from, traits_type::length(s));
 	}
 	size_type find(value_type ch, size_type from = 0) const noexcept {
-		return this->do_find_forwards_if(from, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		// return this->do_find_forwards_if(from, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		if(from >= this->size()){
+			return npos;
+		}
+		const auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
+		if(ptr == nullptr){
+			return npos;
+		}
+		return static_cast<size_type>(ptr - this->data());
 	}
 
 	size_type rfind(shallow sh, size_type to = npos) const noexcept {
@@ -1413,7 +1413,23 @@ public:
 		return this->rfind(s, to, traits_type::length(s));
 	}
 	size_type rfind(value_type ch, size_type to = npos) const noexcept {
-		return this->do_find_backwards_if(to, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		// return this->do_find_backwards_if(to, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		if(this->size() == 0){
+			return npos;
+		}
+		const auto find_end = details_cow_string::xmin(this->size() - 1, to) + 1;
+		size_type res = npos;
+		for(;;){
+			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
+			if(ptr == nullptr){
+				break;
+			}
+			res = static_cast<size_type>(ptr - this->data());
+			if(res + 1 >= find_end){
+				break;
+			}
+		}
+		return res;
 	}
 
 	size_type find_first_of(shallow sh, size_type from = 0) const noexcept {
@@ -1433,7 +1449,7 @@ public:
 		return this->find_first_of(s, from, traits_type::length(s));
 	}
 	size_type find_first_of(value_type ch, size_type from = 0) const noexcept {
-		return this->do_find_forwards_if(from, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		return this->find(ch, from);
 	}
 
 	size_type find_last_of(shallow sh, size_type to = npos) const noexcept {
@@ -1453,7 +1469,7 @@ public:
 		return this->find_last_of(s, to, traits_type::length(s));
 	}
 	size_type find_last_of(value_type ch, size_type to = npos) const noexcept {
-		return this->do_find_backwards_if(to, 1, [&](const_pointer ts){ return traits_type::eq(*ts, ch) != false; });
+		return this->rfind(ch, to);
 	}
 
 	size_type find_first_not_of(shallow sh, size_type from = 0) const noexcept {
