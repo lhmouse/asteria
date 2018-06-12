@@ -182,7 +182,6 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 
 namespace {
 	void do_push_reference(Vp_vector<Reference> &stack_inout, Vp<Reference> &&ref){
-		ASTERIA_DEBUG_LOG("Pushing: ", sp_fmt(ref));
 		stack_inout.emplace_back(std::move(ref));
 	}
 	Vp<Reference> do_pop_reference(Vp_vector<Reference> &stack_inout){
@@ -190,7 +189,6 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
 		auto ref = std::move(stack_inout.back());
-		ASTERIA_DEBUG_LOG("Popping: ", sp_fmt(ref));
 		stack_inout.pop_back();
 		return ref;
 	}
