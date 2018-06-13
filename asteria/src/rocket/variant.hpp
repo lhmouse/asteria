@@ -4,7 +4,7 @@
 #ifndef ROCKET_VARIANT_HPP_
 #define ROCKET_VARIANT_HPP_
 
-#include <type_traits> // so many
+#include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
 #include "assert.hpp"
@@ -99,7 +99,7 @@ namespace details_variant {
 	};
 	template<typename firstT, typename ...remainingT>
 	struct conjunction<firstT, remainingT...> {
-		enum : bool { value = firstT::value ? (conjunction<remainingT...>::value != false) : false };
+		enum : bool { value = firstT::value && conjunction<remainingT...>::value };
 	};
 
 	template<unsigned indexT, typename elementT>
