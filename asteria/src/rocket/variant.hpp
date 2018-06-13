@@ -8,6 +8,7 @@
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
 #include "assert.hpp"
+#include "throw.hpp"
 
 namespace rocket {
 
