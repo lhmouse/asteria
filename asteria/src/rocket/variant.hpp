@@ -4,16 +4,13 @@
 #ifndef ROCKET_VARIANT_HPP_
 #define ROCKET_VARIANT_HPP_
 
-#include <cstddef> // std::size_t
 #include <type_traits> // so many
-#include <stdexcept> // std::invalid_argument
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <new> // placement new
 #include "assert.hpp"
 
 namespace rocket {
 
-using ::std::size_t;
 using ::std::is_convertible;
 using ::std::decay;
 using ::std::enable_if;
@@ -25,13 +22,12 @@ using ::std::is_nothrow_move_constructible;
 using ::std::is_nothrow_copy_assignable;
 using ::std::is_nothrow_move_assignable;
 using ::std::is_nothrow_destructible;
-using ::std::invalid_argument;
 
 template<typename ...elementsT>
 class variant;
 
 namespace details_variant {
-	template<size_t indexT, typename ...typesT>
+	template<unsigned indexT, typename ...typesT>
 	struct type_getter {
 		static_assert(indexT && false, "`indexT` was out of range.");
 	};
@@ -39,22 +35,22 @@ namespace details_variant {
 	struct type_getter<0, firstT, remainingT...> {
 		using type = firstT;
 	};
-	template<size_t indexT, typename firstT, typename ...remainingT>
+	template<unsigned indexT, typename firstT, typename ...remainingT>
 	struct type_getter<indexT, firstT, remainingT...> {
 		using type = typename type_getter<indexT - 1, remainingT...>::type;
 	};
 
-	template<size_t indexT, typename expectT, typename ...typesT>
+	template<unsigned indexT, typename expectT, typename ...typesT>
 	struct type_finder {
 		static_assert(indexT && false, "`expectT` could not be found.");
 	};
-	template<size_t indexT, typename expectT, typename firstT, typename ...remainingT>
+	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct type_finder<indexT, expectT, firstT, remainingT...> {
-		enum : size_t { value = type_finder<indexT + 1, expectT, remainingT...>::value };
+		enum : unsigned { value = type_finder<indexT + 1, expectT, remainingT...>::value };
 	};
-	template<size_t indexT, typename expectT, typename ...remainingT>
+	template<unsigned indexT, typename expectT, typename ...remainingT>
 	struct type_finder<indexT, expectT, expectT, remainingT...> {
-		enum : size_t { value = indexT };
+		enum : unsigned { value = indexT };
 	};
 
 	template<typename expectT, typename ...typesT>
@@ -78,22 +74,22 @@ namespace details_variant {
 		enum : bool { value = true };
 	};
 
-	template<bool conditionT, size_t trueT, typename falseT>
+	template<bool conditionT, unsigned trueT, typename falseT>
 	struct conditional_index {
-		enum : size_t { value = trueT };
+		enum : unsigned { value = trueT };
 	};
-	template<size_t trueT, typename falseT>
+	template<unsigned trueT, typename falseT>
 	struct conditional_index<false, trueT, falseT> {
-		enum : size_t { value = falseT::value };
+		enum : unsigned { value = falseT::value };
 	};
 
-	template<size_t indexT, typename expectT, typename ...typesT>
+	template<unsigned indexT, typename expectT, typename ...typesT>
 	struct recursive_type_finder {
 		static_assert(indexT && false, "`expectT` could not be found.");
 	};
-	template<size_t indexT, typename expectT, typename firstT, typename ...remainingT>
+	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct recursive_type_finder<indexT, expectT, firstT, remainingT...> {
-		enum : size_t { value = conditional_index<has_type_recursive<expectT, firstT>::value, indexT, recursive_type_finder<indexT + 1, expectT, remainingT...>>::value };
+		enum : unsigned { value = conditional_index<has_type_recursive<expectT, firstT>::value, indexT, recursive_type_finder<indexT + 1, expectT, remainingT...>>::value };
 	};
 
 	template<typename ...typesT>
@@ -105,7 +101,7 @@ namespace details_variant {
 		enum : bool { value = firstT::value ? (conjunction<remainingT...>::value != false) : false };
 	};
 
-	template<size_t indexT, typename elementT>
+	template<unsigned indexT, typename elementT>
 	struct storage_for {
 		union {
 			char size [sizeof(elementT)];
@@ -113,21 +109,21 @@ namespace details_variant {
 		} un;
 	};
 
-	template<size_t indexT, typename ...elementsT>
+	template<unsigned indexT, typename ...elementsT>
 	struct variant_buffer {
 		template<typename visitorT>
-		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/) const {
+		void apply_visitor(unsigned /*expect*/, visitorT &&/*visitor*/) const {
 			ROCKET_ASSERT_MSG(false, "type index expected is out of range");
 		}
 		template<typename visitorT>
-		void apply_visitor(size_t /*expect*/, visitorT &&/*visitor*/){
+		void apply_visitor(unsigned /*expect*/, visitorT &&/*visitor*/){
 			ROCKET_ASSERT_MSG(false, "type index expected is out of range");
 		}
 	};
-	template<size_t indexT, typename firstT, typename ...remainingT>
+	template<unsigned indexT, typename firstT, typename ...remainingT>
 	struct variant_buffer<indexT, firstT, remainingT...> : private storage_for<indexT, firstT>, public variant_buffer<indexT + 1, remainingT...> {
 		template<typename visitorT>
-		void apply_visitor(size_t expect, visitorT &&visitor) const {
+		void apply_visitor(unsigned expect, visitorT &&visitor) const {
 			if(expect == indexT){
 				const auto storage = static_cast<const void *>(static_cast<const storage_for<indexT, firstT> *>(this));
 				const auto ptr = static_cast<const firstT *>(storage);
@@ -137,7 +133,7 @@ namespace details_variant {
 			}
 		}
 		template<typename visitorT>
-		void apply_visitor(size_t expect, visitorT &&visitor){
+		void apply_visitor(unsigned expect, visitorT &&visitor){
 			if(expect == indexT){
 				const auto storage = static_cast<void *>(static_cast<storage_for<indexT, firstT> *>(this));
 				const auto ptr = static_cast<firstT *>(storage);
@@ -152,14 +148,14 @@ namespace details_variant {
 	struct visitor_get_pointer {
 		expectT *result_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			this->result_ptr = ptr;
 		}
 	};
 
 	struct visitor_value_initialize {
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT();
 		}
@@ -168,7 +164,7 @@ namespace details_variant {
 	struct visitor_copy_construct_from {
 		const void *source_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT(*static_cast<const elementT *>(this->source_ptr));
 		}
@@ -177,7 +173,7 @@ namespace details_variant {
 	struct visitor_move_construct_from {
 		void *source_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::new(static_cast<void *>(ptr)) elementT(::std::move(*static_cast<elementT *>(this->source_ptr)));
 		}
@@ -186,7 +182,7 @@ namespace details_variant {
 	struct visitor_copy_assign_from {
 		const void *source_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			*ptr = *static_cast<const elementT *>(this->source_ptr);
 		}
@@ -195,7 +191,7 @@ namespace details_variant {
 	struct visitor_move_assign_from {
 		void *source_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			*ptr = ::std::move(*static_cast<elementT *>(this->source_ptr));
 		}
@@ -204,7 +200,7 @@ namespace details_variant {
 	struct visitor_swap {
 		void *source_ptr;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			using ::std::swap;
 			swap(*ptr, *static_cast<elementT *>(this->source_ptr));
@@ -212,7 +208,7 @@ namespace details_variant {
 	};
 
 	struct visitor_destroy {
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			ptr->~elementT();
 		}
@@ -222,7 +218,7 @@ namespace details_variant {
 	struct visitor_forward {
 		fvisitorT &fvisitor;
 
-		template<size_t indexT, typename elementT>
+		template<unsigned indexT, typename elementT>
 		void dispatch(elementT *ptr){
 			::std::forward<fvisitorT>(this->fvisitor)(*ptr);
 		}
@@ -254,13 +250,13 @@ class variant {
 	static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidate types are not allowed to throw exceptions.");
 
 public:
-	template<size_t indexT>
+	template<unsigned indexT>
 	struct at {
 		using type = typename details_variant::type_getter<indexT, elementsT...>::type;
 	};
 	template<typename elementT>
 	struct index_of {
-		enum : size_t { value = details_variant::type_finder<0, elementT, elementsT...>::value };
+		enum : unsigned { value = details_variant::type_finder<0, elementT, elementsT...>::value };
 	};
 	template<typename elementT>
 	struct is_candidate {
@@ -278,7 +274,7 @@ public:
 
 private:
 	details_variant::variant_buffer<0, elementsT...> m_buffer;
-	size_t m_index;
+	unsigned m_index;
 
 public:
 	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value) {
@@ -288,7 +284,7 @@ public:
 	}
 	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
 	variant(elementT &&element) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value) {
-		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
+		enum : unsigned { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		details_variant::visitor_get_pointer<void> visitor = { nullptr };
 		this->m_buffer.apply_visitor(eindex, visitor);
@@ -311,7 +307,7 @@ public:
 	}
 	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
 	variant & operator=(elementT &&element) noexcept(details_variant::is_nothrow_forward_assignable<elementT>::value && details_variant::is_nothrow_forward_constructible<elementT>::value) {
-		enum : size_t { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
+		enum : unsigned { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
 			details_variant::visitor_get_pointer<void> visitor = { nullptr };
@@ -363,13 +359,13 @@ public:
 	}
 
 public:
-	size_t index() const noexcept {
+	unsigned index() const noexcept {
 		ROCKET_ASSERT(this->m_index < sizeof...(elementsT));
 		return this->m_index;
 	}
 	template<typename elementT>
 	const elementT * try_get() const noexcept {
-		enum : size_t { eindex = index_of<typename remove_cv<elementT>::type>::value };
+		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		if(this->m_index != eindex){
 			return nullptr;
 		}
@@ -379,7 +375,7 @@ public:
 	}
 	template<typename elementT>
 	elementT * try_get() noexcept {
-		enum : size_t { eindex = index_of<typename remove_cv<elementT>::type>::value };
+		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		if(this->m_index != eindex){
 			return nullptr;
 		}
@@ -389,17 +385,21 @@ public:
 	}
 	template<typename elementT>
 	const elementT & get() const {
+		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw invalid_argument("variant::get(): `elementT` does not match the type of the element that is currently active.");
+			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the current active index is `%d`.",
+			                       static_cast<int>(eindex), static_cast<int>(this->index()));
 		}
 		return *ptr;
 	}
 	template<typename elementT>
 	elementT & get(){
+		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw invalid_argument("variant::get(): `elementT` does not match the type of the element that is currently active.");
+			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the current active index is `%d`.",
+			                       static_cast<int>(eindex), static_cast<int>(this->index()));
 		}
 		return *ptr;
 	}

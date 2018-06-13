@@ -26,6 +26,7 @@
 
 #include "rocket/compatibility.hpp"
 #include "rocket/assert.hpp"
+#include "rocket/throw.hpp"
 #include "rocket/insertable_streambuf.hpp"
 #include "rocket/insertable_ostream.hpp"
 #include "rocket/value_ptr.hpp"

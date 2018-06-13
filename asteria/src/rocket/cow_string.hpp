@@ -18,6 +18,7 @@
 #include <cstddef> // std::size_t
 #include "compatibility.hpp"
 #include "assert.hpp"
+#include "throw.hpp"
 
 /* Differences from `std::basic_string`:
  * 1. All functions of `basic_cow_string` guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -57,11 +58,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 class basic_cow_string;
 
 namespace details_cow_string {
-	// For `basic_cow_string::at()`, `basic_cow_string::insert()`, etc.
-	ROCKET_NORETURN extern void throw_invalid_argument(const char *fmt, ...);
-	ROCKET_NORETURN extern void throw_out_of_range(const char *fmt, ...);
-	ROCKET_NORETURN extern void throw_length_error(const char *fmt, ...);
-
 	// Utilities.
 	template<typename valueT>
 	inline valueT xchg(valueT &dst, typename decay<valueT>::type src){
@@ -96,7 +92,7 @@ namespace details_cow_string {
 		}
 		// Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
 		if(ios.exceptions() & ios_base::badbit){
-			throw;
+			rethrow_current_exception();
 		}
 	}
 
@@ -789,8 +785,8 @@ private:
 	size_type do_clamp_substr(size_type tpos, size_type n) const {
 		const auto tlen = this->size();
 		if(tpos > tlen){
-			details_cow_string::throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
-			                                       static_cast<long long>(tpos), static_cast<long long>(tlen));
+			throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
+			                   static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
 		return details_cow_string::xmin(tlen - tpos, n);
 	}
@@ -1000,8 +996,8 @@ public:
 	const_reference at(size_type pos) const {
 		const auto len = this->size();
 		if(pos >= len){
-			details_cow_string::throw_out_of_range("basic_cow_string::at(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
-			                                       static_cast<long long>(pos), static_cast<long long>(len));
+			throw_out_of_range("basic_cow_string::at(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			                   static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->data()[pos];
 	}
@@ -1020,8 +1016,8 @@ public:
 	reference & mut(size_type pos){
 		const auto len = this->size();
 		if(pos >= len){
-			details_cow_string::throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
-			                                       static_cast<long long>(pos), static_cast<long long>(len));
+			throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			                   static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->mut_data()[pos];
 	}

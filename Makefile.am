@@ -23,6 +23,7 @@ pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/compatibility.hpp	\
 	asteria/src/rocket/assert.hpp	\
+	asteria/src/rocket/throw.hpp	\
 	asteria/src/rocket/insertable_streambuf.hpp	\
 	asteria/src/rocket/insertable_istream.hpp	\
 	asteria/src/rocket/insertable_ostream.hpp	\
@@ -62,6 +63,7 @@ lib_LTLIBRARIES =	\
 
 lib_libasteria_la_SOURCES =	\
 	asteria/src/rocket/assert.cpp	\
+	asteria/src/rocket/throw.cpp	\
 	asteria/src/rocket/insertable_streambuf.cpp	\
 	asteria/src/rocket/insertable_istream.cpp	\
 	asteria/src/rocket/insertable_ostream.cpp	\

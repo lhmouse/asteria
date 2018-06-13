@@ -21,4 +21,4 @@ ROCKET_NORETURN extern void on_assert_fail(const char *expr, const char *file, u
 #define ROCKET_ASSERT(expr_)              ROCKET_DETAILS_ASSERT(expr_, #expr_, "")
 #define ROCKET_ASSERT_MSG(expr_, m_)      ROCKET_DETAILS_ASSERT(expr_, #expr_, m_)
 
-#endif // ROCKET_ASSERT_HPP_
+#endif
