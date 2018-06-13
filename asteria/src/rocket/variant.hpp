@@ -388,7 +388,7 @@ public:
 		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the current active index is `%d`.",
+			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the index of the type currently active is `%d`.",
 			                       static_cast<int>(eindex), static_cast<int>(this->index()));
 		}
 		return *ptr;
@@ -398,7 +398,7 @@ public:
 		enum : unsigned { eindex = index_of<typename remove_cv<elementT>::type>::value };
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the current active index is `%d`.",
+			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the index of the type currently active is `%d`.",
 			                       static_cast<int>(eindex), static_cast<int>(this->index()));
 		}
 		return *ptr;
