@@ -16,15 +16,15 @@ noescape-string-literal ::=
 numeric-literal ::=
 	( binary-literal | decimal-literal | hexadecimal-literal ) ( decimal-exponent-suffix | binary-exponent-suffix | "" )
 binary-literal ::=
-	PCRE(0[bB][01]+(\.[01]+)
+	PCRE(0[bB][01:_]+(\.[01:_]+)
 decimal-literal ::=
-	PCRE([0-9]+(\.[0-9]+))
+	PCRE([0-9:_]+(\.[0-9:_]+))
 hexadecimal-literal ::=
-	PCRE(0[xX][0-9A-Fa-f]+(\.[0-9A-Fa-f]+))
+	PCRE(0[xX][0-9A-Fa-f:_]+(\.[0-9A-Fa-f:_]+))
 decimal-exponent-suffix ::=
-	PCRE([eE][-+]?[0-9]+)
+	PCRE([eE][-+]?[0-9:_]+)
 binary-exponent-suffix ::=
-	PCRE([pP][-+]?[0-9]+)
+	PCRE([pP][-+]?[0-9:_]+)
 nan-literal ::=
 	"nan"
 infinity-literal ::=
