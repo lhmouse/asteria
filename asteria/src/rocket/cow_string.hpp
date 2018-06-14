@@ -131,10 +131,10 @@ namespace details_cow_string {
 		};
 
 	private:
-		static constexpr size_type capacity_of(size_type n_blocks) noexcept {
+		static constexpr size_type do_get_capacity_of(size_type n_blocks) noexcept {
 			return (n_blocks - 1) * sizeof(storage) / sizeof(value_type);
 		}
-		static constexpr size_type blocks_for(size_type n_chars) noexcept {
+		static constexpr size_type do_get_blocks_for(size_type n_chars) noexcept {
 			return 1 + (n_chars * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage);
 		}
 
@@ -202,15 +202,15 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return 0;
 			}
-			return capacity_of(ptr->n_blocks);
+			return do_get_capacity_of(ptr->n_blocks);
 		}
 		size_type max_size() const noexcept {
 			auto alloc = this->do_make_storage_allocator();
 			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(alloc);
-			return capacity_of(max_n_blocks / 2 - 1);
+			return do_get_capacity_of(max_n_blocks / 2 - 1);
 		}
 		size_type round_up_capacity(size_type cap) const {
-			return capacity_of(blocks_for(this->check_size(0, cap)));
+			return do_get_capacity_of(do_get_blocks_for(this->check_size(0, cap)));
 		}
 		size_type check_size(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
@@ -236,7 +236,7 @@ namespace details_cow_string {
 				return nullptr;
 			}
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto n_blocks = blocks_for(this->check_size(0, cap));
+			const auto n_blocks = do_get_blocks_for(this->check_size(0, cap));
 			auto alloc = this->do_make_storage_allocator();
 			const auto ptr = static_cast<storage *>(allocator_traits<storage_allocator>::allocate(alloc, n_blocks));
 #ifdef ROCKET_DEBUG
