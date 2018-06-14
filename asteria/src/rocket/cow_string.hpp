@@ -956,21 +956,33 @@ public:
 		return this->m_cap;
 	}
 	void reserve(size_type res_arg = 0){
+		if(res_arg == 0){
+			this->shrink_to_fit();
+			return;
+		}
 		const auto len = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(details_cow_string::xmax(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_cap != cap_new) || (this->m_sth.unique() == false)){
-			if(cap_new != 0){
-				this->do_reallocate_no_set_length(len, cap_new);
-				this->do_set_length(len);
-			} else {
-				this->do_deallocate();
-			}
+		if((this->m_cap >= cap_new) && this->m_sth.unique()){
+			return;
 		}
+		this->do_reallocate_no_set_length(len, cap_new);
+		this->do_set_length(len);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
-		this->reserve();
+		const auto len = this->size();
+		const auto cap_min = this->m_sth.round_up_capacity(len);
+		// Don't increase memory usage.
+		if((this->m_cap <= cap_min) || (this->m_sth.unique() == false)){
+			return;
+		}
+		if(len != 0){
+			this->do_reallocate_no_set_length(len, len);
+			this->do_set_length(len);
+		} else {
+			this->do_deallocate();
+		}
 	}
 	void clear() noexcept {
 		if(this->m_sth.unique()){
