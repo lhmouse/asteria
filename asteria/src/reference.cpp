@@ -186,7 +186,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		// Get the parent, which has to be an array.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_array){
-			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 		}
 		auto &array = parent->get<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -218,7 +218,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		// Get the parent, which has to be an object.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_object){
-			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`");
+			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 		}
 		auto &object = parent->get<D_object>();
 		// Find the element.
@@ -295,7 +295,7 @@ namespace {
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
 			if(get_value_type(parent) != Value::type_array){
-				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 			}
 			const auto &array = parent->get<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
@@ -319,7 +319,7 @@ namespace {
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
 			if(get_value_type(parent) != Value::type_object){
-				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`");
+				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 			}
 			const auto &object = parent->get<D_object>();
 			// Find the element.
