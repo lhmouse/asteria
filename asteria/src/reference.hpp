@@ -100,7 +100,7 @@ extern std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> re
 //   `copy_value(value_out, recycler, read_reference_opt(reference_opt))`
 extern void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Vp<Reference> &&reference_opt);
 
-// If the reference is a temporary value, convert it to a value, allowing further modification to it.
+// If the reference is a temporary value, convert it to an unnamed variable, allowing further modification to it.
 extern void materialize_reference(Vp<Reference> &reference_inout_opt, Spr<Recycler> recycler_inout, bool immutable);
 
 }
