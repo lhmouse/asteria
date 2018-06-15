@@ -193,21 +193,21 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 		if(normalized_index < 0){
 			// Prepend `null`s until the subscript designates the beginning.
-			ASTERIA_DEBUG_LOG("Creating array elements automatically in the front: index = ", cand.index, ", size = ", array.size());
 			const auto count_to_prepend = 0 - Unsigned_integer(normalized_index);
 			if(count_to_prepend > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Prepending `", count_to_prepend, "` element(s) to this array would result in an overlarge array that cannot be allocated.");
 			}
 			array.insert(array.begin(), rocket::fill_iterator<Nullptr>(0), rocket::fill_iterator<Nullptr>(static_cast<std::ptrdiff_t>(count_to_prepend)));
+			ASTERIA_DEBUG_LOG("Created array elements automatically in the front: index = ", cand.index, ", size = ", array.size());
 			normalized_index = 0;
 		} else if(normalized_index >= D_integer(array.size())){
 			// Append `null`s until the subscript designates the end.
-			ASTERIA_DEBUG_LOG("Creating array elements automatically in the back: index = ", cand.index, ", size = ", array.size());
 			const auto count_to_append = Unsigned_integer(normalized_index) - array.size() + 1;
 			if(count_to_append > array.max_size() - array.size()){
 				ASTERIA_THROW_RUNTIME_ERROR("Appending `", count_to_append, "` element(s) to this array would result in an overlarge array that cannot not be allocated.");
 			}
 			array.insert(array.end(), rocket::fill_iterator<Nullptr>(0), rocket::fill_iterator<Nullptr>(static_cast<std::ptrdiff_t>(count_to_append)));
+			ASTERIA_DEBUG_LOG("Created array elements automatically in the back: index = ", cand.index, ", size = ", array.size());
 			normalized_index = D_integer(array.size() - 1);
 		}
 		auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
@@ -222,12 +222,15 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		}
 		auto &object = parent->get<D_object>();
 		// Find the element.
-		auto it = object.find(cand.key);
-		if(it == object.end()){
-			ASTERIA_DEBUG_LOG("Creating object member automatically: key = ", cand.key);
-			it = object.emplace(cand.key, nullptr).first;
+#if defined(__cpp_lib_unordered_map_try_emplace) && (__cpp_lib_unordered_map_try_emplace >= 201411)
+		auto pair = object.insert_or_assign(cand.key, nullptr);
+#else
+		auto pair = object.insert(std::make_pair(cand.key, nullptr));
+#endif
+		if(pair.second){
+			ASTERIA_DEBUG_LOG("Created object member automatically: key = ", cand.key);
 		}
-		auto &value_opt = it->second;
+		auto &value_opt = pair.first->second;
 		return std::ref(value_opt); }
 
 	default:
