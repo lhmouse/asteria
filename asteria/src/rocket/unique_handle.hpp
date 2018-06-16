@@ -4,7 +4,7 @@
 #ifndef ROCKET_UNIQUE_HANDLE_HPP_
 #define ROCKET_UNIQUE_HANDLE_HPP_
 
-#include <type_traits> // std::is_array<>, std::is_trivial<>, std::decay<>
+#include <type_traits> // so many...
 #include <utility> // std::move(), std::swap(), std::declval()
 #include "compatibility.hpp"
 #include "assert.hpp"
@@ -24,6 +24,7 @@ namespace rocket {
 using ::std::is_array;
 using ::std::is_trivial;
 using ::std::decay;
+using ::std::conditional;
 
 template<typename handleT, typename closerT>
 class unique_handle;
@@ -43,15 +44,42 @@ namespace details_unique_handle {
 		swap(lhs, rhs);
 	}
 
-	// TODO: Add `final` closer support for C++14.
+	template<typename closerT>
+	struct final_closer_wrapper {
+		closerT xalloc;
+
+		explicit final_closer_wrapper(const closerT &alloc) noexcept
+			: xalloc(alloc)
+		{ }
+		explicit final_closer_wrapper(closerT &&alloc) noexcept
+			: xalloc(::std::move(alloc))
+		{ }
+
+		operator const closerT & () const noexcept {
+			return this->xalloc;
+		}
+		operator closerT & () noexcept {
+			return this->xalloc;
+		}
+	};
+
+	template<typename closerT>
+	struct closer_base_for {
+#if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
+		using type = typename conditional<true, final_closer_wrapper<closerT>, closerT>::type;
+#else
+		using type = closerT;
+#endif
+	};
+
 	template<typename handleT, typename closerT>
-	class stored_handle : private closerT {
+	class stored_handle : private closer_base_for<closerT>::type {
 	public:
 		using handle_type  = handleT;
 		using closer_type  = closerT;
 
 	private:
-		using closer_base  = closerT;
+		using closer_base = typename closer_base_for<closerT>::type;
 
 	private:
 		handle_type m_h;

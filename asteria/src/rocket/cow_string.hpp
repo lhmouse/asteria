@@ -10,7 +10,7 @@
 #include <locale> // std::isspace()
 #include <ostream> // std::basic_ostream<>
 #include <atomic> // std::atomic<>
-#include <type_traits> // std::true_type, std::false_type, std::is_same<>, std::decay<>, std::is_array<>, std::is_trivial<>, std::enable_if<>, std::is_convertible<>
+#include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
@@ -48,6 +48,7 @@ using ::std::is_array;
 using ::std::is_trivial;
 using ::std::enable_if;
 using ::std::is_convertible;
+using ::std::conditional;
 using ::std::iterator_traits;
 using ::std::reverse_iterator;
 using ::std::initializer_list;
@@ -99,9 +100,36 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::ios  &ios);
 	extern template void handle_io_exception(::std::wios &ios);
 
-	// TODO: Add `final` allocator support for C++14.
+	template<typename allocatorT>
+	struct final_allocator_wrapper {
+		allocatorT xalloc;
+
+		explicit final_allocator_wrapper(const allocatorT &alloc) noexcept
+			: xalloc(alloc)
+		{ }
+		explicit final_allocator_wrapper(allocatorT &&alloc) noexcept
+			: xalloc(::std::move(alloc))
+		{ }
+
+		operator const allocatorT & () const noexcept {
+			return this->xalloc;
+		}
+		operator allocatorT & () noexcept {
+			return this->xalloc;
+		}
+	};
+
+	template<typename allocatorT>
+	struct allocator_base_for {
+#if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
+		using type = typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type;
+#else
+		using type = allocatorT;
+#endif
+	};
+
 	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-	class storage_handle : private allocatorT {
+	class storage_handle : private allocator_base_for<allocatorT>::type {
 	public:
 		using value_type       = charT;
 		using traits_type      = traitsT;
@@ -113,8 +141,7 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base    = allocatorT;
-
+		using allocator_base = typename allocator_base_for<allocatorT>::type;
 		struct storage;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
