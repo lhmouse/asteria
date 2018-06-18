@@ -45,21 +45,24 @@ namespace details_unique_handle {
 	}
 
 	template<typename closerT>
-	struct final_closer_wrapper {
-		closerT xalloc;
+	class final_closer_wrapper {
+	private:
+		closerT m_alloc;
 
+	public:
 		explicit final_closer_wrapper(const closerT &alloc) noexcept
-			: xalloc(alloc)
+			: m_alloc(alloc)
 		{ }
 		explicit final_closer_wrapper(closerT &&alloc) noexcept
-			: xalloc(::std::move(alloc))
+			: m_alloc(::std::move(alloc))
 		{ }
 
+	public:
 		operator const closerT & () const noexcept {
-			return this->xalloc;
+			return this->m_alloc;
 		}
 		operator closerT & () noexcept {
-			return this->xalloc;
+			return this->m_alloc;
 		}
 	};
 

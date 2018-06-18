@@ -101,21 +101,24 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::wios &ios);
 
 	template<typename allocatorT>
-	struct final_allocator_wrapper {
-		allocatorT xalloc;
+	class final_allocator_wrapper {
+	private:
+		allocatorT m_alloc;
 
+	public:
 		explicit final_allocator_wrapper(const allocatorT &alloc) noexcept
-			: xalloc(alloc)
+			: m_alloc(alloc)
 		{ }
 		explicit final_allocator_wrapper(allocatorT &&alloc) noexcept
-			: xalloc(::std::move(alloc))
+			: m_alloc(::std::move(alloc))
 		{ }
 
+	public:
 		operator const allocatorT & () const noexcept {
-			return this->xalloc;
+			return this->m_alloc;
 		}
 		operator allocatorT & () noexcept {
-			return this->xalloc;
+			return this->m_alloc;
 		}
 	};
 
@@ -142,20 +145,18 @@ namespace details_cow_string {
 
 	private:
 		using allocator_base = typename allocator_base_for<allocatorT>::type;
-		struct storage;
-		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 		struct storage {
 			atomic<difference_type> ref_count;
 			size_type n_blocks;
-			storage_allocator alloc;
+			typename allocator_traits<allocator_type>::template rebind_alloc<storage> alloc;
 			value_type data[1]; // This makes room for the null terminator.
 
-			// Helper constuctor...
-			storage(size_type n_blocks_x, const allocator_type &alloc_x) noexcept
-				: ref_count(1), n_blocks(n_blocks_x), alloc(alloc_x)
+			storage(size_type xn_blocks, const allocator_type &xalloc) noexcept
+				: ref_count(1), n_blocks(xn_blocks), alloc(xalloc)
 			{ }
 		};
+		using storage_allocator = decltype(storage::alloc);
 
 	private:
 		static constexpr size_type do_get_capacity_of(size_type n_blocks) noexcept {
