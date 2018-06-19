@@ -132,10 +132,10 @@ Sp<const Value> read_reference_opt(Spr<const Reference> ref_opt){
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 		auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 		if(normalized_index < 0){
-			ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", cand.index, ", size = ", array.size());
+			ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", cand.index, ", size = ", array.size());
 			return nullptr;
 		} else if(normalized_index >= D_integer(array.size())){
-			ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", cand.index, ", size = ", array.size());
+			ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", cand.index, ", size = ", array.size());
 			return nullptr;
 		}
 		const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
@@ -152,7 +152,7 @@ Sp<const Value> read_reference_opt(Spr<const Reference> ref_opt){
 		// Find the element.
 		auto it = object.find(cand.key);
 		if(it == object.end()){
-			ASTERIA_DEBUG_LOG("D_object member not found: key = ", cand.key);
+			ASTERIA_DEBUG_LOG("Object member not found: key = ", cand.key);
 			return nullptr;
 		}
 		const auto &value_opt = it->second;
@@ -304,10 +304,10 @@ namespace {
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 			auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 			if(normalized_index < 0){
-				ASTERIA_DEBUG_LOG("D_array subscript falls before the front: index = ", cand.index, ", size = ", array.size());
+				ASTERIA_DEBUG_LOG("Array subscript falls before the front: index = ", cand.index, ", size = ", array.size());
 				return nullptr;
 			} else if(normalized_index >= D_integer(array.size())){
-				ASTERIA_DEBUG_LOG("D_array subscript falls after the back: index = ", cand.index, ", size = ", array.size());
+				ASTERIA_DEBUG_LOG("Array subscript falls after the back: index = ", cand.index, ", size = ", array.size());
 				return nullptr;
 			}
 			const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
@@ -328,7 +328,7 @@ namespace {
 			// Find the element.
 			auto it = object.find(cand.key);
 			if(it == object.end()){
-				ASTERIA_DEBUG_LOG("D_object member not found: key = ", cand.key);
+				ASTERIA_DEBUG_LOG("Object member not found: key = ", cand.key);
 				return nullptr;
 			}
 			const auto &value_opt = it->second;
