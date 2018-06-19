@@ -105,7 +105,7 @@ namespace details_variant {
 	template<unsigned indexT, typename elementT>
 	struct storage_for {
 		union {
-			char size [sizeof(elementT)];
+			char bytes[sizeof(elementT)];
 			alignas(elementT) char align;
 		} un;
 	};
