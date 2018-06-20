@@ -1089,18 +1089,16 @@ public:
 		if(n == 0){
 			return *this;
 		}
+		const auto len_old = this->size();
 		if(this->do_check_overlap_generic(*s)){
-			const auto len_old = this->size();
 			const auto tpos = s - this->data();
 			const auto wptr = this->do_auto_reallocate_no_set_length(len_old, n);
 			traits_type::move(wptr, this->data() + tpos, n);
-			this->do_set_length(len_old + n);
 		} else {
-			const auto len_old = this->size();
 			const auto wptr = this->do_auto_reallocate_no_set_length(len_old, n);
 			traits_type::copy(wptr, s, n);
-			this->do_set_length(len_old + n);
 		}
+		this->do_set_length(len_old + n);
 		return *this;
 	}
 	basic_cow_string & append(const_pointer s){
