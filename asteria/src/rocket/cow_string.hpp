@@ -829,17 +829,19 @@ private:
 	pointer do_append_nonempty_range_restrict(::std::input_iterator_tag, inputT first, inputT last){
 		ROCKET_ASSERT(first != last);
 		const auto len_old = this->size();
-		auto len_new = len_old;
+		size_type len_added = 0;
 		pointer ptr;
 		// Append characters one by one.
 		auto it = first;
 		do {
-			ptr = this->do_auto_reallocate_no_set_length(len_new, 1) - len_new;
-			traits_type::assign(ptr + len_new, 1, *it);
-			this->do_set_length(++len_new);
+			ptr = this->do_auto_reallocate_no_set_length(len_old + len_added, 1) - len_added;
+			this->do_set_length(len_old + len_added);
+			traits_type::assign(ptr[len_added], *it);
+			++len_added;
+			this->do_set_length(len_old + len_added);
 		} while(++it != last);
 		// Return a pointer to the inserted area.
-		return ptr + len_old;
+		return ptr;
 	}
 	template<typename inputT>
 	pointer do_append_nonempty_range_restrict(::std::forward_iterator_tag, inputT first, inputT last){
@@ -847,17 +849,20 @@ private:
 		static_assert(sizeof(range_dist) <= sizeof(size_type), "The `difference_type` of input iterators is larger than `size_type` of this string.");
 		ROCKET_ASSERT(range_dist > 0);
 		const auto len_old = this->size();
-		auto len_new = len_old;
+		size_type len_added = 0;
 		// Reserve the space first.
-		const auto ptr = this->do_auto_reallocate_no_set_length(len_new, static_cast<size_type>(range_dist));
+		const auto ptr = this->do_auto_reallocate_no_set_length(len_old, static_cast<size_type>(range_dist));
+		this->do_set_length(len_old);
 		// Append characters one by one.
 		auto it = first;
 		do {
-			traits_type::assign(ptr + len_new, 1, *it);
-			this->do_set_length(++len_new);
+			ROCKET_ASSERT(len_added < static_cast<size_type>(range_dist));
+			traits_type::assign(ptr[len_added], *it);
+			++len_added;
+			this->do_set_length(len_old + len_added);
 		} while(++it != last);
 		// Return a pointer to the inserted area.
-		return ptr + len_old;
+		return ptr;
 	}
 	// Remove a substring. This function may throw `std::bad_alloc`.
 	pointer do_erase_no_bound_check(size_type tpos, size_type tn){
