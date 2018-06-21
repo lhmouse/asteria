@@ -895,6 +895,7 @@ private:
 		}
 		for(auto i = from; i < len - n + 1; ++i){
 			if(pred(this->data() + i)){
+				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
 			}
@@ -909,6 +910,7 @@ private:
 		}
 		for(auto i = details_cow_string::xmin(len - n, to); i + 1 > 0; --i){
 			if(pred(this->data() + i)){
+				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
 			}
