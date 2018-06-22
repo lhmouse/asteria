@@ -473,8 +473,8 @@ namespace {
 				return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 			}
 			Double_precision mantissa = 0;
-			for(pos = frac_end - 1; pos + 1 != frac_begin; --pos){
-				const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos));
+			for(pos = frac_end; pos != frac_begin; --pos){
+				const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos - 1));
 				if(ptr == nullptr){
 					continue;
 				}
