@@ -123,16 +123,15 @@ namespace details_cow_string {
 	};
 
 	template<typename allocatorT>
-	struct allocator_base_for {
+	using allocator_base_for =
 #if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
-		using type = typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type;
+		typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type;
 #else
-		using type = allocatorT;
+		allocatorT;
 #endif
-	};
 
 	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-	class storage_handle : private allocator_base_for<allocatorT>::type {
+	class storage_handle : private allocator_base_for<allocatorT> {
 	public:
 		using value_type       = charT;
 		using traits_type      = traitsT;
@@ -144,7 +143,7 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base = typename allocator_base_for<allocatorT>::type;
+		using allocator_base = allocator_base_for<allocatorT>;
 
 		struct storage {
 			atomic<difference_type> ref_count;

@@ -67,22 +67,21 @@ namespace details_unique_handle {
 	};
 
 	template<typename closerT>
-	struct closer_base_for {
+	using closer_base_for =
 #if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
-		using type = typename conditional<true, final_closer_wrapper<closerT>, closerT>::type;
+		typename conditional<true, final_closer_wrapper<closerT>, closerT>::type;
 #else
-		using type = closerT;
+		closerT;
 #endif
-	};
 
 	template<typename handleT, typename closerT>
-	class stored_handle : private closer_base_for<closerT>::type {
+	class stored_handle : private closer_base_for<closerT> {
 	public:
 		using handle_type  = handleT;
 		using closer_type  = closerT;
 
 	private:
-		using closer_base = typename closer_base_for<closerT>::type;
+		using closer_base = closer_base_for<closerT>;
 
 	private:
 		handle_type m_h;
