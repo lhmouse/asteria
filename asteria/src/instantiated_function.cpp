@@ -22,8 +22,7 @@ void Instantiated_function::invoke(Vp<Reference> &result_out, Spr<Recycler> recy
 	prepare_function_arguments(arguments_opt, m_parameters_opt);
 	prepare_function_scope(scope_with_args, recycler_inout, m_source_location, m_parameters_opt, std::move(this_opt), std::move(arguments_opt));
 	// Execute the body.
-	Vp<Reference> returned_ref;
-	const auto exec_result = execute_block_in_place(returned_ref, scope_with_args, recycler_inout, m_bound_body_opt);
+	const auto exec_result = execute_block_in_place(result_out, scope_with_args, recycler_inout, m_bound_body_opt);
 	switch(exec_result){
 	case Statement::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.
@@ -38,8 +37,8 @@ void Instantiated_function::invoke(Vp<Reference> &result_out, Spr<Recycler> recy
 	case Statement::execution_result_continue_for:
 		ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
 	case Statement::execution_result_return:
-		// Forward the returned reference;
-		return move_reference(result_out, std::move(returned_ref));
+		// Forward the result reference;
+		return;
 	default:
 		ASTERIA_DEBUG_LOG("Unknown compound statement execution result enumeration `", exec_result, "`. This is probably a bug. Please report.");
 		std::terminate();
