@@ -395,7 +395,7 @@ namespace {
 		}
 		res.reserve(lhs.size() * static_cast<std::size_t>(count));
 		Unsigned_integer mask = 1;
-		mask <<= (std::numeric_limits<Unsigned_integer>::digits - 1);
+		mask <<= 63;
 		for(;;){
 			if(count & mask){
 				res.append(lhs);

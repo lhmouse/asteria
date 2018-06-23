@@ -454,7 +454,7 @@ namespace {
 					// Implement an integral `pow()` function.
 					Unsigned_integer multiplier = 1;
 					std::int32_t mask = 1;
-					mask <<= (std::numeric_limits<std::int32_t>::digits - 1);
+					mask <<= 30;
 					for(;;){
 						if(exp & mask){
 							multiplier *= exp_base;
