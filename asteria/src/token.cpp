@@ -401,7 +401,7 @@ namespace {
 			}
 			// Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
 			// Since we make no use of them, we just reserve them for further use for good.
-			pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", exp_end);
+			pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end);
 			pos = std::min(pos, str.size());
 			if(pos != exp_end){
 				return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_code_numeric_literal_suffixes_disallowed);
