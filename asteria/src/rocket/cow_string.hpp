@@ -125,10 +125,11 @@ namespace details_cow_string {
 	template<typename allocatorT>
 	using allocator_base_for =
 #if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
-		typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type;
+		typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type
 #else
-		allocatorT;
+		allocatorT
 #endif
+		;
 
 	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
 	class storage_handle : private allocator_base_for<allocatorT> {
