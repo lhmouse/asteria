@@ -416,7 +416,7 @@ namespace {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
-				const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
+				const auto bound = (std::numeric_limits<std::int32_t>::max() - digit_value) / 10;
 				if(exp > bound){
 					return Parser_result(line, column, length, Parser_result::error_code_numeric_literal_exponent_overflow);
 				}
@@ -453,8 +453,8 @@ namespace {
 					}
 					// Implement an integral `pow()` function.
 					Unsigned_integer multiplier = 1;
-					int mask = 1;
-					mask <<= (std::numeric_limits<int>::digits - 1);
+					std::int32_t mask = 1;
+					mask <<= (std::numeric_limits<std::int32_t>::digits - 1);
 					for(;;){
 						if(exp & mask){
 							multiplier *= exp_base;
