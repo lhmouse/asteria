@@ -442,30 +442,17 @@ namespace {
 					value *= radix;
 					value += digit_value;
 				}
-				if(exp < 0){
-					return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
-				}
-				if((exp_base != 0) && (value != 0)){
-					const auto multiplier_bound = static_cast<double>(std::numeric_limits<Unsigned_integer>::max() / value);
-					const auto exp_bound = static_cast<std::int32_t>(std::floor(std::log2(multiplier_bound) / std::log2(exp_base) + 0.1));
-					if(exp > exp_bound){
-						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
+				if(value != 0){
+					if(exp < 0){
+						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
 					}
-					// Implement an integral `pow()` function.
-					Unsigned_integer multiplier = 1;
-					std::int32_t mask = 1;
-					mask <<= 30;
-					for(;;){
-						if(exp & mask){
-							multiplier *= exp_base;
+					for(std::int32_t i = 0; i < exp; ++i){
+						const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
+						if(value > bound){
+							return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 						}
-						mask >>= 1;
-						if(mask == 0){
-							break;
-						}
-						multiplier *= multiplier;
+						value *= exp_base;
 					}
-					value *= multiplier;
 				}
 				Token::S_integer_literal token_i = { value };
 				tokens_out.emplace_back(line, column, length, std::move(token_i));
