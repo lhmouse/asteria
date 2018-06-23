@@ -409,7 +409,7 @@ namespace {
 			const auto length = pos - column;
 			const auto digit_table = s_numeric_table + s_delim_count;
 			// Parse the exponent.
-			int exp = 0;
+			std::int32_t exp = 0;
 			for(pos = exp_begin; pos != exp_end; ++pos){
 				const auto ptr = std::char_traits<char>::find(digit_table, 20, str.at(pos));
 				if(ptr == nullptr){
@@ -445,7 +445,7 @@ namespace {
 				if(exp < 0){
 					return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
 				}
-				for(int i = 0; i < exp; ++i){
+				for(std::int32_t i = 0; i < exp; ++i){
 					const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
 					if(value > bound){
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
