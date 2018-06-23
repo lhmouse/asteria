@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main(){
 	T_vector<Token> tokens;
-	auto result = tokenize_line(tokens, 42, Cow_string::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* -0x1_7.8:4p+4  .false 42e3"));
+	auto result = tokenize_line(tokens, 42, Cow_string::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* -0x1_7.8:4p+4  .false 42e13"));
 	ASTERIA_TEST_CHECK(result);
 	ASTERIA_TEST_CHECK(tokens.at(0).get<Token::S_identifier>().id == "hh");
 	ASTERIA_TEST_CHECK(tokens.at(1).get<Token::S_punctuator>().punct == Token::punctuator_inc);
@@ -26,5 +26,5 @@ int main(){
 	ASTERIA_TEST_CHECK(tokens.at(12).get<Token::S_double_literal>().value == 376.25);
 	ASTERIA_TEST_CHECK(tokens.at(13).get<Token::S_punctuator>().punct == Token::punctuator_dot);
 	ASTERIA_TEST_CHECK(tokens.at(14).get<Token::S_keyword>().keyword == Token::keyword_false);
-	ASTERIA_TEST_CHECK(tokens.at(15).get<Token::S_integer_literal>().value == 42000);
+	ASTERIA_TEST_CHECK(tokens.at(15).get<Token::S_integer_literal>().value == 420000000000000);
 }

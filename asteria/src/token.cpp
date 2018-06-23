@@ -416,7 +416,7 @@ namespace {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
-				const auto bound = (std::numeric_limits<decltype(exp)>::max() - digit_value) / 10;
+				const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
 				if(exp > bound){
 					return Parser_result(line, column, length, Parser_result::error_code_numeric_literal_exponent_overflow);
 				}
@@ -435,7 +435,7 @@ namespace {
 						continue;
 					}
 					const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
-					const auto bound = (std::numeric_limits<decltype(value)>::max() - digit_value) / radix;
+					const auto bound = (std::numeric_limits<Unsigned_integer>::max() - digit_value) / radix;
 					if(value > bound){
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 					}
@@ -445,12 +445,27 @@ namespace {
 				if(exp < 0){
 					return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
 				}
-				for(std::int32_t i = 0; i < exp; ++i){
-					const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
-					if(value > bound){
+				if((exp_base != 0) && (value != 0)){
+					const auto multiplier_bound = static_cast<double>(std::numeric_limits<Unsigned_integer>::max() / value);
+					const auto exp_bound = static_cast<std::int32_t>(std::floor(std::log2(multiplier_bound) / std::log2(exp_base) + 0.1));
+					if(exp > exp_bound){
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 					}
-					value *= exp_base;
+					// Implement an integral `pow()` function.
+					Unsigned_integer multiplier = 1;
+					int mask = 1;
+					mask <<= (std::numeric_limits<int>::digits - 1);
+					for(;;){
+						if(exp & mask){
+							multiplier *= exp_base;
+						}
+						mask >>= 1;
+						if(mask == 0){
+							break;
+						}
+						multiplier *= multiplier;
+					}
+					value *= multiplier;
 				}
 				Token::S_integer_literal token_i = { value };
 				tokens_out.emplace_back(line, column, length, std::move(token_i));
@@ -499,7 +514,7 @@ namespace {
 				break;
 #endif
 			default:
-				value *= std::pow(exp_base, exp);
+				value *= std::pow(static_cast<int>(exp_base), exp);
 				break;
 			}
 			value_class = std::fpclassify(value);
