@@ -458,14 +458,16 @@ namespace {
 			}
 			// Parse the literal as a floating-point number.
 			Double_precision value = 0;
-			bool zero = false;
+			bool zero = true;
 			for(pos = int_begin; pos != int_end; ++pos){
 				const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos));
 				if(ptr == nullptr){
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
-				zero |= (digit_value != 0);
+				if(digit_value != 0){
+					zero = false;
+				}
 				value *= radix;
 				value += digit_value;
 			}
@@ -480,7 +482,9 @@ namespace {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
-				zero |= (digit_value != 0);
+				if(digit_value != 0){
+					zero = false;
+				}
 				mantissa += digit_value;
 				mantissa /= radix;
 			}
