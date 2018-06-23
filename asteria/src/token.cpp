@@ -19,14 +19,14 @@ Token::~Token() = default;
 namespace {
 	Parser_result do_validate_code_point_utf8(std::size_t line, const Cow_string &str, std::size_t column){
 		// Get a UTF code point.
-		char32_t code = static_cast<unsigned char>(str.at(column));
-		static constexpr std::array<unsigned char, 32> s_length_table = {
+		static constexpr unsigned char s_length_table[32] = {
 			1, 1, 1, 1, 1, 1, 1, 1, // 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38,
 			1, 1, 1, 1, 1, 1, 1, 1, // 0x40, 0x48, 0x50, 0x58, 0x60, 0x68, 0x70, 0x78,
 			0, 0, 0, 0, 0, 0, 0, 0, // 0x80, 0x88, 0x90, 0x98, 0xA0, 0xA8, 0xB0, 0xB8,
 			2, 2, 2, 2, 3, 3, 4, 0, // 0xC0, 0xC8, 0xD0, 0xD8, 0xE0, 0xE8, 0xF0, 0xF8,
 		};
-		const unsigned length = s_length_table.at(code >> 3);
+		char32_t code = static_cast<unsigned char>(str.at(column));
+		const unsigned length = s_length_table[code >> 3];
 		if(length == 0){
 			// This leading character is not valid.
 			return Parser_result(line, column, 1, Parser_result::error_code_utf8_code_unit_invalid);
