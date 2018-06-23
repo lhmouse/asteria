@@ -394,7 +394,8 @@ namespace {
 			ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` time(s) would result in an overlong string that cannot be allocated.");
 		}
 		res.reserve(lhs.size() * static_cast<std::size_t>(count));
-		auto mask = Unsigned_integer(1) << (std::numeric_limits<Unsigned_integer>::digits - 1);
+		Unsigned_integer mask = 1;
+		mask <<= (std::numeric_limits<Unsigned_integer>::digits - 1);
 		for(;;){
 			if(count & mask){
 				res.append(lhs);
