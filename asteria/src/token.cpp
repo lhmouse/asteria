@@ -409,7 +409,7 @@ namespace {
 			const auto length = pos - column;
 			const auto digit_table = s_numeric_table + s_delim_count;
 			// Parse the exponent.
-			long exp = 0;
+			int exp = 0;
 			for(pos = exp_begin; pos != exp_end; ++pos){
 				const auto ptr = std::char_traits<char>::find(digit_table, 20, str.at(pos));
 				if(ptr == nullptr){
@@ -445,7 +445,7 @@ namespace {
 				if(exp < 0){
 					return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
 				}
-				for(long i = 0; i < exp; ++i){
+				for(int i = 0; i < exp; ++i){
 					const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
 					if(value > bound){
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
@@ -489,10 +489,18 @@ namespace {
 				mantissa /= radix;
 			}
 			value += mantissa;
-			if(exp_base == FLT_RADIX){
-				value = std::scalbln(value, exp);
-			} else {
+			switch(exp_base){
+			case FLT_RADIX:
+				value = std::scalbn(value, exp);
+				break;
+#if (FLT_RADIX != 2)
+			case 2:
+				value = std::ldexp(value, exp);
+				break;
+#endif
+			default:
 				value *= std::pow(exp_base, exp);
+				break;
 			}
 			value_class = std::fpclassify(value);
 			if(value_class == FP_INFINITE){
