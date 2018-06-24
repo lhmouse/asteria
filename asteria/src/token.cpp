@@ -331,9 +331,7 @@ namespace {
 		case '5':  case '6':  case '7':  case '8':  case '9': {
 			// Get a numeric literal.
 			static constexpr char s_numeric_table[] = "_:00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
-			static constexpr std::size_t s_delim_count = 2;
-			char char_next;
-			std::size_t pos;
+			static constexpr unsigned s_delim_count = 2;
 			// Declare everything that will be calculated latter.
 			// 0) The integral part is required. The fractional and exponent parts are optional.
 			// 1) If `frac_begin` equals `int_end` then there is no fractional part.
@@ -347,6 +345,7 @@ namespace {
 			// Check for radix prefixes.
 			radix = 10;
 			int_begin = column;
+			char char_next;
 			if(char_head == '0'){
 				// Do not use `str.at()` here as `int_begin + 1` may exceed `str.size()`.
 				char_next = str[int_begin + 1];
@@ -358,7 +357,7 @@ namespace {
 					int_begin += 2;
 				}
 			}
-			pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
+			auto pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
 			int_end = std::min(pos, str.size());
 			if(int_begin == int_end){
 				return Parser_result(line, column, int_end - column, Parser_result::error_code_numeric_literal_incomplete);
@@ -411,15 +410,14 @@ namespace {
 				return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_code_numeric_literal_suffixes_disallowed);
 			}
 			const auto length = pos - column;
-			const auto digit_table = s_numeric_table + s_delim_count;
 			// Parse the exponent.
 			std::int32_t exp = 0;
 			for(pos = exp_begin; pos != exp_end; ++pos){
-				const auto ptr = std::char_traits<char>::find(digit_table, 20, str.at(pos));
+				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, 20, str.at(pos));
 				if(ptr == nullptr){
 					continue;
 				}
-				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
+				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 				const auto bound = (std::numeric_limits<std::int32_t>::max() - digit_value) / 10;
 				if(exp > bound){
 					return Parser_result(line, column, length, Parser_result::error_code_numeric_literal_exponent_overflow);
@@ -434,11 +432,11 @@ namespace {
 				// Parse the literal as an integer.
 				Unsigned_integer value = 0;
 				for(pos = int_begin; pos != int_end; ++pos){
-					const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos));
+					const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
 					if(ptr == nullptr){
 						continue;
 					}
-					const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
+					const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 					const auto bound = (std::numeric_limits<Unsigned_integer>::max() - digit_value) / radix;
 					if(value > bound){
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
@@ -466,11 +464,11 @@ namespace {
 			Double_precision value = 0;
 			bool zero = true;
 			for(pos = int_begin; pos != int_end; ++pos){
-				const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos));
+				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
 				if(ptr == nullptr){
 					continue;
 				}
-				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
+				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 				if(digit_value != 0){
 					zero = false;
 				}
@@ -483,11 +481,11 @@ namespace {
 			}
 			Double_precision mantissa = 0;
 			for(pos = frac_end; pos != frac_begin; --pos){
-				const auto ptr = std::char_traits<char>::find(digit_table, radix * 2, str.at(pos - 1));
+				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos - 1));
 				if(ptr == nullptr){
 					continue;
 				}
-				const auto digit_value = static_cast<unsigned char>((ptr - digit_table) / 2);
+				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 				if(digit_value != 0){
 					zero = false;
 				}
