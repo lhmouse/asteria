@@ -37,7 +37,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout
 	for(const auto &node : *expression_opt){
 		evaluate_expression_node(stack, recycler_inout, node, scope);
 	}
-	// Get the result. If the stack is empty or has more than one elements, the expression is unbalanced.
+	// Get the result. If the stack is empty or has more than one element, the expression is unbalanced.
 	if(stack.size() != 1){
 		ASTERIA_THROW_RUNTIME_ERROR("The expression was unbalanced. There should be exactly one reference left in the evaluation stack, but there were `", stack.size(), "`.");
 	}
