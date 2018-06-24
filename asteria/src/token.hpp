@@ -86,6 +86,9 @@ public:
 		punctuator_bracket_cl  = 44, // ]
 		punctuator_brace_op    = 45, // {
 		punctuator_brace_cl    = 46, // }
+		punctuator_comma       = 47, // ,
+		punctuator_colon       = 48, // :
+		punctuator_semicolon   = 49, // ;
 	};
 
 	enum Type : signed char {

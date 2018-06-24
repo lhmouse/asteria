@@ -109,12 +109,15 @@ namespace {
 				{ "+",     Token::punctuator_add         },
 				{ "++",    Token::punctuator_inc         },
 				{ "+=",    Token::punctuator_add_eq      },
+				{ ",",     Token::punctuator_comma       },
 				{ "-",     Token::punctuator_sub         },
 				{ "--",    Token::punctuator_dec         },
 				{ "-=",    Token::punctuator_sub_eq      },
 				{ ".",     Token::punctuator_dot         },
 				{ "/",     Token::punctuator_div         },
 				{ "/=",    Token::punctuator_div_eq      },
+				{ ":",     Token::punctuator_colon       },
+				{ ";",     Token::punctuator_semicolon   },
 				{ "<",     Token::punctuator_cmp_lt      },
 				{ "<<",    Token::punctuator_sla         },
 				{ "<<<",   Token::punctuator_sll         },
@@ -172,8 +175,9 @@ namespace {
 					return Parser_result(line, column, length, Parser_result::error_code_success);
 				}
 			}
-			// Some punctuators are not handled as operators, e.g. `;` and `,`.
-			return Parser_result(line, column, 1, Parser_result::error_code_token_character_unrecognized); }
+			// There must be a bug in the punctuator table.
+			ASTERIA_DEBUG_LOG("The punctuator `", char_head, "` is not handled. This is probably a bug. Please report.");
+			std::terminate(); }
 
 		case '\"':  case '\'': {
 			// Get a string literal.
