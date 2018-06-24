@@ -53,7 +53,7 @@ namespace {
 			}
 			if(code >= 0x110000){
 				// Code point value is too large.
-				return Parser_result(line, column, length, Parser_result::error_code_code_point_value_too_large);
+				return Parser_result(line, column, length, Parser_result::error_code_utf_code_point_value_too_large);
 			}
 			// Re-encode it and check for overlong sequences.
 			unsigned len_min;
@@ -291,7 +291,7 @@ namespace {
 						}
 						if(code >= 0x110000){
 							// Code point value is too large.
-							return Parser_result(line, body_end, seq_len, Parser_result::error_code_code_point_value_too_large);
+							return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf_code_point_value_too_large);
 						}
 						// Encode it.
 						const auto encode_one = [&](unsigned shift, unsigned mask){

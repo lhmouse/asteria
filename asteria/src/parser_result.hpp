@@ -12,11 +12,13 @@ class Parser_result {
 public:
 	enum Error_code : std::uint32_t {
 		error_code_success                              =   0,
+		// Category: encoding
 		error_code_utf8_code_unit_invalid               = 101,
 		error_code_utf8_code_point_truncated            = 102,
 		error_code_utf8_surrogates_disallowed           = 103,
-		error_code_code_point_value_too_large           = 104,
+		error_code_utf_code_point_value_too_large       = 104,
 		error_code_utf8_encoding_overlong               = 105,
+		// Category: tokenizer
 		error_code_token_character_unrecognized         = 201,
 		error_code_string_literal_unclosed              = 202,
 		error_code_escape_sequence_incomplete           = 203,
