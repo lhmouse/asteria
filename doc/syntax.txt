@@ -118,7 +118,7 @@ prefix-operator-expression ::=
 expression-initiator ::=
 	identifier | literal | lambda-expression | nested-expression
 lambda-expression ::=
-	"lambda" "(" parameter-list-opt ")" block
+	"function" "(" parameter-list-opt ")" block
 nested-expression ::=
 	"(" expression ")"
 

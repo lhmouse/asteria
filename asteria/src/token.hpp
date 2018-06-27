@@ -31,12 +31,11 @@ public:
 		keyword_continue  = 16,
 		keyword_throw     = 17,
 		keyword_return    = 18,
-		keyword_lambda    = 19,
-		keyword_null      = 20,
-		keyword_true      = 21,
-		keyword_false     = 22,
-		keyword_nan       = 23,
-		keyword_infinity  = 24,
+		keyword_null      = 19,
+		keyword_true      = 20,
+		keyword_false     = 21,
+		keyword_nan       = 22,
+		keyword_infinity  = 23,
 	};
 	enum Punctuator : std::uint8_t {
 		punctuator_add         =  0, // +

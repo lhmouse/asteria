@@ -593,7 +593,6 @@ namespace {
 				{ "function",  Token::keyword_function  },
 				{ "if",        Token::keyword_if        },
 				{ "infinity",  Token::keyword_infinity  },
-				{ "lambda",    Token::keyword_lambda    },
 				{ "nan",       Token::keyword_nan       },
 				{ "null",      Token::keyword_null      },
 				{ "return",    Token::keyword_return    },
