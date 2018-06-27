@@ -167,7 +167,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
-		ASTERIA_THROW_RUNTIME_ERROR("Writing through a null reference is not allowed.");
+		ASTERIA_THROW_RUNTIME_ERROR("Writing through a null reference is an error.");
 
 	case Reference::type_constant: {
 		const auto &cand = ref_opt->get<Reference::S_constant>();
