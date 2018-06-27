@@ -48,17 +48,7 @@ statement-list ::=
 variable-definition ::=
 	( "var" | "const" ) identifier equal-initailizer-opt ";"
 equal-initializer-opt ::=
-	"=" initializer | ""
-initializer ::=
-	"[" initializer-list-opt "]" | "{" key-value-list-opt "}" | expression
-initializer-list-opt ::=
-	initializer-list | ""
-initializer-list ::=
-	initializer ( "," initializer-list-opt | "" )
-key-value-list-opt ::=
-	key-value-list | ""
-key-value-list ::=
-	( string-literal | identifier ) "=" initializer ( "," key-value-list-opt | "" )
+	"=" expression | ""
 function-definition ::=
 	"function" identifier "(" parameter-list-opt ")" block
 parameter-list-opt ::=
@@ -92,7 +82,7 @@ while-statement ::=
 for-statement ::=
 	"for" "(" statement expression-opt ";" expression-opt ")" block
 for-each-statement ::=
-	"for" "each" "(" identifier "," identifier ":" initializer ")" block
+	"for" "each" "(" identifier "," identifier ":" expression ")" block
 
 try-statement ::=
 	"try" block "catch" "(" identifier ")" block
@@ -111,7 +101,22 @@ return-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	prefix-operator-expression | expression-initiator expression-trailer-opt
+	unnamed-array | unnamed-object | prefix-operator-expression | expression-initiator expression-trailer-opt
+
+unnamed-array ::=
+	"[" array-element-list-opt "]"
+array-element-list-opt ::=
+	array-element-list | ""
+array-element-list ::=
+	array-element ( "," array-element-list-opt | "" )
+
+unnamed-object ::=
+	"{" key-value-list-opt "}"
+key-value-list-opt ::=
+	key-value-list | ""
+key-value-list ::=
+	( string-literal | identifier ) "=" expression ( "," key-value-list-opt | "" )
+
 prefix-operator-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
 
