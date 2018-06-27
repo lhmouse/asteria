@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <array>
 #include <vector>
+#include <deque>
 #include <unordered_map>
 
 #include <cstring>

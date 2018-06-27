@@ -74,7 +74,7 @@ namespace {
 		return Parser_result(line, column, length, Parser_result::error_code_success);
 	}
 
-	bool do_merge_sign(T_vector<Token> &tokens_inout, std::size_t line, std::size_t column){
+	bool do_merge_sign(T_deque<Token> &tokens_inout, std::size_t line, std::size_t column){
 		// The last token must be a positive or negative sign.
 		if(tokens_inout.empty()){
 			return false;
@@ -114,7 +114,7 @@ namespace {
 		return sign;
 	}
 
-	Parser_result do_get_token(T_vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column){
+	Parser_result do_get_token(T_deque<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column){
 		const auto char_head = str.at(column);
 		switch(char_head){
 		case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n': {
@@ -634,7 +634,7 @@ namespace {
 	}
 }
 
-Parser_result tokenize_line(T_vector<Token> &tokens_out, std::size_t line, const Cow_string &str){
+Parser_result tokenize_line(T_deque<Token> &tokens_out, std::size_t line, const Cow_string &str){
 	// Ensure the source string is valid UTF-8.
 	std::size_t column = 0;
 	while(column < str.size()){
