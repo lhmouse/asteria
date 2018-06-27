@@ -11,11 +11,10 @@ namespace Asteria {
 class Scope {
 public:
 	enum Purpose : std::uint8_t {
-		purpose_lexical     = 0,
-		purpose_lex_switch  = 1,
-		purpose_plain       = 5,
-		purpose_function    = 6,
-		purpose_file        = 7,
+		purpose_lexical   = 0,
+		purpose_plain     = 1,
+		purpose_function  = 2,
+		purpose_file      = 3,
 	};
 
 private:

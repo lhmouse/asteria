@@ -78,7 +78,7 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		bind_expression(bound_ctrl, cand.ctrl_opt, scope_inout);
 		// Bind clauses recursively. A clause consists of a label expression and a body block.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
-		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lex_switch, scope_inout);
+		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 		T_vector<T_pair<Vp<Expression>, Vp<Block>>> bound_clauses;
 		bound_clauses.reserve(cand.clauses_opt.size());
 		for(const auto &pair : cand.clauses_opt){
