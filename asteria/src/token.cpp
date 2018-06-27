@@ -548,7 +548,7 @@ namespace {
 			if(exp_base == FLT_RADIX){
 				value = std::scalbn(value, exp);
 			} else {
-				value *= std::pow(static_cast<int>(exp_base), exp);
+				value = value * std::pow(static_cast<int>(exp_base), exp);
 			}
 			value_class = std::fpclassify(value);
 			if(value_class == FP_INFINITE){
