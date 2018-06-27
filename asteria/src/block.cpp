@@ -28,6 +28,16 @@ void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr
 	}
 	bound_block_out.emplace(std::move(bound_stmts));
 }
+void fly_over_block_in_place(Spr<Scope> scope_inout, Spr<const Block> block_opt){
+	if(block_opt == nullptr){
+		// Nothing to do.
+		return;
+	}
+	// Skip statements one by one.
+	for(const auto &stmt : *block_opt){
+		fly_over_statement_in_place(scope_inout, stmt);
+	}
+}
 Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_inout, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Nothing to do.

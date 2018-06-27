@@ -33,21 +33,18 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
-		// Create a null named reference for the variable.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
-		set_reference(wref, nullptr);
 		// Bind the initializer recursively.
 		Vp<Initializer> bound_init;
 		bind_initializer(bound_init, cand.init_opt, scope_inout);
 		Statement::S_variable_definition stmt_v = { cand.id, cand.constant, std::move(bound_init) };
 		bound_stmts_out.emplace_back(std::move(stmt_v));
+		// Create a null named reference for the variable.
+		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		set_reference(wref, nullptr);
 		break; }
 
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
-		// Create a null named reference for the function.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
-		set_reference(wref, nullptr);
 		// Bind the function body recursively.
 		const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 		prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
@@ -55,6 +52,9 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
 		Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params_opt, std::move(bound_body) };
 		bound_stmts_out.emplace_back(std::move(stmt_f));
+		// Create a null named reference for the function.
+		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		set_reference(wref, nullptr);
 		break; }
 
 	case Statement::type_if_statement: {
@@ -209,6 +209,46 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 	}
 }
 
+void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt){
+	const auto type = stmt.get_type();
+	switch(type){
+	case Statement::type_expression_statement:
+		break;
+
+	case Statement::type_variable_definition: {
+		const auto &cand = stmt.get<Statement::S_variable_definition>();
+		// Create a null named reference for the variable.
+		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		set_reference(wref, nullptr);
+		break; }
+
+	case Statement::type_function_definition: {
+		const auto &cand = stmt.get<Statement::S_function_definition>();
+		// Create a null named reference for the function.
+		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		set_reference(wref, nullptr);
+		break; }
+
+	case Statement::type_if_statement:
+	case Statement::type_switch_statement:
+	case Statement::type_do_while_statement:
+	case Statement::type_while_statement:
+	case Statement::type_for_statement:
+	case Statement::type_for_each_statement:
+	case Statement::type_try_statement:
+	case Statement::type_defer_statement:
+	case Statement::type_break_statement:
+	case Statement::type_continue_statement:
+	case Statement::type_throw_statement:
+	case Statement::type_return_statement:
+		break;
+
+	default:
+		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
+		std::terminate();
+	}
+}
+
 namespace {
 	bool do_check_loop_condition(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Spr<const Expression> cond_opt, Spr<const Scope> scope_inout){
 		// Overwrite `result_out` unconditionally, even when `cond_opt` is null.
@@ -308,6 +348,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				}
 				match_it = it;
 			}
+			fly_over_block_in_place(scope_switch, it->second);
 		}
 		// Iterate from the match clause to the end of the body, falling through clause ends if any.
 		for(auto it = match_it; it != cand.clauses_opt.end(); ++it){

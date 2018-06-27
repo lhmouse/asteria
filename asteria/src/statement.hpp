@@ -155,6 +155,7 @@ public:
 };
 
 extern void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt);
+extern void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt);
 extern Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_inout, const Statement &stmt);
 
 }
