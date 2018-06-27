@@ -220,11 +220,8 @@ namespace {
 			for(auto it = range.second; it != range.first; --it){
 				const auto &pair = it[-1];
 				const auto length = std::char_traits<char>::length(pair.first);
-				if(str.size() - column < length){
-					continue;
-				}
-				if(std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0){
-					// Push a keyword.
+				if((str.size() - column >= length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)){
+					// Push a punctuator.
 					Token::S_punctuator token_p = { pair.second };
 					tokens_out.emplace_back(line, column, length, std::move(token_p));
 					return Parser_result(line, column, length, Parser_result::error_code_success);
@@ -635,10 +632,7 @@ namespace {
 			const auto range = std::equal_range(std::begin(s_keyword_table), std::end(s_keyword_table), char_head, Keyword_comparator());
 			for(auto it = range.first; it != range.second; ++it){
 				const auto &pair = it[0];
-				if(length != std::char_traits<char>::length(pair.first)){
-					continue;
-				}
-				if(std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0){
+				if((std::char_traits<char>::length(pair.first) == length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)){
 					// Push a keyword.
 					Token::S_keyword token_kw = { pair.second };
 					tokens_out.emplace_back(line, column, length, std::move(token_kw));
