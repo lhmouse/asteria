@@ -222,7 +222,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		}
 		auto &object = parent->get<D_object>();
 		// Find the element.
-#if defined(__cpp_lib_unordered_map_try_emplace) && (__cpp_lib_unordered_map_try_emplace >= 201411)
+#ifdef __cpp_lib_unordered_map_try_emplace
 		auto pair = object.insert_or_assign(cand.key, nullptr);
 #else
 		auto pair = object.insert(std::make_pair(cand.key, nullptr));

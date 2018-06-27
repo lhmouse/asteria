@@ -124,7 +124,7 @@ namespace details_cow_string {
 
 	template<typename allocatorT>
 	using allocator_base_for =
-#if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
+#ifdef __cpp_lib_is_final
 		typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type
 #else
 		allocatorT
