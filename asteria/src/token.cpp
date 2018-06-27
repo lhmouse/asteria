@@ -545,18 +545,10 @@ namespace {
 				mantissa /= radix;
 			}
 			value += mantissa;
-			switch(exp_base){
-			case FLT_RADIX:
+			if(exp_base == FLT_RADIX){
 				value = std::scalbn(value, exp);
-				break;
-#if (FLT_RADIX != 2)
-			case 2:
-				value = std::ldexp(value, exp);
-				break;
-#endif
-			default:
+			} else {
 				value *= std::pow(static_cast<int>(exp_base), exp);
-				break;
 			}
 			value_class = std::fpclassify(value);
 			if(value_class == FP_INFINITE){
