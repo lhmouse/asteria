@@ -74,12 +74,12 @@ namespace {
 		return Parser_result(line, column, length, Parser_result::error_code_success);
 	}
 
-	bool do_check_sign_mergeability(const T_vector<Token> &tokens, std::size_t line, std::size_t column){
+	bool do_merge_sign(T_vector<Token> &tokens_inout, std::size_t line, std::size_t column){
 		// The last token must be a positive or negative sign.
-		if(tokens.empty()){
+		if(tokens_inout.empty()){
 			return false;
 		}
-		const auto &token_sign = tokens.back();
+		const auto &token_sign = tokens_inout.back();
 		auto cand_punct = token_sign.get_opt<Token::S_punctuator>();
 		if(cand_punct == nullptr){
 			return false;
@@ -87,6 +87,7 @@ namespace {
 		if((cand_punct->punct != Token::punctuator_add) && (cand_punct->punct != Token::punctuator_sub)){
 			return false;
 		}
+		const bool sign = cand_punct->punct == Token::punctuator_sub;
 		// Don't merge them if they are not contiguous.
 		if(token_sign.get_source_line() != line){
 			return false;
@@ -95,8 +96,8 @@ namespace {
 			return false;
 		}
 		// Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
-		if(tokens.size() >= 2){
-			const auto &token_prev = tokens.rbegin()[1];
+		if(tokens_inout.size() >= 2){
+			const auto &token_prev = tokens_inout.rbegin()[1];
 			cand_punct = token_prev.get_opt<Token::S_punctuator>();
 			if(cand_punct == nullptr){
 				return false;
@@ -108,25 +109,9 @@ namespace {
 				return false;
 			}
 		}
-		return true;
-	}
-
-	template<typename CandidateT>
-	void do_push_numeric_literal(T_vector<Token> &tokens_out, std::size_t line, std::size_t column, std::size_t length, CandidateT cand){
-		if(do_check_sign_mergeability(tokens_out, line, column)){
-			const auto token_sign = std::move(tokens_out.back());
-			tokens_out.pop_back();
-			ROCKET_ASSERT(line == token_sign.get_source_line());
-			ROCKET_ASSERT(column == token_sign.get_source_column() + token_sign.get_source_length());
-			auto value = std::move(cand.value);
-			if(token_sign.get<Token::S_punctuator>().punct == Token::punctuator_sub){
-				value = -value;
-			}
-			CandidateT cand_merged = { std::move(value) };
-			tokens_out.emplace_back(line, token_sign.get_source_column(), token_sign.get_source_length() + length, std::move(cand_merged));
-		} else {
-			tokens_out.emplace_back(line, column, length, std::move(cand));
-		}
+		// Drop the sign token.
+		tokens_inout.pop_back();
+		return sign;
 	}
 
 	Parser_result do_get_token(T_vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column){
@@ -508,8 +493,11 @@ namespace {
 						value *= exp_base;
 					}
 				}
-				Token::S_integer_literal token_i = { value };
-				do_push_numeric_literal(tokens_out, line, column, length, std::move(token_i));
+				if(do_merge_sign(tokens_out, line, column)){
+					value = -value;
+				}
+				Token::S_integer_literal token_i = { static_cast<Signed_integer>(value) };
+				tokens_out.emplace_back(line, column, length, std::move(token_i));
 				return Parser_result(line, column, length, Parser_result::error_code_success);
 			}
 			// Parse the literal as a floating-point number.
@@ -557,8 +545,11 @@ namespace {
 			if((value_class == FP_ZERO) && (zero == false)){
 				return Parser_result(line, column, length, Parser_result::error_code_double_literal_underflow);
 			}
+			if(do_merge_sign(tokens_out, line, column)){
+				value = -value;
+			}
 			Token::S_double_literal token_d = { value };
-			do_push_numeric_literal(tokens_out, line, column, length, std::move(token_d));
+			tokens_out.emplace_back(line, column, length, std::move(token_d));
 			return Parser_result(line, column, length, Parser_result::error_code_success); }
 
 		case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':

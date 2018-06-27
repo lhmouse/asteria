@@ -108,13 +108,13 @@ public:
 		Cow_string id;
 	};
 	struct S_integer_literal {
-		Unsigned_integer value;
+		D_integer value;
 	};
 	struct S_double_literal {
-		Double_precision value;
+		D_double value;
 	};
 	struct S_string_literal {
-		Cow_string value;
+		D_string value;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_keyword          // 0
