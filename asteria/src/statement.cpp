@@ -38,7 +38,7 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		bind_initializer(bound_init, cand.init_opt, scope_inout);
 		Statement::S_variable_definition stmt_v = { cand.id, cand.constant, std::move(bound_init) };
 		bound_stmts_out.emplace_back(std::move(stmt_v));
-		// Create a null named reference for the variable.
+		// Create a null reference for the variable.
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
@@ -46,13 +46,13 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
 		// Bind the function body recursively.
-		const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
-		prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
+		const auto scope_func = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
+		prepare_function_scope_lexical(scope_func, cand.location, cand.params_opt);
 		Vp<Block> bound_body;
-		bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
+		bind_block_in_place(bound_body, scope_func, cand.body_opt);
 		Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params_opt, std::move(bound_body) };
 		bound_stmts_out.emplace_back(std::move(stmt_f));
-		// Create a null named reference for the function.
+		// Create a null reference for the variable.
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
@@ -128,7 +128,7 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		Vp<Expression> bound_step;
 		bind_expression(bound_step, cand.step_opt, scope_for);
 		Vp<Block> bound_body;
-		bind_block(bound_body, cand.body_opt, scope_for);
+		bind_block_in_place(bound_body, scope_for, cand.body_opt);
 		Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_step), std::move(bound_body) };
 		bound_stmts_out.emplace_back(std::move(stmt_f));
 		break; }
@@ -141,25 +141,30 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		// Bind the loop range initializer recursively.
 		Vp<Initializer> bound_range_init;
 		bind_initializer(bound_range_init, cand.range_init_opt, scope_for);
-		// Create null named references for the key and the value.
+		// Create null references for the key and the value.
 		const auto key_wref = scope_inout->drill_for_named_reference(cand.key_id);
 		const auto value_wref = scope_inout->drill_for_named_reference(cand.value_id);
 		set_reference(key_wref, nullptr);
 		set_reference(value_wref, nullptr);
 		// Bind the body recursively.
 		Vp<Block> bound_body;
-		bind_block(bound_body, cand.body_opt, scope_inout);
+		bind_block_in_place(bound_body, scope_for, cand.body_opt);
 		Statement::S_for_each_statement stmt_f = { cand.key_id, cand.value_id, std::move(bound_range_init), std::move(bound_body) };
 		bound_stmts_out.emplace_back(std::move(stmt_f));
 		break; }
 
 	case Statement::type_try_statement: {
 		const auto &cand = stmt.get<Statement::S_try_statement>();
-		// Bind both branches recursively.
+		// Bind the `try` branch recursively.
 		Vp<Block> bound_branch_try;
 		bind_block(bound_branch_try, cand.branch_try_opt, scope_inout);
+		// Bind the `catch` branch recursively.
+		const auto scope_catch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
+		// Create null references for the exception.
+		const auto wref = scope_inout->drill_for_named_reference(cand.except_id);
+		set_reference(wref, nullptr);
 		Vp<Block> bound_branch_catch;
-		bind_block(bound_branch_catch, cand.branch_catch_opt, scope_inout);
+		bind_block_in_place(bound_branch_catch, scope_catch, cand.branch_catch_opt);
 		Statement::S_try_statement stmt_t = { std::move(bound_branch_try), cand.except_id, std::move(bound_branch_catch) };
 		bound_stmts_out.emplace_back(std::move(stmt_t));
 		break; }
@@ -217,14 +222,14 @@ void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt){
 
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
-		// Create a null named reference for the variable.
+		// Create a null reference for the variable.
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
 
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
-		// Create a null named reference for the function.
+		// Create a null reference for the function.
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
@@ -289,11 +294,11 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
 		// Bind the function body onto the current scope_inout.
-		const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
-		prepare_function_scope_lexical(scope_lexical, cand.location, cand.params_opt);
+		const auto scope_func = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
+		prepare_function_scope_lexical(scope_func, cand.location, cand.params_opt);
 		Vp<Block> bound_body;
-		bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
-		// Create a named reference for the function.
+		bind_block_in_place(bound_body, scope_func, cand.body_opt);
+		// Create a reference for the function.
 		auto func = std::make_shared<Instantiated_function>("function", cand.location, cand.params_opt, scope_inout, std::move(bound_body));
 		Vp<Value> func_var;
 		set_value(func_var, recycler_inout, D_function(std::move(func)));
