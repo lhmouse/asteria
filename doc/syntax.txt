@@ -34,8 +34,8 @@ statement ::=
 	block | variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | for-each-statement |
-	try-statement | defer-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
+	try-statement | defer-statement |
 	expression-statement
 
 block ::=
@@ -83,11 +83,6 @@ for-statement ::=
 for-each-statement ::=
 	"for" "each" "(" identifier "," identifier ":" expression ")" block
 
-try-statement ::=
-	"try" block "catch" "(" identifier ")" block
-defer-statement ::=
-	"defer" block
-
 break-statement ::=
 	"break" ( "switch" | "while" | "for" ) ";"
 continue-statement ::=
@@ -96,6 +91,11 @@ throw-statement ::=
 	"throw" expression-opt ";"
 return-statement ::=
 	"return" expression-opt ";"
+
+try-statement ::=
+	"try" block "catch" "(" identifier ")" block
+defer-statement ::=
+	"defer" block
 
 expression-statement ::=
 	expression-opt ";"
