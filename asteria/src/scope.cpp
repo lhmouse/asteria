@@ -35,6 +35,9 @@ Sp<const Reference> Scope::get_named_reference_opt(const D_string &id) const noe
 	return it->second;
 }
 std::reference_wrapper<Vp<Reference>> Scope::drill_for_named_reference(const D_string &id){
+	if(m_purpose == purpose_lex_switch){
+		ASTERIA_THROW_RUNTIME_ERROR("Variable or function definitions are not allowed immediately inside a `switch` block.");
+	}
 	if(id.empty()){
 		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of variables must not be empty.");
 	}
