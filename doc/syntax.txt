@@ -101,31 +101,29 @@ return-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	unnamed-array | unnamed-object | prefix-operator-expression | expression-initiator expression-trailer-opt
+	prefix-operator-expression | expression-initiator expression-trailer-opt
 
+prefix-operator-expression ::=
+	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
+
+expression-initiator ::=
+	identifier | literal | lambda-expression | nested-expression | unnamed-array | unnamed-object
+lambda-expression ::=
+	"function" "(" parameter-list-opt ")" block
+nested-expression ::=
+	"(" expression ")"
 unnamed-array ::=
 	"[" array-element-list-opt "]"
 array-element-list-opt ::=
 	array-element-list | ""
 array-element-list ::=
 	array-element ( "," array-element-list-opt | "" )
-
 unnamed-object ::=
 	"{" key-value-list-opt "}"
 key-value-list-opt ::=
 	key-value-list | ""
 key-value-list ::=
 	( string-literal | identifier ) "=" expression ( "," key-value-list-opt | "" )
-
-prefix-operator-expression ::=
-	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
-
-expression-initiator ::=
-	identifier | literal | lambda-expression | nested-expression
-lambda-expression ::=
-	"function" "(" parameter-list-opt ")" block
-nested-expression ::=
-	"(" expression ")"
 
 expression-trailer-opt ::=
 	expression-trailer | ""
