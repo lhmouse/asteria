@@ -31,14 +31,13 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	expression-statement | block | variable-definition | function-definition |
+	block | variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | for-each-statement |
 	try-statement | defer-statement |
-	break-statement | continue-statement | throw-statement | return-statement
+	break-statement | continue-statement | throw-statement | return-statement |
+	expression-statement
 
-expression-statement ::=
-	expression-opt ";"
 block ::=
 	"{" statement-list-opt "}"
 statement-list-opt ::=
@@ -98,6 +97,8 @@ throw-statement ::=
 return-statement ::=
 	"return" expression-opt ";"
 
+expression-statement ::=
+	expression-opt ";"
 expression-opt ::=
 	expression | ""
 expression ::=
