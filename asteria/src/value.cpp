@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "value.hpp"
-#include "stored_value.hpp"
+#include "recycler.hpp"
 #include "opaque_base.hpp"
 #include "function_base.hpp"
 #include "utilities.hpp"
@@ -212,6 +212,15 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt){
 	dump_value(os, value_fmt.get());
 	return os;
+}
+
+void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out){
+	if(value_out){
+		return;
+	}
+	auto sp = std::make_shared<Value>(recycler_out, D_opaque());
+	recycler_out->adopt_value(sp);
+	value_out.reset(std::move(sp));
 }
 
 void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Spr<const Value> src_opt){

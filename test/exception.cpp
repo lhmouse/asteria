@@ -3,7 +3,7 @@
 
 #include "test_init.hpp"
 #include "../src/exception.hpp"
-#include "../src/stored_value.hpp"
+#include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
 #include "../src/recycler.hpp"
 #include "../src/variable.hpp"

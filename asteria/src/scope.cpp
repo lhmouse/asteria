@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "scope.hpp"
-#include "stored_value.hpp"
+#include "value.hpp"
 #include "stored_reference.hpp"
 #include "function_base.hpp"
 #include "parameter.hpp"

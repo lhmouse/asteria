@@ -7,7 +7,7 @@
 #include "../src/recycler.hpp"
 #include "../src/expression.hpp"
 #include "../src/initializer.hpp"
-#include "../src/stored_value.hpp"
+#include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
 #include "../src/variable.hpp"
 

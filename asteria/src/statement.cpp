@@ -7,7 +7,7 @@
 #include "scope.hpp"
 #include "expression.hpp"
 #include "initializer.hpp"
-#include "stored_value.hpp"
+#include "value.hpp"
 #include "stored_reference.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"

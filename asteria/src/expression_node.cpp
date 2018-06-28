@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "expression_node.hpp"
 #include "expression.hpp"
-#include "stored_value.hpp"
+#include "value.hpp"
 #include "stored_reference.hpp"
 #include "scope.hpp"
 #include "block.hpp"
