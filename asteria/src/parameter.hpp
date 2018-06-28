@@ -17,6 +17,8 @@ public:
 	Parameter(Cow_string id, Sp<const Value> default_argument_opt)
 		: m_id(std::move(id)), m_default_argument_opt(std::move(default_argument_opt))
 	{ }
+	Parameter(const Parameter &) noexcept;
+	Parameter & operator=(const Parameter &) noexcept;
 	Parameter(Parameter &&) noexcept;
 	Parameter & operator=(Parameter &&) noexcept;
 	~Parameter();
@@ -30,7 +32,7 @@ public:
 	}
 };
 
-extern void prepare_function_arguments(Vector<Vp<Reference>> &arguments_inout, const Vector<Sp<const Parameter>> &parameters_opt);
+extern void prepare_function_arguments(Vector<Vp<Reference>> &args_inout, const Vector<Parameter> &params);
 
 }
 

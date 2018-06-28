@@ -22,7 +22,7 @@ public:
 
 public:
 	Cow_string describe() const override;
-	void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&arguments_opt) const override;
+	void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override;
 };
 
 }

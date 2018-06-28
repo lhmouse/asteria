@@ -26,7 +26,7 @@ void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expre
 	}
 	bound_expr_out.emplace(std::move(bound_nodes));
 }
-void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Spr<const Expression> expression_opt, Spr<const Scope> scope){
+void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
 		move_reference(result_out, nullptr);
@@ -35,7 +35,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout
 	// Parameters are pushed from right to left, in lexical order.
 	Vector<Vp<Reference>> stack;
 	for(const auto &node : *expression_opt){
-		evaluate_expression_node(stack, recycler_inout, node, scope);
+		evaluate_expression_node(stack, recycler_out, node, scope);
 	}
 	// Get the result. If the stack is empty or has more than one element, the expression is unbalanced.
 	if(stack.size() != 1){

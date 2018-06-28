@@ -20,7 +20,7 @@ public:
 
 public:
 	virtual Cow_string describe() const = 0;
-	virtual void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&arguments_opt) const = 0;
+	virtual void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const = 0;
 };
 
 }

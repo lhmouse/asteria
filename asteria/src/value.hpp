@@ -123,8 +123,8 @@ inline void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, D_nu
 	value_out.reset();
 }
 
-extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Spr<const Value> src_opt);
-extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Vp<Value> &&src_opt);
+extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt);
+extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Vp<Value> &&src_opt);
 
 // This function is useful for breaking dependency circles.
 extern void purge_value(Spr<Value> value_opt) noexcept;

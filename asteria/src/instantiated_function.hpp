@@ -12,22 +12,22 @@ namespace Asteria {
 class Instantiated_function : public Function_base {
 private:
 	const char * m_category;
-	Cow_string m_source_location;
+	Cow_string m_source;
 
-	Vector<Sp<const Parameter>> m_parameters_opt;
+	Vector<Parameter> m_params;
 	Sp<const Scope> m_bound_scope;
 	Vp<Block> m_bound_body_opt;
 
 public:
-	Instantiated_function(const char *category, Cow_string source_location, Vector<Sp<const Parameter>> parameters_opt, Sp<const Scope> bound_scope, Vp<Block> &&bound_body_opt)
-		: m_category(category), m_source_location(std::move(source_location))
-		, m_parameters_opt(std::move(parameters_opt)), m_bound_scope(std::move(bound_scope)), m_bound_body_opt(std::move(bound_body_opt))
+	Instantiated_function(const char *category, Cow_string source, Vector<Parameter> params, Sp<const Scope> bound_scope, Vp<Block> &&bound_body_opt)
+		: m_category(category), m_source(std::move(source))
+		, m_params(std::move(params)), m_bound_scope(std::move(bound_scope)), m_bound_body_opt(std::move(bound_body_opt))
 	{ }
 	~Instantiated_function() override;
 
 public:
 	Cow_string describe() const override;
-	void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&arguments_opt) const override;
+	void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override;
 };
 
 }

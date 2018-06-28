@@ -9,22 +9,24 @@
 
 namespace Asteria {
 
+Parameter::Parameter(const Parameter &) noexcept = default;
+Parameter & Parameter::operator=(const Parameter &) noexcept = default;
 Parameter::Parameter(Parameter &&) noexcept = default;
 Parameter & Parameter::operator=(Parameter &&) noexcept = default;
 Parameter::~Parameter() = default;
 
-void prepare_function_arguments(Vector<Vp<Reference>> &arguments_inout, const Vector<Sp<const Parameter>> &params_opt){
-	const auto delta_size = static_cast<std::ptrdiff_t>(arguments_inout.size() - params_opt.size());
+void prepare_function_arguments(Vector<Vp<Reference>> &args_inout, const Vector<Parameter> &params){
+	const auto delta_size = static_cast<std::ptrdiff_t>(args_inout.size() - params.size());
 	if(delta_size < 0){
-		arguments_inout.insert(arguments_inout.end(), rocket::fill_iterator<Nullptr>(delta_size), rocket::fill_iterator<Nullptr>(0));
+		args_inout.insert(args_inout.end(), rocket::fill_iterator<Nullptr>(delta_size), rocket::fill_iterator<Nullptr>(0));
 	}
-	for(std::size_t i = 0; i < params_opt.size(); ++i){
-		const auto &param = params_opt.at(i);
-		auto &arg = arguments_inout.at(i);
+	for(std::size_t i = 0; i < params.size(); ++i){
+		const auto &param = params.at(i);
+		auto &arg = args_inout.at(i);
 		if(arg){
 			continue;
 		}
-		const auto &default_arg = param->get_default_argument_opt();
+		const auto &default_arg = param.get_default_argument_opt();
 		if(!default_arg){
 			continue;
 		}

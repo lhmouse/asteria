@@ -35,13 +35,15 @@ class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
+// Lexical elements (copyable)
+class Parameter;
+
 // Lexical elements (movable only)
 class Initializer;
 class Expression_node;
 class Expression;
 class Statement;
 class Block;
-class Parameter;
 class Parser_result;
 class Token;
 
