@@ -209,8 +209,16 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt){
-	dump_value(os, value_fmt.get());
+std::ostream & operator<<(std::ostream &os, const Sp<const Value> &value_opt){
+	dump_value(os, value_opt);
+	return os;
+}
+std::ostream & operator<<(std::ostream &os, const Sp<Value> &value_opt){
+	dump_value(os, value_opt);
+	return os;
+}
+std::ostream & operator<<(std::ostream &os, const Vp<Value> &value_opt){
+	dump_value(os, value_opt);
 	return os;
 }
 

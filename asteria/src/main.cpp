@@ -54,10 +54,10 @@ int main(){
 	set_value(temp, recycler, D_string("my string"));
 	copy->get<D_object>().emplace(D_string::shallow("new"), std::move(temp));
 
-	std::cerr <<sp_fmt(root) <<std::endl;
+	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
 	recycler.reset();
-	std::cerr <<sp_fmt(copy) <<std::endl;
+	std::cerr <<copy <<std::endl;
 	ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
-	std::cerr <<sp_fmt(root) <<std::endl;
+	std::cerr <<root <<std::endl;
 }

@@ -749,7 +749,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			const auto rhs_var = read_reference_opt(rhs_ref);
 			const auto comparison_result = compare_values(lhs_var, rhs_var);
 			if(comparison_result == Value::comparison_result_unordered){
-				ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
+				ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 			}
 			// Try reusing source operands.
 			if(!lhs_ref){
@@ -768,7 +768,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			const auto rhs_var = read_reference_opt(rhs_ref);
 			const auto comparison_result = compare_values(lhs_var, rhs_var);
 			if(comparison_result == Value::comparison_result_unordered){
-				ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
+				ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 			}
 			// Try reusing source operands.
 			if(!lhs_ref){
@@ -787,7 +787,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			const auto rhs_var = read_reference_opt(rhs_ref);
 			const auto comparison_result = compare_values(lhs_var, rhs_var);
 			if(comparison_result == Value::comparison_result_unordered){
-				ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
+				ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 			}
 			// Try reusing source operands.
 			if(!lhs_ref){
@@ -806,7 +806,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 			const auto rhs_var = read_reference_opt(rhs_ref);
 			const auto comparison_result = compare_values(lhs_var, rhs_var);
 			if(comparison_result == Value::comparison_result_unordered){
-				ASTERIA_THROW_RUNTIME_ERROR("The operands `", sp_fmt(lhs_var), "` and `", sp_fmt(rhs_var), "` are unordered.");
+				ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 			}
 			// Try reusing source operands.
 			if(!lhs_ref){

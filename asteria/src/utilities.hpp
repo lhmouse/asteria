@@ -4,7 +4,6 @@
 #ifndef ASTERIA_UTILITIES_HPP_
 #define ASTERIA_UTILITIES_HPP_
 
-#include "sp_formatter.hpp"
 #include "rocket/insertable_ostream.hpp"
 #include "rocket/compatibility.hpp"
 #include <iomanip>
