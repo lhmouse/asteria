@@ -1121,10 +1121,8 @@ void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> 
 			// Copy the variable referenced by `rhs_ref` into `lhs_ref`, then return it.
 			// `assign` is ignored.
 			// N.B. This is one of the few operators that work on all types.
-			Vp<Value> value;
-			extract_value_from_reference(value, recycler_out, std::move(rhs_ref));
 			const auto wref = drill_reference(lhs_ref);
-			move_value(wref, recycler_out, std::move(value));
+			extract_value_from_reference(wref, recycler_out, std::move(rhs_ref));
 			do_push_reference(stack_inout, std::move(lhs_ref));
 			break; }
 
