@@ -36,7 +36,6 @@ pkginclude_rocket_HEADERS = \
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
-	asteria/src/sp_formatter.hpp	\
 	asteria/src/parser_result.hpp	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\

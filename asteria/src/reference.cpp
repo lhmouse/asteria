@@ -56,10 +56,10 @@ void dump_reference(std::ostream &os, Spr<const Reference> ref_opt, unsigned ind
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt){
-	dump_reference(os, reference_fmt.get());
-	return os;
-}
+//std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt){
+//	dump_reference(os, reference_fmt.get());
+//	return os;
+//}
 
 void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> src_opt){
 	const auto type = get_reference_type(src_opt);
@@ -171,11 +171,11 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 
 	case Reference::type_constant: {
 		const auto &cand = ref_opt->get<Reference::S_constant>();
-		ASTERIA_THROW_RUNTIME_ERROR("The constant `", sp_fmt(cand.src_opt), "` cannot be modified."); }
+		ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src_opt, "` cannot be modified."); }
 
 	case Reference::type_temporary_value: {
 		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
-		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", sp_fmt(cand.value_opt), "` is likely to be an error hence is not allowed."); }
+		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", cand.value_opt, "` is likely to be an error hence is not allowed."); }
 
 	case Reference::type_variable: {
 		const auto &cand = ref_opt->get<Reference::S_variable>();

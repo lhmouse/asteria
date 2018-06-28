@@ -106,7 +106,9 @@ extern const char * get_value_type_name(Spr<const Value> value_opt) noexcept;
 
 extern bool test_value(Spr<const Value> value_opt) noexcept;
 extern void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt);
+extern std::ostream & operator<<(std::ostream &os, const Sp<const Value> &value_opt);
+extern std::ostream & operator<<(std::ostream &os, const Sp<Value> &value_opt);
+extern std::ostream & operator<<(std::ostream &os, const Vp<Value> &value_opt);
 
 extern void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out);
 

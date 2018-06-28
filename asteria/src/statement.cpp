@@ -332,7 +332,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		// Evaluate the control expression.
 		evaluate_expression(result_out, recycler_inout, cand.ctrl_opt, scope_inout);
 		const auto control_var = read_reference_opt(result_out);
-		ASTERIA_DEBUG_LOG("Switching on `", sp_fmt(control_var), "`...");
+		ASTERIA_DEBUG_LOG("Switching on `", control_var, "`...");
 		// Traverse the clause list to find one that matches the result.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
@@ -528,7 +528,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 					return result;
 				}
 			} catch(Exception &e){
-				ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", sp_fmt(e.get_reference_opt()));
+				ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
 				// Print exceptions nested, if any.
 				auto nested_eptr = e.nested_ptr();
 				if(nested_eptr){
@@ -539,7 +539,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 						try {
 							std::rethrow_exception(nested_eptr);
 						} catch(Exception &ne){
-							ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`Asteria::Exception`: ", sp_fmt(ne.get_reference_opt()));
+							ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`Asteria::Exception`: ", ne.get_reference_opt());
 							nested_eptr = ne.nested_ptr();
 						} catch(std::exception &ne){
 							ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`std::exception`: ", ne.what());
