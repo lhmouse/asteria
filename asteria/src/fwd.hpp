@@ -50,7 +50,6 @@ class Token;
 
 // Runtime objects (movable only)
 class Exception;
-class Stored_value;
 class Stored_reference;
 
 // Runtime objects (neither copyable nor movable)

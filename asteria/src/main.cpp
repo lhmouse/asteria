@@ -2,9 +2,9 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "stored_value.hpp"
 #include "utilities.hpp"
 #include "recycler.hpp"
+#include "value.hpp"
 #include "opaque_base.hpp"
 #include <iostream>
 

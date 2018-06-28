@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "initializer.hpp"
-#include "stored_value.hpp"
+#include "value.hpp"
 #include "stored_reference.hpp"
 #include "reference.hpp"
 #include "expression.hpp"

@@ -10,8 +10,6 @@
 namespace Asteria {
 
 class Value {
-	friend Stored_value;
-
 public:
 	enum Type : signed char {
 		type_null      = -1,
@@ -109,6 +107,19 @@ extern const char * get_value_type_name(Spr<const Value> value_opt) noexcept;
 extern bool test_value(Spr<const Value> value_opt) noexcept;
 extern void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Value> &value_fmt);
+
+extern void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out);
+
+template<typename CandidateT>
+inline void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, CandidateT &&cand){
+	if(value_out == nullptr){
+		allocate_value(value_out, recycler_out);
+	}
+	value_out->set(std::forward<CandidateT>(cand));
+}
+inline void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, Nullptr){
+	value_out.reset();
+}
 
 extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Spr<const Value> src_opt);
 extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler_inout, Vp<Value> &&src_opt);
