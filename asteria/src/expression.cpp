@@ -19,7 +19,7 @@ void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expre
 		return;
 	}
 	// Bind nodes recursively.
-	T_vector<Expression_node> bound_nodes;
+	Vector<Expression_node> bound_nodes;
 	bound_nodes.reserve(expression_opt->size());
 	for(const auto &node : *expression_opt){
 		bind_expression_node(bound_nodes, node, scope);
@@ -33,7 +33,7 @@ void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_inout
 		return;
 	}
 	// Parameters are pushed from right to left, in lexical order.
-	Vp_vector<Reference> stack;
+	Vector<Vp<Reference>> stack;
 	for(const auto &node : *expression_opt){
 		evaluate_expression_node(stack, recycler_inout, node, scope);
 	}

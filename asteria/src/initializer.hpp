@@ -20,10 +20,10 @@ public:
 		Vp<Expression> expr;
 	};
 	struct S_bracketed_init_list {
-		Vp_vector<Initializer> elems;
+		Vector<Vp<Initializer>> elems;
 	};
 	struct S_braced_init_list {
-		Vp_string_map<Initializer> key_values;
+		Dictionary<Vp<Initializer>> key_values;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_assignment_init     // 0

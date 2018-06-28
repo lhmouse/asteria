@@ -19,7 +19,7 @@ Statement::Statement(Statement &&) noexcept = default;
 Statement & Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
-void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt){
+void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement: {
@@ -79,7 +79,7 @@ void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> sc
 		// Bind clauses recursively. A clause consists of a label expression and a body block.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
-		T_vector<T_pair<Vp<Expression>, Vp<Block>>> bound_clauses;
+		Vector<Pair<Vp<Expression>, Vp<Block>>> bound_clauses;
 		bound_clauses.reserve(cand.clauses_opt.size());
 		for(const auto &pair : cand.clauses_opt){
 			Vp<Expression> bound_label;
@@ -478,7 +478,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 			}
 		} else if(range_type == Value::type_object){
 			// Save the keys. This is necessary because the object might be subsequently altered.
-			T_vector<D_string> backup_keys;
+			Vector<D_string> backup_keys;
 			{
 				const auto &range_object = range_var->get<D_object>();
 				backup_keys.reserve(range_object.size());
@@ -581,7 +581,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		// Register the function as a deferred callback of the current scope_inout.
-		auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Sp_vector<const Parameter>(), scope_inout, std::move(bound_body));
+		auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Vector<Sp<const Parameter>>(), scope_inout, std::move(bound_body));
 		scope_inout->defer_callback(std::move(func));
 		break; }
 

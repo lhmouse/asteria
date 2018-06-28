@@ -83,7 +83,7 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 	}
 }
 
-void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope){
+void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope){
 	const auto type = node.get_type();
 	switch(type){
 	case Expression_node::type_literal: {
@@ -181,10 +181,10 @@ void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expr
 }
 
 namespace {
-	void do_push_reference(Vp_vector<Reference> &stack_inout, Vp<Reference> &&ref){
+	void do_push_reference(Vector<Vp<Reference>> &stack_inout, Vp<Reference> &&ref){
 		stack_inout.emplace_back(std::move(ref));
 	}
-	Vp<Reference> do_pop_reference(Vp_vector<Reference> &stack_inout){
+	Vp<Reference> do_pop_reference(Vector<Vp<Reference>> &stack_inout){
 		if(stack_inout.empty()){
 			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
@@ -410,7 +410,7 @@ namespace {
 	}
 }
 
-void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> recycler_inout, const Expression_node &node, Spr<const Scope> scope){
+void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> recycler_inout, const Expression_node &node, Spr<const Scope> scope){
 	const auto type = node.get_type();
 	switch(type){
 	case Expression_node::type_literal: {
@@ -517,7 +517,7 @@ void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> r
 		}
 		const auto &callee = callee_var->get<D_function>();
 		// Allocate the argument vector. There will be no fewer arguments than parameters.
-		Vp_vector<Reference> arguments;
+		Vector<Vp<Reference>> arguments;
 		arguments.reserve(32);
 		// Pop arguments off the stack.
 		for(std::size_t i = 0; i < cand.argument_count; ++i){

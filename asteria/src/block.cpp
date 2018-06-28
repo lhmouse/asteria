@@ -21,7 +21,7 @@ void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr
 		return;
 	}
 	// Bind statements recursively.
-	T_vector<Statement> bound_stmts;
+	Vector<Statement> bound_stmts;
 	bound_stmts.reserve(block_opt->size());
 	for(const auto &stmt : *block_opt){
 		bind_statement_in_place(bound_stmts, scope_inout, stmt);

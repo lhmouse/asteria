@@ -33,7 +33,7 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> in
 
 	case Initializer::type_bracketed_init_list: {
 		const auto &cand = init_opt->get<Initializer::S_bracketed_init_list>();
-		Vp_vector<Initializer> bound_elems;
+		Vector<Vp<Initializer>> bound_elems;
 		bound_elems.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
 			bind_initializer(bound_init_out, elem, scope);
@@ -45,7 +45,7 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> in
 
 	case Initializer::type_braced_init_list: {
 		const auto &cand = init_opt->get<Initializer::S_braced_init_list>();
-		Vp_string_map<Initializer> bound_pairs;
+		Dictionary<Vp<Initializer>> bound_pairs;
 		bound_pairs.reserve(cand.key_values.size());
 		for(const auto &pair : cand.key_values){
 			bind_initializer(bound_init_out, pair.second, scope);

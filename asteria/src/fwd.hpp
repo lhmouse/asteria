@@ -62,40 +62,28 @@ class Recycler;
 
 // Aliases.
 template<typename ElementT>
-using T_vector = std::vector<ElementT>;
+using Vector = std::vector<ElementT>;
 template<typename ElementT>
-using T_deque = std::deque<ElementT>;
+using Deque = std::deque<ElementT>;
 template<typename ElementT>
-using T_string_map = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
+using Dictionary = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
 template<typename FirstT, typename SecondT>
-using T_pair = std::pair<FirstT, SecondT>;
+using Pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
 using Sp = std::shared_ptr<ElementT>;
 template<typename ElementT>
 using Spr = const std::shared_ptr<ElementT> &;
-template<typename ElementT>
-using Sp_vector = T_vector<Sp<ElementT>>;
-template<typename ValueT>
-using Sp_string_map = T_string_map<Sp<ValueT>>;
 
 template<typename ElementT>
 using Wp = std::weak_ptr<ElementT>;
 template<typename ElementT>
 using Wpr = const std::weak_ptr<ElementT> &;
-template<typename ElementT>
-using Wp_vector = T_vector<Wp<ElementT>>;
-template<typename ValueT>
-using Wp_string_map = T_string_map<Wp<ValueT>>;
 
 template<typename ElementT>
 using Vp = rocket::value_ptr<ElementT>;
 //template<typename ElementT>
 //using Vpr = const rocket::value_ptr<ElementT> &;
-template<typename ElementT>
-using Vp_vector = T_vector<Vp<ElementT>>;
-template<typename ValueT>
-using Vp_string_map = T_string_map<Vp<ValueT>>;
 
 // Complementary data types used internally
 using Nullptr             = std::nullptr_t;
@@ -104,7 +92,7 @@ using Signed_integer      = std::int64_t;
 using Unsigned_integer    = std::uint64_t;
 using Double_precision    = double;
 using Cow_string          = rocket::cow_string;
-using Function_prototype  = void (Vp<Reference> &, Spr<Recycler>, Vp<Reference> &&, Vp_vector<Reference> &&);
+using Function_prototype  = void (Vp<Reference> &, Spr<Recycler>, Vp<Reference> &&, Vector<Vp<Reference>> &&);
 
 // Data types exposed to users
 using D_null      = Nullptr;
@@ -114,8 +102,8 @@ using D_double    = Double_precision;
 using D_string    = Cow_string;
 using D_opaque    = Vp<Opaque_base>;
 using D_function  = Sp<const Function_base>;
-using D_array     = Vp_vector<Value>;
-using D_object    = Vp_string_map<Value>;
+using D_array     = Vector<Vp<Value>>;
+using D_object    = Dictionary<Vp<Value>>;
 
 }
 

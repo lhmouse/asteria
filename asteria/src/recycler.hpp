@@ -16,7 +16,7 @@ public:
 	};
 
 private:
-	Wp_vector<Value> m_weak_values;
+	Vector<Wp<Value>> m_weak_values;
 	std::size_t m_defragmentation_threshold;
 
 public:

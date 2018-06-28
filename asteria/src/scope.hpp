@@ -21,8 +21,8 @@ private:
 	const Purpose m_purpose;
 	const Sp<const Scope> m_parent_opt;
 
-	Vp_string_map<Reference> m_named_references;
-	Sp_vector<const Function_base> m_deferred_callbacks;
+	Dictionary<Vp<Reference>> m_named_references;
+	Vector<Sp<const Function_base>> m_deferred_callbacks;
 
 public:
 	Scope(Purpose purpose, Sp<const Scope> parent_opt)
@@ -51,8 +51,8 @@ public:
 	void defer_callback(Sp<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt);
-extern void prepare_function_scope_lexical(Spr<Scope> scope, const Cow_string &source_location, const Sp_vector<const Parameter> &parameters_opt);
+extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const Cow_string &source_location, const Vector<Sp<const Parameter>> &parameters_opt, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&arguments_opt);
+extern void prepare_function_scope_lexical(Spr<Scope> scope, const Cow_string &source_location, const Vector<Sp<const Parameter>> &parameters_opt);
 
 }
 

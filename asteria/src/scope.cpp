@@ -55,10 +55,10 @@ namespace {
 	private:
 		D_string m_self_id;
 		D_string m_source_location;
-		Vp_vector<Reference> m_arguments_opt;
+		Vector<Vp<Reference>> m_arguments_opt;
 
 	public:
-		Argument_getter(const D_string &self_id, const D_string &location, Vp_vector<Reference> &&arguments_opt)
+		Argument_getter(const D_string &self_id, const D_string &location, Vector<Vp<Reference>> &&arguments_opt)
 			: m_self_id(self_id), m_source_location(location), m_arguments_opt(std::move(arguments_opt))
 		{ }
 
@@ -66,7 +66,7 @@ namespace {
 		D_string describe() const override {
 			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source_location, "'");
 		}
-		void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&/*this_opt*/, Vp_vector<Reference> &&arguments_opt) const override {
+		void invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_inout, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&arguments_opt) const override {
 			switch(arguments_opt.size()){
 			case 0: {
 				// Return the number of arguments.
@@ -114,7 +114,7 @@ namespace {
 		do_set_argument(scope, param_opt->get_id(), std::move(arg_opt));
 	}
 
-	void do_shift_argument(Spr<Scope> scope, Vp_vector<Reference> &arguments_inout_opt, Spr<const Parameter> param_opt){
+	void do_shift_argument(Spr<Scope> scope, Vector<Vp<Reference>> &arguments_inout_opt, Spr<const Parameter> param_opt){
 		Vp<Reference> arg_opt;
 		if(arguments_inout_opt.empty() == false){
 			arg_opt = std::move(arguments_inout_opt.front());
@@ -123,7 +123,7 @@ namespace {
 		do_set_argument(scope, param_opt, std::move(arg_opt));
 	}
 
-	void do_create_argument_getter(Spr<Scope> scope, const D_string &id, const D_string &description, Vp_vector<Reference> &&arguments_opt){
+	void do_create_argument_getter(Spr<Scope> scope, const D_string &id, const D_string &description, Vector<Vp<Reference>> &&arguments_opt){
 		auto value = std::make_shared<Value>(D_function(std::make_shared<Argument_getter>(id, description, std::move(arguments_opt))));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
@@ -139,7 +139,7 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const D_string &location, const Sp_vector<const Parameter> &params_opt, Vp<Reference> &&this_opt, Vp_vector<Reference> &&arguments_opt){
+void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, const D_string &location, const Vector<Sp<const Parameter>> &params_opt, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&arguments_opt){
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler_inout, true);
 	std::for_each(arguments_opt.begin(), arguments_opt.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_inout, true); });
@@ -150,7 +150,7 @@ void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_inout, cons
 	do_create_source_reference(scope, D_string::shallow("__source"), location);
 	do_create_argument_getter(scope, D_string::shallow("__va_arg"), location, std::move(arguments_opt));
 }
-void prepare_function_scope_lexical(Spr<Scope> scope, const D_string &location, const Sp_vector<const Parameter> &params_opt){
+void prepare_function_scope_lexical(Spr<Scope> scope, const D_string &location, const Vector<Sp<const Parameter>> &params_opt){
 	// Create null arguments in the scope.
 	do_set_argument(scope, D_string::shallow("this"), nullptr);
 	std::for_each(params_opt.begin(), params_opt.end(), [&](Spr<const Parameter> param_opt){ do_set_argument(scope, param_opt, nullptr); });

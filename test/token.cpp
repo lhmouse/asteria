@@ -8,7 +8,7 @@
 using namespace Asteria;
 
 int main(){
-	T_deque<Token> tokens;
+	Deque<Token> tokens;
 	auto result = tokenize_line(tokens, 42, Cow_string::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* - 0x1_7.8:4p+4  .false ;-42e13"));
 	ASTERIA_TEST_CHECK(result);
 	ASTERIA_TEST_CHECK(tokens.at(0).get<Token::S_identifier>().id == "hh");

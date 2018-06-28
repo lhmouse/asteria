@@ -57,7 +57,7 @@ public:
 	struct S_function_definition {
 		Cow_string id;
 		Cow_string location;
-		Sp_vector<const Parameter> params_opt;
+		Vector<Sp<const Parameter>> params_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_if_statement {
@@ -67,7 +67,7 @@ public:
 	};
 	struct S_switch_statement {
 		Vp<Expression> ctrl_opt;
-		T_vector<T_pair<Vp<Expression>, Vp<Block>>> clauses_opt;
+		Vector<Pair<Vp<Expression>, Vp<Block>>> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Vp<Block> body_opt;
@@ -154,7 +154,7 @@ public:
 	}
 };
 
-extern void bind_statement_in_place(T_vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt);
+extern void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt);
 extern void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt);
 extern Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_inout, const Statement &stmt);
 

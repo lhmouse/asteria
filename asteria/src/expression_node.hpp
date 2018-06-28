@@ -72,7 +72,7 @@ public:
 	};
 	struct S_lambda_definition {
 		Cow_string location;
-		Sp_vector<const Parameter> params_opt;
+		Vector<Sp<const Parameter>> params_opt;
 		Vp<Block> body_opt;
 	};
 	struct S_pruning {
@@ -129,8 +129,8 @@ public:
 
 extern const char * get_operator_name(Expression_node::Operator op) noexcept;
 
-extern void bind_expression_node(T_vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope);
-extern void evaluate_expression_node(Vp_vector<Reference> &stack_inout, Spr<Recycler> recycler_inout, const Expression_node &node, Spr<const Scope> scope);
+extern void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope);
+extern void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> recycler_inout, const Expression_node &node, Spr<const Scope> scope);
 
 }
 

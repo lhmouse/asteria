@@ -30,7 +30,7 @@ public:
 	}
 };
 
-extern void prepare_function_arguments(Vp_vector<Reference> &arguments_inout, const Sp_vector<const Parameter> &parameters_opt);
+extern void prepare_function_arguments(Vector<Vp<Reference>> &arguments_inout, const Vector<Sp<const Parameter>> &parameters_opt);
 
 }
 

@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Block {
 private:
-	T_vector<Statement> m_statements;
+	Vector<Statement> m_statements;
 
 public:
-	Block(T_vector<Statement> statements)
+	Block(Vector<Statement> statements)
 		: m_statements(std::move(statements))
 	{ }
 	Block(Block &&) noexcept;

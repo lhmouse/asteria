@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Expression {
 private:
-	T_vector<Expression_node> m_nodes;
+	Vector<Expression_node> m_nodes;
 
 public:
-	Expression(T_vector<Expression_node> nodes)
+	Expression(Vector<Expression_node> nodes)
 		: m_nodes(std::move(nodes))
 	{ }
 	Expression(Expression &&) noexcept;

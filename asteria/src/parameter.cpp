@@ -13,7 +13,7 @@ Parameter::Parameter(Parameter &&) noexcept = default;
 Parameter & Parameter::operator=(Parameter &&) noexcept = default;
 Parameter::~Parameter() = default;
 
-void prepare_function_arguments(Vp_vector<Reference> &arguments_inout, const Sp_vector<const Parameter> &params_opt){
+void prepare_function_arguments(Vector<Vp<Reference>> &arguments_inout, const Vector<Sp<const Parameter>> &params_opt){
 	const auto delta_size = static_cast<std::ptrdiff_t>(arguments_inout.size() - params_opt.size());
 	if(delta_size < 0){
 		arguments_inout.insert(arguments_inout.end(), rocket::fill_iterator<Nullptr>(delta_size), rocket::fill_iterator<Nullptr>(0));
