@@ -119,7 +119,7 @@ inline void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Candidat
 	}
 	value_out->set(std::forward<CandidateT>(cand));
 }
-inline void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, Nullptr){
+inline void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, D_null){
 	value_out.reset();
 }
 
