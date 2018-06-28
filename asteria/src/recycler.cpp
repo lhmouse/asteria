@@ -15,7 +15,7 @@ Recycler::~Recycler(){
 
 void Recycler::do_purge_values() noexcept {
 	while(m_weak_values.empty() == false){
-		purge_value(m_weak_values.back().lock());
+		wipe_out_value(m_weak_values.back().lock());
 		m_weak_values.pop_back();
 	}
 }

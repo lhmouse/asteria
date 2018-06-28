@@ -111,23 +111,19 @@ extern std::ostream & operator<<(std::ostream &os, const Sp<Value> &value_opt);
 extern std::ostream & operator<<(std::ostream &os, const Vp<Value> &value_opt);
 
 extern void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out);
+extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt);
+extern void wipe_out_value(Spr<Value> value_opt) noexcept;
 
 template<typename CandidateT>
 inline void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, CandidateT &&cand){
 	if(value_out == nullptr){
-		allocate_value(value_out, recycler_out);
+		((allocate_value))(value_out, recycler_out);
 	}
 	value_out->set(std::forward<CandidateT>(cand));
 }
 inline void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, D_null){
 	value_out.reset();
 }
-
-extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt);
-extern void move_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Vp<Value> &&src_opt);
-
-// This function is useful for breaking dependency circles.
-extern void purge_value(Spr<Value> value_opt) noexcept;
 
 extern Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Value> rhs_opt) noexcept;
 

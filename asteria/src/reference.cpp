@@ -346,10 +346,13 @@ namespace {
 
 void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler_out, Vp<Reference> &&ref_opt){
 	auto result = do_try_extract_value(ref_opt);
-	if(result.is_movable() == false){
-		return copy_value(value_out, recycler_out, result.get_copyable_pointer());
+	if(result.is_movable()){
+		auto &movable_value = result.get_movable_pointer();
+		if(movable_value && (movable_value->get_recycler_opt() == recycler_out)){
+			return value_out.reset(movable_value.release());
+		}
 	}
-	return move_value(value_out, recycler_out, std::move(result.get_movable_pointer()));
+	return copy_value(value_out, recycler_out, result.get_copyable_pointer());
 }
 
 namespace {

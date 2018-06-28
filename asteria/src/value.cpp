@@ -230,7 +230,6 @@ void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out){
 	recycler_out->adopt_value(sp);
 	value_out.reset(std::move(sp));
 }
-
 void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt){
 	const auto type = get_value_type(src_opt);
 	switch(type){
@@ -285,15 +284,7 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Valu
 		std::terminate();
 	}
 }
-void move_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Vp<Value> &&src_opt){
-	if(src_opt && (src_opt->get_recycler_opt() == recycler_out)){
-		return value_out.reset(src_opt.release());
-	} else {
-		return copy_value(value_out, recycler_out, src_opt);
-	}
-}
-
-void purge_value(Spr<Value> value_opt) noexcept {
+void wipe_out_value(Spr<Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
@@ -308,7 +299,7 @@ void purge_value(Spr<Value> value_opt) noexcept {
 	case Value::type_array: {
 		auto &cand = value_opt->get<D_array>();
 		for(auto &elem : cand){
-			purge_value(elem);
+			wipe_out_value(elem);
 			elem = nullptr;
 		}
 		return; }
@@ -316,7 +307,7 @@ void purge_value(Spr<Value> value_opt) noexcept {
 	case Value::type_object: {
 		auto &cand = value_opt->get<D_object>();
 		for(auto &pair : cand){
-			purge_value(pair.second);
+			wipe_out_value(pair.second);
 			pair.second = nullptr;
 		}
 		return; }
