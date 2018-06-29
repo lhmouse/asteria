@@ -81,7 +81,7 @@ using Wpr = const std::weak_ptr<ElementT> &;
 template<typename ElementT>
 using Vp = rocket::value_ptr<ElementT>;
 template<typename ElementT>
-using Vpr = const rocket::value_ptr<typename std::remove_const<ElementT>::type> &;
+using Vpr = typename std::conditional<std::is_const<ElementT>::value, const rocket::value_ptr<typename std::remove_const<ElementT>::type> &, rocket::value_ptr<ElementT> &>::type;
 
 // Complementary data types used internally
 using Nullptr             = std::nullptr_t;

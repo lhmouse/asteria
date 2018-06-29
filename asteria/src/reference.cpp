@@ -312,7 +312,7 @@ namespace {
 			}
 			const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
 			if(parent_result.is_movable() == false){
-				return value_opt.share_c();
+				return value_opt.cshare();
 			}
 			return const_cast<Vp<Value> &&>(value_opt); }
 
@@ -333,7 +333,7 @@ namespace {
 			}
 			const auto &value_opt = it->second;
 			if(parent_result.is_movable() == false){
-				return value_opt.share_c();
+				return value_opt.cshare();
 			}
 			return const_cast<Vp<Value> &&>(value_opt); }
 

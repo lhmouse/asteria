@@ -19,18 +19,24 @@ using ::std::weak_ptr;
 using ::std::basic_ostream;
 using ::std::enable_if;
 using ::std::is_convertible;
-using ::std::remove_cv;
+using ::std::remove_const;
 using ::std::is_same;
+using ::std::remove_extent;
 
 template<typename elementT>
 class value_ptr;
 
 template<typename elementT>
 class value_ptr {
-	static_assert(is_same<typename remove_cv<elementT>::type, elementT>::value, "Top-level cv-qualifiers are not allowed.");
+	static_assert(is_same<typename remove_const<elementT>::type, elementT>::value, "A top-level `const` qualifier on `elementT` is not allowed.");
+
+public:
+	using element_type  = typename remove_extent<elementT>::type;
+	using shared_type   = shared_ptr<elementT>;
+	using weak_type     = weak_ptr<elementT>;
 
 private:
-	shared_ptr<elementT> m_ptr;
+	shared_type m_ptr;
 
 public:
 	constexpr value_ptr(nullptr_t = nullptr) noexcept
@@ -60,7 +66,7 @@ public:
 		return this->m_ptr;
 	}
 	template<typename otherT = elementT>
-	shared_ptr<const otherT> share_c() const noexcept {
+	shared_ptr<const otherT> cshare() const noexcept {
 		return this->share();
 	}
 
@@ -73,7 +79,7 @@ public:
 		return this->m_ptr;
 	}
 	template<typename otherT = elementT>
-	weak_ptr<const otherT> weaken_c() const noexcept {
+	weak_ptr<const otherT> cweaken() const noexcept {
 		return this->weaken();
 	}
 
@@ -88,8 +94,8 @@ public:
 	void emplace(paramsT &&...params){
 		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
 	}
-	shared_ptr<elementT> release() noexcept {
-		shared_ptr<elementT> ptr;
+	shared_type release() noexcept {
+		shared_type ptr;
 		ptr.swap(this->m_ptr);
 		return ptr;
 	}
@@ -102,7 +108,7 @@ public:
 	operator shared_ptr<const elementT>() const noexcept {
 		return this->m_ptr;
 	}
-	operator shared_ptr<elementT>() noexcept {
+	operator shared_ptr<elementT>() const noexcept {
 		return this->m_ptr;
 	}
 	operator weak_ptr<const elementT>() const noexcept {

@@ -458,7 +458,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				// Set the key, which is an integer.
 				set_value(key_var, recycler_out, D_integer(index));
 				const auto key_wref = scope_for->drill_for_named_reference(cand.key_id);
-				Reference::S_constant ref_k = { key_var.share_c() };
+				Reference::S_constant ref_k = { key_var.cshare() };
 				set_reference(key_wref, std::move(ref_k));
 				// Set the value, which is an array element.
 				copy_reference(temp_ref, range_ref);
@@ -492,7 +492,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				// Set the key, which is an integer.
 				set_value(key_var, recycler_out, D_string(key));
 				const auto key_wref = scope_for->drill_for_named_reference(cand.key_id);
-				Reference::S_constant ref_k = { key_var.share_c() };
+				Reference::S_constant ref_k = { key_var.cshare() };
 				set_reference(key_wref, std::move(ref_k));
 				// Set the value, which is an object member.
 				copy_reference(temp_ref, range_ref);
@@ -630,7 +630,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		// Evaluate the operand, then throw the exception constructed from the result of it.
 		evaluate_expression(result_out, recycler_out, cand.operand_opt, scope_inout);
 		ASTERIA_DEBUG_LOG("Throwing exception: ", result_out);
-		throw Exception(result_out.share_c()); }
+		throw Exception(result_out.cshare()); }
 
 	case Statement::type_return_statement: {
 		const auto &cand = stmt.get<Statement::S_return_statement>();
