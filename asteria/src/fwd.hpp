@@ -35,10 +35,8 @@ class Insertable_streambuf;
 class Insertable_ostream;
 class Logger;
 
-// Lexical elements (copyable)
+// Lexical elements
 class Parameter;
-
-// Lexical elements (movable only)
 class Initializer;
 class Expression_node;
 class Expression;
@@ -47,11 +45,9 @@ class Block;
 class Parser_result;
 class Token;
 
-// Runtime objects (movable only)
+// Runtime objects
 class Exception;
 class Stored_reference;
-
-// Runtime objects (neither copyable nor movable)
 class Opaque_base;
 class Function_base;
 class Slim_function;
@@ -62,7 +58,7 @@ class Variable;
 class Scope;
 class Recycler;
 
-// Aliases.
+// Aliases
 template<typename ElementT>
 using Vector = std::vector<ElementT>;
 template<typename ElementT>
@@ -84,8 +80,8 @@ using Wpr = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Vp = rocket::value_ptr<ElementT>;
-//template<typename ElementT>
-//using Vpr = const rocket::value_ptr<ElementT> &;
+template<typename ElementT>
+using Vpr = const rocket::value_ptr<typename std::remove_const<ElementT>::type> &;
 
 // Complementary data types used internally
 using Nullptr             = std::nullptr_t;

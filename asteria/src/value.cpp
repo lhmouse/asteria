@@ -42,38 +42,16 @@ const char * get_type_name(Value::Type type) noexcept {
 		std::terminate();
 	}
 }
-
 Value::Type get_value_type(Spr<const Value> value_opt) noexcept {
-	return value_opt ? value_opt->get_type() : Value::type_null;
+	if(value_opt){
+		return value_opt->get_type();
+	} else {
+		return Value::type_null;
+	}
 }
 const char * get_value_type_name(Spr<const Value> value_opt) noexcept {
-	return get_type_name(get_value_type(value_opt));
-}
-
-bool test_value(Spr<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
-	switch(type){
-	case Value::type_null:
-		return false;
-	case Value::type_boolean:
-		return value_opt->get<D_boolean>();
-	case Value::type_integer:
-		return value_opt->get<D_integer>() != 0;
-	case Value::type_double:
-		return std::fpclassify(value_opt->get<D_double>()) != FP_ZERO;
-	case Value::type_string:
-		return value_opt->get<D_string>().empty() == false;
-	case Value::type_opaque:
-	case Value::type_function:
-		return true;
-	case Value::type_array:
-		return value_opt->get<D_array>().empty() == false;
-	case Value::type_object:
-		return value_opt->get<D_object>().empty() == false;
-	default:
-		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
-		std::terminate();
-	}
+	return get_type_name(type);
 }
 
 namespace {
@@ -133,41 +111,34 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 	case Value::type_null:
 		os <<"null";
 		return;
-
 	case Value::type_boolean: {
 		const auto &cand = value_opt->get<D_boolean>();
 		os <<std::boolalpha <<std::nouppercase <<cand;
 		return; }
-
 	case Value::type_integer: {
 		const auto &cand = value_opt->get<D_integer>();
 		os <<std::dec <<cand;
 		return; }
-
 	case Value::type_double: {
 		const auto &cand = value_opt->get<D_double>();
 		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<cand;
 		return; }
-
 	case Value::type_string: {
 		const auto &cand = value_opt->get<D_string>();
 		do_quote_string(os, cand);
 		return; }
-
 	case Value::type_opaque: {
 		const auto &cand = value_opt->get<D_opaque>();
 		os <<"opaque(\"" <<typeid(*cand).name() <<"\", ";
 		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
-
 	case Value::type_function: {
 		const auto &cand = value_opt->get<D_opaque>();
 		os <<"function(\"" <<typeid(*cand).name() <<"\", ";
 		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
-
 	case Value::type_array: {
 		const auto &array = value_opt->get<D_array>();
 		os <<'[';
@@ -185,7 +156,6 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		}
 		os <<']';
 		return; }
-
 	case Value::type_object: {
 		const auto &object = value_opt->get<D_object>();
 		os <<'{';
@@ -203,58 +173,60 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		}
 		os <<'}';
 		return; }
-
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Sp<const Value> &value_opt){
+std::ostream & operator<<(std::ostream &os, Spr<const Value> value_opt){
 	dump_value(os, value_opt);
 	return os;
 }
-std::ostream & operator<<(std::ostream &os, const Vp<Value> &value_opt){
+std::ostream & operator<<(std::ostream &os, Vpr<const Value> &value_opt){
 	dump_value(os, value_opt);
 	return os;
 }
 
-void allocate_value(Vp<Value> &value_out, Spr<Recycler> recycler_out){
+void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Value::Variant &&variant){
 	if(value_out){
-		return;
+		value_out->set(std::move(variant));
+	} else {
+		auto sp = std::make_shared<Value>(recycler_out, std::move(variant));
+		recycler_out->adopt_value(sp);
+		value_out.reset(std::move(sp));
 	}
-	auto sp = std::make_shared<Value>(recycler_out, D_opaque());
-	recycler_out->adopt_value(sp);
-	value_out.reset(std::move(sp));
+}
+void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, D_null){
+	value_out.reset();
 }
 void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt){
 	const auto type = get_value_type(src_opt);
 	switch(type){
 	case Value::type_null:
-		return set_value(value_out, recycler_out, nullptr);
-
+		set_value(value_out, recycler_out, nullptr);
+		return;
 	case Value::type_boolean: {
 		const auto &cand = src_opt->get<D_boolean>();
-		return set_value(value_out, recycler_out, cand); }
-
+		set_value(value_out, recycler_out, cand);
+		return; }
 	case Value::type_integer: {
 		const auto &cand = src_opt->get<D_integer>();
-		return set_value(value_out, recycler_out, cand); }
-
+		set_value(value_out, recycler_out, cand);
+		return; }
 	case Value::type_double: {
 		const auto &cand = src_opt->get<D_double>();
-		return set_value(value_out, recycler_out, cand); }
-
+		set_value(value_out, recycler_out, cand);
+		return; }
 	case Value::type_string: {
 		const auto &cand = src_opt->get<D_string>();
-		return set_value(value_out, recycler_out, cand); }
-
+		set_value(value_out, recycler_out, cand);
+		return; }
 	case Value::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Values having opaque types cannot be copied.");
-
 	case Value::type_function: {
 		const auto &cand = src_opt->get<D_function>();
-		return set_value(value_out, recycler_out, cand); }
-
+		set_value(value_out, recycler_out, cand);
+		return; }
 	case Value::type_array: {
 		const auto &cand = src_opt->get<D_array>();
 		D_array array;
@@ -263,8 +235,8 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Valu
 			copy_value(value_out, recycler_out, elem);
 			array.emplace_back(std::move(value_out));
 		}
-		return set_value(value_out, recycler_out, std::move(array)); }
-
+		set_value(value_out, recycler_out, std::move(array));
+		return; }
 	case Value::type_object: {
 		const auto &cand = src_opt->get<D_object>();
 		D_object object;
@@ -273,8 +245,8 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Valu
 			copy_value(value_out, recycler_out, pair.second);
 			object.emplace(pair.first, std::move(value_out));
 		}
-		return set_value(value_out, recycler_out, std::move(object)); }
-
+		set_value(value_out, recycler_out, std::move(object));
+		return; }
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
@@ -291,29 +263,51 @@ void wipe_out_value(Spr<Value> value_opt) noexcept {
 	case Value::type_opaque:
 	case Value::type_function:
 		return;
-
 	case Value::type_array: {
 		auto &cand = value_opt->get<D_array>();
 		for(auto &elem : cand){
 			wipe_out_value(elem);
-			elem = nullptr;
+			elem.reset();
 		}
 		return; }
-
 	case Value::type_object: {
 		auto &cand = value_opt->get<D_object>();
 		for(auto &pair : cand){
 			wipe_out_value(pair.second);
-			pair.second = nullptr;
+			pair.second.reset();
 		}
 		return; }
-
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
 
+bool test_value(Spr<const Value> value_opt) noexcept {
+	const auto type = get_value_type(value_opt);
+	switch(type){
+	case Value::type_null:
+		return false;
+	case Value::type_boolean:
+		return value_opt->get<D_boolean>();
+	case Value::type_integer:
+		return value_opt->get<D_integer>() != 0;
+	case Value::type_double:
+		return std::fpclassify(value_opt->get<D_double>()) != FP_ZERO;
+	case Value::type_string:
+		return value_opt->get<D_string>().empty() == false;
+	case Value::type_opaque:
+	case Value::type_function:
+		return true;
+	case Value::type_array:
+		return value_opt->get<D_array>().empty() == false;
+	case Value::type_object:
+		return value_opt->get<D_object>().empty() == false;
+	default:
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
+		std::terminate();
+	}
+}
 Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Value> rhs_opt) noexcept {
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = get_value_type(lhs_opt);
@@ -331,47 +325,43 @@ Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Valu
 	switch(type_lhs){
 	case Value::type_null:
 		return Value::comparison_result_equal;
-
 	case Value::type_boolean: {
-		const auto &value_lhs = lhs_opt->get<D_boolean>();
-		const auto &value_rhs = rhs_opt->get<D_boolean>();
-		if(value_lhs < value_rhs){
+		const auto &cand_lhs = lhs_opt->get<D_boolean>();
+		const auto &cand_rhs = rhs_opt->get<D_boolean>();
+		if(cand_lhs < cand_rhs){
 			return Value::comparison_result_less;
 		}
-		if(value_lhs > value_rhs){
+		if(cand_lhs > cand_rhs){
 			return Value::comparison_result_greater;
 		}
 		return Value::comparison_result_equal; }
-
 	case Value::type_integer: {
-		const auto &value_lhs = lhs_opt->get<D_integer>();
-		const auto &value_rhs = rhs_opt->get<D_integer>();
-		if(value_lhs < value_rhs){
+		const auto &cand_lhs = lhs_opt->get<D_integer>();
+		const auto &cand_rhs = rhs_opt->get<D_integer>();
+		if(cand_lhs < cand_rhs){
 			return Value::comparison_result_less;
 		}
-		if(value_lhs > value_rhs){
+		if(cand_lhs > cand_rhs){
 			return Value::comparison_result_greater;
 		}
 		return Value::comparison_result_equal; }
-
 	case Value::type_double: {
-		const auto &value_lhs = lhs_opt->get<D_double>();
-		const auto &value_rhs = rhs_opt->get<D_double>();
-		if(std::isunordered(value_lhs, value_rhs)){
+		const auto &cand_lhs = lhs_opt->get<D_double>();
+		const auto &cand_rhs = rhs_opt->get<D_double>();
+		if(std::isunordered(cand_lhs, cand_rhs)){
 			return Value::comparison_result_unordered;
 		}
-		if(std::isless(value_lhs, value_rhs)){
+		if(std::isless(cand_lhs, cand_rhs)){
 			return Value::comparison_result_less;
 		}
-		if(std::isgreater(value_lhs, value_rhs)){
+		if(std::isgreater(cand_lhs, cand_rhs)){
 			return Value::comparison_result_greater;
 		}
 		return Value::comparison_result_equal; }
-
 	case Value::type_string: {
-		const auto &value_lhs = lhs_opt->get<D_string>();
-		const auto &value_rhs = rhs_opt->get<D_string>();
-		const int cmp = value_lhs.compare(value_rhs);
+		const auto &cand_lhs = lhs_opt->get<D_string>();
+		const auto &cand_rhs = rhs_opt->get<D_string>();
+		const int cmp = cand_lhs.compare(cand_rhs);
 		if(cmp < 0){
 			return Value::comparison_result_less;
 		}
@@ -379,11 +369,9 @@ Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Valu
 			return Value::comparison_result_greater;
 		}
 		return Value::comparison_result_equal; }
-
 	case Value::type_opaque:
 	case Value::type_function:
 		return Value::comparison_result_unordered;
-
 	case Value::type_array: {
 		const auto &array_lhs = lhs_opt->get<D_array>();
 		const auto &array_rhs = rhs_opt->get<D_array>();
@@ -401,10 +389,8 @@ Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Valu
 			return Value::comparison_result_greater;
 		}
 		return Value::comparison_result_equal; }
-
 	case Value::type_object:
 		return Value::comparison_result_unordered;
-
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
