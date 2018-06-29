@@ -116,7 +116,7 @@ extern void wipe_out_value(Spr<Value> value_opt) noexcept;
 template<typename CandidateT>
 inline void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, CandidateT &&cand){
 	if(value_out == nullptr){
-		((allocate_value))(value_out, recycler_out);
+		allocate_value(value_out, recycler_out);
 	}
 	value_out->set(std::forward<CandidateT>(cand));
 }
