@@ -209,7 +209,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scop
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown statement type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -249,7 +249,7 @@ void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt){
 		break;
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown statement type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -635,7 +635,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		return Statement::execution_result_return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown statement type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown statement type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 	return Statement::execution_result_next;

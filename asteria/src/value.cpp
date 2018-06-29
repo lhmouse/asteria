@@ -14,7 +14,7 @@ namespace Asteria {
 Value::~Value() = default;
 
 void Value::do_throw_type_mismatch(Value::Type expect) const {
-	ASTERIA_THROW_RUNTIME_ERROR("The formal type `", get_type_name(expect), "` did not match the actual type `", get_type_name(get_type()), "` of this value.");
+	ASTERIA_THROW_RUNTIME_ERROR("The formal type `", get_type_name(expect), "` does not match the actual type `", get_type_name(get_type()), "` of this value.");
 }
 
 const char * get_type_name(Value::Type type) noexcept {
@@ -38,7 +38,7 @@ const char * get_type_name(Value::Type type) noexcept {
 	case Value::type_object:
 		return "object";
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -71,7 +71,7 @@ bool test_value(Spr<const Value> value_opt) noexcept {
 	case Value::type_object:
 		return value_opt->get<D_object>().empty() == false;
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -205,7 +205,7 @@ void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_ne
 		return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -276,7 +276,7 @@ void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Valu
 		return set_value(value_out, recycler_out, std::move(object)); }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -309,7 +309,7 @@ void wipe_out_value(Spr<Value> value_opt) noexcept {
 		return; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -406,7 +406,7 @@ Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Valu
 		return Value::comparison_result_unordered;
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown type enumeration `", type_lhs, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }

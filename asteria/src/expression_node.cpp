@@ -78,7 +78,7 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 	case Expression_node::operator_infix_assign:
 		return "assginment";
 	default:
-		ASTERIA_DEBUG_LOG("Unknown operator enumeration `", op, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown operator enumeration `", op, "` is encountered. This is probably a bug. Please report.");
 		return "<unknown>";
 	}
 }
@@ -175,7 +175,7 @@ void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expres
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown expression node type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -1127,13 +1127,13 @@ void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> 
 			break; }
 
 		default:
-			ASTERIA_DEBUG_LOG("Unknown operator enumeration `", cand.op, "`. This is probably a bug. Please report.");
+			ASTERIA_DEBUG_LOG("An unknown operator enumeration `", cand.op, "` is encountered. This is probably a bug. Please report.");
 			std::terminate();
 		}
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown expression node type enumeration `", type, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown expression node type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }

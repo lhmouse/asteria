@@ -52,7 +52,7 @@ void dump_reference(std::ostream &os, Spr<const Reference> ref_opt, unsigned ind
 		return dump_reference(os, cand.parent_opt, indent_next, indent_increment); }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
@@ -91,7 +91,7 @@ void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> src_opt){
 		return set_reference(reference_out, std::move(object_member)); }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
@@ -159,7 +159,7 @@ Sp<const Value> read_reference_opt(Spr<const Reference> ref_opt){
 		return value_opt; }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
@@ -234,7 +234,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> ref_opt){
 		return std::ref(value_opt); }
 
 	default:
-		ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
@@ -338,7 +338,7 @@ namespace {
 			return const_cast<Vp<Value> &&>(value_opt); }
 
 		default:
-			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+			ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 			std::terminate();
 		}
 	}
@@ -374,7 +374,7 @@ namespace {
 			const auto &cand = ref_opt->get<Reference::S_object_member>();
 			return do_check_materializability(cand.parent_opt); }
 		default:
-			ASTERIA_DEBUG_LOG("Unknown reference type enumeration: type = ", type);
+			ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 			std::terminate();
 		}
 	}

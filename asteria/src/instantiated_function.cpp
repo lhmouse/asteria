@@ -40,7 +40,7 @@ void Instantiated_function::invoke(Vp<Reference> &result_out, Spr<Recycler> recy
 		// Forward the result reference;
 		return;
 	default:
-		ASTERIA_DEBUG_LOG("Unknown compound statement execution result enumeration `", exec_result, "`. This is probably a bug. Please report.");
+		ASTERIA_DEBUG_LOG("An unknown statement execution result enumeration `", exec_result, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
