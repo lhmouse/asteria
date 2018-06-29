@@ -18,8 +18,6 @@ public:
 	explicit Exception(Sp<const Reference> &&reference_opt) noexcept
 		: m_reference_opt(std::move(reference_opt))
 	{ }
-	Exception(const Exception &) noexcept;
-	Exception & operator=(const Exception &) noexcept;
 	Exception(Exception &&) noexcept;
 	Exception & operator=(Exception &&) noexcept;
 	~Exception() override;
