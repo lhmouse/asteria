@@ -517,16 +517,20 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 
 	case Statement::type_try_statement: {
 		const auto &cand = stmt.get<Statement::S_try_statement>();
-		// Execute the `try` branch in a C++ `try...catch` statement.
-		Sp<Scope> scope_catch;
 		try {
+			// Execute the `try` branch in a C++ `try...catch` statement.
+			const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
+			const auto result = execute_block_in_place(result_out, scope_try, recycler_out, cand.branch_try_opt);
+			if(result != Statement::execution_result_next){
+				// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
+				return result;
+			}
+		} catch(...){
+			// Execute the `catch` branch.
+			// Translate the exception object.
+			const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
 			try {
-				const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
-				const auto result = execute_block_in_place(result_out, scope_try, recycler_out, cand.branch_try_opt);
-				if(result != Statement::execution_result_next){
-					// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
-					return result;
-				}
+				throw;
 			} catch(Exception &e){
 				ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
 				// Print exceptions nested, if any.
@@ -547,16 +551,14 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 						}
 					} while(nested_eptr);
 				}
-				// Move the reference into the `catch` scope_inout, then execute the `catch` branch.
-				scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
+				// Copy the reference into the scope.
 				copy_reference(result_out, e.get_reference_opt());
+				materialize_reference(result_out, recycler_out, true);
 				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
 				copy_reference(wref, result_out);
-				throw;
 			} catch(std::exception &e){
 				ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
-				// Create a string containing the error message in the `catch` scope_inout, then execute the `catch` branch.
-				scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
+				// Create a string containing the error message in the scope.
 				Vp<Value> what_var;
 				set_value(what_var, recycler_out, D_string(e.what()));
 				Reference::S_temporary_value ref_t = { std::move(what_var) };
@@ -564,9 +566,12 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				materialize_reference(result_out, recycler_out, true);
 				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
 				copy_reference(wref, result_out);
-				throw;
+			} catch(...){
+				ASTERIA_DEBUG_LOG("Caught an unknown exception...");
+				// Create a null reference in the scope.
+				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
+				set_reference(wref, nullptr);
 			}
-		} catch(std::exception &){
 			const auto result = execute_block_in_place(result_out, scope_catch, recycler_out, cand.branch_catch_opt);
 			if(result != Statement::execution_result_next){
 				// If `break`, `continue` or `return` is encountered inside the branch, forward it to the caller.
@@ -625,7 +630,6 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		// Evaluate the operand, then throw the exception constructed from the result of it.
 		evaluate_expression(result_out, recycler_out, cand.operand_opt, scope_inout);
 		ASTERIA_DEBUG_LOG("Throwing exception: ", result_out);
-		materialize_reference(result_out, recycler_out, true);
 		throw Exception(result_out.share_c()); }
 
 	case Statement::type_return_statement: {
