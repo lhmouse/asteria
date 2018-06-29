@@ -527,8 +527,8 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 			}
 		} catch(...){
 			// Execute the `catch` branch.
-			// Translate the exception object.
 			const auto scope_catch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
+			// Translate the exception object.
 			try {
 				throw;
 			} catch(Exception &e){
@@ -537,7 +537,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				auto nested_eptr = e.nested_ptr();
 				if(nested_eptr){
 					static constexpr char s_prefix[] = "which contains a nested ";
-					auto prefix_width = static_cast<int>(sizeof(s_prefix) - 1);
+					int prefix_width = static_cast<int>(std::strlen(s_prefix));
 					do {
 						prefix_width += 2;
 						try {
