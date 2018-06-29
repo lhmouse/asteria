@@ -13,7 +13,7 @@ namespace Asteria {
 
 Value::~Value() = default;
 
-void Value::do_throw_type_mismatch(Type expect) const {
+void Value::do_throw_type_mismatch(Value::Type expect) const {
 	ASTERIA_THROW_RUNTIME_ERROR("The expected type `", get_type_name(expect), "` did not match the stored type `", get_type_name(get_type()), "` of this value.");
 }
 
