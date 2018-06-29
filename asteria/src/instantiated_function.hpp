@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "function_base.hpp"
+#include "parameter.hpp"
 
 namespace Asteria {
 
