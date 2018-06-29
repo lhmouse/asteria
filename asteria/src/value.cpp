@@ -14,7 +14,7 @@ namespace Asteria {
 Value::~Value() = default;
 
 void Value::do_throw_type_mismatch(Value::Type expect) const {
-	ASTERIA_THROW_RUNTIME_ERROR("The expected type `", get_type_name(expect), "` did not match the stored type `", get_type_name(get_type()), "` of this value.");
+	ASTERIA_THROW_RUNTIME_ERROR("The formal type `", get_type_name(expect), "` did not match the actual type `", get_type_name(get_type()), "` of this value.");
 }
 
 const char * get_type_name(Value::Type type) noexcept {
