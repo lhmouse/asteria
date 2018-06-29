@@ -306,24 +306,6 @@ public:
 		this->m_buffer.apply_visitor(rhs.m_index, visitor);
 		this->m_index = rhs.m_index;
 	}
-	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
-	variant & operator=(elementT &&element) noexcept(details_variant::is_nothrow_forward_assignable<elementT>::value && details_variant::is_nothrow_forward_constructible<elementT>::value) {
-		enum : unsigned { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
-		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		if(this->m_index == eindex){
-			details_variant::visitor_get_pointer<void> visitor = { nullptr };
-			this->m_buffer.apply_visitor(eindex, visitor);
-			*static_cast<etype *>(visitor.result_ptr) = ::std::forward<elementT>(element);
-		} else {
-			details_variant::visitor_get_pointer<void> visitor = { nullptr };
-			this->m_buffer.apply_visitor(eindex, visitor);
-			new(visitor.result_ptr) etype(::std::forward<elementT>(element));
-			details_variant::visitor_destroy cleaner = { };
-			this->m_buffer.apply_visitor(this->m_index, cleaner);
-		}
-		this->m_index = eindex;
-		return *this;
-	}
 	variant & operator=(const variant &rhs) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
 		details_variant::visitor_get_pointer<const void> visitor_rhs = { nullptr };
 		rhs.m_buffer.apply_visitor(rhs.m_index, visitor_rhs);
@@ -405,8 +387,20 @@ public:
 		return *ptr;
 	}
 	template<typename elementT>
-	void set(elementT &&element) noexcept(noexcept(::std::declval<variant &>() = ::std::forward<elementT>(element))) {
-		*this = ::std::forward<elementT>(element);
+	elementT & set(elementT &&element) noexcept(noexcept(::std::declval<variant &>() = ::std::forward<elementT>(element))) {
+		enum : unsigned { eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value };
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+		details_variant::visitor_get_pointer<void> visitor = { nullptr };
+		this->m_buffer.apply_visitor(eindex, visitor);
+		if(this->m_index == eindex){
+			*static_cast<etype *>(visitor.result_ptr) = ::std::forward<elementT>(element);
+		} else {
+			new(visitor.result_ptr) etype(::std::forward<elementT>(element));
+			details_variant::visitor_destroy cleaner = { };
+			this->m_buffer.apply_visitor(this->m_index, cleaner);
+		}
+		this->m_index = eindex;
+		return *static_cast<etype *>(visitor.result_ptr);
 	}
 
 	template<typename fvisitorT>
