@@ -56,7 +56,7 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> in
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
@@ -104,7 +104,7 @@ void evaluate_initializer(Vp<Reference> &result_out, Spr<Recycler> recycler_out,
 		break; }
 
 	default:
-		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type);
+		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }

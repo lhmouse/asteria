@@ -51,7 +51,7 @@ public:
 	};
 	struct S_variable_definition {
 		Cow_string id;
-		bool constant;
+		bool immutable;
 		Vp<Initializer> init_opt;
 	};
 	struct S_function_definition {

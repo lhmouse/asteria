@@ -36,7 +36,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scop
 		// Bind the initializer recursively.
 		Vp<Initializer> bound_init;
 		bind_initializer(bound_init, cand.init_opt, scope_inout);
-		Statement::S_variable_definition stmt_v = { cand.id, cand.constant, std::move(bound_init) };
+		Statement::S_variable_definition stmt_v = { cand.id, cand.immutable, std::move(bound_init) };
 		bound_stmts_out.emplace_back(std::move(stmt_v));
 		// Create a null reference for the variable.
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
@@ -286,7 +286,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		// This results in a variable.
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
-		materialize_reference(result_out, recycler_out, cand.constant);
+		materialize_reference(result_out, recycler_out, cand.immutable);
 		const auto wref = scope_inout->drill_for_named_reference(cand.id);
 		copy_reference(wref, result_out);
 		break; }
