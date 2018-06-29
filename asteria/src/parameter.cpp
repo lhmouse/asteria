@@ -26,12 +26,12 @@ void prepare_function_arguments(Vector<Vp<Reference>> &args_inout, const Vector<
 		if(arg){
 			continue;
 		}
-		const auto &default_arg = param.get_default_argument_opt();
-		if(!default_arg){
+		const auto &def_arg = param.get_default_argument_opt();
+		if(!def_arg){
 			continue;
 		}
-		ASTERIA_DEBUG_LOG("Setting default argument: i = ", i, ", default_arg = ", default_arg);
-		Reference::S_constant ref_k = { default_arg };
+		ASTERIA_DEBUG_LOG("Setting default argument: i = ", i, ", def_arg = ", def_arg);
+		Reference::S_constant ref_k = { def_arg };
 		set_reference(arg, std::move(ref_k));
 	}
 }

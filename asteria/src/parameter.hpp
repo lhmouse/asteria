@@ -11,11 +11,11 @@ namespace Asteria {
 class Parameter {
 private:
 	Cow_string m_id;
-	Sp<const Value> m_default_argument_opt;
+	Sp<const Value> m_def_arg_opt;
 
 public:
-	Parameter(Cow_string id, Sp<const Value> default_argument_opt)
-		: m_id(std::move(id)), m_default_argument_opt(std::move(default_argument_opt))
+	Parameter(Cow_string id, Sp<const Value> def_arg_opt)
+		: m_id(std::move(id)), m_def_arg_opt(std::move(def_arg_opt))
 	{ }
 	Parameter(const Parameter &) noexcept;
 	Parameter & operator=(const Parameter &) noexcept;
@@ -28,7 +28,7 @@ public:
 		return m_id;
 	}
 	const Sp<const Value> & get_default_argument_opt() const {
-		return m_default_argument_opt;
+		return m_def_arg_opt;
 	}
 };
 
