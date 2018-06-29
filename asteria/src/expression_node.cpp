@@ -516,6 +516,7 @@ void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> 
 			ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", get_type_name(callee_type), "`.");
 		}
 		const auto &callee = callee_var->get<D_function>();
+		ROCKET_ASSERT(callee);
 		// Allocate the argument vector. There will be no fewer arguments than params.
 		Vector<Vp<Reference>> args;
 		args.reserve(32);
