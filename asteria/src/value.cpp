@@ -188,7 +188,7 @@ std::ostream & operator<<(std::ostream &os, Vpr<const Value> &value_opt){
 }
 
 void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Value::Variant &&variant){
-	if(value_out){
+	if(value_out && (value_out->get_recycler_opt() == recycler_out)){
 		value_out->set(std::move(variant));
 	} else {
 		auto sp = std::make_shared<Value>(recycler_out, std::move(variant));
