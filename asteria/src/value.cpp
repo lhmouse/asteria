@@ -288,21 +288,27 @@ bool test_value(Spr<const Value> value_opt) noexcept {
 	switch(type){
 	case Value::type_null:
 		return false;
-	case Value::type_boolean:
-		return value_opt->get<D_boolean>();
-	case Value::type_integer:
-		return value_opt->get<D_integer>() != 0;
-	case Value::type_double:
-		return std::fpclassify(value_opt->get<D_double>()) != FP_ZERO;
-	case Value::type_string:
-		return value_opt->get<D_string>().empty() == false;
+	case Value::type_boolean: {
+		const auto &cand = value_opt->get<D_boolean>();
+		return cand; }
+	case Value::type_integer: {
+		const auto &cand = value_opt->get<D_integer>();
+		return cand != 0; }
+	case Value::type_double: {
+		const auto &cand = value_opt->get<D_double>();
+		return std::fpclassify(cand) != FP_ZERO; }
+	case Value::type_string: {
+		const auto &cand = value_opt->get<D_string>();
+		return cand.empty() == false; }
 	case Value::type_opaque:
 	case Value::type_function:
 		return true;
-	case Value::type_array:
-		return value_opt->get<D_array>().empty() == false;
-	case Value::type_object:
-		return value_opt->get<D_object>().empty() == false;
+	case Value::type_array: {
+		const auto &cand = value_opt->get<D_array>();
+		return cand.empty() == false; }
+	case Value::type_object: {
+		const auto &cand = value_opt->get<D_object>();
+		return cand.empty() == false; }
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
