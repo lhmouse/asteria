@@ -10,15 +10,15 @@ Stored_reference::Stored_reference(Stored_reference &&) noexcept = default;
 Stored_reference & Stored_reference::operator=(Stored_reference &&) noexcept = default;
 Stored_reference::~Stored_reference() = default;
 
-void set_reference(Vp<Reference> &reference_out, Stored_reference &&value_opt){
+void set_reference(Vp<Reference> &ref_out, Stored_reference &&value_opt){
 	const auto value = value_opt.get_opt();
 	if(value == nullptr){
-		return reference_out.reset();
-	} else if(reference_out == nullptr){
+		return ref_out.reset();
+	} else if(ref_out == nullptr){
 		auto sp = std::make_shared<Reference>(std::move(*value));
-		return reference_out.reset(std::move(sp));
+		return ref_out.reset(std::move(sp));
 	} else {
-		return reference_out->set(std::move(*value));
+		return ref_out->set(std::move(*value));
 	}
 }
 

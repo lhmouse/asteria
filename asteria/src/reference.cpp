@@ -61,45 +61,45 @@ void dump_reference(std::ostream &os, Spr<const Reference> ref_opt, unsigned ind
 //	return os;
 //}
 
-void copy_reference(Vp<Reference> &reference_out, Spr<const Reference> src_opt){
+void copy_reference(Vp<Reference> &ref_out, Spr<const Reference> src_opt){
 	const auto type = get_reference_type(src_opt);
 	switch(type){
 	case Reference::type_null:
-		return set_reference(reference_out, nullptr);
+		return set_reference(ref_out, nullptr);
 
 	case Reference::type_constant: {
 		const auto &cand = src_opt->get<Reference::S_constant>();
-		return set_reference(reference_out, cand); }
+		return set_reference(ref_out, cand); }
 
 	case Reference::type_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied.");
 
 	case Reference::type_variable: {
 		const auto &cand = src_opt->get<Reference::S_variable>();
-		return set_reference(reference_out, cand); }
+		return set_reference(ref_out, cand); }
 
 	case Reference::type_array_element: {
 		const auto &cand = src_opt->get<Reference::S_array_element>();
-		copy_reference(reference_out, cand.parent_opt);
-		Reference::S_array_element array_element = { std::move(reference_out), cand.index };
-		return set_reference(reference_out, std::move(array_element)); }
+		copy_reference(ref_out, cand.parent_opt);
+		Reference::S_array_element array_element = { std::move(ref_out), cand.index };
+		return set_reference(ref_out, std::move(array_element)); }
 
 	case Reference::type_object_member: {
 		const auto &cand = src_opt->get<Reference::S_object_member>();
-		copy_reference(reference_out, cand.parent_opt);
-		Reference::S_object_member object_member = { std::move(reference_out), cand.key };
-		return set_reference(reference_out, std::move(object_member)); }
+		copy_reference(ref_out, cand.parent_opt);
+		Reference::S_object_member object_member = { std::move(ref_out), cand.key };
+		return set_reference(ref_out, std::move(object_member)); }
 
 	default:
 		ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
 		std::terminate();
 	}
 }
-void move_reference(Vp<Reference> &reference_out, Vp<Reference> &&src_opt){
+void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt){
 	if(src_opt == nullptr){
-		return reference_out.reset();
+		return ref_out.reset();
 	} else {
-		return reference_out.reset(src_opt.release());
+		return ref_out.reset(src_opt.release());
 	}
 }
 

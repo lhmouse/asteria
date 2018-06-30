@@ -38,15 +38,15 @@ void fly_over_block_in_place(Spr<Scope> scope_inout, Spr<const Block> block_opt)
 		fly_over_statement_in_place(scope_inout, stmt);
 	}
 }
-Statement::Execution_result execute_block_in_place(Vp<Reference> &reference_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_out, Spr<const Block> block_opt){
+Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_out, Spr<const Block> block_opt){
 	if(block_opt == nullptr){
 		// Nothing to do.
-		move_reference(reference_out, nullptr);
+		move_reference(ref_out, nullptr);
 		return Statement::execution_result_next;
 	}
 	// Execute statements one by one.
 	for(const auto &stmt : *block_opt){
-		const auto result = execute_statement_in_place(reference_out, scope_inout, recycler_out, stmt);
+		const auto result = execute_statement_in_place(ref_out, scope_inout, recycler_out, stmt);
 		if(result != Statement::execution_result_next){
 			// Forward anything unexpected to the caller.
 			return result;
@@ -64,14 +64,14 @@ void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<cons
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 	bind_block_in_place(bound_block_out, scope_working, block_opt);
 }
-Statement::Execution_result execute_block(Vp<Reference> &reference_out, Spr<Recycler> recycler_out, Spr<const Block> block_opt, Spr<const Scope> scope){
+Statement::Execution_result execute_block(Vp<Reference> &ref_out, Spr<Recycler> recycler_out, Spr<const Block> block_opt, Spr<const Scope> scope){
 	if(block_opt == nullptr){
 		// Nothing to do.
-		move_reference(reference_out, nullptr);
+		move_reference(ref_out, nullptr);
 		return Statement::execution_result_next;
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_plain, scope);
-	return execute_block_in_place(reference_out, scope_working, recycler_out, block_opt);
+	return execute_block_in_place(ref_out, scope_working, recycler_out, block_opt);
 }
 
 }
