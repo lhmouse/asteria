@@ -38,12 +38,6 @@ namespace details_unique_handle {
 		return old;
 	}
 
-	template<typename valueT>
-	inline void adl_swap(valueT &lhs, valueT &rhs) noexcept {
-		using ::std::swap;
-		swap(lhs, rhs);
-	}
-
 	template<typename closerT>
 	class final_closer_wrapper {
 	private:
@@ -208,7 +202,8 @@ public:
 	}
 
 	void swap(unique_handle &other) noexcept {
-		details_unique_handle::adl_swap(this->m_sth.as_closer(), other.m_sth.as_closer());
+		using ::std::swap;
+		swap(this->m_sth.as_closer(), other.m_sth.as_closer());
 		this->m_sth.swap(other.m_sth);
 	}
 };
