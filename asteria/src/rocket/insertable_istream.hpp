@@ -6,6 +6,7 @@
 
 #include "insertable_streambuf.hpp"
 #include <istream> // std::basic_istream<>
+#include <memory> // std::addressof()
 
 namespace rocket {
 
@@ -28,18 +29,18 @@ private:
 
 public:
 	explicit basic_insertable_istream(ios_base::open_mode which = ios_base::in)
-		: basic_istream<charT, traitsT>(&(this->m_sb))
+		: basic_istream<charT, traitsT>(::std::addressof(this->m_sb))
 		, m_sb(which | ios_base::in)
 	{ }
 	explicit basic_insertable_istream(string_type str, ios_base::open_mode which = ios_base::in)
-		: basic_istream<charT, traitsT>(&(this->m_sb))
+		: basic_istream<charT, traitsT>(::std::addressof(this->m_sb))
 		, m_sb(::std::move(str), which | ios_base::in)
 	{ }
 	~basic_insertable_istream() override;
 
 public:
 	basic_insertable_streambuf<charT, traitsT> * rdbuf() const noexcept {
-		return const_cast<basic_insertable_streambuf<charT, traitsT> *>(&(this->m_sb));
+		return const_cast<basic_insertable_streambuf<charT, traitsT> *>(::std::addressof(this->m_sb));
 	}
 
 	const string_type & get_string() const noexcept {
