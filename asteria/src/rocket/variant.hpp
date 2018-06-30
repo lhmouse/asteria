@@ -431,7 +431,7 @@ public:
 			} catch(...){
 				details_variant::visitor_destroy cleaner = { };
 				this->m_buffer.apply_visitor(rhs.m_index, cleaner);
-				noexcept(swap(rhs)) ? static_cast<void>(0) : throw;
+				rethrow_current_exception();
 			}
 			details_variant::visitor_destroy cleaner = { };
 			this->m_buffer.apply_visitor(this->m_index, cleaner);
