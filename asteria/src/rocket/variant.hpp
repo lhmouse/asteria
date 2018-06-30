@@ -275,7 +275,7 @@ private:
 		return this->m_buffers + (this->m_buffer_id ^ 1);
 	}
 	void do_swap_buffers() noexcept {
-		this->m_buffer_id ^= 1;
+		this->m_buffer_id = (this->m_buffer_id ^ 1) & 1;
 	}
 
 public:
