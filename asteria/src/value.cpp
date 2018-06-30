@@ -265,14 +265,22 @@ void wipe_out_value(Spr<Value> value_opt) noexcept {
 		return;
 	case Value::type_array: {
 		auto &cand = value_opt->get<D_array>();
-		for(auto &elem : cand){
+		// Move the array out before recursion.
+		auto array = std::move(cand);
+		cand.clear();
+		// Wipe out every element recursively.
+		for(auto &elem : array){
 			wipe_out_value(elem);
 			elem.reset();
 		}
 		return; }
 	case Value::type_object: {
 		auto &cand = value_opt->get<D_object>();
-		for(auto &pair : cand){
+		// Move the object out before recursion.
+		auto object = std::move(cand);
+		cand.clear();
+		// Wipe out every value recursively.
+		for(auto &pair : object){
 			wipe_out_value(pair.second);
 			pair.second.reset();
 		}
