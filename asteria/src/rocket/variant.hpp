@@ -125,34 +125,6 @@ namespace details_variant {
 		alignas(+align) char bytes[+size];
 	};
 
-	template<typename ...elementsT>
-	struct apply_visitor_helper {
-		template<typename visitorT, typename voidT, typename ...paramsT>
-		void operator()(unsigned /*expect*/, visitorT &&/*visitor*/, voidT */*ptr*/, paramsT &&.../*params*/) const {
-			ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
-		}
-	};
-	template<typename firstT, typename ...remainingT>
-	struct apply_visitor_helper<firstT, remainingT...> {
-		template<typename visitorT, typename voidT, typename ...paramsT>
-		void operator()(unsigned expect, visitorT &&visitor, voidT *ptr, paramsT &&...params) const {
-			if(expect == 0){
-				::std::forward<visitorT>(visitor)(static_cast<firstT *>(ptr), ::std::forward<paramsT>(params)...);
-			} else {
-				apply_visitor_helper<remainingT...>()(expect - 1, visitor, ptr, ::std::forward<paramsT>(params)...);
-			}
-		}
-	};
-
-	template<typename ...elementsT, typename visitorT, typename ...paramsT>
-	void apply_visitor(const storage_for<elementsT...> *storage, unsigned expect, visitorT &&visitor, paramsT &&...params){
-		apply_visitor_helper<const elementsT...>()(expect, ::std::forward<visitorT>(visitor), static_cast<const void *>(storage), ::std::forward<paramsT>(params)...);
-	}
-	template<typename ...elementsT, typename visitorT, typename ...paramsT>
-	void apply_visitor(storage_for<elementsT...> *storage, unsigned expect, visitorT &&visitor, paramsT &&...params){
-		apply_visitor_helper<elementsT...>()(expect, ::std::forward<visitorT>(visitor), static_cast<void *>(storage), ::std::forward<paramsT>(params)...);
-	}
-
 	template<typename typeT, typename ...paramsT>
 	inline typeT * construct(typeT *ptr, paramsT &&...params){
 		return ::new(static_cast<void *>(ptr)) typeT(::std::forward<paramsT>(params)...);
@@ -161,6 +133,30 @@ namespace details_variant {
 	inline void destruct(typeT *ptr) noexcept {
 		ptr->~typeT();
 	}
+
+	template<typename resultT, typename sourceT>
+	inline resultT punning_cast(sourceT *ptr) noexcept {
+		return static_cast<resultT>(static_cast<typename conditional<is_const<sourceT>::value, const void, void>::type *>(ptr));
+	}
+
+	template<typename ...elementsT>
+	struct visit_helper {
+		template<typename storageT, typename visitorT, typename ...paramsT>
+		void operator()(storageT */*ptr*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const {
+			ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
+		}
+	};
+	template<typename firstT, typename ...remainingT>
+	struct visit_helper<firstT, remainingT...> {
+		template<typename storageT, typename visitorT, typename ...paramsT>
+		void operator()(storageT *ptr, unsigned expect, visitorT &&visitor, paramsT &&...params) const {
+			if(expect == 0){
+				::std::forward<visitorT>(visitor)(punning_cast<firstT *>(ptr), ::std::forward<paramsT>(params)...);
+			} else {
+				visit_helper<remainingT...>()(ptr, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
+			}
+		}
+	};
 
 	struct visitor_copy_construct {
 		template<typename elementT>
@@ -279,35 +275,41 @@ private:
 	}
 
 public:
-	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value) {
-		this->m_buffer_id = 0;
-		details_variant::construct(static_cast<typename details_variant::type_getter<0, elementsT...>::type *>(static_cast<void *>(this->do_get_front_buffer())));
+	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value)
+		: m_buffer_id(0)
+	{
+		details_variant::construct(details_variant::punning_cast<typename details_variant::type_getter<0, elementsT...>::type *>(this->do_get_front_buffer()));
 		this->m_index = 0;
 	}
 	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
-	variant(elementT &&elem) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value) {
+	variant(elementT &&elem) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value)
+		: m_buffer_id(0)
+	{
 		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		this->m_buffer_id = 0;
-		details_variant::construct(static_cast<etype *>(static_cast<void *>(this->do_get_front_buffer())), ::std::forward<elementT>(elem));
+		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer())), ::std::forward<elementT>(elem);
 		this->m_index = eindex;
 	}
-	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value) {
+	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
+		: m_buffer_id(0)
+	{
 		this->m_buffer_id = 0;
-		details_variant::apply_visitor(this->do_get_front_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
-	variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value) {
+	variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value)
+		: m_buffer_id(0)
+	{
 		this->m_buffer_id = 0;
-		details_variant::apply_visitor(this->do_get_front_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
 	variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_copy_assign(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_copy_assign(), other.do_get_front_buffer());
 		} else {
-			details_variant::apply_visitor(this->do_get_back_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 			this->do_swap_buffers();
 			this->m_index = other.m_index;
 		}
@@ -315,17 +317,17 @@ public:
 	}
 	variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_move_assign(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_move_assign(), other.do_get_front_buffer());
 		} else {
-			details_variant::apply_visitor(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 			this->do_swap_buffers();
 			this->m_index = other.m_index;
 		}
 		return *this;
 	}
 	~variant(){
-		details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
 		this->m_index = 0x6EEFDEAD;
 		std::memset(this->do_get_front_buffer(), '>', sizeof(storage));
@@ -344,7 +346,7 @@ public:
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		return static_cast<const elementT *>(static_cast<const void *>(this->do_get_front_buffer()));
+		return details_variant::punning_cast<const elementT *>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
 	elementT * try_get() noexcept {
@@ -352,7 +354,7 @@ public:
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		return static_cast<elementT *>(static_cast<void *>(this->do_get_front_buffer()));
+		return details_variant::punning_cast<elementT *>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
 	const elementT & get() const {
@@ -380,11 +382,11 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		elementT *wptr;
 		if(this->m_index == eindex){
-			wptr = static_cast<etype *>(static_cast<void *>(this->do_get_front_buffer()));
+			wptr = details_variant::punning_cast<etype *>(this->do_get_front_buffer());
 			*wptr = ::std::forward<elementT>(elem);
 		} else {
-			wptr = details_variant::construct(static_cast<etype *>(static_cast<void *>(this->do_get_back_buffer())), ::std::forward<elementT>(elem));
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+			wptr = details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 			this->do_swap_buffers();
 			this->m_index = eindex;
 		}
@@ -393,29 +395,29 @@ public:
 
 	template<typename visitorT>
 	void visit(visitorT &&visitor) const {
-		details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
 	}
 	template<typename visitorT>
 	void visit(visitorT &&visitor){
-		details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
 	}
 
 	void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_swap(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_swap(), other.do_get_front_buffer());
 		} else {
-			details_variant::apply_visitor(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
 			try {
-				details_variant::apply_visitor(other.do_get_back_buffer(), this->m_index, details_variant::visitor_move_construct(), this->do_get_front_buffer());
+				details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index, details_variant::visitor_move_construct(), this->do_get_front_buffer());
 			} catch(...){
-				details_variant::apply_visitor(this->do_get_back_buffer(), other.m_index, details_variant::visitor_destruct());
+				details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_destruct());
 				rethrow_current_exception();
 			}
 			const unsigned this_index = this->m_index;
-			details_variant::apply_visitor(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 			this->do_swap_buffers();
 			this->m_index = other.m_index;
-			details_variant::apply_visitor(other.do_get_front_buffer(), other.m_index, details_variant::visitor_destruct());
+			details_variant::visit_helper<elementsT...>()(other.do_get_front_buffer(), other.m_index, details_variant::visitor_destruct());
 			other.do_swap_buffers();
 			other.m_index = this_index;
 		}
