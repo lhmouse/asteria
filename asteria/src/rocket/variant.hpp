@@ -259,26 +259,26 @@ private:
 
 private:
 	const storage * do_get_front_buffer() const noexcept {
-		const auto buffer_id = this->m_buffer_id;
+		const unsigned buffer_id = this->m_buffer_id;
 		return this->m_buffers + buffer_id;
 	}
 	storage * do_get_front_buffer() noexcept {
-		const auto buffer_id = this->m_buffer_id;
+		const unsigned buffer_id = this->m_buffer_id;
 		return this->m_buffers + buffer_id;
 	}
 	const storage * do_get_back_buffer() const noexcept {
-		const auto buffer_id = this->m_buffer_id ^ 1;
-		return this->m_buffers + buffer_id;
+		const unsigned buffer_id = this->m_buffer_id;
+		return this->m_buffers + (buffer_id ^ 1);
 	}
 	storage * do_get_back_buffer() noexcept {
-		const auto buffer_id = this->m_buffer_id ^ 1;
-		return this->m_buffers + buffer_id;
+		const unsigned buffer_id = this->m_buffer_id;
+		return this->m_buffers + (buffer_id ^ 1);
 	}
 
 	void do_set_up_new_buffer(unsigned index_new) noexcept {
-		const auto buffer_id = this->m_buffer_id ^ 1;
-		details_variant::visit_helper<elementsT...>()(this->m_buffers + buffer_id, this->m_index, details_variant::visitor_destruct());
-		this->m_buffer_id = buffer_id & 0x00000001;
+		const unsigned old_buffer_id = this->m_buffer_id;
+		this->m_buffer_id = (old_buffer_id ^ 1) & 1;
+		details_variant::visit_helper<elementsT...>()(this->m_buffers + old_buffer_id, this->m_index, details_variant::visitor_destruct());
 		this->m_index = index_new & 0x7FFFFFFF;
 	}
 
