@@ -259,19 +259,27 @@ private:
 
 private:
 	const storage * do_get_front_buffer() const noexcept {
-		return this->m_buffers + this->m_buffer_id;
+		const auto buffer_id = this->m_buffer_id;
+		return this->m_buffers + buffer_id;
 	}
 	storage * do_get_front_buffer() noexcept {
-		return this->m_buffers + this->m_buffer_id;
+		const auto buffer_id = this->m_buffer_id;
+		return this->m_buffers + buffer_id;
 	}
 	const storage * do_get_back_buffer() const noexcept {
-		return this->m_buffers + (this->m_buffer_id ^ 1);
+		const auto buffer_id = this->m_buffer_id ^ 1;
+		return this->m_buffers + buffer_id;
 	}
 	storage * do_get_back_buffer() noexcept {
-		return this->m_buffers + (this->m_buffer_id ^ 1);
+		const auto buffer_id = this->m_buffer_id ^ 1;
+		return this->m_buffers + buffer_id;
 	}
-	void do_swap_buffers() noexcept {
-		this->m_buffer_id = (this->m_buffer_id ^ 1) & 1;
+
+	void do_set_up_new_buffer(unsigned index_new) noexcept {
+		const auto buffer_id = this->m_buffer_id ^ 1;
+		details_variant::visit_helper<elementsT...>()(this->m_buffers + buffer_id, this->m_index, details_variant::visitor_destruct());
+		this->m_buffer_id = buffer_id & 0x00000001;
+		this->m_index = index_new & 0x7FFFFFFF;
 	}
 
 public:
@@ -309,9 +317,7 @@ public:
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_copy_assign(), other.do_get_front_buffer());
 		} else {
 			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
-			this->do_swap_buffers();
-			this->m_index = other.m_index;
+			this->do_set_up_new_buffer(other.m_index);
 		}
 		return *this;
 	}
@@ -320,9 +326,7 @@ public:
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_move_assign(), other.do_get_front_buffer());
 		} else {
 			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
-			this->do_swap_buffers();
-			this->m_index = other.m_index;
+			this->do_set_up_new_buffer(other.m_index);
 		}
 		return *this;
 	}
@@ -386,9 +390,7 @@ public:
 			*wptr = ::std::forward<elementT>(elem);
 		} else {
 			wptr = details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
-			this->do_swap_buffers();
-			this->m_index = eindex;
+			this->do_set_up_new_buffer(eindex);
 		}
 		return *wptr;
 	}
@@ -414,12 +416,8 @@ public:
 				rethrow_current_exception();
 			}
 			const unsigned this_index = this->m_index;
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
-			this->do_swap_buffers();
-			this->m_index = other.m_index;
-			details_variant::visit_helper<elementsT...>()(other.do_get_front_buffer(), other.m_index, details_variant::visitor_destruct());
-			other.do_swap_buffers();
-			other.m_index = this_index;
+			this->do_set_up_new_buffer(other.m_index);
+			other.do_set_up_new_buffer(this_index);
 		}
 	}
 };
