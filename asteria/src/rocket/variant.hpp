@@ -274,12 +274,12 @@ private:
 		const unsigned buffer_id = this->m_buffer_id;
 		return this->m_buffers + (buffer_id ^ 1);
 	}
-
 	void do_set_up_new_buffer(unsigned index_new) noexcept {
-		const unsigned old_buffer_id = this->m_buffer_id;
-		this->m_buffer_id = (old_buffer_id ^ 1) & 1;
-		details_variant::visit_helper<elementsT...>()(this->m_buffers + old_buffer_id, this->m_index, details_variant::visitor_destruct());
+		const unsigned buffer_id = this->m_buffer_id;
+		this->m_buffer_id = (buffer_id ^ 1) & 1;
+		const unsigned index = this->m_index;
 		this->m_index = index_new & 0x7FFFFFFF;
+		details_variant::visit_helper<elementsT...>()(this->m_buffers + buffer_id, index, details_variant::visitor_destruct());
 	}
 
 public:
@@ -333,9 +333,7 @@ public:
 	~variant(){
 		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
-		this->m_index = 0x6EEFDEAD;
-		std::memset(this->do_get_front_buffer(), '>', sizeof(storage));
-		std::memset(this->do_get_back_buffer(), '<', sizeof(storage));
+		std::memset(this, '<', sizeof(*this));
 #endif
 	}
 
