@@ -286,7 +286,9 @@ public:
 	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value)
 		: m_buffer_id(0)
 	{
-		details_variant::construct(details_variant::punning_cast<typename details_variant::type_getter<0, elementsT...>::type *>(this->do_get_front_buffer()));
+		constexpr unsigned eindex = 0;
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()));
 		this->m_index = 0;
 	}
 	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
@@ -295,20 +297,18 @@ public:
 	{
 		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer())), ::std::forward<elementT>(elem);
+		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()), ::std::forward<elementT>(elem));
 		this->m_index = eindex;
 	}
 	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
 		: m_buffer_id(0)
 	{
-		this->m_buffer_id = 0;
 		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
 	variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value)
 		: m_buffer_id(0)
 	{
-		this->m_buffer_id = 0;
 		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
