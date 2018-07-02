@@ -253,38 +253,39 @@ public:
 	using storage = details_variant::storage_for<elementsT...>;
 
 private:
-	unsigned m_buffer_id : 1;
+	unsigned m_turnout : 1;
 	unsigned m_index : 31;
 	storage m_buffers[2];
 
 private:
 	const storage * do_get_front_buffer() const noexcept {
-		const unsigned buffer_id = this->m_buffer_id;
-		return this->m_buffers + buffer_id;
+		const unsigned turnout = this->m_turnout;
+		return this->m_buffers + turnout;
 	}
 	storage * do_get_front_buffer() noexcept {
-		const unsigned buffer_id = this->m_buffer_id;
-		return this->m_buffers + buffer_id;
+		const unsigned turnout = this->m_turnout;
+		return this->m_buffers + turnout;
 	}
 	const storage * do_get_back_buffer() const noexcept {
-		const unsigned buffer_id = this->m_buffer_id;
-		return this->m_buffers + (buffer_id ^ 1);
+		const unsigned turnout = this->m_turnout;
+		return this->m_buffers + (turnout ^ 1);
 	}
 	storage * do_get_back_buffer() noexcept {
-		const unsigned buffer_id = this->m_buffer_id;
-		return this->m_buffers + (buffer_id ^ 1);
+		const unsigned turnout = this->m_turnout;
+		return this->m_buffers + (turnout ^ 1);
 	}
+
 	void do_set_up_new_buffer(unsigned index_new) noexcept {
-		const unsigned buffer_id = this->m_buffer_id;
-		this->m_buffer_id = (buffer_id ^ 1) & 1;
-		const unsigned index = this->m_index;
+		const unsigned turnout_old = this->m_turnout;
+		this->m_turnout = (turnout_old ^ 1) & 1;
+		const unsigned index_old = this->m_index;
 		this->m_index = index_new & 0x7FFFFFFF;
-		details_variant::visit_helper<elementsT...>()(this->m_buffers + buffer_id, index, details_variant::visitor_destruct());
+		details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old, details_variant::visitor_destruct());
 	}
 
 public:
 	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value)
-		: m_buffer_id(0)
+		: m_turnout(0)
 	{
 		constexpr unsigned eindex = 0;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
@@ -293,7 +294,7 @@ public:
 	}
 	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
 	variant(elementT &&elem) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value)
-		: m_buffer_id(0)
+		: m_turnout(0)
 	{
 		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
@@ -301,13 +302,13 @@ public:
 		this->m_index = eindex;
 	}
 	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
-		: m_buffer_id(0)
+		: m_turnout(0)
 	{
 		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
 	variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value)
-		: m_buffer_id(0)
+		: m_turnout(0)
 	{
 		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
@@ -331,9 +332,9 @@ public:
 		return *this;
 	}
 	~variant(){
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+		this->do_set_up_new_buffer(0xDEADBEEF);
 #ifdef ROCKET_DEBUG
-		std::memset(this, '<', sizeof(*this));
+		std::memset(m_buffers, '#', sizeof(m_buffers));
 #endif
 	}
 
