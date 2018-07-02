@@ -281,6 +281,9 @@ private:
 		const unsigned index_old = this->m_index;
 		this->m_index = index_new & 0x7FFFFFFF;
 		details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old, details_variant::visitor_destruct());
+#ifdef ROCKET_DEBUG
+		std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
+#endif
 	}
 
 public:
