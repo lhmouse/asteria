@@ -11,11 +11,14 @@
 #include <iterator>
 #include <utility>
 #include <stdexcept>
+#include <typeinfo>
 #include <iosfwd>
 #include <iomanip>
 #include <ostream>
 #include <memory>
 #include <type_traits>
+#include <atomic>
+#include <initializer_list>
 #include <array>
 #include <vector>
 #include <deque>
@@ -23,6 +26,7 @@
 
 #include <cstring>
 #include <cstddef>
+#include <cstdint>
 #include <climits>
 
 #include "rocket/compatibility.hpp"
