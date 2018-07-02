@@ -142,18 +142,18 @@ namespace details_variant {
 	template<typename ...elementsT>
 	struct visit_helper {
 		template<typename storageT, typename visitorT, typename ...paramsT>
-		void operator()(storageT * /*ptr*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const {
+		void operator()(storageT * /*stor*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const {
 			ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
 		}
 	};
 	template<typename firstT, typename ...remainingT>
 	struct visit_helper<firstT, remainingT...> {
 		template<typename storageT, typename visitorT, typename ...paramsT>
-		void operator()(storageT *ptr, unsigned expect, visitorT &&visitor, paramsT &&...params) const {
+		void operator()(storageT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const {
 			if(expect == 0){
-				::std::forward<visitorT>(visitor)(punning_cast<firstT *>(ptr), ::std::forward<paramsT>(params)...);
+				::std::forward<visitorT>(visitor)(punning_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
 			} else {
-				visit_helper<remainingT...>()(ptr, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
+				visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
 			}
 		}
 	};
