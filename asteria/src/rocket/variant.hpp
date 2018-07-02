@@ -335,8 +335,9 @@ public:
 		return *this;
 	}
 	~variant(){
-		this->do_set_up_new_buffer(0xDEADBEEF);
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
+		this->m_index = 0x6EEFDEAD;
 		std::memset(m_buffers, '#', sizeof(m_buffers));
 #endif
 	}
