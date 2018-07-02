@@ -142,7 +142,7 @@ namespace details_variant {
 	template<typename ...elementsT>
 	struct visit_helper {
 		template<typename storageT, typename visitorT, typename ...paramsT>
-		void operator()(storageT */*ptr*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const {
+		void operator()(storageT * /*ptr*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const {
 			ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
 		}
 	};
@@ -159,15 +159,27 @@ namespace details_variant {
 	};
 
 	struct visitor_copy_construct {
-		template<typename elementT>
-		void operator()(elementT *ptr, const void *src) const {
-			construct<>(ptr, *static_cast<const elementT *>(src));
+		template<typename elementT, typename sourceT>
+		void operator()(elementT *ptr, const sourceT *src) const {
+			construct<>(ptr, *punning_cast<const elementT *>(src));
 		}
 	};
 	struct visitor_move_construct {
-		template<typename elementT>
-		void operator()(elementT *ptr, void *src) const {
-			construct<>(ptr, ::std::move(*static_cast<elementT *>(src)));
+		template<typename elementT, typename sourceT>
+		void operator()(elementT *ptr, sourceT *src) const {
+			construct<>(ptr, ::std::move(*punning_cast<elementT *>(src)));
+		}
+	};
+	struct visitor_copy_assign {
+		template<typename elementT, typename sourceT>
+		void operator()(elementT *ptr, const sourceT *src) const {
+			*ptr = *punning_cast<const elementT *>(src);
+		}
+	};
+	struct visitor_move_assign {
+		template<typename elementT, typename sourceT>
+		void operator()(elementT *ptr, sourceT *src) const {
+			*ptr = ::std::move(*punning_cast<elementT *>(src));
 		}
 	};
 	struct visitor_destruct {
@@ -176,29 +188,17 @@ namespace details_variant {
 			destruct<>(ptr);
 		}
 	};
-	struct visitor_copy_assign {
-		template<typename elementT>
-		void operator()(elementT *ptr, const void *src) const {
-			*ptr = *static_cast<const elementT *>(src);
-		}
-	};
-	struct visitor_move_assign {
-		template<typename elementT>
-		void operator()(elementT *ptr, void *src) const {
-			*ptr = ::std::move(*static_cast<elementT *>(src));
-		}
-	};
-	struct visitor_swap {
-		template<typename elementT>
-		void operator()(elementT *ptr, void *other) const {
-			using ::std::swap;
-			swap(*ptr, *static_cast<elementT *>(other));
-		}
-	};
 	struct visitor_wrapper {
 		template<typename nextT, typename elementT>
 		void operator()(elementT *ptr, nextT &&next) const {
 			::std::forward<nextT>(next)(*ptr);
+		}
+	};
+	struct visitor_swap {
+		template<typename elementT, typename sourceT>
+		void operator()(elementT *ptr, sourceT *src) const {
+			using ::std::swap;
+			swap(*ptr, *punning_cast<elementT *>(src));
 		}
 	};
 
