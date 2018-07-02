@@ -196,14 +196,14 @@ void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Value::Variant 
 		value_out.reset(std::move(sp));
 	}
 }
-void set_value(Vp<Value> &value_out, Spr<Recycler> /*recycler_out*/, D_null){
+void clear_value(Vp<Value> &value_out){
 	value_out.reset();
 }
 void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt){
 	const auto type = get_value_type(src_opt);
 	switch(type){
 	case Value::type_null:
-		set_value(value_out, recycler_out, nullptr);
+		clear_value(value_out);
 		return;
 	case Value::type_boolean: {
 		const auto &cand = src_opt->get<D_boolean>();

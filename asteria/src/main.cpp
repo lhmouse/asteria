@@ -19,7 +19,7 @@ int main(){
 	Vp<Value> temp;
 
 	D_array arr;
-	set_value(temp, recycler, D_null());
+	clear_value(temp);
 	arr.emplace_back(std::move(temp));
 	set_value(temp, recycler, D_boolean(true));
 	arr.emplace_back(std::move(temp));

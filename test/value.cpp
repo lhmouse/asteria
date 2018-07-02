@@ -52,13 +52,13 @@ int main(){
 	ASTERIA_TEST_CHECK(value->get<D_object>().at(D_string::shallow("two"))->get<D_string>() == D_string::shallow("world"));
 
 	Vp<Value> cmp;
-	set_value(value, recycler, D_null());
-	set_value(cmp, recycler, D_null());
+	clear_value(value);
+	clear_value(cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_result_equal);
 	swap(value, cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_result_equal);
 
-	set_value(value, recycler, D_null());
+	clear_value(value);
 	set_value(cmp, recycler, D_boolean(true));
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_result_less);
 	swap(value, cmp);

@@ -111,7 +111,7 @@ extern std::ostream & operator<<(std::ostream &os, Spr<const Value> value_opt);
 extern std::ostream & operator<<(std::ostream &os, Vpr<const Value> &value_opt);
 
 extern void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Value::Variant &&variant);
-extern void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, D_null);
+extern void clear_value(Vp<Value> &value_out);
 extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt);
 extern void wipe_out_value(Spr<Value> value_opt) noexcept;
 
