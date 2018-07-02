@@ -28,7 +28,11 @@ namespace {
 		D_string describe() const override {
 			return D_string::shallow("fancy deferred callback");
 		}
-		void invoke(Vp<Reference> &/*result_out*/, Spr<Recycler> /*recycler*/, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&/*arguments_opt*/) const override {
+		void invoke(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
+			result_out.reset();
+			(void)recycler_out;
+			(void)this_opt;
+			(void)args;
 			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
 		}
 	};

@@ -24,10 +24,10 @@ public:
 	~Parameter();
 
 public:
-	const Cow_string & get_id() const {
+	Cow_string_ref get_id() const {
 		return m_id;
 	}
-	const Sp<const Value> & get_default_argument_opt() const {
+	Sp_ref<const Value> get_default_argument_opt() const {
 		return m_def_arg_opt;
 	}
 };

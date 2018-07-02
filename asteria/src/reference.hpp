@@ -85,23 +85,23 @@ public:
 	}
 };
 
-extern Reference::Type get_reference_type(Spr<const Reference> reference_opt) noexcept;
+extern Reference::Type get_reference_type(Sp_ref<const Reference> reference_opt) noexcept;
 
-extern void dump_reference(std::ostream &os, Spr<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern void dump_reference(std::ostream &os, Sp_ref<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 //extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt);
 
-extern void copy_reference(Vp<Reference> &ref_out, Spr<const Reference> src_opt);
+extern void copy_reference(Vp<Reference> &ref_out, Sp_ref<const Reference> src_opt);
 extern void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt);
 
-extern Sp<const Value> read_reference_opt(Spr<const Reference> reference_opt);
-extern std::reference_wrapper<Vp<Value>> drill_reference(Spr<const Reference> reference_opt);
+extern Sp<const Value> read_reference_opt(Sp_ref<const Reference> reference_opt);
+extern std::reference_wrapper<Vp<Value>> drill_reference(Sp_ref<const Reference> reference_opt);
 
 // If you do not have an `Vp<Reference>` but an `Sp<const Reference>`, use the following code to copy the value through the reference:
 //   `copy_value(value_out, recycler, read_reference_opt(reference_opt))`
-extern void extract_value_from_reference(Vp<Value> &value_out, Spr<Recycler> recycler_out, Vp<Reference> &&reference_opt);
+extern void extract_value_from_reference(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&reference_opt);
 
 // If the reference is a temporary value, convert it to an unnamed variable, allowing further modification to it.
-extern void materialize_reference(Vp<Reference> &reference_inout_opt, Spr<Recycler> recycler_out, bool immutable);
+extern void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_ref<Recycler> recycler_out, bool immutable);
 
 }
 

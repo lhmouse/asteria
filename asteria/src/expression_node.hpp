@@ -129,8 +129,8 @@ public:
 
 extern const char * get_operator_name(Expression_node::Operator op) noexcept;
 
-extern void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope);
-extern void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> recycler_out, const Expression_node &node, Spr<const Scope> scope);
+extern void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Sp_ref<const Scope> scope);
+extern void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Sp_ref<Recycler> recycler_out, const Expression_node &node, Sp_ref<const Scope> scope);
 
 }
 

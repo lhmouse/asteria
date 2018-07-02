@@ -20,7 +20,7 @@ void Recycler::do_purge_values() noexcept {
 	}
 }
 
-void Recycler::adopt_value(Spr<Value> value_opt){
+void Recycler::adopt_value(Sp_ref<Value> value_opt){
 	if(!value_opt){
 		return;
 	}
@@ -33,7 +33,7 @@ void Recycler::defragment(bool aggressive) noexcept {
 		return;
 	}
 	ASTERIA_DEBUG_LOG("Performing automatic defragmentation: size = ", m_weak_values.size());
-	const auto erased_begin = std::remove_if(m_weak_values.begin(), m_weak_values.end(), [](Wpr<Value> weak_ref){ return weak_ref.expired(); });
+	const auto erased_begin = std::remove_if(m_weak_values.begin(), m_weak_values.end(), [](Wp_ref<Value> weak_ref){ return weak_ref.expired(); });
 	ASTERIA_DEBUG_LOG("Removing dead objects: count_removed = ", std::distance(erased_begin, m_weak_values.end()));
 	m_weak_values.erase(erased_begin, m_weak_values.end());
 	const auto threshold_new = std::max(threshold_old, m_weak_values.size() + defragmentation_threshold_increment);

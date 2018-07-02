@@ -32,7 +32,7 @@ private:
 	void do_purge_values() noexcept;
 
 public:
-	void adopt_value(Spr<Value> value_opt);
+	void adopt_value(Sp_ref<Value> value_opt);
 	void defragment(bool aggressive = false) noexcept;
 };
 

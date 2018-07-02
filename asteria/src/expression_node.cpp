@@ -83,7 +83,7 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 	}
 }
 
-void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Spr<const Scope> scope){
+void bind_expression_node(Vector<Expression_node> &bound_nodes_out, const Expression_node &node, Sp_ref<const Scope> scope){
 	const auto type = node.get_type();
 	switch(type){
 	case Expression_node::type_literal: {
@@ -194,7 +194,7 @@ namespace {
 	}
 
 	template<typename ResultT>
-	void do_set_result(Vp<Reference> &ref_inout_opt, Spr<Recycler> recycler_out, bool assign, ResultT &&result){
+	void do_set_result(Vp<Reference> &ref_inout_opt, Sp_ref<Recycler> recycler_out, bool assign, ResultT &&result){
 		if(assign){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
@@ -410,7 +410,7 @@ namespace {
 	}
 }
 
-void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Spr<Recycler> recycler_out, const Expression_node &node, Spr<const Scope> scope){
+void evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, Sp_ref<Recycler> recycler_out, const Expression_node &node, Sp_ref<const Scope> scope){
 	const auto type = node.get_type();
 	switch(type){
 	case Expression_node::type_literal: {

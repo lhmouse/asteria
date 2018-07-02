@@ -15,7 +15,7 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer & Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
-void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> init_opt, Spr<const Scope> scope){
+void bind_initializer(Vp<Initializer> &bound_init_out, Sp_ref<const Initializer> init_opt, Sp_ref<const Scope> scope){
 	if(init_opt == nullptr){
 		// Return a null initializer.
 		bound_init_out.reset();
@@ -60,7 +60,7 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Spr<const Initializer> in
 		std::terminate();
 	}
 }
-void evaluate_initializer(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Spr<const Initializer> init_opt, Spr<const Scope> scope){
+void evaluate_initializer(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Initializer> init_opt, Sp_ref<const Scope> scope){
 	if(init_opt == nullptr){
 		// Return a null reference only when a null initializer is given.
 		move_reference(result_out, nullptr);

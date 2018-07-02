@@ -41,18 +41,18 @@ public:
 	Purpose get_purpose() const noexcept {
 		return m_purpose;
 	}
-	const Sp<const Scope> & get_parent_opt() const noexcept {
+	Sp_ref<const Scope> get_parent_opt() const noexcept {
 		return m_parent_opt;
 	}
 
-	Sp<const Reference> get_named_reference_opt(const Cow_string &id) const noexcept;
-	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(const Cow_string &id);
+	Sp<const Reference> get_named_reference_opt(Cow_string_ref id) const noexcept;
+	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(Cow_string_ref id);
 
 	void defer_callback(Sp<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Spr<Scope> scope, Spr<Recycler> recycler_out, const Cow_string &source, const Vector<Parameter> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args);
-extern void prepare_function_scope_lexical(Spr<Scope> scope, const Cow_string &source, const Vector<Parameter> &params);
+extern void prepare_function_scope(Sp_ref<Scope> scope, Sp_ref<Recycler> recycler_out, Cow_string_ref source, const Vector<Parameter> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args);
+extern void prepare_function_scope_lexical(Sp_ref<Scope> scope, Cow_string_ref source, const Vector<Parameter> &params);
 
 }
 

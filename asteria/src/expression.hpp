@@ -39,8 +39,8 @@ public:
 	}
 };
 
-extern void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expression_opt, Spr<const Scope> scope);
-extern void evaluate_expression(Vp<Reference> &ref_out, Spr<Recycler> recycler_out, Spr<const Expression> expression_opt, Spr<const Scope> scope);
+extern void bind_expression(Vp<Expression> &bound_expr_out, Sp_ref<const Expression> expression_opt, Sp_ref<const Scope> scope);
+extern void evaluate_expression(Vp<Reference> &ref_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Expression> expression_opt, Sp_ref<const Scope> scope);
 
 }
 

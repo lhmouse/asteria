@@ -103,20 +103,20 @@ public:
 };
 
 extern const char * get_type_name(Value::Type type) noexcept;
-extern Value::Type get_value_type(Spr<const Value> value_opt) noexcept;
-extern const char * get_value_type_name(Spr<const Value> value_opt) noexcept;
+extern Value::Type get_value_type(Sp_ref<const Value> value_opt) noexcept;
+extern const char * get_value_type_name(Sp_ref<const Value> value_opt) noexcept;
 
-extern void dump_value(std::ostream &os, Spr<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, Spr<const Value> value_opt);
-extern std::ostream & operator<<(std::ostream &os, Vpr<const Value> &value_opt);
+extern void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt);
+extern std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> &value_opt);
 
-extern void set_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Value::Variant &&variant);
+extern void set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Value::Variant &&variant);
 extern void clear_value(Vp<Value> &value_out);
-extern void copy_value(Vp<Value> &value_out, Spr<Recycler> recycler_out, Spr<const Value> src_opt);
-extern void wipe_out_value(Spr<Value> value_opt) noexcept;
+extern void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Value> src_opt);
+extern void wipe_out_value(Sp_ref<Value> value_opt) noexcept;
 
-extern bool test_value(Spr<const Value> value_opt) noexcept;
-extern Value::Comparison_result compare_values(Spr<const Value> lhs_opt, Spr<const Value> rhs_opt) noexcept;
+extern bool test_value(Sp_ref<const Value> value_opt) noexcept;
+extern Value::Comparison_result compare_values(Sp_ref<const Value> lhs_opt, Sp_ref<const Value> rhs_opt) noexcept;
 
 }
 

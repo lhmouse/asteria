@@ -39,12 +39,12 @@ public:
 	}
 };
 
-extern void bind_block_in_place(Vp<Block> &bound_block_out, Spr<Scope> scope_inout, Spr<const Block> block_opt);
-extern void fly_over_block_in_place(Spr<Scope> scope_inout, Spr<const Block> block_opt);
-extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_out, Spr<const Block> block_opt);
+extern void bind_block_in_place(Vp<Block> &bound_block_out, Sp_ref<Scope> scope_inout, Sp_ref<const Block> block_opt);
+extern void fly_over_block_in_place(Sp_ref<Scope> scope_inout, Sp_ref<const Block> block_opt);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_ref<Scope> scope_inout, Sp_ref<Recycler> recycler_out, Sp_ref<const Block> block_opt);
 
-extern void bind_block(Vp<Block> &bound_block_out, Spr<const Block> block_opt, Spr<const Scope> scope);
-extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, Spr<Recycler> recycler_out, Spr<const Block> block_opt, Spr<const Scope> scope);
+extern void bind_block(Vp<Block> &bound_block_out, Sp_ref<const Block> block_opt, Sp_ref<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Block> block_opt, Sp_ref<const Scope> scope);
 
 }
 

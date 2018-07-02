@@ -16,7 +16,7 @@ Instantiated_function::~Instantiated_function() = default;
 D_string Instantiated_function::describe() const {
 	return ASTERIA_FORMAT_STRING(m_category, " @ '", m_source, "'");
 }
-void Instantiated_function::invoke(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
+void Instantiated_function::invoke(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
 	// Allocate a function scope.
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
 	prepare_function_arguments(args, m_params);

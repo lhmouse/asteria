@@ -19,7 +19,7 @@ Statement::Statement(Statement &&) noexcept = default;
 Statement & Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
-void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scope_inout, const Statement &stmt){
+void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> scope_inout, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement: {
@@ -214,7 +214,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Spr<Scope> scop
 	}
 }
 
-void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt){
+void fly_over_statement_in_place(Sp_ref<Scope> scope_inout, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement:
@@ -255,7 +255,7 @@ void fly_over_statement_in_place(Spr<Scope> scope_inout, const Statement &stmt){
 }
 
 namespace {
-	bool do_check_loop_condition(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Spr<const Expression> cond_opt, Spr<const Scope> scope_inout){
+	bool do_check_loop_condition(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Expression> cond_opt, Sp_ref<const Scope> scope_inout){
 		// Overwrite `result_out` unconditionally, even when `cond_opt` is null.
 		evaluate_expression(result_out, recycler_out, cond_opt, scope_inout);
 		bool result = true;
@@ -267,7 +267,7 @@ namespace {
 	}
 }
 
-Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Spr<Scope> scope_inout, Spr<Recycler> recycler_out, const Statement &stmt){
+Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Sp_ref<Scope> scope_inout, Sp_ref<Recycler> recycler_out, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
 	case Statement::type_expression_statement: {

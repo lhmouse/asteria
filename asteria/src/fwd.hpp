@@ -71,17 +71,17 @@ using Pair = std::pair<FirstT, SecondT>;
 template<typename ElementT>
 using Sp = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Spr = const std::shared_ptr<ElementT> &;
+using Sp_ref = const std::shared_ptr<ElementT> &;
 
 template<typename ElementT>
 using Wp = std::weak_ptr<ElementT>;
 template<typename ElementT>
-using Wpr = const std::weak_ptr<ElementT> &;
+using Wp_ref = const std::weak_ptr<ElementT> &;
 
 template<typename ElementT>
 using Vp = rocket::value_ptr<ElementT>;
 template<typename ElementT>
-using Vpr = typename std::conditional<std::is_const<ElementT>::value, const rocket::value_ptr<typename std::remove_const<ElementT>::type> &, rocket::value_ptr<ElementT> &>::type;
+using Vp_ref = typename std::conditional<std::is_const<ElementT>::value, const rocket::value_ptr<typename std::remove_const<ElementT>::type> &, rocket::value_ptr<ElementT> &>::type;
 
 // Complementary data types used internally
 using Nullptr             = std::nullptr_t;
@@ -90,7 +90,8 @@ using Signed_integer      = std::int64_t;
 using Unsigned_integer    = std::uint64_t;
 using Double_precision    = double;
 using Cow_string          = rocket::cow_string;
-using Function_prototype  = void (Vp<Reference> &, Spr<Recycler>, Vp<Reference> &&, Vector<Vp<Reference>> &&);
+using Cow_string_ref      = const rocket::cow_string &;
+using Function_prototype  = void (Vp<Reference> &, Sp_ref<Recycler>, Vp<Reference> &&, Vector<Vp<Reference>> &&);
 
 // Data types exposed to users
 using D_null      = Nullptr;

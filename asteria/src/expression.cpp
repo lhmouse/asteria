@@ -12,7 +12,7 @@ Expression::Expression(Expression &&) noexcept = default;
 Expression & Expression::operator=(Expression &&) noexcept = default;
 Expression::~Expression() = default;
 
-void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
+void bind_expression(Vp<Expression> &bound_expr_out, Sp_ref<const Expression> expression_opt, Sp_ref<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null expression.
 		bound_expr_out.reset();
@@ -26,7 +26,7 @@ void bind_expression(Vp<Expression> &bound_expr_out, Spr<const Expression> expre
 	}
 	bound_expr_out.emplace(std::move(bound_nodes));
 }
-void evaluate_expression(Vp<Reference> &result_out, Spr<Recycler> recycler_out, Spr<const Expression> expression_opt, Spr<const Scope> scope){
+void evaluate_expression(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Expression> expression_opt, Sp_ref<const Scope> scope){
 	if(expression_opt == nullptr){
 		// Return a null reference only when a null expression is given.
 		move_reference(result_out, nullptr);
