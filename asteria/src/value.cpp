@@ -182,7 +182,7 @@ std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt){
 	dump_value(os, value_opt);
 	return os;
 }
-std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> &value_opt){
+std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> value_opt){
 	dump_value(os, value_opt);
 	return os;
 }

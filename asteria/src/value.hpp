@@ -108,7 +108,7 @@ extern const char * get_value_type_name(Sp_ref<const Value> value_opt) noexcept;
 
 extern void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt);
-extern std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> &value_opt);
+extern std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> value_opt);
 
 extern void set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Value::Variant &&variant);
 extern void clear_value(Vp<Value> &value_out);
