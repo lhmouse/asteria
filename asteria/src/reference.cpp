@@ -179,7 +179,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Sp_ref<const Reference> ref_op
 
 	case Reference::type_variable: {
 		const auto &cand = ref_opt->get<Reference::S_variable>();
-		return cand.variable->drill_for_value(); }
+		return cand.variable->mutate_value(); }
 
 	case Reference::type_array_element: {
 		const auto &cand = ref_opt->get<Reference::S_array_element>();
@@ -290,7 +290,7 @@ namespace {
 
 		case Reference::type_variable: {
 			auto &cand = ref_opt->get<Reference::S_variable>();
-			return cand.variable->get_value_opt(); }
+			return cand.variable->get_value_opt().share(); }
 
 		case Reference::type_array_element: {
 			auto &cand = ref_opt->get<Reference::S_array_element>();

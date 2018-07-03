@@ -46,7 +46,7 @@ public:
 	}
 
 	Sp<const Reference> get_named_reference_opt(Cow_string_ref id) const noexcept;
-	std::reference_wrapper<Vp<Reference>> drill_for_named_reference(Cow_string_ref id);
+	std::reference_wrapper<Vp<Reference>> mutate_named_reference(Cow_string_ref id);
 
 	void defer_callback(Sp<const Function_base> &&callback);
 };

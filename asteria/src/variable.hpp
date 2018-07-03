@@ -29,10 +29,10 @@ private:
 	ROCKET_NORETURN void do_throw_immutable() const;
 
 public:
-	Sp<const Value> get_value_opt() const noexcept {
+	Vp_ref<const Value> get_value_opt() const noexcept {
 		return m_value_opt;
 	}
-	std::reference_wrapper<Vp<Value>> drill_for_value(){
+	std::reference_wrapper<Vp<Value>> mutate_value(){
 		const auto immutable = is_immutable();
 		if(immutable){
 			do_throw_immutable();

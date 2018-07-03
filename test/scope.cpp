@@ -43,10 +43,10 @@ int main(){
 
 	auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	auto one = std::make_shared<Variable>();
-	set_value(one->drill_for_value(), recycler, D_integer(42));
+	set_value(one->mutate_value(), recycler, D_integer(42));
 	one->set_immutable(true);
 	Reference::S_variable lref = { one };
-	auto wref = scope->drill_for_named_reference(D_string::shallow("one"));
+	auto wref = scope->mutate_named_reference(D_string::shallow("one"));
 	set_reference(wref, std::move(lref));
 
 	auto ref = scope->get_named_reference_opt(D_string::shallow("one"));

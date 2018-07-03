@@ -32,7 +32,7 @@ int main(){
 	ASTERIA_TEST_CHECK(ptr.get() == value.get());
 
 	auto var = std::make_shared<Variable>();
-	set_value(var->drill_for_value(), recycler, D_double(4.2));
+	set_value(var->mutate_value(), recycler, D_double(4.2));
 	Reference::S_variable lref = { var };
 	set_reference(ref, std::move(lref));
 	ptr = read_reference_opt(ref);
@@ -41,7 +41,7 @@ int main(){
 	Vp<Reference> ref_local;
 	copy_reference(ref_local, ref);
 
-	set_value(var->drill_for_value(), recycler, true);
+	set_value(var->mutate_value(), recycler, true);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_boolean);
 	Reference::S_array_element aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
@@ -51,7 +51,7 @@ int main(){
 		set_value(value, recycler, D_integer(i + 200));
 		array.emplace_back(std::move(value));
 	}
-	set_value(var->drill_for_value(), recycler, std::move(array));
+	set_value(var->mutate_value(), recycler, std::move(array));
 	aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	var->set_immutable(true);
@@ -104,7 +104,7 @@ int main(){
 	object.emplace(D_string::shallow("one"), std::move(value));
 	set_value(value, recycler, D_integer(2));
 	object.emplace(D_string::shallow("two"), std::move(value));
-	set_value(var->drill_for_value(), recycler, std::move(object));
+	set_value(var->mutate_value(), recycler, std::move(object));
 	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_immutable(true);

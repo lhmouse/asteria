@@ -34,7 +34,7 @@ Sp<const Reference> Scope::get_named_reference_opt(Cow_string_ref id) const noex
 	}
 	return it->second;
 }
-std::reference_wrapper<Vp<Reference>> Scope::drill_for_named_reference(Cow_string_ref id){
+std::reference_wrapper<Vp<Reference>> Scope::mutate_named_reference(Cow_string_ref id){
 	if(id.empty()){
 		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of variables must not be empty.");
 	}
@@ -104,7 +104,7 @@ namespace {
 		if(id.empty()){
 			return;
 		}
-		const auto wref = scope->drill_for_named_reference(id);
+		const auto wref = scope->mutate_named_reference(id);
 		move_reference(wref, std::move(arg_opt));
 	}
 	void do_set_argument(Sp_ref<Scope> scope, const Parameter &param, Vp<Reference> &&arg_opt){

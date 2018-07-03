@@ -16,21 +16,21 @@ int main(){
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 
 	auto dval = std::make_shared<Variable>();
-	set_value(dval->drill_for_value(), recycler, D_double(1.5));
+	set_value(dval->mutate_value(), recycler, D_double(1.5));
 	Reference::S_variable lref = { dval };
-	auto lrwref = scope->drill_for_named_reference(D_string::shallow("dval"));
+	auto lrwref = scope->mutate_named_reference(D_string::shallow("dval"));
 	set_reference(lrwref, std::move(lref));
 
 	auto cval = std::make_shared<Variable>();
-	set_value(cval->drill_for_value(), recycler, D_integer(10));
+	set_value(cval->mutate_value(), recycler, D_integer(10));
 	lref = { cval };
-	lrwref = scope->drill_for_named_reference(D_string::shallow("cval"));
+	lrwref = scope->mutate_named_reference(D_string::shallow("cval"));
 	set_reference(lrwref, std::move(lref));
 
 	auto rval = std::make_shared<Variable>();
-	set_value(rval->drill_for_value(), recycler, D_array());
+	set_value(rval->mutate_value(), recycler, D_array());
 	lref = { rval };
-	lrwref = scope->drill_for_named_reference(D_string::shallow("rval"));
+	lrwref = scope->mutate_named_reference(D_string::shallow("rval"));
 	set_reference(lrwref, std::move(lref));
 
 	// Plain: rval[1] = !condition ? (dval++ + 0.25) : (cval * "hello,");
@@ -77,10 +77,10 @@ int main(){
 
 	auto condition = std::make_shared<Variable>();
 	lref = { condition };
-	lrwref = scope->drill_for_named_reference(D_string::shallow("condition"));
+	lrwref = scope->mutate_named_reference(D_string::shallow("condition"));
 	set_reference(lrwref, std::move(lref));
 
-	set_value(condition->drill_for_value(), recycler, D_boolean(false));
+	set_value(condition->mutate_value(), recycler, D_boolean(false));
 	Vp<Reference> result;
 	evaluate_expression(result, recycler, expr, scope);
 	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
@@ -89,7 +89,7 @@ int main(){
 	ASTERIA_TEST_CHECK(rval->get_value_opt()->get<D_array>().at(1).get() == rptr.get());
 	ASTERIA_TEST_CHECK(rptr->get<D_double>() == 1.75);
 
-	set_value(condition->drill_for_value(), recycler, D_boolean(true));
+	set_value(condition->mutate_value(), recycler, D_boolean(true));
 	evaluate_expression(result, recycler, expr, scope);
 	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
 	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);

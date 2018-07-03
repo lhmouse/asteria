@@ -26,9 +26,9 @@ public:
 		Dictionary<Vp<Initializer>> key_values;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
-		, S_assignment_init     // 0
-		, S_bracketed_init_list // 1
-		, S_braced_init_list    // 2
+		, S_assignment_init      // 0
+		, S_bracketed_init_list  // 1
+		, S_braced_init_list     // 2
 	)>;
 
 private:

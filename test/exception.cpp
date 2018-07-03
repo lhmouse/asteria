@@ -13,7 +13,7 @@ using namespace Asteria;
 int main(){
 	const auto recycler = std::make_shared<Recycler>();
 	auto var = std::make_shared<Variable>();
-	set_value(var->drill_for_value(), recycler, D_integer(42));
+	set_value(var->mutate_value(), recycler, D_integer(42));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_integer);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_integer>() == 42);
 	try {

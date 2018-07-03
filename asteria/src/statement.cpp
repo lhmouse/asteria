@@ -39,7 +39,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> s
 		Statement::S_variable_definition stmt_v = { cand.id, cand.immutable, std::move(bound_init) };
 		bound_stmts_out.emplace_back(std::move(stmt_v));
 		// Create a null reference for the variable.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
 
@@ -53,7 +53,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> s
 		Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params, std::move(bound_body) };
 		bound_stmts_out.emplace_back(std::move(stmt_f));
 		// Create a null reference for the variable.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
 
@@ -142,8 +142,8 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> s
 		Vp<Initializer> bound_range_init;
 		bind_initializer(bound_range_init, cand.range_init_opt, scope_for);
 		// Create null references for the key and the value.
-		const auto key_wref = scope_inout->drill_for_named_reference(cand.key_id);
-		const auto value_wref = scope_inout->drill_for_named_reference(cand.value_id);
+		const auto key_wref = scope_inout->mutate_named_reference(cand.key_id);
+		const auto value_wref = scope_inout->mutate_named_reference(cand.value_id);
 		set_reference(key_wref, nullptr);
 		set_reference(value_wref, nullptr);
 		// Bind the body recursively.
@@ -161,7 +161,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> s
 		// Bind the `catch` branch recursively.
 		const auto scope_catch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 		// Create null references for the exception.
-		const auto wref = scope_inout->drill_for_named_reference(cand.except_id);
+		const auto wref = scope_inout->mutate_named_reference(cand.except_id);
 		set_reference(wref, nullptr);
 		Vp<Block> bound_branch_catch;
 		bind_block_in_place(bound_branch_catch, scope_catch, cand.branch_catch_opt);
@@ -223,14 +223,14 @@ void fly_over_statement_in_place(Sp_ref<Scope> scope_inout, const Statement &stm
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
 		// Create a null reference for the variable.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
 
 	case Statement::type_function_definition: {
 		const auto &cand = stmt.get<Statement::S_function_definition>();
 		// Create a null reference for the function.
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		set_reference(wref, nullptr);
 		break; }
 
@@ -287,7 +287,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
 		materialize_reference(result_out, recycler_out, cand.immutable);
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		copy_reference(wref, result_out);
 		break; }
 
@@ -305,7 +305,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		Reference::S_temporary_value ref_t = { std::move(func_var) };
 		set_reference(result_out, std::move(ref_t));
 		materialize_reference(result_out, recycler_out, true);
-		const auto wref = scope_inout->drill_for_named_reference(cand.id);
+		const auto wref = scope_inout->mutate_named_reference(cand.id);
 		copy_reference(wref, result_out);
 		break; }
 
@@ -457,12 +457,12 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 			for(std::ptrdiff_t index = 0; index < size; ++index){
 				// Set the key, which is an integer.
 				set_value(key_var, recycler_out, D_integer(index));
-				const auto key_wref = scope_for->drill_for_named_reference(cand.key_id);
+				const auto key_wref = scope_for->mutate_named_reference(cand.key_id);
 				Reference::S_constant ref_k = { key_var.cshare() };
 				set_reference(key_wref, std::move(ref_k));
 				// Set the value, which is an array element.
 				copy_reference(temp_ref, range_ref);
-				const auto value_wref = scope_for->drill_for_named_reference(cand.value_id);
+				const auto value_wref = scope_for->mutate_named_reference(cand.value_id);
 				Reference::S_array_element ref_v = { std::move(temp_ref), index };
 				set_reference(value_wref, std::move(ref_v));
 				// Execute the loop body recursively.
@@ -491,12 +491,12 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 			for(auto &key : backup_keys){
 				// Set the key, which is an integer.
 				set_value(key_var, recycler_out, D_string(key));
-				const auto key_wref = scope_for->drill_for_named_reference(cand.key_id);
+				const auto key_wref = scope_for->mutate_named_reference(cand.key_id);
 				Reference::S_constant ref_k = { key_var.cshare() };
 				set_reference(key_wref, std::move(ref_k));
 				// Set the value, which is an object member.
 				copy_reference(temp_ref, range_ref);
-				const auto value_wref = scope_for->drill_for_named_reference(cand.value_id);
+				const auto value_wref = scope_for->mutate_named_reference(cand.value_id);
 				Reference::S_object_member ref_v = { std::move(temp_ref), std::move(key) };
 				set_reference(value_wref, std::move(ref_v));
 				// Execute the loop body recursively.
@@ -554,7 +554,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				// Copy the reference into the scope.
 				copy_reference(result_out, e.get_reference_opt());
 				materialize_reference(result_out, recycler_out, true);
-				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
+				const auto wref = scope_catch->mutate_named_reference(cand.except_id);
 				copy_reference(wref, result_out);
 			} catch(std::exception &e){
 				ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
@@ -564,12 +564,12 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				Reference::S_temporary_value ref_t = { std::move(what_var) };
 				set_reference(result_out, std::move(ref_t));
 				materialize_reference(result_out, recycler_out, true);
-				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
+				const auto wref = scope_catch->mutate_named_reference(cand.except_id);
 				copy_reference(wref, result_out);
 			} catch(...){
 				ASTERIA_DEBUG_LOG("Caught an unknown exception...");
 				// Create a null reference in the scope.
-				const auto wref = scope_catch->drill_for_named_reference(cand.except_id);
+				const auto wref = scope_catch->mutate_named_reference(cand.except_id);
 				set_reference(wref, nullptr);
 			}
 			const auto result = execute_block_in_place(result_out, scope_catch, recycler_out, cand.branch_catch_opt);
