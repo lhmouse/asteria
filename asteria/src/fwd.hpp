@@ -10,7 +10,6 @@
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include <vector> // std::vector<>
-#include <deque> // std::deque<>
 #include <unordered_map> // std::unordered_map<>
 #include "rocket/cow_string.hpp"
 #include "rocket/value_ptr.hpp"
@@ -54,8 +53,6 @@ class Recycler;
 // Aliases
 template<typename ElementT>
 using Vector = std::vector<ElementT>;
-template<typename ElementT>
-using Deque = std::deque<ElementT>;
 template<typename ElementT>
 using Dictionary = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
 

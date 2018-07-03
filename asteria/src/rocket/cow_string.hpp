@@ -615,11 +615,6 @@ namespace details_cow_string {
 			return 0;
 		}
 	};
-
-	template<typename funcT, typename ...argsT>
-	struct is_nothrow_invocable {
-		enum : bool { value = noexcept(::std::declval<funcT>()(::std::declval<argsT>()...)) };
-	};
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
@@ -1555,12 +1550,12 @@ public:
 
 	// N.B. This is a non-standard extension.
 	template<typename predT>
-	size_type find_first_if(predT pred, size_type from = 0) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+	size_type find_first_if(predT pred, size_type from = 0) const {
 		return this->do_find_forwards_if(from, 1, [&](const char *p){ return pred(*p); });
 	}
 	// N.B. This is a non-standard extension.
 	template<typename predT>
-	size_type find_last_if(predT pred, size_type to = npos) const noexcept(details_cow_string::is_nothrow_invocable<predT &, const_reference>::value) {
+	size_type find_last_if(predT pred, size_type to = npos) const {
 		return this->do_find_backwards_if(to, 1, [&](const char *p){ return pred(*p); });
 	}
 

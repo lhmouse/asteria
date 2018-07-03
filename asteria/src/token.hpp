@@ -163,7 +163,7 @@ public:
 	}
 };
 
-extern Parser_result tokenize_line(Deque<Token> &tokens_out, std::size_t line, Cow_string_ref str);
+extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, Cow_string_ref str);
 
 }
 
