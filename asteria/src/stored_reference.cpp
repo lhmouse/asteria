@@ -13,12 +13,12 @@ Stored_reference::~Stored_reference() = default;
 void set_reference(Vp<Reference> &ref_out, Stored_reference &&value_opt){
 	const auto value = value_opt.get_opt();
 	if(value == nullptr){
-		return ref_out.reset();
+		ref_out.reset();
 	} else if(ref_out == nullptr){
 		auto sp = std::make_shared<Reference>(std::move(*value));
-		return ref_out.reset(std::move(sp));
+		ref_out.reset(std::move(sp));
 	} else {
-		return ref_out->set(std::move(*value));
+		ref_out->set(std::move(*value));
 	}
 }
 

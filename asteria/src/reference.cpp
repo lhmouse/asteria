@@ -97,9 +97,9 @@ void copy_reference(Vp<Reference> &ref_out, Sp_ref<const Reference> src_opt){
 }
 void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt){
 	if(src_opt == nullptr){
-		return ref_out.reset();
+		ref_out.reset();
 	} else {
-		return ref_out.reset(src_opt.release());
+		ref_out.reset(src_opt.release());
 	}
 }
 
@@ -349,10 +349,11 @@ void extract_value_from_reference(Vp<Value> &value_out, Sp_ref<Recycler> recycle
 	if(result.is_movable()){
 		auto &movable_value = result.get_movable_pointer();
 		if(movable_value && (movable_value->get_recycler_opt() == recycler_out)){
-			return value_out.reset(movable_value.release());
+			value_out.reset(movable_value.release());
+			return;
 		}
 	}
-	return copy_value(value_out, recycler_out, result.get_copyable_pointer());
+	copy_value(value_out, recycler_out, result.get_copyable_pointer());
 }
 
 namespace {

@@ -59,7 +59,7 @@ public:
 	}
 
 public:
-	explicit operator bool() const noexcept {
+	explicit operator bool () const noexcept {
 		return m_error_code == error_code_success;
 	}
 };

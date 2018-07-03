@@ -39,6 +39,7 @@ private:
 	shared_type m_ptr;
 
 public:
+	// 23.11.1.2.1, constructors
 	constexpr value_ptr(nullptr_t = nullptr) noexcept
 		: m_ptr(nullptr)
 	{ }
@@ -46,17 +47,37 @@ public:
 	explicit value_ptr(shared_ptr<otherT> &&other) noexcept
 		: m_ptr(::std::move(other))
 	{ }
+	// 23.11.1.2.3, assignment
 	value_ptr(value_ptr &&rhs) = default;
 	value_ptr & operator=(value_ptr &&rhs) = default;
 
 public:
-	const elementT * get() const noexcept {
+	// 23.11.1.2.4, observers
+	const elementT & operator*() const noexcept {
+		ROCKET_ASSERT(this->m_ptr);
+		return *(this->m_ptr);
+	}
+	elementT & operator*() noexcept {
+		ROCKET_ASSERT(this->m_ptr);
+		return *(this->m_ptr);
+	}
+	const elementT * operator->() const noexcept {
+		ROCKET_ASSERT(this->m_ptr);
 		return this->m_ptr.get();
 	}
-	elementT * get() noexcept {
+	elementT * operator->() noexcept {
+		ROCKET_ASSERT(this->m_ptr);
 		return this->m_ptr.get();
 	}
 
+	template<typename otherT = elementT>
+	const otherT * get() const noexcept {
+		return this->m_ptr.get();
+	}
+	template<typename otherT = elementT>
+	otherT * get() noexcept {
+		return this->m_ptr.get();
+	}
 	template<typename otherT = elementT>
 	shared_ptr<const otherT> share() const noexcept {
 		return this->m_ptr;
@@ -66,11 +87,6 @@ public:
 		return this->m_ptr;
 	}
 	template<typename otherT = elementT>
-	shared_ptr<const otherT> cshare() const noexcept {
-		return this->share();
-	}
-
-	template<typename otherT = elementT>
 	weak_ptr<const otherT> weaken() const noexcept {
 		return this->m_ptr;
 	}
@@ -78,199 +94,188 @@ public:
 	weak_ptr<otherT> weaken() noexcept {
 		return this->m_ptr;
 	}
+
+	template<typename otherT = elementT>
+	const otherT * cget() const noexcept {
+		return this->get();
+	}
+	template<typename otherT = elementT>
+	shared_ptr<const otherT> cshare() const noexcept {
+		return this->share();
+	}
 	template<typename otherT = elementT>
 	weak_ptr<const otherT> cweaken() const noexcept {
 		return this->weaken();
 	}
 
-	void reset(nullptr_t = nullptr) noexcept {
-		this->m_ptr.reset();
+	explicit operator bool () const noexcept {
+		return this->m_ptr.get() != nullptr;
 	}
-	template<typename otherT>
-	void reset(shared_ptr<otherT> &&other) noexcept {
-		this->m_ptr = ::std::move(other);
+	operator shared_ptr<const elementT> () const noexcept {
+		return this->m_ptr;
 	}
-	template<typename ...paramsT>
-	void emplace(paramsT &&...params){
-		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
+	operator shared_ptr<elementT> & () noexcept {
+		return this->m_ptr;
 	}
+
+	// 23.11.1.2.5, modifiers
 	shared_type release() noexcept {
 		shared_type ptr;
-		ptr.swap(this->m_ptr);
+		this->m_ptr.swap(ptr);
 		return ptr;
+	}
+	value_ptr & reset(nullptr_t = nullptr) noexcept {
+		this->m_ptr.reset();
+		return *this;
+	}
+	template<typename otherT>
+	value_ptr & reset(shared_ptr<otherT> &&other) noexcept {
+		this->m_ptr = ::std::move(other);
+		return *this;
+	}
+	template<typename ...paramsT>
+	value_ptr & emplace(paramsT &&...params){
+		this->m_ptr = ::std::make_shared<elementT>(::std::forward<paramsT>(params)...);
+		return *this;
 	}
 
 	void swap(value_ptr &rhs) noexcept {
 		this->m_ptr.swap(rhs.m_ptr);
 	}
-
-public:
-	operator shared_ptr<const elementT>() const noexcept {
-		return this->m_ptr;
-	}
-	operator shared_ptr<elementT>() const noexcept {
-		return this->m_ptr;
-	}
-	operator weak_ptr<const elementT>() const noexcept {
-		return this->m_ptr;
-	}
-	operator weak_ptr<elementT>() noexcept {
-		return this->m_ptr;
-	}
-
-	explicit operator bool() const noexcept {
-		return this->m_ptr.operator bool();
-	}
-	const elementT & operator*() const {
-		ROCKET_ASSERT(this->m_ptr != nullptr);
-		return this->m_ptr.operator*();
-	}
-	elementT & operator*(){
-		ROCKET_ASSERT(this->m_ptr != nullptr);
-		return this->m_ptr.operator*();
-	}
-	const elementT * operator->() const {
-		ROCKET_ASSERT(this->m_ptr != nullptr);
-		return this->m_ptr.operator->();
-	}
-	elementT * operator->(){
-		ROCKET_ASSERT(this->m_ptr != nullptr);
-		return this->m_ptr.operator->();
-	}
 };
 
 template<typename elementT, typename otherT>
-bool operator==(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator==(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() == rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator!=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator!=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() != rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() < rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() > rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() <= rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>=(const value_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() >= rhs.get();
 }
 
 template<typename elementT, typename otherT>
-bool operator==(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator==(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() == rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator!=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator!=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() != rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() < rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() > rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() <= rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>=(const shared_ptr<elementT> &lhs, const value_ptr<otherT> &rhs) noexcept {
 	return lhs.get() >= rhs.get();
 }
 
 template<typename elementT, typename otherT>
-bool operator==(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator==(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() == rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator!=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator!=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() != rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator<(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() < rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator>(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() > rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator<=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator<=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() <= rhs.get();
 }
 template<typename elementT, typename otherT>
-bool operator>=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
+inline bool operator>=(const value_ptr<elementT> &lhs, const shared_ptr<otherT> &rhs) noexcept {
 	return lhs.get() >= rhs.get();
 }
 
 template<typename elementT>
-bool operator==(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator==(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() == nullptr;
 }
 template<typename elementT>
-bool operator!=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator!=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() != nullptr;
 }
 template<typename elementT>
-bool operator<(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator<(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() < nullptr;
 }
 template<typename elementT>
-bool operator>(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator>(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() > nullptr;
 }
 template<typename elementT>
-bool operator<=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator<=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() <= nullptr;
 }
 template<typename elementT>
-bool operator>=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
+inline bool operator>=(const value_ptr<elementT> &lhs, nullptr_t) noexcept {
 	return lhs.get() >= nullptr;
 }
 
 template<typename otherT>
-bool operator==(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator==(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr == rhs.get();
 }
 template<typename otherT>
-bool operator!=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator!=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr != rhs.get();
 }
 template<typename otherT>
-bool operator<(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr < rhs.get();
 }
 template<typename otherT>
-bool operator>(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr > rhs.get();
 }
 template<typename otherT>
-bool operator<=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator<=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr <= rhs.get();
 }
 template<typename otherT>
-bool operator>=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
+inline bool operator>=(nullptr_t, const value_ptr<otherT> &rhs) noexcept {
 	return nullptr >= rhs.get();
 }
 
 template<typename elementT>
-void swap(value_ptr<elementT> &lhs, value_ptr<elementT> &rhs) noexcept {
+inline void swap(value_ptr<elementT> &lhs, value_ptr<elementT> &rhs) noexcept {
 	lhs.swap(rhs);
 }
 
 template<typename charT, typename traitsT, typename elementT>
-basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const value_ptr<elementT> &rhs){
+inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const value_ptr<elementT> &rhs){
 	return os <<rhs.get();
 }
 

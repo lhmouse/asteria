@@ -14,10 +14,10 @@ int main(){
 	set_value(obj, recycler, D_object());
 	set_value(value, recycler, D_integer(42));
 	auto pair = obj->get<D_object>().emplace(D_string::shallow("int"), std::move(value));
-	auto weak_int = std::weak_ptr<Value>(pair.first->second);
+	auto weak_int = pair.first->second.weaken();
 	set_value(value, recycler, D_string(D_string::shallow("hello")));
 	pair = obj->get<D_object>().emplace(D_string::shallow("str"), std::move(value));
-	auto weak_str = std::weak_ptr<Value>(pair.first->second);
+	auto weak_str = pair.first->second.weaken();
 
 	ASTERIA_TEST_CHECK(weak_int.expired() == false);
 	ASTERIA_TEST_CHECK(weak_str.expired() == false);
