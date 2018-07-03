@@ -28,6 +28,11 @@ public:
 		execution_result_continue_for          = 7,
 		execution_result_return                = 8,
 	};
+	struct Switch_clause {
+		// `pred_opt` is non-null for `case` clauses and is null for `default` clauses.
+		Vp<Expression> pred_opt;
+		Vp<Block> body_opt;
+	};
 
 	enum Type : signed char {
 		type_expression_statement  =  0,
@@ -67,7 +72,7 @@ public:
 	};
 	struct S_switch_statement {
 		Vp<Expression> ctrl_opt;
-		Vector<Pair<Vp<Expression>, Vp<Block>>> clauses_opt;
+		Vector<Switch_clause> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Vp<Block> body_opt;

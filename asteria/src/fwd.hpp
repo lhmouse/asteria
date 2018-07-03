@@ -59,8 +59,6 @@ template<typename ElementT>
 using Deque = std::deque<ElementT>;
 template<typename ElementT>
 using Dictionary = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
-template<typename FirstT, typename SecondT>
-using Pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
 using Sp = std::shared_ptr<ElementT>;

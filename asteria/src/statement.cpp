@@ -19,6 +19,8 @@ Statement::Statement(Statement &&) noexcept = default;
 Statement & Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
+using Switch_clause = Statement::Switch_clause;
+
 void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> scope_inout, const Statement &stmt){
 	const auto type = stmt.get_type();
 	switch(type){
@@ -79,14 +81,15 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> s
 		// Bind clauses recursively. A clause consists of a label expression and a body block.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
-		Vector<Pair<Vp<Expression>, Vp<Block>>> bound_clauses;
+		Vector<Switch_clause> bound_clauses;
 		bound_clauses.reserve(cand.clauses_opt.size());
-		for(const auto &pair : cand.clauses_opt){
-			Vp<Expression> bound_label;
-			bind_expression(bound_label, pair.first, scope_switch);
+		for(const auto &clause : cand.clauses_opt){
+			Vp<Expression> bound_pred;
+			bind_expression(bound_pred, clause.pred_opt, scope_switch);
 			Vp<Block> bound_body;
-			bind_block_in_place(bound_body, scope_switch, pair.second);
-			bound_clauses.emplace_back(std::move(bound_label), std::move(bound_body));
+			bind_block_in_place(bound_body, scope_switch, clause.body_opt);
+			Switch_clause bound_clause = { std::move(bound_pred), std::move(bound_body) };
+			bound_clauses.emplace_back(std::move(bound_clause));
 		}
 		Statement::S_switch_statement stmt_s = { std::move(bound_ctrl), std::move(bound_clauses) };
 		bound_stmts_out.emplace_back(std::move(stmt_s));
@@ -338,9 +341,9 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
 		auto match_it = cand.clauses_opt.end();
 		for(auto it = cand.clauses_opt.begin(); it != cand.clauses_opt.end(); ++it){
-			if(it->first){
+			if(it->pred_opt){
 				// Deal with a `case` label.
-				evaluate_expression(result_out, recycler_out, it->first, scope_switch);
+				evaluate_expression(result_out, recycler_out, it->pred_opt, scope_switch);
 				const auto case_var = read_reference_opt(result_out);
 				if(compare_values(control_var, case_var) == Value::comparison_result_equal){
 					match_it = it;
@@ -353,12 +356,12 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				}
 				match_it = it;
 			}
-			fly_over_block_in_place(scope_switch, it->second);
+			fly_over_block_in_place(scope_switch, it->body_opt);
 		}
 		// Iterate from the match clause to the end of the body, falling through clause ends if any.
 		for(auto it = match_it; it != cand.clauses_opt.end(); ++it){
 			// Execute the clause recursively.
-			const auto result = execute_block_in_place(result_out, scope_switch, recycler_out, it->second);
+			const auto result = execute_block_in_place(result_out, scope_switch, recycler_out, it->body_opt);
 			if((result == Statement::execution_result_break_unspecified) || (result == Statement::execution_result_break_switch)){
 				// Break out of the body as requested.
 				break;
