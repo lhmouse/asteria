@@ -159,9 +159,9 @@ public:
 	}
 };
 
-extern void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_ref<Scope> scope_inout, const Statement &stmt);
-extern void fly_over_statement_in_place(Sp_ref<Scope> scope_inout, const Statement &stmt);
-extern Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Sp_ref<Scope> scope_inout, Sp_ref<Recycler> recycler_out, const Statement &stmt);
+extern void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> scope_inout, const Statement &stmt);
+extern void fly_over_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt);
+extern Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Sp_cref<Scope> scope_inout, Sp_cref<Recycler> recycler_out, const Statement &stmt);
 
 }
 

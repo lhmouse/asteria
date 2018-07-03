@@ -100,26 +100,26 @@ public:
 };
 
 extern const char * get_type_name(Value::Type type) noexcept;
-extern Value::Type get_value_type(Sp_ref<const Value> value_opt) noexcept;
-extern const char * get_value_type_name(Sp_ref<const Value> value_opt) noexcept;
+extern Value::Type get_value_type(Sp_cref<const Value> value_opt) noexcept;
+extern const char * get_value_type_name(Sp_cref<const Value> value_opt) noexcept;
 
-extern void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt);
-extern std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> value_opt);
+extern void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern std::ostream & operator<<(std::ostream &os, Sp_cref<const Value> value_opt);
+extern std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt);
 
-extern D_boolean & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_boolean cand);
-extern D_integer & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_integer cand);
-extern D_double & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_double cand);
-extern D_string & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_string cand);
-extern D_opaque & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_opaque cand);
-extern D_function & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_function cand);
-extern D_array & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_array cand);
-extern D_object & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_object cand);
+extern D_boolean & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_boolean cand);
+extern D_integer & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_integer cand);
+extern D_double & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_double cand);
+extern D_string & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_string cand);
+extern D_opaque & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_opaque cand);
+extern D_function & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_function cand);
+extern D_array & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_array cand);
+extern D_object & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_object cand);
 extern void clear_value(Vp<Value> &value_out);
-extern void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Value> src_opt);
-extern void wipe_out_value(Sp_ref<Value> value_opt) noexcept;
-extern bool test_value(Sp_ref<const Value> value_opt) noexcept;
-extern Value::Comparison_result compare_values(Sp_ref<const Value> lhs_opt, Sp_ref<const Value> rhs_opt) noexcept;
+extern void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt);
+extern void wipe_out_value(Sp_cref<Value> value_opt) noexcept;
+extern bool test_value(Sp_cref<const Value> value_opt) noexcept;
+extern Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept;
 
 }
 

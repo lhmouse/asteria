@@ -57,8 +57,8 @@ public:
 	}
 };
 
-extern void bind_initializer(Vp<Initializer> &bound_init_out, Sp_ref<const Initializer> init_opt, Sp_ref<const Scope> scope);
-extern void evaluate_initializer(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Initializer> init_opt, Sp_ref<const Scope> scope);
+extern void bind_initializer(Vp<Initializer> &bound_init_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope);
 
 }
 

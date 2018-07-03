@@ -42,14 +42,14 @@ const char * get_type_name(Value::Type type) noexcept {
 		std::terminate();
 	}
 }
-Value::Type get_value_type(Sp_ref<const Value> value_opt) noexcept {
+Value::Type get_value_type(Sp_cref<const Value> value_opt) noexcept {
 	if(value_opt){
 		return value_opt->get_type();
 	} else {
 		return Value::type_null;
 	}
 }
-const char * get_value_type_name(Sp_ref<const Value> value_opt) noexcept {
+const char * get_value_type_name(Sp_cref<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	return get_type_name(type);
 }
@@ -104,7 +104,7 @@ namespace {
 	}
 }
 
-void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned indent_next, unsigned indent_increment){
+void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_value_type(value_opt);
 	os <<get_type_name(type) <<": ";
 	switch(type){
@@ -178,18 +178,18 @@ void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned indent
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt){
+std::ostream & operator<<(std::ostream &os, Sp_cref<const Value> value_opt){
 	dump_value(os, value_opt);
 	return os;
 }
-std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> value_opt){
+std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt){
 	dump_value(os, value_opt);
 	return os;
 }
 
 namespace {
 	template<typename CandidateT>
-	CandidateT & do_set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, CandidateT &&cand){
+	CandidateT & do_set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, CandidateT &&cand){
 		if(!value_out || (value_out->get_recycler_opt() != recycler_out)){
 			auto sp = std::make_shared<Value>(recycler_out, true);
 			recycler_out->adopt_value(sp);
@@ -199,34 +199,34 @@ namespace {
 	}
 }
 
-D_boolean & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_boolean cand){
+D_boolean & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_boolean cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_integer & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_integer cand){
+D_integer & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_integer cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_double & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_double cand){
+D_double & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_double cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_string & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_string cand){
+D_string & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_string cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_opaque & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_opaque cand){
+D_opaque & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_opaque cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_function & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_function cand){
+D_function & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_function cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_array & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_array cand){
+D_array & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_array cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
-D_object & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_object cand){
+D_object & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_object cand){
 	return do_set_value(value_out, recycler_out, std::move(cand));
 }
 void clear_value(Vp<Value> &value_out){
 	value_out.reset();
 }
-void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Value> src_opt){
+void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt){
 	const auto type = get_value_type(src_opt);
 	switch(type){
 	case Value::type_null:
@@ -279,7 +279,7 @@ void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<cons
 		std::terminate();
 	}
 }
-void wipe_out_value(Sp_ref<Value> value_opt) noexcept {
+void wipe_out_value(Sp_cref<Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
@@ -317,7 +317,7 @@ void wipe_out_value(Sp_ref<Value> value_opt) noexcept {
 		std::terminate();
 	}
 }
-bool test_value(Sp_ref<const Value> value_opt) noexcept {
+bool test_value(Sp_cref<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
@@ -348,7 +348,7 @@ bool test_value(Sp_ref<const Value> value_opt) noexcept {
 		std::terminate();
 	}
 }
-Value::Comparison_result compare_values(Sp_ref<const Value> lhs_opt, Sp_ref<const Value> rhs_opt) noexcept {
+Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept {
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = get_value_type(lhs_opt);
 	const auto type_rhs = get_value_type(rhs_opt);

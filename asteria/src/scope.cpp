@@ -26,14 +26,14 @@ try {
 	ASTERIA_DEBUG_LOG("Ignoring `std::exception` thrown from deferred callbacks: ", e.what());
 }
 
-Sp<const Reference> Scope::get_named_reference_opt(Cow_string_ref id) const noexcept {
+Sp<const Reference> Scope::get_named_reference_opt(Cow_string_cref id) const noexcept {
 	auto it = m_named_references.find(id);
 	if(it == m_named_references.end()){
 		return nullptr;
 	}
 	return it->second;
 }
-std::reference_wrapper<Vp<Reference>> Scope::mutate_named_reference(Cow_string_ref id){
+std::reference_wrapper<Vp<Reference>> Scope::mutate_named_reference(Cow_string_cref id){
 	if(id.empty()){
 		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of variables must not be empty.");
 	}
@@ -57,7 +57,7 @@ namespace {
 		Vector<Vp<Reference>> m_args;
 
 	public:
-		Argument_getter(Cow_string_ref self_id, Cow_string_ref location, Vector<Vp<Reference>> &&args)
+		Argument_getter(Cow_string_cref self_id, Cow_string_cref location, Vector<Vp<Reference>> &&args)
 			: m_self_id(self_id), m_source(location), m_args(std::move(args))
 		{ }
 
@@ -65,7 +65,7 @@ namespace {
 		Cow_string describe() const override {
 			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source, "'");
 		}
-		void invoke(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&args) const override {
+		void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&args) const override {
 			switch(args.size()){
 			case 0: {
 				// Return the number of args.
@@ -99,14 +99,14 @@ namespace {
 		}
 	};
 
-	void do_set_argument(Sp_ref<Scope> scope, Cow_string_ref id, Vp<Reference> &&arg_opt){
+	void do_set_argument(Sp_cref<Scope> scope, Cow_string_cref id, Vp<Reference> &&arg_opt){
 		if(id.empty()){
 			return;
 		}
 		const auto wref = scope->mutate_named_reference(id);
 		move_reference(wref, std::move(arg_opt));
 	}
-	void do_shift_argument(Sp_ref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, Cow_string_ref id){
+	void do_shift_argument(Sp_cref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, Cow_string_cref id){
 		Vp<Reference> arg_opt;
 		if(args_inout_opt.empty() == false){
 			arg_opt = std::move(args_inout_opt.front());
@@ -115,14 +115,14 @@ namespace {
 		do_set_argument(scope, id, std::move(arg_opt));
 	}
 
-	void do_create_argument_getter(Sp_ref<Scope> scope, Cow_string_ref id, Cow_string_ref description, Vector<Vp<Reference>> &&args){
+	void do_create_argument_getter(Sp_cref<Scope> scope, Cow_string_cref id, Cow_string_cref description, Vector<Vp<Reference>> &&args){
 		auto value = std::make_shared<Value>(D_function(std::make_shared<Argument_getter>(id, description, std::move(args))));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, id, std::move(arg));
 	}
-	void do_create_source_reference(Sp_ref<Scope> scope, Cow_string_ref id, Cow_string_ref description){
+	void do_create_source_reference(Sp_cref<Scope> scope, Cow_string_cref id, Cow_string_cref description){
 		auto value = std::make_shared<Value>(D_string(description));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
@@ -131,7 +131,7 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Sp_ref<Scope> scope, Sp_ref<Recycler> recycler_out, Cow_string_ref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
+void prepare_function_scope(Sp_cref<Scope> scope, Sp_cref<Recycler> recycler_out, Cow_string_cref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler_out, true);
 	std::for_each(args.begin(), args.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_out, true); });
@@ -142,7 +142,7 @@ void prepare_function_scope(Sp_ref<Scope> scope, Sp_ref<Recycler> recycler_out, 
 	do_create_source_reference(scope, Cow_string::shallow("__source"), source);
 	do_create_argument_getter(scope, Cow_string::shallow("__va_arg"), source, std::move(args));
 }
-void prepare_function_scope_lexical(Sp_ref<Scope> scope, Cow_string_ref source, const Vector<Cow_string> &params){
+void prepare_function_scope_lexical(Sp_cref<Scope> scope, Cow_string_cref source, const Vector<Cow_string> &params){
 	// Create null parameters in the scope.
 	do_set_argument(scope, Cow_string::shallow("this"), nullptr);
 	std::for_each(params.begin(), params.end(), [&](const Cow_string &param){ do_set_argument(scope, param, nullptr); });

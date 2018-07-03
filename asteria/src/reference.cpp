@@ -11,11 +11,11 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Sp_ref<const Reference> ref_opt) noexcept {
+Reference::Type get_reference_type(Sp_cref<const Reference> ref_opt) noexcept {
 	return ref_opt ? ref_opt->get_type() : Reference::type_null;
 }
 
-void dump_reference(std::ostream &os, Sp_ref<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment){
+void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
@@ -60,7 +60,7 @@ void dump_reference(std::ostream &os, Sp_ref<const Reference> ref_opt, unsigned 
 //	return os;
 //}
 
-void copy_reference(Vp<Reference> &ref_out, Sp_ref<const Reference> src_opt){
+void copy_reference(Vp<Reference> &ref_out, Sp_cref<const Reference> src_opt){
 	const auto type = get_reference_type(src_opt);
 	switch(type){
 	case Reference::type_null:
@@ -102,7 +102,7 @@ void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt){
 	}
 }
 
-Sp<const Value> read_reference_opt(Sp_ref<const Reference> ref_opt){
+Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
@@ -162,7 +162,7 @@ Sp<const Value> read_reference_opt(Sp_ref<const Reference> ref_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Vp<Value>> drill_reference(Sp_ref<const Reference> ref_opt){
+std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::type_null:
@@ -273,7 +273,7 @@ namespace {
 		}
 	};
 
-	Extract_value_result do_try_extract_value(Sp_ref<Reference> ref_opt){
+	Extract_value_result do_try_extract_value(Sp_cref<Reference> ref_opt){
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::type_null:
@@ -343,7 +343,7 @@ namespace {
 	}
 }
 
-void extract_value_from_reference(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&ref_opt){
+void extract_value_from_reference(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&ref_opt){
 	auto result = do_try_extract_value(ref_opt);
 	if(result.is_movable()){
 		auto &movable_value = result.get_movable_pointer();
@@ -356,7 +356,7 @@ void extract_value_from_reference(Vp<Value> &value_out, Sp_ref<Recycler> recycle
 }
 
 namespace {
-	bool do_check_materializability(Sp_ref<const Reference> ref_opt){
+	bool do_check_materializability(Sp_cref<const Reference> ref_opt){
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::type_null:
@@ -380,7 +380,7 @@ namespace {
 	}
 }
 
-void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_ref<Recycler> recycler_out, bool immutable){
+void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_cref<Recycler> recycler_out, bool immutable){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
