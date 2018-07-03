@@ -317,7 +317,6 @@ void wipe_out_value(Sp_ref<Value> value_opt) noexcept {
 		std::terminate();
 	}
 }
-
 bool test_value(Sp_ref<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){

@@ -466,8 +466,8 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				// Set the value, which is an array element.
 				copy_reference(temp_ref, range_ref);
 				const auto value_wref = scope_for->mutate_named_reference(cand.value_id);
-				Reference::S_array_element ref_v = { std::move(temp_ref), index };
-				set_reference(value_wref, std::move(ref_v));
+				Reference::S_array_element ref_ae = { std::move(temp_ref), index };
+				set_reference(value_wref, std::move(ref_ae));
 				// Execute the loop body recursively.
 				const auto result = execute_block(result_out, recycler_out, cand.body_opt, scope_for);
 				if((result == Statement::execution_result_break_unspecified) || (result == Statement::execution_result_break_for)){
@@ -500,8 +500,8 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				// Set the value, which is an object member.
 				copy_reference(temp_ref, range_ref);
 				const auto value_wref = scope_for->mutate_named_reference(cand.value_id);
-				Reference::S_object_member ref_v = { std::move(temp_ref), std::move(key) };
-				set_reference(value_wref, std::move(ref_v));
+				Reference::S_object_member ref_om = { std::move(temp_ref), std::move(key) };
+				set_reference(value_wref, std::move(ref_om));
 				// Execute the loop body recursively.
 				const auto result = execute_block(result_out, recycler_out, cand.body_opt, scope_for);
 				if((result == Statement::execution_result_break_unspecified) || (result == Statement::execution_result_break_for)){

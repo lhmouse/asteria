@@ -118,7 +118,6 @@ extern D_object & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out,
 extern void clear_value(Vp<Value> &value_out);
 extern void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Value> src_opt);
 extern void wipe_out_value(Sp_ref<Value> value_opt) noexcept;
-
 extern bool test_value(Sp_ref<const Value> value_opt) noexcept;
 extern Value::Comparison_result compare_values(Sp_ref<const Value> lhs_opt, Sp_ref<const Value> rhs_opt) noexcept;
 
