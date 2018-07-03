@@ -1994,6 +1994,40 @@ void swap(basic_cow_string<charT, traitsT, allocatorT> &lhs, basic_cow_string<ch
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_iterator begin(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.begin();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_iterator end(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.end();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_reverse_iterator rbegin(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.rbegin();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_reverse_iterator rend(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.rend();
+}
+
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_iterator cbegin(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.cbegin();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_iterator cend(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.cend();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_reverse_iterator crbegin(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.crbegin();
+}
+template<typename charT, typename traitsT, typename allocatorT>
+typename basic_cow_string<charT, traitsT, allocatorT>::const_reverse_iterator crend(const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept {
+	return rhs.crend();
+}
+
+template<typename charT, typename traitsT, typename allocatorT>
 basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str){
 	// Initiate this FormattedInputFunction.
 	const typename basic_istream<charT, traitsT>::sentry sentry(is, false);
