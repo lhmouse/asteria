@@ -93,12 +93,9 @@ public:
 		}
 		return *ptr;
 	}
-	template<typename CandidateT, typename std::enable_if<Variant::is_candidate<typename std::decay<CandidateT>::type>::value>::type * = nullptr>
+	template<typename CandidateT>
 	CandidateT & set(CandidateT &&cand){
 		return m_variant.set(std::forward<CandidateT>(cand));
-	}
-	Variant & set(Variant &&variant){
-		return m_variant = std::move(variant);
 	}
 };
 
@@ -110,7 +107,14 @@ extern void dump_value(std::ostream &os, Sp_ref<const Value> value_opt, unsigned
 extern std::ostream & operator<<(std::ostream &os, Sp_ref<const Value> value_opt);
 extern std::ostream & operator<<(std::ostream &os, Vp_ref<const Value> value_opt);
 
-extern void set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Value::Variant &&variant);
+extern D_boolean & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_boolean cand);
+extern D_integer & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_integer cand);
+extern D_double & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_double cand);
+extern D_string & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_string cand);
+extern D_opaque & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_opaque cand);
+extern D_function & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_function cand);
+extern D_array & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_array cand);
+extern D_object & set_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, D_object cand);
 extern void clear_value(Vp<Value> &value_out);
 extern void copy_value(Vp<Value> &value_out, Sp_ref<Recycler> recycler_out, Sp_ref<const Value> src_opt);
 extern void wipe_out_value(Sp_ref<Value> value_opt) noexcept;

@@ -198,13 +198,13 @@ namespace {
 		if(assign){
 			// Update the result in-place.
 			const auto wref = drill_reference(ref_inout_opt);
-			return set_value(wref, recycler_out, std::forward<ResultT>(result));
+			set_value(wref, recycler_out, std::forward<ResultT>(result));
 		} else {
 			// Create a new variable for the result, then replace `lhs_ref` with an rvalue reference to it.
 			Vp<Value> value;
 			set_value(value, recycler_out, std::forward<ResultT>(result));
 			Reference::S_temporary_value ref_d = { std::move(value) };
-			return set_reference(ref_inout_opt, std::move(ref_d));
+			set_reference(ref_inout_opt, std::move(ref_d));
 		}
 	}
 
