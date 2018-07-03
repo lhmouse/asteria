@@ -187,44 +187,10 @@ std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt){
 	return os;
 }
 
-namespace {
-	template<typename CandidateT>
-	CandidateT & do_set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, CandidateT &&cand){
-		if(!value_out || (value_out->get_recycler_opt() != recycler_out)){
-			auto sp = std::make_shared<Value>(recycler_out, true);
-			recycler_out->adopt_value(sp);
-			value_out.reset(std::move(sp));
-		}
-		return value_out->set(std::forward<CandidateT>(cand));
-	}
-}
-
-D_boolean & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_boolean cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_integer & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_integer cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_double & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_double cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_string & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_string cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_opaque & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_opaque cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_function & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_function cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_array & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_array cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-D_object & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_object cand){
-	return do_set_value(value_out, recycler_out, std::move(cand));
-}
-void clear_value(Vp<Value> &value_out){
-	value_out.reset();
+void allocate_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out){
+	auto sp = std::make_shared<Value>(recycler_out, true);
+	recycler_out->adopt_value(sp);
+	value_out.reset(std::move(sp));
 }
 void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt){
 	const auto type = get_value_type(src_opt);

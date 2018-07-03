@@ -94,8 +94,8 @@ public:
 		return *ptr;
 	}
 	template<typename CandidateT>
-	CandidateT & set(CandidateT &&cand){
-		return m_variant.set(std::forward<CandidateT>(cand));
+	void set(CandidateT &&cand){
+		m_variant.set(std::forward<CandidateT>(cand));
 	}
 };
 
@@ -107,19 +107,22 @@ extern void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigne
 extern std::ostream & operator<<(std::ostream &os, Sp_cref<const Value> value_opt);
 extern std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt);
 
-extern D_boolean & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_boolean cand);
-extern D_integer & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_integer cand);
-extern D_double & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_double cand);
-extern D_string & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_string cand);
-extern D_opaque & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_opaque cand);
-extern D_function & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_function cand);
-extern D_array & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_array cand);
-extern D_object & set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, D_object cand);
-extern void clear_value(Vp<Value> &value_out);
+extern void allocate_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out);
 extern void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt);
 extern void wipe_out_value(Sp_cref<Value> value_opt) noexcept;
 extern bool test_value(Sp_cref<const Value> value_opt) noexcept;
 extern Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept;
+
+template<typename CandidateT>
+inline void set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, CandidateT &&cand){
+	if(!value_out || (value_out->get_recycler_opt() != recycler_out)){
+		((allocate_value))(value_out, recycler_out);
+	}
+	value_out->set(std::forward<CandidateT>(cand));
+}
+inline void clear_value(Vp<Value> &value_out){
+	value_out.reset();
+}
 
 }
 

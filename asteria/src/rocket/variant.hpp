@@ -384,18 +384,15 @@ public:
 		return *ptr;
 	}
 	template<typename elementT>
-	elementT & set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
-		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
+	void set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
+		constexpr unsigned eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		elementT *wptr;
 		if(this->m_index == eindex){
-			wptr = details_variant::punning_cast<etype *>(this->do_get_front_buffer());
-			*wptr = ::std::forward<elementT>(elem);
+			*details_variant::punning_cast<etype *>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
 		} else {
-			wptr = details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
+			details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
 			this->do_set_up_new_buffer(eindex);
 		}
-		return *wptr;
 	}
 
 	template<typename visitorT>
