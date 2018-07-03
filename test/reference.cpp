@@ -5,7 +5,6 @@
 #include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
 #include "../src/recycler.hpp"
-#include "../src/variable.hpp"
 
 using namespace Asteria;
 

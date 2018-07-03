@@ -9,7 +9,6 @@
 #include "../src/initializer.hpp"
 #include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
-#include "../src/variable.hpp"
 
 using namespace Asteria;
 

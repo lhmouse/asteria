@@ -5,7 +5,6 @@
 #include "reference.hpp"
 #include "stored_reference.hpp"
 #include "value.hpp"
-#include "variable.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -390,6 +389,22 @@ void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_ref<Recycler> 
 	auto var = std::make_shared<Variable>(std::move(value), immutable);
 	Reference::S_variable ref_l = { std::move(var) };
 	return set_reference(reference_inout_opt, std::move(ref_l));
+}
+
+}
+// This file is part of Asteria.
+// Copyleft 2018, LH_Mouse. All wrongs reserved.
+
+#include "precompiled.hpp"
+#include "value.hpp"
+#include "utilities.hpp"
+
+namespace Asteria {
+
+Variable::~Variable() = default;
+
+void Variable::do_throw_immutable() const {
+	ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", m_value_opt, "` is immutable.");
 }
 
 }

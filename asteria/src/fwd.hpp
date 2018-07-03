@@ -48,7 +48,6 @@ class Slim_function;
 class Instantiated_function;
 class Value;
 class Reference;
-class Variable;
 class Scope;
 class Recycler;
 

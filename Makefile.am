@@ -51,7 +51,6 @@ pkginclude_HEADERS =	\
 	asteria/src/block.hpp	\
 	asteria/src/instantiated_function.hpp	\
 	asteria/src/slim_function.hpp	\
-	asteria/src/variable.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/recycler.hpp	\
 	asteria/src/token.hpp
@@ -81,7 +80,6 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/block.cpp	\
 	asteria/src/instantiated_function.cpp	\
 	asteria/src/slim_function.cpp	\
-	asteria/src/variable.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/recycler.cpp	\
 	asteria/src/token.cpp
