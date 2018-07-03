@@ -586,7 +586,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		// Register the function as a deferred callback of the current scope_inout.
-		auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Vector<Parameter>(), scope_inout, std::move(bound_body));
+		auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Vector<Cow_string>(), scope_inout, std::move(bound_body));
 		scope_inout->defer_callback(std::move(func));
 		break; }
 

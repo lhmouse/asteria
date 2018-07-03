@@ -5,7 +5,6 @@
 #include "instantiated_function.hpp"
 #include "stored_reference.hpp"
 #include "block.hpp"
-#include "parameter.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
 
@@ -13,13 +12,12 @@ namespace Asteria {
 
 Instantiated_function::~Instantiated_function() = default;
 
-D_string Instantiated_function::describe() const {
+Cow_string Instantiated_function::describe() const {
 	return ASTERIA_FORMAT_STRING(m_category, " @ '", m_source, "'");
 }
 void Instantiated_function::invoke(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
 	// Allocate a function scope.
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
-	prepare_function_arguments(args, m_params);
 	prepare_function_scope(scope_with_args, recycler_out, m_source, m_params, std::move(this_opt), std::move(args));
 	// Execute the body.
 	const auto exec_result = execute_block_in_place(result_out, scope_with_args, recycler_out, m_bound_body_opt);

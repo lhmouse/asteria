@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
-#include "parameter.hpp"
 
 namespace Asteria {
 
@@ -72,7 +71,7 @@ public:
 	};
 	struct S_lambda_definition {
 		Cow_string location;
-		Vector<Parameter> params;
+		Vector<Cow_string> params;
 		Vp<Block> body_opt;
 	};
 	struct S_pruning {
@@ -87,7 +86,7 @@ public:
 	};
 	struct S_operator_rpn {
 		Operator op;
-		bool assign; // This parameter is ignored for `++`, `--`, `[]`, `=` and all rational operators.
+		bool assign; // This is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_literal            // 0

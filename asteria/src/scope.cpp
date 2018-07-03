@@ -6,7 +6,6 @@
 #include "value.hpp"
 #include "stored_reference.hpp"
 #include "function_base.hpp"
-#include "parameter.hpp"
 #include "utilities.hpp"
 #include <algorithm>
 
@@ -53,17 +52,17 @@ void Scope::defer_callback(Sp<const Function_base> &&callback){
 namespace {
 	class Argument_getter : public Function_base {
 	private:
-		D_string m_self_id;
-		D_string m_source;
+		Cow_string m_self_id;
+		Cow_string m_source;
 		Vector<Vp<Reference>> m_args;
 
 	public:
-		Argument_getter(const D_string &self_id, const D_string &location, Vector<Vp<Reference>> &&args)
+		Argument_getter(Cow_string_ref self_id, Cow_string_ref location, Vector<Vp<Reference>> &&args)
 			: m_self_id(self_id), m_source(location), m_args(std::move(args))
 		{ }
 
 	public:
-		D_string describe() const override {
+		Cow_string describe() const override {
 			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source, "'");
 		}
 		void invoke(Vp<Reference> &result_out, Sp_ref<Recycler> recycler_out, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&args) const override {
@@ -107,31 +106,23 @@ namespace {
 		const auto wref = scope->mutate_named_reference(id);
 		move_reference(wref, std::move(arg_opt));
 	}
-	void do_set_argument(Sp_ref<Scope> scope, const Parameter &param, Vp<Reference> &&arg_opt){
-		const auto &id = param.get_id();
-		if(id.empty()){
-			return;
-		}
-		do_set_argument(scope, id, std::move(arg_opt));
-	}
-
-	void do_shift_argument(Sp_ref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, const Parameter &param){
+	void do_shift_argument(Sp_ref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, Cow_string_ref id){
 		Vp<Reference> arg_opt;
 		if(args_inout_opt.empty() == false){
 			arg_opt = std::move(args_inout_opt.front());
 			args_inout_opt.erase(args_inout_opt.begin());
 		}
-		do_set_argument(scope, param, std::move(arg_opt));
+		do_set_argument(scope, id, std::move(arg_opt));
 	}
 
-	void do_create_argument_getter(Sp_ref<Scope> scope, Cow_string_ref id, const D_string &description, Vector<Vp<Reference>> &&args){
+	void do_create_argument_getter(Sp_ref<Scope> scope, Cow_string_ref id, Cow_string_ref description, Vector<Vp<Reference>> &&args){
 		auto value = std::make_shared<Value>(D_function(std::make_shared<Argument_getter>(id, description, std::move(args))));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, id, std::move(arg));
 	}
-	void do_create_source_reference(Sp_ref<Scope> scope, Cow_string_ref id, const D_string &description){
+	void do_create_source_reference(Sp_ref<Scope> scope, Cow_string_ref id, Cow_string_ref description){
 		auto value = std::make_shared<Value>(D_string(description));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
@@ -140,21 +131,21 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Sp_ref<Scope> scope, Sp_ref<Recycler> recycler_out, Cow_string_ref source, const Vector<Parameter> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
+void prepare_function_scope(Sp_ref<Scope> scope, Sp_ref<Recycler> recycler_out, Cow_string_ref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
 	// Materialize everything, as function parameters should be modifiable.
 	materialize_reference(this_opt, recycler_out, true);
 	std::for_each(args.begin(), args.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_out, true); });
 	// Move arguments into the scope.
 	do_set_argument(scope, Cow_string::shallow("this"), std::move(this_opt));
-	std::for_each(params.begin(), params.end(), [&](const Parameter &param){ do_shift_argument(scope, args, param); });
+	std::for_each(params.begin(), params.end(), [&](const Cow_string &param){ do_shift_argument(scope, args, param); });
 	// Create pre-defined variables.
 	do_create_source_reference(scope, Cow_string::shallow("__source"), source);
 	do_create_argument_getter(scope, Cow_string::shallow("__va_arg"), source, std::move(args));
 }
-void prepare_function_scope_lexical(Sp_ref<Scope> scope, Cow_string_ref source, const Vector<Parameter> &params){
+void prepare_function_scope_lexical(Sp_ref<Scope> scope, Cow_string_ref source, const Vector<Cow_string> &params){
 	// Create null parameters in the scope.
 	do_set_argument(scope, Cow_string::shallow("this"), nullptr);
-	std::for_each(params.begin(), params.end(), [&](const Parameter &param){ do_set_argument(scope, param, nullptr); });
+	std::for_each(params.begin(), params.end(), [&](const Cow_string &param){ do_set_argument(scope, param, nullptr); });
 	// Create pre-defined variables.
 	do_create_source_reference(scope, Cow_string::shallow("__source"), source);
 	do_set_argument(scope, Cow_string::shallow("__va_arg"), nullptr);

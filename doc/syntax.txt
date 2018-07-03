@@ -53,9 +53,7 @@ function-definition ::=
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
-	identifier default-argument-initializer-opt ( "," parameter-list-opt | "" )
-default-argument-initializer-opt ::=
-	"=" literal | ""
+	identifier ( "," parameter-list | "" )
 
 if-statement ::=
 	"if" "(" expression ")" block ( "else" else-branch | "" )

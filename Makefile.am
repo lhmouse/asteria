@@ -40,7 +40,6 @@ pkginclude_HEADERS =	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\
 	asteria/src/function_base.hpp	\
-	asteria/src/parameter.hpp	\
 	asteria/src/value.hpp	\
 	asteria/src/reference.hpp	\
 	asteria/src/stored_reference.hpp	\
@@ -71,7 +70,6 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/utilities.cpp	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
-	asteria/src/parameter.cpp	\
 	asteria/src/value.cpp	\
 	asteria/src/reference.cpp	\
 	asteria/src/stored_reference.cpp	\

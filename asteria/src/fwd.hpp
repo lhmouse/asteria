@@ -31,7 +31,6 @@ class Insertable_ostream;
 class Logger;
 
 // Lexical elements
-class Parameter;
 class Initializer;
 class Expression_node;
 class Expression;

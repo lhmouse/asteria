@@ -57,7 +57,7 @@ public:
 	struct S_function_definition {
 		Cow_string id;
 		Cow_string location;
-		Vector<Parameter> params;
+		Vector<Cow_string> params;
 		Vp<Block> body_opt;
 	};
 	struct S_if_statement {
