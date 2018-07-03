@@ -45,7 +45,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Value(CandidateT &&cand)
 		: m_weak_recycler(), m_variant(std::forward<CandidateT>(cand))
 	{ }
@@ -93,7 +93,7 @@ public:
 		}
 		return *ptr;
 	}
-	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, typename std::enable_if<Variant::is_candidate<typename std::decay<CandidateT>::type>::value>::type * = nullptr>
 	CandidateT & set(CandidateT &&cand){
 		return m_variant.set(std::forward<CandidateT>(cand));
 	}

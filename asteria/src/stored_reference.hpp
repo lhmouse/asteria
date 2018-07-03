@@ -19,7 +19,7 @@ private:
 	Variant m_value_opt;
 
 public:
-	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Stored_reference(CandidateT &&value_opt)
 		: m_value_opt(std::forward<CandidateT>(value_opt))
 	{ }

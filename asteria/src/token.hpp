@@ -132,7 +132,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, CandidateT &&cand)
 		: m_source_line(source_line), m_source_column(source_column), m_source_length(source_length), m_variant(std::forward<CandidateT>(cand))
 	{ }

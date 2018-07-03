@@ -105,7 +105,7 @@ private:
 	Variant m_variant;
 
 public:
-	template<typename CandidateT, ASTERIA_ENABLE_IF_ACCEPTABLE_BY_VARIANT(CandidateT, Variant)>
+	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Expression_node(CandidateT &&variant)
 		: m_variant(std::forward<CandidateT>(variant))
 	{ }
