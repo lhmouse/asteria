@@ -33,7 +33,6 @@ class Logger;
 class Initializer;
 class Expression_node;
 class Statement;
-class Block;
 class Parser_result;
 class Token;
 

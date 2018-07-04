@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_init.hpp"
-#include "../src/block.hpp"
+#include "../src/statement.hpp"
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
 #include "../src/expression_node.hpp"
@@ -13,15 +13,14 @@
 using namespace Asteria;
 
 int main(){
-	Vp<Block> block, init, body;
-	std::vector<Statement> stmts, stmts_nested;
+	std::vector<Statement> block, init, body;
 	Vector<Expression_node> expr, cond, inc;
 	// value sum = 0;
 	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
 	expr.emplace_back(std::move(expr_l));
 	Initializer::S_assignment_init initzr_a = { std::move(expr) };
 	Statement::S_variable_definition stmt_v = { D_string::shallow("sum"), false, std::move(initzr_a) };
-	stmts.emplace_back(std::move(stmt_v));
+	block.emplace_back(std::move(stmt_v));
 	// for(value i = 1; i <= 10; ++i){
 	//   sum += i;
 	// }
@@ -30,8 +29,7 @@ int main(){
 	expr.emplace_back(std::move(expr_l));
 	initzr_a = { std::move(expr) };
 	stmt_v = { D_string::shallow("i"), false, std::move(initzr_a) };
-	stmts_nested.emplace_back(std::move(stmt_v));
-	init.emplace(std::move(stmts_nested));
+	init.emplace_back(std::move(stmt_v));
 	// >>> i <= 10
 	expr_l = { std::make_shared<Value>(D_integer(10)) };
 	cond.emplace_back(std::move(expr_l));
@@ -51,12 +49,10 @@ int main(){
 	expr.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_infix_add, true };
 	expr.emplace_back(std::move(expr_op));
-	stmts_nested.clear();
 	Statement::S_expression_statement stmt_e = { std::move(expr) };
-	stmts_nested.emplace_back(std::move(stmt_e));
-	body.emplace(std::move(stmts_nested));
+	body.emplace_back(std::move(stmt_e));
 	Statement::S_for_statement stmt_f = { std::move(init), std::move(cond), std::move(inc), std::move(body) };
-	stmts.emplace_back(std::move(stmt_f));
+	block.emplace_back(std::move(stmt_f));
 	// for each(key, value in [100,200,300]){
 	//   sum += key + value;
 	// }
@@ -79,14 +75,11 @@ int main(){
 	expr.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_infix_add, true };
 	expr.emplace_back(std::move(expr_op));
-	stmts_nested.clear();
 	stmt_e = { std::move(expr) };
-	stmts_nested.emplace_back(std::move(stmt_e));
-	body.emplace(std::move(stmts_nested));
+	body.clear();
+	body.emplace_back(std::move(stmt_e));
 	Statement::S_for_each_statement stmt_fe = { D_string::shallow("key"), D_string::shallow("value"), std::move(initzr_a), std::move(body) };
-	stmts.emplace_back(std::move(stmt_fe));
-	// Finish it.
-	block.emplace(std::move(stmts));
+	block.emplace_back(std::move(stmt_fe));
 
 	const auto recycler = std::make_shared<Recycler>();
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);

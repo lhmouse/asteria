@@ -3,6 +3,7 @@
 
 #include "test_init.hpp"
 #include "../src/expression_node.hpp"
+#include "../src/statement.hpp"
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
 #include "../src/value.hpp"

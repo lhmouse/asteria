@@ -6,7 +6,7 @@
 #include "value.hpp"
 #include "stored_reference.hpp"
 #include "scope.hpp"
-#include "block.hpp"
+#include "statement.hpp"
 #include "instantiated_function.hpp"
 #include "utilities.hpp"
 #include <limits>
@@ -136,8 +136,7 @@ namespace {
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params);
-			Vp<Block> bound_body;
-			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
+			auto bound_body = bind_block_in_place(scope_lexical, cand.body_opt);
 			Expression_node::S_lambda_definition node_l = { cand.location, cand.params, std::move(bound_body) };
 			return std::move(node_l); }
 
@@ -167,7 +166,7 @@ namespace {
 Vector<Expression_node> bind_expression(const Vector<Expression_node> &expr, Sp_cref<const Scope> scope){
 	Vector<Expression_node> bound_expr;
 	bound_expr.reserve(expr.size());
-	// Bind nodes recursively.
+	// Bind expression nodes recursively.
 	for(const auto &node : expr){
 		auto bound_node = do_bind_expression_node(node, scope);
 		bound_expr.emplace_back(std::move(bound_node));
@@ -460,10 +459,9 @@ namespace {
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params);
-			Vp<Block> bound_body;
-			bind_block_in_place(bound_body, scope_lexical, cand.body_opt);
+			auto bound_body = bind_block_in_place(scope_lexical, cand.body_opt);
 			// Create a temporary variable for the function.
-			auto func = std::make_shared<Instantiated_function>("lambda", cand.location, cand.params, scope, std::move(bound_body));
+			auto func = std::make_shared<Instantiated_function>("lambda", cand.location, cand.params, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, recycler_out, D_function(std::move(func)));
 			Vp<Reference> result_ref;

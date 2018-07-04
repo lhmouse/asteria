@@ -71,7 +71,7 @@ public:
 	struct S_lambda_definition {
 		Cow_string location;
 		Vector<Cow_string> params;
-		Vp<Block> body_opt;
+		Vector<Statement> body_opt;
 	};
 	struct S_branch {
 		Vector<Expression_node> branch_true;

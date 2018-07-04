@@ -32,7 +32,7 @@ public:
 	struct Switch_clause {
 		// `pred_opt` is non-null for `case` clauses and is null for `default` clauses.
 		Vector<Expression_node> pred;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 
 	enum Type : signed char {
@@ -64,45 +64,45 @@ public:
 		Cow_string id;
 		Cow_string location;
 		Vector<Cow_string> params;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 	struct S_if_statement {
 		Vector<Expression_node> cond;
-		Vp<Block> branch_true;
-		Vp<Block> branch_false;
+		Vector<Statement> branch_true;
+		Vector<Statement> branch_false;
 	};
 	struct S_switch_statement {
 		Vector<Expression_node> ctrl;
-		Vector<Switch_clause> clauses_opt;
+		Vector<Switch_clause> clauses;
 	};
 	struct S_do_while_statement {
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 		Vector<Expression_node> cond;
 	};
 	struct S_while_statement {
 		Vector<Expression_node> cond;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 	struct S_for_statement {
-		Vp<Block> init_opt;
+		Vector<Statement> init;
 		Vector<Expression_node> cond;
 		Vector<Expression_node> step;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 	struct S_for_each_statement {
 		Cow_string key_id;
 		Cow_string value_id;
 		Initializer range_init;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 	struct S_try_statement {
-		Vp<Block> branch_try_opt;
+		Vector<Statement> branch_try;
 		Cow_string except_id;
-		Vp<Block> branch_catch_opt;
+		Vector<Statement> branch_catch;
 	};
 	struct S_defer_statement {
 		Cow_string location;
-		Vp<Block> body_opt;
+		Vector<Statement> body;
 	};
 	struct S_break_statement {
 		Target_scope target_scope;
@@ -160,9 +160,11 @@ public:
 	}
 };
 
-extern void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> scope_inout, const Statement &stmt);
-extern void fly_over_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt);
-extern Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out, Sp_cref<Scope> scope_inout, Sp_cref<Recycler> recycler_out, const Statement &stmt);
+extern Vector<Statement> bind_block_in_place(Sp_cref<Scope> scope_inout, const Vector<Statement> &block);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, Sp_cref<Recycler> recycler_out, const Vector<Statement> &block);
+
+extern Vector<Statement> bind_block(const Vector<Statement> &block, Sp_cref<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, Sp_cref<Recycler> recycler_out, const Vector<Statement> &block, Sp_cref<const Scope> scope);
 
 }
 

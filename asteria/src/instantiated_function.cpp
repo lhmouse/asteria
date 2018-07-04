@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "instantiated_function.hpp"
 #include "stored_reference.hpp"
-#include "block.hpp"
+#include "statement.hpp"
 #include "scope.hpp"
 #include "utilities.hpp"
 
@@ -20,7 +20,7 @@ void Instantiated_function::invoke(Vp<Reference> &result_out, Sp_cref<Recycler> 
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
 	prepare_function_scope(scope_with_args, recycler_out, m_source, m_params, std::move(this_opt), std::move(args));
 	// Execute the body.
-	const auto exec_result = execute_block_in_place(result_out, scope_with_args, recycler_out, m_bound_body_opt);
+	const auto exec_result = execute_block_in_place(result_out, scope_with_args, recycler_out, m_bound_body);
 	switch(exec_result){
 	case Statement::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.

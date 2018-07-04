@@ -15,13 +15,12 @@ private:
 	Cow_string m_source;
 
 	Vector<Cow_string> m_params;
-	Sp<const Scope> m_bound_scope;
-	Vp<Block> m_bound_body_opt;
+	Vector<Statement> m_bound_body;
 
 public:
-	Instantiated_function(const char *category, Cow_string source, Vector<Cow_string> params, Sp<const Scope> bound_scope, Vp<Block> &&bound_body_opt)
+	Instantiated_function(const char *category, Cow_string source, Vector<Cow_string> params, Vector<Statement> bound_body)
 		: m_category(category), m_source(std::move(source))
-		, m_params(std::move(params)), m_bound_scope(std::move(bound_scope)), m_bound_body_opt(std::move(bound_body_opt))
+		, m_params(std::move(params)), m_bound_body(std::move(bound_body))
 	{ }
 	~Instantiated_function() override;
 
