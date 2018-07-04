@@ -8,7 +8,7 @@
 #include <utility> // std::move(), std::swap(), std::declval()
 #include "compatibility.hpp"
 #include "assert.hpp"
-#include "final_allocator_wrapper.hpp"
+#include "allocator_utilities.hpp"
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.

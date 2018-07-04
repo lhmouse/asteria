@@ -19,7 +19,7 @@
 #include "compatibility.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "final_allocator_wrapper.hpp"
+#include "allocator_utilities.hpp"
 
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -41,8 +41,6 @@ using ::std::basic_ios;
 using ::std::basic_istream;
 using ::std::basic_ostream;
 using ::std::atomic;
-using ::std::true_type;
-using ::std::false_type;
 using ::std::is_same;
 using ::std::decay;
 using ::std::is_array;
@@ -270,28 +268,6 @@ namespace details_cow_string {
 	extern template class storage_handle<wchar_t>;
 	extern template class storage_handle<char16_t>;
 	extern template class storage_handle<char32_t>;
-
-	struct copy_assign_tag { };
-	struct move_assign_tag { };
-	struct swap_tag { };
-
-	template<typename tagT, typename allocatorT>
-	inline void manipulate_allocator(false_type, tagT, allocatorT &, const allocatorT &) noexcept {
-		// Do nothing.
-	}
-	template<typename allocatorT>
-	inline void manipulate_allocator(true_type, copy_assign_tag, allocatorT &lhs, const allocatorT &rhs) noexcept {
-		lhs = rhs;
-	}
-	template<typename allocatorT>
-	inline void manipulate_allocator(true_type, move_assign_tag, allocatorT &lhs, allocatorT &&rhs) noexcept {
-		lhs = ::std::move(rhs);
-	}
-	template<typename allocatorT>
-	inline void manipulate_allocator(true_type, swap_tag, allocatorT &lhs, allocatorT &rhs) noexcept {
-		using ::std::swap;
-		swap(lhs, rhs);
-	}
 
 	template<typename stringT>
 	class string_iterator_base {
@@ -703,13 +679,13 @@ public:
 		if(this == &other){
 			return *this;
 		}
-		details_cow_string::manipulate_allocator(typename allocator_traits<allocator_type>::propagate_on_container_copy_assignment(),
-		                                         details_cow_string::copy_assign_tag(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_copy_assignment(),
+		                          allocator_copy_assign_from(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		return this->assign(other);
 	}
 	basic_cow_string & operator=(basic_cow_string &&other) noexcept {
-		details_cow_string::manipulate_allocator(typename allocator_traits<allocator_type>::propagate_on_container_move_assignment(),
-		                                         details_cow_string::move_assign_tag(), this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
+		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_move_assignment(),
+		                          allocator_move_assign_from(), this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
 		return this->assign(::std::move(other));
 	}
 	basic_cow_string & operator=(initializer_list<value_type> init){
@@ -1340,8 +1316,8 @@ public:
 	}
 
 	void swap(basic_cow_string &other) noexcept {
-		details_cow_string::manipulate_allocator(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
-		                                         details_cow_string::swap_tag(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
+		                          allocator_swap_with(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		this->m_sth.swap(other.m_sth);
 		::std::swap(this->m_ptr, other.m_ptr);
 		::std::swap(this->m_len, other.m_len);
