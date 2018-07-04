@@ -141,10 +141,6 @@ namespace {
 			Expression_node::S_lambda_definition node_l = { cand.location, cand.params, std::move(bound_body) };
 			return std::move(node_l); }
 
-		case Expression_node::type_pruning: {
-			const auto &cand = node.get<Expression_node::S_pruning>();
-			return cand; }
-
 		case Expression_node::type_branch: {
 			const auto &cand = node.get<Expression_node::S_branch>();
 			// Bind both branches recursively.
@@ -475,14 +471,6 @@ namespace {
 			set_reference(result_ref, std::move(ref_d));
 			// Push the result onto the stack.
 			do_push_reference(stack_inout, std::move(result_ref));
-			break; }
-
-		case Expression_node::type_pruning: {
-			const auto &cand = node.get<Expression_node::S_pruning>();
-			// Pop references requested.
-			for(std::size_t i = 0; i < cand.count_to_pop; ++i){
-				do_pop_reference(stack_inout);
-			}
 			break; }
 
 		case Expression_node::type_branch: {

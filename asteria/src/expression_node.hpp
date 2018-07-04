@@ -52,10 +52,9 @@ public:
 		type_bound_reference    = 2, // +1
 		type_subexpression      = 3, // +1
 		type_lambda_definition  = 4, // +1
-		type_pruning            = 5, // -X
-		type_branch             = 6, // -1, +1
-		type_function_call      = 7, // -X, +1
-		type_operator_rpn       = 8, // -X, +1
+		type_branch             = 5, // -1, +1
+		type_function_call      = 6, // -X, +1
+		type_operator_rpn       = 7, // -X, +1
 	};
 	struct S_literal {
 		Sp<const Value> src_opt;
@@ -74,9 +73,6 @@ public:
 		Vector<Cow_string> params;
 		Vp<Block> body_opt;
 	};
-	struct S_pruning {
-		std::size_t count_to_pop;
-	};
 	struct S_branch {
 		Vector<Expression_node> branch_true;
 		Vector<Expression_node> branch_false;
@@ -94,10 +90,9 @@ public:
 		, S_bound_reference    // 2
 		, S_subexpression      // 3
 		, S_lambda_definition  // 4
-		, S_pruning            // 5
-		, S_branch             // 6
-		, S_function_call      // 7
-		, S_operator_rpn       // 8
+		, S_branch             // 5
+		, S_function_call      // 6
+		, S_operator_rpn       // 7
 	)>;
 
 private:
