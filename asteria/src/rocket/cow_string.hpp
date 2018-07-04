@@ -15,7 +15,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstdint> // std::uint_fast32_t
-#include <cstddef> // std::size_t
+#include <cstddef> // std::size_t, std::ptrdiff_t
 #include "compatibility.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -55,6 +55,7 @@ using ::std::reverse_iterator;
 using ::std::initializer_list;
 using ::std::uint_fast32_t;
 using ::std::size_t;
+using ::std::ptrdiff_t;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
 class basic_cow_string;
