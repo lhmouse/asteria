@@ -20,10 +20,10 @@ public:
 		Vp<Expression> expr;
 	};
 	struct S_bracketed_init_list {
-		Vector<Vp<Initializer>> elems;
+		Vector<Initializer> elems;
 	};
 	struct S_braced_init_list {
-		Dictionary<Vp<Initializer>> pairs;
+		Dictionary<Initializer> pairs;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_assignment_init      // 0
@@ -57,8 +57,8 @@ public:
 	}
 };
 
-extern void bind_initializer(Vp<Initializer> &bound_init_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope);
-extern void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope);
+extern Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, const Initializer &init, Sp_cref<const Scope> scope);
 
 }
 

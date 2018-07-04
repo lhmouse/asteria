@@ -17,15 +17,13 @@ int main(){
 	std::vector<Statement> stmts, stmts_nested;
 	std::vector<Expression_node> expr_nodes;
 	Vp<Expression> expr, cond, inc;
-	Vp<Initializer> initzr;
 	// value sum = 0;
 	expr_nodes.clear();
 	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	Initializer::S_assignment_init initzr_a = { std::move(expr) };
-	initzr.emplace(std::move(initzr_a));
-	Statement::S_variable_definition stmt_v = { D_string::shallow("sum"), false, std::move(initzr) };
+	Statement::S_variable_definition stmt_v = { D_string::shallow("sum"), false, std::move(initzr_a) };
 	stmts.emplace_back(std::move(stmt_v));
 	// for(value i = 1; i <= 10; ++i){
 	//   sum += i;
@@ -36,8 +34,7 @@ int main(){
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	initzr_a = { std::move(expr) };
-	initzr.emplace(std::move(initzr_a));
-	stmt_v = { D_string::shallow("i"), false, std::move(initzr) };
+	stmt_v = { D_string::shallow("i"), false, std::move(initzr_a) };
 	stmts_nested.emplace_back(std::move(stmt_v));
 	init.emplace(std::move(stmts_nested));
 	// >>> i <= 10
@@ -84,7 +81,6 @@ int main(){
 	expr_nodes.emplace_back(std::move(expr_l));
 	expr.emplace(std::move(expr_nodes));
 	initzr_a = { std::move(expr) };
-	initzr.emplace(std::move(initzr_a));
 	// >>> sum += key + value;
 	expr_nodes.clear();
 	expr_n = { D_string::shallow("value") };
@@ -102,7 +98,7 @@ int main(){
 	stmt_e = { std::move(expr) };
 	stmts_nested.emplace_back(std::move(stmt_e));
 	body.emplace(std::move(stmts_nested));
-	Statement::S_for_each_statement stmt_fe = { D_string::shallow("key"), D_string::shallow("value"), std::move(initzr), std::move(body) };
+	Statement::S_for_each_statement stmt_fe = { D_string::shallow("key"), D_string::shallow("value"), std::move(initzr_a), std::move(body) };
 	stmts.emplace_back(std::move(stmt_fe));
 	// Finish it.
 	block.emplace(std::move(stmts));

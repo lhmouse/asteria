@@ -15,66 +15,54 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer & Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
-void bind_initializer(Vp<Initializer> &bound_init_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope){
-	if(init_opt == nullptr){
-		// Return a null initializer.
-		bound_init_out.reset();
-		return;
-	}
-	const auto type = init_opt->get_type();
+Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope){
+	// Bind elements recursively.
+	const auto type = init.get_type();
 	switch(type){
 	case Initializer::type_assignment_init: {
-		const auto &cand = init_opt->get<Initializer::S_assignment_init>();
+		const auto &cand = init.get<Initializer::S_assignment_init>();
 		Vp<Expression> bound_expr;
 		bind_expression(bound_expr, cand.expr, scope);
-		Initializer::S_assignment_init init_a = { std::move(bound_expr) };
-		bound_init_out.emplace(std::move(init_a));
-		break; }
+		Initializer::S_assignment_init init_ai = { std::move(bound_expr) };
+		return std::move(init_ai); }
 
 	case Initializer::type_bracketed_init_list: {
-		const auto &cand = init_opt->get<Initializer::S_bracketed_init_list>();
-		Vector<Vp<Initializer>> bound_elems;
+		const auto &cand = init.get<Initializer::S_bracketed_init_list>();
+		Vector<Initializer> bound_elems;
 		bound_elems.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
-			bind_initializer(bound_init_out, elem, scope);
-			bound_elems.emplace_back(std::move(bound_init_out));
+			auto bound_init = bind_initializer(elem, scope);
+			bound_elems.emplace_back(std::move(bound_init));
 		}
-		Initializer::S_bracketed_init_list init_bracketed = { std::move(bound_elems) };
-		bound_init_out.emplace(std::move(init_bracketed));
-		break; }
+		Initializer::S_bracketed_init_list init_brkt = { std::move(bound_elems) };
+		return std::move(init_brkt); }
 
 	case Initializer::type_braced_init_list: {
-		const auto &cand = init_opt->get<Initializer::S_braced_init_list>();
-		Dictionary<Vp<Initializer>> bound_pairs;
+		const auto &cand = init.get<Initializer::S_braced_init_list>();
+		Dictionary<Initializer> bound_pairs;
 		bound_pairs.reserve(cand.pairs.size());
 		for(const auto &pair : cand.pairs){
-			bind_initializer(bound_init_out, pair.second, scope);
-			bound_pairs.emplace(pair.first, std::move(bound_init_out));
+			auto bound_init = bind_initializer(pair.second, scope);
+			bound_pairs.emplace(pair.first, std::move(bound_init));
 		}
-		Initializer::S_braced_init_list init_braced = { std::move(bound_pairs) };
-		bound_init_out.emplace(std::move(init_braced));
-		break; }
+		Initializer::S_braced_init_list init_brac = { std::move(bound_pairs) };
+		return std::move(init_brac); }
 
 	default:
 		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();
 	}
 }
-void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Initializer> init_opt, Sp_cref<const Scope> scope){
-	if(init_opt == nullptr){
-		// Return a null reference only when a null initializer is given.
-		move_reference(result_out, nullptr);
-		return;
-	}
-	const auto type = init_opt->get_type();
+void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, const Initializer &init, Sp_cref<const Scope> scope){
+	const auto type = init.get_type();
 	switch(type){
 	case Initializer::type_assignment_init: {
-		const auto &cand = init_opt->get<Initializer::S_assignment_init>();
+		const auto &cand = init.get<Initializer::S_assignment_init>();
 		evaluate_expression(result_out, recycler_out, cand.expr, scope);
-		break; }
+		return; }
 
 	case Initializer::type_bracketed_init_list: {
-		const auto &cand = init_opt->get<Initializer::S_bracketed_init_list>();
+		const auto &cand = init.get<Initializer::S_bracketed_init_list>();
 		Vp<Value> value;
 		D_array array;
 		array.reserve(cand.elems.size());
@@ -86,10 +74,10 @@ void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_
 		set_value(value, recycler_out, std::move(array));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
-		break; }
+		return; }
 
 	case Initializer::type_braced_init_list: {
-		const auto &cand = init_opt->get<Initializer::S_braced_init_list>();
+		const auto &cand = init.get<Initializer::S_braced_init_list>();
 		Vp<Value> value;
 		D_object object;
 		object.reserve(cand.pairs.size());
@@ -101,7 +89,7 @@ void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_
 		set_value(value, recycler_out, std::move(object));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
-		break; }
+		return; }
 
 	default:
 		ASTERIA_DEBUG_LOG("An unknown initializer type enumeration: type = ", type, "` is encountered. This is probably a bug. Please report.");

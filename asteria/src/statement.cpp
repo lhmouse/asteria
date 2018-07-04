@@ -36,8 +36,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
 		// Bind the initializer recursively.
-		Vp<Initializer> bound_init;
-		bind_initializer(bound_init, cand.init_opt, scope_inout);
+		auto bound_init = bind_initializer(cand.init, scope_inout);
 		Statement::S_variable_definition stmt_v = { cand.id, cand.immutable, std::move(bound_init) };
 		bound_stmts_out.emplace_back(std::move(stmt_v));
 		// Create a null reference for the variable.
@@ -142,8 +141,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 		// created and destroyed upon entrance and exit of each iteration.
 		const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 		// Bind the loop range initializer recursively.
-		Vp<Initializer> bound_range_init;
-		bind_initializer(bound_range_init, cand.range_init_opt, scope_for);
+		auto bound_range_init = bind_initializer(cand.range_init, scope_for);
 		// Create null references for the key and the value.
 		const auto key_wref = scope_inout->mutate_named_reference(cand.key_id);
 		const auto value_wref = scope_inout->mutate_named_reference(cand.value_id);
@@ -282,7 +280,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_variable_definition: {
 		const auto &cand = stmt.get<Statement::S_variable_definition>();
 		// Evaluate the initializer and move the result into a variable.
-		evaluate_initializer(result_out, recycler_out, cand.init_opt, scope_inout);
+		evaluate_initializer(result_out, recycler_out, cand.init, scope_inout);
 		Vp<Value> value;
 		extract_value_from_reference(value, recycler_out, std::move(result_out));
 		// Create a reference to a temporary value, then materialize it.
@@ -442,7 +440,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 		// created and destroyed upon entrance and exit of each iteration.
 		const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
 		// Perform loop initialization.
-		evaluate_initializer(result_out, recycler_out, cand.range_init_opt, scope_for);
+		evaluate_initializer(result_out, recycler_out, cand.range_init, scope_for);
 		materialize_reference(result_out, recycler_out, true);
 		Vp<Reference> range_ref;
 		move_reference(range_ref, std::move(result_out));

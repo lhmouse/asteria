@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "initializer.hpp"
 
 namespace Asteria {
 
@@ -57,7 +58,7 @@ public:
 	struct S_variable_definition {
 		Cow_string id;
 		bool immutable;
-		Vp<Initializer> init_opt;
+		Initializer init;
 	};
 	struct S_function_definition {
 		Cow_string id;
@@ -91,7 +92,7 @@ public:
 	struct S_for_each_statement {
 		Cow_string key_id;
 		Cow_string value_id;
-		Vp<Initializer> range_init_opt;
+		Initializer range_init;
 		Vp<Block> body_opt;
 	};
 	struct S_try_statement {
