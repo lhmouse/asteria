@@ -116,7 +116,7 @@ public:
 	struct S_return_statement {
 		Vector<Expression_node> operand;
 	};
-	using Variant = rocket::variant<ROCKET_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(
 		, S_expression_statement  //  0
 		, S_variable_definition   //  1
 		, S_function_definition   //  2

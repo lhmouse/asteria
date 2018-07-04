@@ -25,7 +25,7 @@ public:
 	struct S_braced_init_list {
 		Dictionary<Initializer> pairs;
 	};
-	using Variant = rocket::variant<ROCKET_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(
 		, S_assignment_init      // 0
 		, S_bracketed_init_list  // 1
 		, S_braced_init_list     // 2

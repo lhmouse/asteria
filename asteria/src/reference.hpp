@@ -91,7 +91,7 @@ public:
 		Vp<Reference> parent_opt;
 		Cow_string key;
 	};
-	using Variant = rocket::variant<ROCKET_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(
 		, S_constant         //  0
 		, S_temporary_value  //  1
 		, S_variable         //  2
