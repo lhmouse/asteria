@@ -27,7 +27,7 @@ namespace {
 		Cow_string describe() const override {
 			return Cow_string::shallow("fancy deferred callback");
 		}
-		void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
+		void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override {
 			result_out.reset();
 			(void)recycler_out;
 			(void)this_opt;
