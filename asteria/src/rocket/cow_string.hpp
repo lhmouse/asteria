@@ -22,10 +22,10 @@
 #include "final_allocator_wrapper.hpp"
 
 /* Differences from `std::basic_string`:
- * 1. All functions of `basic_cow_string` guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
+ * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
- * 3. `basic_cow_string` can hold non-owning references of null-terminated strings allocated externally, just like `std::basic_string_view`.
- * 4. The copy constructor and copy assignment operator of `basic_cow_string` will not throw exceptions.
+ * 3. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
+ * 4. The copy constructor and copy assignment operator will not throw exceptions.
  * 5. The constructor taking a sole const pointer is made `explicit`.
  * 6. The assignment operator taking a character and the one taking a const pointer are not provided.
  */
