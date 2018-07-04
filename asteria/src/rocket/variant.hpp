@@ -203,15 +203,6 @@ namespace details_variant {
 	};
 
 	template<typename paramT>
-	struct is_nothrow_forward_constructible {
-		enum : bool { value = is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value };
-	};
-	template<typename paramT>
-	struct is_nothrow_forward_assignable {
-		enum : bool { value = is_nothrow_assignable<typename decay<paramT>::type, paramT &&>::value };
-	};
-
-	template<typename paramT>
 	constexpr bool check_nothrow_swappable() noexcept {
 		using ::std::swap;
 		return noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()));
@@ -235,10 +226,6 @@ public:
 	template<typename elementT>
 	struct index_of {
 		enum : unsigned { value = details_variant::type_finder<0, elementT, elementsT...>::value };
-	};
-	template<typename elementT>
-	struct is_candidate {
-		enum : bool { value = details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value };
 	};
 
 	template<typename ...addT>
@@ -280,7 +267,9 @@ private:
 		this->m_turnout = (turnout_old ^ 1) & 1;
 		const unsigned index_old = this->m_index;
 		this->m_index = index_new & 0x7FFFFFFF;
-		details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old, details_variant::visitor_destruct());
+		// Destroy the old buffer and poison its contents.
+		details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old,
+		                                              details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
 		std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
 #endif
@@ -290,15 +279,17 @@ public:
 	variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value)
 		: m_turnout(0)
 	{
+		// Value-initialize the first element.
 		constexpr unsigned eindex = 0;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()));
 		this->m_index = 0;
 	}
-	template<typename elementT, typename enable_if<is_candidate<elementT>::value>::type * = nullptr>
-	variant(elementT &&elem) noexcept(details_variant::is_nothrow_forward_constructible<elementT>::value)
+	template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
+	variant(elementT &&elem)
 		: m_turnout(0)
 	{
+		// This overload enables construction using the candidate of a nested variant.
 		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()), ::std::forward<elementT>(elem));
@@ -307,35 +298,64 @@ public:
 	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
 		: m_turnout(0)
 	{
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+		// Copy-construct the active element from `other`.
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
+		                                              details_variant::visitor_copy_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
 	}
 	variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value)
 		: m_turnout(0)
 	{
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+		// Move-construct the active element from `other`.
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
+		                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
 		this->m_index = other.m_index;
+	}
+	template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
+	variant & operator=(elementT &&elem){
+		// This overload, unlike `set()`, enables assignment using the candidate of a nested variant.
+		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+		if(this->m_index == eindex){
+			// Assign the active element using perfect forwarding.
+			*details_variant::punning_cast<etype *>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
+		} else {
+			// Construct the active element using perfect forwarding, then destroy the old element.
+			details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
+			this->do_set_up_new_buffer(eindex);
+		}
+		return *this;
 	}
 	variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_copy_assign(), other.do_get_front_buffer());
+			// Copy-assign the active element from `other`
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
+			                                              details_variant::visitor_copy_assign(), other.do_get_front_buffer());
 		} else {
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+			// Copy-construct the active element from `other`, then destroy the old element.
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+			                                              details_variant::visitor_copy_construct(), other.do_get_front_buffer());
 			this->do_set_up_new_buffer(other.m_index);
 		}
 		return *this;
 	}
 	variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_move_assign(), other.do_get_front_buffer());
+			// Move-assign the active element from `other`
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
+			                                              details_variant::visitor_move_assign(), other.do_get_front_buffer());
 		} else {
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+			// Move-construct the active element from `other`, then destroy the old element.
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+			                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
 			this->do_set_up_new_buffer(other.m_index);
 		}
 		return *this;
 	}
 	~variant(){
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_destruct());
+		// Destroy the active element and poison all contents.
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
+		                                              details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
 		this->m_index = 0x6EEFDEAD;
 		std::memset(m_buffers, '#', sizeof(m_buffers));
@@ -385,11 +405,14 @@ public:
 	}
 	template<typename elementT>
 	void set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
+		// This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
 		constexpr unsigned eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
+			// Assign the active element using perfect forwarding.
 			*details_variant::punning_cast<etype *>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
 		} else {
+			// Construct the active element using perfect forwarding, then destroy the old element.
 			details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
 			this->do_set_up_new_buffer(eindex);
 		}
@@ -397,24 +420,36 @@ public:
 
 	template<typename visitorT>
 	void visit(visitorT &&visitor) const {
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
+		                                              details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
 	}
 	template<typename visitorT>
 	void visit(visitorT &&visitor){
-		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
+		                                              details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
 	}
 
 	void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value) {
 		if(this->m_index == other.m_index){
-			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index, details_variant::visitor_swap(), other.do_get_front_buffer());
+			// Swap the active elements.
+			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
+			                                              details_variant::visitor_swap(), other.do_get_front_buffer());
 		} else {
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_move_construct(), other.do_get_front_buffer());
+			// Move-construct the active element in `*this` from `other`.
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+			                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
 			try {
-				details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index, details_variant::visitor_move_construct(), this->do_get_front_buffer());
+				// Move-construct the active element in `other` from `*this`.
+				details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index,
+				                                              details_variant::visitor_move_construct(), this->do_get_front_buffer());
 			} catch(...){
-				details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index, details_variant::visitor_destruct());
+				// In case of an exception, the second object will not have been constructed.
+				// Destroy the first object that has just been constructed, then rethrow the exception.
+				details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+				                                              details_variant::visitor_destruct());
 				rethrow_current_exception();
 			}
+			// Destroy both elements.
 			const unsigned this_index = this->m_index;
 			this->do_set_up_new_buffer(other.m_index);
 			other.do_set_up_new_buffer(this_index);
