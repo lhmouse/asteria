@@ -8,6 +8,7 @@
 #include <utility> // std::move(), std::swap(), std::declval()
 #include "compatibility.hpp"
 #include "assert.hpp"
+#include "final_allocator_wrapper.hpp"
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
@@ -37,45 +38,14 @@ namespace details_unique_handle {
 		return old;
 	}
 
-	template<typename closerT>
-	class final_closer_wrapper {
-	private:
-		closerT m_alloc;
-
-	public:
-		explicit final_closer_wrapper(const closerT &alloc) noexcept
-			: m_alloc(alloc)
-		{ }
-		explicit final_closer_wrapper(closerT &&alloc) noexcept
-			: m_alloc(::std::move(alloc))
-		{ }
-
-	public:
-		operator const closerT & () const noexcept {
-			return this->m_alloc;
-		}
-		operator closerT & () noexcept {
-			return this->m_alloc;
-		}
-	};
-
-	template<typename closerT>
-	using closer_base_for =
-#ifdef __cpp_lib_is_final
-		typename conditional<true, final_closer_wrapper<closerT>, closerT>::type
-#else
-		closerT
-#endif
-		;
-
 	template<typename handleT, typename closerT>
-	class stored_handle : private closer_base_for<closerT> {
+	class stored_handle : private allocator_wrapper_base_for<closerT> {
 	public:
 		using handle_type  = handleT;
 		using closer_type  = closerT;
 
 	private:
-		using closer_base = closer_base_for<closerT>;
+		using closer_base = allocator_wrapper_base_for<closerT>;
 
 	private:
 		handle_type m_h;

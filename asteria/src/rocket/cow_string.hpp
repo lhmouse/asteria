@@ -19,6 +19,7 @@
 #include "compatibility.hpp"
 #include "assert.hpp"
 #include "throw.hpp"
+#include "final_allocator_wrapper.hpp"
 
 /* Differences from `std::basic_string`:
  * 1. All functions of `basic_cow_string` guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -93,39 +94,8 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::ios  &ios);
 	extern template void handle_io_exception(::std::wios &ios);
 
-	template<typename allocatorT>
-	class final_allocator_wrapper {
-	private:
-		allocatorT m_alloc;
-
-	public:
-		explicit final_allocator_wrapper(const allocatorT &alloc) noexcept
-			: m_alloc(alloc)
-		{ }
-		explicit final_allocator_wrapper(allocatorT &&alloc) noexcept
-			: m_alloc(::std::move(alloc))
-		{ }
-
-	public:
-		operator const allocatorT & () const noexcept {
-			return this->m_alloc;
-		}
-		operator allocatorT & () noexcept {
-			return this->m_alloc;
-		}
-	};
-
-	template<typename allocatorT>
-	using allocator_base_for =
-#ifdef __cpp_lib_is_final
-		typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type
-#else
-		allocatorT
-#endif
-		;
-
 	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-	class storage_handle : private allocator_base_for<allocatorT> {
+	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
 	public:
 		using value_type       = charT;
 		using traits_type      = traitsT;
@@ -137,7 +107,7 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base = allocator_base_for<allocatorT>;
+		using allocator_base = allocator_wrapper_base_for<allocatorT>;
 
 		struct storage {
 			atomic<difference_type> ref_count;
