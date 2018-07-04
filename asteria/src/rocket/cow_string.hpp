@@ -107,18 +107,20 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base = allocator_wrapper_base_for<allocatorT>;
-
 		struct storage {
-			atomic<difference_type> ref_count;
 			size_type n_blocks;
 			typename allocator_traits<allocator_type>::template rebind_alloc<storage> alloc;
+			atomic<difference_type> ref_count;
 			value_type data[1]; // This makes room for the null terminator.
 
 			storage(size_type xn_blocks, const allocator_type &xalloc) noexcept
-				: ref_count(1), n_blocks(xn_blocks), alloc(xalloc)
-			{ }
+				: n_blocks(xn_blocks), alloc(xalloc)
+			{
+				this->ref_count.store(1, ::std::memory_order_release);
+			}
 		};
+
+		using allocator_base    = allocator_wrapper_base_for<allocatorT>;
 		using storage_allocator = decltype(storage::alloc);
 
 	private:
@@ -157,8 +159,8 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return;
 			}
-			// Decrement the reference count.
-			const auto old = ptr->ref_count.fetch_sub(1, ::std::memory_order_relaxed);
+			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
+			const auto old = ptr->ref_count.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
 			if(old > 1){
 				return;
