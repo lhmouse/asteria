@@ -39,7 +39,6 @@ class Instantiated_function;
 class Value;
 class Reference;
 class Scope;
-class Recycler;
 
 // Aliases
 template<typename ElementT>
@@ -70,7 +69,7 @@ using Unsigned_integer    = std::uint64_t;
 using Double_precision    = double;
 using Cow_string          = rocket::cow_string;
 using Cow_string_cref     = const rocket::cow_string &;
-using Function_prototype  = void (Vp<Reference> &, Sp_cref<Recycler>, Vp<Reference> &&, Vector<Vp<Reference>> &&);
+using Function_prototype  = void (Vp<Reference> &, Vp<Reference> &&, Vector<Vp<Reference>> &&);
 
 // Data types exposed to users
 using D_null      = Nullptr;

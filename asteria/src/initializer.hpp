@@ -58,7 +58,7 @@ public:
 };
 
 extern Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope);
-extern void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, const Initializer &init, Sp_cref<const Scope> scope);
+extern void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp_cref<const Scope> scope);
 
 }
 

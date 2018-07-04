@@ -26,7 +26,7 @@ public:
 
 public:
 	Cow_string describe() const override;
-	void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override;
+	void invoke(Vp<Reference> &result_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override;
 };
 
 }

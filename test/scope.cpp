@@ -3,7 +3,6 @@
 
 #include "test_init.hpp"
 #include "../src/scope.hpp"
-#include "../src/recycler.hpp"
 #include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
 #include "../src/function_base.hpp"
@@ -27,9 +26,8 @@ namespace {
 		Cow_string describe() const override {
 			return Cow_string::shallow("fancy deferred callback");
 		}
-		void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override {
+		void invoke(Vp<Reference> &result_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const override {
 			result_out.reset();
-			(void)recycler_out;
 			(void)this_opt;
 			(void)args;
 			g_fancy_value = g_fancy_value * m_multiplier + m_addend;
@@ -38,11 +36,9 @@ namespace {
 }
 
 int main(){
-	const auto recycler = std::make_shared<Recycler>();
-
 	auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	auto one = std::make_shared<Variable>();
-	set_value(one->mutate_value(), recycler, D_integer(42));
+	set_value(one->mutate_value(), D_integer(42));
 	one->set_immutable(true);
 	Reference::S_variable lref = { one };
 	auto wref = scope->mutate_named_reference(D_string::shallow("one"));

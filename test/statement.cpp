@@ -4,7 +4,6 @@
 #include "test_init.hpp"
 #include "../src/statement.hpp"
 #include "../src/scope.hpp"
-#include "../src/recycler.hpp"
 #include "../src/expression_node.hpp"
 #include "../src/initializer.hpp"
 #include "../src/value.hpp"
@@ -81,10 +80,9 @@ int main(){
 	Statement::S_for_each_statement stmt_fe = { D_string::shallow("key"), D_string::shallow("value"), std::move(initzr_a), std::move(body) };
 	block.emplace_back(std::move(stmt_fe));
 
-	const auto recycler = std::make_shared<Recycler>();
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	Vp<Reference> reference;
-	const auto result = execute_block_in_place(reference, scope, recycler, block);
+	const auto result = execute_block_in_place(reference, scope, block);
 	ASTERIA_TEST_CHECK(result == Statement::execution_result_next);
 	ASTERIA_TEST_CHECK(scope->get_named_reference_opt(D_string::shallow("i")) == nullptr);
 	const auto sum_ref = scope->get_named_reference_opt(D_string::shallow("sum"));

@@ -150,11 +150,11 @@ extern Sp<const Value> read_reference_opt(Sp_cref<const Reference> reference_opt
 extern std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> reference_opt);
 
 // If you do not have an `Vp<Reference>` but an `Sp<const Reference>`, use the following code to copy the value through the reference:
-//   `copy_value(value_out, recycler, read_reference_opt(reference_opt))`
-extern void extract_value_from_reference(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&reference_opt);
+//   `copy_value(value_out, read_reference_opt(reference_opt))`
+extern void extract_value_from_reference(Vp<Value> &value_out, Vp<Reference> &&reference_opt);
 
 // If the reference is a temporary value, convert it to an unnamed variable, allowing further modification to it.
-extern void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_cref<Recycler> recycler_out, bool immutable);
+extern void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable);
 
 }
 

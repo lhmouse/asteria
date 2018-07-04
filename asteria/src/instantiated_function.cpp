@@ -15,12 +15,12 @@ Instantiated_function::~Instantiated_function() = default;
 Cow_string Instantiated_function::describe() const {
 	return ASTERIA_FORMAT_STRING(m_category, " @ '", m_source, "'");
 }
-void Instantiated_function::invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
+void Instantiated_function::invoke(Vp<Reference> &result_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
 	// Allocate a function scope.
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
-	prepare_function_scope(scope_with_args, recycler_out, m_source, m_params, std::move(this_opt), std::move(args));
+	prepare_function_scope(scope_with_args, m_source, m_params, std::move(this_opt), std::move(args));
 	// Execute the body.
-	const auto exec_result = execute_block_in_place(result_out, scope_with_args, recycler_out, m_bound_body);
+	const auto exec_result = execute_block_in_place(result_out, scope_with_args, m_bound_body);
 	switch(exec_result){
 	case Statement::execution_result_next:
 		// If control flow reaches the end of the function, return `null`.

@@ -41,17 +41,12 @@ public:
 	};
 
 private:
-	const Wp<Recycler> m_weak_recycler;
 	Variant m_variant;
 
 public:
 	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Value(CandidateT &&cand)
-		: m_weak_recycler(), m_variant(std::forward<CandidateT>(cand))
-	{ }
-	template<typename CandidateT>
-	Value(Wp<Recycler> weak_recycler, CandidateT &&cand)
-		: m_weak_recycler(std::move(weak_recycler)), m_variant(std::forward<CandidateT>(cand))
+		: m_variant(std::forward<CandidateT>(cand))
 	{ }
 	~Value();
 
@@ -62,10 +57,6 @@ private:
 	ROCKET_NORETURN void do_throw_type_mismatch(Type expect) const;
 
 public:
-	Sp<Recycler> get_recycler_opt() const noexcept {
-		return m_weak_recycler.lock();
-	}
-
 	Type get_type() const noexcept {
 		return static_cast<Type>(m_variant.index());
 	}
@@ -107,16 +98,16 @@ extern void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigne
 extern std::ostream & operator<<(std::ostream &os, Sp_cref<const Value> value_opt);
 extern std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt);
 
-extern void allocate_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out);
-extern void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt);
+extern void allocate_value(Vp<Value> &value_out);
+extern void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt);
 extern void wipe_out_value(Sp_cref<Value> value_opt) noexcept;
 extern bool test_value(Sp_cref<const Value> value_opt) noexcept;
 extern Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept;
 
 template<typename CandidateT>
-inline void set_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, CandidateT &&cand){
-	if(!value_out || (value_out->get_recycler_opt() != recycler_out)){
-		((allocate_value))(value_out, recycler_out);
+inline void set_value(Vp<Value> &value_out, CandidateT &&cand){
+	if(!value_out){
+		((allocate_value))(value_out);
 	}
 	value_out->set(std::forward<CandidateT>(cand));
 }

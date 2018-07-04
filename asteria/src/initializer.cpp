@@ -52,12 +52,12 @@ Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope
 		std::terminate();
 	}
 }
-void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, const Initializer &init, Sp_cref<const Scope> scope){
+void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp_cref<const Scope> scope){
 	const auto type = init.get_type();
 	switch(type){
 	case Initializer::type_assignment_init: {
 		const auto &cand = init.get<Initializer::S_assignment_init>();
-		evaluate_expression(result_out, recycler_out, cand.expr, scope);
+		evaluate_expression(result_out, cand.expr, scope);
 		return; }
 
 	case Initializer::type_bracketed_init_list: {
@@ -66,11 +66,11 @@ void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_
 		D_array array;
 		array.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
-			evaluate_initializer(result_out, recycler_out, elem, scope);
-			extract_value_from_reference(value, recycler_out, std::move(result_out));
+			evaluate_initializer(result_out, elem, scope);
+			extract_value_from_reference(value, std::move(result_out));
 			array.emplace_back(std::move(value));
 		}
-		set_value(value, recycler_out, std::move(array));
+		set_value(value, std::move(array));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
 		return; }
@@ -81,11 +81,11 @@ void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_
 		D_object object;
 		object.reserve(cand.pairs.size());
 		for(const auto &pair : cand.pairs){
-			evaluate_initializer(result_out, recycler_out, pair.second, scope);
-			extract_value_from_reference(value, recycler_out, std::move(result_out));
+			evaluate_initializer(result_out, pair.second, scope);
+			extract_value_from_reference(value, std::move(result_out));
 			object.emplace(pair.first, std::move(value));
 		}
-		set_value(value, recycler_out, std::move(object));
+		set_value(value, std::move(object));
 		Reference::S_temporary_value ref_t = { std::move(value) };
 		set_reference(result_out, std::move(ref_t));
 		return; }

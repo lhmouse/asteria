@@ -5,14 +5,12 @@
 #include "../src/exception.hpp"
 #include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
-#include "../src/recycler.hpp"
 
 using namespace Asteria;
 
 int main(){
-	const auto recycler = std::make_shared<Recycler>();
 	auto var = std::make_shared<Variable>();
-	set_value(var->mutate_value(), recycler, D_integer(42));
+	set_value(var->mutate_value(), D_integer(42));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_integer);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_integer>() == 42);
 	try {
@@ -23,7 +21,7 @@ int main(){
 	} catch(Exception &e){
 		const auto ref = e.get_reference_opt();
 		ASTERIA_TEST_CHECK(ref);
-		set_value(drill_reference(ref), recycler, D_string(D_string::shallow("hello")));
+		set_value(drill_reference(ref), D_string(D_string::shallow("hello")));
 	}
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_string);
 	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_string>() == D_string::shallow("hello"));

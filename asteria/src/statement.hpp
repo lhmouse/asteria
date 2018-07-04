@@ -161,10 +161,10 @@ public:
 };
 
 extern Vector<Statement> bind_block_in_place(Sp_cref<Scope> scope_inout, const Vector<Statement> &block);
-extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, Sp_cref<Recycler> recycler_out, const Vector<Statement> &block);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Vector<Statement> &block);
 
 extern Vector<Statement> bind_block(const Vector<Statement> &block, Sp_cref<const Scope> scope);
-extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, Sp_cref<Recycler> recycler_out, const Vector<Statement> &block, Sp_cref<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Vector<Statement> &block, Sp_cref<const Scope> scope);
 
 }
 

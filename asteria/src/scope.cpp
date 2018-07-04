@@ -19,7 +19,7 @@ void Scope::do_dispose_deferred_callbacks() noexcept
 try {
 	Vp<Reference> unused_result;
 	while(m_deferred_callbacks.empty() == false){
-		m_deferred_callbacks.back()->invoke(unused_result, nullptr, nullptr, { });
+		m_deferred_callbacks.back()->invoke(unused_result, nullptr, { });
 		m_deferred_callbacks.pop_back();
 	}
 } catch(std::exception &e){
@@ -65,12 +65,12 @@ namespace {
 		Cow_string describe() const override {
 			return ASTERIA_FORMAT_STRING("variadic argument getter @ '", m_source, "'");
 		}
-		void invoke(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&args) const override {
+		void invoke(Vp<Reference> &result_out, Vp<Reference> &&/*this_opt*/, Vector<Vp<Reference>> &&args) const override {
 			switch(args.size()){
 			case 0: {
 				// Return the number of args.
 				Vp<Value> value;
-				set_value(value, recycler_out, D_integer(static_cast<std::ptrdiff_t>(m_args.size())));
+				set_value(value, D_integer(static_cast<std::ptrdiff_t>(m_args.size())));
 				Reference::S_temporary_value ref_t = { std::move(value) };
 				return set_reference(result_out, std::move(ref_t)); }
 
@@ -131,10 +131,10 @@ namespace {
 	}
 }
 
-void prepare_function_scope(Sp_cref<Scope> scope, Sp_cref<Recycler> recycler_out, Cow_string_cref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
+void prepare_function_scope(Sp_cref<Scope> scope, Cow_string_cref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args){
 	// Materialize everything, as function parameters should be modifiable.
-	materialize_reference(this_opt, recycler_out, true);
-	std::for_each(args.begin(), args.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, recycler_out, true); });
+	materialize_reference(this_opt, true);
+	std::for_each(args.begin(), args.end(), [&](Vp<Reference> &arg_opt){ materialize_reference(arg_opt, true); });
 	// Move arguments into the scope.
 	do_set_argument(scope, Cow_string::shallow("this"), std::move(this_opt));
 	std::for_each(params.begin(), params.end(), [&](const Cow_string &param){ do_shift_argument(scope, args, param); });

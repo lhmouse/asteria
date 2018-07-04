@@ -343,16 +343,16 @@ namespace {
 	}
 }
 
-void extract_value_from_reference(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Vp<Reference> &&ref_opt){
+void extract_value_from_reference(Vp<Value> &value_out, Vp<Reference> &&ref_opt){
 	auto result = do_try_extract_value(ref_opt);
 	if(result.is_movable()){
 		auto &movable_value = result.get_movable_pointer();
-		if(movable_value && (movable_value->get_recycler_opt() == recycler_out)){
+		if(movable_value){
 			value_out.reset(movable_value.release());
 			return;
 		}
 	}
-	copy_value(value_out, recycler_out, result.get_copyable_pointer());
+	copy_value(value_out, result.get_copyable_pointer());
 }
 
 namespace {
@@ -380,12 +380,12 @@ namespace {
 	}
 }
 
-void materialize_reference(Vp<Reference> &reference_inout_opt, Sp_cref<Recycler> recycler_out, bool immutable){
+void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
 	Vp<Value> value;
-	extract_value_from_reference(value, recycler_out, std::move(reference_inout_opt));
+	extract_value_from_reference(value, std::move(reference_inout_opt));
 	auto var = std::make_shared<Variable>(std::move(value), immutable);
 	Reference::S_variable ref_l = { std::move(var) };
 	return set_reference(reference_inout_opt, std::move(ref_l));

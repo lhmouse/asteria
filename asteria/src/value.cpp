@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "value.hpp"
-#include "recycler.hpp"
 #include "opaque_base.hpp"
 #include "function_base.hpp"
 #include "utilities.hpp"
@@ -187,12 +186,11 @@ std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt){
 	return os;
 }
 
-void allocate_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out){
-	auto sp = std::make_shared<Value>(recycler_out, true);
-	recycler_out->adopt_value(sp);
+void allocate_value(Vp<Value> &value_out){
+	auto sp = std::make_shared<Value>(true);
 	value_out.reset(std::move(sp));
 }
-void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Value> src_opt){
+void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt){
 	const auto type = get_value_type(src_opt);
 	switch(type){
 	case Value::type_null:
@@ -200,45 +198,45 @@ void copy_value(Vp<Value> &value_out, Sp_cref<Recycler> recycler_out, Sp_cref<co
 		return;
 	case Value::type_boolean: {
 		const auto &cand = src_opt->get<D_boolean>();
-		set_value(value_out, recycler_out, cand);
+		set_value(value_out, cand);
 		return; }
 	case Value::type_integer: {
 		const auto &cand = src_opt->get<D_integer>();
-		set_value(value_out, recycler_out, cand);
+		set_value(value_out, cand);
 		return; }
 	case Value::type_double: {
 		const auto &cand = src_opt->get<D_double>();
-		set_value(value_out, recycler_out, cand);
+		set_value(value_out, cand);
 		return; }
 	case Value::type_string: {
 		const auto &cand = src_opt->get<D_string>();
-		set_value(value_out, recycler_out, cand);
+		set_value(value_out, cand);
 		return; }
 	case Value::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Values having opaque types cannot be copied.");
 	case Value::type_function: {
 		const auto &cand = src_opt->get<D_function>();
-		set_value(value_out, recycler_out, cand);
+		set_value(value_out, cand);
 		return; }
 	case Value::type_array: {
 		const auto &cand = src_opt->get<D_array>();
 		D_array array;
 		array.reserve(cand.size());
 		for(const auto &elem : cand){
-			copy_value(value_out, recycler_out, elem);
+			copy_value(value_out, elem);
 			array.emplace_back(std::move(value_out));
 		}
-		set_value(value_out, recycler_out, std::move(array));
+		set_value(value_out, std::move(array));
 		return; }
 	case Value::type_object: {
 		const auto &cand = src_opt->get<D_object>();
 		D_object object;
 		object.reserve(cand.size());
 		for(const auto &pair : cand){
-			copy_value(value_out, recycler_out, pair.second);
+			copy_value(value_out, pair.second);
 			object.emplace(pair.first, std::move(value_out));
 		}
-		set_value(value_out, recycler_out, std::move(object));
+		set_value(value_out, std::move(object));
 		return; }
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");

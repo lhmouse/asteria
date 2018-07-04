@@ -52,7 +52,6 @@ pkginclude_HEADERS =	\
 	asteria/src/instantiated_function.hpp	\
 	asteria/src/slim_function.hpp	\
 	asteria/src/scope.hpp	\
-	asteria/src/recycler.hpp	\
 	asteria/src/token.hpp
 
 lib_LTLIBRARIES =	\
@@ -79,7 +78,6 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/instantiated_function.cpp	\
 	asteria/src/slim_function.cpp	\
 	asteria/src/scope.cpp	\
-	asteria/src/recycler.cpp	\
 	asteria/src/token.cpp
 
 lib_libasteria_la_LDFLAGS =	\
@@ -98,7 +96,6 @@ check_PROGRAMS = \
 	test/exception.test	\
 	test/expression_node.test	\
 	test/statement.test	\
-	test/recycler.test	\
 	test/scope.test	\
 	test/token.test
 
