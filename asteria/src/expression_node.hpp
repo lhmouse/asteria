@@ -84,7 +84,7 @@ public:
 		Operator op;
 		bool assign; // This is ignored for `++`, `--`, `[]`, `=` and all rational operators.
 	};
-	using Variant = rocket::variant<ASTERIA_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(void
 		, S_literal            // 0
 		, S_named_reference    // 1
 		, S_bound_reference    // 2

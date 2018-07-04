@@ -16,7 +16,7 @@
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstdint> // std::uint_fast32_t
 #include <cstddef> // std::size_t, std::ptrdiff_t
-#include "compatibility.hpp"
+#include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
 #include "allocator_utilities.hpp"

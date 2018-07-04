@@ -28,7 +28,8 @@
 #include <cstdint>
 #include <climits>
 
-#include "rocket/compatibility.hpp"
+#include "rocket/compatibility.h"
+#include "rocket/preprocessor_utilities.h"
 #include "rocket/assert.hpp"
 #include "rocket/throw.hpp"
 #include "rocket/insertable_streambuf.hpp"

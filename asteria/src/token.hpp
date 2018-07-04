@@ -116,7 +116,7 @@ public:
 	struct S_string_literal {
 		D_string value;
 	};
-	using Variant = rocket::variant<ASTERIA_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(void
 		, S_keyword          // 0
 		, S_punctuator       // 1
 		, S_identifier       // 2

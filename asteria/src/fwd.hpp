@@ -11,16 +11,9 @@
 #include <cstdint> // std::int64_t, std::uint64_t
 #include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
+#include "rocket/preprocessor_utilities.h"
 #include "rocket/cow_string.hpp"
 #include "rocket/value_ptr.hpp"
-
-// Preprocessor utilities
-#define ASTERIA_CAR(x_, ...)       x_
-#define ASTERIA_CDR(x_, ...)       __VA_ARGS__
-#define ASTERIA_QUOTE(...)         #__VA_ARGS__
-#define ASTERIA_CAT2(x_, y_)       x_##y_
-#define ASTERIA_CAT3(x_, y_, z_)   x_##y_##z_
-#define ASTERIA_LAZY(f_, ...)      f_(__VA_ARGS__)
 
 namespace Asteria {
 

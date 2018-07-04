@@ -21,7 +21,8 @@ CLEANFILES =	\
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
-	asteria/src/rocket/compatibility.hpp	\
+	asteria/src/rocket/compatibility.h	\
+	asteria/src/rocket/preprocessor_utilities.h	\
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/throw.hpp	\
 	asteria/src/rocket/allocator_utilities.hpp	\

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_COMPATIBILITY_HPP_
-#define ROCKET_COMPATIBILITY_HPP_
+#ifndef ROCKET_COMPATIBILITY_H_
+#define ROCKET_COMPATIBILITY_H_
 
 #if defined(_MSC_VER)
 #  define ROCKET_MSVC        1

@@ -4,8 +4,8 @@
 #ifndef ASTERIA_UTILITIES_HPP_
 #define ASTERIA_UTILITIES_HPP_
 
+#include "rocket/compatibility.h"
 #include "rocket/insertable_ostream.hpp"
-#include "rocket/compatibility.hpp"
 #include <iomanip>
 
 namespace Asteria {

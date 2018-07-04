@@ -1,12 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_VARIABLE_HPP_
-#define ASTERIA_VARIABLE_HPP_
+#ifndef ASTERIA_REFERENCE_HPP_
+#define ASTERIA_REFERENCE_HPP_
 
 #include "fwd.hpp"
 
 namespace Asteria {
+
+
+
 
 class Variable {
 private:
@@ -50,12 +53,9 @@ public:
 
 }
 
-#endif
+
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
-
-#ifndef ASTERIA_REFERENCE_HPP_
-#define ASTERIA_REFERENCE_HPP_
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
@@ -91,7 +91,7 @@ public:
 		Vp<Reference> parent_opt;
 		Cow_string key;
 	};
-	using Variant = rocket::variant<ASTERIA_CDR(void
+	using Variant = rocket::variant<ROCKET_CDR(void
 		, S_constant         //  0
 		, S_temporary_value  //  1
 		, S_variable         //  2

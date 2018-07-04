@@ -4,7 +4,7 @@
 #ifndef ROCKET_ASSERT_HPP_
 #define ROCKET_ASSERT_HPP_
 
-#include "compatibility.hpp"
+#include "compatibility.h"
 
 namespace rocket {
 
