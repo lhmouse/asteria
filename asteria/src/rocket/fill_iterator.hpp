@@ -28,7 +28,7 @@ public:
 
 private:
 	difference_type m_pos;
-	const value_type m_value;
+	value_type m_value;
 
 public:
 	template<typename ...paramsT>
