@@ -6,7 +6,7 @@
 #include "value.hpp"
 #include "stored_reference.hpp"
 #include "reference.hpp"
-#include "expression.hpp"
+#include "expression_node.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -21,8 +21,7 @@ Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope
 	switch(type){
 	case Initializer::type_assignment_init: {
 		const auto &cand = init.get<Initializer::S_assignment_init>();
-		Vp<Expression> bound_expr;
-		bind_expression(bound_expr, cand.expr, scope);
+		auto bound_expr = bind_expression(cand.expr, scope);
 		Initializer::S_assignment_init init_ai = { std::move(bound_expr) };
 		return std::move(init_ai); }
 

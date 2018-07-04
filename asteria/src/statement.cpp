@@ -5,7 +5,7 @@
 #include "statement.hpp"
 #include "block.hpp"
 #include "scope.hpp"
-#include "expression.hpp"
+#include "expression_node.hpp"
 #include "initializer.hpp"
 #include "value.hpp"
 #include "stored_reference.hpp"
@@ -27,8 +27,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_expression_statement: {
 		const auto &cand = stmt.get<Statement::S_expression_statement>();
 		// Bind the expression recursively.
-		Vp<Expression> bound_expr;
-		bind_expression(bound_expr, cand.expr_opt, scope_inout);
+		auto bound_expr = bind_expression(cand.expr, scope_inout);
 		Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
 		bound_stmts_out.emplace_back(std::move(stmt_e));
 		break; }
@@ -61,13 +60,12 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_if_statement: {
 		const auto &cand = stmt.get<Statement::S_if_statement>();
 		// Bind the condition recursively.
-		Vp<Expression> bound_cond;
-		bind_expression(bound_cond, cand.cond_opt, scope_inout);
+		auto bound_cond = bind_expression(cand.cond, scope_inout);
 		// Bind both branches recursively.
 		Vp<Block> bound_branch_true;
-		bind_block(bound_branch_true, cand.branch_true_opt, scope_inout);
+		bind_block(bound_branch_true, cand.branch_true, scope_inout);
 		Vp<Block> bound_branch_false;
-		bind_block(bound_branch_false, cand.branch_false_opt, scope_inout);
+		bind_block(bound_branch_false, cand.branch_false, scope_inout);
 		Statement::S_if_statement stmt_i = { std::move(bound_cond), std::move(bound_branch_true), std::move(bound_branch_false) };
 		bound_stmts_out.emplace_back(std::move(stmt_i));
 		break; }
@@ -75,16 +73,14 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_switch_statement: {
 		const auto &cand = stmt.get<Statement::S_switch_statement>();
 		// Bind the control expression recursively.
-		Vp<Expression> bound_ctrl;
-		bind_expression(bound_ctrl, cand.ctrl_opt, scope_inout);
+		auto bound_ctrl = bind_expression(cand.ctrl, scope_inout);
 		// Bind clauses recursively. A clause consists of a label expression and a body block.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 		Vector<Switch_clause> bound_clauses;
 		bound_clauses.reserve(cand.clauses_opt.size());
 		for(const auto &clause : cand.clauses_opt){
-			Vp<Expression> bound_pred;
-			bind_expression(bound_pred, clause.pred_opt, scope_switch);
+			auto bound_pred = bind_expression(clause.pred, scope_switch);
 			Vp<Block> bound_body;
 			bind_block_in_place(bound_body, scope_switch, clause.body_opt);
 			Switch_clause bound_clause = { std::move(bound_pred), std::move(bound_body) };
@@ -99,8 +95,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 		// Bind the body and the condition recursively.
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
-		Vp<Expression> bound_cond;
-		bind_expression(bound_cond, cand.cond_opt, scope_inout);
+		auto bound_cond = bind_expression(cand.cond, scope_inout);
 		Statement::S_do_while_statement stmt_d = { std::move(bound_body), std::move(bound_cond) };
 		bound_stmts_out.emplace_back(std::move(stmt_d));
 		break; }
@@ -108,8 +103,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_while_statement: {
 		const auto &cand = stmt.get<Statement::S_while_statement>();
 		// Bind the condition and the body recursively.
-		Vp<Expression> bound_cond;
-		bind_expression(bound_cond, cand.cond_opt, scope_inout);
+		auto bound_cond = bind_expression(cand.cond, scope_inout);
 		Vp<Block> bound_body;
 		bind_block(bound_body, cand.body_opt, scope_inout);
 		Statement::S_while_statement stmt_w = { std::move(bound_cond), std::move(bound_body) };
@@ -125,10 +119,8 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 		Vp<Block> bound_init;
 		bind_block_in_place(bound_init, scope_for, cand.init_opt);
 		// Bind the condition, step and body recursively.
-		Vp<Expression> bound_cond;
-		bind_expression(bound_cond, cand.cond_opt, scope_for);
-		Vp<Expression> bound_step;
-		bind_expression(bound_step, cand.step_opt, scope_for);
+		auto bound_cond = bind_expression(cand.cond, scope_for);
+		auto bound_step = bind_expression(cand.step, scope_for);
 		Vp<Block> bound_body;
 		bind_block_in_place(bound_body, scope_for, cand.body_opt);
 		Statement::S_for_statement stmt_f = { std::move(bound_init), std::move(bound_cond), std::move(bound_step), std::move(bound_body) };
@@ -194,8 +186,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_throw_statement: {
 		const auto &cand = stmt.get<Statement::S_throw_statement>();
 		// Bind the operand recursively.
-		Vp<Expression> bound_operand;
-		bind_expression(bound_operand, cand.operand_opt, scope_inout);
+		auto bound_operand = bind_expression(cand.operand, scope_inout);
 		Statement::S_throw_statement stmt_t = { std::move(bound_operand) };
 		bound_stmts_out.emplace_back(std::move(stmt_t));
 		break; }
@@ -203,8 +194,7 @@ void bind_statement_in_place(Vector<Statement> &bound_stmts_out, Sp_cref<Scope> 
 	case Statement::type_return_statement: {
 		const auto &cand = stmt.get<Statement::S_return_statement>();
 		// Bind the operand recursively.
-		Vp<Expression> bound_operand;
-		bind_expression(bound_operand, cand.operand_opt, scope_inout);
+		auto bound_operand = bind_expression(cand.operand, scope_inout);
 		Statement::S_return_statement stmt_r = { std::move(bound_operand) };
 		bound_stmts_out.emplace_back(std::move(stmt_r));
 		break; }
@@ -256,15 +246,15 @@ void fly_over_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &st
 }
 
 namespace {
-	bool do_check_loop_condition(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, Sp_cref<const Expression> cond_opt, Sp_cref<const Scope> scope_inout){
-		// Overwrite `result_out` unconditionally, even when `cond_opt` is null.
-		evaluate_expression(result_out, recycler_out, cond_opt, scope_inout);
-		bool result = true;
-		if(cond_opt != nullptr){
-			const auto condition_var = read_reference_opt(result_out);
-			result = test_value(condition_var);
+	bool do_check_loop_condition(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_out, const Vector<Expression_node> &cond, Sp_cref<const Scope> scope_inout){
+		// Overwrite `result_out` unconditionally, even when `cond` is empty.
+		evaluate_expression(result_out, recycler_out, cond, scope_inout);
+		if(cond.empty()){
+			// An empty condition yields `true`.
+			return true;
 		}
-		return result;
+		const auto cond_var = read_reference_opt(result_out);
+		return test_value(cond_var);
 	}
 }
 
@@ -274,7 +264,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_expression_statement: {
 		const auto &cand = stmt.get<Statement::S_expression_statement>();
 		// Evaluate the expression, storing the result into `result_out`.
-		evaluate_expression(result_out, recycler_out, cand.expr_opt, scope_inout);
+		evaluate_expression(result_out, recycler_out, cand.expr, scope_inout);
 		break; }
 
 	case Statement::type_variable_definition: {
@@ -313,9 +303,9 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_if_statement: {
 		const auto &cand = stmt.get<Statement::S_if_statement>();
 		// Evaluate the condition expression and select a branch basing on the result.
-		evaluate_expression(result_out, recycler_out, cand.cond_opt, scope_inout);
-		const auto condition_var = read_reference_opt(result_out);
-		const auto branch_taken = test_value(condition_var) ? cand.branch_true_opt.share() : cand.branch_false_opt.share();
+		evaluate_expression(result_out, recycler_out, cand.cond, scope_inout);
+		const auto cond_var = read_reference_opt(result_out);
+		const auto &branch_taken = test_value(cond_var) ? cand.branch_true : cand.branch_false;
 		if(!branch_taken){
 			// If the branch is absent, don't execute anything further.
 			break;
@@ -331,28 +321,28 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_switch_statement: {
 		const auto &cand = stmt.get<Statement::S_switch_statement>();
 		// Evaluate the control expression.
-		evaluate_expression(result_out, recycler_out, cand.ctrl_opt, scope_inout);
-		const auto control_var = read_reference_opt(result_out);
-		ASTERIA_DEBUG_LOG("Switching on `", control_var, "`...");
+		evaluate_expression(result_out, recycler_out, cand.ctrl, scope_inout);
+		const auto ctrl_var = read_reference_opt(result_out);
+		ASTERIA_DEBUG_LOG("Switching on `", ctrl_var, "`...");
 		// Traverse the clause list to find one that matches the result.
 		// Notice that clauses in a `switch` statement share the same scope_inout.
 		const auto scope_switch = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
 		auto match_it = cand.clauses_opt.end();
 		for(auto it = cand.clauses_opt.begin(); it != cand.clauses_opt.end(); ++it){
-			if(it->pred_opt){
-				// Deal with a `case` label.
-				evaluate_expression(result_out, recycler_out, it->pred_opt, scope_switch);
-				const auto case_var = read_reference_opt(result_out);
-				if(compare_values(control_var, case_var) == Value::comparison_result_equal){
-					match_it = it;
-					break;
-				}
-			} else {
+			if(it->pred.empty()){
 				// Deal with a `default` label.
 				if(match_it != cand.clauses_opt.end()){
 					ASTERIA_THROW_RUNTIME_ERROR("More than one `default` labels have been found in this `switch` statement.");
 				}
 				match_it = it;
+			} else {
+				// Deal with a `case` label.
+				evaluate_expression(result_out, recycler_out, it->pred, scope_switch);
+				const auto case_var = read_reference_opt(result_out);
+				if(compare_values(ctrl_var, case_var) == Value::comparison_result_equal){
+					match_it = it;
+					break;
+				}
 			}
 			fly_over_block_in_place(scope_switch, it->body_opt);
 		}
@@ -385,13 +375,13 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				return result;
 			}
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-		} while(do_check_loop_condition(result_out, recycler_out, cand.cond_opt, scope_inout));
+		} while(do_check_loop_condition(result_out, recycler_out, cand.cond, scope_inout));
 		break; }
 
 	case Statement::type_while_statement: {
 		const auto &cand = stmt.get<Statement::S_while_statement>();
 		// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-		while(do_check_loop_condition(result_out, recycler_out, cand.cond_opt, scope_inout)){
+		while(do_check_loop_condition(result_out, recycler_out, cand.cond, scope_inout)){
 			// Execute the loop body recursively.
 			const auto result = execute_block(result_out, recycler_out, cand.body_opt, scope_inout);
 			if((result == Statement::execution_result_break_unspecified) || (result == Statement::execution_result_break_while)){
@@ -418,7 +408,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 			return result;
 		}
 		// Evaluate the condition expression and decide whether to start a new loop basing on the result.
-		while(do_check_loop_condition(result_out, recycler_out, cand.cond_opt, scope_for)){
+		while(do_check_loop_condition(result_out, recycler_out, cand.cond, scope_for)){
 			// Execute the loop body recursively.
 			result = execute_block(result_out, recycler_out, cand.body_opt, scope_for);
 			if((result == Statement::execution_result_break_unspecified) || (result == Statement::execution_result_break_for)){
@@ -430,7 +420,7 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 				return result;
 			}
 			// Step to the next iteration.
-			evaluate_expression(result_out, recycler_out, cand.step_opt, scope_for);
+			evaluate_expression(result_out, recycler_out, cand.step, scope_for);
 		}
 		break; }
 
@@ -629,14 +619,14 @@ Statement::Execution_result execute_statement_in_place(Vp<Reference> &result_out
 	case Statement::type_throw_statement: {
 		const auto &cand = stmt.get<Statement::S_throw_statement>();
 		// Evaluate the operand, then throw the exception constructed from the result of it.
-		evaluate_expression(result_out, recycler_out, cand.operand_opt, scope_inout);
+		evaluate_expression(result_out, recycler_out, cand.operand, scope_inout);
 		ASTERIA_DEBUG_LOG("Throwing exception: ", result_out);
 		throw Exception(result_out.cshare()); }
 
 	case Statement::type_return_statement: {
 		const auto &cand = stmt.get<Statement::S_return_statement>();
 		// Evaluate the operand, then return because the value is stored outside this function.
-		evaluate_expression(result_out, recycler_out, cand.operand_opt, scope_inout);
+		evaluate_expression(result_out, recycler_out, cand.operand, scope_inout);
 		return Statement::execution_result_return; }
 
 	default:

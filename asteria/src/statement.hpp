@@ -31,7 +31,7 @@ public:
 	};
 	struct Switch_clause {
 		// `pred_opt` is non-null for `case` clauses and is null for `default` clauses.
-		Vp<Expression> pred_opt;
+		Vector<Expression_node> pred;
 		Vp<Block> body_opt;
 	};
 
@@ -53,7 +53,7 @@ public:
 		type_return_statement      = 14,
 	};
 	struct S_expression_statement {
-		Vp<Expression> expr_opt;
+		Vector<Expression_node> expr;
 	};
 	struct S_variable_definition {
 		Cow_string id;
@@ -67,26 +67,26 @@ public:
 		Vp<Block> body_opt;
 	};
 	struct S_if_statement {
-		Vp<Expression> cond_opt;
-		Vp<Block> branch_true_opt;
-		Vp<Block> branch_false_opt;
+		Vector<Expression_node> cond;
+		Vp<Block> branch_true;
+		Vp<Block> branch_false;
 	};
 	struct S_switch_statement {
-		Vp<Expression> ctrl_opt;
+		Vector<Expression_node> ctrl;
 		Vector<Switch_clause> clauses_opt;
 	};
 	struct S_do_while_statement {
 		Vp<Block> body_opt;
-		Vp<Expression> cond_opt;
+		Vector<Expression_node> cond;
 	};
 	struct S_while_statement {
-		Vp<Expression> cond_opt;
+		Vector<Expression_node> cond;
 		Vp<Block> body_opt;
 	};
 	struct S_for_statement {
 		Vp<Block> init_opt;
-		Vp<Expression> cond_opt;
-		Vp<Expression> step_opt;
+		Vector<Expression_node> cond;
+		Vector<Expression_node> step;
 		Vp<Block> body_opt;
 	};
 	struct S_for_each_statement {
@@ -111,10 +111,10 @@ public:
 		Target_scope target_scope;
 	};
 	struct S_throw_statement {
-		Vp<Expression> operand_opt;
+		Vector<Expression_node> operand;
 	};
 	struct S_return_statement {
-		Vp<Expression> operand_opt;
+		Vector<Expression_node> operand;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_expression_statement  //  0

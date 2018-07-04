@@ -5,7 +5,7 @@
 #include "../src/block.hpp"
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
-#include "../src/expression.hpp"
+#include "../src/expression_node.hpp"
 #include "../src/initializer.hpp"
 #include "../src/value.hpp"
 #include "../src/stored_reference.hpp"
@@ -15,13 +15,10 @@ using namespace Asteria;
 int main(){
 	Vp<Block> block, init, body;
 	std::vector<Statement> stmts, stmts_nested;
-	std::vector<Expression_node> expr_nodes;
-	Vp<Expression> expr, cond, inc;
+	Vector<Expression_node> expr, cond, inc;
 	// value sum = 0;
-	expr_nodes.clear();
 	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
-	expr_nodes.emplace_back(std::move(expr_l));
-	expr.emplace(std::move(expr_nodes));
+	expr.emplace_back(std::move(expr_l));
 	Initializer::S_assignment_init initzr_a = { std::move(expr) };
 	Statement::S_variable_definition stmt_v = { D_string::shallow("sum"), false, std::move(initzr_a) };
 	stmts.emplace_back(std::move(stmt_v));
@@ -29,39 +26,31 @@ int main(){
 	//   sum += i;
 	// }
 	// >>> value i = 1
-	expr_nodes.clear();
 	expr_l = { std::make_shared<Value>(D_integer(1)) };
-	expr_nodes.emplace_back(std::move(expr_l));
-	expr.emplace(std::move(expr_nodes));
+	expr.emplace_back(std::move(expr_l));
 	initzr_a = { std::move(expr) };
 	stmt_v = { D_string::shallow("i"), false, std::move(initzr_a) };
 	stmts_nested.emplace_back(std::move(stmt_v));
 	init.emplace(std::move(stmts_nested));
 	// >>> i <= 10
-	expr_nodes.clear();
 	expr_l = { std::make_shared<Value>(D_integer(10)) };
-	expr_nodes.emplace_back(std::move(expr_l));
+	cond.emplace_back(std::move(expr_l));
 	Expression_node::S_named_reference expr_n = { D_string::shallow("i") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	cond.emplace_back(std::move(expr_n));
 	Expression_node::S_operator_rpn expr_op = { Expression_node::operator_infix_cmp_lte, false };
-	expr_nodes.emplace_back(std::move(expr_op));
-	cond.emplace(std::move(expr_nodes));
+	cond.emplace_back(std::move(expr_op));
 	// >>> ++i
-	expr_nodes.clear();
 	expr_n = { D_string::shallow("i") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	inc.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_prefix_inc, false };
-	expr_nodes.emplace_back(std::move(expr_op));
-	inc.emplace(std::move(expr_nodes));
+	inc.emplace_back(std::move(expr_op));
 	// >>> sum += i
-	expr_nodes.clear();
 	expr_n = { D_string::shallow("i") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	expr.emplace_back(std::move(expr_n));
 	expr_n = { D_string::shallow("sum") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	expr.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_infix_add, true };
-	expr_nodes.emplace_back(std::move(expr_op));
-	expr.emplace(std::move(expr_nodes));
+	expr.emplace_back(std::move(expr_op));
 	stmts_nested.clear();
 	Statement::S_expression_statement stmt_e = { std::move(expr) };
 	stmts_nested.emplace_back(std::move(stmt_e));
@@ -72,28 +61,24 @@ int main(){
 	//   sum += key + value;
 	// }
 	// >>> array
-	expr_nodes.clear();
 	D_array array;
 	array.emplace_back(std::make_shared<Value>(D_integer(100)));
 	array.emplace_back(std::make_shared<Value>(D_integer(200)));
 	array.emplace_back(std::make_shared<Value>(D_integer(300)));
 	expr_l = { std::make_shared<Value>(std::move(array)) };
-	expr_nodes.emplace_back(std::move(expr_l));
-	expr.emplace(std::move(expr_nodes));
+	expr.emplace_back(std::move(expr_l));
 	initzr_a = { std::move(expr) };
 	// >>> sum += key + value;
-	expr_nodes.clear();
 	expr_n = { D_string::shallow("value") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	expr.emplace_back(std::move(expr_n));
 	expr_n = { D_string::shallow("key") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	expr.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_infix_add, false };
-	expr_nodes.emplace_back(std::move(expr_op));
+	expr.emplace_back(std::move(expr_op));
 	expr_n = { D_string::shallow("sum") };
-	expr_nodes.emplace_back(std::move(expr_n));
+	expr.emplace_back(std::move(expr_n));
 	expr_op = { Expression_node::operator_infix_add, true };
-	expr_nodes.emplace_back(std::move(expr_op));
-	expr.emplace(std::move(expr_nodes));
+	expr.emplace_back(std::move(expr_op));
 	stmts_nested.clear();
 	stmt_e = { std::move(expr) };
 	stmts_nested.emplace_back(std::move(stmt_e));

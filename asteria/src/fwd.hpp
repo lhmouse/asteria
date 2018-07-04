@@ -32,7 +32,6 @@ class Logger;
 // Lexical elements
 class Initializer;
 class Expression_node;
-class Expression;
 class Statement;
 class Block;
 class Parser_result;

@@ -47,7 +47,6 @@ pkginclude_HEADERS =	\
 	asteria/src/exception.hpp	\
 	asteria/src/initializer.hpp	\
 	asteria/src/expression_node.hpp	\
-	asteria/src/expression.hpp	\
 	asteria/src/statement.hpp	\
 	asteria/src/block.hpp	\
 	asteria/src/instantiated_function.hpp	\
@@ -76,7 +75,6 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/exception.cpp	\
 	asteria/src/initializer.cpp	\
 	asteria/src/expression_node.cpp	\
-	asteria/src/expression.cpp	\
 	asteria/src/statement.cpp	\
 	asteria/src/block.cpp	\
 	asteria/src/instantiated_function.cpp	\
@@ -99,7 +97,7 @@ check_PROGRAMS = \
 	test/value.test	\
 	test/reference.test	\
 	test/exception.test	\
-	test/expression.test	\
+	test/expression_node.test	\
 	test/block.test	\
 	test/recycler.test	\
 	test/scope.test	\

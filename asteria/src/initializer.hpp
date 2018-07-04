@@ -17,7 +17,7 @@ public:
 		type_braced_init_list     = 2,
 	};
 	struct S_assignment_init {
-		Vp<Expression> expr;
+		Vector<Expression_node> expr;
 	};
 	struct S_bracketed_init_list {
 		Vector<Initializer> elems;

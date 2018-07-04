@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_init.hpp"
-#include "../src/expression.hpp"
+#include "../src/expression_node.hpp"
 #include "../src/scope.hpp"
 #include "../src/recycler.hpp"
 #include "../src/value.hpp"
@@ -37,42 +37,39 @@ int main(){
 	//                    \+-- 0.25 dval ++ +     ::= branch_true
 	//                     \-- "hello," cval *    ::= branch_false
 
-	std::vector<Expression_node> nodes;
+	std::vector<Expression_node> branch_true;
 	Expression_node::S_literal s_lit = { std::make_shared<Value>(D_double(0.25)) };
-	nodes.emplace_back(std::move(s_lit)); // 0.25
+	branch_true.emplace_back(std::move(s_lit)); // 0.25
 	Expression_node::S_named_reference s_nref = { D_string::shallow("dval") };
-	nodes.emplace_back(std::move(s_nref)); // dval
+	branch_true.emplace_back(std::move(s_nref)); // dval
 	Expression_node::S_operator_rpn s_opr = { Expression_node::operator_postfix_inc, false };
-	nodes.emplace_back(std::move(s_opr)); // ++
+	branch_true.emplace_back(std::move(s_opr)); // ++
 	s_opr = { Expression_node::operator_infix_add, false };
-	nodes.emplace_back(std::move(s_opr)); // +
-	auto branch_true = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	branch_true.emplace_back(std::move(s_opr)); // +
 
-	nodes.clear();
+	std::vector<Expression_node> branch_false;
 	s_lit = { std::make_shared<Value>(D_string("hello,")) };
-	nodes.emplace_back(std::move(s_lit)); // "hello,"
+	branch_false.emplace_back(std::move(s_lit)); // "hello,"
 	s_nref = { D_string::shallow("cval") };
-	nodes.emplace_back(std::move(s_nref)); // cval
+	branch_false.emplace_back(std::move(s_nref)); // cval
 	s_opr = { Expression_node::operator_infix_mul, false };
-	nodes.emplace_back(std::move(s_opr)); // *
-	auto branch_false = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	branch_false.emplace_back(std::move(s_opr)); // *
 
-	nodes.clear();
+	std::vector<Expression_node> expr;
 	s_nref = { D_string::shallow("condition") };
-	nodes.emplace_back(std::move(s_nref)); // condition
+	expr.emplace_back(std::move(s_nref)); // condition
 	s_opr = { Expression_node::operator_prefix_notl, false };
-	nodes.emplace_back(std::move(s_opr)); // !
+	expr.emplace_back(std::move(s_opr)); // !
 	Expression_node::S_branch s_br = { std::move(branch_true), std::move(branch_false) };
-	nodes.emplace_back(std::move(s_br)); // ?:
+	expr.emplace_back(std::move(s_br)); // ?:
 	s_lit = { std::make_shared<Value>(D_integer(1)) };
-	nodes.emplace_back(std::move(s_lit)); // 1
+	expr.emplace_back(std::move(s_lit)); // 1
 	s_nref = { D_string::shallow("rval") };
-	nodes.emplace_back(std::move(s_nref)); // rval
+	expr.emplace_back(std::move(s_nref)); // rval
 	s_opr = { Expression_node::operator_postfix_at, false };
-	nodes.emplace_back(std::move(s_opr)); // []
+	expr.emplace_back(std::move(s_opr)); // []
 	s_opr = { Expression_node::operator_infix_assign, false };
-	nodes.emplace_back(std::move(s_opr)); // =
-	auto expr = Vp<Expression>(std::make_shared<Expression>(std::move(nodes)));
+	expr.emplace_back(std::move(s_opr)); // =
 
 	auto condition = std::make_shared<Variable>();
 	lref = { condition };
