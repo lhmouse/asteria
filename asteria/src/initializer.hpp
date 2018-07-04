@@ -23,7 +23,7 @@ public:
 		Vector<Vp<Initializer>> elems;
 	};
 	struct S_braced_init_list {
-		Dictionary<Vp<Initializer>> key_values;
+		Dictionary<Vp<Initializer>> pairs;
 	};
 	using Variant = rocket::variant<ASTERIA_CDR(void
 		, S_assignment_init      // 0

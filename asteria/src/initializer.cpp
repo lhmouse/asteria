@@ -46,8 +46,8 @@ void bind_initializer(Vp<Initializer> &bound_init_out, Sp_cref<const Initializer
 	case Initializer::type_braced_init_list: {
 		const auto &cand = init_opt->get<Initializer::S_braced_init_list>();
 		Dictionary<Vp<Initializer>> bound_pairs;
-		bound_pairs.reserve(cand.key_values.size());
-		for(const auto &pair : cand.key_values){
+		bound_pairs.reserve(cand.pairs.size());
+		for(const auto &pair : cand.pairs){
 			bind_initializer(bound_init_out, pair.second, scope);
 			bound_pairs.emplace(pair.first, std::move(bound_init_out));
 		}
@@ -92,8 +92,8 @@ void evaluate_initializer(Vp<Reference> &result_out, Sp_cref<Recycler> recycler_
 		const auto &cand = init_opt->get<Initializer::S_braced_init_list>();
 		Vp<Value> value;
 		D_object object;
-		object.reserve(cand.key_values.size());
-		for(const auto &pair : cand.key_values){
+		object.reserve(cand.pairs.size());
+		for(const auto &pair : cand.pairs){
 			evaluate_initializer(result_out, recycler_out, pair.second, scope);
 			extract_value_from_reference(value, recycler_out, std::move(result_out));
 			object.emplace(pair.first, std::move(value));
