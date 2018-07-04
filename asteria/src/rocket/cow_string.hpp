@@ -59,7 +59,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 class basic_cow_string;
 
 namespace details_cow_string {
-	// Utilities.
 	template<typename valueT>
 	inline valueT xchg(valueT &dst, typename decay<valueT>::type src){
 		auto old = ::std::move(dst);
