@@ -13,6 +13,7 @@
 
 namespace rocket {
 
+using ::std::common_type;
 using ::std::is_convertible;
 using ::std::decay;
 using ::std::enable_if;
@@ -25,105 +26,108 @@ using ::std::is_nothrow_move_constructible;
 using ::std::is_nothrow_copy_assignable;
 using ::std::is_nothrow_move_assignable;
 using ::std::is_nothrow_destructible;
+using ::std::integral_constant;
 using ::std::conditional;
+using ::std::false_type;
+using ::std::true_type;
 
 template<typename ...elementsT>
 class variant;
 
 namespace details_variant {
 	template<unsigned indexT, typename ...typesT>
-	struct type_getter {
+	struct type_getter
 		// `type` is not defined.
-	};
+	{ };
 	template<typename firstT, typename ...remainingT>
-	struct type_getter<0, firstT, remainingT...> {
-		using type = firstT;
-	};
+	struct type_getter<0, firstT, remainingT...>
+		: common_type<firstT>
+	{ };
 	template<unsigned indexT, typename firstT, typename ...remainingT>
-	struct type_getter<indexT, firstT, remainingT...> {
-		using type = typename type_getter<indexT - 1, remainingT...>::type;
-	};
+	struct type_getter<indexT, firstT, remainingT...>
+		: type_getter<indexT - 1, remainingT...>
+	{ };
 
 	template<unsigned indexT, typename expectT, typename ...typesT>
-	struct type_finder {
+	struct type_finder
 		// `value` is not defined.
-	};
+	{ };
 	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-	struct type_finder<indexT, expectT, firstT, remainingT...> {
-		enum : unsigned { value = type_finder<indexT + 1, expectT, remainingT...>::value };
-	};
+	struct type_finder<indexT, expectT, firstT, remainingT...>
+		: type_finder<indexT + 1, expectT, remainingT...>
+	{ };
 	template<unsigned indexT, typename expectT, typename ...remainingT>
-	struct type_finder<indexT, expectT, expectT, remainingT...> {
-		enum : unsigned { value = indexT };
-	};
-
-	template<typename expectT, typename ...typesT>
-	struct has_type_recursive {
-		enum : bool { value = false };
-	};
-	template<typename expectT, typename firstT, typename ...remainingT>
-	struct has_type_recursive<expectT, firstT, remainingT...> {
-		enum : bool { value = has_type_recursive<expectT, remainingT...>::value };
-	};
-	template<typename expectT, typename ...remainingT>
-	struct has_type_recursive<expectT, expectT, remainingT...> {
-		enum : bool { value = true };
-	};
-	template<typename expectT, typename ...elementsT, typename ...remainingT>
-	struct has_type_recursive<expectT, variant<elementsT...>, remainingT...> {
-		enum : bool { value = has_type_recursive<expectT, elementsT...>::value || has_type_recursive<expectT, remainingT...>::value };
-	};
-	template<typename ...elementsT, typename ...remainingT>
-	struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...> {
-		enum : bool { value = true };
-	};
-
-	template<bool conditionT, unsigned trueT, typename falseT>
-	struct conditional_index {
-		enum : unsigned { value = trueT };
-	};
-	template<unsigned trueT, typename falseT>
-	struct conditional_index<false, trueT, falseT> {
-		enum : unsigned { value = falseT::value };
-	};
-
-	template<unsigned indexT, typename expectT, typename ...typesT>
-	struct recursive_type_finder {
-		// `value` is not defined.
-	};
-	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-	struct recursive_type_finder<indexT, expectT, firstT, remainingT...> {
-		enum : unsigned { value = conditional_index<has_type_recursive<expectT, firstT>::value, indexT, recursive_type_finder<indexT + 1, expectT, remainingT...>>::value };
-	};
+	struct type_finder<indexT, expectT, expectT, remainingT...>
+		: integral_constant<unsigned, indexT>
+	{ };
 
 	template<typename ...typesT>
-	struct conjunction {
-		enum : bool { value = true };
-	};
+	struct conjunction
+		: true_type
+	{ };
 	template<typename firstT, typename ...remainingT>
-	struct conjunction<firstT, remainingT...> {
-		enum : bool { value = firstT::value && conjunction<remainingT...>::value };
-	};
+	struct conjunction<firstT, remainingT...>
+		: conditional<firstT::value, conjunction<remainingT...>, false_type>::type
+	{ };
+
+	template<typename expectT, typename ...typesT>
+	struct has_type_recursive
+		: false_type
+	{ };
+	template<typename expectT, typename firstT, typename ...remainingT>
+	struct has_type_recursive<expectT, firstT, remainingT...>
+		: has_type_recursive<expectT, remainingT...>
+	{ };
+	template<typename expectT, typename ...remainingT>
+	struct has_type_recursive<expectT, expectT, remainingT...>
+		: true_type
+	{ };
+	template<typename expectT, typename ...elementsT, typename ...remainingT>
+	struct has_type_recursive<expectT, variant<elementsT...>, remainingT...>
+		: conditional<has_type_recursive<expectT, elementsT...>::value, true_type, has_type_recursive<expectT, remainingT...>>::type
+	{ };
+	template<typename ...elementsT, typename ...remainingT>
+	struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...>
+		: true_type
+	{ };
+
+	template<unsigned indexT, typename expectT, typename ...typesT>
+	struct recursive_type_finder
+		// `value` is not defined.
+	{ };
+	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
+	struct recursive_type_finder<indexT, expectT, firstT, remainingT...>
+		: conditional<has_type_recursive<expectT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, expectT, remainingT...>>::type
+	{ };
 
 	template<size_t firstT, size_t ...remainingT>
-	struct max_of {
-		enum : size_t { value = max_of<firstT, max_of<remainingT...>::value>::value };
-	};
+	struct max_of
+		: max_of<firstT, max_of<remainingT...>::value>
+	{ };
 	template<size_t firstT>
-	struct max_of<firstT> {
-		enum : size_t { value = firstT };
-	};
+	struct max_of<firstT>
+		: integral_constant<size_t, firstT>
+	{ };
 	template<size_t firstT, size_t secondT>
-	struct max_of<firstT, secondT> {
-		enum : size_t { value = (firstT >= secondT) ? firstT : secondT };
-	};
+	struct max_of<firstT, secondT>
+		: integral_constant<size_t, !(firstT < secondT) ? firstT : secondT>
+	{ };
 
 	template<typename ...elementsT>
-	struct storage_for {
-		enum : size_t { align = max_of<alignof(elementsT)...>::value };
-		enum : size_t { size = max_of<sizeof(elementsT)...>::value };
-		alignas(+align) char bytes[+size];
+	union storage_for {
+		char bytes[max_of<sizeof(elementsT)...>::value];
+		alignas(max_of<alignof(elementsT)...>::value) char align;
 	};
+
+	namespace details_is_nothrow_swappable {
+		using ::std::swap;
+		// Define the value depending on an ADL'd `swap()` call.
+		template<typename paramT>
+		struct is_nothrow_swappable
+			: integral_constant<bool, noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()))>
+		{ };
+	}
+	using details_is_nothrow_swappable::is_nothrow_swappable;
 
 	template<typename typeT, typename ...paramsT>
 	inline typeT * construct(typeT *ptr, paramsT &&...params){
@@ -200,17 +204,6 @@ namespace details_variant {
 			using ::std::swap;
 			swap(*ptr, *punning_cast<elementT *>(src));
 		}
-	};
-
-	template<typename paramT>
-	constexpr bool check_nothrow_swappable() noexcept {
-		using ::std::swap;
-		return noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()));
-	}
-
-	template<typename paramT>
-	struct is_nothrow_swappable {
-		enum : bool { value = check_nothrow_swappable<paramT>() };
 	};
 }
 
