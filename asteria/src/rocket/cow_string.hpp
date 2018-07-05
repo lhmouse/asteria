@@ -918,11 +918,7 @@ public:
 	size_type capacity() const noexcept {
 		return this->m_sth.capacity();
 	}
-	void reserve(size_type res_arg = 0){
-		if(res_arg == 0){
-			this->shrink_to_fit();
-			return;
-		}
+	void reserve(size_type res_arg){
 		const auto len = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(((max))(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
