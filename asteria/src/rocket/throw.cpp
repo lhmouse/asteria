@@ -32,8 +32,4 @@ void throw_length_error(const char *fmt, ...){
 	throw ::std::length_error(str);
 }
 
-void rethrow_current_exception(){
-	throw;
-}
-
 }

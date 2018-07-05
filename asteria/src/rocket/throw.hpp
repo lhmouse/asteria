@@ -12,8 +12,6 @@ ROCKET_FORMAT_CHECK(__printf__, 1, 2) ROCKET_NORETURN extern void throw_invalid_
 ROCKET_FORMAT_CHECK(__printf__, 1, 2) ROCKET_NORETURN extern void throw_out_of_range(const char *fmt, ...);
 ROCKET_FORMAT_CHECK(__printf__, 1, 2) ROCKET_NORETURN extern void throw_length_error(const char *fmt, ...);
 
-ROCKET_NORETURN extern void rethrow_current_exception();
-
 }
 
 #endif

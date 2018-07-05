@@ -71,7 +71,7 @@ namespace details_cow_string {
 		}
 		// Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
 		if(ios.exceptions() & ios_base::badbit){
-			rethrow_current_exception();
+			throw;
 		}
 	}
 

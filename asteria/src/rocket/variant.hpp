@@ -447,7 +447,7 @@ public:
 				// Destroy the first object that has just been constructed, then rethrow the exception.
 				details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
 				                                              details_variant::visitor_destruct());
-				rethrow_current_exception();
+				throw;
 			}
 			// Destroy both elements.
 			const unsigned this_index = this->m_index;
