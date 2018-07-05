@@ -590,7 +590,6 @@ private:
 	details_cow_string::storage_handle<charT, traitsT, allocatorT> m_sth;
 	const_pointer m_ptr;
 	size_type m_len;
-	size_type m_cap;
 
 public:
 	// 24.3.2.2, construct/copy/destroy
@@ -604,7 +603,7 @@ public:
 		: basic_cow_string(sh, allocator_type())
 	{ }
 	basic_cow_string(shallow sh, const allocator_type &alloc) noexcept
-		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size()), m_cap(sh.size())
+		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
 	{ }
 	basic_cow_string(const basic_cow_string &other) noexcept
 		: basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
@@ -689,24 +688,23 @@ private:
 		ROCKET_ASSERT(this->m_sth.unique());
 		traits_type::assign(ptr + len, 1, value_type());
 		this->m_ptr = ptr;
-		this->m_cap = this->m_sth.capacity();
 		return ptr + len;
 	}
 	// Reallocate more storage as needed, without shrinking.
 	pointer do_auto_reallocate_no_set_length(size_type len, size_type cap_add){
 		ROCKET_ASSERT(len <= this->m_len);
 		const auto cap = this->m_sth.check_size(len, cap_add);
-		if((this->m_cap < cap) || (this->m_sth.unique() == false)){
+		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 			this->do_reallocate_no_set_length(len, ((max))((len + len / 2) | 64, cap));
 		}
-		ROCKET_ASSERT(this->m_cap >= cap);
+		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 		const auto ptr = const_cast<pointer>(this->m_ptr);
 		return ptr + len;
 	}
 	// Add a null terminator at `ptr[len]` then set `len` there.
 	void do_set_length(size_type len) noexcept {
 		ROCKET_ASSERT(this->m_sth.unique());
-		ROCKET_ASSERT(len <= this->m_cap);
+		ROCKET_ASSERT(len <= this->m_sth.capacity());
 		const auto ptr = const_cast<pointer>(this->m_ptr);
 		ROCKET_ASSERT(ptr == this->m_sth.data());
 		ROCKET_ASSERT(len <= this->m_sth.capacity());
@@ -729,7 +727,6 @@ private:
 		this->m_sth.deallocate();
 		this->m_ptr = shallow().data();
 		this->m_len = 0;
-		this->m_cap = 0;
 	}
 
 	// This function works the same way as `substr()`.
@@ -912,7 +909,7 @@ public:
 		this->resize(n, value_type());
 	}
 	size_type capacity() const noexcept {
-		return this->m_cap;
+		return this->m_sth.capacity();
 	}
 	void reserve(size_type res_arg = 0){
 		if(res_arg == 0){
@@ -922,7 +919,7 @@ public:
 		const auto len = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(((max))(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_cap >= cap_new) && this->m_sth.unique()){
+		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
 		this->do_reallocate_no_set_length(len, cap_new);
@@ -933,7 +930,7 @@ public:
 		const auto len = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(len);
 		// Don't increase memory usage.
-		if((this->m_cap <= cap_min) || (this->m_sth.unique() == false)){
+		if((this->m_sth.unique() == false) || (this->m_sth.capacity() <= cap_min)){
 			return;
 		}
 		if(len != 0){
@@ -945,7 +942,7 @@ public:
 	}
 	void clear() noexcept {
 		if(this->m_sth.unique()){
-			// If the storage is owned exclusively by this string, truncate it and leave `cap` alone.
+			// If the storage is owned exclusively by this string, truncate it and leave the buffer alone.
 			this->do_set_length(0);
 		} else {
 			// Otherwise, detach the string from it.
@@ -1099,21 +1096,18 @@ public:
 		this->m_sth.assign(other.m_sth);
 		this->m_ptr = other.m_ptr;
 		this->m_len = other.m_len;
-		this->m_cap = other.m_cap;
 		return *this;
 	}
 	basic_cow_string & assign(basic_cow_string &&other) noexcept {
 		this->m_sth.assign(::std::move(other.m_sth));
 		this->m_ptr = ((exchange))(other.m_ptr, shallow().data());
 		this->m_len = ((exchange))(other.m_len, size_type(0));
-		this->m_cap = ((exchange))(other.m_cap, size_type(0));
 		return *this;
 	}
 	basic_cow_string & assign(shallow sh) noexcept {
 		this->m_sth.deallocate();
 		this->m_ptr = sh.data();
 		this->m_len = sh.size();
-		this->m_cap = sh.size();
 		return *this;
 	}
 	basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos){
@@ -1307,7 +1301,6 @@ public:
 		this->m_sth.swap(other.m_sth);
 		::std::swap(this->m_ptr, other.m_ptr);
 		::std::swap(this->m_len, other.m_len);
-		::std::swap(this->m_cap, other.m_cap);
 	}
 
 	// 24.3.2.7, string operations
