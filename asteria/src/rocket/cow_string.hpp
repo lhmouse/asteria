@@ -686,16 +686,20 @@ private:
 		ROCKET_ASSERT(cap != 0);
 		const auto ptr = this->m_sth.reallocate(this->m_ptr, len, cap);
 		ROCKET_ASSERT(this->m_sth.unique());
-		traits_type::assign(ptr + len, 1, value_type());
 		this->m_ptr = ptr;
 		return ptr + len;
 	}
 	// Reallocate more storage as needed, without shrinking.
 	pointer do_auto_reallocate_no_set_length(size_type len, size_type cap_add){
 		ROCKET_ASSERT(len <= this->m_len);
-		const auto cap = this->m_sth.check_size(len, cap_add);
+		auto cap = this->m_sth.check_size(len, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
-			this->do_reallocate_no_set_length(len, ((max))((len + len / 2) | 64, cap));
+#ifndef ROCKET_DEBUG
+			// Reserve more space for non-debug builds.
+			cap |= len + len / 2;
+			cap |= 64;
+#endif
+			this->do_reallocate_no_set_length(len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 		const auto ptr = const_cast<pointer>(this->m_ptr);
@@ -900,9 +904,9 @@ public:
 	}
 	void resize(size_type n, value_type ch){
 		const auto len_old = this->size();
-		const auto len_ex = n - ((min))(len_old, n);
-		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, len_ex);
-		traits_type::assign(wptr, len_ex, ch);
+		const auto len_add = n - ((min))(len_old, n);
+		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, len_add);
+		traits_type::assign(wptr, len_add, ch);
 		this->do_set_length(n);
 	}
 	void resize(size_type n){
