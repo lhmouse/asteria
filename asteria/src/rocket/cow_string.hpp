@@ -889,6 +889,9 @@ public:
 	}
 
 	// 24.3.2.4, capacity
+	bool empty() const noexcept {
+		return this->m_len == 0;
+	}
 	size_type size() const noexcept {
 		return this->m_len;
 	}
@@ -900,10 +903,14 @@ public:
 	}
 	void resize(size_type n, value_type ch){
 		const auto len_old = this->size();
-		const auto len_add = n - ((min))(len_old, n);
-		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, len_add);
-		traits_type::assign(wptr, len_add, ch);
-		this->do_set_length(n);
+		if(len_old == n){
+			return;
+		}
+		if(len_old > n){
+			this->erase(this->end() - static_cast<difference_type>(len_old - n), this->end());
+		} else {
+			this->append(n - len_old, ch);
+		}
 	}
 	void resize(size_type n){
 		this->resize(n, value_type());
@@ -949,9 +956,6 @@ public:
 			this->do_deallocate();
 		}
 		ROCKET_ASSERT(this->empty());
-	}
-	bool empty() const noexcept {
-		return this->m_len == 0;
 	}
 
 	// 24.3.2.5, element access
