@@ -136,9 +136,6 @@ namespace details_cow_string {
 		storage_handle & operator=(const storage_handle &) = delete;
 
 	private:
-		storage_allocator do_make_storage_allocator() const noexcept {
-			return this->as_allocator();
-		}
 		void do_reset(storage *ptr_new) noexcept {
 			const auto ptr = ((exchange))(this->m_ptr, ptr_new);
 			if(ptr == nullptr){
@@ -183,7 +180,7 @@ namespace details_cow_string {
 			return do_get_capacity_of(ptr->n_blocks);
 		}
 		size_type max_size() const noexcept {
-			auto alloc = this->do_make_storage_allocator();
+			auto alloc = storage_allocator(this->as_allocator());
 			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(alloc);
 			return do_get_capacity_of(max_n_blocks / 2 - 1);
 		}
@@ -215,7 +212,7 @@ namespace details_cow_string {
 			}
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto n_blocks = do_get_blocks_for(this->check_size(0, cap));
-			auto alloc = this->do_make_storage_allocator();
+			auto alloc = storage_allocator(this->as_allocator());
 			const auto ptr = static_cast<storage *>(allocator_traits<storage_allocator>::allocate(alloc, n_blocks));
 #ifdef ROCKET_DEBUG
 			::std::memset(ptr, '*', sizeof(*ptr) * n_blocks);
