@@ -815,7 +815,7 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = from; i < len - n + 1; ++i){
+		for(auto i = from; i != len - n + 1; ++i){
 			if(pred(this->data() + i)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
@@ -830,7 +830,7 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = ((min))(len - n, to); i + 1 > 0; --i){
+		for(auto i = ((min))(len - n, to); i + 1 != 0; --i){
 			if(pred(this->data() + i)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
