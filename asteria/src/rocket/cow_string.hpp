@@ -901,7 +901,7 @@ public:
 	size_type max_size() const noexcept {
 		return this->m_sth.max_size();
 	}
-	void resize(size_type n, value_type ch){
+	void resize(size_type n, value_type ch = value_type()){
 		const auto len_old = this->size();
 		if(len_old == n){
 			return;
@@ -911,9 +911,6 @@ public:
 		} else {
 			this->append(n - len_old, ch);
 		}
-	}
-	void resize(size_type n){
-		this->resize(n, value_type());
 	}
 	size_type capacity() const noexcept {
 		return this->m_sth.capacity();
