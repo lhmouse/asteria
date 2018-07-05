@@ -970,14 +970,10 @@ public:
 		return this->data()[pos];
 	}
 	const_reference front() const noexcept {
-		const auto len = this->size();
-		ROCKET_ASSERT(len > 0);
-		return this->data()[0];
+		return this->operator[](0);
 	}
 	const_reference back() const noexcept {
-		const auto len = this->size();
-		ROCKET_ASSERT(len > 0);
-		return this->data()[len - 1];
+		return this->operator[](this->size() - 1);
 	}
 	// There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
 	// N.B. This is a non-standard extension.
@@ -988,6 +984,14 @@ public:
 			                   static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->mut_data()[pos];
+	}
+	// N.B. This is a non-standard extension.
+	const_reference mut_front() noexcept {
+		return this->mut(0);
+	}
+	// N.B. This is a non-standard extension.
+	const_reference mut_back() noexcept {
+		return this->mut(this->size() - 1);
 	}
 
 	// 24.3.2.6, modifiers
