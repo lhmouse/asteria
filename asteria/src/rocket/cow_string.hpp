@@ -221,7 +221,7 @@ namespace details_cow_string {
 			::std::memset(ptr, '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(alloc, ptr, n_blocks, this->as_allocator());
-			// Copy the string into the new block, then terminate it with a null character.
+			// Copy characters into the new block, then terminate it with a null character.
 			// Since `src` might point to somewhere in the old block, this has to be done before deallocating the old block.
 			traits_type::copy(ptr->data, src, len);
 			// Replace the current block.
@@ -949,7 +949,7 @@ public:
 			// If the storage is owned exclusively by this string, truncate it and leave the buffer alone.
 			this->do_set_length(0);
 		} else {
-			// Otherwise, detach the string from it.
+			// Otherwise, detach it from `*this`.
 			this->do_deallocate();
 		}
 		ROCKET_ASSERT(this->empty());
