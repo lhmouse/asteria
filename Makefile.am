@@ -25,6 +25,7 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/preprocessor_utilities.h	\
 	asteria/src/rocket/assert.hpp	\
 	asteria/src/rocket/throw.hpp	\
+	asteria/src/rocket/utilities.hpp	\
 	asteria/src/rocket/allocator_utilities.hpp	\
 	asteria/src/rocket/insertable_streambuf.hpp	\
 	asteria/src/rocket/insertable_istream.hpp	\

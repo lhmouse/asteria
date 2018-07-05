@@ -26,18 +26,13 @@ using ::std::is_array;
 using ::std::is_trivial;
 using ::std::decay;
 using ::std::conditional;
+using ::std::false_type;
+using ::std::true_type;
 
 template<typename handleT, typename closerT>
 class unique_handle;
 
 namespace details_unique_handle {
-	template<typename valueT>
-	inline valueT xchg(valueT &dst, typename decay<valueT>::type src){
-		auto old = ::std::move(dst);
-		dst = ::std::move(src);
-		return old;
-	}
-
 	template<typename handleT, typename closerT>
 	class stored_handle : private allocator_wrapper_base_for<closerT> {
 	public:
@@ -81,10 +76,10 @@ namespace details_unique_handle {
 			return this->m_h;
 		}
 		handle_type release() noexcept {
-			return ((xchg))(this->m_h, this->as_closer().null());
+			return ((exchange))(this->m_h, this->as_closer().null());
 		}
 		void reset(handle_type h_new) noexcept {
-			const auto h_old = ((xchg))(this->m_h, h_new);
+			const auto h_old = ((exchange))(this->m_h, h_new);
 			if(this->as_closer().is_null(h_old)){
 				return;
 			}
@@ -171,8 +166,7 @@ public:
 	}
 
 	void swap(unique_handle &other) noexcept {
-		using ::std::swap;
-		swap(this->m_sth.as_closer(), other.m_sth.as_closer());
+		((manipulate_allocators))(true_type(), allocator_swap_with(), this->m_sth.as_closer(), other.m_sth.as_closer());
 		this->m_sth.swap(other.m_sth);
 	}
 };

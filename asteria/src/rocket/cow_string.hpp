@@ -19,6 +19,7 @@
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
+#include "utilities.hpp"
 #include "allocator_utilities.hpp"
 
 /* Differences from `std::basic_string`:
@@ -59,22 +60,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 class basic_cow_string;
 
 namespace details_cow_string {
-	template<typename valueT>
-	inline valueT xchg(valueT &dst, typename decay<valueT>::type src){
-		auto old = ::std::move(dst);
-		dst = ::std::move(src);
-		return old;
-	}
-
-	template<typename valueT>
-	inline valueT xmin(valueT lhs, valueT rhs){
-		return ::std::move((lhs <= rhs) ? lhs : rhs);
-	}
-	template<typename valueT>
-	inline valueT xmax(valueT lhs, valueT rhs){
-		return ::std::move((lhs >= rhs) ? lhs : rhs);
-	}
-
 	template<typename charT, typename traitsT>
 	void handle_io_exception(basic_ios<charT, traitsT> &ios){
 		// Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
@@ -154,7 +139,7 @@ namespace details_cow_string {
 			return this->as_allocator();
 		}
 		void do_reset(storage *ptr_new) noexcept {
-			const auto ptr = ((xchg))(this->m_ptr, ptr_new);
+			const auto ptr = ((exchange))(this->m_ptr, ptr_new);
 			if(ptr == nullptr){
 				return;
 			}
@@ -256,7 +241,7 @@ namespace details_cow_string {
 			this->do_reset(ptr);
 		}
 		void assign(storage_handle &&other) noexcept {
-			const auto ptr = ((xchg))(other.m_ptr, nullptr);
+			const auto ptr = ((exchange))(other.m_ptr, nullptr);
 			this->do_reset(ptr);
 		}
 		void swap(storage_handle &other) noexcept {
@@ -546,11 +531,11 @@ namespace details_cow_string {
 			if(s1 == s2){
 				return 0;
 			}
-			const int res = traits_type::compare(s1, s2, ((xmin))(n1, n2));
+			const int res = traits_type::compare(s1, s2, ((min))(n1, n2));
 			return res;
 		}
 		static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept {
-			const int res = traits_type::compare(s1, s2, ((xmin))(n1, n2));
+			const int res = traits_type::compare(s1, s2, ((min))(n1, n2));
 			if(res != 0){
 				return res;
 			}
@@ -711,7 +696,7 @@ private:
 		ROCKET_ASSERT(len <= this->m_len);
 		const auto cap = this->m_sth.check_size(len, cap_add);
 		if((this->m_cap < cap) || (this->m_sth.unique() == false)){
-			this->do_reallocate_no_set_length(len, details_cow_string::xmax((len + len / 2) | 64, cap));
+			this->do_reallocate_no_set_length(len, ((max))((len + len / 2) | 64, cap));
 		}
 		ROCKET_ASSERT(this->m_cap >= cap);
 		const auto ptr = const_cast<pointer>(this->m_ptr);
@@ -731,7 +716,7 @@ private:
 	pointer do_ensure_unique(){
 		if(this->m_sth.unique() == false){
 			const auto len = this->m_len;
-			this->do_reallocate_no_set_length(len, details_cow_string::xmax(len, size_type(1)));
+			this->do_reallocate_no_set_length(len, ((max))(len, size_type(1)));
 			this->do_set_length(len);
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
@@ -754,7 +739,7 @@ private:
 			throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
 			                   static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
-		return details_cow_string::xmin(tlen - tpos, n);
+		return ((min))(tlen - tpos, n);
 	}
 
 	// This has to be generic to allow construction of a string from an array of integers... This is a nasty trick anyway.
@@ -846,7 +831,7 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = details_cow_string::xmin(len - n, to); i + 1 > 0; --i){
+		for(auto i = ((min))(len - n, to); i + 1 > 0; --i){
 			if(pred(this->data() + i)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
@@ -917,7 +902,7 @@ public:
 	}
 	void resize(size_type n, value_type ch){
 		const auto len_old = this->size();
-		const auto len_ex = n - details_cow_string::xmin(len_old, n);
+		const auto len_ex = n - ((min))(len_old, n);
 		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, len_ex);
 		traits_type::assign(wptr, len_ex, ch);
 		this->do_set_length(n);
@@ -934,7 +919,7 @@ public:
 			return;
 		}
 		const auto len = this->size();
-		const auto cap_new = this->m_sth.round_up_capacity(details_cow_string::xmax(len, res_arg));
+		const auto cap_new = this->m_sth.round_up_capacity(((max))(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
 		if((this->m_cap >= cap_new) && this->m_sth.unique()){
 			return;
@@ -1118,9 +1103,9 @@ public:
 	}
 	basic_cow_string & assign(basic_cow_string &&other) noexcept {
 		this->m_sth.assign(::std::move(other.m_sth));
-		this->m_ptr = details_cow_string::xchg(other.m_ptr, shallow().data());
-		this->m_len = details_cow_string::xchg(other.m_len, 0);
-		this->m_cap = details_cow_string::xchg(other.m_cap, 0);
+		this->m_ptr = ((exchange))(other.m_ptr, shallow().data());
+		this->m_len = ((exchange))(other.m_len, size_type(0));
+		this->m_cap = ((exchange))(other.m_cap, size_type(0));
 		return *this;
 	}
 	basic_cow_string & assign(shallow sh) noexcept {
@@ -1310,7 +1295,7 @@ public:
 
 	// N.B. The last parameter is a non-standard extension.
 	size_type copy(pointer s, size_type n, size_type tpos = 0, size_type tn = npos) const {
-		const auto rlen = details_cow_string::xmin(this->do_clamp_substr(tpos, tn), n);
+		const auto rlen = ((min))(this->do_clamp_substr(tpos, tn), n);
 		traits_type::copy(s, this->data() + tpos, rlen);
 		return rlen;
 	}
@@ -1400,7 +1385,7 @@ public:
 		if(this->size() == 0){
 			return npos;
 		}
-		const auto find_end = details_cow_string::xmin(this->size() - 1, to) + 1;
+		const auto find_end = ((min))(this->size() - 1, to) + 1;
 		auto res = size_type(npos);
 		for(;;){
 			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
@@ -2034,7 +2019,7 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 		const auto width = os.width();
 		const auto len = static_cast<streamsize>(str.size());
 		ROCKET_ASSERT(len >= 0);
-		auto len_rem = details_cow_string::xmax(width, len);
+		auto len_rem = ((max))(width, len);
 		// Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
 		auto offset = len - len_rem;
 		if((os.flags() & ios_base::adjustfield) == ios_base::left){
