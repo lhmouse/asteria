@@ -108,6 +108,7 @@ namespace details_cow_string {
 		using storage_allocator = decltype(storage::alloc);
 
 	private:
+		// All blocks other than the first one provide storage for characters, while the first one provides storage for the null termiantor.
 		static constexpr size_type do_get_capacity_of(size_type n_blocks) noexcept {
 			return (n_blocks - 1) * sizeof(storage) / sizeof(value_type);
 		}
@@ -154,7 +155,7 @@ namespace details_cow_string {
 			auto alloc = ::std::move(ptr->alloc);
 			allocator_traits<storage_allocator>::destroy(alloc, ptr);
 #ifdef ROCKET_DEBUG
-			char_traits<char>::assign(reinterpret_cast<char *>(ptr), sizeof(*ptr) * n_blocks, '~');
+			::std::memset(ptr, '~', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::deallocate(alloc, ptr, n_blocks);
 		}
@@ -217,7 +218,7 @@ namespace details_cow_string {
 			auto alloc = this->do_make_storage_allocator();
 			const auto ptr = static_cast<storage *>(allocator_traits<storage_allocator>::allocate(alloc, n_blocks));
 #ifdef ROCKET_DEBUG
-			char_traits<char>::assign(reinterpret_cast<char *>(ptr), sizeof(*ptr) * n_blocks, '*');
+			::std::memset(ptr, '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(alloc, ptr, n_blocks, this->as_allocator());
 			// Copy the string into the new block, then terminate it with a null character.
