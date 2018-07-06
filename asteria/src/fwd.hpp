@@ -57,13 +57,12 @@ template<typename ElementT>
 using Vp_cref = typename std::conditional<std::is_const<ElementT>::value, const rocket::value_ptr<typename std::remove_const<ElementT>::type> &, rocket::value_ptr<ElementT> &>::type;
 
 // Aliases
-using Nullptr             = std::nullptr_t;
-using Boolean             = bool;
-using Signed_integer      = std::int64_t;
-using Unsigned_integer    = std::uint64_t;
-using Double_precision    = double;
-using Cow_string          = rocket::cow_string;
-using Cow_string_cref     = const Cow_string &;
+using Nullptr           = std::nullptr_t;
+using Boolean           = bool;
+using Signed_integer    = std::int64_t;
+using Unsigned_integer  = std::uint64_t;
+using Double_precision  = double;
+using Cow_string        = rocket::cow_string;
 
 template<typename ElementT>
 using Vector = std::vector<ElementT>;

@@ -45,14 +45,14 @@ public:
 		return m_parent_opt;
 	}
 
-	Sp<const Reference> get_named_reference_opt(Cow_string_cref id) const noexcept;
-	std::reference_wrapper<Vp<Reference>> mutate_named_reference(Cow_string_cref id);
+	Sp<const Reference> get_named_reference_opt(const Cow_string &id) const noexcept;
+	std::reference_wrapper<Vp<Reference>> mutate_named_reference(const Cow_string &id);
 
 	void defer_callback(Sp<const Function_base> &&callback);
 };
 
-extern void prepare_function_scope(Sp_cref<Scope> scope, Cow_string_cref source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args);
-extern void prepare_function_scope_lexical(Sp_cref<Scope> scope, Cow_string_cref source, const Vector<Cow_string> &params);
+extern void prepare_function_scope(Sp_cref<Scope> scope, const Cow_string &source, const Vector<Cow_string> &params, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args);
+extern void prepare_function_scope_lexical(Sp_cref<Scope> scope, const Cow_string &source, const Vector<Cow_string> &params);
 
 }
 

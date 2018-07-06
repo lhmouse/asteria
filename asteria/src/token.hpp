@@ -163,7 +163,7 @@ public:
 	}
 };
 
-extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, Cow_string_cref str);
+extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str);
 
 }
 
