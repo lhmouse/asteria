@@ -40,12 +40,7 @@ class Value;
 class Reference;
 class Scope;
 
-// Aliases
-template<typename ElementT>
-using Vector = std::vector<ElementT>;
-template<typename ElementT>
-using Dictionary = std::unordered_map<rocket::cow_string, ElementT, rocket::cow_string::hash, rocket::cow_string::equal_to>;
-
+// TODO These will be removed.
 template<typename ElementT>
 using Sp = std::shared_ptr<ElementT>;
 template<typename ElementT>
@@ -61,14 +56,20 @@ using Vp = rocket::value_ptr<ElementT>;
 template<typename ElementT>
 using Vp_cref = typename std::conditional<std::is_const<ElementT>::value, const rocket::value_ptr<typename std::remove_const<ElementT>::type> &, rocket::value_ptr<ElementT> &>::type;
 
-// Complementary data types used internally
+// Aliases
 using Nullptr             = std::nullptr_t;
 using Boolean             = bool;
 using Signed_integer      = std::int64_t;
 using Unsigned_integer    = std::uint64_t;
 using Double_precision    = double;
 using Cow_string          = rocket::cow_string;
-using Cow_string_cref     = const rocket::cow_string &;
+using Cow_string_cref     = const Cow_string &;
+
+template<typename ElementT>
+using Vector = std::vector<ElementT>;
+template<typename ElementT>
+using Dictionary = std::unordered_map<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
+
 using Function_prototype  = void (Vp<Reference> &, Vp<Reference> &&, Vector<Vp<Reference>> &&);
 
 // Data types exposed to users
@@ -77,8 +78,8 @@ using D_boolean   = Boolean;
 using D_integer   = Signed_integer;
 using D_double    = Double_precision;
 using D_string    = Cow_string;
-using D_opaque    = Vp<Opaque_base>;
-using D_function  = Sp<const Function_base>;
+using D_opaque    = std::shared_ptr<Opaque_base>;
+using D_function  = std::shared_ptr<const Function_base>;
 using D_array     = Vector<Vp<Value>>;
 using D_object    = Dictionary<Vp<Value>>;
 

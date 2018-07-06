@@ -54,11 +54,11 @@ namespace {
 	private:
 		Cow_string m_self_id;
 		Cow_string m_source;
-		Vector<Vp<Reference>> m_args;
+		Vector<Vp<Reference>> m_var_args;
 
 	public:
-		Argument_getter(Cow_string_cref self_id, Cow_string_cref location, Vector<Vp<Reference>> &&args)
-			: m_self_id(self_id), m_source(location), m_args(std::move(args))
+		Argument_getter(Cow_string_cref self_id, Cow_string_cref location, Vector<Vp<Reference>> &&var_args)
+			: m_self_id(self_id), m_source(location), m_var_args(std::move(var_args))
 		{ }
 
 	public:
@@ -70,7 +70,7 @@ namespace {
 			case 0: {
 				// Return the number of args.
 				Vp<Value> value;
-				set_value(value, D_integer(static_cast<std::ptrdiff_t>(m_args.size())));
+				set_value(value, D_integer(static_cast<std::ptrdiff_t>(m_var_args.size())));
 				Reference::S_temporary_value ref_t = { std::move(value) };
 				return set_reference(result_out, std::move(ref_t)); }
 
@@ -82,15 +82,15 @@ namespace {
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 				const auto index = index_var->get<D_integer>();
-				auto normalized_index = (index >= 0) ? index : D_integer(Unsigned_integer(index) + m_args.size());
+				auto normalized_index = (index >= 0) ? index : D_integer(Unsigned_integer(index) + m_var_args.size());
 				if(normalized_index < 0){
-					ASTERIA_DEBUG_LOG("Argument subscript falls before the front: index = ", index, ", size = ", m_args.size());
+					ASTERIA_DEBUG_LOG("Argument subscript falls before the front: index = ", index, ", size = ", m_var_args.size());
 					return set_reference(result_out, nullptr);
-				} else if(normalized_index >= D_integer(m_args.size())){
-					ASTERIA_DEBUG_LOG("Argument subscript falls after the back: index = ", index, ", size = ", m_args.size());
+				} else if(normalized_index >= D_integer(m_var_args.size())){
+					ASTERIA_DEBUG_LOG("Argument subscript falls after the back: index = ", index, ", size = ", m_var_args.size());
 					return set_reference(result_out, nullptr);
 				}
-				const auto &arg = m_args.at(static_cast<std::size_t>(normalized_index));
+				const auto &arg = m_var_args.at(static_cast<std::size_t>(normalized_index));
 				return copy_reference(result_out, arg); }
 
 			default:
