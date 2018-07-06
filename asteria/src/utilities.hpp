@@ -66,7 +66,7 @@ public:
 	template<typename ValueT>
 	Logger & operator,(const ValueT &value) noexcept
 	try {
-		do_put(value);
+		this->do_put(value);
 		return *this;
 	} catch(...){
 		return *this;
