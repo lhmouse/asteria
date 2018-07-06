@@ -8,6 +8,7 @@
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
 #include <memory> // std::addressof()
 #include <new> // placement new
+#include <typeinfo>
 #include "assert.hpp"
 #include "throw.hpp"
 
@@ -17,8 +18,6 @@ using ::std::common_type;
 using ::std::is_convertible;
 using ::std::decay;
 using ::std::enable_if;
-using ::std::is_const;
-using ::std::remove_cv;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_assignable;
 using ::std::is_nothrow_copy_constructible;
@@ -30,6 +29,7 @@ using ::std::integral_constant;
 using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
+using ::std::type_info;
 
 template<typename ...elementsT>
 class variant;
@@ -139,8 +139,14 @@ namespace details_variant {
 	}
 
 	template<typename resultT, typename sourceT>
-	inline resultT punning_cast(sourceT *ptr) noexcept {
-		return static_cast<resultT>(static_cast<typename conditional<is_const<sourceT>::value, const void, void>::type *>(ptr));
+	inline const resultT * pun(const sourceT *ptr) noexcept {
+		const auto vptr = static_cast<const void *>(ptr);
+		return static_cast<const resultT *>(vptr);
+	}
+	template<typename resultT, typename sourceT>
+	inline resultT * pun(sourceT *ptr) noexcept {
+		const auto vptr = static_cast<void *>(ptr);
+		return static_cast<resultT *>(vptr);
 	}
 
 	template<typename ...elementsT>
@@ -155,7 +161,7 @@ namespace details_variant {
 		template<typename storageT, typename visitorT, typename ...paramsT>
 		void operator()(storageT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const {
 			if(expect == 0){
-				::std::forward<visitorT>(visitor)(punning_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
+				::std::forward<visitorT>(visitor)(pun<firstT>(stor), ::std::forward<paramsT>(params)...);
 			} else {
 				visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
 			}
@@ -165,31 +171,37 @@ namespace details_variant {
 	struct visitor_copy_construct {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, const sourceT *src) const {
-			construct<>(ptr, *punning_cast<const elementT *>(src));
+			construct<>(ptr, *pun<elementT>(src));
 		}
 	};
 	struct visitor_move_construct {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, sourceT *src) const {
-			construct<>(ptr, ::std::move(*punning_cast<elementT *>(src)));
+			construct<>(ptr, ::std::move(*pun<elementT>(src)));
 		}
 	};
 	struct visitor_copy_assign {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, const sourceT *src) const {
-			*ptr = *punning_cast<const elementT *>(src);
+			*ptr = *pun<elementT>(src);
 		}
 	};
 	struct visitor_move_assign {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, sourceT *src) const {
-			*ptr = ::std::move(*punning_cast<elementT *>(src));
+			*ptr = ::std::move(*pun<elementT>(src));
 		}
 	};
 	struct visitor_destruct {
 		template<typename elementT>
 		void operator()(elementT *ptr) const {
 			destruct<>(ptr);
+		}
+	};
+	struct visitor_get_type_info {
+		template<typename elementT>
+		void operator()(const elementT *ptr, const type_info **ti) const {
+			*ti = ::std::addressof(typeid(*ptr));
 		}
 	};
 	struct visitor_wrapper {
@@ -202,7 +214,7 @@ namespace details_variant {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, sourceT *src) const {
 			using ::std::swap;
-			swap(*ptr, *punning_cast<elementT *>(src));
+			swap(*ptr, *pun<elementT>(src));
 		}
 	};
 }
@@ -275,7 +287,7 @@ public:
 		// Value-initialize the first element.
 		constexpr unsigned eindex = 0;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()));
+		details_variant::construct(details_variant::pun<etype>(this->do_get_front_buffer()));
 		this->m_index = 0;
 	}
 	template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
@@ -285,7 +297,7 @@ public:
 		// This overload enables construction using the candidate of a nested variant.
 		constexpr unsigned eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_front_buffer()), ::std::forward<elementT>(elem));
+		details_variant::construct(details_variant::pun<etype>(this->do_get_front_buffer()), ::std::forward<elementT>(elem));
 		this->m_index = eindex;
 	}
 	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
@@ -311,10 +323,10 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
 			// Assign the active element using perfect forwarding.
-			*details_variant::punning_cast<etype *>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
+			*details_variant::pun<etype>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
 		} else {
 			// Construct the active element using perfect forwarding, then destroy the old element.
-			details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
+			details_variant::construct(details_variant::pun<etype>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
 			this->do_set_up_new_buffer(eindex);
 		}
 		return *this;
@@ -360,13 +372,20 @@ public:
 		ROCKET_ASSERT(this->m_index < sizeof...(elementsT));
 		return this->m_index;
 	}
+	const type_info & type() const noexcept {
+		const type_info *ti = nullptr;
+		details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
+		                                              details_variant::visitor_get_type_info(), &ti);
+		ROCKET_ASSERT(ti);
+		return *ti;
+	}
 	template<typename elementT>
 	const elementT * try_get() const noexcept {
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		return details_variant::punning_cast<const elementT *>(this->do_get_front_buffer());
+		return details_variant::pun<elementT>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
 	elementT * try_get() noexcept {
@@ -374,15 +393,15 @@ public:
 		if(this->m_index != eindex){
 			return nullptr;
 		}
-		return details_variant::punning_cast<elementT *>(this->do_get_front_buffer());
+		return details_variant::pun<elementT>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
 	const elementT & get() const {
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the index of the type currently active is `%d`.",
-			                       static_cast<int>(eindex), static_cast<int>(this->index()));
+			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;
 	}
@@ -391,8 +410,8 @@ public:
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->try_get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index of the type requested is `%d`, but the index of the type currently active is `%d`.",
-			                       static_cast<int>(eindex), static_cast<int>(this->index()));
+			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;
 	}
@@ -403,10 +422,10 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		if(this->m_index == eindex){
 			// Assign the active element using perfect forwarding.
-			*details_variant::punning_cast<etype *>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
+			*details_variant::pun<etype>(this->do_get_front_buffer()) = ::std::forward<elementT>(elem);
 		} else {
 			// Construct the active element using perfect forwarding, then destroy the old element.
-			details_variant::construct(details_variant::punning_cast<etype *>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
+			details_variant::construct(details_variant::pun<etype>(this->do_get_back_buffer()), ::std::forward<elementT>(elem));
 			this->do_set_up_new_buffer(eindex);
 		}
 	}
