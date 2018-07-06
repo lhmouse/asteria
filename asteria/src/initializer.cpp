@@ -17,16 +17,16 @@ Initializer::~Initializer() = default;
 
 Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope){
 	// Bind elements recursively.
-	const auto type = init.get_type();
+	const auto type = init.which();
 	switch(type){
-	case Initializer::type_assignment_init: {
-		const auto &cand = init.get<Initializer::S_assignment_init>();
+	case Initializer::index_assignment_init: {
+		const auto &cand = init.as<Initializer::S_assignment_init>();
 		auto bound_expr = bind_expression(cand.expr, scope);
 		Initializer::S_assignment_init init_ai = { std::move(bound_expr) };
 		return std::move(init_ai); }
 
-	case Initializer::type_bracketed_init_list: {
-		const auto &cand = init.get<Initializer::S_bracketed_init_list>();
+	case Initializer::index_bracketed_init_list: {
+		const auto &cand = init.as<Initializer::S_bracketed_init_list>();
 		Vector<Initializer> bound_elems;
 		bound_elems.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
@@ -36,8 +36,8 @@ Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope
 		Initializer::S_bracketed_init_list init_brkt = { std::move(bound_elems) };
 		return std::move(init_brkt); }
 
-	case Initializer::type_braced_init_list: {
-		const auto &cand = init.get<Initializer::S_braced_init_list>();
+	case Initializer::index_braced_init_list: {
+		const auto &cand = init.as<Initializer::S_braced_init_list>();
 		Dictionary<Initializer> bound_pairs;
 		bound_pairs.reserve(cand.pairs.size());
 		for(const auto &pair : cand.pairs){
@@ -53,15 +53,15 @@ Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope
 	}
 }
 void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp_cref<const Scope> scope){
-	const auto type = init.get_type();
+	const auto type = init.which();
 	switch(type){
-	case Initializer::type_assignment_init: {
-		const auto &cand = init.get<Initializer::S_assignment_init>();
+	case Initializer::index_assignment_init: {
+		const auto &cand = init.as<Initializer::S_assignment_init>();
 		evaluate_expression(result_out, cand.expr, scope);
 		return; }
 
-	case Initializer::type_bracketed_init_list: {
-		const auto &cand = init.get<Initializer::S_bracketed_init_list>();
+	case Initializer::index_bracketed_init_list: {
+		const auto &cand = init.as<Initializer::S_bracketed_init_list>();
 		Vp<Value> value;
 		D_array array;
 		array.reserve(cand.elems.size());
@@ -75,8 +75,8 @@ void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp
 		set_reference(result_out, std::move(ref_t));
 		return; }
 
-	case Initializer::type_braced_init_list: {
-		const auto &cand = init.get<Initializer::S_braced_init_list>();
+	case Initializer::index_braced_init_list: {
+		const auto &cand = init.as<Initializer::S_braced_init_list>();
 		Vp<Value> value;
 		D_object object;
 		object.reserve(cand.pairs.size());

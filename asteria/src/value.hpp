@@ -53,36 +53,25 @@ public:
 	Value(const Value &) = delete;
 	Value & operator=(const Value &) = delete;
 
-private:
-	ROCKET_NORETURN void do_throw_type_mismatch(Type expect) const;
-
 public:
-	Type get_type() const noexcept {
+	Type which() const noexcept {
 		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
 	ExpectT * get_opt() noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & get() const {
-		const auto ptr = m_variant.try_get<ExpectT>();
-		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
-		}
-		return *ptr;
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT & get(){
-		const auto ptr = m_variant.try_get<ExpectT>();
-		if(!ptr){
-			do_throw_type_mismatch(static_cast<Type>(Variant::index_of<ExpectT>::value));
-		}
-		return *ptr;
+	ExpectT & as(){
+		return m_variant.as<ExpectT>();
 	}
 	template<typename CandidateT>
 	void set(CandidateT &&cand){
@@ -100,7 +89,6 @@ extern std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_op
 
 extern void allocate_value(Vp<Value> &value_out);
 extern void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt);
-extern void wipe_out_value(Sp_cref<Value> value_opt) noexcept;
 extern bool test_value(Sp_cref<const Value> value_opt) noexcept;
 extern Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept;
 

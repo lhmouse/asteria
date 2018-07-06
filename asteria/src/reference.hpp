@@ -66,13 +66,13 @@ class Reference {
 	friend Stored_reference;
 
 public:
-	enum Type : signed char {
-		type_null             = -1,
-		type_constant         =  0,
-		type_temporary_value  =  1,
-		type_variable         =  2,
-		type_array_element    =  3,
-		type_object_member    =  4,
+	enum Index : signed char {
+		index_null             = -1,
+		index_constant         =  0,
+		index_temporary_value  =  1,
+		index_variable         =  2,
+		index_array_element    =  3,
+		index_object_member    =  4,
 	};
 	struct S_constant {
 		Sp<const Value> src_opt;
@@ -113,24 +113,24 @@ public:
 	Reference & operator=(const Reference &) = delete;
 
 public:
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+	Index which() const noexcept {
+		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
 	ExpectT * get_opt() noexcept {
-		return m_variant.try_get<ExpectT>();
-	}
-	template<typename ExpectT>
-	const ExpectT & get() const {
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT & get(){
-		return m_variant.get<ExpectT>();
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
+	}
+	template<typename ExpectT>
+	ExpectT & as() {
+		return m_variant.as<ExpectT>();
 	}
 	template<typename CandidateT>
 	void set(CandidateT &&cand){
@@ -138,7 +138,7 @@ public:
 	}
 };
 
-extern Reference::Type get_reference_type(Sp_cref<const Reference> reference_opt) noexcept;
+extern Reference::Index get_reference_type(Sp_cref<const Reference> reference_opt) noexcept;
 
 extern void dump_reference(std::ostream &os, Sp_cref<const Reference> reference_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
 //extern std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt);

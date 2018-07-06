@@ -88,5 +88,5 @@ int main(){
 	const auto sum_ref = scope->get_named_reference_opt(D_string::shallow("sum"));
 	const auto sum_var = read_reference_opt(sum_ref);
 	ASTERIA_TEST_CHECK(sum_var);
-	ASTERIA_TEST_CHECK(sum_var->get<D_integer>() == 658);
+	ASTERIA_TEST_CHECK(sum_var->as<D_integer>() == 658);
 }

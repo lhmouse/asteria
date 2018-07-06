@@ -11,10 +11,10 @@ namespace Asteria {
 
 class Initializer {
 public:
-	enum Type : signed char {
-		type_assignment_init      = 0,
-		type_bracketed_init_list  = 1,
-		type_braced_init_list     = 2,
+	enum Index : signed char {
+		index_assignment_init      = 0,
+		index_bracketed_init_list  = 1,
+		index_braced_init_list     = 2,
 	};
 	struct S_assignment_init {
 		Vector<Expression_node> expr;
@@ -44,16 +44,16 @@ public:
 	~Initializer();
 
 public:
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+	Index which() const noexcept {
+		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & get() const {
-		return m_variant.get<ExpectT>();
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
 	}
 };
 

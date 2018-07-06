@@ -90,13 +90,13 @@ public:
 		punctuator_semicolon   = 49, // ;
 	};
 
-	enum Type : signed char {
-		type_keyword          = 0,
-		type_punctuator       = 1,
-		type_identifier       = 2,
-		type_integer_literal  = 3,
-		type_double_literal   = 4,
-		type_string_literal   = 5,
+	enum Index : signed char {
+		index_keyword          = 0,
+		index_punctuator       = 1,
+		index_identifier       = 2,
+		index_integer_literal  = 3,
+		index_double_literal   = 4,
+		index_string_literal   = 5,
 	};
 	struct S_keyword {
 		Keyword keyword;
@@ -150,16 +150,17 @@ public:
 	std::size_t get_source_length() const noexcept {
 		return m_source_length;
 	}
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+
+	Index which() const noexcept {
+		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & get() const {
-		return m_variant.get<ExpectT>();
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
 	}
 };
 

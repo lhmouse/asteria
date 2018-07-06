@@ -78,17 +78,17 @@ int main(){
 	set_value(condition->mutate_value(), D_boolean(false));
 	Vp<Reference> result;
 	evaluate_expression(result, expr, scope);
-	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);
+	ASTERIA_TEST_CHECK(dval->get_value_opt()->as<D_double>() == 2.5);
+	ASTERIA_TEST_CHECK(cval->get_value_opt()->as<D_integer>() == 10);
 	auto rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rval->get_value_opt()->get<D_array>().at(1).get() == rptr.get());
-	ASTERIA_TEST_CHECK(rptr->get<D_double>() == 1.75);
+	ASTERIA_TEST_CHECK(rval->get_value_opt()->as<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rptr->as<D_double>() == 1.75);
 
 	set_value(condition->mutate_value(), D_boolean(true));
 	evaluate_expression(result, expr, scope);
-	ASTERIA_TEST_CHECK(dval->get_value_opt()->get<D_double>() == 2.5);
-	ASTERIA_TEST_CHECK(cval->get_value_opt()->get<D_integer>() == 10);
+	ASTERIA_TEST_CHECK(dval->get_value_opt()->as<D_double>() == 2.5);
+	ASTERIA_TEST_CHECK(cval->get_value_opt()->as<D_integer>() == 10);
 	rptr = read_reference_opt(result);
-	ASTERIA_TEST_CHECK(rval->get_value_opt()->get<D_array>().at(1).get() == rptr.get());
-	ASTERIA_TEST_CHECK(rptr->get<D_string>() == "hello,hello,hello,hello,hello,hello,hello,hello,hello,hello,");
+	ASTERIA_TEST_CHECK(rval->get_value_opt()->as<D_array>().at(1).get() == rptr.get());
+	ASTERIA_TEST_CHECK(rptr->as<D_string>() == "hello,hello,hello,hello,hello,hello,hello,hello,hello,hello,");
 }

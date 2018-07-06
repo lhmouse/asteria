@@ -32,20 +32,20 @@ public:
 		return m_value_opt.index() == 1;
 	}
 	const Reference::Variant * get_opt() const noexcept {
-		return m_value_opt.try_get<Reference::Variant>();
+		return m_value_opt.get<Reference::Variant>();
 	}
 	Reference::Variant * get_opt() noexcept {
-		return m_value_opt.try_get<Reference::Variant>();
+		return m_value_opt.get<Reference::Variant>();
 	}
 	const Reference::Variant & get() const {
-		return m_value_opt.get<Reference::Variant>();
+		return m_value_opt.as<Reference::Variant>();
 	}
 	Reference::Variant & get(){
-		return m_value_opt.get<Reference::Variant>();
+		return m_value_opt.as<Reference::Variant>();
 	}
 	template<typename CandidateT>
 	void set(CandidateT &&cand){
-		m_value_opt = std::forward<CandidateT>(cand);
+		m_value_opt.set(std::forward<CandidateT>(cand));
 	}
 };
 

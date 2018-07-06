@@ -81,7 +81,7 @@ namespace {
 					ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `", m_self_id, "` must be an `integer`.");
 				}
 				// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
-				const auto index = index_var->get<D_integer>();
+				const auto index = index_var->as<D_integer>();
 				auto normalized_index = (index >= 0) ? index : D_integer(Unsigned_integer(index) + m_var_args.size());
 				if(normalized_index < 0){
 					ASTERIA_DEBUG_LOG("Argument subscript falls before the front: index = ", index, ", size = ", m_var_args.size());

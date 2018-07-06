@@ -48,7 +48,7 @@ int main(){
 	copy_value(copy, root);
 
 	set_value(temp, D_string("my string"));
-	copy->get<D_object>().emplace(D_string::shallow("new"), std::move(temp));
+	copy->as<D_object>().emplace(D_string::shallow("new"), std::move(temp));
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

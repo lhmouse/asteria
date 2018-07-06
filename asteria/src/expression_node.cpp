@@ -84,15 +84,15 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 
 namespace {
 	Expression_node do_bind_expression_node(const Expression_node &node, Sp_cref<const Scope> scope){
-		const auto type = node.get_type();
+		const auto type = node.which();
 		switch(type){
-		case Expression_node::type_literal: {
-			const auto &cand = node.get<Expression_node::S_literal>();
+		case Expression_node::index_literal: {
+			const auto &cand = node.as<Expression_node::S_literal>();
 			// Copy it as is.
 			return cand; }
 
-		case Expression_node::type_named_reference: {
-			const auto &cand = node.get<Expression_node::S_named_reference>();
+		case Expression_node::index_named_reference: {
+			const auto &cand = node.as<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
 			Sp<const Reference> source_ref;
 			auto scope_cur = scope;
@@ -116,23 +116,23 @@ namespace {
 			Expression_node::S_bound_reference node_br = { std::move(bound_ref) };
 			return std::move(node_br); }
 
-		case Expression_node::type_bound_reference: {
-			const auto &cand = node.get<Expression_node::S_bound_reference>();
+		case Expression_node::index_bound_reference: {
+			const auto &cand = node.as<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, cand.ref_opt);
 			Expression_node::S_bound_reference node_br = { std::move(bound_ref) };
 			return std::move(node_br); }
 
-		case Expression_node::type_subexpression: {
-			const auto &cand = node.get<Expression_node::S_subexpression>();
+		case Expression_node::index_subexpression: {
+			const auto &cand = node.as<Expression_node::S_subexpression>();
 			// Bind the subexpression recursively.
 			auto bound_expr = bind_expression(cand.subexpr, scope);
 			Expression_node::S_subexpression node_s = { std::move(bound_expr) };
 			return std::move(node_s); }
 
-		case Expression_node::type_lambda_definition: {
-			const auto &cand = node.get<Expression_node::S_lambda_definition>();
+		case Expression_node::index_lambda_definition: {
+			const auto &cand = node.as<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params);
@@ -140,20 +140,20 @@ namespace {
 			Expression_node::S_lambda_definition node_l = { cand.location, cand.params, std::move(bound_body) };
 			return std::move(node_l); }
 
-		case Expression_node::type_branch: {
-			const auto &cand = node.get<Expression_node::S_branch>();
+		case Expression_node::index_branch: {
+			const auto &cand = node.as<Expression_node::S_branch>();
 			// Bind both branches recursively.
 			auto bound_branch_true = bind_expression(cand.branch_true, scope);
 			auto bound_branch_false = bind_expression(cand.branch_false, scope);
 			Expression_node::S_branch node_b = { std::move(bound_branch_true), std::move(bound_branch_false) };
 			return std::move(node_b); }
 
-		case Expression_node::type_function_call: {
-			const auto &cand = node.get<Expression_node::S_function_call>();
+		case Expression_node::index_function_call: {
+			const auto &cand = node.as<Expression_node::S_function_call>();
 			return cand; }
 
-		case Expression_node::type_operator_rpn: {
-			const auto &cand = node.get<Expression_node::S_operator_rpn>();
+		case Expression_node::index_operator_rpn: {
+			const auto &cand = node.as<Expression_node::S_operator_rpn>();
 			return cand; }
 
 		default:
@@ -404,10 +404,10 @@ namespace {
 	}
 
 	void do_evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, const Expression_node &node, Sp_cref<const Scope> scope){
-		const auto type = node.get_type();
+		const auto type = node.which();
 		switch(type){
-		case Expression_node::type_literal: {
-			const auto &cand = node.get<Expression_node::S_literal>();
+		case Expression_node::index_literal: {
+			const auto &cand = node.as<Expression_node::S_literal>();
 			// Create an constant reference to the constant.
 			Vp<Reference> result_ref;
 			Reference::S_constant ref_k = { cand.src_opt };
@@ -415,8 +415,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(result_ref));
 			break; }
 
-		case Expression_node::type_named_reference: {
-			const auto &cand = node.get<Expression_node::S_named_reference>();
+		case Expression_node::index_named_reference: {
+			const auto &cand = node.as<Expression_node::S_named_reference>();
 			// Look up the reference in the enclosing scope.
 			Sp<const Reference> source_ref;
 			auto scope_cur = scope;
@@ -436,8 +436,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(result_ref));
 			break; }
 
-		case Expression_node::type_bound_reference: {
-			const auto &cand = node.get<Expression_node::S_bound_reference>();
+		case Expression_node::index_bound_reference: {
+			const auto &cand = node.as<Expression_node::S_bound_reference>();
 			// Copy the reference bound.
 			Vp<Reference> bound_ref;
 			copy_reference(bound_ref, cand.ref_opt);
@@ -445,8 +445,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(bound_ref));
 			break; }
 
-		case Expression_node::type_subexpression: {
-			const auto &cand = node.get<Expression_node::S_subexpression>();
+		case Expression_node::index_subexpression: {
+			const auto &cand = node.as<Expression_node::S_subexpression>();
 			// Evaluate the subexpression recursively.
 			Vp<Reference> result_ref;
 			evaluate_expression(result_ref, cand.subexpr, scope);
@@ -454,8 +454,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(result_ref));
 			break; }
 
-		case Expression_node::type_lambda_definition: {
-			const auto &cand = node.get<Expression_node::S_lambda_definition>();
+		case Expression_node::index_lambda_definition: {
+			const auto &cand = node.as<Expression_node::S_lambda_definition>();
 			// Bind the function body onto the current scope.
 			const auto scope_lexical = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params);
@@ -471,8 +471,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(result_ref));
 			break; }
 
-		case Expression_node::type_branch: {
-			const auto &cand = node.get<Expression_node::S_branch>();
+		case Expression_node::index_branch: {
+			const auto &cand = node.as<Expression_node::S_branch>();
 			// Pop the condition off the stack.
 			auto condition_ref = do_pop_reference(stack_inout);
 			// Pick a branch basing on the condition.
@@ -489,8 +489,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(result_ref));
 			break; }
 
-		case Expression_node::type_function_call: {
-			const auto &cand = node.get<Expression_node::S_function_call>();
+		case Expression_node::index_function_call: {
+			const auto &cand = node.as<Expression_node::S_function_call>();
 			// Pop the function off the stack.
 			auto callee_ref = do_pop_reference(stack_inout);
 			const auto callee_var = read_reference_opt(callee_ref);
@@ -499,7 +499,7 @@ namespace {
 			if(callee_type != Value::type_function){
 				ASTERIA_THROW_RUNTIME_ERROR("Only functions can be called, while the operand has type `", get_type_name(callee_type), "`.");
 			}
-			const auto &callee = callee_var->get<D_function>();
+			const auto &callee = callee_var->as<D_function>();
 			ROCKET_ASSERT(callee);
 			// Allocate the argument vector. There will be no fewer arguments than params.
 			Vector<Vp<Reference>> args;
@@ -512,11 +512,11 @@ namespace {
 			// Get the `this` reference.
 			Vp<Reference> this_ref;
 			const auto callee_ref_type = get_reference_type(callee_ref);
-			if(callee_ref_type == Reference::type_array_element){
-				auto &array = callee_ref->get<Reference::S_array_element>();
+			if(callee_ref_type == Reference::index_array_element){
+				auto &array = callee_ref->as<Reference::S_array_element>();
 				this_ref = std::move(array.parent_opt);
-			} else if(callee_ref_type == Reference::type_object_member){
-				auto &object = callee_ref->get<Reference::S_object_member>();
+			} else if(callee_ref_type == Reference::index_object_member){
+				auto &object = callee_ref->as<Reference::S_object_member>();
 				this_ref = std::move(object.parent_opt);
 			}
 			// Call the function and push the result as is.
@@ -524,8 +524,8 @@ namespace {
 			do_push_reference(stack_inout, std::move(callee_ref));
 			break; }
 
-		case Expression_node::type_operator_rpn: {
-			const auto &cand = node.get<Expression_node::S_operator_rpn>();
+		case Expression_node::index_operator_rpn: {
+			const auto &cand = node.as<Expression_node::S_operator_rpn>();
 			switch(cand.op){
 			case Expression_node::operator_postfix_inc: {
 				// Pop the operand off the stack.
@@ -535,11 +535,11 @@ namespace {
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto lhs_type = get_value_type(lhs_var);
 				if(lhs_type == Value::type_integer){
-					const auto lhs = lhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
 					do_set_result(lhs_ref, true, do_add(lhs, D_integer(1)));
 					do_set_result(lhs_ref, false, lhs);
 				} else if(lhs_type == Value::type_double){
-					const auto lhs = lhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
 					do_set_result(lhs_ref, true, do_add(lhs, D_double(1)));
 					do_set_result(lhs_ref, false, lhs);
 				} else {
@@ -556,11 +556,11 @@ namespace {
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto lhs_type = get_value_type(lhs_var);
 				if(lhs_type == Value::type_integer){
-					const auto lhs = lhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
 					do_set_result(lhs_ref, true, do_subtract(lhs, D_integer(1)));
 					do_set_result(lhs_ref, false, lhs);
 				} else if(lhs_type == Value::type_double){
-					const auto lhs = lhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
 					do_set_result(lhs_ref, true, do_subtract(lhs, D_double(1)));
 					do_set_result(lhs_ref, false, lhs);
 				} else {
@@ -578,10 +578,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
-					Reference::S_array_element ref_a = { std::move(lhs_ref), rhs_var->get<D_integer>() };
+					Reference::S_array_element ref_a = { std::move(lhs_ref), rhs_var->as<D_integer>() };
 					rhs_ref->set(std::move(ref_a));
 				} else if(rhs_type == Value::type_string){
-					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->get<D_string>() };
+					Reference::S_object_member ref_o = { std::move(lhs_ref), rhs_var->as<D_string>() };
 					rhs_ref->set(std::move(ref_o));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Values having type `", get_type_name(rhs_type), "` cannot be used as subscripts.");
@@ -596,10 +596,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(rhs_ref, cand.assign, rhs);
 				} else if(rhs_type == Value::type_double){
-					const auto rhs = rhs_var->get<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(rhs_ref, cand.assign, rhs);
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
@@ -614,10 +614,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(rhs_ref, cand.assign, do_negate(rhs));
 				} else if(rhs_type == Value::type_double){
-					const auto rhs = rhs_var->get<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(rhs_ref, cand.assign, do_negate(rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
@@ -632,10 +632,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_boolean){
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(rhs_ref, cand.assign, do_logical_not(rhs));
 				} else if(rhs_type == Value::type_integer){
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(rhs_ref, cand.assign, do_bitwise_not(rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
@@ -661,10 +661,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(rhs_ref, true, do_add(rhs, D_integer(1)));
 				} else if(rhs_type == Value::type_double){
-					const auto rhs = rhs_var->get<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(rhs_ref, true, do_add(rhs, D_double(1)));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
@@ -680,10 +680,10 @@ namespace {
 				const auto rhs_var = read_reference_opt(rhs_ref);
 				const auto rhs_type = get_value_type(rhs_var);
 				if(rhs_type == Value::type_integer){
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(rhs_ref, true, do_subtract(rhs, D_integer(1)));
 				} else if(rhs_type == Value::type_double){
-					const auto rhs = rhs_var->get<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(rhs_ref, true, do_subtract(rhs, D_double(1)));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(rhs_type), "` is undefined.");
@@ -813,20 +813,20 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_add(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
-					const auto lhs = lhs_var->get<D_double>();
-					const auto rhs = rhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(lhs_ref, cand.assign, do_add(lhs, rhs));
 				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_string)){
-					const auto lhs = lhs_var->get<D_string>();
-					const auto rhs = rhs_var->get<D_string>();
+					const auto lhs = lhs_var->as<D_string>();
+					const auto rhs = rhs_var->as<D_string>();
 					do_set_result(lhs_ref, cand.assign, do_concatenate(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -845,16 +845,16 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_subtract(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
-					const auto lhs = lhs_var->get<D_double>();
-					const auto rhs = rhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(lhs_ref, cand.assign, do_subtract(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -874,24 +874,24 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_multiply(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
-					const auto lhs = lhs_var->get<D_double>();
-					const auto rhs = rhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(lhs_ref, cand.assign, do_multiply(lhs, rhs));
 				} else if((lhs_type == Value::type_string) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_string>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_string>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_duplicate(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_string)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_string>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_string>();
 					do_set_result(lhs_ref, cand.assign, do_duplicate(rhs, lhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -909,12 +909,12 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_divide(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
-					const auto lhs = lhs_var->get<D_double>();
-					const auto rhs = rhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(lhs_ref, cand.assign, do_divide(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -932,12 +932,12 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_modulo(lhs, rhs));
 				} else if((lhs_type == Value::type_double) && (rhs_type == Value::type_double)){
-					const auto lhs = lhs_var->get<D_double>();
-					const auto rhs = rhs_var->get<D_double>();
+					const auto lhs = lhs_var->as<D_double>();
+					const auto rhs = rhs_var->as<D_double>();
 					do_set_result(lhs_ref, cand.assign, do_modulo(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -957,8 +957,8 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_shift_left_logical(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -978,8 +978,8 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_shift_right_logical(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -1000,8 +1000,8 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_shift_left_arithmetic(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -1021,8 +1021,8 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_shift_right_arithmetic(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -1040,12 +1040,12 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_and(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_bitwise_and(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -1063,12 +1063,12 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_or(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_bitwise_or(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");
@@ -1086,12 +1086,12 @@ namespace {
 				const auto lhs_type = get_value_type(lhs_var);
 				const auto rhs_type = get_value_type(rhs_var);
 				if((lhs_type == Value::type_boolean) && (rhs_type == Value::type_boolean)){
-					const auto lhs = lhs_var->get<D_boolean>();
-					const auto rhs = rhs_var->get<D_boolean>();
+					const auto lhs = lhs_var->as<D_boolean>();
+					const auto rhs = rhs_var->as<D_boolean>();
 					do_set_result(lhs_ref, cand.assign, do_logical_xor(lhs, rhs));
 				} else if((lhs_type == Value::type_integer) && (rhs_type == Value::type_integer)){
-					const auto lhs = lhs_var->get<D_integer>();
-					const auto rhs = rhs_var->get<D_integer>();
+					const auto lhs = lhs_var->as<D_integer>();
+					const auto rhs = rhs_var->as<D_integer>();
 					do_set_result(lhs_ref, cand.assign, do_bitwise_xor(lhs, rhs));
 				} else {
 					ASTERIA_THROW_RUNTIME_ERROR("Operation `", get_operator_name(cand.op), "` on type `", get_type_name(lhs_type), "` and type `", get_type_name(rhs_type), "` is undefined.");

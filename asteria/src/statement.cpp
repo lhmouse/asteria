@@ -20,37 +20,37 @@ Statement::~Statement() = default;
 
 namespace {
 	void do_skip_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt){
-		const auto type = stmt.get_type();
+		const auto type = stmt.which();
 		switch(type){
-		case Statement::type_expression_statement:
+		case Statement::index_expression_statement:
 			return;
 
-		case Statement::type_variable_definition: {
-			const auto &cand = stmt.get<Statement::S_variable_definition>();
+		case Statement::index_variable_definition: {
+			const auto &cand = stmt.as<Statement::S_variable_definition>();
 			// Create a null reference for the variable.
 			const auto wref = scope_inout->mutate_named_reference(cand.id);
 			set_reference(wref, nullptr);
 			return; }
 
-		case Statement::type_function_definition: {
-			const auto &cand = stmt.get<Statement::S_function_definition>();
+		case Statement::index_function_definition: {
+			const auto &cand = stmt.as<Statement::S_function_definition>();
 			// Create a null reference for the function.
 			const auto wref = scope_inout->mutate_named_reference(cand.id);
 			set_reference(wref, nullptr);
 			return; }
 
-		case Statement::type_if_statement:
-		case Statement::type_switch_statement:
-		case Statement::type_do_while_statement:
-		case Statement::type_while_statement:
-		case Statement::type_for_statement:
-		case Statement::type_for_each_statement:
-		case Statement::type_try_statement:
-		case Statement::type_defer_statement:
-		case Statement::type_break_statement:
-		case Statement::type_continue_statement:
-		case Statement::type_throw_statement:
-		case Statement::type_return_statement:
+		case Statement::index_if_statement:
+		case Statement::index_switch_statement:
+		case Statement::index_do_while_statement:
+		case Statement::index_while_statement:
+		case Statement::index_for_statement:
+		case Statement::index_for_each_statement:
+		case Statement::index_try_statement:
+		case Statement::index_defer_statement:
+		case Statement::index_break_statement:
+		case Statement::index_continue_statement:
+		case Statement::index_throw_statement:
+		case Statement::index_return_statement:
 			return;
 
 		default:
@@ -60,24 +60,24 @@ namespace {
 	}
 
 	Statement do_bind_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt){
-		const auto type = stmt.get_type();
+		const auto type = stmt.which();
 		switch(type){
-		case Statement::type_expression_statement: {
-			const auto &cand = stmt.get<Statement::S_expression_statement>();
+		case Statement::index_expression_statement: {
+			const auto &cand = stmt.as<Statement::S_expression_statement>();
 			// Bind the expression recursively.
 			auto bound_expr = bind_expression(cand.expr, scope_inout);
 			Statement::S_expression_statement stmt_e = { std::move(bound_expr) };
 			return std::move(stmt_e); }
 
-		case Statement::type_variable_definition: {
-			const auto &cand = stmt.get<Statement::S_variable_definition>();
+		case Statement::index_variable_definition: {
+			const auto &cand = stmt.as<Statement::S_variable_definition>();
 			// Bind the initializer recursively.
 			auto bound_init = bind_initializer(cand.init, scope_inout);
 			Statement::S_variable_definition stmt_v = { cand.id, cand.immutable, std::move(bound_init) };
 			return std::move(stmt_v); }
 
-		case Statement::type_function_definition: {
-			const auto &cand = stmt.get<Statement::S_function_definition>();
+		case Statement::index_function_definition: {
+			const auto &cand = stmt.as<Statement::S_function_definition>();
 			// Bind the function body recursively.
 			const auto scope_func = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 			prepare_function_scope_lexical(scope_func, cand.location, cand.params);
@@ -85,8 +85,8 @@ namespace {
 			Statement::S_function_definition stmt_f = { cand.id, cand.location, cand.params, std::move(bound_body) };
 			return std::move(stmt_f); }
 
-		case Statement::type_if_statement: {
-			const auto &cand = stmt.get<Statement::S_if_statement>();
+		case Statement::index_if_statement: {
+			const auto &cand = stmt.as<Statement::S_if_statement>();
 			// Bind the condition recursively.
 			auto bound_cond = bind_expression(cand.cond, scope_inout);
 			// Bind both branches recursively.
@@ -95,8 +95,8 @@ namespace {
 			Statement::S_if_statement stmt_if = { std::move(bound_cond), std::move(bound_branch_true), std::move(bound_branch_false) };
 			return std::move(stmt_if); }
 
-		case Statement::type_switch_statement: {
-			const auto &cand = stmt.get<Statement::S_switch_statement>();
+		case Statement::index_switch_statement: {
+			const auto &cand = stmt.as<Statement::S_switch_statement>();
 			// Bind the control expression recursively.
 			auto bound_ctrl = bind_expression(cand.ctrl, scope_inout);
 			// Bind clauses recursively. A clause consists of a label expression and a body block.
@@ -113,24 +113,24 @@ namespace {
 			Statement::S_switch_statement stmt_sw = { std::move(bound_ctrl), std::move(bound_clauses) };
 			return std::move(stmt_sw); }
 
-		case Statement::type_do_while_statement: {
-			const auto &cand = stmt.get<Statement::S_do_while_statement>();
+		case Statement::index_do_while_statement: {
+			const auto &cand = stmt.as<Statement::S_do_while_statement>();
 			// Bind the body and the condition recursively.
 			auto bound_body = bind_block(cand.body, scope_inout);
 			auto bound_cond = bind_expression(cand.cond, scope_inout);
 			Statement::S_do_while_statement stmt_dw = { std::move(bound_body), std::move(bound_cond) };
 			return std::move(stmt_dw); }
 
-		case Statement::type_while_statement: {
-			const auto &cand = stmt.get<Statement::S_while_statement>();
+		case Statement::index_while_statement: {
+			const auto &cand = stmt.as<Statement::S_while_statement>();
 			// Bind the condition and the body recursively.
 			auto bound_cond = bind_expression(cand.cond, scope_inout);
 			auto bound_body = bind_block(cand.body, scope_inout);
 			Statement::S_while_statement stmt_wh = { std::move(bound_cond), std::move(bound_body) };
 			return std::move(stmt_wh); }
 
-		case Statement::type_for_statement: {
-			const auto &cand = stmt.get<Statement::S_for_statement>();
+		case Statement::index_for_statement: {
+			const auto &cand = stmt.as<Statement::S_for_statement>();
 			// The scope_inout of the lopp initialization outlasts the scope_inout of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
@@ -143,8 +143,8 @@ namespace {
 			Statement::S_for_statement stmt_for = { std::move(bound_init), std::move(bound_cond), std::move(bound_step), std::move(bound_body) };
 			return std::move(stmt_for); }
 
-		case Statement::type_for_each_statement: {
-			const auto &cand = stmt.get<Statement::S_for_each_statement>();
+		case Statement::index_for_each_statement: {
+			const auto &cand = stmt.as<Statement::S_for_each_statement>();
 			// The scope_inout of the lopp initialization outlasts the scope_inout of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
@@ -160,8 +160,8 @@ namespace {
 			Statement::S_for_each_statement stmt_fe = { cand.key_id, cand.value_id, std::move(bound_range_init), std::move(bound_body) };
 			return std::move(stmt_fe); }
 
-		case Statement::type_try_statement: {
-			const auto &cand = stmt.get<Statement::S_try_statement>();
+		case Statement::index_try_statement: {
+			const auto &cand = stmt.as<Statement::S_try_statement>();
 			// Bind the `try` branch recursively.
 			auto bound_branch_try = bind_block(cand.branch_try, scope_inout);
 			// Bind the `catch` branch recursively.
@@ -173,32 +173,32 @@ namespace {
 			Statement::S_try_statement stmt_try = { std::move(bound_branch_try), cand.except_id, std::move(bound_branch_catch) };
 			return std::move(stmt_try); }
 
-		case Statement::type_defer_statement: {
-			const auto &cand = stmt.get<Statement::S_defer_statement>();
+		case Statement::index_defer_statement: {
+			const auto &cand = stmt.as<Statement::S_defer_statement>();
 			// Bind the body recursively.
 			auto bound_body = bind_block(cand.body, scope_inout);
 			Statement::S_defer_statement stmt_de = { cand.location, std::move(bound_body) };
 			return std::move(stmt_de); }
 
-		case Statement::type_break_statement: {
-			const auto &cand = stmt.get<Statement::S_break_statement>();
+		case Statement::index_break_statement: {
+			const auto &cand = stmt.as<Statement::S_break_statement>();
 			// Copy it as is.
 			return cand; }
 
-		case Statement::type_continue_statement: {
-			const auto &cand = stmt.get<Statement::S_continue_statement>();
+		case Statement::index_continue_statement: {
+			const auto &cand = stmt.as<Statement::S_continue_statement>();
 			// Copy it as is.
 			return cand; }
 
-		case Statement::type_throw_statement: {
-			const auto &cand = stmt.get<Statement::S_throw_statement>();
+		case Statement::index_throw_statement: {
+			const auto &cand = stmt.as<Statement::S_throw_statement>();
 			// Bind the operand recursively.
 			auto bound_operand = bind_expression(cand.operand, scope_inout);
 			Statement::S_throw_statement stmt_th = { std::move(bound_operand) };
 			return std::move(stmt_th); }
 
-		case Statement::type_return_statement: {
-			const auto &cand = stmt.get<Statement::S_return_statement>();
+		case Statement::index_return_statement: {
+			const auto &cand = stmt.as<Statement::S_return_statement>();
 			// Bind the operand recursively.
 			auto bound_operand = bind_expression(cand.operand, scope_inout);
 			Statement::S_return_statement stmt_r = { std::move(bound_operand) };
@@ -236,16 +236,16 @@ namespace {
 	}
 
 	Statement::Execution_result do_execute_statement_in_place(Vp<Reference> &result_out, Sp_cref<Scope> scope_inout, const Statement &stmt){
-		const auto type = stmt.get_type();
+		const auto type = stmt.which();
 		switch(type){
-		case Statement::type_expression_statement: {
-			const auto &cand = stmt.get<Statement::S_expression_statement>();
+		case Statement::index_expression_statement: {
+			const auto &cand = stmt.as<Statement::S_expression_statement>();
 			// Evaluate the expression, storing the result into `result_out`.
 			evaluate_expression(result_out, cand.expr, scope_inout);
 			return Statement::execution_result_next; }
 
-		case Statement::type_variable_definition: {
-			const auto &cand = stmt.get<Statement::S_variable_definition>();
+		case Statement::index_variable_definition: {
+			const auto &cand = stmt.as<Statement::S_variable_definition>();
 			// Evaluate the initializer and move the result into a variable.
 			evaluate_initializer(result_out, cand.init, scope_inout);
 			Vp<Value> value;
@@ -259,8 +259,8 @@ namespace {
 			copy_reference(wref, result_out);
 			return Statement::execution_result_next; }
 
-		case Statement::type_function_definition: {
-			const auto &cand = stmt.get<Statement::S_function_definition>();
+		case Statement::index_function_definition: {
+			const auto &cand = stmt.as<Statement::S_function_definition>();
 			// Bind the function body onto the current scope_inout.
 			const auto scope_func = std::make_shared<Scope>(Scope::purpose_lexical, scope_inout);
 			prepare_function_scope_lexical(scope_func, cand.location, cand.params);
@@ -276,8 +276,8 @@ namespace {
 			copy_reference(wref, result_out);
 			return Statement::execution_result_next; }
 
-		case Statement::type_if_statement: {
-			const auto &cand = stmt.get<Statement::S_if_statement>();
+		case Statement::index_if_statement: {
+			const auto &cand = stmt.as<Statement::S_if_statement>();
 			// Evaluate the condition expression and select a branch basing on the result.
 			evaluate_expression(result_out, cand.cond, scope_inout);
 			const auto cond_var = read_reference_opt(result_out);
@@ -292,8 +292,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_switch_statement: {
-			const auto &cand = stmt.get<Statement::S_switch_statement>();
+		case Statement::index_switch_statement: {
+			const auto &cand = stmt.as<Statement::S_switch_statement>();
 			// Evaluate the control expression.
 			evaluate_expression(result_out, cand.ctrl, scope_inout);
 			const auto ctrl_var = read_reference_opt(result_out);
@@ -337,8 +337,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_do_while_statement: {
-			const auto &cand = stmt.get<Statement::S_do_while_statement>();
+		case Statement::index_do_while_statement: {
+			const auto &cand = stmt.as<Statement::S_do_while_statement>();
 			do {
 				// Execute the loop body recursively.
 				const auto result = execute_block(result_out, cand.body, scope_inout);
@@ -354,8 +354,8 @@ namespace {
 			} while(do_check_loop_condition(result_out, cand.cond, scope_inout));
 			return Statement::execution_result_next; }
 
-		case Statement::type_while_statement: {
-			const auto &cand = stmt.get<Statement::S_while_statement>();
+		case Statement::index_while_statement: {
+			const auto &cand = stmt.as<Statement::S_while_statement>();
 			// Evaluate the condition expression and decide whether to start a new loop basing on the result.
 			while(do_check_loop_condition(result_out, cand.cond, scope_inout)){
 				// Execute the loop body recursively.
@@ -371,8 +371,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_for_statement: {
-			const auto &cand = stmt.get<Statement::S_for_statement>();
+		case Statement::index_for_statement: {
+			const auto &cand = stmt.as<Statement::S_for_statement>();
 			// The scope_inout of the lopp initialization outlasts the scope_inout of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
@@ -400,8 +400,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_for_each_statement: {
-			const auto &cand = stmt.get<Statement::S_for_each_statement>();
+		case Statement::index_for_each_statement: {
+			const auto &cand = stmt.as<Statement::S_for_each_statement>();
 			// The scope_inout of the loop initialization outlasts the scope_inout of the loop body, which will be
 			// created and destroyed upon entrance and exit of each iteration.
 			const auto scope_for = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
@@ -416,7 +416,7 @@ namespace {
 				// Save the size. This is necessary because the array might be subsequently altered.
 				std::ptrdiff_t size;
 				{
-					const auto &range_array = range_var->get<D_array>();
+					const auto &range_array = range_var->as<D_array>();
 					size = static_cast<std::ptrdiff_t>(range_array.size());
 				}
 				Vp<Value> key_var;
@@ -447,7 +447,7 @@ namespace {
 				// Save the keys. This is necessary because the object might be subsequently altered.
 				Vector<D_string> backup_keys;
 				{
-					const auto &range_object = range_var->get<D_object>();
+					const auto &range_object = range_var->as<D_object>();
 					backup_keys.reserve(range_object.size());
 					for(const auto &pair : range_object){
 						backup_keys.emplace_back(pair.first);
@@ -482,8 +482,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_try_statement: {
-			const auto &cand = stmt.get<Statement::S_try_statement>();
+		case Statement::index_try_statement: {
+			const auto &cand = stmt.as<Statement::S_try_statement>();
 			try {
 				// Execute the `try` branch in a C++ `try...catch` statement.
 				const auto scope_try = std::make_shared<Scope>(Scope::purpose_plain, scope_inout);
@@ -547,8 +547,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_defer_statement: {
-			const auto &cand = stmt.get<Statement::S_defer_statement>();
+		case Statement::index_defer_statement: {
+			const auto &cand = stmt.as<Statement::S_defer_statement>();
 			// Bind the function body onto the current scope_inout. There are no params.
 			auto bound_body = bind_block(cand.body, scope_inout);
 			// Register the function as a deferred callback of the current scope_inout.
@@ -556,8 +556,8 @@ namespace {
 			scope_inout->defer_callback(std::move(func));
 			return Statement::execution_result_next; }
 
-		case Statement::type_break_statement: {
-			const auto &cand = stmt.get<Statement::S_break_statement>();
+		case Statement::index_break_statement: {
+			const auto &cand = stmt.as<Statement::S_break_statement>();
 			switch(cand.target_scope){
 			case Statement::target_scope_unspecified:
 				return Statement::execution_result_break_unspecified;
@@ -573,8 +573,8 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_continue_statement: {
-			const auto &cand = stmt.get<Statement::S_continue_statement>();
+		case Statement::index_continue_statement: {
+			const auto &cand = stmt.as<Statement::S_continue_statement>();
 			switch(cand.target_scope){
 			case Statement::target_scope_unspecified:
 				return Statement::execution_result_continue_unspecified;
@@ -591,15 +591,15 @@ namespace {
 			}
 			return Statement::execution_result_next; }
 
-		case Statement::type_throw_statement: {
-			const auto &cand = stmt.get<Statement::S_throw_statement>();
+		case Statement::index_throw_statement: {
+			const auto &cand = stmt.as<Statement::S_throw_statement>();
 			// Evaluate the operand, then throw the exception constructed from the result of it.
 			evaluate_expression(result_out, cand.operand, scope_inout);
 			ASTERIA_DEBUG_LOG("Throwing exception: ", result_out);
 			throw Exception(result_out.cshare()); }
 
-		case Statement::type_return_statement: {
-			const auto &cand = stmt.get<Statement::S_return_statement>();
+		case Statement::index_return_statement: {
+			const auto &cand = stmt.as<Statement::S_return_statement>();
 			// Evaluate the operand, then return because the value is stored outside this function.
 			evaluate_expression(result_out, cand.operand, scope_inout);
 			return Statement::execution_result_return; }

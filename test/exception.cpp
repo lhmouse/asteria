@@ -11,8 +11,8 @@ using namespace Asteria;
 int main(){
 	auto var = std::make_shared<Variable>();
 	set_value(var->mutate_value(), D_integer(42));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_integer);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_integer>() == 42);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->which() == Value::type_integer);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_integer>() == 42);
 	try {
 		Reference::S_variable ref_l = { var };
 		Vp<Reference> ref;
@@ -23,6 +23,6 @@ int main(){
 		ASTERIA_TEST_CHECK(ref);
 		set_value(drill_reference(ref), D_string(D_string::shallow("hello")));
 	}
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_string);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_string>() == D_string::shallow("hello"));
+	ASTERIA_TEST_CHECK(var->get_value_opt()->which() == Value::type_string);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_string>() == D_string::shallow("hello"));
 }

@@ -12,10 +12,6 @@ namespace Asteria {
 
 Value::~Value() = default;
 
-void Value::do_throw_type_mismatch(Value::Type expect) const {
-	ASTERIA_THROW_RUNTIME_ERROR("The formal type `", get_type_name(expect), "` does not match the actual type `", get_type_name(get_type()), "` of this value.");
-}
-
 const char * get_type_name(Value::Type type) noexcept {
 	switch(type){
 	case Value::type_null:
@@ -43,7 +39,7 @@ const char * get_type_name(Value::Type type) noexcept {
 }
 Value::Type get_value_type(Sp_cref<const Value> value_opt) noexcept {
 	if(value_opt){
-		return value_opt->get_type();
+		return value_opt->which();
 	} else {
 		return Value::type_null;
 	}
@@ -111,35 +107,35 @@ void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigned inden
 		os <<"null";
 		return;
 	case Value::type_boolean: {
-		const auto &cand = value_opt->get<D_boolean>();
+		const auto &cand = value_opt->as<D_boolean>();
 		os <<std::boolalpha <<std::nouppercase <<cand;
 		return; }
 	case Value::type_integer: {
-		const auto &cand = value_opt->get<D_integer>();
+		const auto &cand = value_opt->as<D_integer>();
 		os <<std::dec <<cand;
 		return; }
 	case Value::type_double: {
-		const auto &cand = value_opt->get<D_double>();
+		const auto &cand = value_opt->as<D_double>();
 		os <<std::dec <<std::nouppercase <<std::setprecision(16) <<cand;
 		return; }
 	case Value::type_string: {
-		const auto &cand = value_opt->get<D_string>();
+		const auto &cand = value_opt->as<D_string>();
 		do_quote_string(os, cand);
 		return; }
 	case Value::type_opaque: {
-		const auto &cand = value_opt->get<D_opaque>();
+		const auto &cand = value_opt->as<D_opaque>();
 		os <<"opaque(\"" <<typeid(*cand).name() <<"\", ";
 		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
 	case Value::type_function: {
-		const auto &cand = value_opt->get<D_opaque>();
+		const auto &cand = value_opt->as<D_opaque>();
 		os <<"function(\"" <<typeid(*cand).name() <<"\", ";
 		do_quote_string(os, cand->describe());
 		os << ')';
 		return; }
 	case Value::type_array: {
-		const auto &array = value_opt->get<D_array>();
+		const auto &array = value_opt->as<D_array>();
 		os <<'[';
 		for(auto it = array.begin(); it != array.end(); ++it){
 			os <<std::endl;
@@ -156,7 +152,7 @@ void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigned inden
 		os <<']';
 		return; }
 	case Value::type_object: {
-		const auto &object = value_opt->get<D_object>();
+		const auto &object = value_opt->as<D_object>();
 		os <<'{';
 		for(auto it = object.begin(); it != object.end(); ++it){
 			os <<std::endl;
@@ -197,29 +193,29 @@ void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt){
 		clear_value(value_out);
 		return;
 	case Value::type_boolean: {
-		const auto &cand = src_opt->get<D_boolean>();
+		const auto &cand = src_opt->as<D_boolean>();
 		set_value(value_out, cand);
 		return; }
 	case Value::type_integer: {
-		const auto &cand = src_opt->get<D_integer>();
+		const auto &cand = src_opt->as<D_integer>();
 		set_value(value_out, cand);
 		return; }
 	case Value::type_double: {
-		const auto &cand = src_opt->get<D_double>();
+		const auto &cand = src_opt->as<D_double>();
 		set_value(value_out, cand);
 		return; }
 	case Value::type_string: {
-		const auto &cand = src_opt->get<D_string>();
+		const auto &cand = src_opt->as<D_string>();
 		set_value(value_out, cand);
 		return; }
 	case Value::type_opaque:
 		ASTERIA_THROW_RUNTIME_ERROR("Values having opaque types cannot be copied.");
 	case Value::type_function: {
-		const auto &cand = src_opt->get<D_function>();
+		const auto &cand = src_opt->as<D_function>();
 		set_value(value_out, cand);
 		return; }
 	case Value::type_array: {
-		const auto &cand = src_opt->get<D_array>();
+		const auto &cand = src_opt->as<D_array>();
 		D_array array;
 		array.reserve(cand.size());
 		for(const auto &elem : cand){
@@ -229,7 +225,7 @@ void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt){
 		set_value(value_out, std::move(array));
 		return; }
 	case Value::type_object: {
-		const auto &cand = src_opt->get<D_object>();
+		const auto &cand = src_opt->as<D_object>();
 		D_object object;
 		object.reserve(cand.size());
 		for(const auto &pair : cand){
@@ -243,69 +239,31 @@ void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt){
 		std::terminate();
 	}
 }
-void wipe_out_value(Sp_cref<Value> value_opt) noexcept {
-	const auto type = get_value_type(value_opt);
-	switch(type){
-	case Value::type_null:
-	case Value::type_boolean:
-	case Value::type_integer:
-	case Value::type_double:
-	case Value::type_string:
-	case Value::type_opaque:
-	case Value::type_function:
-		return;
-	case Value::type_array: {
-		auto &cand = value_opt->get<D_array>();
-		// Move the array out before recursion.
-		auto array = std::move(cand);
-		cand.clear();
-		// Wipe out every element recursively.
-		for(auto &elem : array){
-			wipe_out_value(elem);
-			elem.reset();
-		}
-		return; }
-	case Value::type_object: {
-		auto &cand = value_opt->get<D_object>();
-		// Move the object out before recursion.
-		auto object = std::move(cand);
-		cand.clear();
-		// Wipe out every value recursively.
-		for(auto &pair : object){
-			wipe_out_value(pair.second);
-			pair.second.reset();
-		}
-		return; }
-	default:
-		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
-		std::terminate();
-	}
-}
 bool test_value(Sp_cref<const Value> value_opt) noexcept {
 	const auto type = get_value_type(value_opt);
 	switch(type){
 	case Value::type_null:
 		return false;
 	case Value::type_boolean: {
-		const auto &cand = value_opt->get<D_boolean>();
+		const auto &cand = value_opt->as<D_boolean>();
 		return cand; }
 	case Value::type_integer: {
-		const auto &cand = value_opt->get<D_integer>();
+		const auto &cand = value_opt->as<D_integer>();
 		return cand != 0; }
 	case Value::type_double: {
-		const auto &cand = value_opt->get<D_double>();
+		const auto &cand = value_opt->as<D_double>();
 		return std::fpclassify(cand) != FP_ZERO; }
 	case Value::type_string: {
-		const auto &cand = value_opt->get<D_string>();
+		const auto &cand = value_opt->as<D_string>();
 		return cand.empty() == false; }
 	case Value::type_opaque:
 	case Value::type_function:
 		return true;
 	case Value::type_array: {
-		const auto &cand = value_opt->get<D_array>();
+		const auto &cand = value_opt->as<D_array>();
 		return cand.empty() == false; }
 	case Value::type_object: {
-		const auto &cand = value_opt->get<D_object>();
+		const auto &cand = value_opt->as<D_object>();
 		return cand.empty() == false; }
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
@@ -330,8 +288,8 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 	case Value::type_null:
 		return Value::comparison_result_equal;
 	case Value::type_boolean: {
-		const auto &cand_lhs = lhs_opt->get<D_boolean>();
-		const auto &cand_rhs = rhs_opt->get<D_boolean>();
+		const auto &cand_lhs = lhs_opt->as<D_boolean>();
+		const auto &cand_rhs = rhs_opt->as<D_boolean>();
 		if(cand_lhs < cand_rhs){
 			return Value::comparison_result_less;
 		}
@@ -340,8 +298,8 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 		}
 		return Value::comparison_result_equal; }
 	case Value::type_integer: {
-		const auto &cand_lhs = lhs_opt->get<D_integer>();
-		const auto &cand_rhs = rhs_opt->get<D_integer>();
+		const auto &cand_lhs = lhs_opt->as<D_integer>();
+		const auto &cand_rhs = rhs_opt->as<D_integer>();
 		if(cand_lhs < cand_rhs){
 			return Value::comparison_result_less;
 		}
@@ -350,8 +308,8 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 		}
 		return Value::comparison_result_equal; }
 	case Value::type_double: {
-		const auto &cand_lhs = lhs_opt->get<D_double>();
-		const auto &cand_rhs = rhs_opt->get<D_double>();
+		const auto &cand_lhs = lhs_opt->as<D_double>();
+		const auto &cand_rhs = rhs_opt->as<D_double>();
 		if(std::isunordered(cand_lhs, cand_rhs)){
 			return Value::comparison_result_unordered;
 		}
@@ -363,8 +321,8 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 		}
 		return Value::comparison_result_equal; }
 	case Value::type_string: {
-		const auto &cand_lhs = lhs_opt->get<D_string>();
-		const auto &cand_rhs = rhs_opt->get<D_string>();
+		const auto &cand_lhs = lhs_opt->as<D_string>();
+		const auto &cand_rhs = rhs_opt->as<D_string>();
 		const int cmp = cand_lhs.compare(cand_rhs);
 		if(cmp < 0){
 			return Value::comparison_result_less;
@@ -377,8 +335,8 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 	case Value::type_function:
 		return Value::comparison_result_unordered;
 	case Value::type_array: {
-		const auto &array_lhs = lhs_opt->get<D_array>();
-		const auto &array_rhs = rhs_opt->get<D_array>();
+		const auto &array_lhs = lhs_opt->as<D_array>();
+		const auto &array_rhs = rhs_opt->as<D_array>();
 		const auto len_min = std::min(array_lhs.size(), array_rhs.size());
 		for(std::size_t i = 0; i < len_min; ++i){
 			const auto res = compare_values(array_lhs.at(i), array_rhs.at(i));

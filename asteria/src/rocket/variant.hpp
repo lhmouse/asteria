@@ -380,7 +380,7 @@ public:
 		return *ti;
 	}
 	template<typename elementT>
-	const elementT * try_get() const noexcept {
+	const elementT * get() const noexcept {
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		if(this->m_index != eindex){
 			return nullptr;
@@ -388,7 +388,7 @@ public:
 		return details_variant::pun<elementT>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
-	elementT * try_get() noexcept {
+	elementT * get() noexcept {
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		if(this->m_index != eindex){
 			return nullptr;
@@ -396,9 +396,9 @@ public:
 		return details_variant::pun<elementT>(this->do_get_front_buffer());
 	}
 	template<typename elementT>
-	const elementT & get() const {
+	const elementT & as() const {
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
-		const auto ptr = this->try_get<elementT>();
+		const auto ptr = this->get<elementT>();
 		if(!ptr){
 			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
@@ -406,9 +406,9 @@ public:
 		return *ptr;
 	}
 	template<typename elementT>
-	elementT & get(){
+	elementT & as(){
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
-		const auto ptr = this->try_get<elementT>();
+		const auto ptr = this->get<elementT>();
 		if(!ptr){
 			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());

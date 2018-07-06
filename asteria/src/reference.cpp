@@ -11,42 +11,42 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Type get_reference_type(Sp_cref<const Reference> ref_opt) noexcept {
-	return ref_opt ? ref_opt->get_type() : Reference::type_null;
+Reference::Index get_reference_type(Sp_cref<const Reference> ref_opt) noexcept {
+	return ref_opt ? ref_opt->which() : Reference::index_null;
 }
 
 void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
-	case Reference::type_null:
+	case Reference::index_null:
 		os <<"null ";
 		return dump_value(os, nullptr, indent_next, indent_increment);
 
-	case Reference::type_constant: {
-		const auto &cand = ref_opt->get<Reference::S_constant>();
+	case Reference::index_constant: {
+		const auto &cand = ref_opt->as<Reference::S_constant>();
 		os <<"constant ";
 		return dump_value(os, cand.src_opt, indent_next, indent_increment); }
 
-	case Reference::type_temporary_value: {
-		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
+	case Reference::index_temporary_value: {
+		const auto &cand = ref_opt->as<Reference::S_temporary_value>();
 		os <<"temporary value ";
 		return dump_value(os, cand.value_opt, indent_next, indent_increment); }
 
-	case Reference::type_variable: {
-		const auto &cand = ref_opt->get<Reference::S_variable>();
+	case Reference::index_variable: {
+		const auto &cand = ref_opt->as<Reference::S_variable>();
 		if(cand.variable->is_immutable()){
 			os <<"immutable ";
 		}
 		os <<"variable ";
 		return dump_value(os, cand.variable->get_value_opt(), indent_next, indent_increment); }
 
-	case Reference::type_array_element: {
-		const auto &cand = ref_opt->get<Reference::S_array_element>();
+	case Reference::index_array_element: {
+		const auto &cand = ref_opt->as<Reference::S_array_element>();
 		os <<"the element at index [" <<cand.index <<"] of ";
 		return dump_reference(os, cand.parent_opt, indent_next, indent_increment); }
 
-	case Reference::type_object_member: {
-		const auto &cand = ref_opt->get<Reference::S_object_member>();
+	case Reference::index_object_member: {
+		const auto &cand = ref_opt->as<Reference::S_object_member>();
 		os <<"the cand having key \"" <<cand.key <<"\" in ";
 		return dump_reference(os, cand.parent_opt, indent_next, indent_increment); }
 
@@ -63,28 +63,28 @@ void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned
 void copy_reference(Vp<Reference> &ref_out, Sp_cref<const Reference> src_opt){
 	const auto type = get_reference_type(src_opt);
 	switch(type){
-	case Reference::type_null:
+	case Reference::index_null:
 		return set_reference(ref_out, nullptr);
 
-	case Reference::type_constant: {
-		const auto &cand = src_opt->get<Reference::S_constant>();
+	case Reference::index_constant: {
+		const auto &cand = src_opt->as<Reference::S_constant>();
 		return set_reference(ref_out, cand); }
 
-	case Reference::type_temporary_value:
+	case Reference::index_temporary_value:
 		ASTERIA_THROW_RUNTIME_ERROR("References holding temporary values cannot be copied.");
 
-	case Reference::type_variable: {
-		const auto &cand = src_opt->get<Reference::S_variable>();
+	case Reference::index_variable: {
+		const auto &cand = src_opt->as<Reference::S_variable>();
 		return set_reference(ref_out, cand); }
 
-	case Reference::type_array_element: {
-		const auto &cand = src_opt->get<Reference::S_array_element>();
+	case Reference::index_array_element: {
+		const auto &cand = src_opt->as<Reference::S_array_element>();
 		copy_reference(ref_out, cand.parent_opt);
 		Reference::S_array_element array_element = { std::move(ref_out), cand.index };
 		return set_reference(ref_out, std::move(array_element)); }
 
-	case Reference::type_object_member: {
-		const auto &cand = src_opt->get<Reference::S_object_member>();
+	case Reference::index_object_member: {
+		const auto &cand = src_opt->as<Reference::S_object_member>();
 		copy_reference(ref_out, cand.parent_opt);
 		Reference::S_object_member object_member = { std::move(ref_out), cand.key };
 		return set_reference(ref_out, std::move(object_member)); }
@@ -105,29 +105,29 @@ void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt){
 Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
-	case Reference::type_null:
+	case Reference::index_null:
 		return nullptr;
 
-	case Reference::type_constant: {
-		const auto &cand = ref_opt->get<Reference::S_constant>();
+	case Reference::index_constant: {
+		const auto &cand = ref_opt->as<Reference::S_constant>();
 		return cand.src_opt; }
 
-	case Reference::type_temporary_value: {
-		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
+	case Reference::index_temporary_value: {
+		const auto &cand = ref_opt->as<Reference::S_temporary_value>();
 		return cand.value_opt; }
 
-	case Reference::type_variable: {
-		const auto &cand = ref_opt->get<Reference::S_variable>();
+	case Reference::index_variable: {
+		const auto &cand = ref_opt->as<Reference::S_variable>();
 		return cand.variable->get_value_opt(); }
 
-	case Reference::type_array_element: {
-		const auto &cand = ref_opt->get<Reference::S_array_element>();
+	case Reference::index_array_element: {
+		const auto &cand = ref_opt->as<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = read_reference_opt(cand.parent_opt);
 		if(get_value_type(parent) != Value::type_array){
 			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 		}
-		const auto &array = parent->get<D_array>();
+		const auto &array = parent->as<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 		auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 		if(normalized_index < 0){
@@ -140,14 +140,14 @@ Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 		const auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return value_opt; }
 
-	case Reference::type_object_member: {
-		const auto &cand = ref_opt->get<Reference::S_object_member>();
+	case Reference::index_object_member: {
+		const auto &cand = ref_opt->as<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = read_reference_opt(cand.parent_opt);
 		if(get_value_type(parent) != Value::type_object){
 			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 		}
-		const auto &object = parent->get<D_object>();
+		const auto &object = parent->as<D_object>();
 		// Find the element.
 		auto it = object.find(cand.key);
 		if(it == object.end()){
@@ -165,29 +165,29 @@ Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
-	case Reference::type_null:
+	case Reference::index_null:
 		ASTERIA_THROW_RUNTIME_ERROR("Writing through a null reference is an error.");
 
-	case Reference::type_constant: {
-		const auto &cand = ref_opt->get<Reference::S_constant>();
+	case Reference::index_constant: {
+		const auto &cand = ref_opt->as<Reference::S_constant>();
 		ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src_opt, "` cannot be modified."); }
 
-	case Reference::type_temporary_value: {
-		const auto &cand = ref_opt->get<Reference::S_temporary_value>();
+	case Reference::index_temporary_value: {
+		const auto &cand = ref_opt->as<Reference::S_temporary_value>();
 		ASTERIA_THROW_RUNTIME_ERROR("Modifying the temporary value `", cand.value_opt, "` is likely to be an error hence is not allowed."); }
 
-	case Reference::type_variable: {
-		const auto &cand = ref_opt->get<Reference::S_variable>();
+	case Reference::index_variable: {
+		const auto &cand = ref_opt->as<Reference::S_variable>();
 		return cand.variable->mutate_value(); }
 
-	case Reference::type_array_element: {
-		const auto &cand = ref_opt->get<Reference::S_array_element>();
+	case Reference::index_array_element: {
+		const auto &cand = ref_opt->as<Reference::S_array_element>();
 		// Get the parent, which has to be an array.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_array){
 			ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 		}
-		auto &array = parent->get<D_array>();
+		auto &array = parent->as<D_array>();
 		// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 		auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 		if(normalized_index < 0){
@@ -212,14 +212,14 @@ std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> ref_o
 		auto &value_opt = array.at(static_cast<std::size_t>(normalized_index));
 		return std::ref(value_opt); }
 
-	case Reference::type_object_member: {
-		const auto &cand = ref_opt->get<Reference::S_object_member>();
+	case Reference::index_object_member: {
+		const auto &cand = ref_opt->as<Reference::S_object_member>();
 		// Get the parent, which has to be an object.
 		const auto parent = drill_reference(cand.parent_opt).get().share();
 		if(get_value_type(parent) != Value::type_object){
 			ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 		}
-		auto &object = parent->get<D_object>();
+		auto &object = parent->as<D_object>();
 		// Find the element.
 #ifdef __cpp_lib_unordered_map_try_emplace
 		auto pair = object.insert_or_assign(cand.key, nullptr);
@@ -260,46 +260,46 @@ namespace {
 			default:
 				return nullptr;
 			case 1:
-				return m_variant.get<Sp<const Value>>();
+				return m_variant.as<Sp<const Value>>();
 			case 2:
-				return m_variant.get<Vp<Value>>();
+				return m_variant.as<Vp<Value>>();
 			}
 		}
 		bool is_movable() const noexcept {
 			return m_variant.index() == 2;
 		}
 		Vp<Value> & get_movable_pointer(){
-			return m_variant.get<Vp<Value>>();
+			return m_variant.as<Vp<Value>>();
 		}
 	};
 
 	Extract_value_result do_try_extract_value(Sp_cref<Reference> ref_opt){
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
-		case Reference::type_null:
+		case Reference::index_null:
 			return nullptr;
 
-		case Reference::type_constant: {
-			auto &cand = ref_opt->get<Reference::S_constant>();
+		case Reference::index_constant: {
+			auto &cand = ref_opt->as<Reference::S_constant>();
 			return cand.src_opt; }
 
-		case Reference::type_temporary_value: {
-			auto &cand = ref_opt->get<Reference::S_temporary_value>();
+		case Reference::index_temporary_value: {
+			auto &cand = ref_opt->as<Reference::S_temporary_value>();
 			return std::move(cand.value_opt); }
 
-		case Reference::type_variable: {
-			auto &cand = ref_opt->get<Reference::S_variable>();
+		case Reference::index_variable: {
+			auto &cand = ref_opt->as<Reference::S_variable>();
 			return cand.variable->get_value_opt().share(); }
 
-		case Reference::type_array_element: {
-			auto &cand = ref_opt->get<Reference::S_array_element>();
+		case Reference::index_array_element: {
+			auto &cand = ref_opt->as<Reference::S_array_element>();
 			// Get the parent, which has to be an array.
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
 			if(get_value_type(parent) != Value::type_array){
 				ASTERIA_THROW_RUNTIME_ERROR("Only arrays can be indexed by integer, while the operand has type `", get_value_type_name(parent), "`.");
 			}
-			const auto &array = parent->get<D_array>();
+			const auto &array = parent->as<D_array>();
 			// If a negative index is provided, wrap it around the array once to get the actual subscript. Note that the result may still be negative.
 			auto normalized_index = (cand.index >= 0) ? cand.index : D_integer(Unsigned_integer(cand.index) + array.size());
 			if(normalized_index < 0){
@@ -315,15 +315,15 @@ namespace {
 			}
 			return const_cast<Vp<Value> &&>(value_opt); }
 
-		case Reference::type_object_member: {
-			auto &cand = ref_opt->get<Reference::S_object_member>();
+		case Reference::index_object_member: {
+			auto &cand = ref_opt->as<Reference::S_object_member>();
 			// Get the parent, which has to be an object.
 			auto parent_result = do_try_extract_value(cand.parent_opt);
 			const auto parent = parent_result.get_copyable_pointer();
 			if(get_value_type(parent) != Value::type_object){
 				ASTERIA_THROW_RUNTIME_ERROR("Only objects can be indexed by string, while the operand has type `", get_value_type_name(parent), "`.");
 			}
-			const auto &object = parent->get<D_object>();
+			const auto &object = parent->as<D_object>();
 			// Find the element.
 			auto it = object.find(cand.key);
 			if(it == object.end()){
@@ -359,19 +359,19 @@ namespace {
 	bool do_check_materializability(Sp_cref<const Reference> ref_opt){
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
-		case Reference::type_null:
+		case Reference::index_null:
 			return false;
-		case Reference::type_constant:
+		case Reference::index_constant:
 			return false;
-		case Reference::type_temporary_value:
+		case Reference::index_temporary_value:
 			return true;
-		case Reference::type_variable:
+		case Reference::index_variable:
 			return false;
-		case Reference::type_array_element: {
-			const auto &cand = ref_opt->get<Reference::S_array_element>();
+		case Reference::index_array_element: {
+			const auto &cand = ref_opt->as<Reference::S_array_element>();
 			return do_check_materializability(cand.parent_opt); }
-		case Reference::type_object_member: {
-			const auto &cand = ref_opt->get<Reference::S_object_member>();
+		case Reference::index_object_member: {
+			const auto &cand = ref_opt->as<Reference::S_object_member>();
 			return do_check_materializability(cand.parent_opt); }
 		default:
 			ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);

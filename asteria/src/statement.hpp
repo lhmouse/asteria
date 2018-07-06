@@ -35,22 +35,22 @@ public:
 		Vector<Statement> body;
 	};
 
-	enum Type : signed char {
-		type_expression_statement  =  0,
-		type_variable_definition   =  1,
-		type_function_definition   =  2,
-		type_if_statement          =  3,
-		type_switch_statement      =  4,
-		type_do_while_statement    =  5,
-		type_while_statement       =  6,
-		type_for_statement         =  7,
-		type_for_each_statement    =  8,
-		type_try_statement         =  9,
-		type_defer_statement       = 10,
-		type_break_statement       = 11,
-		type_continue_statement    = 12,
-		type_throw_statement       = 13,
-		type_return_statement      = 14,
+	enum Index : signed char {
+		index_expression_statement  =  0,
+		index_variable_definition   =  1,
+		index_function_definition   =  2,
+		index_if_statement          =  3,
+		index_switch_statement      =  4,
+		index_do_while_statement    =  5,
+		index_while_statement       =  6,
+		index_for_statement         =  7,
+		index_for_each_statement    =  8,
+		index_try_statement         =  9,
+		index_defer_statement       = 10,
+		index_break_statement       = 11,
+		index_continue_statement    = 12,
+		index_throw_statement       = 13,
+		index_return_statement      = 14,
 	};
 	struct S_expression_statement {
 		Vector<Expression_node> expr;
@@ -147,16 +147,16 @@ public:
 	~Statement();
 
 public:
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+	Index which() const noexcept {
+		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & get() const {
-		return m_variant.get<ExpectT>();
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
 	}
 };
 

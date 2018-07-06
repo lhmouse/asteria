@@ -46,15 +46,15 @@ public:
 		operator_infix_assign   = 72, // =
 	};
 
-	enum Type : signed char {
-		type_literal            = 0, // +1
-		type_named_reference    = 1, // +1
-		type_bound_reference    = 2, // +1
-		type_subexpression      = 3, // +1
-		type_lambda_definition  = 4, // +1
-		type_branch             = 5, // -1, +1
-		type_function_call      = 6, // -X, +1
-		type_operator_rpn       = 7, // -X, +1
+	enum Index : signed char {
+		index_literal            = 0, // +1
+		index_named_reference    = 1, // +1
+		index_bound_reference    = 2, // +1
+		index_subexpression      = 3, // +1
+		index_lambda_definition  = 4, // +1
+		index_branch             = 5, // -1, +1
+		index_function_call      = 6, // -X, +1
+		index_operator_rpn       = 7, // -X, +1
 	};
 	struct S_literal {
 		Sp<const Value> src_opt;
@@ -108,16 +108,16 @@ public:
 	~Expression_node();
 
 public:
-	Type get_type() const noexcept {
-		return static_cast<Type>(m_variant.index());
+	Index which() const noexcept {
+		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
 	const ExpectT * get_opt() const noexcept {
-		return m_variant.try_get<ExpectT>();
+		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & get() const {
-		return m_variant.get<ExpectT>();
+	const ExpectT & as() const {
+		return m_variant.as<ExpectT>();
 	}
 };
 

@@ -15,7 +15,7 @@ int main(){
 	set_reference(ref, std::move(rsref));
 	auto ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == D_string::shallow("meow"));
+	ASTERIA_TEST_CHECK(ptr->as<D_string>() == D_string::shallow("meow"));
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_integer(42)));
 	ASTERIA_TEST_CHECK(ptr.get() == value.get());
 
@@ -23,7 +23,7 @@ int main(){
 	set_reference(ref, std::move(tmpref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == D_string::shallow("meow"));
+	ASTERIA_TEST_CHECK(ptr->as<D_string>() == D_string::shallow("meow"));
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_integer(63)));
 	ASTERIA_TEST_CHECK(ptr.get() == value.get());
 
@@ -38,7 +38,7 @@ int main(){
 	copy_reference(ref_local, ref);
 
 	set_value(var->mutate_value(), true);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get_type() == Value::type_boolean);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->which() == Value::type_boolean);
 	Reference::S_array_element aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	ASTERIA_TEST_CHECK_CATCH(read_reference_opt(ref));
@@ -53,14 +53,14 @@ int main(){
 	var->set_immutable(true);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().size() == 5);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().size() == 5);
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_integer(67)));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().size() == 5);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().size() == 5);
 	var->set_immutable(false);
 	set_value(drill_reference(ref), D_integer(67));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().size() == 10);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(8) == nullptr);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(9)->get<D_integer>() == 67);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().size() == 10);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(8) == nullptr);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(9)->as<D_integer>() == 67);
 	aref = { Vp<Reference>(ref_local.share()), 9 };
 	set_reference(ref, std::move(aref));
 	var->set_immutable(true);
@@ -71,26 +71,26 @@ int main(){
 	var->set_immutable(false);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 203);
+	ASTERIA_TEST_CHECK(ptr->as<D_integer>() == 203);
 	set_value(drill_reference(ref), D_integer(65));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(3)->get<D_integer>() == 65);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(3)->as<D_integer>() == 65);
 
 	aref = { Vp<Reference>(ref_local.share()), 1 };
 	set_reference(ref, std::move(aref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 201);
+	ASTERIA_TEST_CHECK(ptr->as<D_integer>() == 201);
 	set_value(drill_reference(ref), D_integer(26));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(1)->get<D_integer>() == 26);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(1)->as<D_integer>() == 26);
 
 	aref = { Vp<Reference>(ref_local.share()), -12 };
 	set_reference(ref, std::move(aref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
 	set_value(drill_reference(ref), D_integer(37));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().size() == 12);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(0)->get<D_integer>() == 37);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_array>().at(3)->get<D_integer>() == 26);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().size() == 12);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(0)->as<D_integer>() == 37);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_array>().at(3)->as<D_integer>() == 26);
 
 	Reference::S_object_member oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
@@ -106,14 +106,14 @@ int main(){
 	var->set_immutable(true);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr == nullptr);
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 2);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_object>().size() == 2);
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_integer(92)));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 2);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_object>().size() == 2);
 	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_immutable(false);
 	set_value(drill_reference(ref), D_integer(92));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().size() == 3);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_object>().size() == 3);
 	oref = { Vp<Reference>(ref_local.share()), D_string::shallow("three") };
 	set_reference(ref, std::move(oref));
 	var->set_immutable(true);
@@ -124,9 +124,9 @@ int main(){
 	var->set_immutable(false);
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_integer>() == 1);
+	ASTERIA_TEST_CHECK(ptr->as<D_integer>() == 1);
 	set_value(drill_reference(ref), D_integer(97));
-	ASTERIA_TEST_CHECK(var->get_value_opt()->get<D_object>().at(D_string::shallow("one"))->get<D_integer>() == 97);
+	ASTERIA_TEST_CHECK(var->get_value_opt()->as<D_object>().at(D_string::shallow("one"))->as<D_integer>() == 97);
 
 	array.clear();
 	set_value(value, D_string(D_string::shallow("first")));
@@ -143,10 +143,10 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_string(D_string::shallow("meow"))));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == D_string::shallow("third"));
+	ASTERIA_TEST_CHECK(ptr->as<D_string>() == D_string::shallow("third"));
 	materialize_reference(ref, false);
 	set_value(drill_reference(ref), D_string(D_string::shallow("meow")));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);
-	ASTERIA_TEST_CHECK(ptr->get<D_string>() == D_string::shallow("meow"));
+	ASTERIA_TEST_CHECK(ptr->as<D_string>() == D_string::shallow("meow"));
 }
