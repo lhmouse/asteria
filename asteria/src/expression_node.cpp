@@ -699,12 +699,12 @@ namespace {
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				const auto comparison = compare_values(lhs_var, rhs_var);
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result == Value::comparison_result_equal);
+				do_set_result(lhs_ref, false, comparison == Value::comparison_equal);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 
@@ -716,12 +716,12 @@ namespace {
 				// N.B. This is one of the few operators that work on all types.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
+				const auto comparison = compare_values(lhs_var, rhs_var);
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result != Value::comparison_result_equal);
+				do_set_result(lhs_ref, false, comparison != Value::comparison_equal);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 
@@ -732,15 +732,15 @@ namespace {
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
-				if(comparison_result == Value::comparison_result_unordered){
+				const auto comparison = compare_values(lhs_var, rhs_var);
+				if(comparison == Value::comparison_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result == Value::comparison_result_less);
+				do_set_result(lhs_ref, false, comparison == Value::comparison_less);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 
@@ -751,15 +751,15 @@ namespace {
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
-				if(comparison_result == Value::comparison_result_unordered){
+				const auto comparison = compare_values(lhs_var, rhs_var);
+				if(comparison == Value::comparison_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result == Value::comparison_result_greater);
+				do_set_result(lhs_ref, false, comparison == Value::comparison_greater);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 
@@ -770,15 +770,15 @@ namespace {
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
-				if(comparison_result == Value::comparison_result_unordered){
+				const auto comparison = compare_values(lhs_var, rhs_var);
+				if(comparison == Value::comparison_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result != Value::comparison_result_greater);
+				do_set_result(lhs_ref, false, comparison != Value::comparison_greater);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 
@@ -789,15 +789,15 @@ namespace {
 				// Throw an exception in case of unordered operands.
 				const auto lhs_var = read_reference_opt(lhs_ref);
 				const auto rhs_var = read_reference_opt(rhs_ref);
-				const auto comparison_result = compare_values(lhs_var, rhs_var);
-				if(comparison_result == Value::comparison_result_unordered){
+				const auto comparison = compare_values(lhs_var, rhs_var);
+				if(comparison == Value::comparison_unordered){
 					ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_var, "` and `", rhs_var, "` are unordered.");
 				}
 				// Try reusing source operands.
 				if(!lhs_ref){
 					lhs_ref = std::move(rhs_ref);
 				}
-				do_set_result(lhs_ref, false, comparison_result != Value::comparison_result_less);
+				do_set_result(lhs_ref, false, comparison != Value::comparison_less);
 				do_push_reference(stack_inout, std::move(lhs_ref));
 				break; }
 

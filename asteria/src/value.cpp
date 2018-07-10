@@ -276,83 +276,83 @@ Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<co
 	const auto type_rhs = get_value_type(rhs_opt);
 	if(type_lhs != type_rhs){
 		if(type_lhs == Value::type_null){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(type_rhs == Value::type_null){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_unordered;
+		return Value::comparison_unordered;
 	}
 	// If both operands have the same type, perform normal comparison.
 	switch(type_lhs){
 	case Value::type_null:
-		return Value::comparison_result_equal;
+		return Value::comparison_equal;
 	case Value::type_boolean: {
 		const auto &cand_lhs = lhs_opt->as<D_boolean>();
 		const auto &cand_rhs = rhs_opt->as<D_boolean>();
 		if(cand_lhs < cand_rhs){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(cand_lhs > cand_rhs){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_equal; }
+		return Value::comparison_equal; }
 	case Value::type_integer: {
 		const auto &cand_lhs = lhs_opt->as<D_integer>();
 		const auto &cand_rhs = rhs_opt->as<D_integer>();
 		if(cand_lhs < cand_rhs){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(cand_lhs > cand_rhs){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_equal; }
+		return Value::comparison_equal; }
 	case Value::type_double: {
 		const auto &cand_lhs = lhs_opt->as<D_double>();
 		const auto &cand_rhs = rhs_opt->as<D_double>();
 		if(std::isunordered(cand_lhs, cand_rhs)){
-			return Value::comparison_result_unordered;
+			return Value::comparison_unordered;
 		}
 		if(std::isless(cand_lhs, cand_rhs)){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(std::isgreater(cand_lhs, cand_rhs)){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_equal; }
+		return Value::comparison_equal; }
 	case Value::type_string: {
 		const auto &cand_lhs = lhs_opt->as<D_string>();
 		const auto &cand_rhs = rhs_opt->as<D_string>();
 		const int cmp = cand_lhs.compare(cand_rhs);
 		if(cmp < 0){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(cmp > 0){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_equal; }
+		return Value::comparison_equal; }
 	case Value::type_opaque:
 	case Value::type_function:
-		return Value::comparison_result_unordered;
+		return Value::comparison_unordered;
 	case Value::type_array: {
 		const auto &array_lhs = lhs_opt->as<D_array>();
 		const auto &array_rhs = rhs_opt->as<D_array>();
 		const auto len_min = std::min(array_lhs.size(), array_rhs.size());
 		for(std::size_t i = 0; i < len_min; ++i){
 			const auto res = compare_values(array_lhs.at(i), array_rhs.at(i));
-			if(res != Value::comparison_result_equal){
+			if(res != Value::comparison_equal){
 				return res;
 			}
 		}
 		if(array_lhs.size() < array_rhs.size()){
-			return Value::comparison_result_less;
+			return Value::comparison_less;
 		}
 		if(array_lhs.size() > array_rhs.size()){
-			return Value::comparison_result_greater;
+			return Value::comparison_greater;
 		}
-		return Value::comparison_result_equal; }
+		return Value::comparison_equal; }
 	case Value::type_object:
-		return Value::comparison_result_unordered;
+		return Value::comparison_unordered;
 	default:
 		ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
 		std::terminate();

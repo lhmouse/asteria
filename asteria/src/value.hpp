@@ -34,10 +34,10 @@ public:
 	)>;
 
 	enum Comparison_result : std::uint8_t {
-		comparison_result_unordered  = 0,
-		comparison_result_less       = 1,
-		comparison_result_equal      = 2,
-		comparison_result_greater    = 3,
+		comparison_unordered  = 0,
+		comparison_less       = 1,
+		comparison_equal      = 2,
+		comparison_greater    = 3,
 	};
 
 private:

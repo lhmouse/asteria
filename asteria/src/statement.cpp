@@ -313,7 +313,7 @@ namespace {
 					// Deal with a `case` label.
 					evaluate_expression(result_out, it->pred, scope_switch);
 					const auto case_var = read_reference_opt(result_out);
-					if(compare_values(ctrl_var, case_var) == Value::comparison_result_equal){
+					if(compare_values(ctrl_var, case_var) == Value::comparison_equal){
 						match_it = it;
 						break;
 					}
