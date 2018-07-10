@@ -50,7 +50,7 @@ pkginclude_HEADERS =	\
 	asteria/src/initializer.hpp	\
 	asteria/src/expression_node.hpp	\
 	asteria/src/statement.hpp	\
-	asteria/src/instantiated_function.hpp	\
+	asteria/src/function.hpp	\
 	asteria/src/slim_function.hpp	\
 	asteria/src/scope.hpp	\
 	asteria/src/token.hpp
@@ -76,7 +76,7 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/initializer.cpp	\
 	asteria/src/expression_node.cpp	\
 	asteria/src/statement.cpp	\
-	asteria/src/instantiated_function.cpp	\
+	asteria/src/function.cpp	\
 	asteria/src/slim_function.cpp	\
 	asteria/src/scope.cpp	\
 	asteria/src/token.cpp

@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "instantiated_function.hpp"
+#include "function.hpp"
 #include "stored_reference.hpp"
 #include "statement.hpp"
 #include "scope.hpp"
@@ -10,12 +10,12 @@
 
 namespace Asteria {
 
-Instantiated_function::~Instantiated_function() = default;
+Function::~Function() = default;
 
-Cow_string Instantiated_function::describe() const {
+Cow_string Function::describe() const {
 	return ASTERIA_FORMAT_STRING(m_category, " @ '", m_source, "'");
 }
-void Instantiated_function::invoke(Vp<Reference> &result_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
+void Function::invoke(Vp<Reference> &result_out, Vp<Reference> &&this_opt, Vector<Vp<Reference>> &&args) const {
 	// Allocate a function scope.
 	const auto scope_with_args = std::make_shared<Scope>(Scope::purpose_function, nullptr);
 	prepare_function_scope(scope_with_args, m_source, m_params, std::move(this_opt), std::move(args));

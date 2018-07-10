@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Instantiated_function : public Function_base {
+class Function : public Function_base {
 private:
 	const char * m_category;
 	Cow_string m_source;
@@ -18,11 +18,11 @@ private:
 	Block m_bound_body;
 
 public:
-	Instantiated_function(const char *category, Cow_string source, Vector<Cow_string> params, Block bound_body)
+	Function(const char *category, Cow_string source, Vector<Cow_string> params, Block bound_body)
 		: m_category(category), m_source(std::move(source))
 		, m_params(std::move(params)), m_bound_body(std::move(bound_body))
 	{ }
-	~Instantiated_function() override;
+	~Function() override;
 
 public:
 	Cow_string describe() const override;

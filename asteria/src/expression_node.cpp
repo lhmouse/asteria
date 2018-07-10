@@ -7,7 +7,7 @@
 #include "stored_reference.hpp"
 #include "scope.hpp"
 #include "statement.hpp"
-#include "instantiated_function.hpp"
+#include "function.hpp"
 #include "utilities.hpp"
 #include <limits>
 #include <cmath>
@@ -461,7 +461,7 @@ namespace {
 			prepare_function_scope_lexical(scope_lexical, cand.location, cand.params);
 			auto bound_body = bind_block_in_place(scope_lexical, cand.body_opt);
 			// Create a temporary variable for the function.
-			auto func = std::make_shared<Instantiated_function>("lambda", cand.location, cand.params, std::move(bound_body));
+			auto func = std::make_shared<Function>("lambda", cand.location, cand.params, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, D_function(std::move(func)));
 			Vp<Reference> result_ref;

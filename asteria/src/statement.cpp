@@ -8,7 +8,7 @@
 #include "initializer.hpp"
 #include "value.hpp"
 #include "stored_reference.hpp"
-#include "instantiated_function.hpp"
+#include "function.hpp"
 #include "exception.hpp"
 #include "utilities.hpp"
 
@@ -266,7 +266,7 @@ namespace {
 			prepare_function_scope_lexical(scope_func, cand.location, cand.params);
 			auto bound_body = bind_block_in_place(scope_func, cand.body);
 			// Create a reference for the function.
-			auto func = std::make_shared<Instantiated_function>("function", cand.location, cand.params, std::move(bound_body));
+			auto func = std::make_shared<Function>("function", cand.location, cand.params, std::move(bound_body));
 			Vp<Value> func_var;
 			set_value(func_var, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
@@ -552,7 +552,7 @@ namespace {
 			// Bind the function body onto the current scope_inout. There are no params.
 			auto bound_body = bind_block(cand.body, scope_inout);
 			// Register the function as a deferred callback of the current scope_inout.
-			auto func = std::make_shared<Instantiated_function>("deferred block", cand.location, Vector<Cow_string>(), std::move(bound_body));
+			auto func = std::make_shared<Function>("deferred block", cand.location, Vector<Cow_string>(), std::move(bound_body));
 			scope_inout->defer_callback(std::move(func));
 			return Statement::execution_result_next; }
 

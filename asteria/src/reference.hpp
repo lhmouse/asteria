@@ -9,7 +9,7 @@
 namespace Asteria {
 
 
-
+class Stored_reference;
 
 class Variable {
 private:
