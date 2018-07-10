@@ -69,7 +69,8 @@ using Vector = std::vector<ElementT>;
 template<typename ElementT>
 using Dictionary = std::unordered_map<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
 
-using Function_prototype  = void (Vp<Reference> &, Vp<Reference> &&, Vector<Vp<Reference>> &&);
+using Expression  = Vector<Expression_node>;
+using Block       = Vector<Statement>;
 
 // Data types exposed to users
 using D_null      = Nullptr;

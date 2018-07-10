@@ -15,10 +15,10 @@ private:
 	Cow_string m_source;
 
 	Vector<Cow_string> m_params;
-	Vector<Statement> m_bound_body;
+	Block m_bound_body;
 
 public:
-	Instantiated_function(const char *category, Cow_string source, Vector<Cow_string> params, Vector<Statement> bound_body)
+	Instantiated_function(const char *category, Cow_string source, Vector<Cow_string> params, Block bound_body)
 		: m_category(category), m_source(std::move(source))
 		, m_params(std::move(params)), m_bound_body(std::move(bound_body))
 	{ }

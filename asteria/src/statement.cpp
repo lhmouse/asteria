@@ -211,8 +211,8 @@ namespace {
 	}
 }
 
-Vector<Statement> bind_block_in_place(Sp_cref<Scope> scope_inout, const Vector<Statement> &block){
-	Vector<Statement> bound_block;
+Block bind_block_in_place(Sp_cref<Scope> scope_inout, const Block &block){
+	Block bound_block;
 	bound_block.reserve(block.size());
 	// Bind statements recursively.
 	for(const auto &stmt : block){
@@ -224,7 +224,7 @@ Vector<Statement> bind_block_in_place(Sp_cref<Scope> scope_inout, const Vector<S
 }
 
 namespace {
-	bool do_check_loop_condition(Vp<Reference> &result_out, const Vector<Expression_node> &cond, Sp_cref<const Scope> scope_inout){
+	bool do_check_loop_condition(Vp<Reference> &result_out, const Expression &cond, Sp_cref<const Scope> scope_inout){
 		// Overwrite `result_out` unconditionally, even when `cond` is empty.
 		evaluate_expression(result_out, cond, scope_inout);
 		if(cond.empty()){
@@ -611,7 +611,7 @@ namespace {
 	}
 }
 
-Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Vector<Statement> &block){
+Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Block &block){
 	// Execute statements recursively.
 	for(const auto &stmt : block){
 		const auto result = do_execute_statement_in_place(ref_out, scope_inout, stmt);
@@ -623,14 +623,14 @@ Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cr
 	return Statement::execution_result_next;
 }
 
-Vector<Statement> bind_block(const Vector<Statement> &block, Sp_cref<const Scope> scope){
+Block bind_block(const Block &block, Sp_cref<const Scope> scope){
 	if(block.empty()){
-		return Vector<Statement>();
+		return Block();
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 	return bind_block_in_place(scope_working, block);
 }
-Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Vector<Statement> &block, Sp_cref<const Scope> scope){
+Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Block &block, Sp_cref<const Scope> scope){
 	if(block.empty()){
 		return Statement::execution_result_return;
 	}

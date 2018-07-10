@@ -31,8 +31,8 @@ public:
 	};
 	struct Switch_clause {
 		// `pred_opt` is non-null for `case` clauses and is null for `default` clauses.
-		Vector<Expression_node> pred;
-		Vector<Statement> body;
+		Expression pred;
+		Block body;
 	};
 
 	enum Index : signed char {
@@ -53,7 +53,7 @@ public:
 		index_return_statement      = 14,
 	};
 	struct S_expression_statement {
-		Vector<Expression_node> expr;
+		Expression expr;
 	};
 	struct S_variable_definition {
 		Cow_string id;
@@ -64,45 +64,45 @@ public:
 		Cow_string id;
 		Cow_string location;
 		Vector<Cow_string> params;
-		Vector<Statement> body;
+		Block body;
 	};
 	struct S_if_statement {
-		Vector<Expression_node> cond;
-		Vector<Statement> branch_true;
-		Vector<Statement> branch_false;
+		Expression cond;
+		Block branch_true;
+		Block branch_false;
 	};
 	struct S_switch_statement {
-		Vector<Expression_node> ctrl;
+		Expression ctrl;
 		Vector<Switch_clause> clauses;
 	};
 	struct S_do_while_statement {
-		Vector<Statement> body;
-		Vector<Expression_node> cond;
+		Block body;
+		Expression cond;
 	};
 	struct S_while_statement {
-		Vector<Expression_node> cond;
-		Vector<Statement> body;
+		Expression cond;
+		Block body;
 	};
 	struct S_for_statement {
-		Vector<Statement> init;
-		Vector<Expression_node> cond;
-		Vector<Expression_node> step;
-		Vector<Statement> body;
+		Block init;
+		Expression cond;
+		Expression step;
+		Block body;
 	};
 	struct S_for_each_statement {
 		Cow_string key_id;
 		Cow_string value_id;
 		Initializer range_init;
-		Vector<Statement> body;
+		Block body;
 	};
 	struct S_try_statement {
-		Vector<Statement> branch_try;
+		Block branch_try;
 		Cow_string except_id;
-		Vector<Statement> branch_catch;
+		Block branch_catch;
 	};
 	struct S_defer_statement {
 		Cow_string location;
-		Vector<Statement> body;
+		Block body;
 	};
 	struct S_break_statement {
 		Target_scope target_scope;
@@ -111,10 +111,10 @@ public:
 		Target_scope target_scope;
 	};
 	struct S_throw_statement {
-		Vector<Expression_node> operand;
+		Expression operand;
 	};
 	struct S_return_statement {
-		Vector<Expression_node> operand;
+		Expression operand;
 	};
 	using Variant = rocket::variant<ROCKET_CDR(
 		, S_expression_statement  //  0
@@ -160,11 +160,11 @@ public:
 	}
 };
 
-extern Vector<Statement> bind_block_in_place(Sp_cref<Scope> scope_inout, const Vector<Statement> &block);
-extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Vector<Statement> &block);
+extern Block bind_block_in_place(Sp_cref<Scope> scope_inout, const Block &block);
+extern Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Block &block);
 
-extern Vector<Statement> bind_block(const Vector<Statement> &block, Sp_cref<const Scope> scope);
-extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Vector<Statement> &block, Sp_cref<const Scope> scope);
+extern Block bind_block(const Block &block, Sp_cref<const Scope> scope);
+extern Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Block &block, Sp_cref<const Scope> scope);
 
 }
 

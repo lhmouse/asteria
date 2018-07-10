@@ -13,7 +13,7 @@ using namespace Asteria;
 
 int main(){
 	std::vector<Statement> block, init, body;
-	Vector<Expression_node> expr, cond, inc;
+	Expression expr, cond, inc;
 	// value sum = 0;
 	Expression_node::S_literal expr_l = { std::make_shared<Value>(D_integer(0)) };
 	expr.emplace_back(std::move(expr_l));

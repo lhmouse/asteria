@@ -66,16 +66,16 @@ public:
 		Sp<const Reference> ref_opt;
 	};
 	struct S_subexpression {
-		Vector<Expression_node> subexpr;
+		Expression subexpr;
 	};
 	struct S_lambda_definition {
 		Cow_string location;
 		Vector<Cow_string> params;
-		Vector<Statement> body_opt;
+		Block body_opt;
 	};
 	struct S_branch {
-		Vector<Expression_node> branch_true;
-		Vector<Expression_node> branch_false;
+		Expression branch_true;
+		Expression branch_false;
 	};
 	struct S_function_call {
 		std::size_t argument_count;
@@ -123,8 +123,8 @@ public:
 
 extern const char * get_operator_name(Expression_node::Operator op) noexcept;
 
-extern Vector<Expression_node> bind_expression(const Vector<Expression_node> &expr, Sp_cref<const Scope> scope);
-extern void evaluate_expression(Vp<Reference> &result_out, const Vector<Expression_node> &expr, Sp_cref<const Scope> scope);
+extern Expression bind_expression(const Expression &expr, Sp_cref<const Scope> scope);
+extern void evaluate_expression(Vp<Reference> &result_out, const Expression &expr, Sp_cref<const Scope> scope);
 
 }
 

@@ -163,8 +163,8 @@ namespace {
 	}
 }
 
-Vector<Expression_node> bind_expression(const Vector<Expression_node> &expr, Sp_cref<const Scope> scope){
-	Vector<Expression_node> bound_expr;
+Expression bind_expression(const Expression &expr, Sp_cref<const Scope> scope){
+	Expression bound_expr;
 	bound_expr.reserve(expr.size());
 	// Bind expression nodes recursively.
 	for(const auto &node : expr){
@@ -1124,7 +1124,7 @@ namespace {
 	}
 }
 
-void evaluate_expression(Vp<Reference> &result_out, const Vector<Expression_node> &expr, Sp_cref<const Scope> scope){
+void evaluate_expression(Vp<Reference> &result_out, const Expression &expr, Sp_cref<const Scope> scope){
 	move_reference(result_out, nullptr);
 	Vector<Vp<Reference>> stack;
 	// Parameters are pushed from right to left, in lexical order.
