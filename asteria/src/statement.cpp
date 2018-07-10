@@ -248,7 +248,7 @@ namespace {
 			const auto &cand = stmt.as<Statement::S_variable_definition>();
 			// Evaluate the initializer and move the result into a variable.
 			evaluate_initializer(result_out, cand.init, scope_inout);
-			Vp<Value> value;
+			Value value;
 			extract_value_from_reference(value, std::move(result_out));
 			// Create a reference to a temporary value, then materialize it.
 			// This results in a variable.
@@ -267,7 +267,7 @@ namespace {
 			auto bound_body = bind_block_in_place(scope_func, cand.body);
 			// Create a reference for the function.
 			auto func = std::make_shared<Function>("function", cand.location, cand.params, std::move(bound_body));
-			Vp<Value> func_var;
+			Value func_var;
 			set_value(func_var, D_function(std::move(func)));
 			Reference::S_temporary_value ref_t = { std::move(func_var) };
 			set_reference(result_out, std::move(ref_t));
@@ -419,7 +419,7 @@ namespace {
 					const auto &range_array = range_var->as<D_array>();
 					size = static_cast<std::ptrdiff_t>(range_array.size());
 				}
-				Vp<Value> key_var;
+				Value key_var;
 				Vp<Reference> temp_ref;
 				for(std::ptrdiff_t index = 0; index < size; ++index){
 					// Set the key, which is an integer.
@@ -453,7 +453,7 @@ namespace {
 						backup_keys.emplace_back(pair.first);
 					}
 				}
-				Vp<Value> key_var;
+				Value key_var;
 				Vp<Reference> temp_ref;
 				for(auto &key : backup_keys){
 					// Set the key, which is an integer.
@@ -526,7 +526,7 @@ namespace {
 				} catch(std::exception &e){
 					ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
 					// Create a string containing the error message in the scope.
-					Vp<Value> what_var;
+					Value what_var;
 					set_value(what_var, D_string(e.what()));
 					Reference::S_temporary_value ref_t = { std::move(what_var) };
 					set_reference(result_out, std::move(ref_t));

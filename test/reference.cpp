@@ -8,7 +8,7 @@
 using namespace Asteria;
 
 int main(){
-	Vp<Value> value;
+	Value value;
 	set_value(value, D_string(D_string::shallow("meow")));
 	Vp<Reference> ref;
 	Reference::S_constant rsref = { value };
@@ -19,7 +19,7 @@ int main(){
 	ASTERIA_TEST_CHECK_CATCH(set_value(drill_reference(ref), D_integer(42)));
 	ASTERIA_TEST_CHECK(ptr.get() == value.get());
 
-	Reference::S_temporary_value tmpref = { Vp<Value>(value.share()) };
+	Reference::S_temporary_value tmpref = { Value(value.share()) };
 	set_reference(ref, std::move(tmpref));
 	ptr = read_reference_opt(ref);
 	ASTERIA_TEST_CHECK(ptr);

@@ -13,14 +13,14 @@ class Stored_reference;
 
 class Variable {
 private:
-	Vp<Value> m_value_opt;
+	Value m_value_opt;
 	bool m_immutable;
 
 public:
 	explicit Variable(bool immutable = false)
 		: m_value_opt(), m_immutable(immutable)
 	{ }
-	Variable(Vp<Value> &&value_opt, bool immutable = false)
+	Variable(Value &&value_opt, bool immutable = false)
 		: m_value_opt(std::move(value_opt)), m_immutable(immutable)
 	{ }
 	~Variable();
@@ -35,7 +35,7 @@ public:
 	Vp_cref<const Value> get_value_opt() const noexcept {
 		return m_value_opt;
 	}
-	std::reference_wrapper<Vp<Value>> mutate_value(){
+	std::reference_wrapper<Value> mutate_value(){
 		const auto immutable = is_immutable();
 		if(immutable){
 			do_throw_immutable();
@@ -78,7 +78,7 @@ public:
 		Sp<const Value> src_opt;
 	};
 	struct S_temporary_value {
-		Vp<Value> value_opt;
+		Value value_opt;
 	};
 	struct S_variable {
 		Sp<Variable> variable;
@@ -147,11 +147,11 @@ extern void copy_reference(Vp<Reference> &ref_out, Sp_cref<const Reference> src_
 extern void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt);
 
 extern Sp<const Value> read_reference_opt(Sp_cref<const Reference> reference_opt);
-extern std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> reference_opt);
+extern std::reference_wrapper<Value> drill_reference(Sp_cref<const Reference> reference_opt);
 
 // If you do not have an `Vp<Reference>` but an `Sp<const Reference>`, use the following code to copy the value through the reference:
 //   `copy_value(value_out, read_reference_opt(reference_opt))`
-extern void extract_value_from_reference(Vp<Value> &value_out, Vp<Reference> &&reference_opt);
+extern void extract_value_from_reference(Value &value_out, Vp<Reference> &&reference_opt);
 
 // If the reference is a temporary value, convert it to an unnamed variable, allowing further modification to it.
 extern void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable);

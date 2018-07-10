@@ -57,7 +57,7 @@ public:
 		index_operator_rpn       = 7, // -X, +1
 	};
 	struct S_literal {
-		Sp<const Value> src_opt;
+		Value value;
 	};
 	struct S_named_reference {
 		Cow_string id;

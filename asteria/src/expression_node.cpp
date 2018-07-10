@@ -195,7 +195,7 @@ namespace {
 			set_value(wref, std::forward<ResultT>(result));
 		} else {
 			// Create a new variable for the result, then replace `lhs_ref` with an rvalue reference to it.
-			Vp<Value> value;
+			Value value;
 			set_value(value, std::forward<ResultT>(result));
 			Reference::S_temporary_value ref_d = { std::move(value) };
 			set_reference(ref_inout_opt, std::move(ref_d));
@@ -462,7 +462,7 @@ namespace {
 			auto bound_body = bind_block_in_place(scope_lexical, cand.body_opt);
 			// Create a temporary variable for the function.
 			auto func = std::make_shared<Function>("lambda", cand.location, cand.params, std::move(bound_body));
-			Vp<Value> func_var;
+			Value func_var;
 			set_value(func_var, D_function(std::move(func)));
 			Vp<Reference> result_ref;
 			Reference::S_temporary_value ref_d = { std::move(func_var) };

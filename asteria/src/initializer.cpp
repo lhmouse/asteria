@@ -62,7 +62,7 @@ void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp
 
 	case Initializer::index_bracketed_init_list: {
 		const auto &cand = init.as<Initializer::S_bracketed_init_list>();
-		Vp<Value> value;
+		Value value;
 		D_array array;
 		array.reserve(cand.elems.size());
 		for(const auto &elem : cand.elems){
@@ -77,7 +77,7 @@ void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp
 
 	case Initializer::index_braced_init_list: {
 		const auto &cand = init.as<Initializer::S_braced_init_list>();
-		Vp<Value> value;
+		Value value;
 		D_object object;
 		object.reserve(cand.pairs.size());
 		for(const auto &pair : cand.pairs){

@@ -9,7 +9,7 @@
 using namespace Asteria;
 
 int main(){
-	Vp<Value> value;
+	Value value;
 	set_value(value, true);
 	ASTERIA_TEST_CHECK(value->which() == Value::type_boolean);
 	ASTERIA_TEST_CHECK(value->as<D_boolean>() == true);
@@ -48,7 +48,7 @@ int main(){
 	ASTERIA_TEST_CHECK(value->as<D_object>().at(D_string::shallow("one"))->as<D_boolean>() == true);
 	ASTERIA_TEST_CHECK(value->as<D_object>().at(D_string::shallow("two"))->as<D_string>() == D_string::shallow("world"));
 
-	Vp<Value> cmp;
+	Value cmp;
 	clear_value(value);
 	clear_value(cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_equal);

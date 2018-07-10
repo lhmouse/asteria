@@ -69,7 +69,7 @@ namespace {
 			switch(args.size()){
 			case 0: {
 				// Return the number of args.
-				Vp<Value> value;
+				Value value;
 				set_value(value, D_integer(static_cast<std::ptrdiff_t>(m_var_args.size())));
 				Reference::S_temporary_value ref_t = { std::move(value) };
 				return set_reference(result_out, std::move(ref_t)); }

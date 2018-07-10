@@ -78,8 +78,8 @@ using D_double    = Double_precision;
 using D_string    = Cow_string;
 using D_opaque    = std::shared_ptr<Opaque_base>;
 using D_function  = std::shared_ptr<const Function_base>;
-using D_array     = Vector<Vp<Value>>;
-using D_object    = Dictionary<Vp<Value>>;
+using D_array     = Vector<Value>;
+using D_object    = Dictionary<Value>;
 
 }
 

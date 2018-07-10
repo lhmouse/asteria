@@ -162,7 +162,7 @@ Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> ref_opt){
+std::reference_wrapper<Value> drill_reference(Sp_cref<const Reference> ref_opt){
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::index_null:
@@ -241,7 +241,7 @@ std::reference_wrapper<Vp<Value>> drill_reference(Sp_cref<const Reference> ref_o
 namespace {
 	class Extract_value_result {
 	private:
-		rocket::variant<Nullptr, Sp<const Value>, Vp<Value>> m_variant;
+		rocket::variant<Nullptr, Sp<const Value>, Value> m_variant;
 
 	public:
 		Extract_value_result(Nullptr = nullptr) noexcept
@@ -250,7 +250,7 @@ namespace {
 		Extract_value_result(Sp<const Value> copyable_pointer) noexcept
 			: m_variant(std::move(copyable_pointer))
 		{ }
-		Extract_value_result(Vp<Value> &&movable_pointer) noexcept
+		Extract_value_result(Value &&movable_pointer) noexcept
 			: m_variant(std::move(movable_pointer))
 		{ }
 
@@ -262,14 +262,14 @@ namespace {
 			case 1:
 				return m_variant.as<Sp<const Value>>();
 			case 2:
-				return m_variant.as<Vp<Value>>();
+				return m_variant.as<Value>();
 			}
 		}
 		bool is_movable() const noexcept {
 			return m_variant.index() == 2;
 		}
-		Vp<Value> & get_movable_pointer(){
-			return m_variant.as<Vp<Value>>();
+		Value & get_movable_pointer(){
+			return m_variant.as<Value>();
 		}
 	};
 
@@ -313,7 +313,7 @@ namespace {
 			if(parent_result.is_movable() == false){
 				return value_opt.cshare();
 			}
-			return const_cast<Vp<Value> &&>(value_opt); }
+			return const_cast<Value &&>(value_opt); }
 
 		case Reference::index_object_member: {
 			auto &cand = ref_opt->as<Reference::S_object_member>();
@@ -334,7 +334,7 @@ namespace {
 			if(parent_result.is_movable() == false){
 				return value_opt.cshare();
 			}
-			return const_cast<Vp<Value> &&>(value_opt); }
+			return const_cast<Value &&>(value_opt); }
 
 		default:
 			ASTERIA_DEBUG_LOG("An unknown reference type enumeration: type = ", type);
@@ -343,7 +343,7 @@ namespace {
 	}
 }
 
-void extract_value_from_reference(Vp<Value> &value_out, Vp<Reference> &&ref_opt){
+void extract_value_from_reference(Value &value_out, Vp<Reference> &&ref_opt){
 	auto result = do_try_extract_value(ref_opt);
 	if(result.is_movable()){
 		auto &movable_value = result.get_movable_pointer();
@@ -384,7 +384,7 @@ void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable){
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
-	Vp<Value> value;
+	Value value;
 	extract_value_from_reference(value, std::move(reference_inout_opt));
 	auto var = std::make_shared<Variable>(std::move(value), immutable);
 	Reference::S_variable ref_l = { std::move(var) };

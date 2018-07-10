@@ -12,25 +12,26 @@ namespace Asteria {
 class Value {
 public:
 	enum Type : std::uint8_t {
-		type_null      = -1,
-		type_boolean   =  0,
-		type_integer   =  1,
-		type_double    =  2,
-		type_string    =  3,
-		type_opaque    =  4,
-		type_function  =  5,
-		type_array     =  6,
-		type_object    =  7,
+		type_null      = 0,
+		type_boolean   = 1,
+		type_integer   = 2,
+		type_double    = 3,
+		type_string    = 4,
+		type_opaque    = 5,
+		type_function  = 6,
+		type_array     = 7,
+		type_object    = 8,
 	};
 	using Variant = rocket::variant<ROCKET_CDR(
-		, D_boolean   //  0
-		, D_integer   //  1
-		, D_double    //  2
-		, D_string    //  3
-		, D_opaque    //  4
-		, D_function  //  5
-		, D_array     //  6
-		, D_object    //  7
+		, D_null      // 0
+		, D_boolean   // 1
+		, D_integer   // 2
+		, D_double    // 3
+		, D_string    // 4
+		, D_opaque    // 5
+		, D_function  // 6
+		, D_array     // 7
+		, D_object    // 8
 	)>;
 
 	enum Comparison_result : std::uint8_t {
@@ -48,10 +49,12 @@ public:
 	Value(CandidateT &&cand)
 		: m_variant(std::forward<CandidateT>(cand))
 	{ }
+	// TODO These will be `noexcept`.
+	Value(const Value &);
+	Value & operator=(const Value &);
+	Value(Value &&) noexcept;
+	Value & operator=(Value &&) noexcept;
 	~Value();
-
-	Value(const Value &) = delete;
-	Value & operator=(const Value &) = delete;
 
 public:
 	Type which() const noexcept {
@@ -80,28 +83,12 @@ public:
 };
 
 extern const char * get_type_name(Value::Type type) noexcept;
-extern Value::Type get_value_type(Sp_cref<const Value> value_opt) noexcept;
-extern const char * get_value_type_name(Sp_cref<const Value> value_opt) noexcept;
+extern const char * get_value_type_name(const Value &value) noexcept;
 
-extern void dump_value(std::ostream &os, Sp_cref<const Value> value_opt, unsigned indent_next = 0, unsigned indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, Sp_cref<const Value> value_opt);
-extern std::ostream & operator<<(std::ostream &os, Vp_cref<const Value> value_opt);
-
-extern void allocate_value(Vp<Value> &value_out);
-extern void copy_value(Vp<Value> &value_out, Sp_cref<const Value> src_opt);
-extern bool test_value(Sp_cref<const Value> value_opt) noexcept;
-extern Value::Comparison_result compare_values(Sp_cref<const Value> lhs_opt, Sp_cref<const Value> rhs_opt) noexcept;
-
-template<typename CandidateT>
-inline void set_value(Vp<Value> &value_out, CandidateT &&cand){
-	if(!value_out){
-		((allocate_value))(value_out);
-	}
-	value_out->set(std::forward<CandidateT>(cand));
-}
-inline void clear_value(Vp<Value> &value_out){
-	value_out.reset();
-}
+extern bool test_value(const Value &value);
+extern Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept;
+extern void dump_value(std::ostream &os, const Value &value, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern std::ostream & operator<<(std::ostream &os, const Value &value);
 
 }
 

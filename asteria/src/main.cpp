@@ -10,9 +10,9 @@
 using namespace Asteria;
 
 int main(){
-	Vp<Value> root, copy;
-	Vp<Value> first, second, third, route;
-	Vp<Value> temp;
+	Value root, copy;
+	Value first, second, third, route;
+	Value temp;
 
 	D_array arr;
 	clear_value(temp);
