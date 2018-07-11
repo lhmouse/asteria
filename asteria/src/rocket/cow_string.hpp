@@ -26,10 +26,10 @@
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
- * 3. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
- * 4. The copy constructor and copy assignment operator will not throw exceptions.
- * 5. The constructor taking a sole const pointer is made `explicit`.
- * 6. The assignment operator taking a character and the one taking a const pointer are not provided.
+ * 3. The copy constructor and copy assignment operator will not throw exceptions.
+ * 4. The constructor taking a sole const pointer is made `explicit`.
+ * 5. The assignment operator taking a character and the one taking a const pointer are not provided.
+ * 6. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
  */
 
 namespace rocket {
@@ -79,7 +79,7 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::ios  &ios);
 	extern template void handle_io_exception(::std::wios &ios);
 
-	template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
+	template<typename charT, typename traitsT, typename allocatorT>
 	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
 	public:
 		using value_type       = charT;
@@ -247,11 +247,6 @@ namespace details_cow_string {
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 	};
-
-	extern template class storage_handle<char>;
-	extern template class storage_handle<wchar_t>;
-	extern template class storage_handle<char16_t>;
-	extern template class storage_handle<char32_t>;
 
 	template<typename stringT>
 	class string_iterator_base {
@@ -553,7 +548,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 class basic_cow_string {
 	static_assert(is_same<typename allocatorT::value_type, charT>::value, "`allocatorT::value_type` must denote the same type as `charT`.");
 	static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
-	static_assert(is_trivial<charT>::value != false, "`charT` must be a trivial type.");
+	static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
 public:
 	// types
@@ -694,7 +689,7 @@ private:
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap |= len + len / 2;
-			cap |= 64;
+			cap |= 31;
 #endif
 			this->do_reallocate_no_set_length(len, cap);
 		}
@@ -1641,7 +1636,7 @@ using cow_u32string  = basic_cow_string<char32_t>;
 
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
 	res.reserve(lhs.size() + rhs.size());
 	res.append(lhs.data(), lhs.size());
 	res.append(rhs.data(), rhs.size());
@@ -1649,7 +1644,7 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_st
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
 	const auto rhs_len = traitsT::length(rhs);
 	res.reserve(lhs.size() + rhs_len);
 	res.append(lhs.data(), lhs.size());
@@ -1658,22 +1653,23 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_st
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, charT rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
 	res.reserve(lhs.size() + 1);
 	res.append(lhs.data(), lhs.size());
 	res.push_back(rhs);
 	return res;
 }
+
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(lhs.get_allocator()));
 	res.assign(::std::move(lhs));
 	res.append(rhs.data(), rhs.size());
 	return res;
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, const charT *rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(lhs.get_allocator()));
 	const auto rhs_len = traitsT::length(rhs);
 	res.assign(::std::move(lhs));
 	res.append(rhs, rhs_len);
@@ -1681,7 +1677,7 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<c
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, charT rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(lhs.get_allocator()));
 	res.assign(::std::move(lhs));
 	res.push_back(rhs);
 	return res;
@@ -1689,7 +1685,7 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<c
 
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
 	res.reserve(lhs.size() + rhs.size());
 	res.append(lhs.data(), lhs.size());
 	res.append(rhs.data(), rhs.size());
@@ -1697,7 +1693,7 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
 	const auto lhs_len = traitsT::length(lhs);
 	res.reserve(lhs_len + rhs.size());
 	res.append(lhs, lhs_len);
@@ -1706,22 +1702,23 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, 
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
 	res.reserve(1 + rhs.size());
 	res.push_back(lhs);
 	res.append(rhs.data(), rhs.size());
 	return res;
 }
+
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(rhs.get_allocator()));
 	res.assign(::std::move(rhs));
 	res.insert(0, lhs.data(), lhs.size());
 	return res;
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(rhs.get_allocator()));
 	const auto lhs_len = traitsT::length(lhs);
 	res.assign(::std::move(rhs));
 	res.insert(0, lhs, lhs_len);
@@ -1729,7 +1726,7 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, 
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs){
-	basic_cow_string<charT, traitsT, allocatorT> res;
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(rhs.get_allocator()));
 	res.assign(::std::move(rhs));
 	res.insert(0, 1, lhs);
 	return res;
@@ -1737,11 +1734,22 @@ inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, basic_c
 
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs){
-	return ((operator+))(lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow(rhs));
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
+	res.assign(typename basic_cow_string<charT, traitsT, allocatorT>::shallow(lhs));
+	res.append(rhs.data(), rhs.size());
+	return res;
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs){
-	return (lhs.size() + rhs.size() <= lhs.capacity()) ? ((operator+))(::std::move(lhs), rhs) : ((operator+))(lhs, ::std::move(rhs));
+	auto &&res = basic_cow_string<charT, traitsT, allocatorT>(::std::move(lhs.get_allocator()));
+	if(lhs.size() + rhs.size() <= lhs.capacity()){
+		res.assign(::std::move(lhs));
+		res.append(rhs.data(), rhs.size());
+	} else {
+		res.assign(::std::move(rhs));
+		res.insert(0, lhs.data(), lhs.size());
+	}
+	return res;
 }
 
 template<typename charT, typename traitsT, typename allocatorT>

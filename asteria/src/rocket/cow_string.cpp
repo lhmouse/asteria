@@ -9,11 +9,6 @@ namespace details_cow_string {
 	template void handle_io_exception(::std::ios  &ios);
 	template void handle_io_exception(::std::wios &ios);
 
-	template class storage_handle<char>;
-	template class storage_handle<wchar_t>;
-	template class storage_handle<char16_t>;
-	template class storage_handle<char32_t>;
-
 	template class shallow_base<char>;
 	template class shallow_base<wchar_t>;
 	template class shallow_base<char16_t>;
