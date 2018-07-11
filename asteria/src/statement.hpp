@@ -35,7 +35,7 @@ public:
 		Block body;
 	};
 
-	enum Index : signed char {
+	enum Index : std::uint8_t {
 		index_expression_statement  =  0,
 		index_variable_definition   =  1,
 		index_function_definition   =  2,

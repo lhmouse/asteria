@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Value {
 public:
-	enum Type : signed char {
+	enum Type : std::uint8_t {
 		type_null      = -1,
 		type_boolean   =  0,
 		type_integer   =  1,

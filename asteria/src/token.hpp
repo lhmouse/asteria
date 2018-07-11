@@ -90,7 +90,7 @@ public:
 		punctuator_semicolon   = 49, // ;
 	};
 
-	enum Index : signed char {
+	enum Index : std::uint8_t {
 		index_keyword          = 0,
 		index_punctuator       = 1,
 		index_identifier       = 2,

@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Initializer {
 public:
-	enum Index : signed char {
+	enum Index : std::uint8_t {
 		index_assignment_init      = 0,
 		index_bracketed_init_list  = 1,
 		index_braced_init_list     = 2,

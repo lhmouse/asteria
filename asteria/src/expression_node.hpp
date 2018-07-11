@@ -46,7 +46,7 @@ public:
 		operator_infix_assign   = 72, // =
 	};
 
-	enum Index : signed char {
+	enum Index : std::uint8_t {
 		index_literal            = 0, // +1
 		index_named_reference    = 1, // +1
 		index_bound_reference    = 2, // +1

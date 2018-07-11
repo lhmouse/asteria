@@ -66,7 +66,7 @@ class Reference {
 	friend Stored_reference;
 
 public:
-	enum Index : signed char {
+	enum Index : std::uint8_t {
 		index_null             = -1,
 		index_constant         =  0,
 		index_temporary_value  =  1,
