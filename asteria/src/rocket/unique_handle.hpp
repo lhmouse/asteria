@@ -6,9 +6,10 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::swap(), std::declval()
-#include "compatibility.hpp"
+#include "compatibility.h"
 #include "assert.hpp"
 #include "allocator_utilities.hpp"
+#include "utilities.hpp"
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
@@ -76,10 +77,10 @@ namespace details_unique_handle {
 			return this->m_h;
 		}
 		handle_type release() noexcept {
-			return ((exchange))(this->m_h, this->as_closer().null());
+			return noadl::exchange(this->m_h, this->as_closer().null());
 		}
 		void reset(handle_type h_new) noexcept {
-			const auto h_old = ((exchange))(this->m_h, h_new);
+			const auto h_old = noadl::exchange(this->m_h, h_new);
 			if(this->as_closer().is_null(h_old)){
 				return;
 			}
@@ -166,7 +167,7 @@ public:
 	}
 
 	void swap(unique_handle &other) noexcept {
-		((manipulate_allocators))(true_type(), allocator_swap_with(), this->m_sth.as_closer(), other.m_sth.as_closer());
+		noadl::manipulate_allocators(true_type(), allocator_swap_with(), this->m_sth.as_closer(), other.m_sth.as_closer());
 		this->m_sth.swap(other.m_sth);
 	}
 };

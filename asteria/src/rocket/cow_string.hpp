@@ -137,7 +137,7 @@ namespace details_cow_string {
 
 	private:
 		void do_reset(storage *ptr_new) noexcept {
-			const auto ptr = ((exchange))(this->m_ptr, ptr_new);
+			const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
 			if(ptr == nullptr){
 				return;
 			}
@@ -192,8 +192,8 @@ namespace details_cow_string {
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
 			if(cap_max - base < add){
-				throw_length_error("storage_handle::check_size(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
-				                   static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
+				noadl::throw_length_error("storage_handle::check_size(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
+				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
 			return base + add;
 		}
@@ -240,7 +240,7 @@ namespace details_cow_string {
 			this->do_reset(ptr);
 		}
 		void assign(storage_handle &&other) noexcept {
-			const auto ptr = ((exchange))(other.m_ptr, nullptr);
+			const auto ptr = noadl::exchange(other.m_ptr, nullptr);
 			this->do_reset(ptr);
 		}
 		void swap(storage_handle &other) noexcept {
@@ -530,11 +530,11 @@ namespace details_cow_string {
 			if(s1 == s2){
 				return 0;
 			}
-			const int res = traits_type::compare(s1, s2, ((min))(n1, n2));
+			const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
 			return res;
 		}
 		static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept {
-			const int res = traits_type::compare(s1, s2, ((min))(n1, n2));
+			const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
 			if(res != 0){
 				return res;
 			}
@@ -661,13 +661,13 @@ public:
 		if(this == &other){
 			return *this;
 		}
-		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_copy_assignment(),
-		                          allocator_copy_assign_from(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_copy_assignment(),
+		                             allocator_copy_assign_from(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		return this->assign(other);
 	}
 	basic_cow_string & operator=(basic_cow_string &&other) noexcept {
-		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_move_assignment(),
-		                          allocator_move_assign_from(), this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
+		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_move_assignment(),
+		                             allocator_move_assign_from(), this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
 		return this->assign(::std::move(other));
 	}
 	basic_cow_string & operator=(initializer_list<value_type> init){
@@ -716,7 +716,7 @@ private:
 	pointer do_ensure_unique(){
 		if(this->m_sth.unique() == false){
 			const auto len = this->m_len;
-			this->do_reallocate_no_set_length(len, ((max))(len, size_type(1)));
+			this->do_reallocate_no_set_length(len, noadl::max(len, size_type(1)));
 			this->do_set_length(len);
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
@@ -735,10 +735,10 @@ private:
 	size_type do_clamp_substr(size_type tpos, size_type n) const {
 		const auto tlen = this->size();
 		if(tpos > tlen){
-			throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
-			                   static_cast<long long>(tpos), static_cast<long long>(tlen));
+			noadl::throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
+			                          static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
-		return ((min))(tlen - tpos, n);
+		return noadl::min(tlen - tpos, n);
 	}
 
 	// This has to be generic to allow construction of a string from an array of integers... This is a nasty trick anyway.
@@ -830,7 +830,7 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = ((min))(len - n, to); i + 1 != 0; --i){
+		for(auto i = noadl::min(len - n, to); i + 1 != 0; --i){
 			if(pred(this->data() + i)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
@@ -918,7 +918,7 @@ public:
 	}
 	void reserve(size_type res_arg){
 		const auto len = this->size();
-		const auto cap_new = this->m_sth.round_up_capacity(((max))(len, res_arg));
+		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
@@ -962,8 +962,8 @@ public:
 	const_reference at(size_type pos) const {
 		const auto len = this->size();
 		if(pos >= len){
-			throw_out_of_range("basic_cow_string::at(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
-			                   static_cast<long long>(pos), static_cast<long long>(len));
+			noadl::throw_out_of_range("basic_cow_string::at(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->data()[pos];
 	}
@@ -978,8 +978,8 @@ public:
 	reference & mut(size_type pos){
 		const auto len = this->size();
 		if(pos >= len){
-			throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
-			                   static_cast<long long>(pos), static_cast<long long>(len));
+			noadl::throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->mut_data()[pos];
 	}
@@ -1102,8 +1102,8 @@ public:
 	}
 	basic_cow_string & assign(basic_cow_string &&other) noexcept {
 		this->m_sth.assign(::std::move(other.m_sth));
-		this->m_ptr = ((exchange))(other.m_ptr, shallow().data());
-		this->m_len = ((exchange))(other.m_len, size_type(0));
+		this->m_ptr = noadl::exchange(other.m_ptr, shallow().data());
+		this->m_len = noadl::exchange(other.m_len, size_type(0));
 		return *this;
 	}
 	basic_cow_string & assign(shallow sh) noexcept {
@@ -1292,14 +1292,14 @@ public:
 
 	// N.B. The last parameter is a non-standard extension.
 	size_type copy(pointer s, size_type n, size_type tpos = 0, size_type tn = npos) const {
-		const auto rlen = ((min))(this->do_clamp_substr(tpos, tn), n);
+		const auto rlen = noadl::min(this->do_clamp_substr(tpos, tn), n);
 		traits_type::copy(s, this->data() + tpos, rlen);
 		return rlen;
 	}
 
 	void swap(basic_cow_string &other) noexcept {
-		((manipulate_allocators))(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
-		                          allocator_swap_with(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
+		                             allocator_swap_with(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		this->m_sth.swap(other.m_sth);
 		::std::swap(this->m_ptr, other.m_ptr);
 		::std::swap(this->m_len, other.m_len);
@@ -1381,7 +1381,7 @@ public:
 		if(this->size() == 0){
 			return npos;
 		}
-		const auto find_end = ((min))(this->size() - 1, to) + 1;
+		const auto find_end = noadl::min(this->size() - 1, to) + 1;
 		auto res = size_type(npos);
 		for(;;){
 			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
@@ -1973,7 +1973,7 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 		const auto width = os.width();
 		const auto len = static_cast<streamsize>(str.size());
 		ROCKET_ASSERT(len >= 0);
-		auto len_rem = ((max))(width, len);
+		auto len_rem = noadl::max(width, len);
 		// Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
 		auto offset = len - len_rem;
 		if((os.flags() & ios_base::adjustfield) == ios_base::left){
@@ -2054,15 +2054,15 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &&is, basic_cow_string<charT, traitsT, allocatorT> &str, charT delim){
-	return ((getline))(is, str, delim);
+	return noadl::getline(is, str, delim);
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str){
-	return ((getline))(is, str, is.widen('\n'));
+	return noadl::getline(is, str, is.widen('\n'));
 }
 template<typename charT, typename traitsT, typename allocatorT>
 inline basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &&is, basic_cow_string<charT, traitsT, allocatorT> &str){
-	return ((getline))(is, str);
+	return noadl::getline(is, str);
 }
 
 extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str, char    delim);

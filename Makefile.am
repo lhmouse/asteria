@@ -33,8 +33,10 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/insertable_iostream.hpp	\
 	asteria/src/rocket/variant.hpp	\
 	asteria/src/rocket/fill_iterator.hpp	\
+	asteria/src/rocket/unique_handle.hpp	\
 	asteria/src/rocket/cow_string.hpp	\
-	asteria/src/rocket/unique_handle.hpp
+	asteria/src/rocket/cow_vector.hpp	\
+	asteria/src/rocket/cow_hashmap.hpp
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\

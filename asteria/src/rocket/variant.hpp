@@ -121,12 +121,13 @@ namespace details_variant {
 
 	namespace details_is_nothrow_swappable {
 		using ::std::swap;
-		// Define the value depending on an ADL'd `swap()` call.
+
 		template<typename paramT>
 		struct is_nothrow_swappable
 			: integral_constant<bool, noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()))>
 		{ };
 	}
+
 	using details_is_nothrow_swappable::is_nothrow_swappable;
 
 	template<typename typeT, typename ...paramsT>
@@ -213,8 +214,7 @@ namespace details_variant {
 	struct visitor_swap {
 		template<typename elementT, typename sourceT>
 		void operator()(elementT *ptr, sourceT *src) const {
-			using ::std::swap;
-			swap(*ptr, *pun<elementT>(src));
+			noadl::adl_swap(*ptr, *pun<elementT>(src));
 		}
 	};
 }
@@ -400,8 +400,8 @@ public:
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
+			noadl::throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			                              static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;
 	}
@@ -410,8 +410,8 @@ public:
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->get<elementT>();
 		if(!ptr){
-			throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-			                       static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
+			noadl::throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			                              static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;
 	}

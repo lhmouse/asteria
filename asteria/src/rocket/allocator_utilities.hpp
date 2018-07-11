@@ -62,8 +62,7 @@ inline void manipulate_allocators(true_type, allocator_move_assign_from, allocat
 }
 template<typename allocatorT>
 inline void manipulate_allocators(true_type, allocator_swap_with, allocatorT &lhs, allocatorT &rhs) noexcept {
-	using ::std::swap;
-	swap(lhs, rhs);
+	noadl::adl_swap(lhs, rhs);
 }
 
 }

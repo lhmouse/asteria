@@ -18,6 +18,11 @@ inline typeT exchange(typeT &ref, withT &&with){
 	ref = ::std::forward<withT>(with);
 	return old;
 }
+template<typename lhsT, typename rhsT>
+inline void adl_swap(lhsT &lhs, rhsT &rhs){
+	using ::std::swap;
+	swap(lhs, rhs);
+}
 
 template<typename lhsT, typename rhsT>
 constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs){
@@ -27,6 +32,8 @@ template<typename lhsT, typename rhsT>
 constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs){
 	return !(lhs < rhs) ? ::std::forward<lhsT>(lhs) : ::std::forward<rhsT>(rhs);
 }
+
+namespace noadl = rocket;
 
 }
 
