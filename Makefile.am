@@ -31,7 +31,6 @@ pkginclude_rocket_HEADERS = \
 	asteria/src/rocket/insertable_istream.hpp	\
 	asteria/src/rocket/insertable_ostream.hpp	\
 	asteria/src/rocket/insertable_iostream.hpp	\
-	asteria/src/rocket/value_ptr.hpp	\
 	asteria/src/rocket/variant.hpp	\
 	asteria/src/rocket/fill_iterator.hpp	\
 	asteria/src/rocket/cow_string.hpp	\
@@ -39,20 +38,11 @@ pkginclude_rocket_HEADERS = \
 
 pkginclude_HEADERS =	\
 	asteria/src/fwd.hpp	\
-	asteria/src/parser_result.hpp	\
 	asteria/src/utilities.hpp	\
 	asteria/src/opaque_base.hpp	\
 	asteria/src/function_base.hpp	\
 	asteria/src/value.hpp	\
-	asteria/src/reference.hpp	\
-	asteria/src/stored_reference.hpp	\
-	asteria/src/exception.hpp	\
-	asteria/src/initializer.hpp	\
-	asteria/src/expression_node.hpp	\
-	asteria/src/statement.hpp	\
-	asteria/src/function.hpp	\
-	asteria/src/slim_function.hpp	\
-	asteria/src/scope.hpp	\
+	asteria/src/parser_result.hpp	\
 	asteria/src/token.hpp
 
 lib_LTLIBRARIES =	\
@@ -70,15 +60,6 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
 	asteria/src/value.cpp	\
-	asteria/src/reference.cpp	\
-	asteria/src/stored_reference.cpp	\
-	asteria/src/exception.cpp	\
-	asteria/src/initializer.cpp	\
-	asteria/src/expression_node.cpp	\
-	asteria/src/statement.cpp	\
-	asteria/src/function.cpp	\
-	asteria/src/slim_function.cpp	\
-	asteria/src/scope.cpp	\
 	asteria/src/token.cpp
 
 lib_libasteria_la_LDFLAGS =	\
@@ -93,11 +74,6 @@ bin_asteria_SOURCES =	\
 check_PROGRAMS = \
 	test/utilities.test	\
 	test/value.test	\
-	test/reference.test	\
-	test/exception.test	\
-	test/expression_node.test	\
-	test/statement.test	\
-	test/scope.test	\
 	test/token.test
 
 TESTS = ${check_PROGRAMS}

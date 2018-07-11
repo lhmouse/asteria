@@ -35,7 +35,7 @@ statement ::=
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement | for-each-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
-	try-statement | defer-statement |
+	try-statement |
 	expression-statement
 
 block ::=
@@ -92,8 +92,6 @@ return-statement ::=
 
 try-statement ::=
 	"try" block "catch" "(" identifier ")" block
-defer-statement ::=
-	"defer" block
 
 expression-statement ::=
 	expression-opt ";"

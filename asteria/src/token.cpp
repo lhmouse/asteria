@@ -6,7 +6,6 @@
 #include "parser_result.hpp"
 #include "utilities.hpp"
 #include <algorithm>
-#include <limits>
 #include <cfloat>
 #include <cmath>
 

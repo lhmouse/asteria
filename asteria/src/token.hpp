@@ -162,7 +162,15 @@ public:
 	const ExpectT & as() const {
 		return m_variant.as<ExpectT>();
 	}
+	void swap(Token &other) noexcept {
+		m_variant.swap(other.m_variant);
+	}
 };
+
+inline void swap(Token &lhs, Token &rhs) noexcept {
+	lhs.swap(rhs);
+}
+
 
 extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str);
 

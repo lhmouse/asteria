@@ -10,45 +10,33 @@
 using namespace Asteria;
 
 int main(){
-	Value root, copy;
-	Value first, second, third, route;
-	Value temp;
-
 	D_array arr;
-	clear_value(temp);
-	arr.emplace_back(std::move(temp));
-	set_value(temp, D_boolean(true));
-	arr.emplace_back(std::move(temp));
-	set_value(first, std::move(arr));
+	arr.emplace_back(D_null());
+	arr.emplace_back(D_boolean(true));
+	Value first(std::move(arr));
 
 	arr.clear();
-	set_value(temp, D_integer(42));
-	arr.emplace_back(std::move(temp));
-	set_value(temp, D_double(123.456));
-	arr.emplace_back(std::move(temp));
-	set_value(second, std::move(arr));
+	arr.emplace_back(D_integer(42));
+	arr.emplace_back(D_double(123.456));
+	Value second(std::move(arr));
 
 	arr.clear();
-	set_value(temp, D_string("hello"));
-	arr.emplace_back(std::move(temp));
-	set_value(third, std::move(arr));
+	arr.emplace_back(D_string("hello"));
+	Value third(std::move(arr));
 
 	D_object obj;
 	obj.emplace(D_string::shallow("first"), std::move(first));
 	obj.emplace(D_string::shallow("second"), std::move(second));
-	set_value(route, std::move(obj));
+	Value route(std::move(obj));
 
 	obj.clear();
 	obj.emplace(D_string::shallow("third"), std::move(third));
 	obj.emplace(D_string::shallow("route"), std::move(route));
-	set_value(temp, D_string("世界"));
-	obj.emplace(D_string::shallow("world"), std::move(temp));
+	obj.emplace(D_string::shallow("world"), D_string("世界"));
+	Value root(std::move(obj));
 
-	set_value(root, std::move(obj));
-	copy_value(copy, root);
-
-	set_value(temp, D_string("my string"));
-	copy->as<D_object>().emplace(D_string::shallow("new"), std::move(temp));
+	Value copy(root);
+	copy.as<D_object>().emplace(D_string::shallow("new"), D_string("my string"));
 
 	std::cerr <<root <<std::endl;
 	ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

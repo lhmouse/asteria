@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #include <iosfwd>
+#include <limits>
 #include <iomanip>
 #include <ostream>
 #include <memory>
@@ -34,7 +35,6 @@
 #include "rocket/throw.hpp"
 #include "rocket/insertable_streambuf.hpp"
 #include "rocket/insertable_ostream.hpp"
-#include "rocket/value_ptr.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/fill_iterator.hpp"
 #include "rocket/cow_string.hpp"

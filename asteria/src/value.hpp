@@ -80,7 +80,14 @@ public:
 	void set(CandidateT &&cand){
 		m_variant.set(std::forward<CandidateT>(cand));
 	}
+	void swap(Value &other) noexcept {
+		m_variant.swap(other.m_variant);
+	}
 };
+
+inline void swap(Value &lhs, Value &rhs) noexcept {
+	lhs.swap(rhs);
+}
 
 extern const char * get_type_name(Value::Type type) noexcept;
 extern const char * get_value_type_name(const Value &value) noexcept;

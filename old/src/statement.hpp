@@ -18,6 +18,7 @@ public:
 		target_scope_while        = 2,
 		target_scope_for          = 3,
 	};
+
 	enum Execution_result : std::uint8_t {
 		execution_result_next                  = 0,
 		execution_result_break_unspecified     = 1,
@@ -29,6 +30,7 @@ public:
 		execution_result_continue_for          = 7,
 		execution_result_return                = 8,
 	};
+
 	struct Switch_clause {
 		// `pred_opt` is non-null for `case` clauses and is null for `default` clauses.
 		Expression pred;

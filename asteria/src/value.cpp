@@ -6,8 +6,6 @@
 #include "opaque_base.hpp"
 #include "function_base.hpp"
 #include "utilities.hpp"
-#include <limits>
-#include <cmath>
 
 namespace Asteria {
 
@@ -190,8 +188,8 @@ namespace {
 		}
 		try {
 			using traits_type = std::ostream::traits_type;
-			const auto range = std::pair<unsigned, unsigned>(0, indent.get_num());
-			for(auto it = range.first; it != range.second; ++it){
+			const auto num = indent.get_num();
+			for(unsigned i = 0; i < num; ++i){
 				if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())){
 					os.setstate(std::ios_base::failbit);
 					goto finish;
@@ -275,7 +273,7 @@ namespace {
 					break;
 				default:
 					if((0x20 <= ch) && (ch <= 0x7E)){
-						const bool failed = traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof());
+						const bool failed = traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof());
 						n_wr = failed ? 0 : 1;
 					} else {
 						static constexpr char s_hex_table[] = "0123456789ABCDEF";

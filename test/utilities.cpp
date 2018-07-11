@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#include "test_init.hpp"
+#include "_test_init.hpp"
 #include "../src/utilities.hpp"
 
 using namespace Asteria;
