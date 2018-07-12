@@ -233,7 +233,7 @@ namespace details_cow_string {
 			this->do_reset(nullptr);
 		}
 
-		void assign(const storage_handle &other) noexcept {
+		void share_with(const storage_handle &other) noexcept {
 			const auto ptr = other.m_ptr;
 			if(ptr){
 				// Increment the reference count.
@@ -242,11 +242,11 @@ namespace details_cow_string {
 			}
 			this->do_reset(ptr);
 		}
-		void assign(storage_handle &&other) noexcept {
+		void share_with(storage_handle &&other) noexcept {
 			const auto ptr = noadl::exchange(other.m_ptr, nullptr);
 			this->do_reset(ptr);
 		}
-		void swap(storage_handle &other) noexcept {
+		void exchange_with(storage_handle &other) noexcept {
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 	};
@@ -1093,13 +1093,13 @@ public:
 	}
 
 	basic_cow_string & assign(const basic_cow_string &other) noexcept {
-		this->m_sth.assign(other.m_sth);
+		this->m_sth.share_with(other.m_sth);
 		this->m_ptr = other.m_ptr;
 		this->m_len = other.m_len;
 		return *this;
 	}
 	basic_cow_string & assign(basic_cow_string &&other) noexcept {
-		this->m_sth.assign(::std::move(other.m_sth));
+		this->m_sth.share_with(::std::move(other.m_sth));
 		this->m_ptr = noadl::exchange(other.m_ptr, shallow().data());
 		this->m_len = noadl::exchange(other.m_len, size_type(0));
 		return *this;
@@ -1298,7 +1298,7 @@ public:
 	void swap(basic_cow_string &other) noexcept {
 		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
 		                             allocator_swap_with(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
-		this->m_sth.swap(other.m_sth);
+		this->m_sth.exchange_with(other.m_sth);
 		::std::swap(this->m_ptr, other.m_ptr);
 		::std::swap(this->m_len, other.m_len);
 	}
