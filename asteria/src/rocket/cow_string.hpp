@@ -220,9 +220,11 @@ namespace details_cow_string {
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
-			// Copy characters into the new block, then terminate it with a null character.
-			// This has to be done before deallocating the old block.
-			traits_type::copy(ptr->data, this->m_ptr->data, len);
+			const auto src = this->m_ptr;
+			if(src){
+				// Copy characters into the new block, then terminate it with a null character.
+				traits_type::copy(ptr->data, src->data, len);
+			}
 			// Replace the current block.
 			this->do_reset(ptr);
 			return ptr->data;
