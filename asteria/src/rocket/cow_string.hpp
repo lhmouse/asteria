@@ -947,7 +947,7 @@ public:
 	}
 	// There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
 	// N.B. This is a non-standard extension.
-	reference & mut(size_type pos){
+	reference mut(size_type pos){
 		const auto len = this->size();
 		if(pos >= len){
 			noadl::throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
