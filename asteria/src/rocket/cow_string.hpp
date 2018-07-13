@@ -199,11 +199,19 @@ namespace details_cow_string {
 			const auto n_blocks = this->do_reserve_blocks_for(cap);
 			return this->do_get_capacity_of(n_blocks);
 		}
-		pointer data() const noexcept {
+		const_pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
 				return nullptr;
 			}
+			return ptr->data;
+		}
+		pointer data() noexcept {
+			const auto ptr = this->m_ptr;
+			if(ptr == nullptr){
+				return nullptr;
+			}
+			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
 		pointer reallocate(size_type len, size_type res_arg){
@@ -874,6 +882,7 @@ public:
 			this->do_ensure_unique();
 			this->do_set_length(n);
 		}
+		ROCKET_ASSERT(this->size() == n);
 	}
 	size_type capacity() const noexcept {
 		return this->m_sth.capacity();
@@ -902,6 +911,7 @@ public:
 		} else {
 			this->do_deallocate();
 		}
+		ROCKET_ASSERT(this->capacity() <= cap_min);
 	}
 	void clear() noexcept {
 		if(this->m_sth.unique()){
@@ -946,11 +956,11 @@ public:
 		return this->mut_data()[pos];
 	}
 	// N.B. This is a non-standard extension.
-	const_reference mut_front() noexcept {
+	reference mut_front() noexcept {
 		return this->mut(0);
 	}
 	// N.B. This is a non-standard extension.
-	const_reference mut_back() noexcept {
+	reference mut_back() noexcept {
 		return this->mut(this->size() - 1);
 	}
 
