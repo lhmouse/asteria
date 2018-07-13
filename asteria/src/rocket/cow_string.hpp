@@ -868,11 +868,11 @@ public:
 		if(len_old == n){
 			return;
 		}
-		if(len_old > n){
+		if(len_old < n){
+			this->append(n - len_old, ch);
+		} else {
 			this->do_ensure_unique();
 			this->do_set_length(n);
-		} else {
-			this->append(n - len_old, ch);
 		}
 	}
 	size_type capacity() const noexcept {
