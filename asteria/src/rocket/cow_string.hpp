@@ -687,8 +687,8 @@ private:
 		return ptr + len;
 	}
 	// Reallocate more storage as needed, without shrinking.
-	pointer do_auto_reallocate_no_set_length(size_type len, size_type cap_add){
-		ROCKET_ASSERT(len <= this->m_len);
+	pointer do_reallocate_more_no_set_length(size_type cap_add){
+		const auto len = this->m_len;
 		auto cap = this->m_sth.check_size_add(len, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
@@ -983,10 +983,10 @@ public:
 		const auto len_old = this->size();
 		if(this->do_check_overlap_generic(*s)){
 			const auto tpos = s - this->data();
-			const auto wptr = this->do_auto_reallocate_no_set_length(len_old, n);
+			const auto wptr = this->do_reallocate_more_no_set_length(n);
 			traits_type::move(wptr, this->data() + tpos, n);
 		} else {
-			const auto wptr = this->do_auto_reallocate_no_set_length(len_old, n);
+			const auto wptr = this->do_reallocate_more_no_set_length(n);
 			traits_type::copy(wptr, s, n);
 		}
 		this->do_set_length(len_old + n);
@@ -1000,7 +1000,7 @@ public:
 			return *this;
 		}
 		const auto len_old = this->size();
-		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, n);
+		const auto wptr = this->do_reallocate_more_no_set_length(n);
 		traits_type::assign(wptr, n, ch);
 		this->do_set_length(len_old + n);
 		return *this;
@@ -1036,7 +1036,7 @@ public:
 	// The return type is a non-standard extension.
 	basic_cow_string & push_back(value_type ch){
 		const auto len_old = this->size();
-		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, 1);
+		const auto wptr = this->do_reallocate_more_no_set_length(1);
 		traits_type::assign(*wptr, ch);
 		this->do_set_length(len_old + 1);
 		return *this;
