@@ -1060,10 +1060,9 @@ public:
 	// N.B. This function may throw `std::bad_alloc()`.
 	// The return type is a non-standard extension.
 	basic_cow_string & pop_back(){
-		const auto len_old = this->size();
-		ROCKET_ASSERT(len_old > 0);
+		ROCKET_ASSERT(this->empty() == false);
 		this->do_ensure_unique();
-		this->do_set_length(len_old - 1);
+		this->do_set_length(this->size() - 1);
 		return *this;
 	}
 
