@@ -747,47 +747,7 @@ private:
 	bool do_check_overlap_generic(const someT &some) const noexcept {
 		return static_cast<size_type>(reinterpret_cast<const value_type (&)[1]>(some) - this->data()) < this->size();
 	}
-	// `[first, last)` must not refer to anywhere inside the current object. Otherwise, the behavior is undefined.
-	template<typename inputT>
-	pointer do_append_nonempty_range_restrict(::std::input_iterator_tag, inputT first, inputT last){
-		ROCKET_ASSERT(first != last);
-		const auto len_old = this->size();
-		size_type len_added = 0;
-		pointer ptr;
-		// Append characters one by one.
-		auto it = first;
-		do {
-			ptr = this->do_auto_reallocate_no_set_length(len_old + len_added, 1);
-			this->do_set_length(len_old + len_added);
-			ptr -= len_added;
-			traits_type::assign(ptr[len_added], *it);
-			++len_added;
-			this->do_set_length(len_old + len_added);
-		} while(++it != last);
-		// Return a pointer to the inserted area.
-		return ptr;
-	}
-	template<typename inputT>
-	pointer do_append_nonempty_range_restrict(::std::forward_iterator_tag, inputT first, inputT last){
-		const auto range_dist = ::std::distance(first, last);
-		static_assert(sizeof(range_dist) <= sizeof(size_type), "The `difference_type` of input iterators is larger than `size_type` of this string.");
-		ROCKET_ASSERT(range_dist > 0);
-		const auto len_old = this->size();
-		size_type len_added = 0;
-		// Reserve the space first.
-		const auto ptr = this->do_auto_reallocate_no_set_length(len_old, static_cast<size_type>(range_dist));
-		this->do_set_length(len_old);
-		// Append characters one by one.
-		auto it = first;
-		do {
-			ROCKET_ASSERT(len_added < static_cast<size_type>(range_dist));
-			traits_type::assign(ptr[len_added], *it);
-			++len_added;
-			this->do_set_length(len_old + len_added);
-		} while(++it != last);
-		// Return a pointer to the inserted area.
-		return ptr;
-	}
+
 	// Remove a substring. This function may throw `std::bad_alloc`.
 	pointer do_erase_no_bound_check(size_type tpos, size_type tn){
 		const auto len_old = this->size();
@@ -798,7 +758,6 @@ private:
 		this->do_set_length(len_old - tn);
 		return ptr + tpos;
 	}
-
 	// This function template implements `assign()`, `insert()` and `replace()` functions.
 	template<typename ...paramsT>
 	pointer do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params){
@@ -1060,19 +1019,27 @@ public:
 			return *this;
 		}
 		if(this->do_check_overlap_generic(*first)){
+			// Append the referenced range into a temporary string, then move it into `*this`.
 			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
-			using input_category = typename iterator_traits<inputT>::iterator_category;
-			other.do_append_nonempty_range_restrict(input_category(), ::std::move(first), ::std::move(last));
+			do {
+				other.push_back(*first);
+			} while(++first != last);
 			this->assign(::std::move(other));
 		} else {
-			using input_category = typename iterator_traits<inputT>::iterator_category;
-			this->do_append_nonempty_range_restrict(input_category(), ::std::move(first), ::std::move(last));
+			// It should be safe to append to `*this` directly.
+			do {
+				this->push_back(*first);
+			} while(++first != last);
 		}
 		return *this;
 	}
 	// The return type is a non-standard extension.
 	basic_cow_string & push_back(value_type ch){
-		return this->append(size_type(1), ch);
+		const auto len_old = this->size();
+		const auto wptr = this->do_auto_reallocate_no_set_length(len_old, 1);
+		traits_type::assign(*wptr, ch);
+		this->do_set_length(len_old + 1);
+		return *this;
 	}
 
 	basic_cow_string & erase(size_type tpos = 0, size_type tn = npos){
@@ -1086,14 +1053,17 @@ public:
 		return iterator(this, this->do_erase_no_bound_check(tpos, tn));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	iterator erase(const_iterator ters){
-		return this->erase(ters, const_iterator(this, ters.tell() + 1));
+	iterator erase(const_iterator tfirst){
+		return this->erase(tfirst, const_iterator(this, tfirst.tell() + 1));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// The return type is a non-standard extension.
 	basic_cow_string & pop_back(){
-		ROCKET_ASSERT(this->size() > 0);
-		return this->erase(this->size() - 1, 1);
+		const auto len_old = this->size();
+		ROCKET_ASSERT(len_old > 0);
+		this->do_ensure_unique();
+		this->do_set_length(len_old - 1);
+		return *this;
 	}
 
 	basic_cow_string & assign(const basic_cow_string &other) noexcept {
