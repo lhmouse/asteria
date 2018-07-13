@@ -206,7 +206,7 @@ namespace details_cow_string {
 			}
 			return ptr->data;
 		}
-		pointer data() noexcept {
+		pointer mut_data() noexcept {
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
 				return nullptr;
@@ -707,7 +707,7 @@ private:
 			this->do_reallocate_no_set_length(len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-		const auto ptr = this->m_sth.data();
+		const auto ptr = this->m_sth.mut_data();
 		ROCKET_ASSERT(ptr == this->m_ptr);
 		return ptr + len;
 	}
@@ -715,7 +715,7 @@ private:
 	void do_set_length(size_type len) noexcept {
 		ROCKET_ASSERT(this->m_sth.unique());
 		ROCKET_ASSERT(len <= this->m_sth.capacity());
-		const auto ptr = this->m_sth.data();
+		const auto ptr = this->m_sth.mut_data();
 		ROCKET_ASSERT(ptr == this->m_ptr);
 		traits_type::assign(ptr[len], value_type());
 		this->m_len = len;
@@ -728,7 +728,7 @@ private:
 			this->do_set_length(len);
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
-		const auto ptr = this->m_sth.data();
+		const auto ptr = this->m_sth.mut_data();
 		ROCKET_ASSERT(ptr == this->m_ptr);
 		return ptr;
 	}
