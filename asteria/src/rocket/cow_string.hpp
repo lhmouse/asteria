@@ -1054,8 +1054,8 @@ public:
 		return iterator(this, this->do_erase_no_bound_check(tpos, tn));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	iterator erase(const_iterator tfirst){
-		return this->erase(tfirst, const_iterator(this, tfirst.tell() + 1));
+	iterator erase(const_iterator trm){
+		return this->erase(trm, const_iterator(this, trm.tell() + 1));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// The return type is a non-standard extension.
