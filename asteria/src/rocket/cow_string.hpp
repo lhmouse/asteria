@@ -757,8 +757,9 @@ private:
 		// Append characters one by one.
 		auto it = first;
 		do {
-			ptr = this->do_auto_reallocate_no_set_length(len_old + len_added, 1) - len_added;
+			ptr = this->do_auto_reallocate_no_set_length(len_old + len_added, 1);
 			this->do_set_length(len_old + len_added);
+			ptr -= len_added;
 			traits_type::assign(ptr[len_added], *it);
 			++len_added;
 			this->do_set_length(len_old + len_added);
