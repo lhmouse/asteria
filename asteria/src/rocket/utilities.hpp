@@ -10,6 +10,8 @@
 
 namespace rocket {
 
+namespace noadl = ::rocket;
+
 using ::std::common_type;
 
 template<typename withT, typename typeT>
@@ -32,8 +34,6 @@ template<typename lhsT, typename rhsT>
 constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs){
 	return !(lhs < rhs) ? ::std::forward<lhsT>(lhs) : ::std::forward<rhsT>(rhs);
 }
-
-namespace noadl = rocket;
 
 }
 
