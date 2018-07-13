@@ -1088,31 +1088,43 @@ public:
 		if(this != &other){
 			this->clear();
 		}
-		this->do_replace_no_bound_check(0, this->size(), other, pos, n);
+		if(this->empty()){
+			this->append(other, pos, n);
+		} else {
+			this->do_replace_no_bound_check(0, this->size(), other, pos, n);
+		}
 		return *this;
 	}
 	basic_cow_string & assign(const_pointer s, size_type n){
 		if((n != 0) && (this->do_check_overlap_generic(*s) == false)){
 			this->clear();
 		}
-		this->do_replace_no_bound_check(0, this->size(), s, n);
+		if(this->empty()){
+			this->append(s, n);
+		} else {
+			this->do_replace_no_bound_check(0, this->size(), s, n);
+		}
 		return *this;
 	}
 	basic_cow_string & assign(const_pointer s){
 		if(this->do_check_overlap_generic(*s) == false){
 			this->clear();
 		}
-		this->do_replace_no_bound_check(0, this->size(), s);
+		if(this->empty()){
+			this->append(s);
+		} else {
+			this->do_replace_no_bound_check(0, this->size(), s);
+		}
 		return *this;
 	}
 	basic_cow_string & assign(size_type n, value_type ch){
 		this->clear();
-		this->do_replace_no_bound_check(0, this->size(), n, ch);
+		this->append(n, ch);
 		return *this;
 	}
 	basic_cow_string & assign(initializer_list<value_type> init){
 		this->clear();
-		this->do_replace_no_bound_check(0, this->size(), init);
+		this->append(init);
 		return *this;
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
@@ -1120,7 +1132,11 @@ public:
 		if((first != last) && (this->do_check_overlap_generic(*first) == false)){
 			this->clear();
 		}
-		this->do_replace_no_bound_check(0, this->size(), ::std::move(first), ::std::move(last));
+		if(this->empty()){
+			this->append(::std::move(first), ::std::move(last));
+		} else {
+			this->do_replace_no_bound_check(0, this->size(), ::std::move(first), ::std::move(last));
+		}
 		return *this;
 	}
 
