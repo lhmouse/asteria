@@ -869,7 +869,8 @@ public:
 			return;
 		}
 		if(len_old > n){
-			this->erase(this->end() - static_cast<difference_type>(len_old - n), this->end());
+			this->do_ensure_unique();
+			this->do_set_length(n);
 		} else {
 			this->append(n - len_old, ch);
 		}
