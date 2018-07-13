@@ -185,18 +185,19 @@ namespace details_cow_string {
 			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(st_alloc);
 			return this->do_get_capacity_of(max_n_blocks / 2 - 1);
 		}
-		size_type round_up_capacity(size_type cap) const {
-			const auto n_blocks = this->do_reserve_blocks_for(this->check_size(0, cap));
-			return this->do_get_capacity_of(n_blocks);
-		}
-		size_type check_size(size_type base, size_type add) const {
+		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
 			if(cap_max - base < add){
-				noadl::throw_length_error("storage_handle::check_size(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
+				noadl::throw_length_error("storage_handle::check_size_add(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
 				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
 			return base + add;
+		}
+		size_type round_up_capacity(size_type res_arg) const {
+			const auto cap = this->check_size_add(0, res_arg);
+			const auto n_blocks = this->do_reserve_blocks_for(cap);
+			return this->do_get_capacity_of(n_blocks);
 		}
 		pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -205,15 +206,16 @@ namespace details_cow_string {
 			}
 			return ptr->data;
 		}
-		pointer reallocate(size_type len, size_type cap){
-			ROCKET_ASSERT(len <= cap);
-			if(cap == 0){
+		pointer reallocate(size_type len, size_type res_arg){
+			ROCKET_ASSERT(len <= res_arg);
+			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);
 				return nullptr;
 			}
+			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto n_blocks = this->do_reserve_blocks_for(this->check_size(0, cap));
+			const auto n_blocks = this->do_reserve_blocks_for(cap);
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto ptr = static_cast<storage *>(allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks));
 #ifdef ROCKET_DEBUG
@@ -675,11 +677,11 @@ public:
 private:
 	// Reallocate the storage to `cap` characters, not including the null terminator. The first `len` characters are left intact and the rest are undefined.
 	// The storage is owned by the current string exclusively after this function returns normally.
-	pointer do_reallocate_no_set_length(size_type len, size_type cap){
-		ROCKET_ASSERT(len <= cap);
+	pointer do_reallocate_no_set_length(size_type len, size_type res_arg){
+		ROCKET_ASSERT(len <= res_arg);
 		ROCKET_ASSERT(len <= this->m_len);
-		ROCKET_ASSERT(cap != 0);
-		const auto ptr = this->m_sth.reallocate(len, cap);
+		ROCKET_ASSERT(res_arg != 0);
+		const auto ptr = this->m_sth.reallocate(len, res_arg);
 		ROCKET_ASSERT(this->m_sth.unique());
 		this->m_ptr = ptr;
 		return ptr + len;
@@ -687,7 +689,7 @@ private:
 	// Reallocate more storage as needed, without shrinking.
 	pointer do_auto_reallocate_no_set_length(size_type len, size_type cap_add){
 		ROCKET_ASSERT(len <= this->m_len);
-		auto cap = this->m_sth.check_size(len, cap_add);
+		auto cap = this->m_sth.check_size_add(len, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
@@ -697,17 +699,17 @@ private:
 			this->do_reallocate_no_set_length(len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-		const auto ptr = const_cast<pointer>(this->m_ptr);
+		const auto ptr = this->m_sth.data();
+		ROCKET_ASSERT(ptr == this->m_ptr);
 		return ptr + len;
 	}
 	// Add a null terminator at `ptr[len]` then set `len` there.
 	void do_set_length(size_type len) noexcept {
 		ROCKET_ASSERT(this->m_sth.unique());
 		ROCKET_ASSERT(len <= this->m_sth.capacity());
-		const auto ptr = const_cast<pointer>(this->m_ptr);
-		ROCKET_ASSERT(ptr == this->m_sth.data());
-		ROCKET_ASSERT(len <= this->m_sth.capacity());
-		traits_type::assign(ptr + len, 1, value_type());
+		const auto ptr = this->m_sth.data();
+		ROCKET_ASSERT(ptr == this->m_ptr);
+		traits_type::assign(ptr[len], value_type());
 		this->m_len = len;
 	}
 	// Get a pointer to mutable storage.
@@ -718,7 +720,8 @@ private:
 			this->do_set_length(len);
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
-		const auto ptr = const_cast<pointer>(this->m_ptr);
+		const auto ptr = this->m_sth.data();
+		ROCKET_ASSERT(ptr == this->m_ptr);
 		return ptr;
 	}
 	// Deallocate any dynamic storage.
