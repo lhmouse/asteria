@@ -1020,17 +1020,20 @@ public:
 			return *this;
 		}
 		if(this->do_check_overlap_generic(*first)){
-			// Append the referenced range into a temporary string, then move it into `*this`.
 			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
+			// Append the range into the temporary string.
+			auto it = std::move(first);
 			do {
-				other.push_back(*first);
-			} while(++first != last);
+				other.push_back(*it);
+			} while(++it != last);
+			// Then move it into `*this`.
 			this->assign(::std::move(other));
 		} else {
 			// It should be safe to append to `*this` directly.
+			auto it = std::move(first);
 			do {
-				this->push_back(*first);
-			} while(++first != last);
+				this->push_back(*it);
+			} while(++it != last);
 		}
 		return *this;
 	}
