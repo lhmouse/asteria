@@ -261,19 +261,36 @@ namespace details_cow_string {
 		}
 	};
 
-	template<typename stringT>
-	class string_iterator_base {
+	template<typename stringT, typename charT>
+	class string_iterator {
 		friend stringT;
+
+	public:
+		using value_type         = charT;
+		using pointer            = value_type *;
+		using reference          = value_type &;
+		using difference_type    = ptrdiff_t;
+		using iterator_category  = ::std::random_access_iterator_tag;
 
 	private:
 		const stringT *m_str;
+		charT *m_ptr;
 
-	protected:
-		explicit constexpr string_iterator_base(const stringT *str) noexcept
-			: m_str(str)
+	private:
+		constexpr string_iterator(const stringT *str, charT *ptr) noexcept
+			: m_str(str), m_ptr(ptr)
 		{ }
 
-	protected:
+	public:
+		constexpr string_iterator() noexcept
+			: string_iterator(nullptr, nullptr)
+		{ }
+		template<typename ycharT, typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
+		constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
+			: string_iterator(other.m_str, other.m_ptr)
+		{ }
+
+	private:
 		template<typename pointerT>
 		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept {
 			const auto str = this->m_str;
@@ -288,97 +305,14 @@ namespace details_cow_string {
 
 	public:
 		const stringT * parent() const noexcept {
-			return m_str;
+			return this->m_str;
 		}
-	};
 
-	// basic_cow_string::iterator
-	template<typename stringT, typename charT>
-	class string_iterator : public string_iterator_base<stringT> {
-		friend stringT;
-		friend string_iterator<stringT, const charT>;
-
-	public:
-		using value_type         = charT;
-		using pointer            = value_type *;
-		using reference          = value_type &;
-		using difference_type    = ptrdiff_t;
-		using iterator_category  = ::std::random_access_iterator_tag;
-
-	private:
-		pointer m_ptr;
-
-	private:
-		string_iterator(const stringT *str, pointer ptr) noexcept
-			: string_iterator_base<stringT>(str)
-			, m_ptr(this->do_assert_valid_pointer(ptr, false))
-		{ }
-
-	public:
-		constexpr string_iterator() noexcept
-			: string_iterator_base<stringT>(nullptr)
-			, m_ptr(nullptr)
-		{ }
-
-	public:
 		pointer tell() const noexcept {
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
 		pointer tell_owned_by(const stringT *str) const noexcept {
-			ROCKET_ASSERT(this->parent() == str);
-			return this->tell();
-		}
-		string_iterator & seek(pointer ptr) noexcept {
-			this->m_ptr = this->do_assert_valid_pointer(ptr, false);
-			return *this;
-		}
-
-		reference operator*() const noexcept {
-			return *(this->do_assert_valid_pointer(this->m_ptr, true));
-		}
-		reference operator[](difference_type off) const noexcept {
-			return *(this->do_assert_valid_pointer(this->m_ptr + off, true));
-		}
-	};
-
-	// basic_cow_string::const_iterator
-	template<typename stringT, typename charT>
-	class string_iterator<stringT, const charT> : public string_iterator_base<stringT> {
-		friend stringT;
-		friend string_iterator<stringT, charT>;
-
-	public:
-		using value_type         = charT;
-		using pointer            = const value_type *;
-		using reference          = const value_type &;
-		using difference_type    = ptrdiff_t;
-		using iterator_category  = ::std::random_access_iterator_tag;
-
-	private:
-		pointer m_ptr;
-
-	private:
-		string_iterator(const stringT *str, pointer ptr) noexcept
-			: string_iterator_base<stringT>(str)
-			, m_ptr(this->do_assert_valid_pointer(ptr, false))
-		{ }
-
-	public:
-		constexpr string_iterator() noexcept
-			: string_iterator_base<stringT>(nullptr)
-			, m_ptr(nullptr)
-		{ }
-		string_iterator(const string_iterator<stringT, charT> &other) noexcept
-			: string_iterator_base<stringT>(other)
-			, m_ptr(other.m_ptr)
-		{ }
-
-	public:
-		pointer tell() const noexcept {
-			return this->do_assert_valid_pointer(this->m_ptr, false);
-		}
-		pointer tell_owned_by(const stringT *str) const noexcept {
-			ROCKET_ASSERT(this->parent() == str);
+			ROCKET_ASSERT(this->m_str == str);
 			return this->tell();
 		}
 		string_iterator & seek(pointer ptr) noexcept {
