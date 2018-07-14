@@ -49,8 +49,8 @@ public:
 	size_type get_caret() const noexcept {
 		return this->rdbuf()->get_caret();
 	}
-	void set_string(string_type str) noexcept {
-		return this->rdbuf()->set_string(::std::move(str));
+	void set_string(string_type str, size_type caret = string_type::npos) noexcept {
+		return this->rdbuf()->set_string(::std::move(str), caret);
 	}
 	void set_caret(size_type caret) noexcept {
 		return this->rdbuf()->set_caret(caret);
