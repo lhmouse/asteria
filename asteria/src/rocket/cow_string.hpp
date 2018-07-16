@@ -229,6 +229,7 @@ namespace details_cow_string {
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
 			const auto src = this->m_ptr;
 			if(src){
+				ROCKET_ASSERT(len <= this->do_get_capacity_of(src->st_n_blocks));
 				// Copy characters into the new block, without adding a null character.
 				traits_type::copy(ptr->data, src->data, len);
 			}
