@@ -259,6 +259,7 @@ namespace details_cow_string {
 	template<typename stringT, typename charT>
 	class string_iterator {
 		friend stringT;
+		friend string_iterator<stringT, const charT>;
 
 	public:
 		using value_type         = charT;
@@ -628,8 +629,7 @@ private:
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
-			cap |= len + len / 2;
-			cap |= 31;
+			cap = noadl::max(cap, len + len / 2 + 31);
 #endif
 			this->do_reallocate(cap);
 		}
@@ -704,8 +704,10 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = from; i != len - n + 1; ++i){
-			if(pred(this->data() + i)){
+		const auto rlen = len - n;
+		for(auto i = noadl::min(from, rlen + 1); i - 1 != rlen; ++i){
+			const auto ts = this->data() + i;
+			if(pred(ts)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
@@ -719,8 +721,10 @@ private:
 		if(len < n){
 			return npos;
 		}
-		for(auto i = noadl::min(len - n, to); i + 1 != 0; --i){
-			if(pred(this->data() + i)){
+		const auto rlen = len - n;
+		for(auto i = noadl::min(rlen, to); i + 1 != 0; --i){
+			const auto ts = this->data() + i;
+			if(pred(ts)){
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
