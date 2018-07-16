@@ -122,13 +122,16 @@ namespace details_variant {
 	namespace details_is_nothrow_swappable {
 		using ::std::swap;
 
-		template<typename paramT>
+		template<typename typeT>
 		struct is_nothrow_swappable
-			: integral_constant<bool, noexcept(swap(::std::declval<paramT &>(), ::std::declval<paramT &>()))>
+			: integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
 		{ };
 	}
 
-	using details_is_nothrow_swappable::is_nothrow_swappable;
+	template<typename typeT>
+	struct is_nothrow_swappable
+		: details_is_nothrow_swappable::is_nothrow_swappable<typeT>
+	{ };
 
 	template<typename typeT, typename ...paramsT>
 	inline typeT * construct(typeT *ptr, paramsT &&...params){
