@@ -197,7 +197,8 @@ namespace details_cow_vector {
 			}
 			return ptr->n_values;
 		}
-		pointer reallocate(size_type len, size_type res_arg){
+		pointer reallocate(size_type res_arg){
+			const auto len = this->size();
 			ROCKET_ASSERT(len <= res_arg);
 			if(res_arg == 0){
 				// Deallocate the block.
@@ -213,14 +214,13 @@ namespace details_cow_vector {
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
-			const auto src = this->m_ptr;
-			if(src){
+			if(len != 0){
 				auto cur = size_type(0);
-				ROCKET_ASSERT(len <= src->n_values);
 				try {
+					const auto src = this->m_ptr->data;
 					// Move-constructs values into the new block.
 					while(cur != len){
-						allocator_traits<allocator_type>::construct(this->as_allocator(), ptr->data + cur, ::std::move(*(src->data + cur)));
+						allocator_traits<allocator_type>::construct(this->as_allocator(), ptr->data + cur, ::std::move(*(src + cur)));
 						ptr->n_values = ++cur;
 					}
 				} catch(...){
@@ -356,6 +356,7 @@ namespace details_cow_vector {
 	template<typename vectorT, typename valueT>
 	class vector_iterator {
 		friend vectorT;
+		friend vector_iterator<vectorT, const valueT>;
 
 	public:
 		using value_type         = valueT;
@@ -613,8 +614,7 @@ private:
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
-			cap |= len + len / 2;
-			cap |= 31;
+			cap = noadl::max(cap, len + len / 2 + 31);
 #endif
 			this->do_reallocate_no_set_length(len, cap);
 		}
