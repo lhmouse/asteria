@@ -211,7 +211,7 @@ namespace details_cow_string {
 			ROCKET_ASSERT(ptr);
 			return ptr->data;
 		}
-		pointer reallocate(const value_type *src_data, size_type len, size_type res_arg){
+		pointer reallocate(const value_type *src, size_type len, size_type res_arg){
 			ROCKET_ASSERT(len <= res_arg);
 			if(res_arg == 0){
 				// Deallocate the block.
@@ -228,7 +228,7 @@ namespace details_cow_string {
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
 			// Copy characters into the new block, then add a null character.
-			traits_type::copy(ptr->data, src_data, len);
+			traits_type::copy(ptr->data, src, len);
 			traits_type::assign(ptr->data[len], value_type());
 			// Replace the current block.
 			this->do_reset(ptr);
