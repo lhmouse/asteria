@@ -207,11 +207,9 @@ namespace details_cow_string {
 			return ptr->data;
 		}
 		pointer mut_data() noexcept {
-			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
-				return nullptr;
-			}
 			ROCKET_ASSERT(this->unique());
+			const auto ptr = this->m_ptr;
+			ROCKET_ASSERT(ptr);
 			return ptr->data;
 		}
 		pointer reallocate(size_type len, size_type res_arg){
