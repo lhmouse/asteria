@@ -51,7 +51,6 @@ using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::conditional;
 using ::std::iterator_traits;
-using ::std::reverse_iterator;
 using ::std::initializer_list;
 using ::std::uint_fast32_t;
 using ::std::size_t;
