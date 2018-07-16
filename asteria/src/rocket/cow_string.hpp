@@ -211,7 +211,7 @@ namespace details_cow_string {
 			ROCKET_ASSERT(ptr);
 			return ptr->data;
 		}
-		pointer reallocate(size_type len, size_type res_arg){
+		pointer reallocate(const value_type *src_data, size_type len, size_type res_arg){
 			ROCKET_ASSERT(len <= res_arg);
 			if(res_arg == 0){
 				// Deallocate the block.
@@ -227,12 +227,9 @@ namespace details_cow_string {
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
-			const auto src = this->m_ptr;
-			if(src){
-				ROCKET_ASSERT(len <= this->do_get_capacity_of(src->st_n_blocks));
-				// Copy characters into the new block, without adding a null character.
-				traits_type::copy(ptr->data, src->data, len);
-			}
+			// Copy characters into the new block, then add a null character.
+			traits_type::copy(ptr->data, src_data, len);
+			traits_type::assign(ptr->data[len], value_type());
 			// Replace the current block.
 			this->do_reset(ptr);
 			return ptr->data;
@@ -617,17 +614,15 @@ public:
 private:
 	// Reallocate the storage to `cap` characters, not including the null terminator. The first `len` characters are left intact and the rest are undefined.
 	// The storage is owned by the current string exclusively after this function returns normally.
-	pointer do_reallocate_no_set_length(size_type len, size_type res_arg){
-		ROCKET_ASSERT(len <= res_arg);
-		ROCKET_ASSERT(len <= this->m_len);
+	void do_reallocate(size_type res_arg){
+		ROCKET_ASSERT(res_arg >= this->m_len);
 		ROCKET_ASSERT(res_arg != 0);
-		const auto ptr = this->m_sth.reallocate(len, res_arg);
+		const auto ptr = this->m_sth.reallocate(this->m_ptr, this->m_len, res_arg);
 		ROCKET_ASSERT(this->m_sth.unique());
 		this->m_ptr = ptr;
-		return ptr + len;
 	}
 	// Reallocate more storage as needed, without shrinking.
-	pointer do_reallocate_more_no_set_length(size_type cap_add){
+	void do_reallocate_more(size_type cap_add){
 		const auto len = this->m_len;
 		auto cap = this->m_sth.check_size_add(len, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
@@ -636,12 +631,9 @@ private:
 			cap |= len + len / 2;
 			cap |= 31;
 #endif
-			this->do_reallocate_no_set_length(len, cap);
+			this->do_reallocate(cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-		const auto ptr = this->m_sth.mut_data();
-		ROCKET_ASSERT(ptr == this->m_ptr);
-		return ptr + len;
 	}
 	// Add a null terminator at `ptr[len]` then set `len` there.
 	void do_set_length(size_type len) noexcept {
@@ -653,16 +645,11 @@ private:
 		this->m_len = len;
 	}
 	// Get a pointer to mutable storage.
-	pointer do_ensure_unique(){
+	void do_ensure_unique(){
 		if(this->m_sth.unique() == false){
-			const auto len = this->m_len;
-			this->do_reallocate_no_set_length(len, noadl::max(len, size_type(1)));
-			this->do_set_length(len);
+			this->do_reallocate(this->m_len | 1);
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
-		const auto ptr = this->m_sth.mut_data();
-		ROCKET_ASSERT(ptr == this->m_ptr);
-		return ptr;
 	}
 	// Deallocate any dynamic storage.
 	void do_deallocate() noexcept {
@@ -693,7 +680,8 @@ private:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
-		const auto ptr = this->do_ensure_unique();
+		this->do_ensure_unique();
+		const auto ptr = this->m_sth.mut_data();
 		traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - tpos - tn);
 		this->do_set_length(len_old - tn);
 		return ptr + tpos;
@@ -826,8 +814,7 @@ public:
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate_no_set_length(len, cap_new);
-		this->do_set_length(len);
+		this->do_reallocate(cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
@@ -838,8 +825,7 @@ public:
 			return;
 		}
 		if(len != 0){
-			this->do_reallocate_no_set_length(len, len);
-			this->do_set_length(len);
+			this->do_reallocate(len);
 		} else {
 			this->do_deallocate();
 		}
@@ -926,11 +912,13 @@ public:
 		const auto len_old = this->size();
 		if(this->do_check_overlap_generic(*s)){
 			const auto tpos = s - this->data();
-			const auto wptr = this->do_reallocate_more_no_set_length(n);
-			traits_type::move(wptr, this->data() + tpos, n);
+			this->do_reallocate_more(n);
+			const auto wptr = this->m_sth.mut_data();
+			traits_type::move(wptr + len_old, wptr + tpos, n);
 		} else {
-			const auto wptr = this->do_reallocate_more_no_set_length(n);
-			traits_type::copy(wptr, s, n);
+			this->do_reallocate_more(n);
+			const auto wptr = this->m_sth.mut_data();
+			traits_type::copy(wptr + len_old, s, n);
 		}
 		this->do_set_length(len_old + n);
 		return *this;
@@ -943,8 +931,9 @@ public:
 			return *this;
 		}
 		const auto len_old = this->size();
-		const auto wptr = this->do_reallocate_more_no_set_length(n);
-		traits_type::assign(wptr, n, ch);
+		this->do_reallocate_more(n);
+		const auto wptr = this->m_sth.mut_data();
+		traits_type::assign(wptr + len_old, n, ch);
 		this->do_set_length(len_old + n);
 		return *this;
 	}
@@ -982,8 +971,9 @@ public:
 	// The return type is a non-standard extension.
 	basic_cow_string & push_back(value_type ch){
 		const auto len_old = this->size();
-		const auto wptr = this->do_reallocate_more_no_set_length(1);
-		traits_type::assign(*wptr, ch);
+		this->do_reallocate_more(1);
+		const auto wptr = this->m_sth.mut_data();
+		traits_type::assign(wptr[len_old], ch);
 		this->do_set_length(len_old + 1);
 		return *this;
 	}
@@ -1030,36 +1020,15 @@ public:
 		return *this;
 	}
 	basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos){
-		if(this != &other){
-			this->clear();
-		}
-		if(this->empty()){
-			this->append(other, pos, n);
-		} else {
-			this->do_replace_no_bound_check(0, this->size(), other, pos, n);
-		}
+		this->do_replace_no_bound_check(0, this->size(), other, pos, n);
 		return *this;
 	}
 	basic_cow_string & assign(const_pointer s, size_type n){
-		if((n != 0) && (this->do_check_overlap_generic(*s) == false)){
-			this->clear();
-		}
-		if(this->empty()){
-			this->append(s, n);
-		} else {
-			this->do_replace_no_bound_check(0, this->size(), s, n);
-		}
+		this->do_replace_no_bound_check(0, this->size(), s, n);
 		return *this;
 	}
 	basic_cow_string & assign(const_pointer s){
-		if(this->do_check_overlap_generic(*s) == false){
-			this->clear();
-		}
-		if(this->empty()){
-			this->append(s);
-		} else {
-			this->do_replace_no_bound_check(0, this->size(), s);
-		}
+		this->do_replace_no_bound_check(0, this->size(), s);
 		return *this;
 	}
 	basic_cow_string & assign(size_type n, value_type ch){
@@ -1074,14 +1043,7 @@ public:
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	basic_cow_string & assign(inputT first, inputT last){
-		if((first != last) && (this->do_check_overlap_generic(*first) == false)){
-			this->clear();
-		}
-		if(this->empty()){
-			this->append(::std::move(first), ::std::move(last));
-		} else {
-			this->do_replace_no_bound_check(0, this->size(), ::std::move(first), ::std::move(last));
-		}
+		this->do_replace_no_bound_check(0, this->size(), ::std::move(first), ::std::move(last));
 		return *this;
 	}
 
@@ -1245,7 +1207,8 @@ public:
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	pointer mut_data(){
-		return this->do_ensure_unique();
+		this->do_ensure_unique();
+		return this->m_sth.mut_data();
 	}
 	const_pointer c_str() const noexcept {
 		return this->data();
