@@ -225,14 +225,14 @@ namespace details_cow_string {
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto n_blocks = this->do_reserve_blocks_for(cap);
 			auto st_alloc = storage_allocator(this->as_allocator());
-			const auto ptr = static_cast<storage *>(allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks));
+			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
 			const auto src = this->m_ptr;
 			if(src){
-				// Copy characters into the new block, then terminate it with a null character.
+				// Copy characters into the new block, without adding a null character.
 				traits_type::copy(ptr->data, src->data, len);
 			}
 			// Replace the current block.
