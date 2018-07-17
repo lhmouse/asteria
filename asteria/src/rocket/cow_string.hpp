@@ -78,6 +78,24 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::ios  &ios);
 	extern template void handle_io_exception(::std::wios &ios);
 
+	template<typename charT, typename allocatorT>
+	struct storage_header {
+		static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
+		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
+
+		typename allocator_traits<allocatorT>::template rebind_alloc<storage_header> st_alloc;
+		size_t st_n_blocks;
+
+		atomic<ptrdiff_t> ref_count;
+		ROCKET_EXTENSION(charT data[0]);
+
+		storage_header(const allocatorT &alloc, size_t n_blocks) noexcept
+			: st_alloc(alloc), st_n_blocks(n_blocks)
+		{
+			this->ref_count.store(1, ::std::memory_order_release);
+		}
+	};
+
 	template<typename charT, typename traitsT, typename allocatorT>
 	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
 	public:
@@ -91,22 +109,9 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		struct storage {
-			typename allocator_traits<allocator_type>::template rebind_alloc<storage> st_alloc;
-			size_type st_n_blocks;
-
-			atomic<difference_type> ref_count;
-			ROCKET_EXTENSION(value_type data[0]);
-
-			storage(const allocator_type &alloc, size_type n_blocks) noexcept
-				: st_alloc(alloc), st_n_blocks(n_blocks)
-			{
-				this->ref_count.store(1, ::std::memory_order_release);
-			}
-		};
-
 		using allocator_base    = allocator_wrapper_base_for<allocatorT>;
-		using storage_allocator = decltype(storage::st_alloc);
+		using storage           = storage_header<value_type, allocator_type>;
+		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
 		static constexpr size_type do_reserve_blocks_for(size_type n_chars) noexcept {
@@ -492,8 +497,6 @@ namespace details_cow_string {
 template<typename charT, typename traitsT, typename allocatorT>
 class basic_cow_string {
 	static_assert(is_same<typename allocatorT::value_type, charT>::value, "`allocatorT::value_type` must denote the same type as `charT`.");
-	static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
-	static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
 public:
 	// types

@@ -51,6 +51,25 @@ class cow_vector;
 
 namespace details_cow_vector {
 	template<typename valueT, typename allocatorT>
+	struct storage_header {
+		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
+
+		typename allocator_traits<allocatorT>::template rebind_alloc<storage_header> st_alloc;
+		size_t st_n_blocks;
+
+		atomic<ptrdiff_t> ref_count;
+		size_t n_values;
+		ROCKET_EXTENSION(valueT data[0]);
+
+		storage_header(const allocatorT &alloc, size_t n_blocks) noexcept
+			: st_alloc(alloc), st_n_blocks(n_blocks)
+		{
+			this->n_values = 0;
+			this->ref_count.store(1, ::std::memory_order_release);
+		}
+	};
+
+	template<typename valueT, typename allocatorT>
 	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
 	public:
 		using value_type       = valueT;
@@ -62,24 +81,9 @@ namespace details_cow_vector {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		struct storage {
-			typename allocator_traits<allocator_type>::template rebind_alloc<storage> st_alloc;
-			size_type st_n_blocks;
-
-			atomic<difference_type> ref_count;
-			size_type n_values;
-			ROCKET_EXTENSION(value_type data[0]);
-
-			storage(const allocator_type &alloc, size_type n_blocks) noexcept
-				: st_alloc(alloc), st_n_blocks(n_blocks)
-			{
-				this->n_values = 0;
-				this->ref_count.store(1, ::std::memory_order_release);
-			}
-		};
-
 		using allocator_base    = allocator_wrapper_base_for<allocatorT>;
-		using storage_allocator = decltype(storage::st_alloc);
+		using storage           = storage_header<value_type, allocator_type>;
+		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
 		static constexpr size_type do_reserve_blocks_for(size_type n_values) noexcept {
@@ -507,7 +511,6 @@ namespace details_cow_vector {
 template<typename valueT, typename allocatorT>
 class cow_vector {
 	static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
-	static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
 
 public:
 	// types
