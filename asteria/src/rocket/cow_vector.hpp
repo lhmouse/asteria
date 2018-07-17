@@ -104,7 +104,8 @@ namespace details_cow_vector {
 
 	template<typename valueT, typename allocatorT>
 	struct siphon
-		: siphon_copy<valueT, allocatorT, is_copy_constructible<valueT>::value>, siphon_move<valueT, allocatorT>
+		: siphon_copy<valueT, allocatorT, is_copy_constructible<valueT>::value>
+		, siphon_move<valueT, allocatorT>
 	{ };
 
 	template<typename valueT, typename allocatorT>
