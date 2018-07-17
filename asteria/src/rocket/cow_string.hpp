@@ -615,7 +615,7 @@ public:
 	}
 
 private:
-	// Reallocate the storage to `cap` characters, not including the null terminator. The first `len` characters are left intact and the rest are undefined.
+	// Reallocate the storage to `cap` characters, not including the null terminator.
 	// The storage is owned by the current string exclusively after this function returns normally.
 	void do_reallocate(size_type res_arg){
 		ROCKET_ASSERT(res_arg >= this->m_len);
