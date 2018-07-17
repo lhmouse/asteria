@@ -31,5 +31,10 @@ void throw_length_error(const char *fmt, ...){
 	VSNPRINTF(str, fmt);
 	throw ::std::length_error(str);
 }
+void throw_domain_error(const char *fmt, ...){
+	char str[1024];
+	VSNPRINTF(str, fmt);
+	throw ::std::domain_error(str);
+}
 
 }
