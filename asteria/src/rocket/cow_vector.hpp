@@ -745,7 +745,7 @@ public:
 		}
 		if(len_old < n){
 			this->do_reallocate_more(n - len_old);
-			this->m_sth.emplace_back_n(n, params...);
+			this->m_sth.emplace_back_n(n - len_old, params...);
 		} else {
 			this->do_ensure_unique();
 			this->m_sth.pop_back_n(len_old - n);
