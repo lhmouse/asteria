@@ -368,12 +368,12 @@ namespace details_cow_vector {
 		using iterator_category  = ::std::random_access_iterator_tag;
 
 	private:
-		const vectorT *m_str;
+		const vectorT *m_vec;
 		valueT *m_ptr;
 
 	private:
-		constexpr vector_iterator(const vectorT *str, valueT *ptr) noexcept
-			: m_str(str), m_ptr(ptr)
+		constexpr vector_iterator(const vectorT *vec, valueT *ptr) noexcept
+			: m_vec(vec), m_ptr(ptr)
 		{ }
 
 	public:
@@ -382,32 +382,32 @@ namespace details_cow_vector {
 		{ }
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
 		constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
-			: vector_iterator(other.m_str, other.m_ptr)
+			: vector_iterator(other.m_vec, other.m_ptr)
 		{ }
 
 	private:
 		template<typename pointerT>
 		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept {
-			const auto str = this->m_str;
-			ROCKET_ASSERT_MSG(str, "This iterator has not been initialized.");
-			const auto dist = static_cast<typename vectorT::size_type>(ptr - str->data());
-			ROCKET_ASSERT_MSG(dist <= str->size(), "This iterator has been invalidated.");
+			const auto vec = this->m_vec;
+			ROCKET_ASSERT_MSG(vec, "This iterator has not been initialized.");
+			const auto dist = static_cast<typename vectorT::size_type>(ptr - vec->data());
+			ROCKET_ASSERT_MSG(dist <= vec->size(), "This iterator has been invalidated.");
 			if(to_dereference){
-				ROCKET_ASSERT_MSG(dist < str->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
+				ROCKET_ASSERT_MSG(dist < vec->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
 			}
 			return ptr;
 		}
 
 	public:
 		const vectorT * parent() const noexcept {
-			return this->m_str;
+			return this->m_vec;
 		}
 
 		pointer tell() const noexcept {
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
-		pointer tell_owned_by(const vectorT *str) const noexcept {
-			ROCKET_ASSERT(this->m_str == str);
+		pointer tell_owned_by(const vectorT *vec) const noexcept {
+			ROCKET_ASSERT(this->m_vec == vec);
 			return this->tell();
 		}
 		vector_iterator & seek(pointer ptr) noexcept {
@@ -628,6 +628,15 @@ private:
 		this->m_sth.deallocate();
 	}
 
+	template<typename ...paramsT>
+	iterator do_insert(const_iterator tins, paramsT &&...params){
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+		const auto len_old = this->size();
+		this->append(::std::forward<paramsT>(params)...);
+		this->m_sth.rotate(tpos, len_old);
+		return iterator(this, this->mut_data() + tpos);
+	}
+
 public:
 	// iterators
 	const_iterator begin() const noexcept {
@@ -780,6 +789,26 @@ public:
 		return this->mut(this->size() - 1);
 	}
 
+	// N.B. This is a non-standard extension.
+	template<typename ...paramsT>
+	cow_vector & append(size_type n, const paramsT &...params){
+		this->do_reallocate_more(n);
+		this->m_sth.emplace_back_n(n, params...);
+		return *this;
+	}
+	// N.B. This is a non-standard extension.
+	cow_vector & append(initializer_list<value_type> init){
+		return this->append(init.begin(), init.end());
+	}
+	// N.B. This is a non-standard extension.
+	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+	cow_vector & append(inputT first, inputT last){
+		this->do_reallocate_more(noadl::estimate_distance(first, last));
+		for(auto it = ::std::move(first); it != last; ++it){
+			this->emplace_back(*it);
+		}
+		return *this;
+	}
 	// 26.3.11.5, modifiers
 	template<typename ...paramsT>
 	reference emplace_back(paramsT &&...params){
@@ -802,7 +831,7 @@ public:
 		const auto len_old = this->size();
 		this->emplace_back(::std::forward<paramsT>(params)...);
 		this->m_sth.rotate(tpos, len_old);
-		return iterator(this, this->m_sth.mut_data() + tpos);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value){
 		return this->emplace(tins, value);
@@ -813,33 +842,14 @@ public:
 	// N.B. The parameter pack is a non-standard extension.
 	template<typename ...paramsT>
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params){
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto len_old = this->size();
-		this->do_reallocate_more(n);
-		this->m_sth.emplace_back_n(n, params...);
-		this->m_sth.rotate(tpos, len_old);
-		return iterator(this, this->m_sth.mut_data() + tpos);
+		return this->do_insert(tins, n, params...);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init){
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto len_old = this->size();
-		this->do_reallocate_more(init.size());
-		for(auto it = init.begin(); it != init.end(); ++it){
-			this->m_sth.emplace_back_n(1, *it);
-		}
-		this->m_sth.rotate(tpos, len_old);
-		return iterator(this, this->m_sth.mut_data() + tpos);
+		return this->do_insert(tins, init);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last){
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto len_old = this->size();
-		this->do_reallocate_more(noadl::estimate_distance(first, last));
-		for(auto it = ::std::move(first); it != last; ++it){
-			this->emplace_back(*it);
-		}
-		this->m_sth.rotate(tpos, len_old);
-		return iterator(this, this->m_sth.mut_data() + tpos);
+		return this->do_insert(tins, ::std::move(first), ::std::move(last));
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
@@ -849,7 +859,7 @@ public:
 		this->do_ensure_unique();
 		this->m_sth.rotate(tpos, tpos + tn);
 		this->m_sth.pop_back_n(tn);
-		return iterator(this, this->m_sth.mut_data() + tpos);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator trm){
