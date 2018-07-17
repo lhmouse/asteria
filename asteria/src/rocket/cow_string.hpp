@@ -85,7 +85,6 @@ namespace details_cow_string {
 
 		typename allocator_traits<allocatorT>::template rebind_alloc<storage_header> st_alloc;
 		size_t st_n_blocks;
-
 		atomic<ptrdiff_t> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
@@ -849,6 +848,10 @@ public:
 			this->do_deallocate();
 		}
 		ROCKET_ASSERT(this->empty());
+	}
+	// N.B. This is a non-standard extension.
+	bool unique() const noexcept {
+		return this->m_sth.unique();
 	}
 
 	// 24.3.2.5, element access

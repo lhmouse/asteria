@@ -21,7 +21,6 @@
 #include <atomic>
 #include <initializer_list>
 #include <array>
-#include <vector>
 #include <unordered_map>
 
 #include <cstring>
@@ -38,7 +37,7 @@
 #include "rocket/variant.hpp"
 #include "rocket/fill_iterator.hpp"
 #include "rocket/cow_string.hpp"
-//#include "rocket/cow_vector.hpp"
+#include "rocket/cow_vector.hpp"
 //#include "rocket/cow_hashmap.hpp"
 
 namespace Asteria {

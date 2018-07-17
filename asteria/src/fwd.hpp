@@ -9,10 +9,10 @@
 #include <memory> // std::shared_ptr<>, std::weak_ptr<>
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
-#include <vector> // std::vector<>
 #include <unordered_map> // std::unordered_map<>
 #include "rocket/preprocessor_utilities.h"
 #include "rocket/cow_string.hpp"
+#include "rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -25,7 +25,7 @@ using Double_precision  = double;
 using Cow_string        = rocket::cow_string;
 
 template<typename ElementT>
-using Vector = std::vector<ElementT>;
+using Vector = rocket::cow_vector<ElementT>;
 template<typename ElementT>
 using Dictionary = std::unordered_map<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
 template<typename FirstT, typename SecondT>

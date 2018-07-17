@@ -145,7 +145,7 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
 		const auto &array_rhs = rhs.as<D_array>();
 		const auto len_min = std::min(array_lhs.size(), array_rhs.size());
 		for(std::size_t i = 0; i < len_min; ++i){
-			const auto res = compare_values(array_lhs.at(i), array_rhs.at(i));
+			const auto res = compare_values(array_lhs[i], array_rhs[i]);
 			if(res != Value::comparison_equal){
 				return res;
 			}

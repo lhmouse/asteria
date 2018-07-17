@@ -109,12 +109,12 @@ int main(){
 	swap(value, cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_equal);
 
-	value.as<D_array>().at(1).set(D_string(D_string::shallow("hello")));
+	value.as<D_array>().mut(1).set(D_string(D_string::shallow("hello")));
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_less);
 	swap(value, cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_greater);
 
-	value.as<D_array>().at(1).set(D_boolean(true));
+	value.as<D_array>().mut(1).set(D_boolean(true));
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_unordered);
 	swap(value, cmp);
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_unordered);

@@ -57,7 +57,6 @@ namespace details_cow_vector {
 
 		typename allocator_traits<allocatorT>::template rebind_alloc<storage_header> st_alloc;
 		size_t st_n_blocks;
-
 		atomic<ptrdiff_t> ref_count;
 		size_t n_values;
 		ROCKET_EXTENSION(valueT data[0]);
@@ -126,13 +125,13 @@ namespace details_cow_vector {
 				return;
 			}
 			// If it has been decremented to zero, destroy all values backwards.
-			auto st_alloc = ::std::move(ptr->st_alloc);
 			auto cur = ptr->n_values;
 			while(cur != 0){
 				ptr->n_values = --cur;
 				allocator_traits<allocator_type>::destroy(this->as_allocator(), ptr->data + cur);
 			}
 			// Deallocate the block.
+			auto st_alloc = ::std::move(ptr->st_alloc);
 			const auto n_blocks = ptr->st_n_blocks;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
@@ -225,10 +224,18 @@ namespace details_cow_vector {
 				auto cur = size_type(0);
 				try {
 					const auto src = this->m_ptr->data;
-					// Move-constructs values into the new block.
-					while(cur != len){
-						allocator_traits<allocator_type>::construct(this->as_allocator(), ptr->data + cur, ::std::move(*(src + cur)));
-						ptr->n_values = ++cur;
+					if((is_trivial<value_type>::value == false) && (this->m_ptr->ref_count.load(::std::memory_order_relaxed) == 1)){
+						// Move-constructs values into the new block.
+						while(cur != len){
+							allocator_traits<allocator_type>::construct(this->as_allocator(), ptr->data + cur, ::std::move(*(src + cur)));
+							ptr->n_values = ++cur;
+						}
+					} else {
+						// Copy-constructs values into the new block.
+						while(cur != len){
+							allocator_traits<allocator_type>::construct(this->as_allocator(), ptr->data + cur, *(src + cur));
+							ptr->n_values = ++cur;
+						}
 					}
 				} catch(...){
 					// If an exception is thrown, destroy all values that have been constructed so far.
@@ -752,6 +759,10 @@ public:
 			this->do_deallocate();
 		}
 		ROCKET_ASSERT(this->empty());
+	}
+	// N.B. This is a non-standard extension.
+	bool unique() const noexcept {
+		return this->m_sth.unique();
 	}
 
 	// element access
