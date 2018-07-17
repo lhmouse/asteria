@@ -83,16 +83,17 @@ namespace details_cow_string {
 		static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
 		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
-		typename allocator_traits<allocatorT>::template rebind_alloc<storage_header> st_alloc;
-		size_t st_n_blocks;
+		allocatorT alloc;
+		size_t n_blocks;
 		atomic<ptrdiff_t> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
-		storage_header(const allocatorT &alloc, size_t n_blocks) noexcept
-			: st_alloc(alloc), st_n_blocks(n_blocks)
+		storage_header(allocatorT xalloc, size_t xblocks) noexcept
+			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->ref_count.store(1, ::std::memory_order_release);
 		}
+		storage_header(const storage_header &) = delete;
 	};
 
 	template<typename charT, typename traitsT, typename allocatorT>
@@ -145,15 +146,15 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return;
 			}
-			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->st_alloc`.
+			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
 			const auto old = ptr->ref_count.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
 			if(old > 1){
 				return;
 			}
 			// If it has been decremented to zero, deallocate the block.
-			auto st_alloc = ::std::move(ptr->st_alloc);
-			const auto n_blocks = ptr->st_n_blocks;
+			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
+			const auto n_blocks = ptr->n_blocks;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(ptr), '~', sizeof(*ptr) * n_blocks);
@@ -181,7 +182,7 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return 0;
 			}
-			return this->do_get_capacity_of(ptr->st_n_blocks);
+			return this->do_get_capacity_of(ptr->n_blocks);
 		}
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
@@ -227,12 +228,13 @@ namespace details_cow_string {
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto n_blocks = this->do_reserve_blocks_for(cap);
-			auto st_alloc = storage_allocator(this->as_allocator());
+			auto alloc = this->as_allocator();
+			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, ptr, this->as_allocator(), n_blocks);
+			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
 			// Copy characters into the new block, then add a null character.
 			traits_type::copy(ptr->data, src, len);
 			traits_type::assign(ptr->data[len], value_type());
