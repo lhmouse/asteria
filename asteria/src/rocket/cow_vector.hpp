@@ -24,6 +24,7 @@
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
  * 3. The copy constructor and copy assignment operator will not throw exceptions.
  * 4. The specialization for `bool` is not provided.
+ * 5. Comparison operators are not provided.
  */
 
 namespace rocket {
