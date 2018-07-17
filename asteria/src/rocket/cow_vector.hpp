@@ -167,7 +167,7 @@ namespace details_cow_vector {
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
 			if(cap_max - base < add){
-				noadl::throw_length_error("storage_handle::check_size_add(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
+				noadl::throw_length_error("storage_handle::check_size_add(): Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
 				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
 			return base + add;
@@ -684,9 +684,6 @@ public:
 	size_type size() const noexcept {
 		return this->m_sth.size();
 	}
-	size_type length() const noexcept {
-		return this->size();
-	}
 	size_type max_size() const noexcept {
 		return this->m_sth.max_size();
 	}
@@ -753,7 +750,7 @@ public:
 	const_reference at(size_type pos) const {
 		const auto len = this->size();
 		if(pos >= len){
-			noadl::throw_out_of_range("cow_vector::at(): The subscript `%lld` is not a writable position within a vector of length `%lld`.",
+			noadl::throw_out_of_range("cow_vector::at(): The subscript `%lld` is not a writable position within a vector of size `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->data()[pos];
@@ -769,7 +766,7 @@ public:
 	reference mut(size_type pos){
 		const auto len = this->size();
 		if(pos >= len){
-			noadl::throw_out_of_range("cow_vector::mut(): The subscript `%lld` is not a writable position within a vector of length `%lld`.",
+			noadl::throw_out_of_range("cow_vector::mut(): The subscript `%lld` is not a writable position within a vector of size `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->mut_data()[pos];
@@ -910,6 +907,9 @@ public:
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	pointer mut_data(){
+		if(this->empty()){
+			return nullptr;
+		}
 		this->do_ensure_unique();
 		return this->m_sth.mut_data();
 	}

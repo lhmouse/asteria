@@ -1215,6 +1215,9 @@ public:
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	pointer mut_data(){
+		if(this->empty()){
+			return nullptr;
+		}
 		this->do_ensure_unique();
 		return this->m_sth.mut_data();
 	}
