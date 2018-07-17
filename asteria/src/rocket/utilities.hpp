@@ -41,7 +41,7 @@ constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rh
 
 namespace details_utilities {
 	template<typename iteratorT>
-	constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT first, iteratorT last){
+	constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/){
 		return 0;
 	}
 	template<typename iteratorT>
