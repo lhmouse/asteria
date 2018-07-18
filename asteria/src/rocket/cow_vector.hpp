@@ -228,8 +228,7 @@ namespace details_cow_vector {
 			}
 			return ptr->n_elems;
 		}
-		pointer reallocate(size_type res_arg){
-			const auto len = this->size();
+		pointer reallocate(size_type len, size_type res_arg){
 			ROCKET_ASSERT(len <= res_arg);
 			if(res_arg == 0){
 				// Deallocate the block.
@@ -249,6 +248,7 @@ namespace details_cow_vector {
 			if(len != 0){
 				const auto ptr_old = this->m_ptr;
 				ROCKET_ASSERT(ptr_old);
+				ROCKET_ASSERT(len <= ptr_old->n_elems);
 				const bool should_copy = is_trivial<value_type>::value || (ptr_old->ref_count.load(::std::memory_order_relaxed) != 1);
 				try {
 					if(should_copy){
@@ -627,9 +627,13 @@ public:
 private:
 	// Reallocate the storage to `cap` elements.
 	// The storage is owned by the current string exclusively after this function returns normally.
-	void do_reallocate(size_type res_arg){
-		ROCKET_ASSERT(res_arg != 0);
-		this->m_sth.reallocate(res_arg);
+	void do_reallocate(size_type len, size_type res_arg){
+		ROCKET_ASSERT(len <= res_arg);
+		const auto ptr = this->m_sth.reallocate(len, res_arg);
+		if(ptr == nullptr){
+			// The storage has been deallocated.
+			return;
+		}
 		ROCKET_ASSERT(this->m_sth.unique());
 	}
 	// Reallocate more storage as needed, without shrinking.
@@ -641,16 +645,9 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 7);
 #endif
-			this->do_reallocate(cap);
+			this->do_reallocate(len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-	}
-	// Get a pointer to mutable storage.
-	void do_ensure_unique(){
-		if(this->m_sth.unique() == false){
-			this->do_reallocate(this->size() | 1);
-		}
-		ROCKET_ASSERT(this->m_sth.unique());
 	}
 	// Deallocate any dynamic storage.
 	void do_deallocate() noexcept {
@@ -733,11 +730,9 @@ public:
 			return;
 		}
 		if(len_old < n){
-			this->do_reallocate_more(n - len_old);
-			this->m_sth.emplace_back_n(n - len_old, params...);
+			this->append(n - len_old, params...);
 		} else {
-			this->do_ensure_unique();
-			this->m_sth.pop_back_n(len_old - n);
+			this->pop_back(len_old - n);
 		}
 		ROCKET_ASSERT(this->size() == n);
 	}
@@ -751,7 +746,7 @@ public:
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate(cap_new);
+		this->do_reallocate(len, cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
@@ -762,7 +757,7 @@ public:
 			return;
 		}
 		if(len != 0){
-			this->do_reallocate(len);
+			this->do_reallocate(len, len);
 		} else {
 			this->do_deallocate();
 		}
@@ -849,11 +844,11 @@ public:
 		const auto wptr = this->m_sth.emplace_back_n(1, ::std::forward<paramsT>(params)...);
 		return *wptr;
 	}
-	// The return type is a non-standard extension.
+	// N.B. The return type is a non-standard extension.
 	reference push_back(const value_type &value){
 		return this->emplace_back(value);
 	}
-	// The return type is a non-standard extension.
+	// N.B. The return type is a non-standard extension.
 	reference push_back(value_type &&value){
 		return this->emplace_back(::std::move(value));
 	}
@@ -889,20 +884,45 @@ public:
 	iterator erase(const_iterator tfirst, const_iterator tlast){
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_ensure_unique();
-		this->m_sth.rotate(tpos, tpos + tn);
-		this->m_sth.pop_back_n(tn);
-		return iterator(this, this->mut_data() + tpos);
+		const auto len_old = this->size();
+		ROCKET_ASSERT(tpos <= len_old);
+		ROCKET_ASSERT(tn <= len_old - tpos);
+		pointer ptr;
+		if(tpos + tn == len_old){
+			if(this->m_sth.unique() == false){
+				this->do_reallocate(tpos, len_old);
+			} else {
+				this->m_sth.pop_back_n(tn);
+			}
+			ptr = this->m_sth.mut_data();
+		} else {
+			if(this->m_sth.unique() == false){
+				this->do_reallocate(len_old, len_old);
+			}
+			ptr = this->m_sth.mut_data();
+			this->m_sth.rotate(tpos, tpos + tn);
+			this->m_sth.pop_back_n(tn);
+		}
+		return iterator(this, ptr + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator trm){
 		return this->erase(trm, const_iterator(this, trm.tell() + 1));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	void pop_back(){
-		ROCKET_ASSERT(this->empty() == false);
-		this->do_ensure_unique();
-		this->m_sth.pop_back_n(1);
+	// N.B. The return type and parameter are non-standard extensions.
+	cow_vector & pop_back(size_type n = 1){
+		if(n == 0){
+			return *this;
+		}
+		const auto len_old = this->size();
+		ROCKET_ASSERT(n <= len_old);
+		if(this->m_sth.unique() == false){
+			this->do_reallocate(len_old - n, len_old);
+		} else {
+			this->m_sth.pop_back_n(n);
+		}
+		return *this;
 	}
 
 	// N.B. The return type is a non-standard extension.
@@ -950,10 +970,13 @@ public:
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	pointer mut_data(){
-		if(this->empty()){
+		const auto len = this->size();
+		if(len == 0){
 			return nullptr;
 		}
-		this->do_ensure_unique();
+		if(this->m_sth.unique() == false){
+			this->do_reallocate(len, len);
+		}
 		return this->m_sth.mut_data();
 	}
 	// N.B. The return type differs from `std::vector`.
