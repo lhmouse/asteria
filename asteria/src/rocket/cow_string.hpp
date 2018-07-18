@@ -620,7 +620,7 @@ public:
 
 private:
 	// Reallocate the storage to `cap` characters, not including the null terminator.
-	void do_reallocate_no_set_length(size_type len, size_type res_arg){
+	void do_reallocate(size_type len, size_type res_arg){
 		ROCKET_ASSERT(len <= this->m_len);
 		ROCKET_ASSERT(len <= res_arg);
 		const auto ptr = this->m_sth.reallocate(this->m_ptr, len, res_arg);
@@ -631,6 +631,7 @@ private:
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
 		this->m_ptr = ptr;
+		this->m_len = len;
 	}
 	// Reallocate more storage as needed, without shrinking.
 	void do_reallocate_more(size_type cap_add){
@@ -641,7 +642,7 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 31);
 #endif
-			this->do_reallocate_no_set_length(len, cap);
+			this->do_reallocate(len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 	}
@@ -686,13 +687,14 @@ private:
 		pointer ptr;
 		if(tpos + tn == len_old){
 			if(this->m_sth.unique() == false){
-				this->do_reallocate_no_set_length(tpos, len_old);
+				this->do_reallocate(tpos, len_old);
+			} else {
+				this->do_set_length(tpos);
 			}
 			ptr = this->m_sth.mut_data();
-			this->do_set_length(tpos);
 		} else {
 			if(this->m_sth.unique() == false){
-				this->do_reallocate_no_set_length(len_old, len_old);
+				this->do_reallocate(len_old, len_old);
 			}
 			ptr = this->m_sth.mut_data();
 			traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - tpos - tn);
@@ -831,7 +833,7 @@ public:
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate_no_set_length(len, cap_new);
+		this->do_reallocate(len, cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
@@ -842,7 +844,7 @@ public:
 			return;
 		}
 		if(len != 0){
-			this->do_reallocate_no_set_length(len, len);
+			this->do_reallocate(len, len);
 		} else {
 			this->do_deallocate();
 		}
@@ -1024,9 +1026,10 @@ public:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(n <= len_old);
 		if(this->m_sth.unique() == false){
-			this->do_reallocate_no_set_length(len_old - n, len_old);
+			this->do_reallocate(len_old - n, len_old);
+		} else {
+			this->do_set_length(len_old - n);
 		}
-		this->do_set_length(len_old - n);
 		return *this;
 	}
 
@@ -1241,7 +1244,7 @@ public:
 			return nullptr;
 		}
 		if(this->m_sth.unique() == false){
-			this->do_reallocate_no_set_length(len, len);
+			this->do_reallocate(len, len);
 		}
 		return this->m_sth.mut_data();
 	}
