@@ -10,7 +10,6 @@
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
-#include <cstdint> // std::uint_fast32_t
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
