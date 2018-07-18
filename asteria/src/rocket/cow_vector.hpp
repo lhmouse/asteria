@@ -63,7 +63,7 @@ namespace details_cow_vector {
 		size_t n_elems;
 		ROCKET_EXTENSION(valueT data[0]);
 
-		storage_header(allocatorT xalloc, size_t xblocks) noexcept
+		storage_header(allocatorT &&xalloc, size_t xblocks) noexcept
 			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->n_elems = 0;

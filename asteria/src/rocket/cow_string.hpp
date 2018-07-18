@@ -88,7 +88,7 @@ namespace details_cow_string {
 		atomic<ptrdiff_t> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
-		storage_header(allocatorT xalloc, size_t xblocks) noexcept
+		storage_header(allocatorT &&xalloc, size_t xblocks) noexcept
 			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->ref_count.store(1, ::std::memory_order_release);
