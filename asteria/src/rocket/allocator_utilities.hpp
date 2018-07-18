@@ -13,36 +13,43 @@ using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
 
-template<typename allocatorT>
-class final_allocator_wrapper {
-private:
-	allocatorT m_alloc;
-
-public:
-	explicit final_allocator_wrapper(const allocatorT &alloc) noexcept
-		: m_alloc(alloc)
-	{ }
-	explicit final_allocator_wrapper(allocatorT &&alloc) noexcept
-		: m_alloc(::std::move(alloc))
-	{ }
-
-public:
-	operator const allocatorT & () const noexcept {
-		return this->m_alloc;
-	}
-	operator allocatorT & () noexcept {
-		return this->m_alloc;
-	}
-};
-
-template<typename allocatorT>
-using allocator_wrapper_base_for =
+namespace details_allocator_utilities {
+	template<typename typeT>
+	struct is_final
 #ifdef __cpp_lib_is_final
-	typename conditional<true, final_allocator_wrapper<allocatorT>, allocatorT>::type
+		: ::std::is_final<typeT>
 #else
-	allocatorT
+		: false_type
 #endif
-	;
+	{ };
+
+	template<typename allocatorT>
+	class final_wrapper {
+	private:
+		allocatorT m_alloc;
+
+	public:
+		explicit final_wrapper(const allocatorT &alloc) noexcept
+			: m_alloc(alloc)
+		{ }
+		explicit final_wrapper(allocatorT &&alloc) noexcept
+			: m_alloc(::std::move(alloc))
+		{ }
+
+	public:
+		operator const allocatorT & () const noexcept {
+			return this->m_alloc;
+		}
+		operator allocatorT & () noexcept {
+			return this->m_alloc;
+		}
+	};
+}
+
+template<typename allocatorT>
+struct allocator_wrapper_base_for
+	: conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
+{ };
 
 struct allocator_copy_assign_from { };
 struct allocator_move_assign_from { };

@@ -35,13 +35,13 @@ class unique_handle;
 
 namespace details_unique_handle {
 	template<typename handleT, typename closerT>
-	class stored_handle : private allocator_wrapper_base_for<closerT> {
+	class stored_handle : private allocator_wrapper_base_for<closerT>::type {
 	public:
 		using handle_type  = handleT;
 		using closer_type  = closerT;
 
 	private:
-		using closer_base = allocator_wrapper_base_for<closerT>;
+		using closer_base = typename allocator_wrapper_base_for<closerT>::type;
 
 	private:
 		handle_type m_h;

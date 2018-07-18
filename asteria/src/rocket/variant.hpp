@@ -114,7 +114,7 @@ namespace details_variant {
 	{ };
 
 	template<typename ...elementsT>
-	union storage_for {
+	union basic_storage {
 		char bytes[max_of<sizeof(elementsT)...>::value];
 		alignas(max_of<alignof(elementsT)...>::value) char align;
 	};
@@ -245,7 +245,7 @@ public:
 		using type = variant<elementsT..., addT...>;
 	};
 
-	using storage = details_variant::storage_for<elementsT...>;
+	using storage = details_variant::basic_storage<elementsT...>;
 
 private:
 	unsigned m_turnout : 1;

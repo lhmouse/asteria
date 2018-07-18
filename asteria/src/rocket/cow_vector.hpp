@@ -109,7 +109,7 @@ namespace details_cow_vector {
 	{ };
 
 	template<typename valueT, typename allocatorT>
-	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
+	class storage_handle : private allocator_wrapper_base_for<allocatorT>::type {
 	public:
 		using value_type       = valueT;
 		using allocator_type   = allocatorT;
@@ -120,7 +120,7 @@ namespace details_cow_vector {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base    = allocator_wrapper_base_for<allocatorT>;
+		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = storage_header<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 

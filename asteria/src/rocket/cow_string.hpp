@@ -97,7 +97,7 @@ namespace details_cow_string {
 	};
 
 	template<typename charT, typename traitsT, typename allocatorT>
-	class storage_handle : private allocator_wrapper_base_for<allocatorT> {
+	class storage_handle : private allocator_wrapper_base_for<allocatorT>::type {
 	public:
 		using value_type       = charT;
 		using traits_type      = traitsT;
@@ -109,7 +109,7 @@ namespace details_cow_string {
 		using pointer          = typename allocator_traits<allocator_type>::pointer;
 
 	private:
-		using allocator_base    = allocator_wrapper_base_for<allocatorT>;
+		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = storage_header<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
