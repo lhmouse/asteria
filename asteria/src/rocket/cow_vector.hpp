@@ -81,31 +81,20 @@ namespace details_cow_vector {
 		}
 	};
 
-	template<typename valueT, typename allocatorT, bool copyableT>
-	struct siphon_copy {
-		static void copy(storage_header<valueT, allocatorT> *ptr, const valueT &value){
+	template<bool copyableT>
+	struct copy_or_throw_helper {
+		template<typename valueT, typename allocatorT>
+		static void do_copy(storage_header<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
+			noadl::throw_domain_error("copy_or_throw_helper::do_copy(): The `value_type` of this `cow_vector` is not copy-constructible.");
+		}
+	};
+	template<>
+	struct copy_or_throw_helper<true> {
+		template<typename valueT, typename allocatorT>
+		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT &value){
 			ptr->do_push_unsafe(value);
 		}
 	};
-	template<typename valueT, typename allocatorT>
-	struct siphon_copy<valueT, allocatorT, false> {
-		static void copy(storage_header<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
-			noadl::throw_domain_error("siphon_copy::copy(): The `value_type` of this `cow_vector` is not copy-constructible.");
-		}
-	};
-
-	template<typename valueT, typename allocatorT>
-	struct siphon_move {
-		static void move(storage_header<valueT, allocatorT> *ptr, valueT &&value){
-			ptr->do_push_unsafe(::std::move(value));
-		}
-	};
-
-	template<typename valueT, typename allocatorT>
-	struct siphon
-		: siphon_copy<valueT, allocatorT, is_copy_constructible<valueT>::value>
-		, siphon_move<valueT, allocatorT>
-	{ };
 
 	template<typename valueT, typename allocatorT>
 	class storage_handle : private allocator_wrapper_base_for<allocatorT>::type {
@@ -265,12 +254,12 @@ namespace details_cow_vector {
 					if(should_copy){
 						// Copy-construct elements into the new block.
 						while(ptr->n_elems != len){
-							siphon<value_type, allocator_type>::copy(ptr, ptr_old->data[ptr->n_elems]);
+							copy_or_throw_helper<is_copy_constructible<value_type>::value>::do_copy(ptr, ptr_old->data[ptr->n_elems]);
 						}
 					} else {
 						// Move-construct elements into the new block.
 						while(ptr->n_elems != len){
-							siphon<value_type, allocator_type>::move(ptr, ::std::move(ptr_old->data[ptr->n_elems]));
+							ptr->do_push_unsafe(::std::move(ptr_old->data[ptr->n_elems]));
 						}
 					}
 				} catch(...){
