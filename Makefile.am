@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion -Wno-error=unused	\
-	-Winvalid-pch -Wwrite-strings -Wsuggest-attribute=noreturn -Wno-unknown-warning-option	\
-	-Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas -Wswitch-enum	\
+	-Winvalid-pch -Wwrite-strings -Wsuggest-attribute=noreturn -Wswitch-enum -Wundef -Wshadow	\
+	-Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas -Wno-error-warning-option	\
 	-pipe -fPIC -DPIC -pedantic -pedantic-errors
 if ENABLE_WERROR
 AM_CPPFLAGS += -Werror
