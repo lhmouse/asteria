@@ -256,17 +256,16 @@ namespace details_cow_vector {
 				const auto ptr_old = this->m_ptr;
 				ROCKET_ASSERT(ptr_old);
 				ROCKET_ASSERT(len <= ptr_old->n_elems);
-				const bool should_copy = is_trivial<value_type>::value || (ptr_old->ref_count.load(::std::memory_order_relaxed) != 1);
 				try {
-					if(should_copy){
-						// Copy-construct elements into the new block.
-						while(ptr->n_elems != len){
-							copy_or_throw_helper<is_copy_constructible<value_type>::value>::do_copy(ptr, ptr_old->da->ta[ptr->n_elems]);
-						}
-					} else {
+					if(this->unique()){
 						// Move-construct elements into the new block.
 						while(ptr->n_elems != len){
 							ptr->do_push_unsafe(::std::move(ptr_old->da->ta[ptr->n_elems]));
+						}
+					} else {
+						// Copy-construct elements into the new block.
+						while(ptr->n_elems != len){
+							copy_or_throw_helper<is_copy_constructible<value_type>::value>::do_copy(ptr, ptr_old->da->ta[ptr->n_elems]);
 						}
 					}
 				} catch(...){
