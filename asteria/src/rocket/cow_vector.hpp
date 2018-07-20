@@ -111,7 +111,7 @@ namespace details_cow_vector {
 		// copyable and trivial
 		template<typename valueT, typename allocatorT>
 		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT *src, size_t len){
-			::std::memcpy(ptr, src, sizeof(*src) * len);
+			::std::memcpy(ptr->da->ta, src, sizeof(*src) * len);
 			ptr->n_elems = len;
 		}
 	};
