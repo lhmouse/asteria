@@ -88,18 +88,31 @@ namespace details_cow_vector {
 		}
 	};
 
-	template<bool copyableT>
+	template<bool copyableT, bool trivialT>
 	struct copy_or_throw_helper {
+		// non-copyable
 		template<typename valueT, typename allocatorT>
-		static void do_copy(storage_header<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
+		static void do_copy(storage_header<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*len*/){
 			noadl::throw_domain_error("copy_or_throw_helper::do_copy(): The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
 	template<>
-	struct copy_or_throw_helper<true> {
+	struct copy_or_throw_helper<true, false> {
+		// copyable but non-trivial
 		template<typename valueT, typename allocatorT>
-		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT &value){
-			ptr->do_push_unsafe(value);
+		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT *src, size_t len){
+			while(ptr->n_elems != len){
+				ptr->do_push_unsafe(src[ptr->n_elems]);
+			}
+		}
+	};
+	template<>
+	struct copy_or_throw_helper<true, true> {
+		// copyable and trivial
+		template<typename valueT, typename allocatorT>
+		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT *src, size_t len){
+			::std::memcpy(ptr, src, sizeof(*src) * len);
+			ptr->n_elems = len;
 		}
 	};
 
@@ -260,9 +273,7 @@ namespace details_cow_vector {
 				try {
 					if(should_copy){
 						// Copy-construct elements into the new block.
-						while(ptr->n_elems != len){
-							copy_or_throw_helper<is_copy_constructible<value_type>::value>::do_copy(ptr, ptr_old->da->ta[ptr->n_elems]);
-						}
+						copy_or_throw_helper<is_copy_constructible<value_type>::value, is_trivial<value_type>::value>::do_copy(ptr, ptr_old->da->ta, len);
 					} else {
 						// Move-construct elements into the new block.
 						while(ptr->n_elems != len){
