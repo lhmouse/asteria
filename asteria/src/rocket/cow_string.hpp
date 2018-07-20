@@ -79,7 +79,7 @@ namespace details_cow_string {
 	extern template void handle_io_exception(::std::wios &ios);
 
 	template<typename charT, typename allocatorT>
-	struct storage_header {
+	struct basic_storage {
 		static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
 		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
@@ -88,12 +88,12 @@ namespace details_cow_string {
 		atomic<long> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
-		storage_header(allocatorT &&xalloc, size_t xblocks) noexcept
+		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
 			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->ref_count.store(1, ::std::memory_order_release);
 		}
-		storage_header(const storage_header &) = delete;
+		basic_storage(const basic_storage &) = delete;
 	};
 
 	template<typename charT, typename traitsT, typename allocatorT>
@@ -110,7 +110,7 @@ namespace details_cow_string {
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
-		using storage           = storage_header<value_type, allocator_type>;
+		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
