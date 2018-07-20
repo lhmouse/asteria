@@ -60,22 +60,22 @@ namespace details_cow_vector {
 	};
 
 	template<typename valueT, typename allocatorT>
-	struct storage_header {
+	struct basic_storage {
 		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
 
 		allocatorT alloc;
-		size_t n_blocks;
-		atomic<ptrdiff_t> ref_count;
-		size_t n_elems;
+		typename allocatorT::size_type n_blocks;
+		atomic<long> ref_count;
+		typename allocatorT::size_type n_elems;
 		ROCKET_EXTENSION(trivial_wrapper<valueT> da[0]);
 
-		storage_header(allocatorT &&xalloc, size_t xblocks) noexcept
+		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
 			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->n_elems = 0;
 			this->ref_count.store(1, ::std::memory_order_release);
 		}
-		storage_header(const storage_header &) = delete;
+		basic_storage(const basic_storage &) = delete;
 
 		template<typename ...paramsT>
 		void do_push_unsafe(paramsT &&...params){
@@ -91,14 +91,14 @@ namespace details_cow_vector {
 	template<bool copyableT>
 	struct copy_or_throw_helper {
 		template<typename valueT, typename allocatorT>
-		static void do_copy(storage_header<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
+		static void do_copy(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
 			noadl::throw_domain_error("copy_or_throw_helper::do_copy(): The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
 	template<>
 	struct copy_or_throw_helper<true> {
 		template<typename valueT, typename allocatorT>
-		static void do_copy(storage_header<valueT, allocatorT> *ptr, const valueT &value){
+		static void do_copy(basic_storage<valueT, allocatorT> *ptr, const valueT &value){
 			ptr->do_push_unsafe(value);
 		}
 	};
@@ -116,7 +116,7 @@ namespace details_cow_vector {
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
-		using storage           = storage_header<value_type, allocator_type>;
+		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
