@@ -84,8 +84,8 @@ namespace details_cow_string {
 		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
 		allocatorT alloc;
-		size_t n_blocks;
-		atomic<ptrdiff_t> ref_count;
+		typename allocatorT::size_type n_blocks;
+		atomic<long> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
 		storage_header(allocatorT &&xalloc, size_t xblocks) noexcept
