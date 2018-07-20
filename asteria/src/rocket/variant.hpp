@@ -403,7 +403,7 @@ public:
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->get<elementT>();
 		if(!ptr){
-			noadl::throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                              static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;
@@ -413,7 +413,7 @@ public:
 		constexpr unsigned eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		const auto ptr = this->get<elementT>();
 		if(!ptr){
-			noadl::throw_invalid_argument("variant::get(): The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+			noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                              static_cast<int>(eindex), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
 		return *ptr;

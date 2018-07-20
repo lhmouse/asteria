@@ -193,7 +193,7 @@ namespace details_cow_string {
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
 			if(cap_max - base < add){
-				noadl::throw_length_error("storage_handle::check_size_add(): Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
+				noadl::throw_length_error("basic_cow_string: Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
 				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
 			return base + add;
@@ -667,7 +667,7 @@ private:
 	size_type do_clamp_substr(size_type tpos, size_type n) const {
 		const auto tlen = this->size();
 		if(tpos > tlen){
-			noadl::throw_out_of_range("basic_cow_string::do_clamp_substr(): The subscript `%lld` is out of range for a string of length `%lld`.",
+			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is out of range for a string of length `%lld`.",
 			                          static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
 		return noadl::min(tlen - tpos, n);
@@ -875,7 +875,7 @@ public:
 	const_reference at(size_type pos) const {
 		const auto len = this->size();
 		if(pos >= len){
-			noadl::throw_out_of_range("basic_cow_string::at(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->data()[pos];
@@ -891,7 +891,7 @@ public:
 	reference mut(size_type pos){
 		const auto len = this->size();
 		if(pos >= len){
-			noadl::throw_out_of_range("basic_cow_string::mut(): The subscript `%lld` is not a writable position within a string of length `%lld`.",
+			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
 		return this->mut_data()[pos];
