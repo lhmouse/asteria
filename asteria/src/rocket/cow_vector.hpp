@@ -64,9 +64,9 @@ namespace details_cow_vector {
 		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
 
 		allocatorT alloc;
-		typename allocatorT::size_type n_blocks;
+		typename allocator_traits<allocatorT>::size_type n_blocks;
 		atomic<long> ref_count;
-		typename allocatorT::size_type n_elems;
+		typename allocator_traits<allocatorT>::size_type n_elems;
 		ROCKET_EXTENSION(trivial_wrapper<valueT> da[0]);
 
 		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
@@ -76,30 +76,71 @@ namespace details_cow_vector {
 			this->ref_count.store(1, ::std::memory_order_release);
 		}
 		basic_storage(const basic_storage &) = delete;
+	};
 
-		template<typename ...paramsT>
-		void do_push_unsafe(paramsT &&...params){
-			allocator_traits<allocatorT>::construct(this->alloc, this->da->ta + this->n_elems, ::std::forward<paramsT>(params)...);
-			++(this->n_elems);
+	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool trivialT = is_trivial<valueT>::value>
+	struct copy_storage_helper {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+			// This is the generic version.
+			auto cur = ptr->n_elems;
+			const auto begin = cur;
+			while(cur - begin != len){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, src[cur - begin]);
+				ptr->n_elems = ++cur;
+			}
 		}
-		void do_pop_unsafe() noexcept {
-			--(this->n_elems);
-			allocator_traits<allocatorT>::destroy(this->alloc, this->da->ta + this->n_elems);
+	};
+	template<typename valueT, typename allocatorT, bool trivialT>
+	struct copy_storage_helper<valueT, allocatorT, false, trivialT> {
+		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, typename allocator_traits<allocatorT>::size_type /*len*/) const {
+			// `valueT` is not copy-constructible.
+			// Throw an exception unconditionally, even when `len` is zero.
+			noadl::throw_domain_error("copy_or_throw_helper::operator()(): The `value_type` of this `cow_vector` is not copy-constructible.");
+		}
+	};
+	template<typename valueT, typename avalueT>
+	struct copy_storage_helper<valueT, ::std::allocator<avalueT>, true, true> {
+		void operator()(basic_storage<valueT, ::std::allocator<avalueT>> *ptr, const valueT *src, ::std::size_t len) const {
+			// `std::allocator` is to be used to copy a trivial type.
+			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+			auto cur = ptr->n_elems;
+			::std::memcpy(ptr->da->ta, src, sizeof(valueT) * len);
+			ptr->n_elems = (cur += len);
 		}
 	};
 
-	template<bool copyableT>
-	struct copy_or_throw_helper {
-		template<typename valueT, typename allocatorT>
-		static void do_copy(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT & /*value*/){
-			noadl::throw_domain_error("copy_or_throw_helper::do_copy(): The `value_type` of this `cow_vector` is not copy-constructible.");
+	template<typename valueT, typename allocatorT, bool trivialT = is_trivial<valueT>::value>
+	struct move_storage_helper {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+			// This is the generic version.
+			auto cur = ptr->n_elems;
+			const auto begin = cur;
+			while(cur - begin != len){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::move(src[cur - begin]));
+				ptr->n_elems = ++cur;
+			}
 		}
 	};
-	template<>
-	struct copy_or_throw_helper<true> {
-		template<typename valueT, typename allocatorT>
-		static void do_copy(basic_storage<valueT, allocatorT> *ptr, const valueT &value){
-			ptr->do_push_unsafe(value);
+	template<typename valueT, typename avalueT>
+	struct move_storage_helper<valueT, ::std::allocator<avalueT>, true> {
+		void operator()(basic_storage<valueT, ::std::allocator<avalueT>> *ptr, valueT *src, ::std::size_t len) const {
+			// `std::allocator` is to be used to move a trivial type.
+			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+			auto cur = ptr->n_elems;
+			::std::memcpy(ptr->da->ta, src, sizeof(valueT) * len);
+			ptr->n_elems = (cur += len);
+		}
+	};
+
+	template<typename valueT, typename allocatorT>
+	struct clear_storage_helper {
+		void operator()(basic_storage<valueT, allocatorT> *ptr) const {
+			// Destroy all elements backwards.
+			auto cur = ptr->n_elems;
+			while(cur != 0){
+				ptr->n_elems = --cur;
+				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->da->ta + cur);
+			}
 		}
 	};
 
@@ -159,9 +200,7 @@ namespace details_cow_vector {
 				return;
 			}
 			// If it has been decremented to zero, destroy all elements backwards.
-			while(ptr->n_elems != 0){
-				ptr->do_pop_unsafe();
-			}
+			clear_storage_helper<value_type, allocator_type>()(ptr);
 			// Deallocate the block.
 			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
 			const auto n_blocks = ptr->n_blocks;
@@ -257,22 +296,15 @@ namespace details_cow_vector {
 				ROCKET_ASSERT(ptr_old);
 				ROCKET_ASSERT(len <= ptr_old->n_elems);
 				try {
+					// Copy-construct or move-construct elements into the new block.
 					if(this->unique()){
-						// Move-construct elements into the new block.
-						while(ptr->n_elems != len){
-							ptr->do_push_unsafe(::std::move(ptr_old->da->ta[ptr->n_elems]));
-						}
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len);
 					} else {
-						// Copy-construct elements into the new block.
-						while(ptr->n_elems != len){
-							copy_or_throw_helper<is_copy_constructible<value_type>::value>::do_copy(ptr, ptr_old->da->ta[ptr->n_elems]);
-						}
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len);
 					}
 				} catch(...){
 					// If an exception is thrown, destroy all elements that have been constructed so far.
-					while(ptr->n_elems != 0){
-						ptr->do_pop_unsafe();
-					}
+					clear_storage_helper<value_type, allocator_type>()(ptr);
 					// Deallocate the new block, then rethrow the exception.
 					allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
