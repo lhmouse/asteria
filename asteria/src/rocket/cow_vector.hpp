@@ -312,11 +312,14 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(n <= this->capacity() - ptr->n_elems);
-			for(size_type i = 0; i < n; ++i){
-				ptr->do_push_unsafe(::std::forward<paramsT>(params)...);
+			auto cur = ptr->n_elems;
+			ROCKET_ASSERT(n <= this->capacity() - cur);
+			const auto end = cur + n;
+			while(cur != end){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::forward<paramsT>(params)...);
+				ptr->n_elems = ++cur;
 			}
-			return ptr->da->ta + ptr->n_elems - n;
+			return ptr->da->ta + cur - n;
 		}
 		pointer pop_back_n(size_type n) noexcept {
 			if(n == 0){
@@ -325,11 +328,14 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(n <= ptr->n_elems);
-			for(size_type i = 0; i < n; ++i){
-				ptr->do_pop_unsafe();
+			auto cur = ptr->n_elems;
+			ROCKET_ASSERT(n <= cur);
+			const auto begin = cur - n;
+			while(cur != begin){
+				ptr->n_elems = --cur;
+				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->da->ta + cur);
 			}
-			return ptr->da->ta + ptr->n_elems;
+			return ptr->da->ta + cur;
 		}
 		void rotate(size_type after, size_type seek){
 			ROCKET_ASSERT(after <= seek);
