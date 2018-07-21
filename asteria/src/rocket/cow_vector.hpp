@@ -63,9 +63,9 @@ namespace details_cow_vector {
 	struct basic_storage {
 		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
 
+		atomic<long> ref_count;
 		allocatorT alloc;
 		typename allocator_traits<allocatorT>::size_type n_blocks;
-		atomic<long> ref_count;
 		typename allocator_traits<allocatorT>::size_type n_elems;
 		ROCKET_EXTENSION(trivial_wrapper<valueT> da[0]);
 

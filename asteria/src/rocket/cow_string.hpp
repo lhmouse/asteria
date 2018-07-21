@@ -83,9 +83,9 @@ namespace details_cow_string {
 		static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
 		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 
+		atomic<long> ref_count;
 		allocatorT alloc;
 		typename allocator_traits<allocatorT>::size_type n_blocks;
-		atomic<long> ref_count;
 		ROCKET_EXTENSION(charT data[0]);
 
 		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
