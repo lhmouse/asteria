@@ -72,6 +72,15 @@ inline void manipulate_allocators(true_type, allocator_swap_with, allocatorT &lh
 	noadl::adl_swap(lhs, rhs);
 }
 
+template<typename allocatorT>
+struct is_std_allocator
+	: false_type
+{ };
+template<typename valueT>
+struct is_std_allocator<::std::allocator<valueT>>
+	: true_type
+{ };
+
 }
 
 #endif
