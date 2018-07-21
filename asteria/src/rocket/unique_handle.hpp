@@ -167,7 +167,7 @@ public:
 	}
 
 	void swap(unique_handle &other) noexcept {
-		noadl::manipulate_allocators(true_type(), allocator_swap_with(), this->m_sth.as_closer(), other.m_sth.as_closer());
+		allocator_swapper<closer_type, true>()(this->m_sth.as_closer(), other.m_sth.as_closer());
 		this->m_sth.swap(other.m_sth);
 	}
 };

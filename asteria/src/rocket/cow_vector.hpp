@@ -658,13 +658,11 @@ public:
 		if(this == &other){
 			return *this;
 		}
-		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_copy_assignment(),
-		                             allocator_copy_assign_from(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		return this->assign(other);
 	}
 	cow_vector & operator=(cow_vector &&other) noexcept {
-		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_move_assignment(),
-		                             allocator_move_assign_from(), this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
+		allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
 		return this->assign(::std::move(other));
 	}
 	cow_vector & operator=(initializer_list<value_type> init){
@@ -1005,8 +1003,7 @@ public:
 	}
 
 	void swap(cow_vector &other) noexcept {
-		noadl::manipulate_allocators(typename allocator_traits<allocator_type>::propagate_on_container_swap(),
-		                             allocator_swap_with(), this->m_sth.as_allocator(), other.m_sth.as_allocator());
+		allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		this->m_sth.exchange_with(other.m_sth);
 	}
 
