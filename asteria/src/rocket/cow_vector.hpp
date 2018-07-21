@@ -78,7 +78,7 @@ namespace details_cow_vector {
 		basic_storage(const basic_storage &) = delete;
 	};
 
-	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool trivialT = is_trivial<valueT>::value>
+	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
 	struct copy_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// This is the generic version.
@@ -90,17 +90,17 @@ namespace details_cow_vector {
 			}
 		}
 	};
-	template<typename valueT, typename allocatorT, bool trivialT>
-	struct copy_storage_helper<valueT, allocatorT, false, trivialT> {
+	template<typename valueT, typename allocatorT, bool memcpyT>
+	struct copy_storage_helper<valueT, allocatorT, false, memcpyT> {
 		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, typename allocator_traits<allocatorT>::size_type /*len*/) const {
 			// `valueT` is not copy-constructible.
 			// Throw an exception unconditionally, even when `len` is zero.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
-	template<typename valueT, typename avalueT>
-	struct copy_storage_helper<valueT, ::std::allocator<avalueT>, true, true> {
-		void operator()(basic_storage<valueT, ::std::allocator<avalueT>> *ptr, const valueT *src, ::std::size_t len) const {
+	template<typename valueT, typename allocatorT>
+	struct copy_storage_helper<valueT, allocatorT, true, true> {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
@@ -109,7 +109,7 @@ namespace details_cow_vector {
 		}
 	};
 
-	template<typename valueT, typename allocatorT, bool trivialT = is_trivial<valueT>::value>
+	template<typename valueT, typename allocatorT, bool memcpyT = is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
 	struct move_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// This is the generic version.
@@ -121,14 +121,17 @@ namespace details_cow_vector {
 			}
 		}
 	};
-	template<typename valueT, typename avalueT>
-	struct move_storage_helper<valueT, ::std::allocator<avalueT>, true> {
-		void operator()(basic_storage<valueT, ::std::allocator<avalueT>> *ptr, valueT *src, ::std::size_t len) const {
+	template<typename valueT, typename allocatorT>
+	struct move_storage_helper<valueT, allocatorT, true> {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
 			::std::memcpy(ptr->da->ta, src, sizeof(valueT) * len);
 			ptr->n_elems = (cur += len);
+#ifdef ROCKET_DEBUG
+			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * len);
+#endif
 		}
 	};
 
@@ -206,7 +209,7 @@ namespace details_cow_vector {
 			const auto n_blocks = ptr->n_blocks;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '~', sizeof(*ptr) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
 		}
@@ -288,7 +291,7 @@ namespace details_cow_vector {
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
 			if(len != 0){

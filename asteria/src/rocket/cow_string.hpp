@@ -157,7 +157,7 @@ namespace details_cow_string {
 			const auto n_blocks = ptr->n_blocks;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '~', sizeof(*ptr) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
 		}
@@ -232,7 +232,7 @@ namespace details_cow_string {
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '*', sizeof(*ptr) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
 			// Copy characters into the new block, then add a null character.
