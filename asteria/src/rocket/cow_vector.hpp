@@ -83,9 +83,9 @@ namespace details_cow_vector {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// This is the generic version.
 			auto cur = ptr->n_elems;
-			const auto begin = cur;
-			while(cur - begin != len){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, src[cur - begin]);
+			const auto end = cur + len;
+			while(cur != end){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, *(src + len - (end - cur)));
 				ptr->n_elems = ++cur;
 			}
 		}
@@ -104,7 +104,7 @@ namespace details_cow_vector {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->da->ta, src, sizeof(valueT) * len);
+			::std::memcpy(ptr->da->ta + cur, src, sizeof(valueT) * len);
 			ptr->n_elems = (cur += len);
 		}
 	};
@@ -114,9 +114,9 @@ namespace details_cow_vector {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
 			// This is the generic version.
 			auto cur = ptr->n_elems;
-			const auto begin = cur;
-			while(cur - begin != len){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::move(src[cur - begin]));
+			const auto end = cur + len;
+			while(cur != end){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::move(*(src + len - (end - cur))));
 				ptr->n_elems = ++cur;
 			}
 		}
@@ -127,7 +127,7 @@ namespace details_cow_vector {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->da->ta, src, sizeof(valueT) * len);
+			::std::memcpy(ptr->da->ta + cur, src, sizeof(valueT) * len);
 			ptr->n_elems = (cur += len);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * len);
@@ -277,8 +277,7 @@ namespace details_cow_vector {
 			}
 			return ptr->n_elems;
 		}
-		pointer reallocate(size_type len, size_type res_arg){
-			ROCKET_ASSERT(len <= res_arg);
+		pointer reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
 			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);
@@ -294,16 +293,17 @@ namespace details_cow_vector {
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * n_blocks);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
-			if(len != 0){
+			if((len_one != 0) || (len_two != 0)){
 				const auto ptr_old = this->m_ptr;
 				ROCKET_ASSERT(ptr_old);
-				ROCKET_ASSERT(len <= ptr_old->n_elems);
 				try {
 					// Copy-construct or move-construct elements into the new block.
-					if(this->unique()){
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len);
+					if(this->unique() == false){
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len_one);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta + off_two, len_two);
 					} else {
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len_one);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta + off_two, len_two);
 					}
 				} catch(...){
 					// If an exception is thrown, destroy all elements that have been constructed so far.
@@ -672,9 +672,12 @@ public:
 private:
 	// Reallocate the storage to `cap` elements.
 	// The storage is owned by the current string exclusively after this function returns normally.
-	void do_reallocate(size_type len, size_type res_arg){
-		ROCKET_ASSERT(len <= res_arg);
-		const auto ptr = this->m_sth.reallocate(len, res_arg);
+	void do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
+		ROCKET_ASSERT(len_one <= off_two);
+		ROCKET_ASSERT(off_two <= this->m_sth.size());
+		ROCKET_ASSERT(len_two <= this->m_sth.size() - off_two);
+		ROCKET_ASSERT(len_one + len_two <= res_arg);
+		const auto ptr = this->m_sth.reallocate(len_one, off_two, len_two, res_arg);
 		if(ptr == nullptr){
 			// The storage has been deallocated.
 			return;
@@ -690,7 +693,7 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 7);
 #endif
-			this->do_reallocate(len, cap);
+			this->do_reallocate(0, 0, len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 	}
@@ -791,7 +794,7 @@ public:
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate(len, cap_new);
+		this->do_reallocate(0, 0, len, cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
@@ -802,7 +805,7 @@ public:
 			return;
 		}
 		if(len != 0){
-			this->do_reallocate(len, len);
+			this->do_reallocate(0, 0, len, len);
 		} else {
 			this->do_deallocate();
 		}
@@ -933,17 +936,10 @@ public:
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
 		pointer ptr;
-		if(tpos + tn == len_old){
-			if(this->m_sth.unique() == false){
-				this->do_reallocate(tpos, len_old);
-			} else {
-				this->m_sth.pop_back_n(tn);
-			}
+		if(this->m_sth.unique() == false){
+			this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
 			ptr = this->m_sth.mut_data();
 		} else {
-			if(this->m_sth.unique() == false){
-				this->do_reallocate(len_old, len_old);
-			}
 			ptr = this->m_sth.mut_data();
 			this->m_sth.rotate(tpos, tpos + tn);
 			this->m_sth.pop_back_n(tn);
@@ -963,7 +959,7 @@ public:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(n <= len_old);
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(len_old - n, len_old);
+			this->do_reallocate(0, 0, len_old - n, len_old);
 		} else {
 			this->m_sth.pop_back_n(n);
 		}
@@ -1019,7 +1015,7 @@ public:
 			return nullptr;
 		}
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(len, len);
+			this->do_reallocate(0, 0, len, len);
 		}
 		return this->m_sth.mut_data();
 	}
