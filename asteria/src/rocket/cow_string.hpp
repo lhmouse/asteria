@@ -218,8 +218,7 @@ namespace details_cow_string {
 			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
-		pointer reallocate(const value_type *src, size_type len, size_type res_arg){
-			ROCKET_ASSERT(len <= res_arg);
+		pointer reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
 			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);
@@ -236,7 +235,10 @@ namespace details_cow_string {
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
 			// Copy characters into the new block, then add a null character.
-			traits_type::copy(ptr->data, src, len);
+			traits_type::copy(ptr->data, src, len_one);
+			auto len = len_one;
+			traits_type::copy(ptr->data + len, src + off_two, len_two);
+			len += len_two;
 			traits_type::assign(ptr->data[len], value_type());
 			// Replace the current block.
 			this->do_reset(ptr);
@@ -618,10 +620,12 @@ public:
 
 private:
 	// Reallocate the storage to `cap` characters, not including the null terminator.
-	void do_reallocate(size_type len, size_type res_arg){
-		ROCKET_ASSERT(len <= this->m_len);
-		ROCKET_ASSERT(len <= res_arg);
-		const auto ptr = this->m_sth.reallocate(this->m_ptr, len, res_arg);
+	void do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
+		ROCKET_ASSERT(len_one <= off_two);
+		ROCKET_ASSERT(off_two <= this->m_len);
+		ROCKET_ASSERT(len_two <= this->m_len - off_two);
+		ROCKET_ASSERT(len_one + len_two <= res_arg);
+		const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
 		if(ptr == nullptr){
 			// The storage has been deallocated.
 			this->m_ptr = shallow().data();
@@ -629,7 +633,7 @@ private:
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
 		this->m_ptr = ptr;
-		this->m_len = len;
+		this->m_len = len_one + len_two;
 	}
 	// Reallocate more storage as needed, without shrinking.
 	void do_reallocate_more(size_type cap_add){
@@ -640,7 +644,7 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 31);
 #endif
-			this->do_reallocate(len, cap);
+			this->do_reallocate(0, 0, len, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 	}
@@ -683,19 +687,12 @@ private:
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
 		pointer ptr;
-		if(tpos + tn == len_old){
-			if(this->m_sth.unique() == false){
-				this->do_reallocate(tpos, len_old);
-			} else {
-				this->do_set_length(tpos);
-			}
+		if(this->m_sth.unique() == false){
+			this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
 			ptr = this->m_sth.mut_data();
 		} else {
-			if(this->m_sth.unique() == false){
-				this->do_reallocate(len_old, len_old);
-			}
 			ptr = this->m_sth.mut_data();
-			traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - tpos - tn);
+			traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
 			this->do_set_length(len_old - tn);
 		}
 		return ptr + tpos;
@@ -831,7 +828,7 @@ public:
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate(len, cap_new);
+		this->do_reallocate(0, 0, len, cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
@@ -842,7 +839,7 @@ public:
 			return;
 		}
 		if(len != 0){
-			this->do_reallocate(len, len);
+			this->do_reallocate(0, 0, len, len);
 		} else {
 			this->do_deallocate();
 		}
@@ -1024,7 +1021,7 @@ public:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(n <= len_old);
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(len_old - n, len_old);
+			this->do_reallocate(0, 0, len_old - n, len_old);
 		} else {
 			this->do_set_length(len_old - n);
 		}
@@ -1241,7 +1238,7 @@ public:
 			return nullptr;
 		}
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(len, len);
+			this->do_reallocate(0, 0, len, len);
 		}
 		return this->m_sth.mut_data();
 	}
