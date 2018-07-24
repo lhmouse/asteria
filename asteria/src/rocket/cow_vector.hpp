@@ -52,13 +52,6 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
 class cow_vector;
 
 namespace details_cow_vector {
-	template<typename valueT>
-	union trivial_wrapper {
-		valueT ta[1];
-		trivial_wrapper() noexcept { }
-		~trivial_wrapper(){ }
-	};
-
 	template<typename valueT, typename allocatorT>
 	struct basic_storage {
 		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
@@ -67,13 +60,16 @@ namespace details_cow_vector {
 		allocatorT alloc;
 		typename allocator_traits<allocatorT>::size_type n_blocks;
 		typename allocator_traits<allocatorT>::size_type n_elems;
-		ROCKET_EXTENSION(trivial_wrapper<valueT> da[0]);
+		union { ROCKET_EXTENSION(valueT data[0]); };
 
 		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
 			: alloc(::std::move(xalloc)), n_blocks(xblocks)
 		{
 			this->n_elems = 0;
 			this->ref_count.store(1, ::std::memory_order_release);
+		}
+		~basic_storage(){
+			// An user-provided destructor is necessary, as the implicit one is deleted due to the anonymous union.
 		}
 		basic_storage(const basic_storage &) = delete;
 	};
@@ -85,7 +81,7 @@ namespace details_cow_vector {
 			auto cur = ptr->n_elems;
 			const auto end = cur + len;
 			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, *(src + len - (end - cur)));
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, *(src + len - (end - cur)));
 				ptr->n_elems = ++cur;
 			}
 		}
@@ -104,7 +100,7 @@ namespace details_cow_vector {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->da->ta + cur, src, sizeof(valueT) * len);
+			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * len);
 			ptr->n_elems = (cur += len);
 		}
 	};
@@ -116,7 +112,7 @@ namespace details_cow_vector {
 			auto cur = ptr->n_elems;
 			const auto end = cur + len;
 			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::move(*(src + len - (end - cur))));
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::move(*(src + len - (end - cur))));
 				ptr->n_elems = ++cur;
 			}
 		}
@@ -127,7 +123,7 @@ namespace details_cow_vector {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->da->ta + cur, src, sizeof(valueT) * len);
+			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * len);
 			ptr->n_elems = (cur += len);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * len);
@@ -142,7 +138,7 @@ namespace details_cow_vector {
 			auto cur = ptr->n_elems;
 			while(cur != 0){
 				ptr->n_elems = --cur;
-				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->da->ta + cur);
+				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
 			}
 		}
 	};
@@ -260,7 +256,7 @@ namespace details_cow_vector {
 			if(ptr == nullptr){
 				return nullptr;
 			}
-			return ptr->da->ta;
+			return ptr->data;
 		}
 		pointer mut_data() noexcept {
 			const auto ptr = this->m_ptr;
@@ -268,7 +264,7 @@ namespace details_cow_vector {
 				return nullptr;
 			}
 			ROCKET_ASSERT(this->unique());
-			return ptr->da->ta;
+			return ptr->data;
 		}
 		size_type size() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -299,11 +295,11 @@ namespace details_cow_vector {
 				try {
 					// Copy-construct or move-construct elements into the new block.
 					if(this->unique() == false){
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len_one);
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta + off_two, len_two);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, len_one);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, len_two);
 					} else {
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta, len_one);
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->da->ta + off_two, len_two);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, len_one);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, len_two);
 					}
 				} catch(...){
 					// If an exception is thrown, destroy all elements that have been constructed so far.
@@ -316,7 +312,7 @@ namespace details_cow_vector {
 			}
 			// Replace the current block.
 			this->do_reset(ptr);
-			return ptr->da->ta;
+			return ptr->data;
 		}
 		void deallocate() noexcept {
 			this->do_reset(nullptr);
@@ -351,10 +347,10 @@ namespace details_cow_vector {
 			ROCKET_ASSERT(n <= this->capacity() - cur);
 			const auto end = cur + n;
 			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->da->ta + cur, ::std::forward<paramsT>(params)...);
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::forward<paramsT>(params)...);
 				ptr->n_elems = ++cur;
 			}
-			return ptr->da->ta + cur - n;
+			return ptr->data + cur - n;
 		}
 		pointer pop_back_n(size_type n) noexcept {
 			if(n == 0){
@@ -368,9 +364,9 @@ namespace details_cow_vector {
 			const auto begin = cur - n;
 			while(cur != begin){
 				ptr->n_elems = --cur;
-				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->da->ta + cur);
+				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
 			}
-			return ptr->da->ta + cur;
+			return ptr->data + cur;
 		}
 		void rotate(size_type after, size_type seek){
 			ROCKET_ASSERT(after <= seek);
@@ -400,7 +396,7 @@ namespace details_cow_vector {
 				// After:         bot   brk     end
 				//        > 3 4 5 0 1 2 6 7 8 9 -
 				do {
-					noadl::adl_swap(ptr->da->ta[bot++], ptr->da->ta[brk++]);
+					noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
 				} while(bot != stp);
 				stp = brk;
 				// `isr` will have been decreased by `isl`, which will not result in zero.
@@ -414,7 +410,7 @@ namespace details_cow_vector {
 				// After:       bot       brk   end
 				//        > 7 8 9 3 4 5 6 0 1 2 -
 				do {
-					noadl::adl_swap(ptr->da->ta[bot++], ptr->da->ta[brk++]);
+					noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
 				} while(brk != end);
 				brk = stp;
 				// `isl` will have been decreased by `isr`, which will not result in zero.
@@ -427,7 +423,7 @@ namespace details_cow_vector {
 			// After:             bot       brk
 			//        > 3 4 5 0 1 2 6 7 8 9 -
 			do {
-				noadl::adl_swap(ptr->da->ta[bot++], ptr->da->ta[brk++]);
+				noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
 			} while(bot != stp);
 		}
 	};
