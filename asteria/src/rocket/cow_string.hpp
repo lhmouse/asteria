@@ -80,9 +80,6 @@ namespace details_cow_string {
 
 	template<typename charT, typename allocatorT>
 	struct basic_storage {
-		static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
-		static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
-
 		atomic<long> ref_count;
 		allocatorT alloc;
 		size_t n_blocks;
@@ -499,6 +496,8 @@ namespace details_cow_string {
 
 template<typename charT, typename traitsT, typename allocatorT>
 class basic_cow_string {
+	static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
+	static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
 	static_assert(is_same<typename allocatorT::value_type, charT>::value, "`allocatorT::value_type` must denote the same type as `charT`.");
 
 public:

@@ -55,8 +55,6 @@ class cow_vector;
 namespace details_cow_vector {
 	template<typename valueT, typename allocatorT>
 	struct basic_storage {
-		static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
-
 		atomic<long> ref_count;
 		allocatorT alloc;
 		size_t n_blocks;
@@ -589,6 +587,7 @@ namespace details_cow_vector {
 
 template<typename valueT, typename allocatorT>
 class cow_vector {
+	static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
 	static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
 
 public:
