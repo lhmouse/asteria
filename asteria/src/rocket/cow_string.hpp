@@ -85,7 +85,7 @@ namespace details_cow_string {
 
 		atomic<long> ref_count;
 		allocatorT alloc;
-		typename allocator_traits<allocatorT>::size_type n_blocks;
+		size_t n_blocks;
 		ROCKET_EXTENSION(charT data[0]);
 
 		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
@@ -1532,9 +1532,9 @@ struct basic_cow_string<charT, traitsT, allocatorT>::equal_to {
 
 template<typename charT, typename traitsT, typename allocatorT>
 struct basic_cow_string<charT, traitsT, allocatorT>::less {
-	using result_type = bool;
-	using first_argument_type = basic_cow_string;
-	using second_argument_type = basic_cow_string;
+	using result_type           = bool;
+	using first_argument_type   = basic_cow_string;
+	using second_argument_type  = basic_cow_string;
 
 	result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept {
 		return lhs.compare(rhs) < 0;
@@ -1543,8 +1543,8 @@ struct basic_cow_string<charT, traitsT, allocatorT>::less {
 
 template<typename charT, typename traitsT, typename allocatorT>
 struct basic_cow_string<charT, traitsT, allocatorT>::hash {
-	using result_type = size_t;
-	using argument_type = basic_cow_string;
+	using result_type    = size_t;
+	using argument_type  = basic_cow_string;
 
 	result_type operator()(const argument_type &str) const noexcept {
 		// This implements the 32-bit FNV-1a hash algorithm.

@@ -42,6 +42,7 @@ using ::std::is_copy_constructible;
 using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_move_constructible;
 using ::std::conditional;
+using ::std::integral_constant;
 using ::std::iterator_traits;
 using ::std::reverse_iterator;
 using ::std::initializer_list;
@@ -58,8 +59,8 @@ namespace details_cow_vector {
 
 		atomic<long> ref_count;
 		allocatorT alloc;
-		typename allocator_traits<allocatorT>::size_type n_blocks;
-		typename allocator_traits<allocatorT>::size_type n_elems;
+		size_t n_blocks;
+		size_t n_elems;
 		union { ROCKET_EXTENSION(valueT data[0]); };
 
 		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
@@ -74,9 +75,18 @@ namespace details_cow_vector {
 		basic_storage(const basic_storage &) = delete;
 	};
 
-	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
+	template<typename valueT>
+	struct cc // can copy
+		: is_copy_constructible<valueT>
+	{ };
+	template<typename valueT, typename allocatorT>
+	struct ct // copy trivially
+		: integral_constant<bool, is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
+	{ };
+
+	template<typename valueT, typename allocatorT, bool copyableT = cc<valueT>::value, bool memcpyT = ct<valueT, allocatorT>::value>
 	struct copy_storage_helper {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t len) const {
 			// This is the generic version.
 			auto cur = ptr->n_elems;
 			const auto end = cur + len;
@@ -88,7 +98,7 @@ namespace details_cow_vector {
 	};
 	template<typename valueT, typename allocatorT, bool memcpyT>
 	struct copy_storage_helper<valueT, allocatorT, false, memcpyT> {
-		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, typename allocator_traits<allocatorT>::size_type /*len*/) const {
+		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*len*/) const {
 			// `valueT` is not copy-constructible.
 			// Throw an exception unconditionally, even when `len` is zero.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
@@ -96,7 +106,7 @@ namespace details_cow_vector {
 	};
 	template<typename valueT, typename allocatorT>
 	struct copy_storage_helper<valueT, allocatorT, true, true> {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t len) const {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
@@ -105,9 +115,9 @@ namespace details_cow_vector {
 		}
 	};
 
-	template<typename valueT, typename allocatorT, bool memcpyT = is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
+	template<typename valueT, typename allocatorT, bool memcpyT = ct<valueT, allocatorT>::value>
 	struct move_storage_helper {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t len) const {
 			// This is the generic version.
 			auto cur = ptr->n_elems;
 			const auto end = cur + len;
@@ -119,7 +129,7 @@ namespace details_cow_vector {
 	};
 	template<typename valueT, typename allocatorT>
 	struct move_storage_helper<valueT, allocatorT, true> {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, typename allocator_traits<allocatorT>::size_type len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t len) const {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto cur = ptr->n_elems;
