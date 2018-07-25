@@ -73,16 +73,12 @@ namespace details_cow_vector {
 		basic_storage(const basic_storage &) = delete;
 	};
 
-	template<typename valueT>
-	struct cc // can copy
-		: is_copy_constructible<valueT>
-	{ };
 	template<typename valueT, typename allocatorT>
-	struct ct // copy trivially
-		: integral_constant<bool, is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
+	struct copy_trivially
+		: integral_constant<bool, is_copy_constructible<valueT>::value && is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
 	{ };
 
-	template<typename valueT, typename allocatorT, bool copyableT = cc<valueT>::value, bool memcpyT = ct<valueT, allocatorT>::value>
+	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct copy_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const {
 			// This is the generic version.
@@ -113,7 +109,7 @@ namespace details_cow_vector {
 		}
 	};
 
-	template<typename valueT, typename allocatorT, bool memcpyT = ct<valueT, allocatorT>::value>
+	template<typename valueT, typename allocatorT, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct move_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const {
 			// This is the generic version.
