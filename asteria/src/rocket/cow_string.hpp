@@ -80,15 +80,15 @@ namespace details_cow_string {
 
 	template<typename charT, typename allocatorT>
 	struct basic_storage {
-		atomic<long> ref_count;
+		atomic<long> nref;
 		allocatorT alloc;
-		size_t n_blocks;
+		size_t nblk;
 		ROCKET_EXTENSION(charT data[0]);
 
-		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
-			: alloc(::std::move(xalloc)), n_blocks(xblocks)
+		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
+			: alloc(::std::move(xalloc)), nblk(xnblk)
 		{
-			this->ref_count.store(1, ::std::memory_order_release);
+			this->nref.store(1, ::std::memory_order_release);
 		}
 		basic_storage(const basic_storage &) = delete;
 	};
@@ -111,11 +111,11 @@ namespace details_cow_string {
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
-		static constexpr size_type do_reserve_blocks_for(size_type n_chars) noexcept {
-			return ((n_chars + 1) * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
+		static constexpr size_type do_reserve_blocks_for(size_type len) noexcept {
+			return ((len + 1) * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
 		}
-		static constexpr size_type do_get_capacity_of(size_type n_blocks) noexcept {
-			return (n_blocks - 1) * sizeof(storage) / sizeof(value_type) - 1;
+		static constexpr size_type do_get_capacity_of(size_type nblk) noexcept {
+			return (nblk - 1) * sizeof(storage) / sizeof(value_type) - 1;
 		}
 
 	private:
@@ -144,19 +144,19 @@ namespace details_cow_string {
 				return;
 			}
 			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-			const auto old = ptr->ref_count.fetch_sub(1, ::std::memory_order_acq_rel);
+			const auto old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
 			if(old > 1){
 				return;
 			}
 			// If it has been decremented to zero, deallocate the block.
 			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
-			const auto n_blocks = ptr->n_blocks;
+			const auto nblk = ptr->nblk;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
+			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 		}
 
 	public:
@@ -172,14 +172,14 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return false;
 			}
-			return ptr->ref_count.load(::std::memory_order_relaxed) == 1;
+			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
 		size_type capacity() const noexcept {
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
 				return 0;
 			}
-			return this->do_get_capacity_of(ptr->n_blocks);
+			return this->do_get_capacity_of(ptr->nblk);
 		}
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
@@ -197,8 +197,8 @@ namespace details_cow_string {
 		}
 		size_type round_up_capacity(size_type res_arg) const {
 			const auto cap = this->check_size_add(0, res_arg);
-			const auto n_blocks = this->do_reserve_blocks_for(cap);
-			return this->do_get_capacity_of(n_blocks);
+			const auto nblk = this->do_reserve_blocks_for(cap);
+			return this->do_get_capacity_of(nblk);
 		}
 		const_pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -223,14 +223,14 @@ namespace details_cow_string {
 			}
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto n_blocks = this->do_reserve_blocks_for(cap);
+			const auto nblk = this->do_reserve_blocks_for(cap);
 			auto alloc = this->as_allocator();
 			auto st_alloc = storage_allocator(alloc);
-			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
+			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
+			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), nblk);
 			// Copy characters into the new block, then add a null character.
 			traits_type::copy(ptr->data, src, len_one);
 			auto len = len_one;
@@ -249,7 +249,7 @@ namespace details_cow_string {
 			const auto ptr = other.m_ptr;
 			if(ptr){
 				// Increment the reference count.
-				const auto old = ptr->ref_count.fetch_add(1, ::std::memory_order_relaxed);
+				const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
 				ROCKET_ASSERT(old > 0);
 			}
 			this->do_reset(ptr);

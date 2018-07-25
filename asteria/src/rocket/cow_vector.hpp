@@ -55,17 +55,17 @@ class cow_vector;
 namespace details_cow_vector {
 	template<typename valueT, typename allocatorT>
 	struct basic_storage {
-		atomic<long> ref_count;
+		atomic<long> nref;
 		allocatorT alloc;
-		size_t n_blocks;
-		size_t n_elems;
+		size_t nblk;
+		size_t nelem;
 		union { ROCKET_EXTENSION(valueT data[0]); };
 
-		basic_storage(allocatorT &&xalloc, size_t xblocks) noexcept
-			: alloc(::std::move(xalloc)), n_blocks(xblocks)
+		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
+			: alloc(::std::move(xalloc)), nblk(xnblk)
 		{
-			this->n_elems = 0;
-			this->ref_count.store(1, ::std::memory_order_release);
+			this->nelem = 0;
+			this->nref.store(1, ::std::memory_order_release);
 		}
 		~basic_storage(){
 			// An user-provided destructor is necessary, as the implicit one is deleted due to the anonymous union.
@@ -84,57 +84,57 @@ namespace details_cow_vector {
 
 	template<typename valueT, typename allocatorT, bool copyableT = cc<valueT>::value, bool memcpyT = ct<valueT, allocatorT>::value>
 	struct copy_storage_helper {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const {
 			// This is the generic version.
-			auto cur = ptr->n_elems;
-			const auto end = cur + len;
+			auto cur = ptr->nelem;
+			const auto end = cur + cnt;
 			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, *(src + len - (end - cur)));
-				ptr->n_elems = ++cur;
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, *(src + cnt - (end - cur)));
+				ptr->nelem = ++cur;
 			}
 		}
 	};
 	template<typename valueT, typename allocatorT, bool memcpyT>
 	struct copy_storage_helper<valueT, allocatorT, false, memcpyT> {
-		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*len*/) const {
+		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*cnt*/) const {
 			// `valueT` is not copy-constructible.
-			// Throw an exception unconditionally, even when `len` is zero.
+			// Throw an exception unconditionally, even when `cnt` is zero.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
 	template<typename valueT, typename allocatorT>
 	struct copy_storage_helper<valueT, allocatorT, true, true> {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * len);
-			ptr->n_elems = (cur += len);
+			auto cur = ptr->nelem;
+			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * cnt);
+			ptr->nelem = (cur += cnt);
 		}
 	};
 
 	template<typename valueT, typename allocatorT, bool memcpyT = ct<valueT, allocatorT>::value>
 	struct move_storage_helper {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const {
 			// This is the generic version.
-			auto cur = ptr->n_elems;
-			const auto end = cur + len;
+			auto cur = ptr->nelem;
+			const auto end = cur + cnt;
 			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::move(*(src + len - (end - cur))));
-				ptr->n_elems = ++cur;
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::move(*(src + cnt - (end - cur))));
+				ptr->nelem = ++cur;
 			}
 		}
 	};
 	template<typename valueT, typename allocatorT>
 	struct move_storage_helper<valueT, allocatorT, true> {
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t len) const {
+		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			auto cur = ptr->n_elems;
-			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * len);
-			ptr->n_elems = (cur += len);
+			auto cur = ptr->nelem;
+			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * cnt);
+			ptr->nelem = (cur += cnt);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * len);
+			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * cnt);
 #endif
 		}
 	};
@@ -143,9 +143,9 @@ namespace details_cow_vector {
 	struct clear_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr) const {
 			// Destroy all elements backwards.
-			auto cur = ptr->n_elems;
+			auto cur = ptr->nelem;
 			while(cur != 0){
-				ptr->n_elems = --cur;
+				ptr->nelem = --cur;
 				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
 			}
 		}
@@ -168,11 +168,11 @@ namespace details_cow_vector {
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
-		static constexpr size_type do_reserve_blocks_for(size_type n_elems) noexcept {
-			return (n_elems * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
+		static constexpr size_type do_reserve_blocks_for(size_type cnt) noexcept {
+			return (cnt * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
 		}
-		static constexpr size_type do_get_capacity_of(size_type n_blocks) noexcept {
-			return (n_blocks - 1) * sizeof(storage) / sizeof(value_type);
+		static constexpr size_type do_get_capacity_of(size_type nblk) noexcept {
+			return (nblk - 1) * sizeof(storage) / sizeof(value_type);
 		}
 
 	private:
@@ -201,7 +201,7 @@ namespace details_cow_vector {
 				return;
 			}
 			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-			const auto old = ptr->ref_count.fetch_sub(1, ::std::memory_order_acq_rel);
+			const auto old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
 			if(old > 1){
 				return;
@@ -210,12 +210,12 @@ namespace details_cow_vector {
 			clear_storage_helper<value_type, allocator_type>()(ptr);
 			// Deallocate the block.
 			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
-			const auto n_blocks = ptr->n_blocks;
+			const auto nblk = ptr->nblk;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
+			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 		}
 
 	public:
@@ -231,19 +231,19 @@ namespace details_cow_vector {
 			if(ptr == nullptr){
 				return false;
 			}
-			return ptr->ref_count.load(::std::memory_order_relaxed) == 1;
+			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
 		size_type capacity() const noexcept {
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
 				return 0;
 			}
-			return this->do_get_capacity_of(ptr->n_blocks);
+			return this->do_get_capacity_of(ptr->nblk);
 		}
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
-			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return this->do_get_capacity_of(max_n_blocks / 2 - 1);
+			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
+			return this->do_get_capacity_of(max_nblk / 2 - 1);
 		}
 		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
@@ -256,8 +256,8 @@ namespace details_cow_vector {
 		}
 		size_type round_up_capacity(size_type res_arg) const {
 			const auto cap = this->check_size_add(0, res_arg);
-			const auto n_blocks = this->do_reserve_blocks_for(cap);
-			return this->do_get_capacity_of(n_blocks);
+			const auto nblk = this->do_reserve_blocks_for(cap);
+			return this->do_get_capacity_of(nblk);
 		}
 		const_pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -279,9 +279,9 @@ namespace details_cow_vector {
 			if(ptr == nullptr){
 				return 0;
 			}
-			return ptr->n_elems;
+			return ptr->nelem;
 		}
-		pointer reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
+		pointer reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg){
 			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);
@@ -289,32 +289,32 @@ namespace details_cow_vector {
 			}
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto n_blocks = this->do_reserve_blocks_for(cap);
+			const auto nblk = this->do_reserve_blocks_for(cap);
 			auto alloc = this->as_allocator();
 			auto st_alloc = storage_allocator(alloc);
-			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, n_blocks);
+			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * n_blocks);
+			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), n_blocks);
-			if((len_one != 0) || (len_two != 0)){
+			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), nblk);
+			if((cnt_one != 0) || (cnt_two != 0)){
 				const auto ptr_old = this->m_ptr;
 				ROCKET_ASSERT(ptr_old);
 				try {
 					// Copy-construct or move-construct elements into the new block.
 					if(this->unique() == false){
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, len_one);
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, len_two);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, cnt_one);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
 					} else {
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, len_one);
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, len_two);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, cnt_one);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
 					}
 				} catch(...){
 					// If an exception is thrown, destroy all elements that have been constructed so far.
 					clear_storage_helper<value_type, allocator_type>()(ptr);
 					// Deallocate the new block, then rethrow the exception.
 					allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
-					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, n_blocks);
+					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 					throw;
 				}
 			}
@@ -330,7 +330,7 @@ namespace details_cow_vector {
 			const auto ptr = other.m_ptr;
 			if(ptr){
 				// Increment the reference count.
-				const auto old = ptr->ref_count.fetch_add(1, ::std::memory_order_relaxed);
+				const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
 				ROCKET_ASSERT(old > 0);
 			}
 			this->do_reset(ptr);
@@ -351,12 +351,12 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			auto cur = ptr->n_elems;
+			auto cur = ptr->nelem;
 			ROCKET_ASSERT(n <= this->capacity() - cur);
 			const auto end = cur + n;
 			while(cur != end){
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::forward<paramsT>(params)...);
-				ptr->n_elems = ++cur;
+				ptr->nelem = ++cur;
 			}
 			return ptr->data + cur - n;
 		}
@@ -367,11 +367,11 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			auto cur = ptr->n_elems;
+			auto cur = ptr->nelem;
 			ROCKET_ASSERT(n <= cur);
 			const auto begin = cur - n;
 			while(cur != begin){
-				ptr->n_elems = --cur;
+				ptr->nelem = --cur;
 				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
 			}
 			return ptr->data + cur;
@@ -390,7 +390,7 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			const auto end = ptr->n_elems;
+			const auto end = ptr->nelem;
 			ROCKET_ASSERT(seek <= end);
 			auto isr = end - brk;
 			if(isr == 0){
@@ -677,12 +677,12 @@ public:
 private:
 	// Reallocate the storage to `cap` elements.
 	// The storage is owned by the current string exclusively after this function returns normally.
-	void do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg){
-		ROCKET_ASSERT(len_one <= off_two);
+	void do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg){
+		ROCKET_ASSERT(cnt_one <= off_two);
 		ROCKET_ASSERT(off_two <= this->m_sth.size());
-		ROCKET_ASSERT(len_two <= this->m_sth.size() - off_two);
-		ROCKET_ASSERT(len_one + len_two <= res_arg);
-		const auto ptr = this->m_sth.reallocate(len_one, off_two, len_two, res_arg);
+		ROCKET_ASSERT(cnt_two <= this->m_sth.size() - off_two);
+		ROCKET_ASSERT(cnt_one + cnt_two <= res_arg);
+		const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
 		if(ptr == nullptr){
 			// The storage has been deallocated.
 			return;
@@ -691,14 +691,14 @@ private:
 	}
 	// Reallocate more storage as needed, without shrinking.
 	void do_reallocate_more(size_type cap_add){
-		const auto len = this->m_sth.size();
-		auto cap = this->m_sth.check_size_add(len, cap_add);
+		const auto cnt = this->m_sth.size();
+		auto cap = this->m_sth.check_size_add(cnt, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
-			cap = noadl::max(cap, len + len / 2 + 7);
+			cap = noadl::max(cap, cnt + cnt / 2 + 7);
 #endif
-			this->do_reallocate(0, 0, len, cap);
+			this->do_reallocate(0, 0, cnt, cap);
 		}
 		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
 	}
@@ -710,9 +710,9 @@ private:
 	template<typename ...paramsT>
 	iterator do_insert(const_iterator tins, paramsT &&...params){
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto len_old = this->size();
+		const auto cnt_old = this->size();
 		this->append(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate(tpos, len_old);
+		this->m_sth.rotate(tpos, cnt_old);
 		return iterator(this, this->mut_data() + tpos);
 	}
 
@@ -778,14 +778,14 @@ public:
 	// N.B. The parameter pack is a non-standard extension.
 	template<typename ...paramsT>
 	void resize(size_type n, const paramsT &...params){
-		const auto len_old = this->size();
-		if(len_old == n){
+		const auto cnt_old = this->size();
+		if(cnt_old == n){
 			return;
 		}
-		if(len_old < n){
-			this->append(n - len_old, params...);
+		if(cnt_old < n){
+			this->append(n - cnt_old, params...);
 		} else {
-			this->pop_back(len_old - n);
+			this->pop_back(cnt_old - n);
 		}
 		ROCKET_ASSERT(this->size() == n);
 	}
@@ -793,24 +793,24 @@ public:
 		return this->m_sth.capacity();
 	}
 	void reserve(size_type res_arg){
-		const auto len = this->size();
-		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
+		const auto cnt = this->size();
+		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
 		// If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
 		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
 			return;
 		}
-		this->do_reallocate(0, 0, len, cap_new);
+		this->do_reallocate(0, 0, cnt, cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit(){
-		const auto len = this->size();
-		const auto cap_min = this->m_sth.round_up_capacity(len);
+		const auto cnt = this->size();
+		const auto cap_min = this->m_sth.round_up_capacity(cnt);
 		// Don't increase memory usage.
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() <= cap_min)){
 			return;
 		}
-		if(len != 0){
-			this->do_reallocate(0, 0, len, len);
+		if(cnt != 0){
+			this->do_reallocate(0, 0, cnt, cnt);
 		} else {
 			this->do_deallocate();
 		}
@@ -833,15 +833,15 @@ public:
 
 	// element access
 	const_reference operator[](size_type pos) const noexcept {
-		const auto len = this->size();
-		ROCKET_ASSERT(pos < len);
+		const auto cnt = this->size();
+		ROCKET_ASSERT(pos < cnt);
 		return this->data()[pos];
 	}
 	const_reference at(size_type pos) const {
-		const auto len = this->size();
-		if(pos >= len){
+		const auto cnt = this->size();
+		if(pos >= cnt){
 			noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
-			                          static_cast<long long>(pos), static_cast<long long>(len));
+			                          static_cast<long long>(pos), static_cast<long long>(cnt));
 		}
 		return this->data()[pos];
 	}
@@ -854,10 +854,10 @@ public:
 	// There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
 	// N.B. This is a non-standard extension.
 	reference mut(size_type pos){
-		const auto len = this->size();
-		if(pos >= len){
+		const auto cnt = this->size();
+		if(pos >= cnt){
 			noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
-			                          static_cast<long long>(pos), static_cast<long long>(len));
+			                          static_cast<long long>(pos), static_cast<long long>(cnt));
 		}
 		return this->mut_data()[pos];
 	}
@@ -909,9 +909,9 @@ public:
 	template<typename ...paramsT>
 	iterator emplace(const_iterator tins, paramsT &&...params){
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto len_old = this->size();
+		const auto cnt_old = this->size();
 		this->emplace_back(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate(tpos, len_old);
+		this->m_sth.rotate(tpos, cnt_old);
 		return iterator(this, this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value){
@@ -937,12 +937,12 @@ public:
 	iterator erase(const_iterator tfirst, const_iterator tlast){
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		const auto len_old = this->size();
-		ROCKET_ASSERT(tpos <= len_old);
-		ROCKET_ASSERT(tn <= len_old - tpos);
+		const auto cnt_old = this->size();
+		ROCKET_ASSERT(tpos <= cnt_old);
+		ROCKET_ASSERT(tn <= cnt_old - tpos);
 		pointer ptr;
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
+			this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			ptr = this->m_sth.mut_data();
 		} else {
 			ptr = this->m_sth.mut_data();
@@ -961,10 +961,10 @@ public:
 		if(n == 0){
 			return *this;
 		}
-		const auto len_old = this->size();
-		ROCKET_ASSERT(n <= len_old);
+		const auto cnt_old = this->size();
+		ROCKET_ASSERT(n <= cnt_old);
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(0, 0, len_old - n, len_old);
+			this->do_reallocate(0, 0, cnt_old - n, cnt_old);
 		} else {
 			this->m_sth.pop_back_n(n);
 		}
@@ -1015,12 +1015,12 @@ public:
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	pointer mut_data(){
-		const auto len = this->size();
-		if(len == 0){
+		const auto cnt = this->size();
+		if(cnt == 0){
 			return nullptr;
 		}
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(0, 0, len, len);
+			this->do_reallocate(0, 0, cnt, cnt);
 		}
 		return this->m_sth.mut_data();
 	}
