@@ -75,8 +75,13 @@ namespace details_cow_vector {
 			this->nref.store(1, ::std::memory_order_release);
 		}
 		~basic_storage(){
-			// An user-provided destructor is necessary, as the implicit one is deleted due to the anonymous union.
+			// Destroy all elements backwards.
+			while(this->nelem != 0){
+				this->nelem -= 1;
+				allocator_traits<allocatorT>::destroy(this->alloc, this->data + this->nelem);
+			}
 		}
+
 		basic_storage(const basic_storage &) = delete;
 		basic_storage & operator=(const basic_storage &) = delete;
 	};
@@ -90,11 +95,9 @@ namespace details_cow_vector {
 	struct copy_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const {
 			// This is the generic version.
-			auto cur = ptr->nelem;
-			const auto end = cur + cnt;
-			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, *(src + cnt - (end - cur)));
-				ptr->nelem = ++cur;
+			for(size_t i = 0; i < cnt; ++i){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, src[i]);
+				ptr->nelem += 1;
 			}
 		}
 	};
@@ -111,9 +114,8 @@ namespace details_cow_vector {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const {
 			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			auto cur = ptr->nelem;
-			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * cnt);
-			ptr->nelem = (cur += cnt);
+			::std::memcpy(ptr->data + ptr->nelem, src, sizeof(valueT) * cnt);
+			ptr->nelem += cnt;
 		}
 	};
 
@@ -121,11 +123,9 @@ namespace details_cow_vector {
 	struct move_storage_helper {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const {
 			// This is the generic version.
-			auto cur = ptr->nelem;
-			const auto end = cur + cnt;
-			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::move(*(src + cnt - (end - cur))));
-				ptr->nelem = ++cur;
+			for(size_t i = 0; i < cnt; ++i){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(src[i]));
+				ptr->nelem += 1;
 			}
 		}
 	};
@@ -134,24 +134,11 @@ namespace details_cow_vector {
 		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const {
 			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			auto cur = ptr->nelem;
-			::std::memcpy(ptr->data + cur, src, sizeof(valueT) * cnt);
-			ptr->nelem = (cur += cnt);
+			::std::memcpy(ptr->data + ptr->nelem, src, sizeof(valueT) * cnt);
+			ptr->nelem += cnt;
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * cnt);
 #endif
-		}
-	};
-
-	template<typename valueT, typename allocatorT>
-	struct clear_storage_helper {
-		void operator()(basic_storage<valueT, allocatorT> *ptr) const {
-			// Destroy all elements backwards.
-			auto cur = ptr->nelem;
-			while(cur != 0){
-				ptr->nelem = --cur;
-				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
-			}
 		}
 	};
 
@@ -202,9 +189,7 @@ namespace details_cow_vector {
 			if(old > 1){
 				return;
 			}
-			// If it has been decremented to zero, destroy all elements backwards.
-			clear_storage_helper<value_type, allocator_type>()(ptr);
-			// Deallocate the block.
+			// If it has been decremented to zero, deallocate the block.
 			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
 			const auto nblk = ptr->nblk;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
@@ -306,9 +291,7 @@ namespace details_cow_vector {
 						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
 					}
 				} catch(...){
-					// If an exception is thrown, destroy all elements that have been constructed so far.
-					clear_storage_helper<value_type, allocator_type>()(ptr);
-					// Deallocate the new block, then rethrow the exception.
+					// If an exception is thrown, deallocate the new block, then rethrow the exception.
 					allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
 					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 					throw;
@@ -347,14 +330,12 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			auto cur = ptr->nelem;
-			ROCKET_ASSERT(n <= this->capacity() - cur);
-			const auto end = cur + n;
-			while(cur != end){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + cur, ::std::forward<paramsT>(params)...);
-				ptr->nelem = ++cur;
+			ROCKET_ASSERT(n <= this->capacity() - ptr->nelem);
+			for(size_type i = 0; i < n; ++i){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
+				ptr->nelem += 1;
 			}
-			return ptr->data + cur - n;
+			return ptr->data + ptr->nelem - n;
 		}
 		pointer pop_back_n(size_type n) noexcept {
 			if(n == 0){
@@ -363,14 +344,12 @@ namespace details_cow_vector {
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			ROCKET_ASSERT(this->unique());
-			auto cur = ptr->nelem;
-			ROCKET_ASSERT(n <= cur);
-			const auto begin = cur - n;
-			while(cur != begin){
-				ptr->nelem = --cur;
-				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + cur);
+			ROCKET_ASSERT(n <= ptr->nelem);
+			for(size_type i = 0; i < n; ++i){
+				ptr->nelem -= 1;
+				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + ptr->nelem);
 			}
-			return ptr->data + cur;
+			return ptr->data + ptr->nelem;
 		}
 		void rotate(size_type after, size_type seek){
 			ROCKET_ASSERT(after <= seek);

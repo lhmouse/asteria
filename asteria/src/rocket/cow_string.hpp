@@ -97,6 +97,7 @@ namespace details_cow_string {
 		{
 			this->nref.store(1, ::std::memory_order_release);
 		}
+
 		basic_storage(const basic_storage &) = delete;
 		basic_storage & operator=(const basic_storage &) = delete;
 	};
