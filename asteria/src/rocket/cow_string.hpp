@@ -185,7 +185,7 @@ namespace details_cow_string {
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return storage::max_nchar_for_nblk(max_n_blocks / 2 - 1);
+			return storage::max_nchar_for_nblk(max_n_blocks / 2);
 		}
 		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();

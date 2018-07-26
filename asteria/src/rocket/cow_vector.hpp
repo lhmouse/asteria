@@ -103,7 +103,7 @@ namespace details_cow_vector {
 	};
 	template<typename valueT, typename allocatorT, bool memcpyT>
 	struct copy_storage_helper<valueT, allocatorT, false, memcpyT> {
-		void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*cnt*/) const {
+		ROCKET_NORETURN void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*cnt*/) const {
 			// `valueT` is not copy-constructible.
 			// Throw an exception unconditionally, even when `cnt` is zero.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
@@ -224,7 +224,7 @@ namespace details_cow_vector {
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return storage::max_nelem_for_nblk(max_nblk / 2 - 1);
+			return storage::max_nelem_for_nblk(max_nblk / 2);
 		}
 		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
@@ -332,7 +332,7 @@ namespace details_cow_vector {
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(n <= this->capacity() - ptr->nelem);
 			for(size_type i = 0; i < n; ++i){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
+				allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
 				ptr->nelem += 1;
 			}
 			return ptr->data + ptr->nelem - n;
@@ -347,7 +347,7 @@ namespace details_cow_vector {
 			ROCKET_ASSERT(n <= ptr->nelem);
 			for(size_type i = 0; i < n; ++i){
 				ptr->nelem -= 1;
-				allocator_traits<allocatorT>::destroy(ptr->alloc, ptr->data + ptr->nelem);
+				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
 			}
 			return ptr->data + ptr->nelem;
 		}
