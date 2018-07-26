@@ -1029,42 +1029,42 @@ public:
 	}
 };
 
-template<typename valueT, typename allocatorT>
-inline void swap(cow_vector<valueT, allocatorT> &lhs, cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline void swap(cow_vector<paramsT...> &lhs, cow_vector<paramsT...> &rhs) noexcept {
 	lhs.swap(rhs);
 }
 
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_iterator begin(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_iterator begin(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.begin();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_iterator end(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_iterator end(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.end();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_reverse_iterator rbegin(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_reverse_iterator rbegin(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.rbegin();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_reverse_iterator rend(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_reverse_iterator rend(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.rend();
 }
 
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_iterator cbegin(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_iterator cbegin(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.cbegin();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_iterator cend(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_iterator cend(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.cend();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_reverse_iterator crbegin(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_reverse_iterator crbegin(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.crbegin();
 }
-template<typename valueT, typename allocatorT>
-inline typename cow_vector<valueT, allocatorT>::const_reverse_iterator crend(const cow_vector<valueT, allocatorT> &rhs) noexcept {
+template<typename ...paramsT>
+inline typename cow_vector<paramsT...>::const_reverse_iterator crend(const cow_vector<paramsT...> &rhs) noexcept {
 	return rhs.crend();
 }
 
