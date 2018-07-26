@@ -1211,9 +1211,8 @@ public:
 		return this->replace(tfirst, tlast, size_type(1), ch);
 	}
 
-	// N.B. The last parameter is a non-standard extension.
-	size_type copy(pointer s, size_type n, size_type tpos = 0, size_type tn = npos) const {
-		const auto rlen = noadl::min(this->do_clamp_substr(tpos, tn), n);
+	size_type copy(pointer s, size_type tn, size_type tpos = 0) const {
+		const auto rlen = this->do_clamp_substr(tpos, tn);
 		traits_type::copy(s, this->data() + tpos, rlen);
 		return rlen;
 	}
