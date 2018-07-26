@@ -80,6 +80,13 @@ namespace details_cow_string {
 
 	template<typename charT, typename allocatorT>
 	struct basic_storage {
+		static constexpr size_t min_nblk_for_nchar(size_t nchar) noexcept {
+			return ((nchar + 1) * sizeof(charT) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+		}
+		static constexpr size_t max_nchar_for_nblk(size_t nblk) noexcept {
+			return (nblk - 1) * sizeof(basic_storage) / sizeof(charT) - 1;
+		}
+
 		atomic<long> nref;
 		allocatorT alloc;
 		size_t nblk;
@@ -91,6 +98,7 @@ namespace details_cow_string {
 			this->nref.store(1, ::std::memory_order_release);
 		}
 		basic_storage(const basic_storage &) = delete;
+		basic_storage & operator=(const basic_storage &) = delete;
 	};
 
 	template<typename charT, typename traitsT, typename allocatorT>
@@ -109,14 +117,6 @@ namespace details_cow_string {
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
-
-	private:
-		static constexpr size_type do_reserve_blocks_for(size_type len) noexcept {
-			return ((len + 1) * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
-		}
-		static constexpr size_type do_get_capacity_of(size_type nblk) noexcept {
-			return (nblk - 1) * sizeof(storage) / sizeof(value_type) - 1;
-		}
 
 	private:
 		storage *m_ptr;
@@ -179,12 +179,12 @@ namespace details_cow_string {
 			if(ptr == nullptr){
 				return 0;
 			}
-			return this->do_get_capacity_of(ptr->nblk);
+			return storage::max_nchar_for_nblk(ptr->nblk);
 		}
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_n_blocks = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return this->do_get_capacity_of(max_n_blocks / 2 - 1);
+			return storage::max_nchar_for_nblk(max_n_blocks / 2 - 1);
 		}
 		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
@@ -197,8 +197,8 @@ namespace details_cow_string {
 		}
 		size_type round_up_capacity(size_type res_arg) const {
 			const auto cap = this->check_size_add(0, res_arg);
-			const auto nblk = this->do_reserve_blocks_for(cap);
-			return this->do_get_capacity_of(nblk);
+			const auto nblk = storage::min_nblk_for_nchar(cap);
+			return storage::max_nchar_for_nblk(nblk);
 		}
 		const_pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -223,7 +223,7 @@ namespace details_cow_string {
 			}
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto nblk = this->do_reserve_blocks_for(cap);
+			const auto nblk = storage::min_nblk_for_nchar(cap);
 			auto alloc = this->as_allocator();
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);

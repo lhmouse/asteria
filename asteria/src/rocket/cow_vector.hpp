@@ -55,6 +55,13 @@ class cow_vector;
 namespace details_cow_vector {
 	template<typename valueT, typename allocatorT>
 	struct basic_storage {
+		static constexpr size_t min_nblk_for_nelem(size_t nelem) noexcept {
+			return (nelem * sizeof(valueT) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+		}
+		static constexpr size_t max_nelem_for_nblk(size_t nblk) noexcept {
+			return (nblk - 1) * sizeof(basic_storage) / sizeof(valueT);
+		}
+
 		atomic<long> nref;
 		allocatorT alloc;
 		size_t nblk;
@@ -71,6 +78,7 @@ namespace details_cow_vector {
 			// An user-provided destructor is necessary, as the implicit one is deleted due to the anonymous union.
 		}
 		basic_storage(const basic_storage &) = delete;
+		basic_storage & operator=(const basic_storage &) = delete;
 	};
 
 	template<typename valueT, typename allocatorT>
@@ -164,14 +172,6 @@ namespace details_cow_vector {
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 
 	private:
-		static constexpr size_type do_reserve_blocks_for(size_type cnt) noexcept {
-			return (cnt * sizeof(value_type) + sizeof(storage) - 1) / sizeof(storage) + 1;
-		}
-		static constexpr size_type do_get_capacity_of(size_type nblk) noexcept {
-			return (nblk - 1) * sizeof(storage) / sizeof(value_type);
-		}
-
-	private:
 		storage *m_ptr;
 
 	public:
@@ -234,12 +234,12 @@ namespace details_cow_vector {
 			if(ptr == nullptr){
 				return 0;
 			}
-			return this->do_get_capacity_of(ptr->nblk);
+			return storage::max_nelem_for_nblk(ptr->nblk);
 		}
 		size_type max_size() const noexcept {
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return this->do_get_capacity_of(max_nblk / 2 - 1);
+			return storage::max_nelem_for_nblk(max_nblk / 2 - 1);
 		}
 		size_type check_size_add(size_type base, size_type add) const {
 			const auto cap_max = this->max_size();
@@ -252,8 +252,8 @@ namespace details_cow_vector {
 		}
 		size_type round_up_capacity(size_type res_arg) const {
 			const auto cap = this->check_size_add(0, res_arg);
-			const auto nblk = this->do_reserve_blocks_for(cap);
-			return this->do_get_capacity_of(nblk);
+			const auto nblk = storage::min_nblk_for_nelem(cap);
+			return storage::max_nelem_for_nblk(nblk);
 		}
 		const_pointer data() const noexcept {
 			const auto ptr = this->m_ptr;
@@ -285,7 +285,7 @@ namespace details_cow_vector {
 			}
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-			const auto nblk = this->do_reserve_blocks_for(cap);
+			const auto nblk = storage::min_nblk_for_nelem(cap);
 			auto alloc = this->as_allocator();
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
