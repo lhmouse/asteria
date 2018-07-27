@@ -8,9 +8,11 @@
 #include "rocket/insertable_ostream.hpp"
 #include <iomanip>
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Logger {
+class Logger
+{
 private:
 	const char *const m_file;
 	const unsigned long m_line;
@@ -24,7 +26,8 @@ public:
 
 private:
 	template<typename ValueT>
-	void do_put(const ValueT &value){
+	void do_put(const ValueT &value)
+	{
 		m_stream <<value;
 	}
 	void do_put(bool value);
@@ -45,20 +48,25 @@ private:
 	void do_put(const void *value);
 
 public:
-	const char * get_file() const noexcept {
+	const char * get_file() const noexcept
+	{
 		return m_file;
 	}
-	unsigned long get_line() const noexcept {
+	unsigned long get_line() const noexcept
+	{
 		return m_line;
 	}
-	const char * get_func() const noexcept {
+	const char * get_func() const noexcept
+	{
 		return m_func;
 	}
 
-	const rocket::insertable_ostream & get_stream() const noexcept {
+	const rocket::insertable_ostream & get_stream() const noexcept
+	{
 		return m_stream;
 	}
-	rocket::insertable_ostream & get_stream() noexcept {
+	rocket::insertable_ostream & get_stream() noexcept
+	{
 		return m_stream;
 	}
 

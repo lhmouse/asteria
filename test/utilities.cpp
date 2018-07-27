@@ -6,7 +6,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	try {
 		ASTERIA_THROW_RUNTIME_ERROR("test", ' ', "exception: ", 42, '$');
 		std::terminate();

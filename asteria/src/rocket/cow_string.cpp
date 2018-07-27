@@ -3,9 +3,11 @@
 
 #include "cow_string.hpp"
 
-namespace rocket {
+namespace rocket
+{
 
-namespace details_cow_string {
+namespace details_cow_string
+{
 	template void handle_io_exception(::std::ios  &ios);
 	template void handle_io_exception(::std::wios &ios);
 

@@ -6,9 +6,11 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Opaque_base {
+class Opaque_base
+{
 public:
 	Opaque_base() noexcept
 		// :

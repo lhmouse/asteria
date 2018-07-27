@@ -32,10 +32,12 @@ private:
 	ROCKET_NORETURN void do_throw_immutable() const;
 
 public:
-	Vp_cref<const Value> get_value_opt() const noexcept {
+	Vp_cref<const Value> get_value_opt() const noexcept
+	{
 		return m_value_opt;
 	}
-	std::reference_wrapper<Value> mutate_value(){
+	std::reference_wrapper<Value> mutate_value()
+	{
 		const auto immutable = is_immutable();
 		if(immutable){
 			do_throw_immutable();
@@ -43,10 +45,12 @@ public:
 		return std::ref(m_value_opt);
 	}
 
-	bool is_immutable() const noexcept {
+	bool is_immutable() const noexcept
+	{
 		return m_immutable;
 	}
-	void set_immutable(bool immutable = true) noexcept {
+	void set_immutable(bool immutable = true) noexcept
+	{
 		m_immutable = immutable;
 	}
 };
@@ -113,23 +117,28 @@ public:
 	Reference & operator=(const Reference &) = delete;
 
 public:
-	Index which() const noexcept {
+	Index which() const noexcept
+	{
 		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT * get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT * get_opt() noexcept {
+	ExpectT * get_opt() noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & as() const {
+	const ExpectT & as() const
+	{
 		return m_variant.as<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT & as() {
+	ExpectT & as()
+	{
 		return m_variant.as<ExpectT>();
 	}
 	template<typename CandidateT>

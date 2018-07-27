@@ -9,14 +9,16 @@
 #include <utility> // std::move()
 #include "utilities.hpp"
 
-namespace rocket {
+namespace rocket
+{
 
 using ::std::allocator_traits;
 using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
 
-namespace details_allocator_utilities {
+namespace details_allocator_utilities
+{
 	template<typename typeT>
 	struct is_final
 #ifdef __cpp_lib_is_final
@@ -27,7 +29,8 @@ namespace details_allocator_utilities {
 	{ };
 
 	template<typename allocatorT>
-	class final_wrapper {
+	class final_wrapper
+	{
 	private:
 		allocatorT m_alloc;
 
@@ -40,10 +43,12 @@ namespace details_allocator_utilities {
 		{ }
 
 	public:
-		operator const allocatorT & () const noexcept {
+		operator const allocatorT & () const noexcept
+		{
 			return this->m_alloc;
 		}
-		operator allocatorT & () noexcept {
+		operator allocatorT & () noexcept
+		{
 			return this->m_alloc;
 		}
 	};
@@ -55,40 +60,52 @@ struct allocator_wrapper_base_for
 { };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value>
-struct allocator_copy_assigner {
-	void operator()(allocatorT & /*lhs*/, const allocatorT & /*rhs*/) const {
+struct allocator_copy_assigner
+{
+	void operator()(allocatorT & /*lhs*/, const allocatorT & /*rhs*/) const
+	{
 		// nothing to do
 	}
 };
 template<typename allocatorT>
-struct allocator_copy_assigner<allocatorT, true> {
-	void operator()(allocatorT &lhs, const allocatorT &rhs) const {
+struct allocator_copy_assigner<allocatorT, true>
+{
+	void operator()(allocatorT &lhs, const allocatorT &rhs) const
+	{
 		lhs = rhs;
 	}
 };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value>
-struct allocator_move_assigner {
-	void operator()(allocatorT & /*lhs*/, allocatorT && /*rhs*/) const {
+struct allocator_move_assigner
+{
+	void operator()(allocatorT & /*lhs*/, allocatorT && /*rhs*/) const
+	{
 		// nothing to do
 	}
 };
 template<typename allocatorT>
-struct allocator_move_assigner<allocatorT, true> {
-	void operator()(allocatorT &lhs, allocatorT &&rhs) const {
+struct allocator_move_assigner<allocatorT, true>
+{
+	void operator()(allocatorT &lhs, allocatorT &&rhs) const
+	{
 		lhs = ::std::move(rhs);
 	}
 };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value>
-struct allocator_swapper {
-	void operator()(allocatorT & /*lhs*/, allocatorT & /*rhs*/) const {
+struct allocator_swapper
+{
+	void operator()(allocatorT & /*lhs*/, allocatorT & /*rhs*/) const
+	{
 		// nothing to do
 	}
 };
 template<typename allocatorT>
-struct allocator_swapper<allocatorT, true> {
-	void operator()(allocatorT &lhs, allocatorT &rhs) const {
+struct allocator_swapper<allocatorT, true>
+{
+	void operator()(allocatorT &lhs, allocatorT &rhs) const
+	{
 		noadl::adl_swap(lhs, rhs);
 	}
 };

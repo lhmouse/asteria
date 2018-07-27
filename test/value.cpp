@@ -6,7 +6,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	Value value(true);
 	ASTERIA_TEST_CHECK(value.which() == Value::type_boolean);
 	ASTERIA_TEST_CHECK(value.as<D_boolean>() == true);

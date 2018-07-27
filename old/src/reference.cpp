@@ -11,11 +11,13 @@ namespace Asteria {
 
 Reference::~Reference() = default;
 
-Reference::Index get_reference_type(Sp_cref<const Reference> ref_opt) noexcept {
+Reference::Index get_reference_type(Sp_cref<const Reference> ref_opt) noexcept
+{
 	return ref_opt ? ref_opt->which() : Reference::index_null;
 }
 
-void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment){
+void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned indent_next, unsigned indent_increment)
+{
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::index_null:
@@ -55,12 +57,14 @@ void dump_reference(std::ostream &os, Sp_cref<const Reference> ref_opt, unsigned
 		std::terminate();
 	}
 }
-//std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt){
+//std::ostream & operator<<(std::ostream &os, const Sp_formatter<Reference> &reference_fmt)
+{
 //	dump_reference(os, reference_fmt.get());
 //	return os;
 //}
 
-void copy_reference(Vp<Reference> &ref_out, Sp_cref<const Reference> src_opt){
+void copy_reference(Vp<Reference> &ref_out, Sp_cref<const Reference> src_opt)
+{
 	const auto type = get_reference_type(src_opt);
 	switch(type){
 	case Reference::index_null:
@@ -102,7 +106,8 @@ void move_reference(Vp<Reference> &ref_out, Vp<Reference> &&src_opt){
 	}
 }
 
-Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
+Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt)
+{
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::index_null:
@@ -162,7 +167,8 @@ Sp<const Value> read_reference_opt(Sp_cref<const Reference> ref_opt){
 		std::terminate();
 	}
 }
-std::reference_wrapper<Value> drill_reference(Sp_cref<const Reference> ref_opt){
+std::reference_wrapper<Value> drill_reference(Sp_cref<const Reference> ref_opt)
+{
 	const auto type = get_reference_type(ref_opt);
 	switch(type){
 	case Reference::index_null:
@@ -255,7 +261,8 @@ namespace {
 		{ }
 
 	public:
-		Sp<const Value> get_copyable_pointer() const noexcept {
+		Sp<const Value> get_copyable_pointer() const noexcept
+		{
 			switch(m_variant.index()){
 			default:
 				return nullptr;
@@ -265,15 +272,18 @@ namespace {
 				return m_variant.as<Value>();
 			}
 		}
-		bool is_movable() const noexcept {
+		bool is_movable() const noexcept
+		{
 			return m_variant.index() == 2;
 		}
-		Value & get_movable_pointer(){
+		Value & get_movable_pointer()
+		{
 			return m_variant.as<Value>();
 		}
 	};
 
-	Extract_value_result do_try_extract_value(Sp_cref<Reference> ref_opt){
+	Extract_value_result do_try_extract_value(Sp_cref<Reference> ref_opt)
+	{
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::index_null:
@@ -356,7 +366,8 @@ void extract_value_from_reference(Value &value_out, Vp<Reference> &&ref_opt){
 }
 
 namespace {
-	bool do_check_materializability(Sp_cref<const Reference> ref_opt){
+	bool do_check_materializability(Sp_cref<const Reference> ref_opt)
+	{
 		const auto type = get_reference_type(ref_opt);
 		switch(type){
 		case Reference::index_null:
@@ -380,7 +391,8 @@ namespace {
 	}
 }
 
-void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable){
+void materialize_reference(Vp<Reference> &reference_inout_opt, bool immutable)
+{
 	if(do_check_materializability(reference_inout_opt) == false){
 		return;
 	}
@@ -403,7 +415,8 @@ namespace Asteria {
 
 Variable::~Variable() = default;
 
-void Variable::do_throw_immutable() const {
+void Variable::do_throw_immutable() const
+{
 	ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", m_value_opt, "` is immutable.");
 }
 

@@ -19,7 +19,8 @@ Statement & Statement::operator=(Statement &&) noexcept = default;
 Statement::~Statement() = default;
 
 namespace {
-	void do_skip_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt){
+	void do_skip_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt)
+	{
 		const auto type = stmt.which();
 		switch(type){
 		case Statement::index_expression_statement:
@@ -59,7 +60,8 @@ namespace {
 		}
 	}
 
-	Statement do_bind_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt){
+	Statement do_bind_statement_in_place(Sp_cref<Scope> scope_inout, const Statement &stmt)
+	{
 		const auto type = stmt.which();
 		switch(type){
 		case Statement::index_expression_statement: {
@@ -211,7 +213,8 @@ namespace {
 	}
 }
 
-Block bind_block_in_place(Sp_cref<Scope> scope_inout, const Block &block){
+Block bind_block_in_place(Sp_cref<Scope> scope_inout, const Block &block)
+{
 	Block bound_block;
 	bound_block.reserve(block.size());
 	// Bind statements recursively.
@@ -224,7 +227,8 @@ Block bind_block_in_place(Sp_cref<Scope> scope_inout, const Block &block){
 }
 
 namespace {
-	bool do_check_loop_condition(Vp<Reference> &result_out, const Expression &cond, Sp_cref<const Scope> scope_inout){
+	bool do_check_loop_condition(Vp<Reference> &result_out, const Expression &cond, Sp_cref<const Scope> scope_inout)
+	{
 		// Overwrite `result_out` unconditionally, even when `cond` is empty.
 		evaluate_expression(result_out, cond, scope_inout);
 		if(cond.empty()){
@@ -235,7 +239,8 @@ namespace {
 		return test_value(cond_var);
 	}
 
-	Statement::Execution_result do_execute_statement_in_place(Vp<Reference> &result_out, Sp_cref<Scope> scope_inout, const Statement &stmt){
+	Statement::Execution_result do_execute_statement_in_place(Vp<Reference> &result_out, Sp_cref<Scope> scope_inout, const Statement &stmt)
+	{
 		const auto type = stmt.which();
 		switch(type){
 		case Statement::index_expression_statement: {
@@ -498,7 +503,8 @@ namespace {
 				// Translate the exception object.
 				try {
 					throw;
-				} catch(Exception &e){
+				} catch(Exception &e)
+				{
 					ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference_opt());
 					// Print exceptions nested, if any.
 					auto nested_eptr = e.nested_ptr();
@@ -509,10 +515,12 @@ namespace {
 							prefix_width += 2;
 							try {
 								std::rethrow_exception(nested_eptr);
-							} catch(Exception &ne){
+							} catch(Exception &ne)
+							{
 								ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`Asteria::Exception`: ", ne.get_reference_opt());
 								nested_eptr = ne.nested_ptr();
-							} catch(std::exception &ne){
+							} catch(std::exception &ne)
+							{
 								ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`std::exception`: ", ne.what());
 								nested_eptr = nullptr;
 							}
@@ -523,7 +531,8 @@ namespace {
 					materialize_reference(result_out, true);
 					const auto wref = scope_catch->mutate_named_reference(cand.except_id);
 					copy_reference(wref, result_out);
-				} catch(std::exception &e){
+				} catch(std::exception &e)
+				{
 					ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
 					// Create a string containing the error message in the scope.
 					Value what_var;
@@ -611,7 +620,8 @@ namespace {
 	}
 }
 
-Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Block &block){
+Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cref<Scope> scope_inout, const Block &block)
+{
 	// Execute statements recursively.
 	for(const auto &stmt : block){
 		const auto result = do_execute_statement_in_place(ref_out, scope_inout, stmt);
@@ -623,14 +633,16 @@ Statement::Execution_result execute_block_in_place(Vp<Reference> &ref_out, Sp_cr
 	return Statement::execution_result_next;
 }
 
-Block bind_block(const Block &block, Sp_cref<const Scope> scope){
+Block bind_block(const Block &block, Sp_cref<const Scope> scope)
+{
 	if(block.empty()){
 		return Block();
 	}
 	const auto scope_working = std::make_shared<Scope>(Scope::purpose_lexical, scope);
 	return bind_block_in_place(scope_working, block);
 }
-Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Block &block, Sp_cref<const Scope> scope){
+Statement::Execution_result execute_block(Vp<Reference> &ref_out, const Block &block, Sp_cref<const Scope> scope)
+{
 	if(block.empty()){
 		return Statement::execution_result_return;
 	}

@@ -38,10 +38,12 @@ private:
 	void do_dispose_deferred_callbacks() noexcept;
 
 public:
-	Purpose get_purpose() const noexcept {
+	Purpose get_purpose() const noexcept
+	{
 		return m_purpose;
 	}
-	Sp_cref<const Scope> get_parent_opt() const noexcept {
+	Sp_cref<const Scope> get_parent_opt() const noexcept
+	{
 		return m_parent_opt;
 	}
 

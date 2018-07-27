@@ -8,7 +8,8 @@
 #include <ostream> // std::basic_ostream<>
 #include <memory> // std::addressof()
 
-namespace rocket {
+namespace rocket
+{
 
 using ::std::basic_ostream;
 
@@ -16,7 +17,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 class basic_insertable_ostream;
 
 template<typename charT, typename traitsT, typename allocatorT>
-class basic_insertable_ostream : public basic_ostream<charT, traitsT> {
+class basic_insertable_ostream
+	: public basic_ostream<charT, traitsT>
+{
 public:
 	using string_type  = typename basic_insertable_streambuf<charT, traitsT>::string_type;
 	using size_type    = typename basic_insertable_streambuf<charT, traitsT>::size_type;
@@ -39,23 +42,29 @@ public:
 	~basic_insertable_ostream() override;
 
 public:
-	basic_insertable_streambuf<charT, traitsT> * rdbuf() const noexcept {
+	basic_insertable_streambuf<charT, traitsT> * rdbuf() const noexcept
+	{
 		return const_cast<basic_insertable_streambuf<charT, traitsT> *>(::std::addressof(this->m_sb));
 	}
 
-	const string_type & get_string() const noexcept {
+	const string_type & get_string() const noexcept
+	{
 		return this->rdbuf()->get_string();
 	}
-	size_type get_caret() const noexcept {
+	size_type get_caret() const noexcept
+	{
 		return this->rdbuf()->get_caret();
 	}
-	void set_string(string_type str, size_type caret = string_type::npos) noexcept {
+	void set_string(string_type str, size_type caret = string_type::npos) noexcept
+	{
 		return this->rdbuf()->set_string(::std::move(str), caret);
 	}
-	void set_caret(size_type caret) noexcept {
+	void set_caret(size_type caret) noexcept
+	{
 		return this->rdbuf()->set_caret(caret);
 	}
-	string_type extract_string() noexcept {
+	string_type extract_string() noexcept
+	{
 		return this->rdbuf()->extract_string();
 	}
 };

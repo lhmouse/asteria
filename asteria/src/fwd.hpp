@@ -14,7 +14,8 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
 // Aliases
 using Nullptr           = std::nullptr_t;

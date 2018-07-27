@@ -7,11 +7,15 @@
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Token {
+class Token
+{
 public:
-	enum Keyword : std::uint8_t {
+	enum Keyword
+		: std::uint8_t
+	{
 		keyword_var       =  0,
 		keyword_const     =  1,
 		keyword_function  =  2,
@@ -37,7 +41,9 @@ public:
 		keyword_nan       = 22,
 		keyword_infinity  = 23,
 	};
-	enum Punctuator : std::uint8_t {
+	enum Punctuator
+		: std::uint8_t
+	{
 		punctuator_add         =  0, // +
 		punctuator_add_eq      =  1, // +=
 		punctuator_sub         =  2, // -
@@ -90,7 +96,9 @@ public:
 		punctuator_semicolon   = 49, // ;
 	};
 
-	enum Index : std::uint8_t {
+	enum Index
+		: std::uint8_t
+	{
 		index_keyword          = 0,
 		index_punctuator       = 1,
 		index_identifier       = 2,
@@ -98,22 +106,28 @@ public:
 		index_double_literal   = 4,
 		index_string_literal   = 5,
 	};
-	struct S_keyword {
+	struct S_keyword
+	{
 		Keyword keyword;
 	};
-	struct S_punctuator {
+	struct S_punctuator
+	{
 		Punctuator punct;
 	};
-	struct S_identifier {
+	struct S_identifier
+	{
 		Cow_string id;
 	};
-	struct S_integer_literal {
+	struct S_integer_literal
+	{
 		D_integer value;
 	};
-	struct S_double_literal {
+	struct S_double_literal
+	{
 		D_double value;
 	};
-	struct S_string_literal {
+	struct S_string_literal
+	{
 		D_string value;
 	};
 	using Variant = rocket::variant<ROCKET_CDR(
@@ -141,33 +155,41 @@ public:
 	~Token();
 
 public:
-	std::size_t get_source_line() const noexcept {
+	std::size_t get_source_line() const noexcept
+	{
 		return m_source_line;
 	}
-	std::size_t get_source_column() const noexcept {
+	std::size_t get_source_column() const noexcept
+	{
 		return m_source_column;
 	}
-	std::size_t get_source_length() const noexcept {
+	std::size_t get_source_length() const noexcept
+	{
 		return m_source_length;
 	}
 
-	Index which() const noexcept {
+	Index which() const noexcept
+	{
 		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT * get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & as() const {
+	const ExpectT & as() const
+	{
 		return m_variant.as<ExpectT>();
 	}
-	void swap(Token &other) noexcept {
+	void swap(Token &other) noexcept
+	{
 		m_variant.swap(other.m_variant);
 	}
 };
 
-inline void swap(Token &lhs, Token &rhs) noexcept {
+inline void swap(Token &lhs, Token &rhs) noexcept
+{
 	lhs.swap(rhs);
 }
 

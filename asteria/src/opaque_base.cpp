@@ -4,7 +4,8 @@
 #include "precompiled.hpp"
 #include "opaque_base.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
 Opaque_base::~Opaque_base() = default;
 

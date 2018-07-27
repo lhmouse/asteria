@@ -6,11 +6,15 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Parser_result {
+class Parser_result
+{
 public:
-	enum Error_code : std::uint32_t {
+	enum Error_code
+		: std::uint32_t
+	{
 		error_code_success                              =   0,
 		// Category: encoding
 		error_code_utf8_code_unit_invalid               = 101,
@@ -45,21 +49,26 @@ public:
 	{ }
 
 public:
-	std::size_t get_line() const noexcept {
+	std::size_t get_line() const noexcept
+	{
 		return m_line;
 	}
-	std::size_t get_column() const noexcept {
+	std::size_t get_column() const noexcept
+	{
 		return m_column;
 	}
-	std::size_t get_length() const noexcept {
+	std::size_t get_length() const noexcept
+	{
 		return m_length;
 	}
-	Error_code get_error_code() const noexcept {
+	Error_code get_error_code() const noexcept
+	{
 		return m_error_code;
 	}
 
 public:
-	explicit operator bool () const noexcept {
+	explicit operator bool () const noexcept
+	{
 		return m_error_code == error_code_success;
 	}
 };

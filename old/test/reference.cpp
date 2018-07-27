@@ -7,7 +7,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	Value value;
 	set_value(value, D_string(D_string::shallow("meow")));
 	Vp<Reference> ref;

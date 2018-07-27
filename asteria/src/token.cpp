@@ -9,14 +9,17 @@
 #include <cfloat>
 #include <cmath>
 
-namespace Asteria {
+namespace Asteria
+{
 
 Token::Token(Token &&) noexcept = default;
 Token & Token::operator=(Token &&) noexcept = default;
 Token::~Token() = default;
 
-namespace {
-	Parser_result do_validate_code_point_utf8(std::size_t line, const Cow_string &str, std::size_t column){
+namespace
+{
+	Parser_result do_validate_code_point_utf8(std::size_t line, const Cow_string &str, std::size_t column)
+	{
 		// Get a UTF code point.
 		static constexpr unsigned char s_length_table[32] = {
 			1, 1, 1, 1, 1, 1, 1, 1, // 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38,
@@ -73,7 +76,8 @@ namespace {
 		return Parser_result(line, column, length, Parser_result::error_code_success);
 	}
 
-	bool do_merge_sign(Vector<Token> &tokens_inout, std::size_t line, std::size_t column){
+	bool do_merge_sign(Vector<Token> &tokens_inout, std::size_t line, std::size_t column)
+	{
 		// The last token must be a positive or negative sign.
 		if(tokens_inout.empty()){
 			return false;
@@ -113,7 +117,8 @@ namespace {
 		return sign;
 	}
 
-	Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column){
+	Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column)
+	{
 		const auto char_head = str.at(column);
 		switch(char_head){
 		case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n': {
@@ -126,7 +131,8 @@ namespace {
 		case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
 		case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~': {
 			// Get a punctuator.
-			struct Punctuator_element {
+			struct Punctuator_element
+			{
 				char first[7];
 				Token::Punctuator second;
 			};
@@ -184,14 +190,18 @@ namespace {
 				{ "}",     Token::punctuator_brace_cl    },
 				{ "~",     Token::punctuator_notb        },
 			};
-			struct Punctuator_comparator {
-				bool operator()(const Punctuator_element &lhs, const Punctuator_element &rhs) const noexcept {
+			struct Punctuator_comparator
+			{
+				bool operator()(const Punctuator_element &lhs, const Punctuator_element &rhs) const noexcept
+				{
 					return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
 				}
-				bool operator()(char lhs, const Punctuator_element &rhs) const noexcept {
+				bool operator()(char lhs, const Punctuator_element &rhs) const noexcept
+				{
 					return std::char_traits<char>::lt(lhs, rhs.first[0]);
 				}
-				bool operator()(const Punctuator_element &lhs, char rhs) const noexcept {
+				bool operator()(const Punctuator_element &lhs, char rhs) const noexcept
+				{
 					return std::char_traits<char>::lt(lhs.first[0], rhs);
 				}
 			};
@@ -330,7 +340,8 @@ namespace {
 							return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf_code_point_value_too_large);
 						}
 						// Encode it.
-						const auto encode_one = [&](unsigned shift, unsigned mask){
+						const auto encode_one = [&](unsigned shift, unsigned mask)
+						{
 							value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask)));
 						};
 						if(code < 0x80){
@@ -561,7 +572,8 @@ namespace {
 		case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
 		case '_': {
 			// Get an identifier, then check whether it is a keyword.
-			struct Keyword_element {
+			struct Keyword_element
+			{
 				char first[15];
 				Token::Keyword second;
 			};
@@ -593,14 +605,18 @@ namespace {
 				{ "var",       Token::keyword_var       },
 				{ "while",     Token::keyword_while     },
 			};
-			struct Keyword_comparator {
-				bool operator()(const Keyword_element &lhs, const Keyword_element &rhs) const noexcept {
+			struct Keyword_comparator
+			{
+				bool operator()(const Keyword_element &lhs, const Keyword_element &rhs) const noexcept
+				{
 					return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
 				}
-				bool operator()(char lhs, const Keyword_element &rhs) const noexcept {
+				bool operator()(char lhs, const Keyword_element &rhs) const noexcept
+				{
 					return std::char_traits<char>::lt(lhs, rhs.first[0]);
 				}
-				bool operator()(const Keyword_element &lhs, char rhs) const noexcept {
+				bool operator()(const Keyword_element &lhs, char rhs) const noexcept
+				{
 					return std::char_traits<char>::lt(lhs.first[0], rhs);
 				}
 			};
@@ -633,7 +649,8 @@ namespace {
 	}
 }
 
-Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str){
+Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str)
+{
 	// Ensure the source string is valid UTF-8.
 	std::size_t column = 0;
 	while(column < str.size()){

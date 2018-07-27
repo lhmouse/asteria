@@ -6,7 +6,8 @@
 #include <cstdarg>
 #include <cstdio>
 
-namespace rocket {
+namespace rocket
+{
 
 #define VSNPRINTF(buf_, fmt_)	\
 	do {	\
@@ -16,22 +17,26 @@ namespace rocket {
 	  va_end(ap_);	\
 	} while(false)
 
-void throw_invalid_argument(const char *fmt, ...){
+void throw_invalid_argument(const char *fmt, ...)
+{
 	char str[1024];
 	VSNPRINTF(str, fmt);
 	throw ::std::invalid_argument(str);
 }
-void throw_out_of_range(const char *fmt, ...){
+void throw_out_of_range(const char *fmt, ...)
+{
 	char str[1024];
 	VSNPRINTF(str, fmt);
 	throw ::std::out_of_range(str);
 }
-void throw_length_error(const char *fmt, ...){
+void throw_length_error(const char *fmt, ...)
+{
 	char str[1024];
 	VSNPRINTF(str, fmt);
 	throw ::std::length_error(str);
 }
-void throw_domain_error(const char *fmt, ...){
+void throw_domain_error(const char *fmt, ...)
+{
 	char str[1024];
 	VSNPRINTF(str, fmt);
 	throw ::std::domain_error(str);

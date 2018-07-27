@@ -4,7 +4,8 @@
 #include "precompiled.hpp"
 #include "function_base.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
 Function_base::~Function_base() = default;
 

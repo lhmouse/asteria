@@ -10,7 +10,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	const auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 
 	auto dval = std::make_shared<Variable>();

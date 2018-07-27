@@ -7,11 +7,15 @@
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Value {
+class Value
+{
 public:
-	enum Type : std::uint8_t {
+	enum Type
+		: std::uint8_t
+	{
 		type_null      = 0,
 		type_boolean   = 1,
 		type_integer   = 2,
@@ -34,7 +38,9 @@ public:
 		, D_object    // 8
 	)>;
 
-	enum Comparison_result : std::uint8_t {
+	enum Comparison_result
+		: std::uint8_t
+	{
 		comparison_unordered  = 0,
 		comparison_less       = 1,
 		comparison_equal      = 2,
@@ -57,35 +63,43 @@ public:
 	~Value();
 
 public:
-	Type which() const noexcept {
+	Type which() const noexcept
+	{
 		return static_cast<Type>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT * get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT * get_opt() noexcept {
+	ExpectT * get_opt() noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & as() const {
+	const ExpectT & as() const
+	{
 		return m_variant.as<ExpectT>();
 	}
 	template<typename ExpectT>
-	ExpectT & as(){
+	ExpectT & as()
+	{
 		return m_variant.as<ExpectT>();
 	}
 	template<typename CandidateT>
-	void set(CandidateT &&cand){
+	void set(CandidateT &&cand)
+	{
 		m_variant.set(std::forward<CandidateT>(cand));
 	}
-	void swap(Value &other) noexcept {
+	void swap(Value &other) noexcept
+	{
 		m_variant.swap(other.m_variant);
 	}
 };
 
-inline void swap(Value &lhs, Value &rhs) noexcept {
+inline void swap(Value &lhs, Value &rhs) noexcept
+{
 	lhs.swap(rhs);
 }
 

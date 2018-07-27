@@ -11,7 +11,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	std::vector<Statement> block, init, body;
 	Expression expr, cond, inc;
 	// value sum = 0;

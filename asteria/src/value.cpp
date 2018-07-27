@@ -7,7 +7,8 @@
 #include "function_base.hpp"
 #include "utilities.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
 Value::Value(const Value &) = default;
 Value & Value::operator=(const Value &) = default;
@@ -15,7 +16,8 @@ Value::Value(Value &&) noexcept = default;
 Value & Value::operator=(Value &&) noexcept = default;
 Value::~Value() = default;
 
-const char * get_type_name(Value::Type type) noexcept {
+const char * get_type_name(Value::Type type) noexcept
+{
 	switch(type){
 	case Value::type_null:
 		return "null";
@@ -40,12 +42,14 @@ const char * get_type_name(Value::Type type) noexcept {
 		std::terminate();
 	}
 }
-const char * get_value_type_name(const Value &value) noexcept {
+const char * get_value_type_name(const Value &value) noexcept
+{
 	const auto type = value.which();
 	return get_type_name(type);
 }
 
-bool test_value(const Value &value){
+bool test_value(const Value &value)
+{
 	const auto type = value.which();
 	switch(type){
 	case Value::type_null:
@@ -76,7 +80,8 @@ bool test_value(const Value &value){
 		std::terminate();
 	}
 }
-Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept {
+Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept
+{
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = lhs.which();
 	const auto type_rhs = rhs.which();
@@ -165,8 +170,10 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
 	}
 }
 
-namespace {
-	class Indent {
+namespace
+{
+	class Indent
+	{
 	private:
 		unsigned m_num;
 
@@ -176,12 +183,14 @@ namespace {
 		{ }
 
 	public:
-		unsigned get_num() const noexcept {
+		unsigned get_num() const noexcept
+		{
 			return m_num;
 		}
 	};
 
-	inline std::ostream & operator<<(std::ostream &os, const Indent &indent){
+	inline std::ostream & operator<<(std::ostream &os, const Indent &indent)
+	{
 		const std::ostream::sentry sentry(os);
 		if(!sentry){
 			return os;
@@ -210,7 +219,8 @@ namespace {
 		return os;
 	}
 
-	class Quote {
+	class Quote
+	{
 	private:
 		Cow_string m_str;
 
@@ -220,12 +230,14 @@ namespace {
 		{ }
 
 	public:
-		const Cow_string & get_str() const noexcept {
+		const Cow_string & get_str() const noexcept
+		{
 			return m_str;
 		}
 	};
 
-	inline std::ostream & operator<<(std::ostream &os, const Quote &quote){
+	inline std::ostream & operator<<(std::ostream &os, const Quote &quote)
+	{
 		const std::ostream::sentry sentry(os);
 		if(!sentry){
 			return os;
@@ -309,7 +321,8 @@ namespace {
 	}
 }
 
-void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment){
+void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment)
+{
 	const auto type = value.which();
 	switch(type){
 	case Value::type_null:
@@ -408,7 +421,8 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
 		std::terminate();
 	}
 }
-std::ostream & operator<<(std::ostream &os, const Value &value){
+std::ostream & operator<<(std::ostream &os, const Value &value)
+{
 	dump_value(os, value);
 	return os;
 }

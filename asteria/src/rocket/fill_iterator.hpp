@@ -9,7 +9,8 @@
 #include <utility> // std::forward()
 #include <cstddef> // std::ptrdiff_t
 
-namespace rocket {
+namespace rocket
+{
 
 using ::std::is_nothrow_constructible;
 using ::std::ptrdiff_t;
@@ -18,7 +19,8 @@ template<typename elementT>
 class fill_iterator;
 
 template<typename elementT>
-class fill_iterator {
+class fill_iterator
+{
 public:
 	using value_type         = elementT;
 	using pointer            = const value_type *;
@@ -37,99 +39,119 @@ public:
 	{ }
 
 public:
-	difference_type tell() const noexcept {
+	difference_type tell() const noexcept
+	{
 		return this->m_pos;
 	}
-	fill_iterator & seek(difference_type pos) noexcept {
+	fill_iterator & seek(difference_type pos) noexcept
+	{
 		this->m_pos = pos;
 		return *this;
 	}
 
-	reference operator*() const noexcept {
+	reference operator*() const noexcept
+	{
 		return this->m_value;
 	}
-	reference operator[](difference_type) const noexcept {
+	reference operator[](difference_type) const noexcept
+	{
 		return this->m_value;
 	}
 };
 
 template<typename elementT>
-inline fill_iterator<elementT> & operator++(fill_iterator<elementT> &rhs) noexcept {
+inline fill_iterator<elementT> & operator++(fill_iterator<elementT> &rhs) noexcept
+{
 	return rhs.seek(rhs.tell() + 1);
 }
 template<typename elementT>
-inline fill_iterator<elementT> & operator--(fill_iterator<elementT> &rhs) noexcept {
+inline fill_iterator<elementT> & operator--(fill_iterator<elementT> &rhs) noexcept
+{
 	return rhs.seek(rhs.tell() - 1);
 }
 
 template<typename elementT>
-inline fill_iterator<elementT> operator++(fill_iterator<elementT> &lhs, int) noexcept {
+inline fill_iterator<elementT> operator++(fill_iterator<elementT> &lhs, int) noexcept
+{
 	auto res = lhs;
 	lhs.seek(lhs.tell() + 1);
 	return res;
 }
 template<typename elementT>
-inline fill_iterator<elementT> operator--(fill_iterator<elementT> &lhs, int) noexcept {
+inline fill_iterator<elementT> operator--(fill_iterator<elementT> &lhs, int) noexcept
+{
 	auto res = lhs;
 	lhs.seek(lhs.tell() - 1);
 	return res;
 }
 
 template<typename elementT>
-inline fill_iterator<elementT> & operator+=(fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept {
+inline fill_iterator<elementT> & operator+=(fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
+{
 	return lhs.seek(lhs.tell() + rhs);
 }
 template<typename elementT>
-inline fill_iterator<elementT> & operator-=(fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept {
+inline fill_iterator<elementT> & operator-=(fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
+{
 	return lhs.seek(lhs.tell() - rhs);
 }
 
 template<typename elementT>
-inline fill_iterator<elementT> operator+(const fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept {
+inline fill_iterator<elementT> operator+(const fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
+{
 	auto res = lhs;
 	res.seek(res.tell() + rhs);
 	return res;
 }
 template<typename elementT>
-inline fill_iterator<elementT> operator-(const fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept {
+inline fill_iterator<elementT> operator-(const fill_iterator<elementT> &lhs, typename fill_iterator<elementT>::difference_type rhs) noexcept
+{
 	auto res = lhs;
 	res.seek(res.tell() - rhs);
 	return res;
 }
 
 template<typename elementT>
-inline fill_iterator<elementT> operator+(typename fill_iterator<elementT>::difference_type lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline fill_iterator<elementT> operator+(typename fill_iterator<elementT>::difference_type lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	auto res = rhs;
 	res.seek(res.tell() + lhs);
 	return res;
 }
 template<typename elementT>
-inline typename fill_iterator<elementT>::difference_type operator-(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline typename fill_iterator<elementT>::difference_type operator-(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() - rhs.tell();
 }
 
 template<typename elementT>
-inline bool operator==(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator==(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() == rhs.tell();
 }
 template<typename elementT>
-inline bool operator!=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator!=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() != rhs.tell();
 }
 template<typename elementT>
-inline bool operator<(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator<(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() < rhs.tell();
 }
 template<typename elementT>
-inline bool operator>(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator>(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() > rhs.tell();
 }
 template<typename elementT>
-inline bool operator<=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator<=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() <= rhs.tell();
 }
 template<typename elementT>
-inline bool operator>=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept {
+inline bool operator>=(const fill_iterator<elementT> &lhs, const fill_iterator<elementT> &rhs) noexcept
+{
 	return lhs.tell() >= rhs.tell();
 }
 

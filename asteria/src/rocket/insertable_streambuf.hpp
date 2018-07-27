@@ -8,7 +8,8 @@
 #include <utility> // std::move()
 #include "cow_string.hpp"
 
-namespace rocket {
+namespace rocket
+{
 
 using ::std::ios_base;
 using ::std::basic_streambuf;
@@ -18,7 +19,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 class basic_insertable_streambuf;
 
 template<typename charT, typename traitsT, typename allocatorT>
-class basic_insertable_streambuf : public basic_streambuf<charT, traitsT> {
+class basic_insertable_streambuf
+	: public basic_streambuf<charT, traitsT>
+{
 public:
 	using string_type      = basic_cow_string<charT, traitsT, allocatorT>;
 	using allocator_type   = typename string_type::allocator_type;
@@ -56,11 +59,13 @@ protected:
 	int_type overflow(int_type c) override;
 
 public:
-	string_type & get_string(){
+	string_type & get_string()
+	{
 		this->basic_insertable_streambuf::sync();
 		return this->m_str;
 	}
-	size_type get_caret() const noexcept {
+	size_type get_caret() const noexcept
+	{
 		return this->m_caret;
 	}
 	void set_string(string_type str, size_type caret = string_type::npos) noexcept(noexcept(m_str = ::std::move(m_str))) {
@@ -68,7 +73,8 @@ public:
 		this->m_str = ::std::move(str);
 		this->m_caret = caret;
 	}
-	void set_caret(size_type caret) noexcept {
+	void set_caret(size_type caret) noexcept
+	{
 		this->m_caret = caret;
 	}
 	string_type extract_string() noexcept(noexcept(m_str.swap(m_str))) {
@@ -84,7 +90,8 @@ template<typename charT, typename traitsT, typename allocatorT>
 basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf() = default;
 
 template<typename charT, typename traitsT, typename allocatorT>
-int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync(){
+int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()
+{
 	if(this->gptr() != nullptr){
 		// Empty the get area. If there are any characters read from it, remove them from the internal buffer.
 		const auto n_got = static_cast<size_type>(this->gptr() - this->eback());
@@ -95,7 +102,8 @@ int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync(){
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
-streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc(){
+streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc()
+{
 	if(this->m_which & ios_base::in){
 		// Return the number of characters inside the internal buffer, minus those that have been read from it.
 		const auto n_total = this->m_str.size();
@@ -108,7 +116,8 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc(){
 	}
 }
 template<typename charT, typename traitsT, typename allocatorT>
-streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_type *s, streamsize n){
+streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_type *s, streamsize n)
+{
 	if(this->m_which & ios_base::in){
 		// Tidy the get area.
 		this->basic_insertable_streambuf::sync();
@@ -122,7 +131,8 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_t
 	}
 }
 template<typename charT, typename traitsT, typename allocatorT>
-typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::underflow(){
+typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::underflow()
+{
 	if(this->m_which & ios_base::in){
 		// Tidy the get area.
 		this->basic_insertable_streambuf::sync();
@@ -140,7 +150,8 @@ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
-typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::pbackfail(int_type c){
+typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::pbackfail(int_type c)
+{
 	if(this->m_which & ios_base::out){
 		if(traits_type::eq_int_type(c, traits_type::eof())){
 			return traits_type::eof();
@@ -157,7 +168,8 @@ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_
 }
 
 template<typename charT, typename traitsT, typename allocatorT>
-streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n){
+streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n)
+{
 	if(this->m_which & ios_base::out){
 		// Tidy the get area, as the internal buffer is subject to reallocation.
 		this->basic_insertable_streambuf::sync();
@@ -178,7 +190,8 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const 
 	}
 }
 template<typename charT, typename traitsT, typename allocatorT>
-typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c){
+typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c)
+{
 	if(this->m_which & ios_base::out){
 		if(traits_type::eq_int_type(c, traits_type::eof())){
 			return traits_type::not_eof(c);

@@ -35,7 +35,8 @@ namespace {
 	};
 }
 
-int main(){
+int main()
+{
 	auto scope = std::make_shared<Scope>(Scope::purpose_plain, nullptr);
 	auto one = std::make_shared<Variable>();
 	set_value(one->mutate_value(), D_integer(42));

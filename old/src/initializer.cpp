@@ -15,7 +15,8 @@ Initializer::Initializer(Initializer &&) noexcept = default;
 Initializer & Initializer::operator=(Initializer &&) noexcept = default;
 Initializer::~Initializer() = default;
 
-Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope){
+Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope)
+{
 	// Bind elements recursively.
 	const auto type = init.which();
 	switch(type){
@@ -52,7 +53,8 @@ Initializer bind_initializer(const Initializer &init, Sp_cref<const Scope> scope
 		std::terminate();
 	}
 }
-void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp_cref<const Scope> scope){
+void evaluate_initializer(Vp<Reference> &result_out, const Initializer &init, Sp_cref<const Scope> scope)
+{
 	const auto type = init.which();
 	switch(type){
 	case Initializer::index_assignment_init: {

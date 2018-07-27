@@ -23,10 +23,12 @@ public:
 	~Exception() override;
 
 public:
-	const Reference & get_reference() const noexcept {
+	const Reference & get_reference() const noexcept
+	{
 		return m_ref;
 	}
-	void set_reference(Reference &&ref) noexcept {
+	void set_reference(Reference &&ref) noexcept
+	{
 		m_ref = std::move(ref);
 	}
 

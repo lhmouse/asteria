@@ -9,7 +9,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	D_array arr;
 	arr.emplace_back(D_null());
 	arr.emplace_back(D_boolean(true));

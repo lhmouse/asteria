@@ -8,7 +8,8 @@
 
 using namespace Asteria;
 
-int main(){
+int main()
+{
 	auto var = std::make_shared<Variable>();
 	set_value(var->mutate_value(), D_integer(42));
 	ASTERIA_TEST_CHECK(var->get_value_opt()->which() == Value::type_integer);
@@ -18,7 +19,8 @@ int main(){
 		Vp<Reference> ref;
 		set_reference(ref, std::move(ref_l));
 		throw Exception(std::move(ref));
-	} catch(Exception &e){
+	} catch(Exception &e)
+	{
 		const auto ref = e.get_reference_opt();
 		ASTERIA_TEST_CHECK(ref);
 		set_value(drill_reference(ref), D_string(D_string::shallow("hello")));

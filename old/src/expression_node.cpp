@@ -18,7 +18,8 @@ Expression_node::Expression_node(Expression_node &&) noexcept = default;
 Expression_node & Expression_node::operator=(Expression_node &&) noexcept = default;
 Expression_node::~Expression_node() = default;
 
-const char * get_operator_name(Expression_node::Operator op) noexcept {
+const char * get_operator_name(Expression_node::Operator op) noexcept
+{
 	switch(op){
 	case Expression_node::operator_postfix_inc:
 		return "postfix increment";
@@ -83,7 +84,8 @@ const char * get_operator_name(Expression_node::Operator op) noexcept {
 }
 
 namespace {
-	Expression_node do_bind_expression_node(const Expression_node &node, Sp_cref<const Scope> scope){
+	Expression_node do_bind_expression_node(const Expression_node &node, Sp_cref<const Scope> scope)
+	{
 		const auto type = node.which();
 		switch(type){
 		case Expression_node::index_literal: {
@@ -163,7 +165,8 @@ namespace {
 	}
 }
 
-Expression bind_expression(const Expression &expr, Sp_cref<const Scope> scope){
+Expression bind_expression(const Expression &expr, Sp_cref<const Scope> scope)
+{
 	Expression bound_expr;
 	bound_expr.reserve(expr.size());
 	// Bind expression nodes recursively.
@@ -178,7 +181,8 @@ namespace {
 	void do_push_reference(Vector<Vp<Reference>> &stack_inout, Vp<Reference> &&ref){
 		stack_inout.emplace_back(std::move(ref));
 	}
-	Vp<Reference> do_pop_reference(Vector<Vp<Reference>> &stack_inout){
+	Vp<Reference> do_pop_reference(Vector<Vp<Reference>> &stack_inout)
+	{
 		if(stack_inout.empty()){
 			ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack was empty.");
 		}
@@ -202,41 +206,49 @@ namespace {
 		}
 	}
 
-	D_boolean do_logical_not(D_boolean rhs){
+	D_boolean do_logical_not(D_boolean rhs)
+	{
 		return !rhs;
 	}
-	D_boolean do_logical_and(D_boolean lhs, D_boolean rhs){
+	D_boolean do_logical_and(D_boolean lhs, D_boolean rhs)
+	{
 		return lhs & rhs;
 	}
-	D_boolean do_logical_or(D_boolean lhs, D_boolean rhs){
+	D_boolean do_logical_or(D_boolean lhs, D_boolean rhs)
+	{
 		return lhs | rhs;
 	}
-	D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs){
+	D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs)
+	{
 		return lhs ^ rhs;
 	}
 
-	D_integer do_negate(D_integer rhs){
+	D_integer do_negate(D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs == limits::min()){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
 		}
 		return -rhs;
 	}
-	D_integer do_add(D_integer lhs, D_integer rhs){
+	D_integer do_add(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if((rhs >= 0) ? (lhs > limits::max() - rhs) : (lhs < limits::min() - rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs + rhs;
 	}
-	D_integer do_subtract(D_integer lhs, D_integer rhs){
+	D_integer do_subtract(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if((rhs >= 0) ? (lhs < limits::min() + rhs) : (lhs > limits::max() + rhs)){
 			ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
 		}
 		return lhs - rhs;
 	}
-	D_integer do_multiply(D_integer lhs, D_integer rhs){
+	D_integer do_multiply(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if((lhs == 0) || (rhs == 0)){
 			return 0;
@@ -257,7 +269,8 @@ namespace {
 		}
 		return slhs * arhs;
 	}
-	D_integer do_divide(D_integer lhs, D_integer rhs){
+	D_integer do_divide(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -267,7 +280,8 @@ namespace {
 		}
 		return lhs / rhs;
 	}
-	D_integer do_modulo(D_integer lhs, D_integer rhs){
+	D_integer do_modulo(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs == 0){
 			ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -278,7 +292,8 @@ namespace {
 		return lhs % rhs;
 	}
 
-	D_integer do_shift_left_logical(D_integer lhs, D_integer rhs){
+	D_integer do_shift_left_logical(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
@@ -290,7 +305,8 @@ namespace {
 		reg <<= rhs;
 		return D_integer(reg);
 	}
-	D_integer do_shift_right_logical(D_integer lhs, D_integer rhs){
+	D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
@@ -302,7 +318,8 @@ namespace {
 		reg >>= rhs;
 		return D_integer(reg);
 	}
-	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs){
+	D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
@@ -320,7 +337,8 @@ namespace {
 		reg <<= rhs;
 		return D_integer(reg);
 	}
-	D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs){
+	D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
+	{
 		using limits = std::numeric_limits<D_integer>;
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
@@ -336,46 +354,58 @@ namespace {
 		return D_integer(reg);
 	}
 
-	D_integer do_bitwise_not(D_integer rhs){
+	D_integer do_bitwise_not(D_integer rhs)
+	{
 		return ~rhs;
 	}
-	D_integer do_bitwise_and(D_integer lhs, D_integer rhs){
+	D_integer do_bitwise_and(D_integer lhs, D_integer rhs)
+	{
 		return lhs & rhs;
 	}
-	D_integer do_bitwise_or(D_integer lhs, D_integer rhs){
+	D_integer do_bitwise_or(D_integer lhs, D_integer rhs)
+	{
 		return lhs | rhs;
 	}
-	D_integer do_bitwise_xor(D_integer lhs, D_integer rhs){
+	D_integer do_bitwise_xor(D_integer lhs, D_integer rhs)
+	{
 		return lhs ^ rhs;
 	}
 
-	D_double do_negate(D_double rhs){
+	D_double do_negate(D_double rhs)
+	{
 		return -rhs;
 	}
-	D_double do_add(D_double lhs, D_double rhs){
+	D_double do_add(D_double lhs, D_double rhs)
+	{
 		return lhs + rhs;
 	}
-	D_double do_subtract(D_double lhs, D_double rhs){
+	D_double do_subtract(D_double lhs, D_double rhs)
+	{
 		return lhs - rhs;
 	}
-	D_double do_multiply(D_double lhs, D_double rhs){
+	D_double do_multiply(D_double lhs, D_double rhs)
+	{
 		return lhs * rhs;
 	}
-	D_double do_divide(D_double lhs, D_double rhs){
+	D_double do_divide(D_double lhs, D_double rhs)
+	{
 		return lhs / rhs;
 	}
-	D_double do_modulo(D_double lhs, D_double rhs){
+	D_double do_modulo(D_double lhs, D_double rhs)
+	{
 		return std::fmod(lhs, rhs);
 	}
 
-	D_string do_concatenate(const D_string &lhs, const D_string &rhs){
+	D_string do_concatenate(const D_string &lhs, const D_string &rhs)
+	{
 		D_string res;
 		res.reserve(lhs.size() + rhs.size());
 		res.append(lhs);
 		res.append(rhs);
 		return res;
 	}
-	D_string do_duplicate(const D_string &lhs, D_integer rhs){
+	D_string do_duplicate(const D_string &lhs, D_integer rhs)
+	{
 		if(rhs < 0){
 			ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
 		}
@@ -403,7 +433,8 @@ namespace {
 		return res;
 	}
 
-	void do_evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, const Expression_node &node, Sp_cref<const Scope> scope){
+	void do_evaluate_expression_node(Vector<Vp<Reference>> &stack_inout, const Expression_node &node, Sp_cref<const Scope> scope)
+	{
 		const auto type = node.which();
 		switch(type){
 		case Expression_node::index_literal: {
@@ -1124,7 +1155,8 @@ namespace {
 	}
 }
 
-void evaluate_expression(Vp<Reference> &result_out, const Expression &expr, Sp_cref<const Scope> scope){
+void evaluate_expression(Vp<Reference> &result_out, const Expression &expr, Sp_cref<const Scope> scope)
+{
 	move_reference(result_out, nullptr);
 	Vector<Vp<Reference>> stack;
 	// Parameters are pushed from right to left, in lexical order.

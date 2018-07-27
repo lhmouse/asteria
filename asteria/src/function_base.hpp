@@ -6,9 +6,11 @@
 
 #include "fwd.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
-class Function_base {
+class Function_base
+{
 public:
 	Function_base() noexcept
 		// :

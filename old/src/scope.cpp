@@ -11,7 +11,8 @@
 
 namespace Asteria {
 
-Scope::~Scope(){
+Scope::~Scope()
+{
 	do_dispose_deferred_callbacks();
 }
 
@@ -22,18 +23,21 @@ try {
 		m_deferred_callbacks.back()->invoke(unused_result, nullptr, { });
 		m_deferred_callbacks.pop_back();
 	}
-} catch(std::exception &e){
+} catch(std::exception &e)
+{
 	ASTERIA_DEBUG_LOG("Ignoring `std::exception` thrown from deferred callbacks: ", e.what());
 }
 
-Sp<const Reference> Scope::get_named_reference_opt(const Cow_string &id) const noexcept {
+Sp<const Reference> Scope::get_named_reference_opt(const Cow_string &id) const noexcept
+{
 	auto it = m_named_references.find(id);
 	if(it == m_named_references.end()){
 		return nullptr;
 	}
 	return it->second;
 }
-std::reference_wrapper<Vp<Reference>> Scope::mutate_named_reference(const Cow_string &id){
+std::reference_wrapper<Vp<Reference>> Scope::mutate_named_reference(const Cow_string &id)
+{
 	if(id.empty()){
 		ASTERIA_THROW_RUNTIME_ERROR("Identifiers of variables must not be empty.");
 	}
@@ -106,7 +110,8 @@ namespace {
 		const auto wref = scope->mutate_named_reference(id);
 		move_reference(wref, std::move(arg_opt));
 	}
-	void do_shift_argument(Sp_cref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, const Cow_string &id){
+	void do_shift_argument(Sp_cref<Scope> scope, Vector<Vp<Reference>> &args_inout_opt, const Cow_string &id)
+	{
 		Vp<Reference> arg_opt;
 		if(args_inout_opt.empty() == false){
 			arg_opt = std::move(args_inout_opt.front());
@@ -122,7 +127,8 @@ namespace {
 		set_reference(arg, std::move(ref_k));
 		do_set_argument(scope, id, std::move(arg));
 	}
-	void do_create_source_reference(Sp_cref<Scope> scope, const Cow_string &id, const Cow_string &description){
+	void do_create_source_reference(Sp_cref<Scope> scope, const Cow_string &id, const Cow_string &description)
+	{
 		auto value = std::make_shared<Value>(D_string(description));
 		Vp<Reference> arg;
 		Reference::S_constant ref_k = { std::move(value) };
@@ -142,7 +148,8 @@ void prepare_function_scope(Sp_cref<Scope> scope, const Cow_string &source, cons
 	do_create_source_reference(scope, Cow_string::shallow("__source"), source);
 	do_create_argument_getter(scope, Cow_string::shallow("__va_arg"), source, std::move(args));
 }
-void prepare_function_scope_lexical(Sp_cref<Scope> scope, const Cow_string &source, const Vector<Cow_string> &params){
+void prepare_function_scope_lexical(Sp_cref<Scope> scope, const Cow_string &source, const Vector<Cow_string> &params)
+{
 	// Create null parameters in the scope.
 	do_set_argument(scope, Cow_string::shallow("this"), nullptr);
 	std::for_each(params.begin(), params.end(), [&](const Cow_string &param){ do_set_argument(scope, param, nullptr); });

@@ -108,15 +108,18 @@ public:
 	~Expression_node();
 
 public:
-	Index which() const noexcept {
+	Index which() const noexcept
+	{
 		return static_cast<Index>(m_variant.index());
 	}
 	template<typename ExpectT>
-	const ExpectT * get_opt() const noexcept {
+	const ExpectT * get_opt() const noexcept
+	{
 		return m_variant.get<ExpectT>();
 	}
 	template<typename ExpectT>
-	const ExpectT & as() const {
+	const ExpectT & as() const
+	{
 		return m_variant.as<ExpectT>();
 	}
 };
