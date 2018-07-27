@@ -310,12 +310,12 @@ namespace details_cow_vector
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * nblk);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), nblk);
-			if((cnt_one != 0) || (cnt_two != 0)){
-				const auto ptr_old = this->m_ptr;
-				ROCKET_ASSERT(ptr_old);
+			const auto ptr_old = this->m_ptr;
+			if(ptr_old){
 				try {
-					// Copy-construct or move-construct elements into the new block.
-					if(this->unique() == false){
+					// Copy or move elements into the new block.
+					// Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
+					if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)){
 						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, cnt_one);
 						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
 					} else {
