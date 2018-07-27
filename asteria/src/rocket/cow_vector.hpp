@@ -83,7 +83,8 @@ namespace details_cow_vector
 		{
 			// Destroy all elements backwards.
 			for(size_t i = this->nelem; i != 0; --i){
-				allocator_traits<allocatorT>::destroy(this->alloc, this->data + i - 1);
+				this->nelem -= 1;
+				allocator_traits<allocatorT>::destroy(this->alloc, this->data + this->nelem);
 			}
 		}
 
@@ -99,11 +100,12 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct copy_storage_helper
 	{
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const
+		using storage = basic_storage<valueT, allocatorT>;
+		// This is the generic version.
+		void operator()(storage *ptr, const storage *ptr_old, size_t off, size_t cnt) const
 		{
-			// This is the generic version.
 			for(size_t i = 0; i < cnt; ++i){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, src[i]);
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, *(ptr_old->data + off + i));
 				ptr->nelem += 1;
 			}
 		}
@@ -111,9 +113,10 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool memcpyT>
 	struct copy_storage_helper<valueT, allocatorT, false, memcpyT>
 	{
-		ROCKET_NORETURN void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*cnt*/) const
+		using storage = basic_storage<valueT, allocatorT>;
+		// This specialization is used when `valueT` is not copy-constructible.
+		ROCKET_NORETURN void operator()(storage * /*ptr*/, const storage * /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
 		{
-			// `valueT` is not copy-constructible.
 			// Throw an exception unconditionally, even when there is nothing to copy.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
@@ -121,11 +124,12 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT>
 	struct copy_storage_helper<valueT, allocatorT, true, true>
 	{
-		void operator()(basic_storage<valueT, allocatorT> *ptr, const valueT *src, size_t cnt) const
+		using storage = basic_storage<valueT, allocatorT>;
+		// This specialization is used when `std::allocator` is to be used to copy a trivial type.
+		void operator()(storage *ptr, const storage *ptr_old, size_t off, size_t cnt) const
 		{
-			// `std::allocator` is to be used to copy a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			::std::memcpy(ptr->data + ptr->nelem, src, sizeof(valueT) * cnt);
+			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
 			ptr->nelem += cnt;
 		}
 	};
@@ -133,11 +137,12 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct move_storage_helper
 	{
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const
+		using storage = basic_storage<valueT, allocatorT>;
+		// This is the generic version.
+		void operator()(storage *ptr, storage *ptr_old, size_t off, size_t cnt) const
 		{
-			// This is the generic version.
 			for(size_t i = 0; i < cnt; ++i){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(src[i]));
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(*(ptr_old->data + off + i)));
 				ptr->nelem += 1;
 			}
 		}
@@ -145,14 +150,15 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT>
 	struct move_storage_helper<valueT, allocatorT, true>
 	{
-		void operator()(basic_storage<valueT, allocatorT> *ptr, valueT *src, size_t cnt) const
+		using storage = basic_storage<valueT, allocatorT>;
+		// This specialization is used when `std::allocator` is to be used to move a trivial type.
+		void operator()(storage *ptr, storage *ptr_old, size_t off, size_t cnt) const
 		{
-			// `std::allocator` is to be used to move a trivial type.
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			::std::memcpy(ptr->data + ptr->nelem, src, sizeof(valueT) * cnt);
+			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
 			ptr->nelem += cnt;
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(src), '!', sizeof(valueT) * cnt);
+			::std::memset(ptr_old->data + off, '/', sizeof(valueT) * cnt);
 #endif
 		}
 	};
@@ -316,11 +322,11 @@ namespace details_cow_vector
 					// Copy or move elements into the new block.
 					// Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
 					if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)){
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, cnt_one);
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old,       0, cnt_one);
+						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					} else {
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data, cnt_one);
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old->data + off_two, cnt_two);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old,       0, cnt_one);
+						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					}
 				} catch(...){
 					// If an exception is thrown, deallocate the new block, then rethrow the exception.
