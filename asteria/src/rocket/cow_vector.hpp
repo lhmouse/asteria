@@ -114,7 +114,7 @@ namespace details_cow_vector
 		ROCKET_NORETURN void operator()(basic_storage<valueT, allocatorT> * /*ptr*/, const valueT * /*src*/, size_t /*cnt*/) const
 		{
 			// `valueT` is not copy-constructible.
-			// Throw an exception unconditionally, even when `cnt` is zero.
+			// Throw an exception unconditionally, even when there is nothing to copy.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
