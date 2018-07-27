@@ -55,8 +55,7 @@ public:
 	Value(CandidateT &&cand)
 		: m_variant(std::forward<CandidateT>(cand))
 	{ }
-	// TODO These will be `noexcept`.
-	Value(const Value &);
+	Value(const Value &); // TODO These will be `noexcept`.
 	Value & operator=(const Value &);
 	Value(Value &&) noexcept;
 	Value & operator=(Value &&) noexcept;

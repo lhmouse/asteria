@@ -13,7 +13,6 @@ class Opaque_base
 {
 public:
 	Opaque_base() noexcept
-		// :
 	{ }
 	virtual ~Opaque_base();
 
