@@ -518,6 +518,8 @@ public:
 	using iterator                = details_cow_string::string_iterator<basic_cow_string, value_type>;
 	using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
 	using reverse_iterator        = ::std::reverse_iterator<iterator>;
+	friend const_iterator;
+	friend iterator;
 
 	enum : size_type { npos = size_type(-1) };
 

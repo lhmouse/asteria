@@ -581,6 +581,8 @@ public:
 	using iterator                = details_cow_vector::vector_iterator<cow_vector, value_type>;
 	using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
 	using reverse_iterator        = ::std::reverse_iterator<iterator>;
+	friend const_iterator;
+	friend iterator;
 
 private:
 	details_cow_vector::storage_handle<valueT, allocatorT> m_sth;
