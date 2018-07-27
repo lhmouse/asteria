@@ -82,9 +82,8 @@ namespace details_cow_vector
 		~basic_storage()
 		{
 			// Destroy all elements backwards.
-			while(this->nelem != 0){
-				this->nelem -= 1;
-				allocator_traits<allocatorT>::destroy(this->alloc, this->data + this->nelem);
+			for(size_t i = this->nelem; i != 0; --i){
+				allocator_traits<allocatorT>::destroy(this->alloc, this->data + i - 1);
 			}
 		}
 
