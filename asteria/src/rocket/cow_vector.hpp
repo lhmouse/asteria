@@ -294,6 +294,8 @@ namespace details_cow_vector
 		}
 		pointer reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
 		{
+			ROCKET_ASSERT(cnt_one <= res_arg);
+			ROCKET_ASSERT(cnt_two <= res_arg - cnt_one);
 			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);

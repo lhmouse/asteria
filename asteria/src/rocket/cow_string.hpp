@@ -237,6 +237,8 @@ namespace details_cow_string
 		}
 		pointer reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
 		{
+			ROCKET_ASSERT(len_one <= res_arg);
+			ROCKET_ASSERT(len_two <= res_arg - len_one);
 			if(res_arg == 0){
 				// Deallocate the block.
 				this->do_reset(nullptr);
