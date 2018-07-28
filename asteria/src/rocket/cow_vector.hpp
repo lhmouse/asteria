@@ -369,13 +369,13 @@ namespace details_cow_vector
 		template<typename ...paramsT>
 		pointer emplace_back_n(size_type n, paramsT &&...params)
 		{
+			ROCKET_ASSERT(this->unique());
+			ROCKET_ASSERT(n <= this->capacity() - this->size());
 			if(n == 0){
 				return nullptr;
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(n <= this->capacity() - ptr->nelem);
 			for(size_type i = 0; i < n; ++i){
 				allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
 				ptr->nelem += 1;
@@ -384,13 +384,13 @@ namespace details_cow_vector
 		}
 		pointer pop_back_n(size_type n) noexcept
 		{
+			ROCKET_ASSERT(this->unique());
+			ROCKET_ASSERT(n <= this->size());
 			if(n == 0){
 				return nullptr;
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(n <= ptr->nelem);
 			for(size_type i = 0; i < n; ++i){
 				ptr->nelem -= 1;
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
