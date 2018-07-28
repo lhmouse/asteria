@@ -173,11 +173,6 @@ namespace details_cow_vector
 		using value_type       = valueT;
 		using allocator_type   = allocatorT;
 
-		using size_type        = typename allocator_traits<allocator_type>::size_type;
-		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
-		using const_pointer    = typename allocator_traits<allocator_type>::const_pointer;
-		using pointer          = typename allocator_traits<allocator_type>::pointer;
-
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
@@ -244,7 +239,7 @@ namespace details_cow_vector
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
-		size_type capacity() const noexcept
+		size_t capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -252,13 +247,13 @@ namespace details_cow_vector
 			}
 			return storage::max_nelem_for_nblk(ptr->nblk);
 		}
-		size_type max_size() const noexcept
+		size_t max_size() const noexcept
 		{
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
 			return storage::max_nelem_for_nblk(max_nblk / 2);
 		}
-		size_type check_size_add(size_type base, size_type add) const
+		size_t check_size_add(size_t base, size_t add) const
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
@@ -268,13 +263,13 @@ namespace details_cow_vector
 			}
 			return base + add;
 		}
-		size_type round_up_capacity(size_type res_arg) const
+		size_t round_up_capacity(size_t res_arg) const
 		{
 			const auto cap = this->check_size_add(0, res_arg);
 			const auto nblk = storage::min_nblk_for_nelem(cap);
 			return storage::max_nelem_for_nblk(nblk);
 		}
-		const_pointer data() const noexcept
+		const value_type * data() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -282,7 +277,7 @@ namespace details_cow_vector
 			}
 			return ptr->data;
 		}
-		pointer mut_data() noexcept
+		value_type * mut_data() noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -291,7 +286,7 @@ namespace details_cow_vector
 			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
-		size_type size() const noexcept
+		size_t size() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -299,7 +294,7 @@ namespace details_cow_vector
 			}
 			return ptr->nelem;
 		}
-		pointer reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+		value_type * reallocate(size_t cnt_one, size_t off_two, size_t cnt_two, size_t res_arg)
 		{
 			ROCKET_ASSERT(cnt_one <= res_arg);
 			ROCKET_ASSERT(cnt_two <= res_arg - cnt_one);
@@ -367,7 +362,7 @@ namespace details_cow_vector
 		}
 
 		template<typename ...paramsT>
-		pointer emplace_back_unchecked(paramsT &&...params)
+		value_type * emplace_back_unchecked(paramsT &&...params)
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(this->size() < this->capacity());
@@ -377,7 +372,7 @@ namespace details_cow_vector
 			ptr->nelem += 1;
 			return ptr->data + ptr->nelem - 1;
 		}
-		void pop_back_n_unchecked(size_type n) noexcept
+		void pop_back_n_unchecked(size_t n) noexcept
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(n <= this->size());
@@ -386,12 +381,12 @@ namespace details_cow_vector
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			for(size_type i = 0; i < n; ++i){
+			for(size_t i = 0; i < n; ++i){
 				ptr->nelem -= 1;
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
 			}
 		}
-		void rotate(size_type after, size_type seek)
+		void rotate(size_t after, size_t seek)
 		{
 			ROCKET_ASSERT(after <= seek);
 			auto bot = after;
@@ -489,7 +484,7 @@ namespace details_cow_vector
 		{
 			const auto vec = this->m_vec;
 			ROCKET_ASSERT_MSG(vec, "This iterator has not been initialized.");
-			const auto dist = static_cast<typename vectorT::size_type>(ptr - vec->data());
+			const auto dist = static_cast<size_t>(ptr - vec->data());
 			ROCKET_ASSERT_MSG(dist <= vec->size(), "This iterator has been invalidated.");
 			if(to_dereference){
 				ROCKET_ASSERT_MSG(dist < vec->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");

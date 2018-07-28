@@ -117,11 +117,6 @@ namespace details_cow_string
 		using traits_type      = traitsT;
 		using allocator_type   = allocatorT;
 
-		using size_type        = typename allocator_traits<allocator_type>::size_type;
-		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
-		using const_pointer    = typename allocator_traits<allocator_type>::const_pointer;
-		using pointer          = typename allocator_traits<allocator_type>::pointer;
-
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
@@ -188,7 +183,7 @@ namespace details_cow_string
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
-		size_type capacity() const noexcept
+		size_t capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -196,13 +191,13 @@ namespace details_cow_string
 			}
 			return storage::max_nchar_for_nblk(ptr->nblk);
 		}
-		size_type max_size() const noexcept
+		size_t max_size() const noexcept
 		{
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_bblk = allocator_traits<storage_allocator>::max_size(st_alloc);
 			return storage::max_nchar_for_nblk(max_bblk / 2);
 		}
-		size_type check_size_add(size_type base, size_type add) const
+		size_t check_size_add(size_t base, size_t add) const
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
@@ -212,13 +207,13 @@ namespace details_cow_string
 			}
 			return base + add;
 		}
-		size_type round_up_capacity(size_type res_arg) const
+		size_t round_up_capacity(size_t res_arg) const
 		{
 			const auto cap = this->check_size_add(0, res_arg);
 			const auto nblk = storage::min_nblk_for_nchar(cap);
 			return storage::max_nchar_for_nblk(nblk);
 		}
-		const_pointer data() const noexcept
+		const value_type * data() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -226,7 +221,7 @@ namespace details_cow_string
 			}
 			return ptr->data;
 		}
-		pointer mut_data() noexcept
+		value_type * mut_data() noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -235,7 +230,7 @@ namespace details_cow_string
 			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
-		pointer reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
+		value_type * reallocate(const value_type *src, size_t len_one, size_t off_two, size_t len_two, size_t res_arg)
 		{
 			ROCKET_ASSERT(len_one <= res_arg);
 			ROCKET_ASSERT(len_two <= res_arg - len_one);
@@ -327,7 +322,7 @@ namespace details_cow_string
 		{
 			const auto str = this->m_str;
 			ROCKET_ASSERT_MSG(str, "This iterator has not been initialized.");
-			const auto dist = static_cast<typename stringT::size_type>(ptr - str->data());
+			const auto dist = static_cast<size_t>(ptr - str->data());
 			ROCKET_ASSERT_MSG(dist <= str->size(), "This iterator has been invalidated.");
 			if(to_dereference){
 				ROCKET_ASSERT_MSG(dist < str->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
