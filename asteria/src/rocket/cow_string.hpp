@@ -157,7 +157,7 @@ namespace details_cow_string
 				return;
 			}
 			// If it has been decremented to zero, deallocate the block.
-			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
+			auto st_alloc = storage_allocator(ptr->alloc);
 			const auto nblk = ptr->nblk;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ::std::addressof(*ptr));
 #ifdef ROCKET_DEBUG
