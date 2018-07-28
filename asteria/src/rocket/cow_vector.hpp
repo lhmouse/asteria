@@ -367,27 +367,22 @@ namespace details_cow_vector
 		}
 
 		template<typename ...paramsT>
-		pointer emplace_back_n(size_type n, paramsT &&...params)
+		pointer emplace_back_unchecked(paramsT &&...params)
 		{
 			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(n <= this->capacity() - this->size());
-			if(n == 0){
-				return nullptr;
-			}
+			ROCKET_ASSERT(this->size() < this->capacity());
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			for(size_type i = 0; i < n; ++i){
-				allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
-				ptr->nelem += 1;
-			}
-			return ptr->data + ptr->nelem - n;
+			allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
+			ptr->nelem += 1;
+			return ptr->data + ptr->nelem - 1;
 		}
-		pointer pop_back_n(size_type n) noexcept
+		void pop_back_n_unchecked(size_type n) noexcept
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(n <= this->size());
 			if(n == 0){
-				return nullptr;
+				return;
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
@@ -395,7 +390,6 @@ namespace details_cow_vector
 				ptr->nelem -= 1;
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
 			}
-			return ptr->data + ptr->nelem;
 		}
 		void rotate(size_type after, size_type seek)
 		{
@@ -895,7 +889,7 @@ public:
 	{
 		if(this->m_sth.unique()){
 			// If the storage is owned exclusively by this vector, truncate it and leave the buffer alone.
-			this->m_sth.pop_back_n(this->size());
+			this->m_sth.pop_back_n_unchecked(this->size());
 		} else {
 			// Otherwise, detach it from `*this`.
 			this->do_deallocate();
@@ -959,7 +953,9 @@ public:
 	cow_vector & append(size_type n, const paramsT &...params)
 	{
 		this->do_reallocate_more(n);
-		this->m_sth.emplace_back_n(n, params...);
+		for(size_type i = 0; i < n; ++i){
+			this->m_sth.emplace_back_unchecked(params...);
+		}
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
@@ -982,7 +978,7 @@ public:
 	reference emplace_back(paramsT &&...params)
 	{
 		this->do_reallocate_more(1);
-		const auto wptr = this->m_sth.emplace_back_n(1, ::std::forward<paramsT>(params)...);
+		const auto wptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
 		return *wptr;
 	}
 	// N.B. The return type is a non-standard extension.
@@ -1044,7 +1040,7 @@ public:
 		} else {
 			ptr = this->m_sth.mut_data();
 			this->m_sth.rotate(tpos, tpos + tn);
-			this->m_sth.pop_back_n(tn);
+			this->m_sth.pop_back_n_unchecked(tn);
 		}
 		return iterator(this, ptr + tpos);
 	}
@@ -1065,7 +1061,7 @@ public:
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(0, 0, cnt_old - n, cnt_old);
 		} else {
-			this->m_sth.pop_back_n(n);
+			this->m_sth.pop_back_n_unchecked(n);
 		}
 		return *this;
 	}
