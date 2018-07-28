@@ -100,9 +100,9 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct copy_storage_helper
 	{
-		using storage = basic_storage<valueT, allocatorT>;
 		// This is the generic version.
-		void operator()(storage *ptr, const storage *ptr_old, size_t off, size_t cnt) const
+		template<typename xpointerT, typename ypointerT>
+		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			for(size_t i = 0; i < cnt; ++i){
 				const auto slot_old = ptr_old->data + off + i;
@@ -114,9 +114,9 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool memcpyT>
 	struct copy_storage_helper<valueT, allocatorT, false, memcpyT>
 	{
-		using storage = basic_storage<valueT, allocatorT>;
 		// This specialization is used when `valueT` is not copy-constructible.
-		ROCKET_NORETURN void operator()(storage * /*ptr*/, const storage * /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+		template<typename xpointerT, typename ypointerT>
+		ROCKET_NORETURN void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
 		{
 			// Throw an exception unconditionally, even when there is nothing to copy.
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
@@ -125,9 +125,9 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT>
 	struct copy_storage_helper<valueT, allocatorT, true, true>
 	{
-		using storage = basic_storage<valueT, allocatorT>;
 		// This specialization is used when `std::allocator` is to be used to copy a trivial type.
-		void operator()(storage *ptr, const storage *ptr_old, size_t off, size_t cnt) const
+		template<typename xpointerT, typename ypointerT>
+		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
@@ -138,9 +138,9 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct move_storage_helper
 	{
-		using storage = basic_storage<valueT, allocatorT>;
 		// This is the generic version.
-		void operator()(storage *ptr, storage *ptr_old, size_t off, size_t cnt) const
+		template<typename xpointerT, typename ypointerT>
+		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			for(size_t i = 0; i < cnt; ++i){
 				const auto slot_old = ptr_old->data + off + i;
@@ -152,9 +152,9 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT>
 	struct move_storage_helper<valueT, allocatorT, true>
 	{
-		using storage = basic_storage<valueT, allocatorT>;
 		// This specialization is used when `std::allocator` is to be used to move a trivial type.
-		void operator()(storage *ptr, storage *ptr_old, size_t off, size_t cnt) const
+		template<typename xpointerT, typename ypointerT>
+		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
@@ -177,9 +177,10 @@ namespace details_cow_vector
 		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
+		using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
 	private:
-		storage *m_ptr;
+		storage_pointer m_ptr;
 
 	public:
 		explicit storage_handle(const allocator_type &alloc) noexcept
@@ -199,7 +200,7 @@ namespace details_cow_vector
 		storage_handle & operator=(const storage_handle &) = delete;
 
 	private:
-		void do_reset(storage *ptr_new) noexcept
+		void do_reset(storage_pointer ptr_new) noexcept
 		{
 			const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
 			if(ptr == nullptr){
@@ -214,7 +215,7 @@ namespace details_cow_vector
 			// If it has been decremented to zero, deallocate the block.
 			auto st_alloc = storage_allocator(::std::move(ptr->alloc));
 			const auto nblk = ptr->nblk;
-			allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
+			allocator_traits<storage_allocator>::destroy(st_alloc, ::std::addressof(*ptr));
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * nblk);
 #endif
@@ -312,7 +313,7 @@ namespace details_cow_vector
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, ptr, ::std::move(alloc), nblk);
+			allocator_traits<storage_allocator>::construct(st_alloc, ::std::addressof(*ptr), ::std::move(alloc), nblk);
 			const auto ptr_old = this->m_ptr;
 			if(ptr_old){
 				try {
@@ -327,7 +328,7 @@ namespace details_cow_vector
 					}
 				} catch(...){
 					// If an exception is thrown, deallocate the new block, then rethrow the exception.
-					allocator_traits<storage_allocator>::destroy(st_alloc, ptr);
+					allocator_traits<storage_allocator>::destroy(st_alloc, ::std::addressof(*ptr));
 					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 					throw;
 				}
@@ -454,18 +455,20 @@ namespace details_cow_vector
 		friend vector_iterator<vectorT, const valueT>;
 
 	public:
+		using iterator_category  = ::std::random_access_iterator_tag;
+		using parent_type        = vectorT;
 		using value_type         = valueT;
+
 		using pointer            = value_type *;
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
-		using iterator_category  = ::std::random_access_iterator_tag;
 
 	private:
-		const vectorT *m_vec;
-		valueT *m_ptr;
+		const parent_type *m_vec;
+		value_type *m_ptr;
 
 	private:
-		constexpr vector_iterator(const vectorT *vec, valueT *ptr) noexcept
+		constexpr vector_iterator(const parent_type *vec, valueT *ptr) noexcept
 			: m_vec(vec), m_ptr(ptr)
 		{ }
 
@@ -474,7 +477,7 @@ namespace details_cow_vector
 			: vector_iterator(nullptr, nullptr)
 		{ }
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
-		constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+		constexpr vector_iterator(const vector_iterator<parent_type, yvalueT> &other) noexcept
 			: vector_iterator(other.m_vec, other.m_ptr)
 		{ }
 
@@ -493,21 +496,21 @@ namespace details_cow_vector
 		}
 
 	public:
-		const vectorT * parent() const noexcept
+		const parent_type * parent() const noexcept
 		{
 			return this->m_vec;
 		}
 
-		pointer tell() const noexcept
+		value_type *tell() const noexcept
 		{
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
-		pointer tell_owned_by(const vectorT *vec) const noexcept
+		value_type *tell_owned_by(const parent_type *vec) const noexcept
 		{
 			ROCKET_ASSERT(this->m_vec == vec);
 			return this->tell();
 		}
-		vector_iterator & seek(pointer ptr) noexcept
+		vector_iterator & seek(value_type *ptr) noexcept
 		{
 			this->m_ptr = this->do_assert_valid_pointer(ptr, false);
 			return *this;
@@ -1028,7 +1031,7 @@ public:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
-		pointer ptr;
+		value_type *ptr;
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			ptr = this->m_sth.mut_data();
@@ -1105,13 +1108,13 @@ public:
 	}
 
 	// 26.3.11.4, data access
-	const_pointer data() const noexcept
+	const value_type *data() const noexcept
 	{
 		return this->m_sth.data();
 	}
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
-	pointer mut_data()
+	value_type *mut_data()
 	{
 		const auto cnt = this->size();
 		if(cnt == 0){
