@@ -105,7 +105,8 @@ namespace details_cow_vector
 		void operator()(storage *ptr, const storage *ptr_old, size_t off, size_t cnt) const
 		{
 			for(size_t i = 0; i < cnt; ++i){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, *(ptr_old->data + off + i));
+				const auto slot_old = ptr_old->data + off + i;
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, *slot_old);
 				ptr->nelem += 1;
 			}
 		}
@@ -142,7 +143,8 @@ namespace details_cow_vector
 		void operator()(storage *ptr, storage *ptr_old, size_t off, size_t cnt) const
 		{
 			for(size_t i = 0; i < cnt; ++i){
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(*(ptr_old->data + off + i)));
+				const auto slot_old = ptr_old->data + off + i;
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(*slot_old));
 				ptr->nelem += 1;
 			}
 		}
@@ -156,10 +158,10 @@ namespace details_cow_vector
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
-			ptr->nelem += cnt;
 #ifdef ROCKET_DEBUG
 			::std::memset(ptr_old->data + off, '/', sizeof(valueT) * cnt);
 #endif
+			ptr->nelem += cnt;
 		}
 	};
 
