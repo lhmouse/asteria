@@ -687,7 +687,7 @@ public:
 	}
 
 private:
-	// Reallocate the storage to `cap` characters, not including the null terminator.
+	// Reallocate the storage to `res_arg` characters, not including the null terminator.
 	void do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
 	{
 		ROCKET_ASSERT(len_one <= off_two);
