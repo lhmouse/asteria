@@ -456,7 +456,7 @@ namespace details_cow_vector
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
-		using parent_type        = vectorT;
+		using parent_type        = storage_handle<typename vectorT::value_type, typename vectorT::allocator_type>;
 		using value_type         = valueT;
 
 		using pointer            = value_type *;
@@ -464,12 +464,12 @@ namespace details_cow_vector
 		using difference_type    = ptrdiff_t;
 
 	private:
-		const parent_type *m_vec;
+		const parent_type *m_ref;
 		value_type *m_ptr;
 
 	private:
-		constexpr vector_iterator(const parent_type *vec, valueT *ptr) noexcept
-			: m_vec(vec), m_ptr(ptr)
+		constexpr vector_iterator(const parent_type *ref, valueT *ptr) noexcept
+			: m_ref(ref), m_ptr(ptr)
 		{ }
 
 	public:
@@ -478,36 +478,34 @@ namespace details_cow_vector
 		{ }
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
 		constexpr vector_iterator(const vector_iterator<parent_type, yvalueT> &other) noexcept
-			: vector_iterator(other.m_vec, other.m_ptr)
+			: vector_iterator(other.m_ref, other.m_ptr)
 		{ }
 
 	private:
 		template<typename pointerT>
 		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept
 		{
-			const auto vec = this->m_vec;
-			ROCKET_ASSERT_MSG(vec, "This iterator has not been initialized.");
-			const auto dist = static_cast<size_t>(ptr - vec->data());
-			ROCKET_ASSERT_MSG(dist <= vec->size(), "This iterator has been invalidated.");
-			if(to_dereference){
-				ROCKET_ASSERT_MSG(dist < vec->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
-			}
+			const auto ref = this->m_ref;
+			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+			const auto dist = static_cast<size_t>(ptr - ref->data());
+			ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
+			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
 			return ptr;
 		}
 
 	public:
 		const parent_type * parent() const noexcept
 		{
-			return this->m_vec;
+			return this->m_ref;
 		}
 
 		value_type *tell() const noexcept
 		{
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
-		value_type *tell_owned_by(const parent_type *vec) const noexcept
+		value_type *tell_owned_by(const parent_type *ref) const noexcept
 		{
-			ROCKET_ASSERT(this->m_vec == vec);
+			ROCKET_ASSERT(this->m_ref == ref);
 			return this->tell();
 		}
 		vector_iterator & seek(value_type *ptr) noexcept
@@ -645,8 +643,6 @@ public:
 	using iterator                = details_cow_vector::vector_iterator<cow_vector, value_type>;
 	using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
 	using reverse_iterator        = ::std::reverse_iterator<iterator>;
-	friend const_iterator;
-	friend iterator;
 
 private:
 	details_cow_vector::storage_handle<valueT, allocatorT> m_sth;
@@ -757,22 +753,22 @@ private:
 	template<typename ...paramsT>
 	iterator do_insert(const_iterator tins, paramsT &&...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto cnt_old = this->size();
 		this->append(::std::forward<paramsT>(params)...);
 		this->m_sth.rotate(tpos, cnt_old);
-		return iterator(this, this->mut_data() + tpos);
+		return iterator(&(this->m_sth), this->mut_data() + tpos);
 	}
 
 public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(this, this->data());
+		return const_iterator(&(this->m_sth), this->data());
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(this, this->data() + this->size());
+		return const_iterator(&(this->m_sth), this->data() + this->size());
 	}
 	const_reverse_iterator rbegin() const noexcept
 	{
@@ -804,13 +800,13 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(this, this->mut_data());
+		return iterator(&(this->m_sth), this->mut_data());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(this, this->mut_data() + this->size());
+		return iterator(&(this->m_sth), this->mut_data() + this->size());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -993,11 +989,11 @@ public:
 	template<typename ...paramsT>
 	iterator emplace(const_iterator tins, paramsT &&...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto cnt_old = this->size();
 		this->emplace_back(::std::forward<paramsT>(params)...);
 		this->m_sth.rotate(tpos, cnt_old);
-		return iterator(this, this->mut_data() + tpos);
+		return iterator(&(this->m_sth), this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
@@ -1026,8 +1022,8 @@ public:
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst, const_iterator tlast)
 	{
-		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
@@ -1040,12 +1036,12 @@ public:
 			this->m_sth.rotate(tpos, tpos + tn);
 			this->m_sth.pop_back_n_unchecked(tn);
 		}
-		return iterator(this, ptr + tpos);
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator trm)
 	{
-		return this->erase(trm, const_iterator(this, trm.tell() + 1));
+		return this->erase(trm, const_iterator(&(this->m_sth), trm.tell() + 1));
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type and parameter are non-standard extensions.

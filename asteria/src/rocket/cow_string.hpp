@@ -302,12 +302,12 @@ namespace details_cow_string
 		using difference_type    = ptrdiff_t;
 
 	private:
-		const parent_type *m_str;
+		const parent_type *m_ref;
 		value_type *m_ptr;
 
 	private:
-		constexpr string_iterator(const parent_type *str, value_type *ptr) noexcept
-			: m_str(str), m_ptr(ptr)
+		constexpr string_iterator(const parent_type *ref, value_type *ptr) noexcept
+			: m_ref(ref), m_ptr(ptr)
 		{ }
 
 	public:
@@ -316,36 +316,34 @@ namespace details_cow_string
 		{ }
 		template<typename ycharT, typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
 		constexpr string_iterator(const string_iterator<parent_type, ycharT> &other) noexcept
-			: string_iterator(other.m_str, other.m_ptr)
+			: string_iterator(other.m_ref, other.m_ptr)
 		{ }
 
 	private:
 		template<typename pointerT>
 		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept
 		{
-			const auto str = this->m_str;
-			ROCKET_ASSERT_MSG(str, "This iterator has not been initialized.");
-			const auto dist = static_cast<size_t>(ptr - str->data());
-			ROCKET_ASSERT_MSG(dist <= str->size(), "This iterator has been invalidated.");
-			if(to_dereference){
-				ROCKET_ASSERT_MSG(dist < str->size(), "This iterator contains a past-the-end value and cannot be dereferenced.");
-			}
+			const auto ref = this->m_ref;
+			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+			const auto dist = static_cast<size_t>(ptr - ref->data());
+			ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
+			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
 			return ptr;
 		}
 
 	public:
 		const parent_type * parent() const noexcept
 		{
-			return this->m_str;
+			return this->m_ref;
 		}
 
 		value_type * tell() const noexcept
 		{
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
-		value_type * tell_owned_by(const parent_type *str) const noexcept
+		value_type * tell_owned_by(const parent_type *ref) const noexcept
 		{
-			ROCKET_ASSERT(this->m_str == str);
+			ROCKET_ASSERT(this->m_ref == ref);
 			return this->tell();
 		}
 		string_iterator & seek(value_type *ptr) noexcept
@@ -575,8 +573,6 @@ public:
 	using iterator                = details_cow_string::string_iterator<basic_cow_string, value_type>;
 	using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
 	using reverse_iterator        = ::std::reverse_iterator<iterator>;
-	friend const_iterator;
-	friend iterator;
 
 	enum : size_type { npos = size_type(-1) };
 
