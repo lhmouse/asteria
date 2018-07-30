@@ -707,9 +707,6 @@ public:
 	}
 	cow_vector & operator=(const cow_vector &other) noexcept
 	{
-		if(this == &other){
-			return *this;
-		}
 		allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		return this->assign(other);
 	}

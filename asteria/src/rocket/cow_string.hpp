@@ -670,9 +670,6 @@ public:
 	}
 	basic_cow_string & operator=(const basic_cow_string &other) noexcept
 	{
-		if(this == &other){
-			return *this;
-		}
 		allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
 		return this->assign(other);
 	}
