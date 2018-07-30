@@ -108,17 +108,17 @@ namespace details_cow_string
 		basic_storage & operator=(const basic_storage &) = delete;
 	};
 
-	template<typename charT, typename traitsT, typename allocatorT>
+	template<typename allocatorT, typename traitsT>
 	class storage_handle
 		: private allocator_wrapper_base_for<allocatorT>::type
 	{
 	public:
-		using value_type       = charT;
-		using traits_type      = traitsT;
 		using allocator_type   = allocatorT;
+		using traits_type      = traitsT;
+		using value_type       = typename allocator_type::value_type;
 
 	private:
-		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
+		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 		using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
@@ -595,7 +595,7 @@ public:
 	struct hash;
 
 private:
-	details_cow_string::storage_handle<charT, traitsT, allocatorT> m_sth;
+	details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
 	const value_type *m_ptr;
 	size_type m_len;
 

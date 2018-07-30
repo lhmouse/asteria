@@ -166,16 +166,16 @@ namespace details_cow_vector
 		}
 	};
 
-	template<typename valueT, typename allocatorT>
+	template<typename allocatorT>
 	class storage_handle
 		: private allocator_wrapper_base_for<allocatorT>::type
 	{
 	public:
-		using value_type       = valueT;
 		using allocator_type   = allocatorT;
+		using value_type       = typename allocator_type::value_type;
 
 	private:
-		using allocator_base    = typename allocator_wrapper_base_for<allocatorT>::type;
+		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
 		using storage           = basic_storage<value_type, allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 		using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
@@ -459,7 +459,7 @@ namespace details_cow_vector
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
-		using parent_type        = storage_handle<typename vectorT::value_type, typename vectorT::allocator_type>;
+		using parent_type        = storage_handle<typename vectorT::allocator_type>;
 		using value_type         = valueT;
 
 		using pointer            = value_type *;
@@ -652,7 +652,7 @@ public:
 	using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
 private:
-	details_cow_vector::storage_handle<valueT, allocatorT> m_sth;
+	details_cow_vector::storage_handle<allocator_type> m_sth;
 
 public:
 	// 26.3.11.2, construct/copy/destroy
