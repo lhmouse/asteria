@@ -609,11 +609,7 @@ public:
 		: basic_cow_string(shallow(), alloc)
 	{
 	}
-	basic_cow_string(shallow sh) noexcept(noexcept(allocator_type()))
-		: basic_cow_string(sh, allocator_type())
-	{
-	}
-	basic_cow_string(shallow sh, const allocator_type &alloc) noexcept
+	basic_cow_string(shallow sh, const allocator_type &alloc = allocator_type()) noexcept
 		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
 	{
 	}
