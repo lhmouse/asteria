@@ -592,13 +592,14 @@ namespace details_cow_vector
 	template<typename vectorT, typename xvalueT, typename yvalueT>
 	inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
 	{
-		return lhs.tell_owned_by(rhs.parent()) == rhs.tell();
+		return lhs.tell() == rhs.tell();
 	}
 	template<typename vectorT, typename xvalueT, typename yvalueT>
 	inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
 	{
-		return lhs.tell_owned_by(rhs.parent()) != rhs.tell();
+		return lhs.tell() != rhs.tell();
 	}
+
 	template<typename vectorT, typename xvalueT, typename yvalueT>
 	inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
 	{

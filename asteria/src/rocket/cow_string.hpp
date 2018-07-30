@@ -430,13 +430,14 @@ namespace details_cow_string
 	template<typename stringT, typename xcharT, typename ycharT>
 	inline bool operator==(const string_iterator<stringT, xcharT> &lhs, const string_iterator<stringT, ycharT> &rhs) noexcept
 	{
-		return lhs.tell_owned_by(rhs.parent()) == rhs.tell();
+		return lhs.tell() == rhs.tell();
 	}
 	template<typename stringT, typename xcharT, typename ycharT>
 	inline bool operator!=(const string_iterator<stringT, xcharT> &lhs, const string_iterator<stringT, ycharT> &rhs) noexcept
 	{
-		return lhs.tell_owned_by(rhs.parent()) != rhs.tell();
+		return lhs.tell() != rhs.tell();
 	}
+
 	template<typename stringT, typename xcharT, typename ycharT>
 	inline bool operator<(const string_iterator<stringT, xcharT> &lhs, const string_iterator<stringT, ycharT> &rhs) noexcept
 	{
