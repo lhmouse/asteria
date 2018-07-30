@@ -656,12 +656,12 @@ private:
 
 public:
 	// 26.3.11.2, construct/copy/destroy
-	cow_vector() noexcept(noexcept(allocator_type()))
-		: cow_vector(allocator_type())
-	{
-	}
 	explicit cow_vector(const allocator_type &alloc) noexcept
 		: m_sth(alloc)
+	{
+	}
+	cow_vector() noexcept(noexcept(allocator_type()))
+		: cow_vector(allocator_type())
 	{
 	}
 	cow_vector(const cow_vector &other) noexcept

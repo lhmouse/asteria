@@ -601,16 +601,16 @@ private:
 
 public:
 	// 24.3.2.2, construct/copy/destroy
-	basic_cow_string() noexcept(noexcept(allocator_type()))
-		: basic_cow_string(shallow(), allocator_type())
+	basic_cow_string(shallow sh, const allocator_type &alloc = allocator_type()) noexcept
+		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
 	{
 	}
 	explicit basic_cow_string(const allocator_type &alloc) noexcept
 		: basic_cow_string(shallow(), alloc)
 	{
 	}
-	basic_cow_string(shallow sh, const allocator_type &alloc = allocator_type()) noexcept
-		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
+	basic_cow_string() noexcept(noexcept(allocator_type()))
+		: basic_cow_string(shallow(), allocator_type())
 	{
 	}
 	basic_cow_string(const basic_cow_string &other) noexcept
