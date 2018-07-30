@@ -54,7 +54,8 @@ public:
 	template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
 	Value(CandidateT &&cand)
 		: m_variant(std::forward<CandidateT>(cand))
-	{ }
+	{
+	}
 	Value(const Value &); // TODO These will be `noexcept`.
 	Value & operator=(const Value &);
 	Value(Value &&) noexcept;

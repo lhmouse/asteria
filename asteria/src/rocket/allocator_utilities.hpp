@@ -26,7 +26,8 @@ namespace details_allocator_utilities
 #else
 		: false_type
 #endif
-	{ };
+	{
+	};
 
 	template<typename allocatorT>
 	class final_wrapper
@@ -37,10 +38,12 @@ namespace details_allocator_utilities
 	public:
 		explicit final_wrapper(const allocatorT &alloc) noexcept
 			: m_alloc(alloc)
-		{ }
+		{
+		}
 		explicit final_wrapper(allocatorT &&alloc) noexcept
 			: m_alloc(::std::move(alloc))
-		{ }
+		{
+		}
 
 	public:
 		operator const allocatorT & () const noexcept
@@ -57,7 +60,8 @@ namespace details_allocator_utilities
 template<typename allocatorT>
 struct allocator_wrapper_base_for
 	: conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
-{ };
+{
+};
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value>
 struct allocator_copy_assigner
@@ -113,11 +117,13 @@ struct allocator_swapper<allocatorT, true>
 template<typename allocatorT>
 struct is_std_allocator
 	: false_type
-{ };
+{
+};
 template<typename valueT>
 struct is_std_allocator<::std::allocator<valueT>>
 	: true_type
-{ };
+{
+};
 
 }
 

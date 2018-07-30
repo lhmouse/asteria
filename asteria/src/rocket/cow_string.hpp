@@ -130,11 +130,13 @@ namespace details_cow_string
 		explicit storage_handle(const allocator_type &alloc) noexcept
 			: allocator_base(alloc)
 			, m_ptr(nullptr)
-		{ }
+		{
+		}
 		explicit storage_handle(allocator_type &&alloc) noexcept
 			: allocator_base(::std::move(alloc))
 			, m_ptr(nullptr)
-		{ }
+		{
+		}
 		~storage_handle()
 		{
 			this->do_reset(nullptr);
@@ -308,16 +310,19 @@ namespace details_cow_string
 	private:
 		constexpr string_iterator(const parent_type *ref, value_type *ptr) noexcept
 			: m_ref(ref), m_ptr(ptr)
-		{ }
+		{
+		}
 
 	public:
 		constexpr string_iterator() noexcept
 			: string_iterator(nullptr, nullptr)
-		{ }
+		{
+		}
 		template<typename ycharT, typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
 		constexpr string_iterator(const string_iterator<parent_type, ycharT> &other) noexcept
 			: string_iterator(other.m_ref, other.m_ptr)
-		{ }
+		{
+		}
 
 	private:
 		template<typename pointerT>
@@ -494,14 +499,17 @@ namespace details_cow_string
 	public:
 		shallow() noexcept
 			: m_ptr(shallow_base<charT>::s_empty), m_len(0)
-		{ }
+		{
+		}
 		explicit shallow(const char_type *ptr) noexcept
 			: m_ptr(ptr), m_len(traitsT::length(ptr))
-		{ }
+		{
+		}
 		template<typename allocatorT>
 		explicit shallow(const basic_cow_string<charT, traitsT, allocatorT> &str) noexcept
 			: m_ptr(str.data()), m_len(str.size())
-		{ }
+		{
+		}
 
 	public:
 		const char_type * data() const noexcept
@@ -595,16 +603,20 @@ public:
 	// 24.3.2.2, construct/copy/destroy
 	basic_cow_string() noexcept(noexcept(allocator_type()))
 		: basic_cow_string(shallow(), allocator_type())
-	{ }
+	{
+	}
 	explicit basic_cow_string(const allocator_type &alloc) noexcept
 		: basic_cow_string(shallow(), alloc)
-	{ }
+	{
+	}
 	basic_cow_string(shallow sh) noexcept(noexcept(allocator_type()))
 		: basic_cow_string(sh, allocator_type())
-	{ }
+	{
+	}
 	basic_cow_string(shallow sh, const allocator_type &alloc) noexcept
 		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
-	{ }
+	{
+	}
 	basic_cow_string(const basic_cow_string &other) noexcept
 		: basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
 	{

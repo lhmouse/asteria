@@ -54,11 +54,13 @@ namespace details_unique_handle
 		explicit stored_handle(const closer_type &close) noexcept
 			: closer_base(close)
 			, m_h(this->as_closer().null())
-		{ }
+		{
+		}
 		explicit stored_handle(closer_type &&close) noexcept
 			: closer_base(::std::move(close))
 			, m_h(this->as_closer().null())
-		{ }
+		{
+		}
 		~stored_handle()
 		{
 			this->reset(this->as_closer().null());
@@ -121,10 +123,12 @@ public:
 	// 23.11.1.2.1, constructors
 	unique_handle() noexcept(noexcept(closer_type()))
 		: m_sth(closer_type())
-	{ }
+	{
+	}
 	explicit unique_handle(const closer_type &close) noexcept
 		: m_sth(close)
-	{ }
+	{
+	}
 	explicit unique_handle(handle_type h) noexcept(noexcept(closer_type()))
 		: m_sth(closer_type())
 	{

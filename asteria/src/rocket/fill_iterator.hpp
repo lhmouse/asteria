@@ -36,7 +36,8 @@ public:
 	template<typename ...paramsT>
 	explicit fill_iterator(difference_type pos, paramsT &&...params) noexcept(is_nothrow_constructible<value_type, paramsT &&...>::value)
 		: m_pos(pos), m_value(::std::forward<paramsT>(params)...)
-	{ }
+	{
+	}
 
 public:
 	difference_type tell() const noexcept

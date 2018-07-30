@@ -46,7 +46,8 @@ private:
 public:
 	constexpr Parser_result(std::size_t line, std::size_t column, std::size_t length, Error_code error_code) noexcept
 		: m_line(line), m_column(column), m_length(length), m_error_code(error_code)
-	{ }
+	{
+	}
 
 public:
 	std::size_t get_line() const noexcept

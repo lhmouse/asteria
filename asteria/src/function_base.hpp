@@ -13,7 +13,8 @@ class Function_base
 {
 public:
 	Function_base() noexcept
-	{ }
+	{
+	}
 	virtual ~Function_base();
 
 	Function_base(const Function_base &) = delete;

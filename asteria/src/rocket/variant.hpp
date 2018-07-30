@@ -40,80 +40,98 @@ namespace details_variant
 	template<unsigned indexT, typename ...typesT>
 	struct type_getter
 		// `type` is not defined.
-	{ };
+	{
+	};
 	template<typename firstT, typename ...remainingT>
 	struct type_getter<0, firstT, remainingT...>
 		: common_type<firstT>
-	{ };
+	{
+	};
 	template<unsigned indexT, typename firstT, typename ...remainingT>
 	struct type_getter<indexT, firstT, remainingT...>
 		: type_getter<indexT - 1, remainingT...>
-	{ };
+	{
+	};
 
 	template<unsigned indexT, typename expectT, typename ...typesT>
 	struct type_finder
 		// `value` is not defined.
-	{ };
+	{
+	};
 	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct type_finder<indexT, expectT, firstT, remainingT...>
 		: type_finder<indexT + 1, expectT, remainingT...>
-	{ };
+	{
+	};
 	template<unsigned indexT, typename expectT, typename ...remainingT>
 	struct type_finder<indexT, expectT, expectT, remainingT...>
 		: integral_constant<unsigned, indexT>
-	{ };
+	{
+	};
 
 	template<typename ...typesT>
 	struct conjunction
 		: true_type
-	{ };
+	{
+	};
 	template<typename firstT, typename ...remainingT>
 	struct conjunction<firstT, remainingT...>
 		: conditional<firstT::value, conjunction<remainingT...>, false_type>::type
-	{ };
+	{
+	};
 
 	template<typename expectT, typename ...typesT>
 	struct has_type_recursive
 		: false_type
-	{ };
+	{
+	};
 	template<typename expectT, typename firstT, typename ...remainingT>
 	struct has_type_recursive<expectT, firstT, remainingT...>
 		: has_type_recursive<expectT, remainingT...>
-	{ };
+	{
+	};
 	template<typename expectT, typename ...remainingT>
 	struct has_type_recursive<expectT, expectT, remainingT...>
 		: true_type
-	{ };
+	{
+	};
 	template<typename expectT, typename ...elementsT, typename ...remainingT>
 	struct has_type_recursive<expectT, variant<elementsT...>, remainingT...>
 		: conditional<has_type_recursive<expectT, elementsT...>::value, true_type, has_type_recursive<expectT, remainingT...>>::type
-	{ };
+	{
+	};
 	template<typename ...elementsT, typename ...remainingT>
 	struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...>
 		: true_type
-	{ };
+	{
+	};
 
 	template<unsigned indexT, typename expectT, typename ...typesT>
 	struct recursive_type_finder
 		// `value` is not defined.
-	{ };
+	{
+	};
 	template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
 	struct recursive_type_finder<indexT, expectT, firstT, remainingT...>
 		: conditional<has_type_recursive<expectT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, expectT, remainingT...>>::type
-	{ };
+	{
+	};
 
 	template<size_t firstT, size_t ...remainingT>
 	struct max_of
 		: max_of<firstT, max_of<remainingT...>::value>
-	{ };
+	{
+	};
 	template<size_t firstT>
 	struct max_of<firstT>
 		: integral_constant<size_t, firstT>
-	{ };
+	{
+	};
 	template<size_t firstT, size_t secondT>
 	struct max_of<firstT, secondT>
 		: integral_constant<size_t, !(firstT < secondT) ? firstT : secondT>
-	{ };
+	{
+	};
 
 	template<typename ...elementsT>
 	union basic_storage
@@ -129,13 +147,15 @@ namespace details_variant
 		template<typename typeT>
 		struct is_nothrow_swappable
 			: integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
-		{ };
+		{
+		};
 	}
 
 	template<typename typeT>
 	struct is_nothrow_swappable
 		: details_is_nothrow_swappable::is_nothrow_swappable<typeT>
-	{ };
+	{
+	};
 
 	template<typename typeT, typename ...paramsT>
 	inline typeT * construct(typeT *ptr, paramsT &&...params)
@@ -259,20 +279,24 @@ public:
 	template<unsigned indexT>
 	struct at
 		: details_variant::type_getter<indexT, elementsT...>
-	{ };
+	{
+	};
 	template<typename elementT>
 	struct index_of
 		: details_variant::type_finder<0, elementT, elementsT...>
-	{ };
+	{
+	};
 
 	template<typename ...addT>
 	struct prepend
 		: common_type<variant<addT..., elementsT...>>
-	{ };
+	{
+	};
 	template<typename ...addT>
 	struct append
 		: common_type<variant<elementsT..., addT...>>
-	{ };
+	{
+	};
 
 private:
 	using storage = details_variant::basic_storage<elementsT...>;

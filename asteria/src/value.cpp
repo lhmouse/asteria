@@ -180,7 +180,8 @@ namespace
 	public:
 		explicit constexpr Indent(unsigned num) noexcept
 			: m_num(num)
-		{ }
+		{
+		}
 
 	public:
 		unsigned get_num() const noexcept
@@ -227,7 +228,8 @@ namespace
 	public:
 		explicit Quote(Cow_string str) noexcept
 			: m_str(std::move(str))
-		{ }
+		{
+		}
 
 	public:
 		const Cow_string & get_str() const noexcept

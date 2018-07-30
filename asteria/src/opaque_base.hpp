@@ -13,7 +13,8 @@ class Opaque_base
 {
 public:
 	Opaque_base() noexcept
-	{ }
+	{
+	}
 	virtual ~Opaque_base();
 
 	Opaque_base(const Opaque_base &) = delete;

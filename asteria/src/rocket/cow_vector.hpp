@@ -95,7 +95,8 @@ namespace details_cow_vector
 	template<typename valueT, typename allocatorT>
 	struct copy_trivially
 		: integral_constant<bool, is_copy_constructible<valueT>::value && is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
-	{ };
+	{
+	};
 
 	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
 	struct copy_storage_helper
@@ -186,11 +187,13 @@ namespace details_cow_vector
 		explicit storage_handle(const allocator_type &alloc) noexcept
 			: allocator_base(alloc)
 			, m_ptr(nullptr)
-		{ }
+		{
+		}
 		explicit storage_handle(allocator_type &&alloc) noexcept
 			: allocator_base(::std::move(alloc))
 			, m_ptr(nullptr)
-		{ }
+		{
+		}
 		~storage_handle()
 		{
 			this->do_reset(nullptr);
@@ -470,16 +473,19 @@ namespace details_cow_vector
 	private:
 		constexpr vector_iterator(const parent_type *ref, valueT *ptr) noexcept
 			: m_ref(ref), m_ptr(ptr)
-		{ }
+		{
+		}
 
 	public:
 		constexpr vector_iterator() noexcept
 			: vector_iterator(nullptr, nullptr)
-		{ }
+		{
+		}
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
 		constexpr vector_iterator(const vector_iterator<parent_type, yvalueT> &other) noexcept
 			: vector_iterator(other.m_ref, other.m_ptr)
-		{ }
+		{
+		}
 
 	private:
 		template<typename pointerT>
@@ -652,10 +658,12 @@ public:
 	// 26.3.11.2, construct/copy/destroy
 	cow_vector() noexcept(noexcept(allocator_type()))
 		: cow_vector(allocator_type())
-	{ }
+	{
+	}
 	explicit cow_vector(const allocator_type &alloc) noexcept
 		: m_sth(alloc)
-	{ }
+	{
+	}
 	cow_vector(const cow_vector &other) noexcept
 		: cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
 	{

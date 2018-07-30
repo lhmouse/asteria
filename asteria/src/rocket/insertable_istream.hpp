@@ -34,11 +34,13 @@ public:
 	explicit basic_insertable_istream(ios_base::open_mode which = ios_base::in)
 		: basic_istream<charT, traitsT>(::std::addressof(this->m_sb))
 		, m_sb(which | ios_base::in)
-	{ }
+	{
+	}
 	explicit basic_insertable_istream(string_type str, ios_base::open_mode which = ios_base::in)
 		: basic_istream<charT, traitsT>(::std::addressof(this->m_sb))
 		, m_sb(::std::move(str), which | ios_base::in)
-	{ }
+	{
+	}
 	~basic_insertable_istream() override;
 
 public:
