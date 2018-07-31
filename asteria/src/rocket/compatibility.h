@@ -30,6 +30,7 @@
 #define ROCKET_FORMAT_CHECK(...)      // not implemented
 #define ROCKET_FUNCSIG                __FUNCSIG__
 #define ROCKET_UNREACHABLE()          __assume(0)
+#define ROCKET_SELECTANY              __declspec(selectany)
 
 #endif // ROCKET_MSVC
 
@@ -50,6 +51,7 @@
 #define ROCKET_FORMAT_CHECK(...)      __attribute__((__format__(__VA_ARGS__)))
 #define ROCKET_FUNCSIG                __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()          __builtin_unreachable()
+#define ROCKET_SELECTANY              __attribute__((__weak__))
 
 #endif // ROCKET_CLANG
 
@@ -68,6 +70,7 @@
 #define ROCKET_FORMAT_CHECK(...)      __attribute__((__format__(__VA_ARGS__)))
 #define ROCKET_FUNCSIG                __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()          __builtin_unreachable()
+#define ROCKET_SELECTANY              __attribute__((__weak__))
 
 #endif // ROCKET_GCC
 
