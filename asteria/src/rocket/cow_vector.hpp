@@ -1111,13 +1111,13 @@ public:
 	}
 
 	// 26.3.11.4, data access
-	const value_type *data() const noexcept
+	const value_type * data() const noexcept
 	{
 		return this->m_sth.data();
 	}
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
-	value_type *mut_data()
+	value_type * mut_data()
 	{
 		const auto cnt = this->size();
 		if(cnt == 0){

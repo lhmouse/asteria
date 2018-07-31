@@ -1388,13 +1388,13 @@ public:
 	}
 
 	// 24.3.2.7, string operations
-	const value_type *data() const noexcept
+	const value_type * data() const noexcept
 	{
 		return this->m_ptr;
 	}
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
-	value_type *mut_data()
+	value_type * mut_data()
 	{
 		const auto len = this->size();
 		if(len == 0){
@@ -1405,7 +1405,7 @@ public:
 		}
 		return this->m_sth.mut_data();
 	}
-	const value_type *c_str() const noexcept
+	const value_type * c_str() const noexcept
 	{
 		return this->data();
 	}
