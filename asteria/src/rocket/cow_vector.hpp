@@ -736,24 +736,25 @@ private:
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
 	}
+	// Deallocate any dynamic storage.
+	void do_deallocate() noexcept
+	{
+		this->m_sth.deallocate();
+	}
+
 	// Reallocate more storage as needed, without shrinking.
 	void do_reallocate_more(size_type cap_add)
 	{
-		const auto cnt = this->m_sth.size();
+		const auto cnt = this->size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
+		if((this->unique() == false) || (this->capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, cnt + cnt / 2 + 7);
 #endif
 			this->do_reallocate(0, 0, cnt, cap);
 		}
-		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-	}
-	// Deallocate any dynamic storage.
-	void do_deallocate() noexcept
-	{
-		this->m_sth.deallocate();
+		ROCKET_ASSERT(this->capacity() >= cap);
 	}
 
 	template<typename ...paramsT>
@@ -864,7 +865,7 @@ public:
 		const auto cnt = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
 		// If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
+		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)){
 			return;
 		}
 		this->do_reallocate(0, 0, cnt, cap_new);
@@ -875,7 +876,7 @@ public:
 		const auto cnt = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(cnt);
 		// Don't increase memory usage.
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() <= cap_min)){
+		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)){
 			return;
 		}
 		if(cnt != 0){
@@ -889,7 +890,7 @@ public:
 	{
 		if(this->m_sth.unique()){
 			// If the storage is owned exclusively by this vector, truncate it and leave the buffer alone.
-			this->m_sth.pop_back_n_unchecked(this->size());
+			this->m_sth.pop_back_n_unchecked(this->m_sth.size());
 		} else {
 			// Otherwise, detach it from `*this`.
 			this->do_deallocate();

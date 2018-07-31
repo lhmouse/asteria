@@ -701,20 +701,6 @@ private:
 		this->m_ptr = ptr;
 		this->m_len = len_one + len_two;
 	}
-	// Reallocate more storage as needed, without shrinking.
-	void do_reallocate_more(size_type cap_add)
-	{
-		const auto len = this->m_len;
-		auto cap = this->m_sth.check_size_add(len, cap_add);
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
-#ifndef ROCKET_DEBUG
-			// Reserve more space for non-debug builds.
-			cap = noadl::max(cap, len + len / 2 + 31);
-#endif
-			this->do_reallocate(0, 0, len, cap);
-		}
-		ROCKET_ASSERT(this->m_sth.capacity() >= cap);
-	}
 	// Add a null terminator at `ptr[len]` then set `len` there.
 	void do_set_length(size_type len) noexcept
 	{
@@ -731,6 +717,21 @@ private:
 		this->m_sth.deallocate();
 		this->m_ptr = shallow().data();
 		this->m_len = 0;
+	}
+
+	// Reallocate more storage as needed, without shrinking.
+	void do_reallocate_more(size_type cap_add)
+	{
+		const auto len = this->size();
+		auto cap = this->m_sth.check_size_add(len, cap_add);
+		if((this->unique() == false) || (this->capacity() < cap)){
+#ifndef ROCKET_DEBUG
+			// Reserve more space for non-debug builds.
+			cap = noadl::max(cap, len + len / 2 + 31);
+#endif
+			this->do_reallocate(0, 0, len, cap);
+		}
+		ROCKET_ASSERT(this->capacity() >= cap);
 	}
 
 	// This function works the same way as `substr()`.
@@ -920,7 +921,7 @@ public:
 		const auto len = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_sth.unique() != false) && (this->m_sth.capacity() >= cap_new)){
+		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)){
 			return;
 		}
 		this->do_reallocate(0, 0, len, cap_new);
@@ -931,7 +932,7 @@ public:
 		const auto len = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(len);
 		// Don't increase memory usage.
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() <= cap_min)){
+		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)){
 			return;
 		}
 		if(len != 0){
