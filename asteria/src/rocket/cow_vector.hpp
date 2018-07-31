@@ -471,7 +471,7 @@ namespace details_cow_vector
 		value_type *m_ptr;
 
 	private:
-		constexpr vector_iterator(const parent_type *ref, valueT *ptr) noexcept
+		constexpr vector_iterator(const parent_type *ref, value_type *ptr) noexcept
 			: m_ref(ref), m_ptr(ptr)
 		{
 		}
