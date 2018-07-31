@@ -482,7 +482,7 @@ namespace details_cow_vector
 		{
 		}
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
-		constexpr vector_iterator(const vector_iterator<parent_type, yvalueT> &other) noexcept
+		constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
 			: vector_iterator(other.m_ref, other.m_ptr)
 		{
 		}

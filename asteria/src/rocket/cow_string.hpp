@@ -319,7 +319,7 @@ namespace details_cow_string
 		{
 		}
 		template<typename ycharT, typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
-		constexpr string_iterator(const string_iterator<parent_type, ycharT> &other) noexcept
+		constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
 			: string_iterator(other.m_ref, other.m_ptr)
 		{
 		}
