@@ -101,13 +101,13 @@ ROCKET_EXTENSION_END
 		basic_storage & operator=(const basic_storage &) = delete;
 	};
 
-	template<typename valueT, typename allocatorT>
+	template<typename allocatorT>
 	struct copy_trivially
-		: integral_constant<bool, is_copy_constructible<valueT>::value && is_trivial<valueT>::value && is_std_allocator<allocatorT>::value>
+		: integral_constant<bool, is_trivial<typename allocatorT::value_type>::value && is_std_allocator<allocatorT>::value>
 	{
 	};
 
-	template<typename valueT, typename allocatorT, bool copyableT = is_copy_constructible<valueT>::value, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
+	template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value, bool memcpyT = copy_trivially<allocatorT>::value>
 	struct copy_storage_helper
 	{
 		// This is the generic version.
@@ -121,10 +121,10 @@ ROCKET_EXTENSION_END
 			}
 		}
 	};
-	template<typename valueT, typename allocatorT, bool memcpyT>
-	struct copy_storage_helper<valueT, allocatorT, false, memcpyT>
+	template<typename allocatorT, bool memcpyT>
+	struct copy_storage_helper<allocatorT, false, memcpyT>
 	{
-		// This specialization is used when `valueT` is not copy-constructible.
+		// This specialization is used when `allocatorT::value_type` is not copy-constructible.
 		template<typename xpointerT, typename ypointerT>
 		ROCKET_NORETURN void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
 		{
@@ -132,8 +132,8 @@ ROCKET_EXTENSION_END
 			noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
 		}
 	};
-	template<typename valueT, typename allocatorT>
-	struct copy_storage_helper<valueT, allocatorT, true, true>
+	template<typename allocatorT>
+	struct copy_storage_helper<allocatorT, true, true>
 	{
 		// This specialization is used when `std::allocator` is to be used to copy a trivial type.
 		template<typename xpointerT, typename ypointerT>
@@ -141,12 +141,12 @@ ROCKET_EXTENSION_END
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
-			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(valueT) * cnt);
+			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 			ptr->nelem = (nelem += cnt);
 		}
 	};
 
-	template<typename valueT, typename allocatorT, bool memcpyT = copy_trivially<valueT, allocatorT>::value>
+	template<typename allocatorT, bool memcpyT = copy_trivially<allocatorT>::value>
 	struct move_storage_helper
 	{
 		// This is the generic version.
@@ -160,8 +160,8 @@ ROCKET_EXTENSION_END
 			}
 		}
 	};
-	template<typename valueT, typename allocatorT>
-	struct move_storage_helper<valueT, allocatorT, true>
+	template<typename allocatorT>
+	struct move_storage_helper<allocatorT, true>
 	{
 		// This specialization is used when `std::allocator` is to be used to move a trivial type.
 		template<typename xpointerT, typename ypointerT>
@@ -169,9 +169,9 @@ ROCKET_EXTENSION_END
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
-			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(valueT) * cnt);
+			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 #ifdef ROCKET_DEBUG
-			::std::memset(ptr_old->data + off, '/', sizeof(valueT) * cnt);
+			::std::memset(ptr_old->data + off, '/', sizeof(ptr->data[0]) * cnt);
 #endif
 			ptr->nelem = (nelem += cnt);
 		}
@@ -326,11 +326,11 @@ ROCKET_EXTENSION_END
 					// Copy or move elements into the new block.
 					// Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
 					if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)){
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old,       0, cnt_one);
-						copy_storage_helper<value_type, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+						copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
+						copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					} else {
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old,       0, cnt_one);
-						move_storage_helper<value_type, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+						move_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
+						move_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					}
 				} catch(...){
 					// If an exception is thrown, deallocate the new block, then rethrow the exception.
