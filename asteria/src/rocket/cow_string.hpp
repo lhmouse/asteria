@@ -756,31 +756,27 @@ private:
 		return static_cast<size_type>(reinterpret_cast<const value_type (&)[1]>(some) - this->data()) < this->size();
 	}
 
-	// Remove a substring. This function may throw `std::bad_alloc`.
-	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
+	template<typename ...paramsT>
+	void do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
+	{
+		const auto len_old = this->size();
+		ROCKET_ASSERT(tpos <= len_old);
+		this->append(::std::forward<paramsT>(params)...);
+		this->append(this->data() + tpos + tn, len_old - (tpos + tn));
+		this->do_erase_no_bound_check(tpos, len_old - tpos);
+	}
+	void do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
-		} else {
-			const auto ptr = this->m_sth.mut_data_unchecked();
-			traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
-			this->do_set_length(len_old - tn);
+			return;
 		}
-		return this->m_sth.mut_data_unchecked() + tpos;
-	}
-	// This function template implements `assign()`, `insert()` and `replace()` functions.
-	template<typename ...paramsT>
-	value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
-	{
-		const auto len_old = this->size();
-		ROCKET_ASSERT(tpos <= len_old);
-		ROCKET_ASSERT(tn <= len_old - tpos);
-		this->append(::std::forward<paramsT>(params)...);
-		this->append(this->data() + tpos + tn, len_old - tpos - tn);
-		return this->do_erase_no_bound_check(tpos, len_old - tpos);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
+		this->do_set_length(len_old - tn);
 	}
 
 	// These are generic implementations for `{find,rfind,find_{first,last}{,_not}_of}()` functions.
@@ -979,11 +975,15 @@ public:
 	}
 	const_reference front() const noexcept
 	{
-		return this->operator[](0);
+		const auto len = this->size();
+		ROCKET_ASSERT(len > 0);
+		return this->data()[0];
 	}
 	const_reference back() const noexcept
 	{
-		return this->operator[](this->size() - 1);
+		const auto len = this->size();
+		ROCKET_ASSERT(len > 0);
+		return this->data()[len - 1];
 	}
 	// There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
 	// N.B. This is a non-standard extension.
@@ -997,14 +997,18 @@ public:
 		return this->mut_data()[pos];
 	}
 	// N.B. This is a non-standard extension.
-	reference mut_front() noexcept
+	reference mut_front()
 	{
-		return this->mut(0);
+		const auto len = this->size();
+		ROCKET_ASSERT(len > 0);
+		return this->mut_data()[0];
 	}
 	// N.B. This is a non-standard extension.
-	reference mut_back() noexcept
+	reference mut_back()
 	{
-		return this->mut(this->size() - 1);
+		const auto len = this->size();
+		ROCKET_ASSERT(len > 0);
+		return this->mut_data()[len - 1];
 	}
 
 	// 24.3.2.6, modifiers
@@ -1129,12 +1133,15 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		return iterator(this, this->do_erase_no_bound_check(tpos, tn));
+		this->do_erase_no_bound_check(tpos, tn);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	iterator erase(const_iterator trm)
+	iterator erase(const_iterator tfirst)
 	{
-		return this->erase(trm, const_iterator(this, trm.tell() + 1));
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+		this->do_erase_no_bound_check(tpos, 1);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type and parameter are non-standard extensions.
@@ -1243,48 +1250,48 @@ public:
 	iterator insert(const_iterator tins, shallow sh)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, sh);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, sh);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, other, pos, n);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, other, pos, n);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s, size_type n)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s, n);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, s, n);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, s);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, size_type n, value_type ch)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, n, ch);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, n, ch);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, init);
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, init);
+		return iterator(this, this->mut_data() + tpos);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, ::std::move(first), ::std::move(last));
-		return iterator(this, ptr);
+		this->do_replace_no_bound_check(tpos, 0, ::std::move(first), ::std::move(last));
+		return iterator(this, this->mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, value_type ch)
 	{
