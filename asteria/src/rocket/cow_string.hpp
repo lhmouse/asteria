@@ -105,6 +105,9 @@ ROCKET_EXTENSION_END
 		{
 			this->nref.store(1, ::std::memory_order_release);
 		}
+		~basic_storage()
+		{
+		}
 
 		basic_storage(const basic_storage &) = delete;
 		basic_storage & operator=(const basic_storage &) = delete;

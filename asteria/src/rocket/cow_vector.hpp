@@ -83,11 +83,14 @@ ROCKET_EXTENSION_END
 		}
 		~basic_storage()
 		{
-			// Destroy all elements backwards.
-			for(size_t i = this->nelem; i != 0; --i){
-				this->nelem -= 1;
-				allocator_traits<allocatorT>::destroy(this->alloc, this->data + this->nelem);
+			auto nrem = this->nelem;
+			while(nrem != 0){
+				--nrem;
+				allocator_traits<allocatorT>::destroy(this->alloc, this->data + nrem);
 			}
+#ifdef ROCKET_DEBUG
+			this->nelem = 0xCCAA;
+#endif
 		}
 
 		basic_storage(const basic_storage &) = delete;
@@ -107,10 +110,10 @@ ROCKET_EXTENSION_END
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
-			for(size_t i = 0; i < cnt; ++i){
-				const auto slot_old = ptr_old->data + off + i;
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, *slot_old);
-				ptr->nelem += 1;
+			auto nelem = ptr->nelem;
+			for(auto i = off; i != off + cnt; ++i){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
+				ptr->nelem = (nelem += 1);
 			}
 		}
 	};
@@ -133,8 +136,9 @@ ROCKET_EXTENSION_END
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
-			ptr->nelem += cnt;
+			auto nelem = ptr->nelem;
+			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(valueT) * cnt);
+			ptr->nelem = (nelem += cnt);
 		}
 	};
 
@@ -145,10 +149,10 @@ ROCKET_EXTENSION_END
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
-			for(size_t i = 0; i < cnt; ++i){
-				const auto slot_old = ptr_old->data + off + i;
-				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::move(*slot_old));
-				ptr->nelem += 1;
+			auto nelem = ptr->nelem;
+			for(auto i = off; i != off + cnt; ++i){
+				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
+				ptr->nelem = (nelem += 1);
 			}
 		}
 	};
@@ -160,11 +164,12 @@ ROCKET_EXTENSION_END
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-			::std::memcpy(ptr->data + ptr->nelem, ptr_old->data + off, sizeof(valueT) * cnt);
+			auto nelem = ptr->nelem;
+			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(valueT) * cnt);
 #ifdef ROCKET_DEBUG
 			::std::memset(ptr_old->data + off, '/', sizeof(valueT) * cnt);
 #endif
-			ptr->nelem += cnt;
+			ptr->nelem = (nelem += cnt);
 		}
 	};
 
@@ -377,9 +382,10 @@ ROCKET_EXTENSION_END
 			ROCKET_ASSERT(this->size() < this->capacity());
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + ptr->nelem, ::std::forward<paramsT>(params)...);
-			ptr->nelem += 1;
-			return ptr->data + ptr->nelem - 1;
+			auto nelem = ptr->nelem;
+			allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
+			ptr->nelem = (nelem += 1);
+			return ptr->data + nelem - 1;
 		}
 		void pop_back_n_unchecked(size_t n) noexcept
 		{
@@ -390,9 +396,10 @@ ROCKET_EXTENSION_END
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			for(size_t i = 0; i < n; ++i){
-				ptr->nelem -= 1;
-				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + ptr->nelem);
+			auto nelem = ptr->nelem;
+			for(auto i = size_t(0); i < n; ++i){
+				ptr->nelem = (nelem -= 1);
+				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
 		}
 		void rotate(size_t after, size_t seek)
@@ -978,7 +985,7 @@ public:
 	cow_vector & append(size_type n, const paramsT &...params)
 	{
 		this->do_reallocate_more(n);
-		for(size_type i = 0; i < n; ++i){
+		for(auto i = size_type(0); i < n; ++i){
 			this->m_sth.emplace_back_unchecked(params...);
 		}
 		return *this;
