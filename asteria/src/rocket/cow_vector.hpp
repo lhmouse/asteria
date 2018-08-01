@@ -227,7 +227,7 @@ ROCKET_EXTENSION_END
 			const auto nblk = ptr->nblk;
 			allocator_traits<storage_allocator>::destroy(st_alloc, ::std::addressof(*ptr));
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '~', sizeof(storage) * nblk);
+			::std::memset(static_cast<void *>(::std::addressof(*ptr)), '~', sizeof(storage) * nblk);
 #endif
 			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 		}
@@ -312,7 +312,7 @@ ROCKET_EXTENSION_END
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(ptr), '*', sizeof(storage) * nblk);
+			::std::memset(static_cast<void *>(::std::addressof(*ptr)), '*', sizeof(storage) * nblk);
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, ::std::addressof(*ptr), ::std::move(alloc), nblk);
 			const auto ptr_old = this->m_ptr;
