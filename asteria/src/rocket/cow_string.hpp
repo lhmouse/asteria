@@ -96,7 +96,9 @@ namespace details_cow_string
 		atomic<long> nref;
 		allocatorT alloc;
 		size_t nblk;
-		ROCKET_EXTENSION(charT data[0]);
+ROCKET_EXTENSION_BEGIN
+		charT data[0];
+ROCKET_EXTENSION_END
 
 		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
 			: alloc(::std::move(xalloc)), nblk(xnblk)

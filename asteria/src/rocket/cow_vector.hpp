@@ -71,7 +71,9 @@ namespace details_cow_vector
 		allocatorT alloc;
 		size_t nblk;
 		size_t nelem;
-		union { ROCKET_EXTENSION(valueT data[0]); };
+ROCKET_EXTENSION_BEGIN
+		union { valueT data[0]; };
+ROCKET_EXTENSION_END
 
 		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
 			: alloc(::std::move(xalloc)), nblk(xnblk)
