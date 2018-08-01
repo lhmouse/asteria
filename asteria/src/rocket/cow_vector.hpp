@@ -55,27 +55,31 @@ class cow_vector;
 
 namespace details_cow_vector
 {
-	template<typename valueT, typename allocatorT>
+	template<typename allocatorT>
 	struct basic_storage
 	{
-		static constexpr size_t min_nblk_for_nelem(size_t nelem) noexcept
+		using allocator_type   = allocatorT;
+		using value_type       = typename allocator_type::value_type;
+		using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+		static constexpr size_type min_nblk_for_nelem(size_type nelem) noexcept
 		{
-			return (nelem * sizeof(valueT) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+			return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
 		}
-		static constexpr size_t max_nelem_for_nblk(size_t nblk) noexcept
+		static constexpr size_type max_nelem_for_nblk(size_type nblk) noexcept
 		{
-			return (nblk - 1) * sizeof(basic_storage) / sizeof(valueT);
+			return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);
 		}
 
 		atomic<long> nref;
-		allocatorT alloc;
-		size_t nblk;
-		size_t nelem;
+		allocator_type alloc;
+		size_type nblk;
+		size_type nelem;
 ROCKET_EXTENSION_BEGIN
-		union { valueT data[0]; };
+		union { value_type data[0]; };
 ROCKET_EXTENSION_END
 
-		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
+		basic_storage(allocator_type &&xalloc, size_type xnblk) noexcept
 			: alloc(::std::move(xalloc)), nblk(xnblk)
 		{
 			this->nelem = 0;
@@ -86,7 +90,7 @@ ROCKET_EXTENSION_END
 			auto nrem = this->nelem;
 			while(nrem != 0){
 				--nrem;
-				allocator_traits<allocatorT>::destroy(this->alloc, this->data + nrem);
+				allocator_traits<allocator_type>::destroy(this->alloc, this->data + nrem);
 			}
 #ifdef ROCKET_DEBUG
 			this->nelem = 0xCCAA;
@@ -180,10 +184,11 @@ ROCKET_EXTENSION_END
 	public:
 		using allocator_type   = allocatorT;
 		using value_type       = typename allocator_type::value_type;
+		using size_type        = typename allocator_traits<allocator_type>::size_type;
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
-		using storage           = basic_storage<value_type, allocator_type>;
+		using storage           = basic_storage<allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 		using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
@@ -250,7 +255,7 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
-		size_t capacity() const noexcept
+		size_type capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -258,13 +263,13 @@ ROCKET_EXTENSION_END
 			}
 			return storage::max_nelem_for_nblk(ptr->nblk);
 		}
-		size_t max_size() const noexcept
+		size_type max_size() const noexcept
 		{
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
 			return storage::max_nelem_for_nblk(max_nblk / 2);
 		}
-		size_t check_size_add(size_t base, size_t add) const
+		size_type check_size_add(size_type base, size_type add) const
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
@@ -274,7 +279,7 @@ ROCKET_EXTENSION_END
 			}
 			return base + add;
 		}
-		size_t round_up_capacity(size_t res_arg) const
+		size_type round_up_capacity(size_type res_arg) const
 		{
 			const auto cap = this->check_size_add(0, res_arg);
 			const auto nblk = storage::min_nblk_for_nelem(cap);
@@ -288,7 +293,7 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->data;
 		}
-		size_t size() const noexcept
+		size_type size() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -296,7 +301,7 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->nelem;
 		}
-		value_type * reallocate(size_t cnt_one, size_t off_two, size_t cnt_two, size_t res_arg)
+		value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
 		{
 			ROCKET_ASSERT(cnt_one <= res_arg);
 			ROCKET_ASSERT(cnt_two <= res_arg - cnt_one);
@@ -387,7 +392,7 @@ ROCKET_EXTENSION_END
 			ptr->nelem = (nelem += 1);
 			return ptr->data + nelem - 1;
 		}
-		void pop_back_n_unchecked(size_t n) noexcept
+		void pop_back_n_unchecked(size_type n) noexcept
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(n <= this->size());
@@ -397,12 +402,12 @@ ROCKET_EXTENSION_END
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			auto nelem = ptr->nelem;
-			for(auto i = size_t(0); i < n; ++i){
+			for(auto i = size_type(0); i < n; ++i){
 				ptr->nelem = (nelem -= 1);
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
 		}
-		void rotate(size_t after, size_t seek)
+		void rotate(size_type after, size_type seek)
 		{
 			ROCKET_ASSERT(after <= seek);
 			auto bot = after;

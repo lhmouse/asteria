@@ -81,26 +81,30 @@ namespace details_cow_string
 	extern template void handle_io_exception(::std::ios  &ios);
 	extern template void handle_io_exception(::std::wios &ios);
 
-	template<typename charT, typename allocatorT>
+	template<typename allocatorT>
 	struct basic_storage
 	{
-		static constexpr size_t min_nblk_for_nchar(size_t nchar) noexcept
+		using allocator_type   = allocatorT;
+		using value_type       = typename allocator_type::value_type;
+		using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+		static constexpr size_type min_nblk_for_nchar(size_type nchar) noexcept
 		{
-			return ((nchar + 1) * sizeof(charT) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+			return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
 		}
-		static constexpr size_t max_nchar_for_nblk(size_t nblk) noexcept
+		static constexpr size_type max_nchar_for_nblk(size_type nblk) noexcept
 		{
-			return (nblk - 1) * sizeof(basic_storage) / sizeof(charT) - 1;
+			return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;
 		}
 
 		atomic<long> nref;
-		allocatorT alloc;
-		size_t nblk;
+		allocator_type alloc;
+		size_type nblk;
 ROCKET_EXTENSION_BEGIN
-		charT data[0];
+		union { value_type data[0]; };
 ROCKET_EXTENSION_END
 
-		basic_storage(allocatorT &&xalloc, size_t xnblk) noexcept
+		basic_storage(allocator_type &&xalloc, size_type xnblk) noexcept
 			: alloc(::std::move(xalloc)), nblk(xnblk)
 		{
 			this->nref.store(1, ::std::memory_order_release);
@@ -121,10 +125,11 @@ ROCKET_EXTENSION_END
 		using allocator_type   = allocatorT;
 		using traits_type      = traitsT;
 		using value_type       = typename allocator_type::value_type;
+		using size_type        = typename allocator_traits<allocator_type>::size_type;
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
-		using storage           = basic_storage<value_type, allocator_type>;
+		using storage           = basic_storage<allocator_type>;
 		using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
 		using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
@@ -191,7 +196,7 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
-		size_t capacity() const noexcept
+		size_type capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr){
@@ -199,13 +204,13 @@ ROCKET_EXTENSION_END
 			}
 			return storage::max_nchar_for_nblk(ptr->nblk);
 		}
-		size_t max_size() const noexcept
+		size_type max_size() const noexcept
 		{
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_bblk = allocator_traits<storage_allocator>::max_size(st_alloc);
 			return storage::max_nchar_for_nblk(max_bblk / 2);
 		}
-		size_t check_size_add(size_t base, size_t add) const
+		size_type check_size_add(size_type base, size_type add) const
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
@@ -215,7 +220,7 @@ ROCKET_EXTENSION_END
 			}
 			return base + add;
 		}
-		size_t round_up_capacity(size_t res_arg) const
+		size_type round_up_capacity(size_type res_arg) const
 		{
 			const auto cap = this->check_size_add(0, res_arg);
 			const auto nblk = storage::min_nblk_for_nchar(cap);
@@ -229,7 +234,7 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->data;
 		}
-		value_type * reallocate(const value_type *src, size_t len_one, size_t off_two, size_t len_two, size_t res_arg)
+		value_type * reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
 		{
 			ROCKET_ASSERT(len_one <= res_arg);
 			ROCKET_ASSERT(len_two <= res_arg - len_one);
