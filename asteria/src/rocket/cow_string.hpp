@@ -226,15 +226,6 @@ ROCKET_EXTENSION_END
 			}
 			return ptr->data;
 		}
-		value_type * mut_data() noexcept
-		{
-			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
-				return nullptr;
-			}
-			ROCKET_ASSERT(this->unique());
-			return ptr->data;
-		}
 		value_type * reallocate(const value_type *src, size_t len_one, size_t off_two, size_t len_two, size_t res_arg)
 		{
 			ROCKET_ASSERT(len_one <= res_arg);
@@ -287,6 +278,16 @@ ROCKET_EXTENSION_END
 		void exchange_with(storage_handle &other) noexcept
 		{
 			::std::swap(this->m_ptr, other.m_ptr);
+		}
+
+		value_type * mut_data_unchecked() noexcept
+		{
+			const auto ptr = this->m_ptr;
+			if(ptr == nullptr){
+				return nullptr;
+			}
+			ROCKET_ASSERT(this->unique());
+			return ptr->data;
 		}
 	};
 
@@ -708,7 +709,7 @@ private:
 	{
 		ROCKET_ASSERT(this->m_sth.unique());
 		ROCKET_ASSERT(len <= this->m_sth.capacity());
-		const auto ptr = this->m_sth.mut_data();
+		const auto ptr = this->m_sth.mut_data_unchecked();
 		ROCKET_ASSERT(ptr == this->m_ptr);
 		traits_type::assign(ptr[len], value_type());
 		this->m_len = len;
@@ -756,25 +757,23 @@ private:
 	}
 
 	// Remove a substring. This function may throw `std::bad_alloc`.
-	value_type *do_erase_no_bound_check(size_type tpos, size_type tn)
+	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
-		value_type *ptr;
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
-			ptr = this->m_sth.mut_data();
 		} else {
-			ptr = this->m_sth.mut_data();
+			const auto ptr = this->m_sth.mut_data_unchecked();
 			traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
 			this->do_set_length(len_old - tn);
 		}
-		return ptr + tpos;
+		return this->m_sth.mut_data_unchecked() + tpos;
 	}
 	// This function template implements `assign()`, `insert()` and `replace()` functions.
 	template<typename ...paramsT>
-	value_type *do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
+	value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
 	{
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
@@ -1047,12 +1046,12 @@ public:
 		if(this->do_check_overlap_generic(*s)){
 			const auto tpos = s - this->data();
 			this->do_reallocate_more(n);
-			const auto wptr = this->m_sth.mut_data();
-			traits_type::move(wptr + len_old, wptr + tpos, n);
+			const auto ptr = this->m_sth.mut_data_unchecked();
+			traits_type::move(ptr + len_old, ptr + tpos, n);
 		} else {
 			this->do_reallocate_more(n);
-			const auto wptr = this->m_sth.mut_data();
-			traits_type::copy(wptr + len_old, s, n);
+			const auto ptr = this->m_sth.mut_data_unchecked();
+			traits_type::copy(ptr + len_old, s, n);
 		}
 		this->do_set_length(len_old + n);
 		return *this;
@@ -1068,8 +1067,8 @@ public:
 		}
 		const auto len_old = this->size();
 		this->do_reallocate_more(n);
-		const auto wptr = this->m_sth.mut_data();
-		traits_type::assign(wptr + len_old, n, ch);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		traits_type::assign(ptr + len_old, n, ch);
 		this->do_set_length(len_old + n);
 		return *this;
 	}
@@ -1114,8 +1113,8 @@ public:
 	{
 		const auto len_old = this->size();
 		this->do_reallocate_more(1);
-		const auto wptr = this->m_sth.mut_data();
-		traits_type::assign(wptr[len_old], ch);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		traits_type::assign(ptr[len_old], ch);
 		this->do_set_length(len_old + 1);
 		return *this;
 	}
@@ -1244,48 +1243,48 @@ public:
 	iterator insert(const_iterator tins, shallow sh)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, sh);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, sh);
+		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, other, pos, n);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, other, pos, n);
+		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s, size_type n)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, s, n);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s, n);
+		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, s);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s);
+		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, size_type n, value_type ch)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, n, ch);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, n, ch);
+		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, init);
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, init);
+		return iterator(this, ptr);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto wptr = this->do_replace_no_bound_check(tpos, 0, ::std::move(first), ::std::move(last));
-		return iterator(this, wptr);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, ::std::move(first), ::std::move(last));
+		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, value_type ch)
 	{
@@ -1405,7 +1404,7 @@ public:
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(0, 0, len, len);
 		}
-		return this->m_sth.mut_data();
+		return this->m_sth.mut_data_unchecked();
 	}
 	const value_type * c_str() const noexcept
 	{
