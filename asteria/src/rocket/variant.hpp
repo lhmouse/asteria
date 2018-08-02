@@ -480,6 +480,18 @@ public:
 		}
 		return *ptr;
 	}
+	template<typename elementT, typename ...paramsT>
+	elementT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+	{
+		// This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
+		constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
+		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+		// Construct the active element using perfect forwarding, then destroy the old element.
+		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
+		details_variant::construct(ptr, ::std::forward<paramsT>(params)...);
+		this->do_set_up_new_buffer(eindex);
+		return *ptr;
+	}
 	template<typename elementT>
 	elementT & set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
 	{
@@ -495,18 +507,6 @@ public:
 		// Construct the active element using perfect forwarding, then destroy the old element.
 		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
 		details_variant::construct(ptr, ::std::forward<elementT>(elem));
-		this->do_set_up_new_buffer(eindex);
-		return *ptr;
-	}
-	template<typename elementT, typename ...paramsT>
-	elementT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
-	{
-		// This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
-		constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
-		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		// Construct the active element using perfect forwarding, then destroy the old element.
-		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-		details_variant::construct(ptr, ::std::forward<paramsT>(params)...);
 		this->do_set_up_new_buffer(eindex);
 		return *ptr;
 	}
