@@ -157,17 +157,6 @@ namespace details_variant
 	{
 	};
 
-	template<typename typeT, typename ...paramsT>
-	inline typeT * construct(typeT *ptr, paramsT &&...params)
-	{
-		return ::new(static_cast<void *>(ptr)) typeT(::std::forward<paramsT>(params)...);
-	}
-	template<typename typeT>
-	inline void destruct(typeT *ptr) noexcept
-	{
-		ptr->~typeT();
-	}
-
 	template<typename ...elementsT>
 	struct visit_helper
 	{
@@ -196,7 +185,7 @@ namespace details_variant
 		template<typename elementT>
 		void operator()(elementT *ptr, const void *src) const
 		{
-			construct<>(ptr, *(static_cast<const elementT *>(src)));
+			::new(static_cast<void *>(ptr)) elementT(*(static_cast<const elementT *>(src)));
 		}
 	};
 	struct visitor_move_construct
@@ -204,7 +193,7 @@ namespace details_variant
 		template<typename elementT>
 		void operator()(elementT *ptr, void *src) const
 		{
-			construct<>(ptr, ::std::move(*(static_cast<elementT *>(src))));
+			::new(static_cast<void *>(ptr)) elementT(::std::move(*(static_cast<const elementT *>(src))));
 		}
 	};
 	struct visitor_copy_assign
@@ -228,7 +217,7 @@ namespace details_variant
 		template<typename elementT>
 		void operator()(elementT *ptr) const
 		{
-			destruct<>(ptr);
+			ptr->~elementT();
 		}
 	};
 	struct visitor_get_type_info
@@ -338,7 +327,7 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Default-construct the first element in-place.
 		const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-		details_variant::construct(ptr);
+		::new(static_cast<void *>(ptr)) etype();
 		this->m_index = 0;
 	}
 	template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
@@ -350,7 +339,7 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Construct the element in-place.
 		const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-		details_variant::construct(ptr, ::std::forward<elementT>(elem));
+		::new(static_cast<void *>(ptr)) etype(::std::forward<elementT>(elem));
 		this->m_index = eindex;
 	}
 	variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
@@ -383,7 +372,7 @@ public:
 		}
 		// Construct the active element using perfect forwarding, then destroy the old element.
 		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-		details_variant::construct(ptr, ::std::forward<elementT>(elem));
+		::new(static_cast<void *>(ptr)) etype(::std::forward<elementT>(elem));
 		this->do_set_up_new_buffer(eindex);
 		return *this;
 	}
@@ -488,7 +477,7 @@ public:
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Construct the active element using perfect forwarding, then destroy the old element.
 		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-		details_variant::construct(ptr, ::std::forward<paramsT>(params)...);
+		::new(static_cast<void *>(ptr)) etype(::std::forward<paramsT>(params)...);
 		this->do_set_up_new_buffer(eindex);
 		return *ptr;
 	}
@@ -506,7 +495,7 @@ public:
 		}
 		// Construct the active element using perfect forwarding, then destroy the old element.
 		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-		details_variant::construct(ptr, ::std::forward<elementT>(elem));
+		::new(static_cast<void *>(ptr)) etype(::std::forward<elementT>(elem));
 		this->do_set_up_new_buffer(eindex);
 		return *ptr;
 	}
