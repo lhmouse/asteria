@@ -337,7 +337,7 @@ public:
 		constexpr auto eindex = unsigned(0);
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Default-construct the first element in-place.
-		auto ptr = static_cast<etype *>(this->do_get_front_buffer());
+		const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 		details_variant::construct(ptr);
 		this->m_index = 0;
 	}
@@ -349,7 +349,7 @@ public:
 		constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Construct the element in-place.
-		auto ptr = static_cast<etype *>(this->do_get_front_buffer());
+		const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 		details_variant::construct(ptr, ::std::forward<elementT>(elem));
 		this->m_index = eindex;
 	}
@@ -375,17 +375,16 @@ public:
 		// This overload, unlike `set()`, enables assignment using the candidate of a nested variant.
 		constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		etype *ptr;
 		if(this->m_index == eindex){
 			// Assign the active element using perfect forwarding.
-			ptr = static_cast<etype *>(this->do_get_front_buffer());
+			const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 			*ptr = ::std::forward<elementT>(elem);
-		} else {
-			// Construct the active element using perfect forwarding, then destroy the old element.
-			ptr = static_cast<etype *>(this->do_get_back_buffer());
-			details_variant::construct(ptr, ::std::forward<elementT>(elem));
-			this->do_set_up_new_buffer(eindex);
+			return *this;
 		}
+		// Construct the active element using perfect forwarding, then destroy the old element.
+		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
+		details_variant::construct(ptr, ::std::forward<elementT>(elem));
+		this->do_set_up_new_buffer(eindex);
 		return *this;
 	}
 	variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value)
@@ -394,12 +393,12 @@ public:
 			// Copy-assign the active element from `other`
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_copy_assign(), other.do_get_front_buffer());
-		} else {
-			// Copy-construct the active element from `other`, then destroy the old element.
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-			                                              details_variant::visitor_copy_construct(), other.do_get_front_buffer());
-			this->do_set_up_new_buffer(other.m_index);
+			return *this;
 		}
+		// Copy-construct the active element from `other`, then destroy the old element.
+		details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+		                                              details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+		this->do_set_up_new_buffer(other.m_index);
 		return *this;
 	}
 	variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
@@ -408,12 +407,12 @@ public:
 			// Move-assign the active element from `other`
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_move_assign(), other.do_get_front_buffer());
-		} else {
-			// Move-construct the active element from `other`, then destroy the old element.
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-			                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
-			this->do_set_up_new_buffer(other.m_index);
+			return *this;
 		}
+		// Move-construct the active element from `other`, then destroy the old element.
+		details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+		                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
+		this->do_set_up_new_buffer(other.m_index);
 		return *this;
 	}
 	~variant()
@@ -487,17 +486,16 @@ public:
 		// This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
 		constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		etype *ptr;
 		if(this->m_index == eindex){
 			// Assign the active element using perfect forwarding.
-			ptr = static_cast<etype *>(this->do_get_front_buffer());
+			const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 			*ptr = ::std::forward<elementT>(elem);
-		} else {
-			// Construct the active element using perfect forwarding, then destroy the old element.
-			ptr = static_cast<etype *>(this->do_get_back_buffer());
-			details_variant::construct(ptr, ::std::forward<elementT>(elem));
-			this->do_set_up_new_buffer(eindex);
+			return *ptr;
 		}
+		// Construct the active element using perfect forwarding, then destroy the old element.
+		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
+		details_variant::construct(ptr, ::std::forward<elementT>(elem));
+		this->do_set_up_new_buffer(eindex);
 		return *ptr;
 	}
 	template<typename elementT, typename ...paramsT>
@@ -507,7 +505,7 @@ public:
 		constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
 		// Construct the active element using perfect forwarding, then destroy the old element.
-		auto ptr = static_cast<etype *>(this->do_get_back_buffer());
+		const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
 		details_variant::construct(ptr, ::std::forward<paramsT>(params)...);
 		this->do_set_up_new_buffer(eindex);
 		return *ptr;
@@ -532,26 +530,26 @@ public:
 			// Swap the active elements.
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_swap(), other.do_get_front_buffer());
-		} else {
-			// Move-construct the active element in `*this` from `other`.
-			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-			                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
-			try {
-				// Move-construct the active element in `other` from `*this`.
-				details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index,
-				                                              details_variant::visitor_move_construct(), this->do_get_front_buffer());
-			} catch(...){
-				// In case of an exception, the second object will not have been constructed.
-				// Destroy the first object that has just been constructed, then rethrow the exception.
-				details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-				                                              details_variant::visitor_destruct());
-				throw;
-			}
-			// Destroy both elements.
-			const unsigned this_index = this->m_index;
-			this->do_set_up_new_buffer(other.m_index);
-			other.do_set_up_new_buffer(this_index);
+			return;
 		}
+		// Move-construct the active element in `*this` from `other`.
+		details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+		                                              details_variant::visitor_move_construct(), other.do_get_front_buffer());
+		try {
+			// Move-construct the active element in `other` from `*this`.
+			details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index,
+			                                              details_variant::visitor_move_construct(), this->do_get_front_buffer());
+		} catch(...){
+			// In case of an exception, the second object will not have been constructed.
+			// Destroy the first object that has just been constructed, then rethrow the exception.
+			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
+			                                              details_variant::visitor_destruct());
+			throw;
+		}
+		// Destroy both elements.
+		const unsigned this_index = this->m_index;
+		this->do_set_up_new_buffer(other.m_index);
+		other.do_set_up_new_buffer(this_index);
 	}
 };
 
