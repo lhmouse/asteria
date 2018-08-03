@@ -6,7 +6,7 @@
 
 #include <memory> // std::allocator<>, std::allocator_traits<>
 #include <type_traits> // std::conditional<>, std::false_type, std::true_type
-#include <utility> // std::move()
+#include <utility> // std::move(), std::declval()
 #include "utilities.hpp"
 
 namespace rocket
@@ -16,6 +16,7 @@ using ::std::allocator_traits;
 using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
+using ::std::remove_reference;
 
 namespace details_allocator_utilities
 {
@@ -124,6 +125,15 @@ struct is_std_allocator<::std::allocator<valueT>>
 	: true_type
 {
 };
+
+template<typename xpointerT>
+#ifdef __cpp_lib_addressof_constexpr
+constexpr
+#endif
+inline typename ::std::remove_reference<decltype(*(::std::declval<const xpointerT &>()))>::type * unfancy(const xpointerT &xptr)
+{
+	return ::std::addressof(*xptr);
+}
 
 }
 

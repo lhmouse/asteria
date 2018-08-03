@@ -169,9 +169,9 @@ ROCKET_EXTENSION_END
 			// If it has been decremented to zero, deallocate the block.
 			auto st_alloc = storage_allocator(ptr->alloc);
 			const auto nblk = ptr->nblk;
-			allocator_traits<storage_allocator>::destroy(st_alloc, ::std::addressof(*ptr));
+			allocator_traits<storage_allocator>::destroy(st_alloc, noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(::std::addressof(*ptr)), '~', sizeof(storage) * nblk);
+			::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
 			allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
 		}
@@ -248,9 +248,9 @@ ROCKET_EXTENSION_END
 			auto st_alloc = storage_allocator(alloc);
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
-			::std::memset(static_cast<void *>(::std::addressof(*ptr)), '*', sizeof(storage) * nblk);
+			::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, ::std::addressof(*ptr), ::std::move(alloc), nblk);
+			allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), ::std::move(alloc), nblk);
 			// Copy characters into the new block, then add a null character.
 			traits_type::copy(ptr->data, src, len_one);
 			auto len = len_one;
