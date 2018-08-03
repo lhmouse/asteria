@@ -1425,6 +1425,7 @@ public:
 	{
 		return this->data();
 	}
+
 	// N.B. The return type differs from `std::basic_string`.
 	const allocator_type & get_allocator() const noexcept
 	{

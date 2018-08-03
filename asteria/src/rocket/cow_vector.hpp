@@ -1161,6 +1161,7 @@ public:
 		}
 		return this->m_sth.mut_data();
 	}
+
 	// N.B. The return type differs from `std::vector`.
 	const allocator_type & get_allocator() const noexcept
 	{
