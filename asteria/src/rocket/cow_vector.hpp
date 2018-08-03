@@ -522,11 +522,11 @@ ROCKET_EXTENSION_END
 			return this->m_ref;
 		}
 
-		value_type *tell() const noexcept
+		value_type * tell() const noexcept
 		{
 			return this->do_assert_valid_pointer(this->m_ptr, false);
 		}
-		value_type *tell_owned_by(const parent_type *ref) const noexcept
+		value_type * tell_owned_by(const parent_type *ref) const noexcept
 		{
 			ROCKET_ASSERT(this->m_ref == ref);
 			return this->tell();
@@ -540,6 +540,10 @@ ROCKET_EXTENSION_END
 		reference operator*() const noexcept
 		{
 			return *(this->do_assert_valid_pointer(this->m_ptr, true));
+		}
+		pointer operator->() const noexcept
+		{
+			return this->do_assert_valid_pointer(this->m_ptr, true);
 		}
 		reference operator[](difference_type off) const noexcept
 		{

@@ -372,6 +372,10 @@ ROCKET_EXTENSION_END
 		{
 			return *(this->do_assert_valid_pointer(this->m_ptr, true));
 		}
+		pointer operator->() const noexcept
+		{
+			return this->do_assert_valid_pointer(this->m_ptr, true);
+		}
 		reference operator[](difference_type off) const noexcept
 		{
 			return *(this->do_assert_valid_pointer(this->m_ptr + off, true));
