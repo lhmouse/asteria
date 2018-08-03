@@ -7,6 +7,7 @@
 #include <type_traits> // std::common_type<>
 #include <iterator> // std::iterator_traits<>
 #include <utility> // std::swap(), std::move(), std::forward()
+#include <new> // placement new
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
 namespace rocket
@@ -15,6 +16,8 @@ namespace rocket
 namespace noadl = ::rocket;
 
 using ::std::common_type;
+using ::std::is_nothrow_constructible;
+using ::std::is_nothrow_destructible;
 using ::std::iterator_traits;
 using ::std::size_t;
 using ::std::ptrdiff_t;
@@ -72,6 +75,17 @@ constexpr size_t estimate_distance(iteratorT first, iteratorT last)
 {
 	return details_utilities::estimate_distance(typename iterator_traits<iteratorT>::iterator_category(),
 	                                            ::std::move(first), ::std::move(last));
+}
+
+template<typename elementT, typename ...paramsT>
+inline elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+{
+	return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
+}
+template<typename elementT>
+inline void destruct_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+{
+	ptr->~elementT();
 }
 
 }
