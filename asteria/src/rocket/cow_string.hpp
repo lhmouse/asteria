@@ -14,7 +14,6 @@
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
-#include <cstdint> // std::uint_fast32_t
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
@@ -53,7 +52,6 @@ using ::std::is_convertible;
 using ::std::conditional;
 using ::std::iterator_traits;
 using ::std::initializer_list;
-using ::std::uint_fast32_t;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
@@ -1806,9 +1804,9 @@ struct basic_cow_string<charT, traitsT, allocatorT>::hash
 	result_type operator()(const argument_type &str) const noexcept
 	{
 		// This implements the 32-bit FNV-1a hash algorithm.
-		uint_fast32_t reg = 2166136261u;
+		char32_t reg = 2166136261;
 		for(auto p = str.begin(); p != str.end(); ++p){
-			reg ^= static_cast<uint_fast32_t>(traits_type::to_int_type(*p));
+			reg ^= static_cast<char32_t>(traits_type::to_int_type(*p));
 			reg *= 16777619u;
 		}
 		return static_cast<result_type>(reg);
