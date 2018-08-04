@@ -4,7 +4,7 @@
 #ifndef ROCKET_COW_VECTOR_HPP_
 #define ROCKET_COW_VECTOR_HPP_
 
-#include <memory> // std::allocator<>, std::allocator_traits<>, std::addressof()
+#include <memory> // std::allocator<>, std::allocator_traits<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()

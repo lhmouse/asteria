@@ -5,7 +5,7 @@
 #define ROCKET_COW_STRING_HPP_
 
 #include <string> // std::char_traits<>
-#include <memory> // std::allocator<>, std::allocator_traits<>, std::addressof()
+#include <memory> // std::allocator<>, std::allocator_traits<>
 #include <istream> // std::streamsize, std::ios_base, std::basic_ios<>, std::basic_istream<>
 #include <locale> // std::isspace()
 #include <ostream> // std::basic_ostream<>

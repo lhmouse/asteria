@@ -6,7 +6,6 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
-#include <memory> // std::addressof()
 #include <typeinfo>
 #include "assert.hpp"
 #include "throw.hpp"
@@ -225,7 +224,7 @@ namespace details_variant
 		template<typename elementT>
 		void operator()(const elementT *ptr, const type_info **ti) const
 		{
-			*ti = ::std::addressof(typeid(*ptr));
+			*ti = &(typeid(*ptr));
 		}
 	};
 	struct visitor_wrapper
