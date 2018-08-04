@@ -471,7 +471,6 @@ ROCKET_EXTENSION_END
 	class vector_iterator
 	{
 		friend vectorT;
-		friend vector_iterator<vectorT, const valueT>;
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;

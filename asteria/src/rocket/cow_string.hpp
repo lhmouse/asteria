@@ -300,7 +300,6 @@ ROCKET_EXTENSION_END
 	class string_iterator
 	{
 		friend stringT;
-		friend string_iterator<stringT, const charT>;
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
