@@ -79,8 +79,8 @@ ROCKET_EXTENSION_BEGIN
 		union { value_type data[0]; };
 ROCKET_EXTENSION_END
 
-		basic_storage(allocator_type &&xalloc, size_type xnblk) noexcept
-			: alloc(::std::move(xalloc)), nblk(xnblk)
+		basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
+			: alloc(xalloc), nblk(xnblk)
 		{
 			this->nelem = 0;
 			this->nref.store(1, ::std::memory_order_release);
@@ -313,13 +313,12 @@ ROCKET_EXTENSION_END
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto nblk = storage::min_nblk_for_nelem(cap);
-			auto alloc = this->as_allocator();
-			auto st_alloc = storage_allocator(alloc);
+			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
 			::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-			allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), ::std::move(alloc), nblk);
+			allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), this->as_allocator(), nblk);
 			const auto ptr_old = this->m_ptr;
 			if(ptr_old){
 				try {
