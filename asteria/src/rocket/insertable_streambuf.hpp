@@ -70,7 +70,8 @@ public:
 	{
 		return this->m_caret;
 	}
-	void set_string(string_type str, size_type caret = string_type::npos) noexcept(noexcept(m_str = ::std::move(m_str))) {
+	void set_string(string_type str, size_type caret = string_type::npos) noexcept(noexcept(m_str = ::std::move(m_str)))
+	{
 		this->basic_insertable_streambuf::sync();
 		this->m_str = ::std::move(str);
 		this->m_caret = caret;
@@ -79,7 +80,8 @@ public:
 	{
 		this->m_caret = caret;
 	}
-	string_type extract_string() noexcept(noexcept(m_str.swap(m_str))) {
+	string_type extract_string() noexcept(noexcept(m_str.swap(m_str)))
+	{
 		string_type str;
 		this->basic_insertable_streambuf::sync();
 		this->m_str.swap(str);
