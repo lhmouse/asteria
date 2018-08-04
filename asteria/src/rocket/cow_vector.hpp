@@ -177,6 +177,63 @@ ROCKET_EXTENSION_END
 		}
 	};
 
+	template<typename valueT>
+	void rotate(valueT *ptr, size_t after, size_t seek, size_t end)
+	{
+		ROCKET_ASSERT(after <= seek);
+		ROCKET_ASSERT(seek <= end);
+		auto bot = after;
+		auto brk = seek;
+		//   |<- isl ->|<- isr ->|
+		//   bot       brk       end
+		// > 0 1 2 3 4 5 6 7 8 9 -
+		auto isl = brk - bot;
+		if(isl == 0){
+			return;
+		}
+		auto isr = end - brk;
+		if(isr == 0){
+			return;
+		}
+		auto stp = brk;
+	loop:
+		if(isl < isr){
+			// Before:  bot   brk           end
+			//        > 0 1 2 3 4 5 6 7 8 9 -
+			// After:         bot   brk     end
+			//        > 3 4 5 0 1 2 6 7 8 9 -
+			do {
+				noadl::adl_swap(ptr[bot++], ptr[brk++]);
+			} while(bot != stp);
+			stp = brk;
+			// `isr` will have been decreased by `isl`, which will not result in zero.
+			isr = end - brk;
+			// `isl` is unchanged.
+			goto loop;
+		}
+		if(isl > isr){
+			// Before:  bot           brk   end
+			//        > 0 1 2 3 4 5 6 7 8 9 -
+			// After:       bot       brk   end
+			//        > 7 8 9 3 4 5 6 0 1 2 -
+			do {
+				noadl::adl_swap(ptr[bot++], ptr[brk++]);
+			} while(brk != end);
+			brk = stp;
+			// `isl` will have been decreased by `isr`, which will not result in zero.
+			isl = brk - bot;
+			// `isr` is unchanged.
+			goto loop;
+		}
+		// Before:  bot       brk       end
+		//        > 0 1 2 3 4 5 6 7 8 9 -
+		// After:             bot       brk
+		//        > 3 4 5 0 1 2 6 7 8 9 -
+		do {
+			noadl::adl_swap(ptr[bot++], ptr[brk++]);
+		} while(bot != stp);
+	}
+
 	template<typename allocatorT>
 	class storage_handle
 		: private allocator_wrapper_base_for<allocatorT>::type
@@ -367,16 +424,13 @@ ROCKET_EXTENSION_END
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 
-		value_type * mut_data() noexcept
+		value_type * mut_data_unchecked() noexcept
 		{
 			auto ptr = this->m_ptr;
 			if(ptr == nullptr){
 				return nullptr;
 			}
-			if(this->unique() == false){
-				this->reallocate(0, 0, ptr->nelem, ptr->nelem);
-				ptr = this->m_ptr;
-			}
+			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
 		template<typename ...paramsT>
@@ -405,65 +459,6 @@ ROCKET_EXTENSION_END
 				ptr->nelem = (nelem -= 1);
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
-		}
-		void rotate_unchecked(size_type after, size_type seek)
-		{
-			ROCKET_ASSERT(after <= seek);
-			auto bot = after;
-			auto brk = seek;
-			//   |<- isl ->|<- isr ->|
-			//   bot       brk       end
-			// > 0 1 2 3 4 5 6 7 8 9 -
-			auto isl = brk - bot;
-			if(isl == 0){
-				return;
-			}
-			const auto ptr = this->m_ptr;
-			ROCKET_ASSERT(ptr);
-			ROCKET_ASSERT(this->unique());
-			const auto end = ptr->nelem;
-			ROCKET_ASSERT(seek <= end);
-			auto isr = end - brk;
-			if(isr == 0){
-				return;
-			}
-			auto stp = brk;
-		loop:
-			if(isl < isr){
-				// Before:  bot   brk           end
-				//        > 0 1 2 3 4 5 6 7 8 9 -
-				// After:         bot   brk     end
-				//        > 3 4 5 0 1 2 6 7 8 9 -
-				do {
-					noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
-				} while(bot != stp);
-				stp = brk;
-				// `isr` will have been decreased by `isl`, which will not result in zero.
-				isr = end - brk;
-				// `isl` is unchanged.
-				goto loop;
-			}
-			if(isl > isr){
-				// Before:  bot           brk   end
-				//        > 0 1 2 3 4 5 6 7 8 9 -
-				// After:       bot       brk   end
-				//        > 7 8 9 3 4 5 6 0 1 2 -
-				do {
-					noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
-				} while(brk != end);
-				brk = stp;
-				// `isl` will have been decreased by `isr`, which will not result in zero.
-				isl = brk - bot;
-				// `isr` is unchanged.
-				goto loop;
-			}
-			// Before:  bot       brk       end
-			//        > 0 1 2 3 4 5 6 7 8 9 -
-			// After:             bot       brk
-			//        > 3 4 5 0 1 2 6 7 8 9 -
-			do {
-				noadl::adl_swap(ptr->data[bot++], ptr->data[brk++]);
-			} while(bot != stp);
 		}
 	};
 
@@ -746,7 +741,7 @@ public:
 private:
 	// Reallocate the storage to `res_arg` elements.
 	// The storage is owned by the current vector exclusively after this function returns normally.
-	void do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+	value_type * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
 	{
 		ROCKET_ASSERT(cnt_one <= off_two);
 		ROCKET_ASSERT(off_two <= this->m_sth.size());
@@ -755,9 +750,10 @@ private:
 		const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
 		if(ptr == nullptr){
 			// The storage has been deallocated.
-			return;
+			return nullptr;
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
+		return ptr;
 	}
 	// Deallocate any dynamic storage.
 	void do_deallocate() noexcept
@@ -768,7 +764,7 @@ private:
 	// Reallocate more storage as needed, without shrinking.
 	void do_reallocate_more(size_type cap_add)
 	{
-		const auto cnt = this->size();
+		const auto cnt = this->m_sth.size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
@@ -781,35 +777,39 @@ private:
 	}
 
 	template<typename ...paramsT>
-	void do_insert_no_bound_check(size_type tpos, paramsT &&...params)
+	value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
 	{
-		const auto cnt_old = this->size();
+		const auto cnt_old = this->m_sth.size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->append(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate_unchecked(tpos, cnt_old);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		details_cow_vector::rotate(ptr, tpos, cnt_old, this->m_sth.size());
+		return ptr + tpos;
 	}
-	void do_erase_no_bound_check(size_type tpos, size_type tn)
+	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
-		const auto cnt_old = this->size();
+		const auto cnt_old = this->m_sth.size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
 		if(this->m_sth.unique() == false){
-			this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
-			return;
+			const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
+			return ptr + tpos;
 		}
-		this->m_sth.rotate_unchecked(tpos, tpos + tn);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		details_cow_vector::rotate(ptr, tpos, tpos + tn, this->m_sth.size());
 		this->m_sth.pop_back_n_unchecked(tn);
+		return ptr + tpos;
 	}
 
 public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->m_sth.data());
+		return const_iterator(&(this->m_sth), this->data());
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->m_sth.data() + this->m_sth.size());
+		return const_iterator(&(this->m_sth), this->data() + this->m_sth.size());
 	}
 	const_reverse_iterator rbegin() const noexcept
 	{
@@ -841,13 +841,13 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(&(this->m_sth), this->m_sth.mut_data());
+		return iterator(&(this->m_sth), this->mut_data());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + this->m_sth.size());
+		return iterator(&(this->m_sth), this->mut_data() + this->m_sth.size());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -1041,8 +1041,9 @@ public:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->emplace_back(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate_unchecked(tpos, cnt_old);
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		details_cow_vector::rotate(ptr, tpos, cnt_old, this->m_sth.size());
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
@@ -1057,21 +1058,21 @@ public:
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
-		this->do_insert_no_bound_check(tpos, n, params...);
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, n, params...);
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
-		this->do_insert_no_bound_check(tpos, init);
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, init);
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
-		this->do_insert_no_bound_check(tpos, ::std::move(first), ::std::move(last));
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, ::std::move(first), ::std::move(last));
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
@@ -1079,15 +1080,15 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
-		this->do_erase_no_bound_check(tpos, tn);
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
-		this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
+		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
+		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type and parameter are non-standard extensions.
@@ -1165,7 +1166,7 @@ public:
 		if(this->m_sth.unique() == false){
 			this->do_reallocate(0, 0, cnt, cnt);
 		}
-		return this->m_sth.mut_data();
+		return this->m_sth.mut_data_unchecked();
 	}
 
 	// N.B. The return type differs from `std::vector`.
