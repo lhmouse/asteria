@@ -406,7 +406,7 @@ ROCKET_EXTENSION_END
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
 		}
-		void rotate(size_type after, size_type seek)
+		void rotate_unchecked(size_type after, size_type seek)
 		{
 			ROCKET_ASSERT(after <= seek);
 			auto bot = after;
@@ -786,7 +786,7 @@ private:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->append(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate(tpos, cnt_old);
+		this->m_sth.rotate_unchecked(tpos, cnt_old);
 	}
 	void do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
@@ -797,7 +797,7 @@ private:
 			this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			return;
 		}
-		this->m_sth.rotate(tpos, tpos + tn);
+		this->m_sth.rotate_unchecked(tpos, tpos + tn);
 		this->m_sth.pop_back_n_unchecked(tn);
 	}
 
@@ -1041,7 +1041,7 @@ public:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->emplace_back(::std::forward<paramsT>(params)...);
-		this->m_sth.rotate(tpos, cnt_old);
+		this->m_sth.rotate_unchecked(tpos, cnt_old);
 		return iterator(&(this->m_sth), this->m_sth.mut_data() + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
