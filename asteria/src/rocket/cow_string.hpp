@@ -739,7 +739,7 @@ private:
 	{
 		const auto len = this->size();
 		auto cap = this->m_sth.check_size_add(len, cap_add);
-		if((this->unique() == false) || (this->capacity() < cap)){
+		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 31);
