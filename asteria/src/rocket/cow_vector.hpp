@@ -205,10 +205,10 @@ ROCKET_EXTENSION_END
 			do {
 				noadl::adl_swap(ptr[bot++], ptr[brk++]);
 			} while(bot != stp);
-			stp = brk;
 			// `isr` will have been decreased by `isl`, which will not result in zero.
 			isr = end - brk;
 			// `isl` is unchanged.
+			stp = brk;
 			goto loop;
 		}
 		if(isl > isr){
@@ -219,10 +219,10 @@ ROCKET_EXTENSION_END
 			do {
 				noadl::adl_swap(ptr[bot++], ptr[brk++]);
 			} while(brk != end);
-			brk = stp;
 			// `isl` will have been decreased by `isr`, which will not result in zero.
 			isl = brk - bot;
 			// `isr` is unchanged.
+			brk = stp;
 			goto loop;
 		}
 		// Before:  bot       brk       end
