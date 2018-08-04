@@ -313,7 +313,7 @@ private:
 		details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old,
 		                                              details_variant::visitor_destruct());
 #ifdef ROCKET_DEBUG
-		std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
+		::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
 #endif
 	}
 

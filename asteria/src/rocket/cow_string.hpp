@@ -1108,7 +1108,7 @@ public:
 			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
 			// Append the range into the temporary string.
 			other.do_reallocate_more(noadl::estimate_distance(first, last));
-			auto it = std::move(first);
+			auto it = ::std::move(first);
 			do {
 				other.push_back(*it);
 			} while(++it != last);
@@ -1117,7 +1117,7 @@ public:
 		} else {
 			// It should be safe to append to `*this` directly.
 			this->do_reallocate_more(noadl::estimate_distance(first, last));
-			auto it = std::move(first);
+			auto it = ::std::move(first);
 			do {
 				this->push_back(*it);
 			} while(++it != last);
