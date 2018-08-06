@@ -277,7 +277,11 @@ ROCKET_EXTENSION_END
 		}
 		void share_with(storage_handle &&other) noexcept
 		{
-			const auto ptr = noadl::exchange(other.m_ptr, nullptr);
+			const auto ptr = other.m_ptr;
+			if(ptr) {
+				// Detach the block.
+				other.m_ptr = nullptr;
+			}
 			this->do_reset(ptr);
 		}
 		void exchange_with(storage_handle &other) noexcept
