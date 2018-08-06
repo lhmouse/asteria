@@ -15,6 +15,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstddef> // std::size_t, std::ptrdiff_t
+#include <cstdint> // std::uintptr_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -52,6 +53,7 @@ using ::std::is_convertible;
 using ::std::conditional;
 using ::std::iterator_traits;
 using ::std::initializer_list;
+using ::std::uintptr_t;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
@@ -766,13 +768,6 @@ private:
 		return noadl::min(tlen - tpos, n);
 	}
 
-	// This has to be generic to allow construction of a string from an array of integers... This is a nasty trick anyway.
-	template<typename someT>
-	bool do_check_overlap_generic(const someT &some) const noexcept
-	{
-		return static_cast<size_type>(reinterpret_cast<const value_type (&)[1]>(some) - this->data()) < this->size();
-	}
-
 	template<typename ...paramsT>
 	value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
 	{
@@ -1065,14 +1060,13 @@ public:
 			return *this;
 		}
 		const auto len_old = this->size();
-		if(this->do_check_overlap_generic(*s)) {
-			const auto tpos = s - this->data();
-			this->do_reserve_more(n);
-			const auto ptr = this->m_sth.mut_data_unchecked();
-			traits_type::move(ptr + len_old, ptr + tpos, n);
+		// Check for overlapped strings before `do_reserve_more()`.
+		const auto srpos = static_cast<uintptr_t>(s - this->data());
+		this->do_reserve_more(n);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		if(srpos < len_old) {
+			traits_type::move(ptr + len_old, ptr + srpos, n);
 		} else {
-			this->do_reserve_more(n);
-			const auto ptr = this->m_sth.mut_data_unchecked();
 			traits_type::copy(ptr + len_old, s, n);
 		}
 		this->do_set_length(len_old + n);
@@ -1110,24 +1104,14 @@ public:
 		if(first == last) {
 			return *this;
 		}
-		if(this->do_check_overlap_generic(*first)) {
-			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
-			// Append the range into the temporary string.
-			other.do_reserve_more(noadl::estimate_distance(first, last));
-			auto it = ::std::move(first);
-			do {
-				other.push_back(*it);
-			} while(++it != last);
-			// Then move it into `*this`.
-			this->assign(::std::move(other));
-		} else {
-			// It should be safe to append to `*this` directly.
-			this->do_reserve_more(noadl::estimate_distance(first, last));
-			auto it = ::std::move(first);
-			do {
-				this->push_back(*it);
-			} while(++it != last);
-		}
+		auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
+		const auto dist = noadl::estimate_distance(first, last);
+		other.do_reserve_more(dist);
+		auto it = ::std::move(first);
+		do {
+			other.push_back(*it);
+		} while(++it != last);
+		this->assign(::std::move(other));
 		return *this;
 	}
 	// N.B. The return type is a non-standard extension.

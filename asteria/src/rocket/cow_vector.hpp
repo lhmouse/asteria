@@ -999,9 +999,10 @@ public:
 			return *this;
 		}
 		this->do_reserve_more(n);
-		for(auto i = size_type(0); i < n; ++i) {
+		auto i = size_type(0);
+		do {
 			this->m_sth.emplace_back_unchecked(params...);
-		}
+		} while(++i != n);
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
@@ -1016,10 +1017,19 @@ public:
 		if(first == last) {
 			return *this;
 		}
-		this->do_reserve_more(noadl::estimate_distance(first, last));
-		for(auto it = ::std::move(first); it != last; ++it) {
-			this->emplace_back(*it);
+		const auto dist = noadl::estimate_distance(first, last);
+		if(dist == 0){
+			auto it = ::std::move(first);
+			do {
+				this->emplace_back(*it);
+			} while(++it != last);
+			return *this;
 		}
+		this->do_reserve_more(dist);
+		auto it = ::std::move(first);
+		do {
+			this->m_sth.emplace_back_unchecked(*it);
+		} while(++it != last);
 		return *this;
 	}
 	// 26.3.11.5, modifiers
@@ -1027,7 +1037,8 @@ public:
 	reference emplace_back(paramsT &&...params)
 	{
 		this->do_reserve_more(1);
-		return *(this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...));
+		const auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
+		return *ptr;
 	}
 	// N.B. The return type is a non-standard extension.
 	reference push_back(const value_type &value)
