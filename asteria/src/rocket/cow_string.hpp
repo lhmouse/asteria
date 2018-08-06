@@ -1426,7 +1426,7 @@ public:
 	// N.B. This is a non-standard extension.
 	value_type * mut_data()
 	{
-		if(this->empty()){
+		if(this->empty()) {
 			return nullptr;
 		}
 		if(this->unique() == false) {
@@ -1470,7 +1470,7 @@ public:
 	}
 	size_type find(const value_type *s, size_type from, size_type n) const noexcept
 	{
-		return this->do_find_forwards_if(from, n, [&](const value_type *ts){ return traits_type::compare(ts, s, n) == 0; });
+		return this->do_find_forwards_if(from, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0; });
 	}
 	size_type find(const value_type *s, size_type from = 0) const noexcept
 	{
@@ -1478,7 +1478,7 @@ public:
 	}
 	size_type find(value_type ch, size_type from = 0) const noexcept
 	{
-		// return this->do_find_forwards_if(from, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) != false; });
+		// return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
 		if(from >= this->size()) {
 			return npos;
 		}
@@ -1506,7 +1506,7 @@ public:
 	}
 	size_type rfind(const value_type *s, size_type to, size_type n) const noexcept
 	{
-		return this->do_find_backwards_if(to, n, [&](const value_type *ts){ return traits_type::compare(ts, s, n) == 0; });
+		return this->do_find_backwards_if(to, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0; });
 	}
 	size_type rfind(const value_type *s, size_type to = npos) const noexcept
 	{
@@ -1514,7 +1514,7 @@ public:
 	}
 	size_type rfind(value_type ch, size_type to = npos) const noexcept
 	{
-		// return this->do_find_backwards_if(to, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) != false; });
+		// return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
 		if(this->size() == 0) {
 			return npos;
 		}
@@ -1549,7 +1549,7 @@ public:
 	}
 	size_type find_first_of(const value_type *s, size_type from, size_type n) const noexcept
 	{
-		return this->do_find_forwards_if(from, 1, [&](const value_type *ts){ return traits_type::find(s, n, *ts) != nullptr; });
+		return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr; });
 	}
 	size_type find_first_of(const value_type *s, size_type from = 0) const noexcept
 	{
@@ -1575,7 +1575,7 @@ public:
 	}
 	size_type find_last_of(const value_type *s, size_type to, size_type n) const noexcept
 	{
-		return this->do_find_backwards_if(to, 1, [&](const value_type *ts){ return traits_type::find(s, n, *ts) != nullptr; });
+		return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr; });
 	}
 	size_type find_last_of(const value_type *s, size_type to = npos) const noexcept
 	{
@@ -1601,7 +1601,7 @@ public:
 	}
 	size_type find_first_not_of(const value_type *s, size_type from, size_type n) const noexcept
 	{
-		return this->do_find_forwards_if(from, 1, [&](const value_type *ts){ return traits_type::find(s, n, *ts) == nullptr; });
+		return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr; });
 	}
 	size_type find_first_not_of(const value_type *s, size_type from = 0) const noexcept
 	{
@@ -1609,7 +1609,7 @@ public:
 	}
 	size_type find_first_not_of(value_type ch, size_type from = 0) const noexcept
 	{
-		return this->do_find_forwards_if(from, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) == false; });
+		return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) == false; });
 	}
 
 	size_type find_last_not_of(shallow sh, size_type to = npos) const noexcept
@@ -1627,7 +1627,7 @@ public:
 	}
 	size_type find_last_not_of(const value_type *s, size_type to, size_type n) const noexcept
 	{
-		return this->do_find_backwards_if(to, 1, [&](const value_type *ts){ return traits_type::find(s, n, *ts) == nullptr; });
+		return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr; });
 	}
 	size_type find_last_not_of(const value_type *s, size_type to = npos) const noexcept
 	{
@@ -1635,20 +1635,20 @@ public:
 	}
 	size_type find_last_not_of(value_type ch, size_type to = npos) const noexcept
 	{
-		return this->do_find_backwards_if(to, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) == false; });
+		return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) == false; });
 	}
 
 	// N.B. This is a non-standard extension.
 	template<typename predT>
 	size_type find_first_if(predT pred, size_type from = 0) const
 	{
-		return this->do_find_forwards_if(from, 1, [&](const char *p){ return pred(*p); });
+		return this->do_find_forwards_if(from, 1, [&](const char *p) { return pred(*p); });
 	}
 	// N.B. This is a non-standard extension.
 	template<typename predT>
 	size_type find_last_if(predT pred, size_type to = npos) const
 	{
-		return this->do_find_backwards_if(to, 1, [&](const char *p){ return pred(*p); });
+		return this->do_find_backwards_if(to, 1, [&](const char *p) { return pred(*p); });
 	}
 
 	basic_cow_string substr(size_type pos = 0, size_type n = npos) const
