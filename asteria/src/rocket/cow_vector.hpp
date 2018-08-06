@@ -1169,12 +1169,11 @@ public:
 	// N.B. This is a non-standard extension.
 	value_type * mut_data()
 	{
-		const auto cnt = this->size();
-		if(cnt == 0) {
+		if(this->empty()) {
 			return nullptr;
 		}
 		if(this->unique() == false) {
-			return this->do_reallocate(0, 0, cnt, cnt);
+			return this->do_reallocate(0, 0, this->size(), this->size());
 		}
 		return this->m_sth.mut_data_unchecked();
 	}
