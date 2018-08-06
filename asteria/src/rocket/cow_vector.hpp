@@ -780,12 +780,12 @@ private:
 		ROCKET_ASSERT(this->capacity() >= cap);
 	}
 
-	template<typename ...paramsT>
-	value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
+	template<typename modifierT>
+	value_type * do_insert_no_bound_check(size_type tpos, modifierT &&modifier)
 	{
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
-		this->append(::std::forward<paramsT>(params)...);
+		::std::forward<modifierT>(modifier)();
 		const auto cnt_add = this->size() - cnt_old;
 		this->do_reserve_more(0);
 		const auto ptr = this->m_sth.mut_data_unchecked();
@@ -1054,12 +1054,8 @@ public:
 	iterator emplace(const_iterator tins, paramsT &&...params)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto cnt_old = this->size();
-		ROCKET_ASSERT(tpos <= cnt_old);
-		this->emplace_back(::std::forward<paramsT>(params)...);
-		const auto ptr = this->m_sth.mut_data_unchecked();
-		details_cow_vector::rotate(ptr, tpos, cnt_old, this->size());
-		return iterator(&(this->m_sth), ptr + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->emplace_back(::std::forward<paramsT>(params)...); });
+		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
@@ -1074,21 +1070,21 @@ public:
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, n, params...);
-		return iterator(&(this->m_sth), ptr + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(n, params...); });
+		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, init);
-		return iterator(&(this->m_sth), ptr + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(init); });
+		return iterator(&(this->m_sth), ptr);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, ::std::move(first), ::std::move(last));
-		return iterator(&(this->m_sth), ptr + tpos);
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(::std::move(first), ::std::move(last)); });
+		return iterator(&(this->m_sth), ptr);
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
@@ -1097,14 +1093,14 @@ public:
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
 		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(&(this->m_sth), ptr + tpos);
+		return iterator(&(this->m_sth), ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), ptr + tpos);
+		return iterator(&(this->m_sth), ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type and parameter are non-standard extensions.

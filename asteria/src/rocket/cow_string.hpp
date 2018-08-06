@@ -768,12 +768,12 @@ private:
 		return noadl::min(tlen - tpos, n);
 	}
 
-	template<typename ...paramsT>
-	value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
+	template<typename modifierT>
+	value_type * do_replace_no_bound_check(size_type tpos, size_type tn, modifierT &&modifier)
 	{
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
-		this->append(::std::forward<paramsT>(params)...);
+		::std::forward<modifierT>(modifier)();
 		const auto len_add = this->size() - len_old;
 		const auto len_sfx = len_old - (tpos + tn);
 		this->do_reserve_more(len_sfx);
@@ -1184,17 +1184,17 @@ public:
 	}
 	basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos)
 	{
-		this->do_replace_no_bound_check(0, this->size(), other, pos, n);
+		this->do_replace_no_bound_check(0, this->size(), [&] { this->append(other, pos, n); });
 		return *this;
 	}
 	basic_cow_string & assign(const value_type *s, size_type n)
 	{
-		this->do_replace_no_bound_check(0, this->size(), s, n);
+		this->do_replace_no_bound_check(0, this->size(), [&] { this->append(s, n); });
 		return *this;
 	}
 	basic_cow_string & assign(const value_type *s)
 	{
-		this->do_replace_no_bound_check(0, this->size(), s);
+		this->do_replace_no_bound_check(0, this->size(), [&] { this->append(s); });
 		return *this;
 	}
 	basic_cow_string & assign(size_type n, value_type ch)
@@ -1212,123 +1212,125 @@ public:
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	basic_cow_string & assign(inputT first, inputT last)
 	{
-		this->do_replace_no_bound_check(0, this->size(), ::std::move(first), ::std::move(last));
+		this->do_replace_no_bound_check(0, this->size(), [&] { this->append(::std::move(first), ::std::move(last)); });
 		return *this;
 	}
 
 	basic_cow_string & insert(size_type tpos, shallow sh)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), sh);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(sh); });
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const basic_cow_string & other, size_type pos = 0, size_type n = npos)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), other, pos, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(other, pos, n); });
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const value_type *s, size_type n)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), s, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(s, n); });
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, const value_type *s)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), s);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(s); });
 		return *this;
 	}
 	basic_cow_string & insert(size_type tpos, size_type n, value_type ch)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), n, ch);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(n, ch); });
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
 	basic_cow_string & insert(size_type tpos, initializer_list<value_type> init)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), init);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), [&] { this->append(init); });
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, shallow sh)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, sh);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(sh); });
 		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, other, pos, n);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(other, pos, n); });
 		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s, size_type n)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s, n);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(s, n); });
 		return iterator(this, ptr);
 	}
 	// N.B. This is a non-standard extension.
 	iterator insert(const_iterator tins, const value_type *s)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, s);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(s); });
 		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, size_type n, value_type ch)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, n, ch);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(n, ch); });
 		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, init);
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(init); });
 		return iterator(this, ptr);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-		const auto ptr = this->do_replace_no_bound_check(tpos, 0, ::std::move(first), ::std::move(last));
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->append(::std::move(first), ::std::move(last)); });
 		return iterator(this, ptr);
 	}
 	iterator insert(const_iterator tins, value_type ch)
 	{
-		return this->insert(tins, size_type(1), ch);
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+		const auto ptr = this->do_replace_no_bound_check(tpos, 0, [&] { this->push_back(ch); });
+		return iterator(this, ptr);
 	}
 
 	basic_cow_string & replace(size_type tpos, size_type tn, shallow sh)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), sh);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), [&] { this->append(sh); });
 		return *this;
 	}
 	basic_cow_string & replace(size_type tpos, size_type tn, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), other, pos, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), [&] { this->append(other, pos, n); });
 		return *this;
 	}
 	basic_cow_string & replace(size_type tpos, size_type tn, const value_type *s, size_type n)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), s, n);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), [&] { this->append(s, n); });
 		return *this;
 	}
 	basic_cow_string & replace(size_type tpos, size_type tn, const value_type *s)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), s);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), [&] { this->append(s); });
 		return *this;
 	}
 	basic_cow_string & replace(size_type tpos, size_type tn, size_type n, value_type ch)
 	{
-		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), n, ch);
+		this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, tn), [&] { this->append(n, ch); });
 		return *this;
 	}
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, shallow sh)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, sh);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(sh); });
 		return *this;
 	}
 	// N.B. The last two parameters are non-standard extensions.
@@ -1336,35 +1338,35 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, other, pos, n);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(other, pos, n); });
 		return *this;
 	}
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, const value_type *s, size_type n)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, s, n);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(s, n); });
 		return *this;
 	}
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, const value_type *s)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, s);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(s); });
 		return *this;
 	}
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, size_type n, value_type ch)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, n, ch);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(n, ch); });
 		return *this;
 	}
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, init);
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(init); });
 		return *this;
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
@@ -1372,13 +1374,16 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-		this->do_replace_no_bound_check(tpos, tn, ::std::move(first), ::std::move(last));
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->append(::std::move(first), ::std::move(last)); });
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
 	basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, value_type ch)
 	{
-		return this->replace(tfirst, tlast, size_type(1), ch);
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+		this->do_replace_no_bound_check(tpos, tn, [&] { this->push_back(ch); });
+		return *this;
 	}
 
 	size_type copy(value_type *s, size_type tn, size_type tpos = 0) const
