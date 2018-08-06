@@ -130,7 +130,7 @@ template<typename xpointerT>
 #ifdef __cpp_lib_addressof_constexpr
 constexpr
 #endif
-inline typename ::std::remove_reference<decltype(*(::std::declval<const xpointerT &>()))>::type * unfancy(const xpointerT &xptr)
+inline typename ::std::remove_reference<decltype(*(::std::declval<const xpointerT &>()))>::type * unfancy(const xpointerT &xptr) noexcept
 {
 	return ::std::addressof(*xptr);
 }
