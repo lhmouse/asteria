@@ -775,8 +775,14 @@ private:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		this->append(::std::forward<paramsT>(params)...);
-		this->append(this->data() + tpos + tn, len_old - (tpos + tn));
-		return this->do_erase_no_bound_check(tpos, len_old - tpos);
+		const auto len_add = this->size() - len_old;
+		const auto len_sfx = len_old - (tpos + tn);
+		this->do_reserve_more(len_sfx);
+		const auto ptr = this->m_sth.mut_data_unchecked();
+		traits_type::copy(ptr + len_old + len_add, ptr + tpos + tn, len_sfx);
+		traits_type::move(ptr + tpos, ptr + len_old, len_add + len_sfx);
+		this->do_set_length(len_old + len_add - tn);
+		return ptr + tpos;
 	}
 	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{

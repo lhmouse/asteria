@@ -782,8 +782,10 @@ private:
 		const auto cnt_old = this->m_sth.size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->append(::std::forward<paramsT>(params)...);
+		const auto cnt_add = this->m_sth.size() - cnt_old;
+		this->do_reserve_more(0);
 		const auto ptr = this->m_sth.mut_data_unchecked();
-		details_cow_vector::rotate(ptr, tpos, cnt_old, this->m_sth.size());
+		details_cow_vector::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
 		return ptr + tpos;
 	}
 	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
@@ -796,7 +798,7 @@ private:
 			return ptr + tpos;
 		}
 		const auto ptr = this->m_sth.mut_data_unchecked();
-		details_cow_vector::rotate(ptr, tpos, tpos + tn, this->m_sth.size());
+		details_cow_vector::rotate(ptr, tpos, tpos + tn, cnt_old);
 		this->m_sth.pop_back_n_unchecked(tn);
 		return ptr + tpos;
 	}
@@ -995,6 +997,9 @@ public:
 	template<typename ...paramsT>
 	cow_vector & append(size_type n, const paramsT &...params)
 	{
+		if(n == 0){
+			return *this;
+		}
 		this->do_reserve_more(n);
 		for(auto i = size_type(0); i < n; ++i){
 			this->m_sth.emplace_back_unchecked(params...);
@@ -1010,6 +1015,9 @@ public:
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	cow_vector & append(inputT first, inputT last)
 	{
+		if(first == last){
+			return *this;
+		}
 		this->do_reserve_more(noadl::estimate_distance(first, last));
 		for(auto it = ::std::move(first); it != last; ++it){
 			this->emplace_back(*it);
