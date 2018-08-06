@@ -764,7 +764,7 @@ private:
 	// Reallocate more storage as needed, without shrinking.
 	void do_reserve_more(size_type cap_add)
 	{
-		const auto cnt = this->m_sth.size();
+		const auto cnt = this->size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
 		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)) {
 #ifndef ROCKET_DEBUG
@@ -779,10 +779,10 @@ private:
 	template<typename ...paramsT>
 	value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
 	{
-		const auto cnt_old = this->m_sth.size();
+		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->append(::std::forward<paramsT>(params)...);
-		const auto cnt_add = this->m_sth.size() - cnt_old;
+		const auto cnt_add = this->size() - cnt_old;
 		this->do_reserve_more(0);
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		details_cow_vector::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
@@ -790,7 +790,7 @@ private:
 	}
 	value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
-		const auto cnt_old = this->m_sth.size();
+		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
 		if(this->m_sth.unique() == false) {
@@ -811,7 +811,7 @@ public:
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->data() + this->m_sth.size());
+		return const_iterator(&(this->m_sth), this->data() + this->size());
 	}
 	const_reverse_iterator rbegin() const noexcept
 	{
@@ -849,7 +849,7 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->mut_data() + this->m_sth.size());
+		return iterator(&(this->m_sth), this->mut_data() + this->size());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -926,7 +926,7 @@ public:
 	{
 		if(this->m_sth.unique()) {
 			// If the storage is owned exclusively by this vector, truncate it and leave the buffer alone.
-			this->m_sth.pop_back_n_unchecked(this->m_sth.size());
+			this->m_sth.pop_back_n_unchecked(this->size());
 		} else {
 			// Otherwise, detach it from `*this`.
 			this->do_deallocate();
@@ -1045,12 +1045,12 @@ public:
 	template<typename ...paramsT>
 	iterator emplace(const_iterator tins, paramsT &&...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		this->emplace_back(::std::forward<paramsT>(params)...);
 		const auto ptr = this->m_sth.mut_data_unchecked();
-		details_cow_vector::rotate(ptr, tpos, cnt_old, this->m_sth.size());
+		details_cow_vector::rotate(ptr, tpos, cnt_old, this->size());
 		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
@@ -1065,20 +1065,20 @@ public:
 	template<typename ...paramsT>
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, n, params...);
 		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, init);
 		return iterator(&(this->m_sth), ptr + tpos);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->m_sth.data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, ::std::move(first), ::std::move(last));
 		return iterator(&(this->m_sth), ptr + tpos);
 	}
