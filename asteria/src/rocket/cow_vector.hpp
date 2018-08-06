@@ -926,10 +926,9 @@ public:
 	{
 		if(this->unique() == false) {
 			this->do_deallocate();
-		} else {
-			this->m_sth.pop_back_n_unchecked(this->size());
+			return;
 		}
-		ROCKET_ASSERT(this->empty());
+		this->m_sth.pop_back_n_unchecked(this->size());
 	}
 	// N.B. This is a non-standard extension.
 	bool unique() const noexcept

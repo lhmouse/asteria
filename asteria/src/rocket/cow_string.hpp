@@ -958,10 +958,9 @@ public:
 	{
 		if(this->unique() == false) {
 			this->do_deallocate();
-		} else {
-			this->do_set_length(0);
+			return;
 		}
-		ROCKET_ASSERT(this->empty());
+		this->do_set_length(0);
 	}
 	// N.B. This is a non-standard extension.
 	bool unique() const noexcept
