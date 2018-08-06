@@ -736,7 +736,7 @@ private:
 	}
 
 	// Reallocate more storage as needed, without shrinking.
-	void do_reallocate_more(size_type cap_add)
+	void do_reserve_more(size_type cap_add)
 	{
 		const auto len = this->size();
 		auto cap = this->m_sth.check_size_add(len, cap_add);
@@ -1063,11 +1063,11 @@ public:
 		const auto len_old = this->size();
 		if(this->do_check_overlap_generic(*s)){
 			const auto tpos = s - this->data();
-			this->do_reallocate_more(n);
+			this->do_reserve_more(n);
 			const auto ptr = this->m_sth.mut_data_unchecked();
 			traits_type::move(ptr + len_old, ptr + tpos, n);
 		} else {
-			this->do_reallocate_more(n);
+			this->do_reserve_more(n);
 			const auto ptr = this->m_sth.mut_data_unchecked();
 			traits_type::copy(ptr + len_old, s, n);
 		}
@@ -1084,7 +1084,7 @@ public:
 			return *this;
 		}
 		const auto len_old = this->size();
-		this->do_reallocate_more(n);
+		this->do_reserve_more(n);
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		traits_type::assign(ptr + len_old, n, ch);
 		this->do_set_length(len_old + n);
@@ -1109,7 +1109,7 @@ public:
 		if(this->do_check_overlap_generic(*first)){
 			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
 			// Append the range into the temporary string.
-			other.do_reallocate_more(noadl::estimate_distance(first, last));
+			other.do_reserve_more(noadl::estimate_distance(first, last));
 			auto it = ::std::move(first);
 			do {
 				other.push_back(*it);
@@ -1118,7 +1118,7 @@ public:
 			this->assign(::std::move(other));
 		} else {
 			// It should be safe to append to `*this` directly.
-			this->do_reallocate_more(noadl::estimate_distance(first, last));
+			this->do_reserve_more(noadl::estimate_distance(first, last));
 			auto it = ::std::move(first);
 			do {
 				this->push_back(*it);
@@ -1130,7 +1130,7 @@ public:
 	basic_cow_string & push_back(value_type ch)
 	{
 		const auto len_old = this->size();
-		this->do_reallocate_more(1);
+		this->do_reserve_more(1);
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		traits_type::assign(ptr[len_old], ch);
 		this->do_set_length(len_old + 1);

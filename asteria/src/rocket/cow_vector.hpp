@@ -762,7 +762,7 @@ private:
 	}
 
 	// Reallocate more storage as needed, without shrinking.
-	void do_reallocate_more(size_type cap_add)
+	void do_reserve_more(size_type cap_add)
 	{
 		const auto cnt = this->m_sth.size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
@@ -995,7 +995,7 @@ public:
 	template<typename ...paramsT>
 	cow_vector & append(size_type n, const paramsT &...params)
 	{
-		this->do_reallocate_more(n);
+		this->do_reserve_more(n);
 		for(auto i = size_type(0); i < n; ++i){
 			this->m_sth.emplace_back_unchecked(params...);
 		}
@@ -1010,7 +1010,7 @@ public:
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	cow_vector & append(inputT first, inputT last)
 	{
-		this->do_reallocate_more(noadl::estimate_distance(first, last));
+		this->do_reserve_more(noadl::estimate_distance(first, last));
 		for(auto it = ::std::move(first); it != last; ++it){
 			this->emplace_back(*it);
 		}
@@ -1020,7 +1020,7 @@ public:
 	template<typename ...paramsT>
 	reference emplace_back(paramsT &&...params)
 	{
-		this->do_reallocate_more(1);
+		this->do_reserve_more(1);
 		return *(this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...));
 	}
 	// N.B. The return type is a non-standard extension.
