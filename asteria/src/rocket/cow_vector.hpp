@@ -220,7 +220,7 @@ ROCKET_EXTENSION_END
 				noadl::adl_swap(ptr[bot++], ptr[brk++]);
 			} while(brk != end);
 			// `isl` will have been decreased by `isr`, which will not result in zero.
-			isl = brk - bot;
+			isl = stp - bot;
 			// `isr` is unchanged.
 			brk = stp;
 			goto loop;
