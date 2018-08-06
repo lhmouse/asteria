@@ -29,46 +29,46 @@ namespace
 		};
 		char32_t code = static_cast<unsigned char>(str.at(column));
 		const unsigned length = s_length_table[code >> 3];
-		if(length == 0){
+		if(length == 0) {
 			// This leading character is not valid.
 			return Parser_result(line, column, 1, Parser_result::error_code_utf8_code_unit_invalid);
 		}
-		if(length > 1){
+		if(length > 1) {
 			// Unset bits that are not part of the payload.
 			code &= static_cast<char32_t>(0xFF) >> length;
 			// Accumulate trailing code units.
-			if(str.size() - column < length){
+			if(str.size() - column < length) {
 				// No enough characters are provided.
 				return Parser_result(line, column, str.size() - column, Parser_result::error_code_utf8_code_point_truncated);
 			}
-			for(unsigned i = 1; i < length; ++i){
+			for(unsigned i = 1; i < length; ++i) {
 				const char32_t next = static_cast<unsigned char>(str.at(column + i));
-				if((next & 0xC0) != 0x80){
+				if((next & 0xC0) != 0x80) {
 					// This trailing character is not valid.
 					return Parser_result(line, column, i + 1, Parser_result::error_code_utf8_code_unit_invalid);
 				}
 				code = (code << 6) | (next & 0x3F);
 			}
-			if((0xD800 <= code) && (code < 0xE000)){
+			if((0xD800 <= code) && (code < 0xE000)) {
 				// Surrogates are not allowed.
 				return Parser_result(line, column, length, Parser_result::error_code_utf8_surrogates_disallowed);
 			}
-			if(code >= 0x110000){
+			if(code >= 0x110000) {
 				// Code point value is too large.
 				return Parser_result(line, column, length, Parser_result::error_code_utf_code_point_value_too_large);
 			}
 			// Re-encode it and check for overlong sequences.
 			unsigned len_min;
-			if(code < 0x80){
+			if(code < 0x80) {
 				len_min = 1;
-			} else if(code < 0x800){
+			} else if(code < 0x800) {
 				len_min = 2;
-			} else if(code < 0x10000){
+			} else if(code < 0x10000) {
 				len_min = 3;
 			} else {
 				len_min = 4;
 			}
-			if(length != len_min){
+			if(length != len_min) {
 				// Overlong sequences are not allowed.
 				return Parser_result(line, column, length, Parser_result::error_code_utf8_encoding_overlong);
 			}
@@ -79,36 +79,36 @@ namespace
 	bool do_merge_sign(Vector<Token> &tokens_inout, std::size_t line, std::size_t column)
 	{
 		// The last token must be a positive or negative sign.
-		if(tokens_inout.empty()){
+		if(tokens_inout.empty()) {
 			return false;
 		}
 		const auto &token_sign = tokens_inout.back();
 		auto cand_punct = token_sign.get_opt<Token::S_punctuator>();
-		if(cand_punct == nullptr){
+		if(cand_punct == nullptr) {
 			return false;
 		}
-		if((cand_punct->punct != Token::punctuator_add) && (cand_punct->punct != Token::punctuator_sub)){
+		if((cand_punct->punct != Token::punctuator_add) && (cand_punct->punct != Token::punctuator_sub)) {
 			return false;
 		}
 		const bool sign = cand_punct->punct == Token::punctuator_sub;
 		// Don't merge them if they are not contiguous.
-		if(token_sign.get_source_line() != line){
+		if(token_sign.get_source_line() != line) {
 			return false;
 		}
-		if(token_sign.get_source_column() + token_sign.get_source_length() != column){
+		if(token_sign.get_source_column() + token_sign.get_source_length() != column) {
 			return false;
 		}
 		// Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
-		if(tokens_inout.size() >= 2){
+		if(tokens_inout.size() >= 2) {
 			const auto &token_prev = tokens_inout.rbegin()[1];
 			cand_punct = token_prev.get_opt<Token::S_punctuator>();
-			if(cand_punct == nullptr){
+			if(cand_punct == nullptr) {
 				return false;
 			}
-			if((cand_punct->punct == Token::punctuator_inc) || (cand_punct->punct == Token::punctuator_dec)){
+			if((cand_punct->punct == Token::punctuator_inc) || (cand_punct->punct == Token::punctuator_dec)) {
 				return false;
 			}
-			if((cand_punct->punct == Token::punctuator_parenth_cl) || (cand_punct->punct == Token::punctuator_bracket_cl)){
+			if((cand_punct->punct == Token::punctuator_parenth_cl) || (cand_punct->punct == Token::punctuator_bracket_cl)) {
 				return false;
 			}
 		}
@@ -120,7 +120,7 @@ namespace
 	Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column)
 	{
 		const auto char_head = str.at(column);
-		switch(char_head){
+		switch(char_head) {
 		case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n': {
 			// Ignore a series of spaces.
 			const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
@@ -211,10 +211,10 @@ namespace
 			const auto range = std::equal_range(std::begin(s_punctuator_table), std::end(s_punctuator_table), char_head, Punctuator_comparator());
 			// For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
 			// Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-			for(auto it = range.second; it != range.first; --it){
+			for(auto it = range.second; it != range.first; --it) {
 				const auto &pair = it[-1];
 				const auto length = std::char_traits<char>::length(pair.first);
-				if((str.size() - column >= length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)){
+				if((str.size() - column >= length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)) {
 					// Push a punctuator.
 					Token::S_punctuator token_p = { pair.second };
 					tokens_out.emplace_back(line, column, length, std::move(token_p));
@@ -230,9 +230,9 @@ namespace
 			const auto body_begin = column + 1;
 			auto body_end = str.find(char_head, body_begin);
 			Cow_string value;
-			if(char_head == '\''){
+			if(char_head == '\'') {
 				// Escape sequences do not have special meanings inside single quotation marks.
-				if(body_end == str.npos){
+				if(body_end == str.npos) {
 					return Parser_result(line, column, str.size() - column, Parser_result::error_code_string_literal_unclosed);
 				}
 				// Copy the substring as is.
@@ -243,16 +243,16 @@ namespace
 				value.reserve(body_end - body_begin);
 				// Translate escape sequences as needed.
 				body_end = body_begin;
-				for(;;){
-					if(body_end >= str.size()){
+				for(;;) {
+					if(body_end >= str.size()) {
 						return Parser_result(line, column, str.size() - column, Parser_result::error_code_string_literal_unclosed);
 					}
 					auto char_next = str.at(body_end);
-					if(char_next == char_head){
+					if(char_next == char_head) {
 						// Got end of string literal. Finish.
 						break;
 					}
-					if(char_next != '\\'){
+					if(char_next != '\\') {
 						// This character does not start an escape sequence. Copy it as is.
 						value.push_back(char_next);
 						body_end += 1;
@@ -260,11 +260,11 @@ namespace
 					}
 					// This character starts an escape sequence.
 					unsigned seq_len = 2;
-					if(str.size() - body_end < seq_len){
+					if(str.size() - body_end < seq_len) {
 						return Parser_result(line, body_end, str.size() - body_end, Parser_result::error_code_escape_sequence_incomplete);
 					}
 					char_next = str.at(body_end + 1);
-					switch(char_next){
+					switch(char_next) {
 					case '\'':
 						value.push_back('\'');
 						break;
@@ -317,25 +317,25 @@ namespace
 					case 'x':
 						seq_len += 2;
 						// Read hex digits.
-						if(str.size() - body_end < seq_len){
+						if(str.size() - body_end < seq_len) {
 							return Parser_result(line, body_end, str.size() - body_end, Parser_result::error_code_escape_sequence_incomplete);
 						}
 						char32_t code = 0;
-						for(unsigned i = 2; i < seq_len; ++i){
+						for(unsigned i = 2; i < seq_len; ++i) {
 							const auto digit = str.at(body_end + i);
 							static constexpr char s_hex_table[] = "00112233445566778899AaBbCcDdEeFf";
 							const auto ptr = std::char_traits<char>::find(s_hex_table, 32, digit);
-							if(ptr == nullptr){
+							if(ptr == nullptr) {
 								return Parser_result(line, body_end, i, Parser_result::error_code_escape_sequence_invalid_hex);
 							}
 							const auto digit_value = static_cast<unsigned char>((ptr - s_hex_table) / 2);
 							code = (code << 4) | digit_value;
 						}
-						if((0xD800 <= code) && (code < 0xE000)){
+						if((0xD800 <= code) && (code < 0xE000)) {
 							// Surrogates are not allowed.
 							return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf8_surrogates_disallowed);
 						}
-						if(code >= 0x110000){
+						if(code >= 0x110000) {
 							// Code point value is too large.
 							return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf_code_point_value_too_large);
 						}
@@ -344,12 +344,12 @@ namespace
 						{
 							value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask)));
 						};
-						if(code < 0x80){
+						if(code < 0x80) {
 							encode_one( 0, 0xFF);
-						} else if(code < 0x800){
+						} else if(code < 0x800) {
 							encode_one( 6, 0x1F);
 							encode_one( 0, 0x3F);
-						} else if(code < 0x10000){
+						} else if(code < 0x10000) {
 							encode_one(12, 0x0F);
 							encode_one( 6, 0x3F);
 							encode_one( 0, 0x3F);
@@ -393,31 +393,31 @@ namespace
 			radix = 10;
 			int_begin = column;
 			char char_next;
-			if(char_head == '0'){
+			if(char_head == '0') {
 				// Do not use `str.at()` here as `int_begin + 1` may exceed `str.size()`.
 				char_next = str[int_begin + 1];
-				if((char_next == 'B') || (char_next == 'b')){
+				if((char_next == 'B') || (char_next == 'b')) {
 					radix = 2;
 					int_begin += 2;
-				} else if((char_next == 'X') || (char_next == 'x')){
+				} else if((char_next == 'X') || (char_next == 'x')) {
 					radix = 16;
 					int_begin += 2;
 				}
 			}
 			auto pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
 			int_end = std::min(pos, str.size());
-			if(int_begin == int_end){
+			if(int_begin == int_end) {
 				return Parser_result(line, column, int_end - column, Parser_result::error_code_numeric_literal_incomplete);
 			}
 			// Look for the fractional part.
 			frac_begin = int_end;
 			frac_end = frac_begin;
 			char_next = str[int_end];
-			if(char_next == '.'){
+			if(char_next == '.') {
 				frac_begin += 1;
 				pos = str.find_first_not_of(s_numeric_table, frac_begin, s_delim_count + radix * 2);
 				frac_end = std::min(pos, str.size());
-				if(frac_begin == frac_end){
+				if(frac_begin == frac_end) {
 					return Parser_result(line, column, frac_end - column, Parser_result::error_code_numeric_literal_incomplete);
 				}
 			}
@@ -427,25 +427,25 @@ namespace
 			exp_begin = frac_end;
 			exp_end = exp_begin;
 			char_next = str[frac_end];
-			if((char_next == 'E') || (char_next == 'e')){
+			if((char_next == 'E') || (char_next == 'e')) {
 				exp_base = 10;
 				exp_begin += 1;
-			} else if((char_next == 'P') || (char_next == 'p')){
+			} else if((char_next == 'P') || (char_next == 'p')) {
 				exp_base = 2;
 				exp_begin += 1;
 			}
-			if(exp_base != 0){
+			if(exp_base != 0) {
 				char_next = str[exp_begin];
-				if(char_next == '+'){
+				if(char_next == '+') {
 					exp_sign = false;
 					exp_begin += 1;
-				} else if(char_next == '-'){
+				} else if(char_next == '-') {
 					exp_sign = true;
 					exp_begin += 1;
 				}
 				pos = str.find_first_not_of(s_numeric_table, exp_begin, s_delim_count + 20);
 				exp_end = std::min(pos, str.size());
-				if(exp_begin == exp_end){
+				if(exp_begin == exp_end) {
 					return Parser_result(line, column, exp_end - column, Parser_result::error_code_numeric_literal_incomplete);
 				}
 			}
@@ -453,57 +453,57 @@ namespace
 			// Since we make no use of them, we just reserve them for further use for good.
 			pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end);
 			pos = std::min(pos, str.size());
-			if(pos != exp_end){
+			if(pos != exp_end) {
 				return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_code_numeric_literal_suffixes_disallowed);
 			}
 			const auto length = pos - column;
 			// Parse the exponent.
 			std::int32_t exp = 0;
-			for(pos = exp_begin; pos != exp_end; ++pos){
+			for(pos = exp_begin; pos != exp_end; ++pos) {
 				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, 20, str.at(pos));
-				if(ptr == nullptr){
+				if(ptr == nullptr) {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 				const auto bound = (std::numeric_limits<std::int32_t>::max() - digit_value) / 10;
-				if(exp > bound){
+				if(exp > bound) {
 					return Parser_result(line, column, length, Parser_result::error_code_numeric_literal_exponent_overflow);
 				}
 				exp *= 10;
 				exp += digit_value;
 			}
-			if(exp_sign){
+			if(exp_sign) {
 				exp = -exp;
 			}
-			if(frac_begin == int_end){
+			if(frac_begin == int_end) {
 				// Parse the literal as an integer.
 				Unsigned_integer value = 0;
-				for(pos = int_begin; pos != int_end; ++pos){
+				for(pos = int_begin; pos != int_end; ++pos) {
 					const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-					if(ptr == nullptr){
+					if(ptr == nullptr) {
 						continue;
 					}
 					const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
 					const auto bound = (std::numeric_limits<Unsigned_integer>::max() - digit_value) / radix;
-					if(value > bound){
+					if(value > bound) {
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 					}
 					value *= radix;
 					value += digit_value;
 				}
-				if(value != 0){
-					if(exp < 0){
+				if(value != 0) {
+					if(exp < 0) {
 						return Parser_result(line, column, length, Parser_result::error_code_integer_literal_exponent_negative);
 					}
-					for(std::int32_t i = 0; i < exp; ++i){
+					for(std::int32_t i = 0; i < exp; ++i) {
 						const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
-						if(value > bound){
+						if(value > bound) {
 							return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 						}
 						value *= exp_base;
 					}
 				}
-				if(do_merge_sign(tokens_out, line, column)){
+				if(do_merge_sign(tokens_out, line, column)) {
 					value = -value;
 				}
 				Token::S_integer_literal token_i = { static_cast<Signed_integer>(value) };
@@ -513,49 +513,49 @@ namespace
 			// Parse the literal as a floating-point number.
 			Double_precision value = 0;
 			bool zero = true;
-			for(pos = int_begin; pos != int_end; ++pos){
+			for(pos = int_begin; pos != int_end; ++pos) {
 				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-				if(ptr == nullptr){
+				if(ptr == nullptr) {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-				if(digit_value != 0){
+				if(digit_value != 0) {
 					zero = false;
 				}
 				value *= radix;
 				value += digit_value;
 			}
 			int value_class = std::fpclassify(value);
-			if(value_class == FP_INFINITE){
+			if(value_class == FP_INFINITE) {
 				return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
 			}
 			Double_precision mantissa = 0;
-			for(pos = frac_end; pos != frac_begin; --pos){
+			for(pos = frac_end; pos != frac_begin; --pos) {
 				const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos - 1));
-				if(ptr == nullptr){
+				if(ptr == nullptr) {
 					continue;
 				}
 				const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-				if(digit_value != 0){
+				if(digit_value != 0) {
 					zero = false;
 				}
 				mantissa += digit_value;
 				mantissa /= radix;
 			}
 			value += mantissa;
-			if(exp_base == FLT_RADIX){
+			if(exp_base == FLT_RADIX) {
 				value = std::scalbn(value, exp);
 			} else {
 				value = value * std::pow(static_cast<int>(exp_base), exp);
 			}
 			value_class = std::fpclassify(value);
-			if(value_class == FP_INFINITE){
+			if(value_class == FP_INFINITE) {
 				return Parser_result(line, column, length, Parser_result::error_code_double_literal_overflow);
 			}
-			if((value_class == FP_ZERO) && (zero == false)){
+			if((value_class == FP_ZERO) && (zero == false)) {
 				return Parser_result(line, column, length, Parser_result::error_code_double_literal_underflow);
 			}
-			if(do_merge_sign(tokens_out, line, column)){
+			if(do_merge_sign(tokens_out, line, column)) {
 				value = -value;
 			}
 			Token::S_double_literal token_d = { value };
@@ -627,9 +627,9 @@ namespace
 			const auto length = std::min(pos, str.size()) - column;
 			// Check whether this matches a keyword.
 			const auto range = std::equal_range(std::begin(s_keyword_table), std::end(s_keyword_table), char_head, Keyword_comparator());
-			for(auto it = range.first; it != range.second; ++it){
+			for(auto it = range.first; it != range.second; ++it) {
 				const auto &pair = it[0];
-				if((std::char_traits<char>::length(pair.first) == length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)){
+				if((std::char_traits<char>::length(pair.first) == length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)) {
 					// Push a keyword.
 					Token::S_keyword token_kw = { pair.second };
 					tokens_out.emplace_back(line, column, length, std::move(token_kw));
@@ -653,10 +653,10 @@ Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const C
 {
 	// Ensure the source string is valid UTF-8.
 	std::size_t column = 0;
-	while(column < str.size()){
+	while(column < str.size()) {
 		const auto result = do_validate_code_point_utf8(line, str, column);
 		ROCKET_ASSERT(result.get_length() <= str.size() - column);
-		if(result.get_error_code() != Parser_result::error_code_success){
+		if(result.get_error_code() != Parser_result::error_code_success) {
 			ASTERIA_DEBUG_LOG("Invalid UTF-8 string: line = ", line, ", substr = `", str.substr(column, result.get_length()), "`, error_code = ", result.get_error_code());
 			return result;
 		}
@@ -665,10 +665,10 @@ Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const C
 	}
 	// Get tokens one by one.
 	column = 0;
-	while(column < str.size()){
+	while(column < str.size()) {
 		const auto result = do_get_token(tokens_out, line, str, column);
 		ROCKET_ASSERT(result.get_length() <= str.size() - column);
-		if(result.get_error_code() != Parser_result::error_code_success){
+		if(result.get_error_code() != Parser_result::error_code_success) {
 			ASTERIA_DEBUG_LOG("Parser error: line = ", line, ", substr = `", str.substr(column, result.get_length()), "`, error_code = ", result.get_error_code());
 			return result;
 		}

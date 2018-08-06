@@ -88,7 +88,7 @@ ROCKET_EXTENSION_END
 		~basic_storage()
 		{
 			auto nrem = this->nelem;
-			while(nrem != 0){
+			while(nrem != 0) {
 				--nrem;
 				allocator_traits<allocator_type>::destroy(this->alloc, this->data + nrem);
 			}
@@ -115,7 +115,7 @@ ROCKET_EXTENSION_END
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			auto nelem = ptr->nelem;
-			for(auto i = off; i != off + cnt; ++i){
+			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
 				ptr->nelem = (nelem += 1);
 			}
@@ -154,7 +154,7 @@ ROCKET_EXTENSION_END
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			auto nelem = ptr->nelem;
-			for(auto i = off; i != off + cnt; ++i){
+			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
 				ptr->nelem = (nelem += 1);
 			}
@@ -188,16 +188,16 @@ ROCKET_EXTENSION_END
 		//   bot       brk       end
 		// > 0 1 2 3 4 5 6 7 8 9 -
 		auto isl = brk - bot;
-		if(isl == 0){
+		if(isl == 0) {
 			return;
 		}
 		auto isr = end - brk;
-		if(isr == 0){
+		if(isr == 0) {
 			return;
 		}
 		auto stp = brk;
 	loop:
-		if(isl < isr){
+		if(isl < isr) {
 			// Before:  bot   brk           end
 			//        > 0 1 2 3 4 5 6 7 8 9 -
 			// After:         bot   brk     end
@@ -211,7 +211,7 @@ ROCKET_EXTENSION_END
 			stp = brk;
 			goto loop;
 		}
-		if(isl > isr){
+		if(isl > isr) {
 			// Before:  bot           brk   end
 			//        > 0 1 2 3 4 5 6 7 8 9 -
 			// After:       bot       brk   end
@@ -275,13 +275,13 @@ ROCKET_EXTENSION_END
 		void do_reset(storage_pointer ptr_new) noexcept
 		{
 			const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return;
 			}
 			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
 			const auto old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
-			if(old > 1){
+			if(old > 1) {
 				return;
 			}
 			// If it has been decremented to zero, deallocate the block.
@@ -307,7 +307,7 @@ ROCKET_EXTENSION_END
 		bool unique() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return false;
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
@@ -315,7 +315,7 @@ ROCKET_EXTENSION_END
 		size_type capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return 0;
 			}
 			return storage::max_nelem_for_nblk(ptr->nblk);
@@ -330,7 +330,7 @@ ROCKET_EXTENSION_END
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
-			if(cap_max - base < add){
+			if(cap_max - base < add) {
 				noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
 				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
@@ -345,7 +345,7 @@ ROCKET_EXTENSION_END
 		const value_type * data() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return nullptr;
 			}
 			return ptr->data;
@@ -353,7 +353,7 @@ ROCKET_EXTENSION_END
 		size_type size() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return 0;
 			}
 			return ptr->nelem;
@@ -362,7 +362,7 @@ ROCKET_EXTENSION_END
 		{
 			ROCKET_ASSERT(cnt_one <= res_arg);
 			ROCKET_ASSERT(cnt_two <= res_arg - cnt_one);
-			if(res_arg == 0){
+			if(res_arg == 0) {
 				// Deallocate the block.
 				this->do_reset(nullptr);
 				return nullptr;
@@ -377,18 +377,18 @@ ROCKET_EXTENSION_END
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), this->as_allocator(), nblk);
 			const auto ptr_old = this->m_ptr;
-			if(ptr_old){
+			if(ptr_old) {
 				try {
 					// Copy or move elements into the new block.
 					// Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
-					if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)){
+					if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)) {
 						copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
 						copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					} else {
 						move_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
 						move_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
 					}
-				} catch(...){
+				} catch(...) {
 					// If an exception is thrown, deallocate the new block, then rethrow the exception.
 					allocator_traits<storage_allocator>::destroy(st_alloc, noadl::unfancy(ptr));
 					allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
@@ -407,7 +407,7 @@ ROCKET_EXTENSION_END
 		void share_with(const storage_handle &other) noexcept
 		{
 			const auto ptr = other.m_ptr;
-			if(ptr){
+			if(ptr) {
 				// Increment the reference count.
 				const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
 				ROCKET_ASSERT(old > 0);
@@ -427,7 +427,7 @@ ROCKET_EXTENSION_END
 		value_type * mut_data_unchecked() noexcept
 		{
 			auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return nullptr;
 			}
 			ROCKET_ASSERT(this->unique());
@@ -449,13 +449,13 @@ ROCKET_EXTENSION_END
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(n <= this->size());
-			if(n == 0){
+			if(n == 0) {
 				return;
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			auto nelem = ptr->nelem;
-			for(auto i = size_type(0); i < n; ++i){
+			for(auto i = size_type(0); i < n; ++i) {
 				ptr->nelem = (nelem -= 1);
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
@@ -748,7 +748,7 @@ private:
 		ROCKET_ASSERT(cnt_two <= this->m_sth.size() - off_two);
 		ROCKET_ASSERT(cnt_one + cnt_two <= res_arg);
 		const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
-		if(ptr == nullptr){
+		if(ptr == nullptr) {
 			// The storage has been deallocated.
 			return nullptr;
 		}
@@ -766,7 +766,7 @@ private:
 	{
 		const auto cnt = this->m_sth.size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
+		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)) {
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, cnt + cnt / 2 + 7);
@@ -793,7 +793,7 @@ private:
 		const auto cnt_old = this->m_sth.size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			return ptr + tpos;
 		}
@@ -882,10 +882,10 @@ public:
 	void resize(size_type n, const paramsT &...params)
 	{
 		const auto cnt_old = this->size();
-		if(cnt_old == n){
+		if(cnt_old == n) {
 			return;
 		}
-		if(cnt_old < n){
+		if(cnt_old < n) {
 			this->append(n - cnt_old, params...);
 		} else {
 			this->pop_back(cnt_old - n);
@@ -901,7 +901,7 @@ public:
 		const auto cnt = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
 		// If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)){
+		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)) {
 			return;
 		}
 		this->do_reallocate(0, 0, cnt, cap_new);
@@ -912,10 +912,10 @@ public:
 		const auto cnt = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(cnt);
 		// Don't increase memory usage.
-		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)){
+		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)) {
 			return;
 		}
-		if(cnt != 0){
+		if(cnt != 0) {
 			this->do_reallocate(0, 0, cnt, cnt);
 		} else {
 			this->do_deallocate();
@@ -924,7 +924,7 @@ public:
 	}
 	void clear() noexcept
 	{
-		if(this->m_sth.unique()){
+		if(this->m_sth.unique()) {
 			// If the storage is owned exclusively by this vector, truncate it and leave the buffer alone.
 			this->m_sth.pop_back_n_unchecked(this->m_sth.size());
 		} else {
@@ -949,7 +949,7 @@ public:
 	const_reference at(size_type pos) const
 	{
 		const auto cnt = this->size();
-		if(pos >= cnt){
+		if(pos >= cnt) {
 			noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(cnt));
 		}
@@ -972,7 +972,7 @@ public:
 	reference mut(size_type pos)
 	{
 		const auto cnt = this->size();
-		if(pos >= cnt){
+		if(pos >= cnt) {
 			noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(cnt));
 		}
@@ -997,11 +997,11 @@ public:
 	template<typename ...paramsT>
 	cow_vector & append(size_type n, const paramsT &...params)
 	{
-		if(n == 0){
+		if(n == 0) {
 			return *this;
 		}
 		this->do_reserve_more(n);
-		for(auto i = size_type(0); i < n; ++i){
+		for(auto i = size_type(0); i < n; ++i) {
 			this->m_sth.emplace_back_unchecked(params...);
 		}
 		return *this;
@@ -1015,11 +1015,11 @@ public:
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	cow_vector & append(inputT first, inputT last)
 	{
-		if(first == last){
+		if(first == last) {
 			return *this;
 		}
 		this->do_reserve_more(noadl::estimate_distance(first, last));
-		for(auto it = ::std::move(first); it != last; ++it){
+		for(auto it = ::std::move(first); it != last; ++it) {
 			this->emplace_back(*it);
 		}
 		return *this;
@@ -1102,12 +1102,12 @@ public:
 	// N.B. The return type and parameter are non-standard extensions.
 	cow_vector & pop_back(size_type n = 1)
 	{
-		if(n == 0){
+		if(n == 0) {
 			return *this;
 		}
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(n <= cnt_old);
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			this->do_reallocate(0, 0, cnt_old - n, cnt_old);
 		} else {
 			this->m_sth.pop_back_n_unchecked(n);
@@ -1168,10 +1168,10 @@ public:
 	value_type * mut_data()
 	{
 		const auto cnt = this->size();
-		if(cnt == 0){
+		if(cnt == 0) {
 			return nullptr;
 		}
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			this->do_reallocate(0, 0, cnt, cnt);
 		}
 		return this->m_sth.mut_data_unchecked();

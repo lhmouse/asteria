@@ -67,11 +67,11 @@ namespace details_cow_string
 		// XXX: Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
 		try {
 			ios.setstate(ios_base::badbit);
-		} catch(ios_base::failure &){
+		} catch(ios_base::failure &) {
 			// Ignore this exception.
 		}
 		// Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
-		if(ios.exceptions() & ios_base::badbit){
+		if(ios.exceptions() & ios_base::badbit) {
 			throw;
 		}
 	}
@@ -157,13 +157,13 @@ ROCKET_EXTENSION_END
 		void do_reset(storage_pointer ptr_new) noexcept
 		{
 			const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return;
 			}
 			// Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
 			const auto old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
 			ROCKET_ASSERT(old > 0);
-			if(old > 1){
+			if(old > 1) {
 				return;
 			}
 			// If it has been decremented to zero, deallocate the block.
@@ -189,7 +189,7 @@ ROCKET_EXTENSION_END
 		bool unique() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return false;
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
@@ -197,7 +197,7 @@ ROCKET_EXTENSION_END
 		size_type capacity() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return 0;
 			}
 			return storage::max_nchar_for_nblk(ptr->nblk);
@@ -212,7 +212,7 @@ ROCKET_EXTENSION_END
 		{
 			const auto cap_max = this->max_size();
 			ROCKET_ASSERT(base <= cap_max);
-			if(cap_max - base < add){
+			if(cap_max - base < add) {
 				noadl::throw_length_error("basic_cow_string: Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
 				                          static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
 			}
@@ -227,7 +227,7 @@ ROCKET_EXTENSION_END
 		const value_type * data() const noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return nullptr;
 			}
 			return ptr->data;
@@ -236,7 +236,7 @@ ROCKET_EXTENSION_END
 		{
 			ROCKET_ASSERT(len_one <= res_arg);
 			ROCKET_ASSERT(len_two <= res_arg - len_one);
-			if(res_arg == 0){
+			if(res_arg == 0) {
 				// Deallocate the block.
 				this->do_reset(nullptr);
 				return nullptr;
@@ -268,7 +268,7 @@ ROCKET_EXTENSION_END
 		void share_with(const storage_handle &other) noexcept
 		{
 			const auto ptr = other.m_ptr;
-			if(ptr){
+			if(ptr) {
 				// Increment the reference count.
 				const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
 				ROCKET_ASSERT(old > 0);
@@ -288,7 +288,7 @@ ROCKET_EXTENSION_END
 		value_type * mut_data_unchecked() noexcept
 		{
 			const auto ptr = this->m_ptr;
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				return nullptr;
 			}
 			ROCKET_ASSERT(this->unique());
@@ -547,10 +547,10 @@ ROCKET_EXTENSION_END
 
 		static int inequality(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
 		{
-			if(n1 != n2){
+			if(n1 != n2) {
 				return 2;
 			}
-			if(s1 == s2){
+			if(s1 == s2) {
 				return 0;
 			}
 			const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
@@ -559,13 +559,13 @@ ROCKET_EXTENSION_END
 		static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
 		{
 			const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
-			if(res != 0){
+			if(res != 0) {
 				return res;
 			}
-			if(n1 < n2){
+			if(n1 < n2) {
 				return -1;
 			}
-			if(n1 > n2){
+			if(n1 > n2) {
 				return +1;
 			}
 			return 0;
@@ -707,7 +707,7 @@ private:
 		ROCKET_ASSERT(len_two <= this->m_len - off_two);
 		ROCKET_ASSERT(len_one + len_two <= res_arg);
 		const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
-		if(ptr == nullptr){
+		if(ptr == nullptr) {
 			// The storage has been deallocated.
 			this->m_ptr = shallow().data();
 			return nullptr;
@@ -740,7 +740,7 @@ private:
 	{
 		const auto len = this->size();
 		auto cap = this->m_sth.check_size_add(len, cap_add);
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)){
+		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)) {
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, len + len / 2 + 31);
@@ -755,7 +755,7 @@ private:
 	size_type do_clamp_substr(size_type tpos, size_type n) const
 	{
 		const auto tlen = this->size();
-		if(tpos > tlen){
+		if(tpos > tlen) {
 			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is out of range for a string of length `%lld`.",
 			                          static_cast<long long>(tpos), static_cast<long long>(tlen));
 		}
@@ -789,7 +789,7 @@ private:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
 			return ptr + tpos;
 		}
@@ -804,13 +804,13 @@ private:
 	size_type do_find_forwards_if(size_type from, size_type n, predT pred) const
 	{
 		const auto len = this->size();
-		if(len < n){
+		if(len < n) {
 			return npos;
 		}
 		const auto rlen = len - n;
-		for(auto i = noadl::min(from, rlen + 1); i - 1 != rlen; ++i){
+		for(auto i = noadl::min(from, rlen + 1); i - 1 != rlen; ++i) {
 			const auto ts = this->data() + i;
-			if(pred(ts)){
+			if(pred(ts)) {
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
@@ -822,13 +822,13 @@ private:
 	size_type do_find_backwards_if(size_type to, size_type n, predT pred) const
 	{
 		const auto len = this->size();
-		if(len < n){
+		if(len < n) {
 			return npos;
 		}
 		const auto rlen = len - n;
-		for(auto i = noadl::min(rlen, to); i + 1 != 0; --i){
+		for(auto i = noadl::min(rlen, to); i + 1 != 0; --i) {
 			const auto ts = this->data() + i;
-			if(pred(ts)){
+			if(pred(ts)) {
 				ROCKET_ASSERT(i < len);
 				ROCKET_ASSERT(i != npos);
 				return i;
@@ -919,10 +919,10 @@ public:
 	void resize(size_type n, value_type ch = value_type())
 	{
 		const auto len_old = this->size();
-		if(len_old == n){
+		if(len_old == n) {
 			return;
 		}
-		if(len_old < n){
+		if(len_old < n) {
 			this->append(n - len_old, ch);
 		} else {
 			this->pop_back(len_old - n);
@@ -938,7 +938,7 @@ public:
 		const auto len = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
 		// If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)){
+		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)) {
 			return;
 		}
 		this->do_reallocate(0, 0, len, cap_new);
@@ -949,10 +949,10 @@ public:
 		const auto len = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(len);
 		// Don't increase memory usage.
-		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)){
+		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)) {
 			return;
 		}
-		if(len != 0){
+		if(len != 0) {
 			this->do_reallocate(0, 0, len, len);
 		} else {
 			this->do_deallocate();
@@ -961,7 +961,7 @@ public:
 	}
 	void clear() noexcept
 	{
-		if(this->m_sth.unique()){
+		if(this->m_sth.unique()) {
 			// If the storage is owned exclusively by this string, truncate it and leave the buffer alone.
 			this->do_set_length(0);
 		} else {
@@ -987,7 +987,7 @@ public:
 	const_reference at(size_type pos) const
 	{
 		const auto len = this->size();
-		if(pos >= len){
+		if(pos >= len) {
 			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
@@ -1010,7 +1010,7 @@ public:
 	reference mut(size_type pos)
 	{
 		const auto len = this->size();
-		if(pos >= len){
+		if(pos >= len) {
 			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
@@ -1063,11 +1063,11 @@ public:
 	}
 	basic_cow_string & append(const value_type *s, size_type n)
 	{
-		if(n == 0){
+		if(n == 0) {
 			return *this;
 		}
 		const auto len_old = this->size();
-		if(this->do_check_overlap_generic(*s)){
+		if(this->do_check_overlap_generic(*s)) {
 			const auto tpos = s - this->data();
 			this->do_reserve_more(n);
 			const auto ptr = this->m_sth.mut_data_unchecked();
@@ -1086,7 +1086,7 @@ public:
 	}
 	basic_cow_string & append(size_type n, value_type ch)
 	{
-		if(n == 0){
+		if(n == 0) {
 			return *this;
 		}
 		const auto len_old = this->size();
@@ -1109,10 +1109,10 @@ public:
 	template<typename inputT,  typename enable_if<is_convertible<inputT, const value_type *>::value == false, typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
 	basic_cow_string & append(inputT first, inputT last)
 	{
-		if(first == last){
+		if(first == last) {
 			return *this;
 		}
-		if(this->do_check_overlap_generic(*first)){
+		if(this->do_check_overlap_generic(*first)) {
 			auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
 			// Append the range into the temporary string.
 			other.do_reserve_more(noadl::estimate_distance(first, last));
@@ -1167,12 +1167,12 @@ public:
 	// N.B. The return type and parameter are non-standard extensions.
 	basic_cow_string & pop_back(size_type n = 1)
 	{
-		if(n == 0){
+		if(n == 0) {
 			return *this;
 		}
 		const auto len_old = this->size();
 		ROCKET_ASSERT(n <= len_old);
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			this->do_reallocate(0, 0, len_old - n, len_old);
 			return *this;
 		}
@@ -1425,10 +1425,10 @@ public:
 	value_type * mut_data()
 	{
 		const auto len = this->size();
-		if(len == 0){
+		if(len == 0) {
 			return nullptr;
 		}
-		if(this->m_sth.unique() == false){
+		if(this->m_sth.unique() == false) {
 			return this->do_reallocate(0, 0, len, len);
 		}
 		return this->m_sth.mut_data_unchecked();
@@ -1478,11 +1478,11 @@ public:
 	size_type find(value_type ch, size_type from = 0) const noexcept
 	{
 		// return this->do_find_forwards_if(from, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) != false; });
-		if(from >= this->size()){
+		if(from >= this->size()) {
 			return npos;
 		}
 		const auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
-		if(ptr == nullptr){
+		if(ptr == nullptr) {
 			return npos;
 		}
 		auto res = static_cast<size_type>(ptr - this->data());
@@ -1514,19 +1514,19 @@ public:
 	size_type rfind(value_type ch, size_type to = npos) const noexcept
 	{
 		// return this->do_find_backwards_if(to, 1, [&](const value_type *ts){ return traits_type::eq(*ts, ch) != false; });
-		if(this->size() == 0){
+		if(this->size() == 0) {
 			return npos;
 		}
 		const auto find_end = noadl::min(this->size() - 1, to) + 1;
 		auto res = size_type(npos);
-		for(;;){
+		for(;;) {
 			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
-			if(ptr == nullptr){
+			if(ptr == nullptr) {
 				break;
 			}
 			res = static_cast<size_type>(ptr - this->data());
 			ROCKET_ASSERT(res != npos);
-			if(res + 1 >= find_end){
+			if(res + 1 >= find_end) {
 				break;
 			}
 		}
@@ -1652,7 +1652,7 @@ public:
 
 	basic_cow_string substr(size_type pos = 0, size_type n = npos) const
 	{
-		if((pos == 0) && (n >= this->size())){
+		if((pos == 0) && (n >= this->size())) {
 			// Utilize reference counting.
 			return basic_cow_string(*this, this->m_sth.as_allocator());
 		}
@@ -1782,10 +1782,10 @@ struct basic_cow_string<charT, traitsT, allocatorT>::equal_to
 
 	result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
 	{
-		if(lhs.data() == rhs.data()){
+		if(lhs.data() == rhs.data()) {
 			return true;
 		}
-		if(lhs.size() != rhs.size()){
+		if(lhs.size() != rhs.size()) {
 			return false;
 		}
 		return lhs.compare(rhs) == 0;
@@ -1815,7 +1815,7 @@ struct basic_cow_string<charT, traitsT, allocatorT>::hash
 	{
 		// This implements the 32-bit FNV-1a hash algorithm.
 		char32_t reg = 2166136261;
-		for(auto p = str.begin(); p != str.end(); ++p){
+		for(auto p = str.begin(); p != str.end(); ++p) {
 			reg ^= static_cast<char32_t>(traits_type::to_int_type(*p));
 			reg *= 16777619u;
 		}
@@ -1955,7 +1955,7 @@ template<typename ...paramsT>
 inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, basic_cow_string<paramsT...> &&rhs)
 {
 	auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
-	if(lhs.size() + rhs.size() <= lhs.capacity()){
+	if(lhs.size() + rhs.size() <= lhs.capacity()) {
 		res.assign(::std::move(lhs));
 		res.append(rhs.data(), rhs.size());
 	} else {
@@ -2174,7 +2174,7 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 {
 	// Initiate this FormattedInputFunction.
 	const typename basic_istream<charT, traitsT>::sentry sentry(is, false);
-	if(!sentry){
+	if(!sentry) {
 		return is;
 	}
 	try {
@@ -2184,7 +2184,7 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 		// Determine the maximum number of characters to extract.
 		const auto width = is.width();
 		auto len_max = width;
-		if(len_max <= 0){
+		if(len_max <= 0) {
 			len_max = static_cast<streamsize>(str.max_size());
 			ROCKET_ASSERT(len_max > 0);
 		}
@@ -2192,27 +2192,27 @@ basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, ba
 		const auto loc = is.getloc();
 		// Extract characters and append them to `str`.
 		auto ich = is.rdbuf()->sgetc();
-		for(;;){
-			if(traits_type::eq_int_type(ich, traits_type::eof())){
+		for(;;) {
+			if(traits_type::eq_int_type(ich, traits_type::eof())) {
 				is.setstate(ios_base::eofbit);
 				break;
 			}
-			if(static_cast<streamsize>(str.size()) >= len_max){
+			if(static_cast<streamsize>(str.size()) >= len_max) {
 				break;
 			}
 			const auto ch = traits_type::to_char_type(ich);
-			if(::std::isspace<charT>(ch, loc)){
+			if(::std::isspace<charT>(ch, loc)) {
 				break;
 			}
 			str.push_back(ch);
 			ich = is.rdbuf()->snextc();
 		}
 		// If this function extracts no characters, set `std::ios_base::failbit`.
-		if(str.empty()){
+		if(str.empty()) {
 			is.setstate(ios_base::failbit);
 		}
 		is.width(0);
-	} catch(...){
+	} catch(...) {
 		details_cow_string::handle_io_exception(is);
 	}
 	return is;
@@ -2226,7 +2226,7 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 {
 	// Initiate this FormattedOutputFunction.
 	const typename basic_ostream<charT, traitsT>::sentry sentry(os);
-	if(!sentry){
+	if(!sentry) {
 		return os;
 	}
 	try {
@@ -2238,22 +2238,22 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 		auto len_rem = noadl::max(width, len);
 		// Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
 		auto offset = len - len_rem;
-		if((os.flags() & ios_base::adjustfield) == ios_base::left){
+		if((os.flags() & ios_base::adjustfield) == ios_base::left) {
 			offset = 0;
 		}
-		for(;;){
-			if(len_rem <= 0){
+		for(;;) {
+			if(len_rem <= 0) {
 				break;
 			}
 			streamsize written;
-			if((0 <= offset) && (offset < len)){
+			if((0 <= offset) && (offset < len)) {
 				written = os.rdbuf()->sputn(str.data() + offset, len - offset);
-				if(written == 0){
+				if(written == 0) {
 					os.setstate(ios_base::failbit);
 					break;
 				}
 			} else {
-				if(traits_type::eq_int_type(os.rdbuf()->sputc(os.fill()), traits_type::eof())){
+				if(traits_type::eq_int_type(os.rdbuf()->sputc(os.fill()), traits_type::eof())) {
 					os.setstate(ios_base::failbit);
 					break;
 				}
@@ -2263,7 +2263,7 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 			offset += written;
 		}
 		os.width(0);
-	} catch(...){
+	} catch(...) {
 		details_cow_string::handle_io_exception(os);
 	}
 	return os;
@@ -2277,7 +2277,7 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 {
 	// Initiate this UnformattedInputFunction.
 	const typename basic_istream<charT, traitsT>::sentry sentry(is, true);
-	if(!sentry){
+	if(!sentry) {
 		return is;
 	}
 	try {
@@ -2287,19 +2287,19 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 		// Extract characters and append them to `str`.
 		auto ich = is.rdbuf()->sgetc();
 		bool eol = false;
-		for(;;){
-			if(traits_type::eq_int_type(ich, traits_type::eof())){
+		for(;;) {
+			if(traits_type::eq_int_type(ich, traits_type::eof())) {
 				is.setstate(ios_base::eofbit);
 				break;
 			}
 			const auto ch = traits_type::to_char_type(ich);
-			if(traits_type::eq(ch, delim)){
+			if(traits_type::eq(ch, delim)) {
 				// Discard the delimiter.
 				ich = is.rdbuf()->snextc();
 				eol = true;
 				break;
 			}
-			if(str.size() >= str.max_size()){
+			if(str.size() >= str.max_size()) {
 				is.setstate(ios_base::failbit);
 				break;
 			}
@@ -2307,10 +2307,10 @@ basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic
 			ich = is.rdbuf()->snextc();
 		}
 		// If this function extracts no characters, set `std::ios_base::failbit`.
-		if(!eol && str.empty()){
+		if(!eol && str.empty()) {
 			is.setstate(ios_base::failbit);
 		}
-	} catch(...){
+	} catch(...) {
 		details_cow_string::handle_io_exception(is);
 	}
 	return is;

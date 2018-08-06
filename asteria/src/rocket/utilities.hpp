@@ -58,7 +58,7 @@ namespace details_utilities
 	inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
 	{
 		size_t total = 0;
-		for(auto it = ::std::move(first); it != last; ++it){
+		for(auto it = ::std::move(first); it != last; ++it) {
 			++total;
 		}
 		return total;

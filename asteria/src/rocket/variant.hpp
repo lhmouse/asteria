@@ -171,7 +171,7 @@ namespace details_variant
 		template<typename voidT, typename visitorT, typename ...paramsT>
 		void operator()(voidT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const
 		{
-			if(expect == 0){
+			if(expect == 0) {
 				::std::forward<visitorT>(visitor)(reinterpret_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
 			} else {
 				visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
@@ -363,7 +363,7 @@ public:
 		// This overload, unlike `set()`, enables assignment using the candidate of a nested variant.
 		constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		if(this->m_index == eindex){
+		if(this->m_index == eindex) {
 			// Assign the active element using perfect forwarding.
 			const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 			*ptr = ::std::forward<elementT>(elem);
@@ -377,7 +377,7 @@ public:
 	}
 	variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value)
 	{
-		if(this->m_index == other.m_index){
+		if(this->m_index == other.m_index) {
 			// Copy-assign the active element from `other`
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_copy_assign(), other.do_get_front_buffer());
@@ -391,7 +391,7 @@ public:
 	}
 	variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
 	{
-		if(this->m_index == other.m_index){
+		if(this->m_index == other.m_index) {
 			// Move-assign the active element from `other`
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_move_assign(), other.do_get_front_buffer());
@@ -433,7 +433,7 @@ public:
 	{
 		constexpr auto eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		if(this->m_index != eindex){
+		if(this->m_index != eindex) {
 			return nullptr;
 		}
 		return static_cast<const etype *>(this->do_get_front_buffer());
@@ -443,7 +443,7 @@ public:
 	{
 		constexpr auto eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		if(this->m_index != eindex){
+		if(this->m_index != eindex) {
 			return nullptr;
 		}
 		return static_cast<etype *>(this->do_get_front_buffer());
@@ -452,7 +452,7 @@ public:
 	const elementT & as() const
 	{
 		const auto ptr = this->get<elementT>();
-		if(!ptr){
+		if(!ptr) {
 			noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                              static_cast<int>(index_of<elementT>::value), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
@@ -462,7 +462,7 @@ public:
 	elementT & as()
 	{
 		const auto ptr = this->get<elementT>();
-		if(!ptr){
+		if(!ptr) {
 			noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
 			                              static_cast<int>(index_of<elementT>::value), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
 		}
@@ -486,7 +486,7 @@ public:
 		// This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
 		constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
 		using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-		if(this->m_index == eindex){
+		if(this->m_index == eindex) {
 			// Assign the active element using perfect forwarding.
 			const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
 			*ptr = ::std::forward<elementT>(elem);
@@ -514,7 +514,7 @@ public:
 
 	void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
 	{
-		if(this->m_index == other.m_index){
+		if(this->m_index == other.m_index) {
 			// Swap the active elements.
 			details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
 			                                              details_variant::visitor_swap(), other.do_get_front_buffer());
@@ -527,7 +527,7 @@ public:
 			// Move-construct the active element in `other` from `*this`.
 			details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index,
 			                                              details_variant::visitor_move_construct(), this->do_get_front_buffer());
-		} catch(...){
+		} catch(...) {
 			// In case of an exception, the second object will not have been constructed.
 			// Destroy the first object that has just been constructed, then rethrow the exception.
 			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,

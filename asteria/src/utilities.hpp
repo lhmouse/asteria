@@ -76,7 +76,7 @@ public:
 	try {
 		this->do_put(value);
 		return *this;
-	} catch(...){
+	} catch(...) {
 		return *this;
 	}
 };

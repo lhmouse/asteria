@@ -105,7 +105,7 @@ try {
 	stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ## ";
 	std::cerr <<stream.get_string() <<std::endl;
 	return true;
-} catch(...){
+} catch(...) {
 	return false;
 }
 

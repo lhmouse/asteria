@@ -96,7 +96,7 @@ basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_stream
 template<typename charT, typename traitsT, typename allocatorT>
 int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()
 {
-	if(this->gptr() != nullptr){
+	if(this->gptr() != nullptr) {
 		// Empty the get area. If there are any characters read from it, remove them from the internal buffer.
 		const auto n_got = static_cast<size_type>(this->gptr() - this->eback());
 		this->m_str.erase(0, n_got);
@@ -108,7 +108,7 @@ int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()
 template<typename charT, typename traitsT, typename allocatorT>
 streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc()
 {
-	if(this->m_which & ios_base::in){
+	if(this->m_which & ios_base::in) {
 		// Return the number of characters inside the internal buffer, minus those that have been read from it.
 		const auto n_total = this->m_str.size();
 		// N.B. This will yield the correct result (zero) even when both pointers are null.
@@ -122,7 +122,7 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc()
 template<typename charT, typename traitsT, typename allocatorT>
 streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_type *s, streamsize n)
 {
-	if(this->m_which & ios_base::in){
+	if(this->m_which & ios_base::in) {
 		// Tidy the get area.
 		this->basic_insertable_streambuf::sync();
 		// Read and discard characters from the internal buffer directly.
@@ -137,11 +137,11 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_t
 template<typename charT, typename traitsT, typename allocatorT>
 typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::underflow()
 {
-	if(this->m_which & ios_base::in){
+	if(this->m_which & ios_base::in) {
 		// Tidy the get area.
 		this->basic_insertable_streambuf::sync();
 		// Set the get area to the entire string.
-		if(this->m_str.empty()){
+		if(this->m_str.empty()) {
 			return traits_type::eof();
 		}
 		const auto gp = this->m_str.mut_data();
@@ -156,8 +156,8 @@ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_
 template<typename charT, typename traitsT, typename allocatorT>
 typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::pbackfail(int_type c)
 {
-	if(this->m_which & ios_base::out){
-		if(traits_type::eq_int_type(c, traits_type::eof())){
+	if(this->m_which & ios_base::out) {
+		if(traits_type::eq_int_type(c, traits_type::eof())) {
 			return traits_type::eof();
 		}
 		// Tidy the get area, as the internal buffer is subject to reallocation.
@@ -174,12 +174,12 @@ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_
 template<typename charT, typename traitsT, typename allocatorT>
 streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n)
 {
-	if(this->m_which & ios_base::out){
+	if(this->m_which & ios_base::out) {
 		// Tidy the get area, as the internal buffer is subject to reallocation.
 		this->basic_insertable_streambuf::sync();
 		// Write the string provided as a single operation.
 		const auto n_put = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
-		if(this->m_caret == string_type::npos){
+		if(this->m_caret == string_type::npos) {
 			// Append the string provided to the internal buffer.
 			this->m_str.insert(this->m_str.size(), s, n_put);
 		} else {
@@ -196,14 +196,14 @@ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const 
 template<typename charT, typename traitsT, typename allocatorT>
 typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c)
 {
-	if(this->m_which & ios_base::out){
-		if(traits_type::eq_int_type(c, traits_type::eof())){
+	if(this->m_which & ios_base::out) {
+		if(traits_type::eq_int_type(c, traits_type::eof())) {
 			return traits_type::not_eof(c);
 		}
 		// Tidy the get area, as the internal buffer is subject to reallocation.
 		this->basic_insertable_streambuf::sync();
 		// Write the character provided as a single operation.
-		if(this->m_caret == string_type::npos){
+		if(this->m_caret == string_type::npos) {
 			// Append the character provided to the internal buffer.
 			this->m_str.push_back(traits_type::to_char_type(c));
 		} else {

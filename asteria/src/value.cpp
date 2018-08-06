@@ -18,7 +18,7 @@ Value::~Value() = default;
 
 const char * get_type_name(Value::Type type) noexcept
 {
-	switch(type){
+	switch(type) {
 	case Value::type_null:
 		return "null";
 	case Value::type_boolean:
@@ -51,7 +51,7 @@ const char * get_value_type_name(const Value &value) noexcept
 bool test_value(const Value &value)
 {
 	const auto type = value.which();
-	switch(type){
+	switch(type) {
 	case Value::type_null:
 		return false;
 	case Value::type_boolean: {
@@ -85,49 +85,49 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
 	// `null` is considered to be equal to `null` and less than anything else.
 	const auto type_lhs = lhs.which();
 	const auto type_rhs = rhs.which();
-	if(type_lhs != type_rhs){
-		if(type_lhs == Value::type_null){
+	if(type_lhs != type_rhs) {
+		if(type_lhs == Value::type_null) {
 			return Value::comparison_less;
 		}
-		if(type_rhs == Value::type_null){
+		if(type_rhs == Value::type_null) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_unordered;
 	}
 	// If both operands have the same type, perform normal comparison.
-	switch(type_lhs){
+	switch(type_lhs) {
 	case Value::type_null:
 		return Value::comparison_equal;
 	case Value::type_boolean: {
 		const auto &cand_lhs = lhs.as<D_boolean>();
 		const auto &cand_rhs = rhs.as<D_boolean>();
-		if(cand_lhs < cand_rhs){
+		if(cand_lhs < cand_rhs) {
 			return Value::comparison_less;
 		}
-		if(cand_lhs > cand_rhs){
+		if(cand_lhs > cand_rhs) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_equal; }
 	case Value::type_integer: {
 		const auto &cand_lhs = lhs.as<D_integer>();
 		const auto &cand_rhs = rhs.as<D_integer>();
-		if(cand_lhs < cand_rhs){
+		if(cand_lhs < cand_rhs) {
 			return Value::comparison_less;
 		}
-		if(cand_lhs > cand_rhs){
+		if(cand_lhs > cand_rhs) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_equal; }
 	case Value::type_double: {
 		const auto &cand_lhs = lhs.as<D_double>();
 		const auto &cand_rhs = rhs.as<D_double>();
-		if(std::isunordered(cand_lhs, cand_rhs)){
+		if(std::isunordered(cand_lhs, cand_rhs)) {
 			return Value::comparison_unordered;
 		}
-		if(std::isless(cand_lhs, cand_rhs)){
+		if(std::isless(cand_lhs, cand_rhs)) {
 			return Value::comparison_less;
 		}
-		if(std::isgreater(cand_lhs, cand_rhs)){
+		if(std::isgreater(cand_lhs, cand_rhs)) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_equal; }
@@ -135,10 +135,10 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
 		const auto &cand_lhs = lhs.as<D_string>();
 		const auto &cand_rhs = rhs.as<D_string>();
 		const int cmp = cand_lhs.compare(cand_rhs);
-		if(cmp < 0){
+		if(cmp < 0) {
 			return Value::comparison_less;
 		}
-		if(cmp > 0){
+		if(cmp > 0) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_equal; }
@@ -149,16 +149,16 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
 		const auto &array_lhs = lhs.as<D_array>();
 		const auto &array_rhs = rhs.as<D_array>();
 		const auto len_min = std::min(array_lhs.size(), array_rhs.size());
-		for(std::size_t i = 0; i < len_min; ++i){
+		for(std::size_t i = 0; i < len_min; ++i) {
 			const auto res = compare_values(array_lhs[i], array_rhs[i]);
-			if(res != Value::comparison_equal){
+			if(res != Value::comparison_equal) {
 				return res;
 			}
 		}
-		if(array_lhs.size() < array_rhs.size()){
+		if(array_lhs.size() < array_rhs.size()) {
 			return Value::comparison_less;
 		}
-		if(array_lhs.size() > array_rhs.size()){
+		if(array_lhs.size() > array_rhs.size()) {
 			return Value::comparison_greater;
 		}
 		return Value::comparison_equal; }
@@ -193,27 +193,27 @@ namespace
 	inline std::ostream & operator<<(std::ostream &os, const Indent &indent)
 	{
 		const std::ostream::sentry sentry(os);
-		if(!sentry){
+		if(!sentry) {
 			return os;
 		}
 		try {
 			using traits_type = std::ostream::traits_type;
 			const auto num = indent.get_num();
-			for(unsigned i = 0; i < num; ++i){
-				if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())){
+			for(unsigned i = 0; i < num; ++i) {
+				if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
 					os.setstate(std::ios_base::failbit);
 					goto finish;
 				}
 			}
 		finish:
 			os.width(0);
-		} catch(...){
+		} catch(...) {
 			try {
 				os.setstate(std::ios_base::badbit);
-			} catch(std::ios_base::failure &){
+			} catch(std::ios_base::failure &) {
 				// Ignore this exception.
 			}
-			if(os.exceptions() & std::ios_base::badbit){
+			if(os.exceptions() & std::ios_base::badbit) {
 				throw;
 			}
 		}
@@ -241,20 +241,20 @@ namespace
 	inline std::ostream & operator<<(std::ostream &os, const Quote &quote)
 	{
 		const std::ostream::sentry sentry(os);
-		if(!sentry){
+		if(!sentry) {
 			return os;
 		}
 		try {
 			using traits_type = std::ostream::traits_type;
 			const auto range = std::make_pair(quote.get_str().begin(), quote.get_str().end());
-			if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())){
+			if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
 				os.setstate(std::ios_base::failbit);
 				goto finish;
 			}
-			for(auto it = range.first; it != range.second; ++it){
+			for(auto it = range.first; it != range.second; ++it) {
 				std::streamsize n_wr;
 				const int ch = *it & 0xFF;
-				switch(ch){
+				switch(ch) {
 				case '\"':
 					n_wr = os.rdbuf()->sputn("\\\"", 2);
 					break;
@@ -286,7 +286,7 @@ namespace
 					n_wr = os.rdbuf()->sputn("\\v", 2);
 					break;
 				default:
-					if((0x20 <= ch) && (ch <= 0x7E)){
+					if((0x20 <= ch) && (ch <= 0x7E)) {
 						const bool failed = traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof());
 						n_wr = failed ? 0 : 1;
 					} else {
@@ -298,24 +298,24 @@ namespace
 					}
 					break;
 				}
-				if(n_wr == 0){
+				if(n_wr == 0) {
 					os.setstate(std::ios_base::failbit);
 					goto finish;
 				}
 			}
-			if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())){
+			if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
 				os.setstate(std::ios_base::failbit);
 				goto finish;
 			}
 		finish:
 			os.width(0);
-		} catch(...){
+		} catch(...) {
 			try {
 				os.setstate(std::ios_base::badbit);
-			} catch(std::ios_base::failure &){
+			} catch(std::ios_base::failure &) {
 				// Ignore this exception.
 			}
-			if(os.exceptions() & std::ios_base::badbit){
+			if(os.exceptions() & std::ios_base::badbit) {
 				throw;
 			}
 		}
@@ -326,7 +326,7 @@ namespace
 void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment)
 {
 	const auto type = value.which();
-	switch(type){
+	switch(type) {
 	case Value::type_null:
 		// null
 		os <<"null";
@@ -380,14 +380,14 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
 		const auto len = cand.size();
 		os <<"array(" <<std::dec <<len <<") ";
 		os <<'[';
-		for(auto it = cand.begin(); it != cand.end(); ++it){
+		for(auto it = cand.begin(); it != cand.end(); ++it) {
 			os <<std::endl <<Indent(indent_next + indent_increment);
 			os <<std::dec <<(it - cand.begin());
 			os <<" = ";
 			dump_value(os, *it, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(cand.empty()){
+		if(cand.empty()) {
 			os <<' ';
 		} else {
 			os <<std::endl <<Indent(indent_next);
@@ -404,14 +404,14 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
 		const auto len = cand.size();
 		os <<"object(" <<std::dec <<len <<") ";
 		os <<'{';
-		for(auto it = cand.begin(); it != cand.end(); ++it){
+		for(auto it = cand.begin(); it != cand.end(); ++it) {
 			os <<std::endl <<Indent(indent_next + indent_increment);
 			os <<Quote(it->first);
 			os <<" = ";
 			dump_value(os, it->second, indent_next + indent_increment, indent_increment);
 			os <<',';
 		}
-		if(cand.empty()){
+		if(cand.empty()) {
 			os <<' ';
 		} else {
 			os <<std::endl <<Indent(indent_next);

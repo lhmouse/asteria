@@ -94,7 +94,7 @@ namespace details_unique_handle
 		void reset(handle_type h_new) noexcept
 		{
 			const auto h_old = noadl::exchange(this->m_h, h_new);
-			if(this->as_closer().is_null(h_old)){
+			if(this->as_closer().is_null(h_old)) {
 				return;
 			}
 			this->as_closer().close(h_old);
