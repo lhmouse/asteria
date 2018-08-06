@@ -469,12 +469,12 @@ ROCKET_EXTENSION_END
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
-		using parent_type        = storage_handle<typename vectorT::allocator_type>;
 		using value_type         = valueT;
-
 		using pointer            = value_type *;
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
+
+		using parent_type        = storage_handle<typename vectorT::allocator_type>;
 
 	private:
 		const parent_type *m_ref;

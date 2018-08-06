@@ -303,12 +303,12 @@ ROCKET_EXTENSION_END
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
-		using parent_type        = stringT;
 		using value_type         = charT;
-
 		using pointer            = value_type *;
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
+
+		using parent_type        = stringT;
 
 	private:
 		const parent_type *m_ref;
