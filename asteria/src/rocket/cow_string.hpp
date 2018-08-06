@@ -956,11 +956,7 @@ public:
 		if((this->unique() == false) || (this->capacity() <= cap_min)) {
 			return;
 		}
-		if(len != 0) {
-			this->do_reallocate(0, 0, len, len);
-		} else {
-			this->do_deallocate();
-		}
+		this->do_reallocate(0, 0, len, len);
 		ROCKET_ASSERT(this->capacity() <= cap_min);
 	}
 	void clear() noexcept
