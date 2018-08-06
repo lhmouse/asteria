@@ -770,7 +770,7 @@ private:
 	{
 		const auto cnt = this->size();
 		auto cap = this->m_sth.check_size_add(cnt, cap_add);
-		if((this->m_sth.unique() == false) || (this->m_sth.capacity() < cap)) {
+		if((this->m_sth.unique() == false) || (this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, cnt + cnt / 2 + 7);
@@ -797,7 +797,7 @@ private:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
-		if(this->m_sth.unique() == false) {
+		if(this->unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			return ptr + tpos;
 		}
@@ -905,7 +905,7 @@ public:
 		const auto cnt = this->size();
 		const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
 		// If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
-		if((this->m_sth.unique() != false) && (this->capacity() >= cap_new)) {
+		if((this->unique() != false) && (this->capacity() >= cap_new)) {
 			return;
 		}
 		this->do_reallocate(0, 0, cnt, cap_new);
@@ -916,7 +916,7 @@ public:
 		const auto cnt = this->size();
 		const auto cap_min = this->m_sth.round_up_capacity(cnt);
 		// Don't increase memory usage.
-		if((this->m_sth.unique() == false) || (this->capacity() <= cap_min)) {
+		if((this->unique() == false) || (this->capacity() <= cap_min)) {
 			return;
 		}
 		if(cnt != 0) {
@@ -928,12 +928,10 @@ public:
 	}
 	void clear() noexcept
 	{
-		if(this->m_sth.unique()) {
-			// If the storage is owned exclusively by this vector, truncate it and leave the buffer alone.
-			this->m_sth.pop_back_n_unchecked(this->size());
-		} else {
-			// Otherwise, detach it from `*this`.
+		if(this->unique() == false) {
 			this->do_deallocate();
+		} else {
+			this->m_sth.pop_back_n_unchecked(this->size());
 		}
 		ROCKET_ASSERT(this->empty());
 	}
@@ -1111,11 +1109,11 @@ public:
 		}
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(n <= cnt_old);
-		if(this->m_sth.unique() == false) {
+		if(this->unique() == false) {
 			this->do_reallocate(0, 0, cnt_old - n, cnt_old);
-		} else {
-			this->m_sth.pop_back_n_unchecked(n);
+			return *this;
 		}
+		this->m_sth.pop_back_n_unchecked(n);
 		return *this;
 	}
 
@@ -1175,8 +1173,8 @@ public:
 		if(cnt == 0) {
 			return nullptr;
 		}
-		if(this->m_sth.unique() == false) {
-			this->do_reallocate(0, 0, cnt, cnt);
+		if(this->unique() == false) {
+			return this->do_reallocate(0, 0, cnt, cnt);
 		}
 		return this->m_sth.mut_data_unchecked();
 	}
