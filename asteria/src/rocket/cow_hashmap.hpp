@@ -635,7 +635,7 @@ ROCKET_EXTENSION_END
 			ROCKET_ASSERT(slot);
 			if(slot->get() != nullptr) {
 				// A duplicate key has been found.
-				return make_pair(slot, false);
+				return ::std::make_pair(slot, false);
 			}
 			// Allocate a new element.
 			const auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_type(1));
@@ -649,7 +649,7 @@ ROCKET_EXTENSION_END
 			ROCKET_ASSERT(slot->get() == nullptr);
 			slot->exchange(eptr);
 			ptr->nelem += 1;
-			return make_pair(slot, true);
+			return ::std::make_pair(slot, true);
 		}
 		void erase_range_unchecked(size_type tpos, size_type tn) noexcept
 		{
@@ -1135,13 +1135,13 @@ public:
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.try_emplace_using_key_unchecked(value.first, value);
-		return make_pair(iterator(&(this->m_sth), result.first), false);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
 	}
 	pair<iterator, bool> insert(value_type &&value)
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.try_emplace_using_key_unchecked(value.first, ::std::move(value));
-		return make_pair(iterator(&(this->m_sth), result.first), false);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
 	}
 	// N.B. The return type is a non-standard extension.
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
@@ -1186,14 +1186,14 @@ public:
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, key, ::std::forward<paramsT>(params)...);
-		return make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	template<typename ...paramsT>
 	pair<iterator, bool> try_emplace(key_type &&key, paramsT &&...params)
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::move(key), ::std::forward<paramsT>(params)...);
-		return make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	// N.B. The hint is ignored.
 	template<typename ...paramsT>
@@ -1216,7 +1216,7 @@ public:
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
-		return make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	template<typename yvalueT>
 	pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
@@ -1226,7 +1226,7 @@ public:
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
-		return make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	// N.B. The hint is ignored.
 	template<typename yvalueT>
