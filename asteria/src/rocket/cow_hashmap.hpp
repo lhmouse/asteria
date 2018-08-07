@@ -606,7 +606,7 @@ namespace details_cow_hashmap
 			return ptr->data;
 		}
 		template<typename ykeyT>
-		difference_type find_unchecked(const ykeyT &ykey) const
+		difference_type index_of_unchecked(const ykeyT &ykey) const
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr) {
@@ -621,7 +621,7 @@ namespace details_cow_hashmap
 			return toff;
 		}
 		template<typename ykeyT, typename ...paramsT>
-		pair<handle_type *, bool> try_emplace_using_key_unchecked(const ykeyT &ykey, paramsT &&...params)
+		pair<handle_type *, bool> keyed_emplace_unchecked(const ykeyT &ykey, paramsT &&...params)
 		{
 			ROCKET_ASSERT(this->unique());
 			ROCKET_ASSERT(this->element_count() < this->capacity());
@@ -1136,7 +1136,7 @@ public:
 	// N.B. The `constexpr` specifier is a non-standard extension.
 	constexpr float max_load_factor() const noexcept
 	{
-		return 1.0f / static_cast<float>(static_cast<difference_type>(m_sth.max_load_factor_reciprocal));
+		return 1.0f / static_cast<float>(static_cast<difference_type>(this->m_sth.max_load_factor_reciprocal));
 	}
 	void rehash(size_type n)
 	{
@@ -1147,13 +1147,13 @@ public:
 	pair<iterator, bool> insert(const value_type &value)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(value.first, value);
+		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, value);
 		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
 	}
 	pair<iterator, bool> insert(value_type &&value)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(value.first, ::std::move(value));
+		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, ::std::move(value));
 		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
 	}
 	// N.B. The return type is a non-standard extension.
@@ -1174,7 +1174,7 @@ public:
 		this->do_reserve_more(dist);
 		auto it = ::std::move(first);
 		do {
-			this->m_sth.try_emplace_using_key_unchecked(it->first, *it);
+			this->m_sth.keyed_emplace_unchecked(it->first, *it);
 		} while(++it != last);
 		return *this;
 	}
@@ -1198,14 +1198,16 @@ public:
 	pair<iterator, bool> try_emplace(const key_type &key, paramsT &&...params)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, key, ::std::forward<paramsT>(params)...);
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
 		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	template<typename ...paramsT>
 	pair<iterator, bool> try_emplace(key_type &&key, paramsT &&...params)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::move(key), ::std::forward<paramsT>(params)...);
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
 		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
 	}
 	// N.B. The hint is ignored.
@@ -1225,7 +1227,7 @@ public:
 	pair<iterator, bool> insert_or_assign(const key_type &key, yvalueT &&yvalue)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
@@ -1235,7 +1237,7 @@ public:
 	pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
@@ -1259,19 +1261,19 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
-		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(&(this->m_sth), ptr);
+		const auto slot = this->do_erase_no_bound_check(tpos, tn);
+		return iterator(&(this->m_sth), slot);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
-		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), ptr);
+		const auto slot = this->do_erase_no_bound_check(tpos, 1);
+		return iterator(&(this->m_sth), slot);
 	}
 	size_type erase(const key_type &key)
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			return 0;
 		}
@@ -1282,24 +1284,25 @@ public:
 	// map operations
 	const_iterator find(const key_type &key) const
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			return this->end();
 		}
-		return const_iterator(&(this->m_sth), this->do_get_table() + toff);
+		const auto slot = this->do_get_table() + toff;
+		return const_iterator(&(this->m_sth), slot);
 	}
 	iterator find(const key_type &key)
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			return this->mut_end();
 		}
-		return iterator(&(this->m_sth), this->do_mut_table() + toff);
+		const auto slot = this->do_mut_table() + toff;
+		return iterator(&(this->m_sth), slot);
 	}
-
 	size_type count(const key_type &key) const
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			return 0;
 		}
@@ -1310,31 +1313,34 @@ public:
 	mapped_type & operator[](const key_type &key)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::piecewise_construct, ::std::forward_as_tuple(key), ::std::forward_as_tuple());
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
 		return result.first->get()->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::piecewise_construct, ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
+		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
 		return result.first->get()->second;
 	}
-
 	const mapped_type & at(const key_type &key) const
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this map.");
 		}
-		return this->do_get_table()[toff].get()->second;
+		const auto slot = this->do_table() + toff;
+		return slot->get()->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
-		const auto toff = this->m_sth.find_unchecked(key);
+		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this map.");
 		}
-		return this->do_mut_table()[toff].get()->second;
+		const auto slot = this->do_mut_table() + toff;
+		return slot->get()->second;
 	}
 
 	// N.B. This function is a non-standard extension.
