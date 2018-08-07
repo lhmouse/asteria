@@ -338,8 +338,7 @@ ROCKET_EXTENSION_END
 		}
 
 	private:
-		template<typename pointerT>
-		pointerT do_assert_valid_pointer(pointerT ptr, bool to_dereference) const noexcept
+		value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
 		{
 			const auto ref = this->m_ref;
 			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
@@ -362,7 +361,7 @@ ROCKET_EXTENSION_END
 		}
 		value_type * tell_owned_by(const parent_type *ref) const noexcept
 		{
-			ROCKET_ASSERT(this->m_ref == ref);
+			ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
 			return this->tell();
 		}
 		string_iterator & seek(value_type *ptr) noexcept
