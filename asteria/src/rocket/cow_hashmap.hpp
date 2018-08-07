@@ -371,11 +371,10 @@ ROCKET_EXTENSION_END
 	{
 	public:
 		using allocator_type   = allocatorT;
+		using value_type       = typename allocator_type::value_type;
 		using hasher           = hasherT;
 		using key_equal        = equalT;
 		using handle_type      = value_handle<allocator_type>;
-		using key_type         = typename remove_const<typename allocator_type::value_type::first_type>::type;
-		using mapped_type      = typename allocator_type::value_type::second_type;
 		using size_type        = typename allocator_traits<allocator_type>::size_type;
 		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
@@ -616,7 +615,7 @@ ROCKET_EXTENSION_END
 			if(ptr == nullptr) {
 				return -1;
 			}
-			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const key_type &xkey) { return this->as_key_equal()(xkey, ykey); });
+			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
 			if((slot == nullptr) || (slot->get() == nullptr)) {
 				return -1;
 			}
@@ -632,7 +631,7 @@ ROCKET_EXTENSION_END
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			// Find a slot for the new element.
-			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const key_type &xkey) { return this->as_key_equal()(xkey, ykey); });
+			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
 			ROCKET_ASSERT(slot);
 			if(slot->get() != nullptr) {
 				// A duplicate key has been found.
