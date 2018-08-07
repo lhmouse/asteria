@@ -1062,7 +1062,7 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->do_mut_table() + this->n_sth.slot_count());
+		return iterator(&(this->m_sth), this->do_mut_table() + this->m_sth.slot_count());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -1165,8 +1165,8 @@ public:
 		} while(++it != last);
 		return *this;
 	}
-	// N.B. The return value is a non-standard extension.
-	size_type insert(initializer_list<value_type> init)
+	// N.B. The return type is a non-standard extension.
+	cow_hashmap & insert(initializer_list<value_type> init)
 	{
 		return this->insert(init.begin(), init.end());
 	}
@@ -1253,8 +1253,7 @@ public:
 	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
-		const auto tn = static_cast<size_type>(const_iterator(tfirst).next().tell() - tfirst.tell());
-		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
 		return iterator(&(this->m_sth), ptr);
 	}
 	size_type erase(const key_type &key)
@@ -1298,13 +1297,13 @@ public:
 	mapped_type & operator[](const key_type &key)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, key);
+		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::piecewise_construct, ::std::forward_as_tuple(key), ::std::forward_as_tuple());
 		return result.first->get()->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
 		this->do_reserve_more(1);
-		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::move(key));
+		const auto result = this->m_sth.try_emplace_using_key_unchecked(key, ::std::piecewise_construct, ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
 		return result.first->get()->second;
 	}
 
