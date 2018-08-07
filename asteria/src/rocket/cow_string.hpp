@@ -1462,17 +1462,7 @@ public:
 	}
 	size_type find(value_type ch, size_type from = 0) const noexcept
 	{
-		// return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
-		if(from >= this->size()) {
-			return npos;
-		}
-		const auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
-		if(ptr == nullptr) {
-			return npos;
-		}
-		auto res = static_cast<size_type>(ptr - this->data());
-		ROCKET_ASSERT(res != npos);
-		return res;
+		return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
 	}
 
 	size_type rfind(shallow sh, size_type to = npos) const noexcept
@@ -1498,24 +1488,7 @@ public:
 	}
 	size_type rfind(value_type ch, size_type to = npos) const noexcept
 	{
-		// return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
-		if(this->size() == 0) {
-			return npos;
-		}
-		const auto find_end = noadl::min(this->size() - 1, to) + 1;
-		auto res = size_type(npos);
-		for(;;) {
-			const auto ptr = traits_type::find(this->data() + (res + 1), find_end - (res + 1), ch);
-			if(ptr == nullptr) {
-				break;
-			}
-			res = static_cast<size_type>(ptr - this->data());
-			ROCKET_ASSERT(res != npos);
-			if(res + 1 >= find_end) {
-				break;
-			}
-		}
-		return res;
+		return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
 	}
 
 	size_type find_first_of(shallow sh, size_type from = 0) const noexcept
