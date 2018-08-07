@@ -35,8 +35,8 @@ int main()
 	ASTERIA_TEST_CHECK(value.as<D_array>().at(1).as<D_string>() == D_string::shallow("world"));
 
 	D_object object;
-	object.emplace(D_string::shallow("one"), D_boolean(true));
-	object.emplace(D_string::shallow("two"), D_string("world"));
+	object.try_emplace(D_string::shallow("one"), D_boolean(true));
+	object.try_emplace(D_string::shallow("two"), D_string("world"));
 	value.set(std::move(object));
 	ASTERIA_TEST_CHECK(value.which() == Value::type_object);
 	ASTERIA_TEST_CHECK(value.as<D_object>().at(D_string::shallow("one")).as<D_boolean>() == true);
@@ -123,8 +123,8 @@ int main()
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_less);
 
 	object.clear();
-	object.emplace(D_string::shallow("one"), D_boolean(true));
-	object.emplace(D_string::shallow("two"), D_string("world"));
+	object.try_emplace(D_string::shallow("one"), D_boolean(true));
+	object.try_emplace(D_string::shallow("two"), D_string("world"));
 	value.set(std::move(object));
 	cmp = value;
 	ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_unordered);
