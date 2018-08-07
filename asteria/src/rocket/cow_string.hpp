@@ -236,14 +236,14 @@ ROCKET_EXTENSION_END
 		}
 		value_type * reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
 		{
-			ROCKET_ASSERT(len_one <= res_arg);
-			ROCKET_ASSERT(len_two <= res_arg - len_one);
 			if(res_arg == 0) {
 				// Deallocate the block.
 				this->do_reset(nullptr);
 				return nullptr;
 			}
 			const auto cap = this->check_size_add(0, res_arg);
+			ROCKET_ASSERT(len_one <= cap);
+			ROCKET_ASSERT(len_two <= cap - len_one);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto nblk = storage::min_nblk_for_nchar(cap);
 			auto st_alloc = storage_allocator(this->as_allocator());
@@ -710,7 +710,6 @@ private:
 		ROCKET_ASSERT(len_one <= off_two);
 		ROCKET_ASSERT(off_two <= this->m_len);
 		ROCKET_ASSERT(len_two <= this->m_len - off_two);
-		ROCKET_ASSERT(len_one + len_two <= res_arg);
 		const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
 		if(ptr == nullptr) {
 			// The storage has been deallocated.
