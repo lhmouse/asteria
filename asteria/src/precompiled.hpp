@@ -26,6 +26,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <climits>
+#include <cmath>
 
 #include "rocket/compatibility.h"
 #include "rocket/preprocessor_utilities.h"

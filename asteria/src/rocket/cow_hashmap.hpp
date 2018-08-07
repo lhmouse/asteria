@@ -122,9 +122,7 @@ namespace details_cow_hashmap
 		allocator_type alloc;
 		size_type nblk;
 		size_type nelem;
-ROCKET_EXTENSION_BEGIN
 		union { handle_type data[0]; };
-ROCKET_EXTENSION_END
 
 		handle_storage(const allocator_type &xalloc, size_type xnblk) noexcept
 			: alloc(xalloc), nblk(xnblk)

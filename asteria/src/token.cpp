@@ -7,7 +7,6 @@
 #include "utilities.hpp"
 #include <algorithm>
 #include <cfloat>
-#include <cmath>
 
 namespace Asteria
 {

@@ -243,6 +243,11 @@ namespace details_variant
 			noadl::adl_swap(*ptr, *(static_cast<elementT *>(src)));
 		}
 	};
+
+	ROCKET_NORETURN inline void rethrow()
+	{
+		throw;
+	}
 }
 
 template<typename ...elementsT>
@@ -532,7 +537,7 @@ public:
 			// Destroy the first object that has just been constructed, then rethrow the exception.
 			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
 			                                              details_variant::visitor_destruct());
-			throw;
+			details_variant::rethrow();
 		}
 		// Destroy both elements.
 		const unsigned this_index = this->m_index;

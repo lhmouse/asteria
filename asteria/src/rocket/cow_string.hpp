@@ -100,9 +100,7 @@ namespace details_cow_string
 		atomic<long> nref;
 		allocator_type alloc;
 		size_type nblk;
-ROCKET_EXTENSION_BEGIN
 		union { value_type data[0]; };
-ROCKET_EXTENSION_END
 
 		basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
 			: alloc(xalloc), nblk(xnblk)
