@@ -11,7 +11,7 @@
 #include <ostream> // std::basic_ostream<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
+#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstddef> // std::size_t, std::ptrdiff_t
@@ -312,7 +312,7 @@ namespace details_cow_string
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
 
-		using parent_type        = stringT;
+		using parent_type   = stringT;
 
 	private:
 		const parent_type *m_ref;

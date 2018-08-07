@@ -7,7 +7,7 @@
 #include <memory> // std::allocator<>, std::allocator_traits<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
+#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstddef> // std::size_t, std::ptrdiff_t
@@ -45,7 +45,6 @@ using ::std::is_nothrow_move_constructible;
 using ::std::conditional;
 using ::std::integral_constant;
 using ::std::iterator_traits;
-using ::std::reverse_iterator;
 using ::std::initializer_list;
 using ::std::size_t;
 using ::std::ptrdiff_t;
@@ -476,7 +475,7 @@ namespace details_cow_vector
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
 
-		using parent_type        = storage_handle<typename vectorT::allocator_type>;
+		using parent_type   = storage_handle<typename vectorT::allocator_type>;
 
 	private:
 		const parent_type *m_ref;

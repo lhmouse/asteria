@@ -7,7 +7,7 @@
 #include <memory> // std::allocator<>, std::allocator_traits<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag, std::distance()
+#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <unordered_map> // std::hash<>, std::equal_to<>, std::pair<>
 #include <utility> // std::move(), std::forward(), std::declval()
@@ -52,7 +52,6 @@ using ::std::remove_const;
 using ::std::conditional;
 using ::std::integral_constant;
 using ::std::iterator_traits;
-using ::std::reverse_iterator;
 using ::std::initializer_list;
 using ::std::hash;
 using ::std::equal_to;
@@ -683,8 +682,8 @@ namespace details_cow_hashmap
 		using reference          = value_type &;
 		using difference_type    = ptrdiff_t;
 
-		using parent_type        = storage_handle<typename hashmapT::allocator_type, typename hashmapT::hasher, typename hashmapT::key_equal>;
-		using handle_type        = typename copy_const_from<typename parent_type::handle_type, value_type>::type;
+		using parent_type   = storage_handle<typename hashmapT::allocator_type, typename hashmapT::hasher, typename hashmapT::key_equal>;
+		using handle_type   = typename copy_const_from<typename parent_type::handle_type, value_type>::type;
 
 	private:
 		const parent_type *m_ref;
