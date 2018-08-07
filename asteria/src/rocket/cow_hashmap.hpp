@@ -973,15 +973,11 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, cnt + cnt / 2 + 7);
 #endif
-			this->do_reallocate(0, 0, this->do_count_slots(), cap);
+			this->do_reallocate(0, 0, this->slot_count(), cap);
 		}
 		ROCKET_ASSERT(this->capacity() >= cap);
 	}
 
-	size_type do_count_slots() const noexcept
-	{
-		return this->m_sth.slot_count();
-	}
 	const details_cow_hashmap::value_handle<allocator_type> * do_get_table() const noexcept
 	{
 		return this->m_sth.data();
@@ -992,7 +988,7 @@ private:
 			return nullptr;
 		}
 		if(this->unique() == false) {
-			return this->do_reallocate(0, 0, this->do_count_slots(), this->size());
+			return this->do_reallocate(0, 0, this->slot_count(), this->size());
 		}
 		return this->m_sth.mut_data_unchecked();
 	}
@@ -1000,7 +996,7 @@ private:
 	details_cow_hashmap::value_handle<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto cnt_old = this->size();
-		const auto slot_cnt_old = this->do_count_slots();
+		const auto slot_cnt_old = this->slot_count();
 		ROCKET_ASSERT(tpos <= slot_cnt_old);
 		ROCKET_ASSERT(tn <= slot_cnt_old - tpos);
 		if(this->unique() == false) {
@@ -1020,7 +1016,7 @@ public:
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->do_get_table() + this->do_count_slots());
+		return const_iterator(&(this->m_sth), this->do_get_table() + this->slot_count());
 	}
 	// N.B. This is a non-standard extension.
 	const_reverse_iterator rbegin() const noexcept
@@ -1062,7 +1058,7 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->do_mut_table() + this->m_sth.slot_count());
+		return iterator(&(this->m_sth), this->do_mut_table() + this->slot_count());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -1102,7 +1098,7 @@ public:
 		if((this->unique() != false) && (this->capacity() >= cap_new)) {
 			return;
 		}
-		this->do_reallocate(0, 0, this->do_count_slots(), cap_new);
+		this->do_reallocate(0, 0, this->slot_count(), cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit()
@@ -1122,12 +1118,32 @@ public:
 			this->do_deallocate();
 			return;
 		}
-		this->m_sth.erase_range_unchecked(0, this->do_count_slots());
+		this->m_sth.erase_range_unchecked(0, this->slot_count());
 	}
 	// N.B. This is a non-standard extension.
 	bool unique() const noexcept
 	{
 		return this->m_sth.unique();
+	}
+
+	// hash policy
+	// N.B. This is a non-standard extension.
+	size_type slot_count() const noexcept
+	{
+		return this->m_sth.slot_count();
+	}
+	float load_factor() const noexcept
+	{
+		return static_cast<float>(static_cast<difference_type>(this->size())) / static_cast<float>(static_cast<difference_type>(this->slot_count()));
+	}
+	// N.B. The `constexpr` specifier is a non-standard extension.
+	constexpr float max_load_factor() const noexcept
+	{
+		return 1.0f / static_cast<float>(static_cast<difference_type>(m_sth.max_load_factor_reciprocal));
+	}
+	void rehash(size_type n)
+	{
+		this->reserve(n);
 	}
 
 	// 26.5.4.4, modifiers
