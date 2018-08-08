@@ -34,15 +34,15 @@ public:
 
 private:
 	string_type m_str;
-	ios_base::open_mode m_which;
+	ios_base::openmode m_which;
 	size_type m_caret;
 
 public:
-	explicit basic_insertable_streambuf(ios_base::open_mode which = ios_base::in | ios_base::out)
+	explicit basic_insertable_streambuf(ios_base::openmode which = ios_base::in | ios_base::out)
 		: m_str(), m_which(which), m_caret(string_type::npos)
 	{
 	}
-	explicit basic_insertable_streambuf(string_type str, ios_base::open_mode which = ios_base::in | ios_base::out)
+	explicit basic_insertable_streambuf(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
 		: m_str(::std::move(str)), m_which(which), m_caret(string_type::npos)
 	{
 	}

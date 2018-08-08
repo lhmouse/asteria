@@ -30,12 +30,12 @@ private:
 	basic_insertable_streambuf<charT, traitsT> m_sb;
 
 public:
-	explicit basic_insertable_ostream(ios_base::open_mode which = ios_base::out)
+	explicit basic_insertable_ostream(ios_base::openmode which = ios_base::out)
 		: basic_ostream<charT, traitsT>(&(this->m_sb))
 		, m_sb(which | ios_base::out)
 	{
 	}
-	explicit basic_insertable_ostream(string_type str, ios_base::open_mode which = ios_base::out)
+	explicit basic_insertable_ostream(string_type str, ios_base::openmode which = ios_base::out)
 		: basic_ostream<charT, traitsT>(&(this->m_sb))
 		, m_sb(::std::move(str), which | ios_base::out)
 	{
