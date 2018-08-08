@@ -652,6 +652,27 @@ namespace details_cow_vector
 	{
 		return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();
 	}
+
+	// Insertion helpers.
+	constexpr struct append_tag       { } append;
+	constexpr struct emplace_back_tag { } emplace_back;
+	constexpr struct push_back_tag    { } push_back;
+
+	template<typename vectorT, typename ...paramsT>
+	inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
+	{
+		vec->append(::std::forward<paramsT>(params)...);
+	}
+	template<typename vectorT, typename ...paramsT>
+	inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
+	{
+		vec->emplace_back(::std::forward<paramsT>(params)...);
+	}
+	template<typename vectorT, typename ...paramsT>
+	inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
+	{
+		vec->push_back(::std::forward<paramsT>(params)...);
+	}
 }
 
 template<typename valueT, typename allocatorT>
@@ -783,12 +804,12 @@ private:
 		ROCKET_ASSERT(this->capacity() >= cap);
 	}
 
-	template<typename modifierT>
-	value_type * do_insert_no_bound_check(size_type tpos, modifierT &&modifier)
+	template<typename ...paramsT>
+	value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
 	{
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
-		::std::forward<modifierT>(modifier)();
+		details_cow_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
 		const auto cnt_add = this->size() - cnt_old;
 		this->do_reserve_more(0);
 		const auto ptr = this->m_sth.mut_data_unchecked();
@@ -1068,19 +1089,19 @@ public:
 	iterator emplace(const_iterator tins, paramsT &&...params)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->emplace_back(::std::forward<paramsT>(params)...); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::emplace_back, ::std::forward<paramsT>(params)...);
 		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->push_back(value); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, value);
 		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, value_type &&value)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->push_back(::std::move(value)); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, ::std::move(value));
 		return iterator(&(this->m_sth), ptr);
 	}
 	// N.B. The parameter pack is a non-standard extension.
@@ -1088,20 +1109,20 @@ public:
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(n, params...); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, n, params...);
 		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(init); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, init);
 		return iterator(&(this->m_sth), ptr);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
 		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->append(::std::move(first), ::std::move(last)); });
+		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, ::std::move(first), ::std::move(last));
 		return iterator(&(this->m_sth), ptr);
 	}
 

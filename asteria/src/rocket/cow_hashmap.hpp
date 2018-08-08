@@ -670,9 +670,7 @@ namespace details_cow_hashmap
 	};
 
 	// This informs the constructor of an iterator that the `slot` parameter might point to an empty slot.
-	struct need_adjust_tag
-	{
-	} constexpr need_adjust;
+	constexpr struct need_adjust_tag { } need_adjust;
 
 	template<typename hashmapT, typename valueT>
 	class hashmap_iterator
