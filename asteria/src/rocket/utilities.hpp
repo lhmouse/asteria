@@ -66,7 +66,7 @@ namespace details_utilities
 	template<typename iteratorT>
 	constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
 	{
-		return last - first;
+		return static_cast<size_t>(last - first);
 	}
 }
 
