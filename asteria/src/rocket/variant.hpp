@@ -133,10 +133,9 @@ namespace details_variant
 	};
 
 	template<typename ...elementsT>
-	union basic_storage
+	struct basic_storage
 	{
-		char bytes[max_of<sizeof(elementsT)...>::value];
-		alignas(max_of<alignof(elementsT)...>::value) char align;
+		alignas(max_of<alignof(elementsT)...>::value + 0) char bytes[max_of<sizeof(elementsT)...>::value + 0];
 	};
 
 	namespace details_is_nothrow_swappable
@@ -244,7 +243,7 @@ namespace details_variant
 		}
 	};
 
-	ROCKET_NORETURN inline void rethrow()
+	ROCKET_NORETURN inline void rethrow_current_exception()
 	{
 		throw;
 	}
@@ -537,7 +536,7 @@ public:
 			// Destroy the first object that has just been constructed, then rethrow the exception.
 			details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
 			                                              details_variant::visitor_destruct());
-			details_variant::rethrow();
+			details_variant::rethrow_current_exception();
 		}
 		// Destroy both elements.
 		const unsigned this_index = this->m_index;
