@@ -18,7 +18,7 @@ struct transparent_equal_to
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) == ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() == ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) == ::std::forward<otherT>(other);
 	}
@@ -29,7 +29,7 @@ struct transparent_not_equal_to
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) != ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() != ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) != ::std::forward<otherT>(other);
 	}
@@ -40,7 +40,7 @@ struct transparent_less
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) < ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() < ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) < ::std::forward<otherT>(other);
 	}
@@ -51,7 +51,7 @@ struct transparent_greater
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) > ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() > ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) > ::std::forward<otherT>(other);
 	}
@@ -62,7 +62,7 @@ struct transparent_less_equal
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) <= ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() <= ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) <= ::std::forward<otherT>(other);
 	}
@@ -73,7 +73,7 @@ struct transparent_greater_equal
 	using is_transparent = true_type;
 
 	template<typename selfT, typename otherT>
-	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::forward<selfT>(self) >= ::std::forward<otherT>(other))
+	constexpr auto operator()(selfT &&self, otherT &&other) const -> decltype(::std::declval<selfT>() >= ::std::declval<otherT>())
 	{
 		return ::std::forward<selfT>(self) >= ::std::forward<otherT>(other);
 	}
