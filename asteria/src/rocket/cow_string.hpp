@@ -1061,9 +1061,10 @@ public:
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		if(srpos < len_old) {
 			traits_type::move(ptr + len_old, ptr + srpos, n);
-		} else {
-			traits_type::copy(ptr + len_old, s, n);
+			this->do_set_length(len_old + n);
+			return *this;
 		}
+		traits_type::copy(ptr + len_old, s, n);
 		this->do_set_length(len_old + n);
 		return *this;
 	}

@@ -11,6 +11,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstddef> // std::size_t, std::ptrdiff_t
+#include <cstdint> // std::uintptr_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -48,6 +49,7 @@ using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::size_t;
 using ::std::ptrdiff_t;
+using ::std::uintptr_t;
 
 template<typename valueT, typename allocatorT = allocator<valueT>>
 class cow_vector;
@@ -1043,12 +1045,23 @@ public:
 	// N.B. The return type is a non-standard extension.
 	reference push_back(const value_type &value)
 	{
-		return this->emplace_back(value);
+		const auto len_old = this->size();
+		// Check for overlapped elements before `do_reserve_more()`.
+		const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
+		this->do_reserve_more(1);
+		if(srpos < len_old) {
+			const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data_unchecked() + srpos);
+			return *ptr;
+		}
+		const auto ptr = this->m_sth.emplace_back_unchecked(value);
+		return *ptr;
 	}
 	// N.B. The return type is a non-standard extension.
 	reference push_back(value_type &&value)
 	{
-		return this->emplace_back(::std::move(value));
+		this->do_reserve_more(1);
+		const auto ptr = this->m_sth.emplace_back_unchecked(value);
+		return *ptr;
 	}
 
 	template<typename ...paramsT>
@@ -1060,11 +1073,15 @@ public:
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
-		return this->emplace(tins, value);
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->push_back(value); });
+		return iterator(&(this->m_sth), ptr);
 	}
 	iterator insert(const_iterator tins, value_type &&value)
 	{
-		return this->emplace(tins, ::std::move(value));
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto ptr = this->do_insert_no_bound_check(tpos, [&] { this->push_back(::std::move(value)); });
+		return iterator(&(this->m_sth), ptr);
 	}
 	// N.B. The parameter pack is a non-standard extension.
 	template<typename ...paramsT>
