@@ -135,6 +135,7 @@ namespace details_variant
 	template<typename ...elementsT>
 	struct basic_storage
 	{
+		// The `+ 0` parts are necessary to work around a bug in GCC 4.8.
 		alignas(max_of<alignof(elementsT)...>::value + 0) char bytes[max_of<sizeof(elementsT)...>::value + 0];
 	};
 
