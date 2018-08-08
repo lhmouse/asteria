@@ -7,7 +7,7 @@
 #include <memory> // std::allocator<>, std::allocator_traits<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
+#include <iterator> // std::iterator_traits<>, std::forward_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <unordered_map> // std::hash<>, std::equal_to<>, std::pair<>
 #include <utility> // std::move(), std::forward(), std::declval()
@@ -21,14 +21,13 @@
 
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
- * 2. `const_iterator` and `iterator` are bidirectional iterators in addition to forward iterators (so they can be decremented).
- * 3. The copy constructor and copy assignment operator will not throw exceptions.
- * 4. Comparison operators are not provided.
- * 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
- * 6. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
- * 7. `equal_range()` functions are not provided.
- * 8. The key type may be incomplete.
- * 9. The value type may be incomplete. It need be neither copy-assignable nor move-assignable.
+ * 2. The copy constructor and copy assignment operator will not throw exceptions.
+ * 3. Comparison operators are not provided.
+ * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
+ * 5. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
+ * 6. `equal_range()` functions are not provided.
+ * 7. The key type may be incomplete.
+ * 8. The value type may be incomplete. It need be neither copy-assignable nor move-assignable.
  */
 
 namespace rocket
@@ -670,13 +669,18 @@ namespace details_cow_hashmap
 		}
 	};
 
+	// This informs the constructor of an iterator that the `slot` parameter might point to an empty slot.
+	struct need_adjust_tag
+	{
+	} constexpr need_adjust;
+
 	template<typename hashmapT, typename valueT>
 	class hashmap_iterator
 	{
 		friend hashmapT;
 
 	public:
-		using iterator_category  = ::std::bidirectional_iterator_tag;
+		using iterator_category  = ::std::forward_iterator_tag;
 		using value_type         = valueT;
 		using pointer            = value_type *;
 		using reference          = value_type &;
@@ -692,6 +696,10 @@ namespace details_cow_hashmap
 	private:
 		constexpr hashmap_iterator(const parent_type *ref, handle_type *slot) noexcept
 			: m_ref(ref), m_slot(slot)
+		{
+		}
+		hashmap_iterator(const parent_type *ref, need_adjust_tag, handle_type *hint) noexcept
+			: m_ref(ref), m_slot(this->do_adjust_forwards(hint))
 		{
 		}
 
@@ -717,13 +725,18 @@ namespace details_cow_hashmap
 			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->slot_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
 			return slot;
 		}
-		handle_type * do_step_over(handle_type *start, const handle_type *end, ptrdiff_t step) const noexcept
+		handle_type * do_adjust_forwards(handle_type *hint) const noexcept
 		{
-			auto slot = start;
-			ROCKET_ASSERT(slot != end);
-			do {
-				slot += step;
-			} while((slot != end) && (slot->get() == nullptr));
+			if(hint == nullptr) {
+				return nullptr;
+			}
+			const auto ref = this->m_ref;
+			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+			const auto end = ref->data() + ref->slot_count();
+			auto slot = hint;
+			while((slot != end) && (slot->get() == nullptr)) {
+				++slot;
+			}
 			return slot;
 		}
 
@@ -744,35 +757,23 @@ namespace details_cow_hashmap
 		}
 		hashmap_iterator & seek_next() noexcept
 		{
-			const auto ref = this->m_ref;
-			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-			// Search forwards for the first non-null slot.
-			const auto slot_old = this->do_assert_valid_slot(this->m_slot, false);
-			const auto end = ref->data() + ref->slot_count();
-			ROCKET_ASSERT_MSG(slot_old != end, "The past-the-end iterator cannot be incremented.");
-			this->m_slot = this->do_step_over(slot_old, end, +1);
-			return *this;
-		}
-		hashmap_iterator & seek_prev() noexcept
-		{
-			const auto ref = this->m_ref;
-			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-			// Search backwards for the last non-null slot.
-			const auto slot_old = this->do_assert_valid_slot(this->m_slot, false);
-			const auto begin = ref->data();
-			ROCKET_ASSERT_MSG(slot_old != begin, "The beginning iterator cannot be decremented.");
-			this->m_slot = this->do_step_over(slot_old, begin, -1);
+			auto slot = this->do_assert_valid_slot(this->m_slot, false);
+			ROCKET_ASSERT_MSG(slot != this->m_ref->data() + this->m_ref->slot_count(), "The past-the-end iterator cannot be incremented.");
+			slot = this->do_adjust_forwards(slot + 1);
+			this->m_slot = this->do_assert_valid_slot(slot, false);
 			return *this;
 		}
 
 		reference operator*() const noexcept
 		{
-			const auto ptr = this->do_assert_valid_slot(this->m_slot, true)->get();
+			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
+			const auto ptr = slot->get();
 			return *ptr;
 		}
 		pointer operator->() const noexcept
 		{
-			const auto ptr = this->do_assert_valid_slot(this->m_slot, true)->get();
+			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
+			const auto ptr = slot->get();
 			return noadl::unfancy(ptr);
 		}
 	};
@@ -782,24 +783,12 @@ namespace details_cow_hashmap
 	{
 		return rhs.seek_next();
 	}
-	template<typename hashmapT, typename valueT>
-	inline hashmap_iterator<hashmapT, valueT> & operator--(hashmap_iterator<hashmapT, valueT> &rhs) noexcept
-	{
-		return rhs.seek_prev();
-	}
 
 	template<typename hashmapT, typename valueT>
 	inline hashmap_iterator<hashmapT, valueT> operator++(hashmap_iterator<hashmapT, valueT> &lhs, int) noexcept
 	{
 		auto res = lhs;
 		lhs.seek_next();
-		return res;
-	}
-	template<typename hashmapT, typename valueT>
-	inline hashmap_iterator<hashmapT, valueT> operator--(hashmap_iterator<hashmapT, valueT> &lhs, int) noexcept
-	{
-		auto res = lhs;
-		lhs.seek_prev();
 		return res;
 	}
 
@@ -840,9 +829,6 @@ public:
 
 	using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
 	using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
-	// N.B. Reverse iterators are non-standard extensions.
-	using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
-	using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
 private:
 	details_cow_hashmap::storage_handle<allocator_type, hasher, key_equal> m_sth;
@@ -1009,21 +995,11 @@ public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->do_get_table());
+		return const_iterator(&(this->m_sth), details_cow_hashmap::need_adjust, this->do_get_table());
 	}
 	const_iterator end() const noexcept
 	{
 		return const_iterator(&(this->m_sth), this->do_get_table() + this->slot_count());
-	}
-	// N.B. This is a non-standard extension.
-	const_reverse_iterator rbegin() const noexcept
-	{
-		return const_reverse_iterator(this->end());
-	}
-	// N.B. This is a non-standard extension.
-	const_reverse_iterator rend() const noexcept
-	{
-		return const_reverse_iterator(this->begin());
 	}
 
 	const_iterator cbegin() const noexcept
@@ -1034,40 +1010,18 @@ public:
 	{
 		return this->end();
 	}
-	// N.B. This is a non-standard extension.
-	const_reverse_iterator crbegin() const noexcept
-	{
-		return this->rbegin();
-	}
-	// N.B. This is a non-standard extension.
-	const_reverse_iterator crend() const noexcept
-	{
-		return this->rend();
-	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(&(this->m_sth), this->do_mut_table());
+		return iterator(&(this->m_sth), details_cow_hashmap::need_adjust, this->do_mut_table());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
 		return iterator(&(this->m_sth), this->do_mut_table() + this->slot_count());
-	}
-	// N.B. This function may throw `std::bad_alloc()`.
-	// N.B. This is a non-standard extension.
-	reverse_iterator mut_rbegin()
-	{
-		return reverse_iterator(this->mut_end());
-	}
-	// N.B. This function may throw `std::bad_alloc()`.
-	// N.B. This is a non-standard extension.
-	reverse_iterator mut_rend()
-	{
-		return reverse_iterator(this->mut_begin());
 	}
 
 	// capacity
@@ -1269,7 +1223,7 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
 		const auto slot = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), slot);
+		return iterator(&(this->m_sth), details_cow_hashmap::need_adjust, slot);
 	}
 	size_type erase(const key_type &key)
 	{
@@ -1315,14 +1269,16 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
-		return result.first->get()->second;
+		const auto slot = result.first;
+		return slot->get()->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
-		return result.first->get()->second;
+		const auto slot = result.first;
+		return slot->get()->second;
 	}
 	const mapped_type & at(const key_type &key) const
 	{
@@ -1330,7 +1286,7 @@ public:
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this map.");
 		}
-		const auto slot = this->do_table() + toff;
+		const auto slot = this->do_get_table() + toff;
 		return slot->get()->second;
 	}
 	mapped_type & at(const key_type &key)
@@ -1420,16 +1376,6 @@ inline typename cow_hashmap<paramsT...>::const_iterator end(const cow_hashmap<pa
 {
 	return rhs.end();
 }
-template<typename ...paramsT>
-inline typename cow_hashmap<paramsT...>::const_reverse_iterator rbegin(const cow_hashmap<paramsT...> &rhs) noexcept
-{
-	return rhs.rbegin();
-}
-template<typename ...paramsT>
-inline typename cow_hashmap<paramsT...>::const_reverse_iterator rend(const cow_hashmap<paramsT...> &rhs) noexcept
-{
-	return rhs.rend();
-}
 
 template<typename ...paramsT>
 inline typename cow_hashmap<paramsT...>::const_iterator cbegin(const cow_hashmap<paramsT...> &rhs) noexcept
@@ -1440,16 +1386,6 @@ template<typename ...paramsT>
 inline typename cow_hashmap<paramsT...>::const_iterator cend(const cow_hashmap<paramsT...> &rhs) noexcept
 {
 	return rhs.cend();
-}
-template<typename ...paramsT>
-inline typename cow_hashmap<paramsT...>::const_reverse_iterator crbegin(const cow_hashmap<paramsT...> &rhs) noexcept
-{
-	return rhs.crbegin();
-}
-template<typename ...paramsT>
-inline typename cow_hashmap<paramsT...>::const_reverse_iterator crend(const cow_hashmap<paramsT...> &rhs) noexcept
-{
-	return rhs.crend();
 }
 
 }
