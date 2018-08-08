@@ -12,13 +12,15 @@ addons:
 
 matrix:
   include:
-    - env: "_options=\"--enable-debug-logs\""
-    - env: "_options=\"\""
+    - env: "_options=\"CXX=g++ --enable-debug-logs\""
+    - env: "_options=\"CXX=g++\""
+    - env: "_options=\"CXX=clang++ --enable-debug-logs\""
+    - env: "_options=\"CXX=clang++\""
 
 install:
   - "mkdir -p m4"
   - "autoreconf -ifv"
-  - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC\" CXXFLAGS=\"-O1\" ${_options}"
+  - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_DEBUG -D_LIBCPP_DEBUG\" ${_options}"
   - "make -j$(nproc)"
 
 script:
