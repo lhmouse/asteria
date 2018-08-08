@@ -764,14 +764,14 @@ namespace details_cow_hashmap
 		reference operator*() const noexcept
 		{
 			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
-			const auto ptr = slot->get();
-			return *ptr;
+			const auto eptr = slot->get();
+			return *eptr;
 		}
 		pointer operator->() const noexcept
 		{
 			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
-			const auto ptr = slot->get();
-			return noadl::unfancy(ptr);
+			const auto eptr = slot->get();
+			return noadl::unfancy(eptr);
 		}
 	};
 
@@ -1222,14 +1222,16 @@ public:
 		const auto slot = this->do_erase_no_bound_check(tpos, 1);
 		return iterator(&(this->m_sth), details_cow_hashmap::need_adjust, slot);
 	}
-	size_type erase(const key_type &key)
+	// N.B. This function may throw `std::bad_alloc()`.
+	// N.B. The return type differs from `std::unordered_map`.
+	bool erase(const key_type &key)
 	{
 		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
-			return 0;
+			return false;
 		}
 		this->do_erase_no_bound_check(static_cast<size_type>(toff), 1);
-		return 1;
+		return true;
 	}
 
 	// map operations
@@ -1251,13 +1253,37 @@ public:
 		const auto slot = this->do_mut_table() + toff;
 		return iterator(&(this->m_sth), slot);
 	}
-	size_type count(const key_type &key) const
+	// N.B. The return type differs from `std::unordered_map`.
+	bool count(const key_type &key) const
 	{
 		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
-			return 0;
+			return false;
 		}
-		return 1;
+		return true;
+	}
+
+	// N.B. This is a non-standard extension.
+	const mapped_type * get(const key_type &key) const
+	{
+		const auto toff = this->m_sth.index_of_unchecked(key);
+		if(toff < 0) {
+			return nullptr;
+		}
+		const auto slot = this->do_get_table() + toff;
+		const auto eptr = slot->get();
+		return ::std::addressof(eptr->second);
+	}
+	// N.B. This is a non-standard extension.
+	mapped_type * get(const key_type &key)
+	{
+		const auto toff = this->m_sth.index_of_unchecked(key);
+		if(toff < 0) {
+			return nullptr;
+		}
+		const auto slot = this->do_mut_table() + toff;
+		const auto eptr = slot->get();
+		return ::std::addressof(eptr->second);
 	}
 
 	// 26.5.4.3, element access
@@ -1267,7 +1293,8 @@ public:
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
 		const auto slot = result.first;
-		return slot->get()->second;
+		const auto eptr = slot->get();
+		return eptr->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
@@ -1275,25 +1302,28 @@ public:
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
 		const auto slot = result.first;
-		return slot->get()->second;
+		const auto eptr = slot->get();
+		return eptr->second;
 	}
 	const mapped_type & at(const key_type &key) const
 	{
 		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
-			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this map.");
+			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
 		const auto slot = this->do_get_table() + toff;
-		return slot->get()->second;
+		const auto eptr = slot->get();
+		return eptr->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
 		const auto toff = this->m_sth.index_of_unchecked(key);
 		if(toff < 0) {
-			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this map.");
+			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
 		const auto slot = this->do_mut_table() + toff;
-		return slot->get()->second;
+		const auto eptr = slot->get();
+		return eptr->second;
 	}
 
 	// N.B. This function is a non-standard extension.
