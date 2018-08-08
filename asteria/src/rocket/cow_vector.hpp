@@ -112,6 +112,8 @@ namespace details_cow_vector
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			auto nelem = ptr->nelem;
+			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(cnt <= cap - nelem);
 			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
 				ptr->nelem = (nelem += 1);
@@ -138,6 +140,8 @@ namespace details_cow_vector
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
+			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(cnt <= cap - nelem);
 			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 			ptr->nelem = (nelem += cnt);
 		}
@@ -151,6 +155,8 @@ namespace details_cow_vector
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			auto nelem = ptr->nelem;
+			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(cnt <= cap - nelem);
 			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
 				ptr->nelem = (nelem += 1);
@@ -166,6 +172,8 @@ namespace details_cow_vector
 		{
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
+			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(cnt <= cap - nelem);
 			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 #ifdef ROCKET_DEBUG
 			::std::memset(ptr_old->data + off, '/', sizeof(ptr->data[0]) * cnt);
@@ -363,8 +371,6 @@ namespace details_cow_vector
 				return nullptr;
 			}
 			const auto cap = this->check_size_add(0, res_arg);
-			ROCKET_ASSERT(cnt_one <= cap);
-			ROCKET_ASSERT(cnt_two <= cap - cnt_one);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto nblk = storage::min_nblk_for_nelem(cap);
 			auto st_alloc = storage_allocator(this->as_allocator());

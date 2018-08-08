@@ -240,8 +240,6 @@ namespace details_cow_string
 				return nullptr;
 			}
 			const auto cap = this->check_size_add(0, res_arg);
-			ROCKET_ASSERT(len_one <= cap);
-			ROCKET_ASSERT(len_two <= cap - len_one);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
 			const auto nblk = storage::min_nblk_for_nchar(cap);
 			auto st_alloc = storage_allocator(this->as_allocator());
@@ -251,8 +249,10 @@ namespace details_cow_string
 #endif
 			allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), this->as_allocator(), nblk);
 			// Copy characters into the new block, then add a null character.
+			ROCKET_ASSERT(len_one <= cap);
 			traits_type::copy(ptr->data, src, len_one);
 			auto len = len_one;
+			ROCKET_ASSERT(len_two <= cap - len);
 			traits_type::copy(ptr->data + len, src + off_two, len_two);
 			len += len_two;
 			traits_type::assign(ptr->data[len], value_type());
