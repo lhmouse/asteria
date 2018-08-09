@@ -9,14 +9,13 @@ addons:
     update: true
     packages:
       - checkinstall
-      - libc++-helpers
 
 matrix:
   include:
     - env: "_options=\"CXX=g++ --enable-debug-logs\""
     - env: "_options=\"CXX=g++\""
-    - env: "_options=\"CXX=clang++-libc++ --disable-werror --enable-debug-logs\""
-    - env: "_options=\"CXX=clang++-libc++ --disable-werror\""
+    - env: "_options=\"CXX=clang++ --disable-werror --enable-debug-logs\""
+    - env: "_options=\"CXX=clang++ --disable-werror\""
 
 install:
   - "mkdir -p m4"
