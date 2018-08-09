@@ -229,8 +229,14 @@ namespace details_cow_hashmap
 				return nullptr;
 			}
 			// Check the first element.
-			const auto seed = static_cast<unsigned long long>(hval) * 0xA17870F5D4F51B49;
-			const auto origin = static_cast<typename allocator_traits<allocatorT>::size_type>((seed >> 16) % nslot);
+			const auto seed = static_cast<::std::uint64_t>(hval) * 0xA17870F5D4F51B49;
+			// Conversion between an unsigned integer type and a floating point type results in performance penalty.
+			// For values known to be non-negative, an intermediate cast to a signed integer type will mitigate this.
+			const auto ratio = static_cast<double>(static_cast<::std::int_fast64_t>(seed / 2)) / 0x1p63;
+			ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
+			const auto roffset = static_cast<double>(static_cast<::std::int_fast64_t>(nslot)) * ratio;
+			ROCKET_ASSERT((0.0 <= roffset) && (roffset < static_cast<double>(nslot)));
+			const auto origin = static_cast<typename allocator_traits<allocatorT>::size_type>(static_cast<::std::int64_t>(roffset));
 			auto cur = origin;
 			// Stop when a null slot is encountered, or when the predicator function returns `true`.
 			const auto stop_here = [&] { return (ptr->data[cur].get() == nullptr) || ::std::forward<predT>(pred)(ptr->data[cur].get()->first); };
@@ -243,7 +249,7 @@ namespace details_cow_hashmap
 				// Iterate the entire table using double hashing scheme.
 				// `step` and `nslot` shall be mutually prime.
 				size_t step;
-				cur = (seed >> 48) % 512;
+				cur = (seed >> 32) % 512;
 				for(;;) {
 					// Choose a prime number for `step`.
 					step = step_table[cur];
