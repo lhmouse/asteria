@@ -433,6 +433,15 @@ namespace details_cow_vector
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 
+		constexpr operator const storage_handle * () const noexcept
+		{
+			return this;
+		}
+		operator storage_handle * () noexcept
+		{
+			return this;
+		}
+
 		value_type * mut_data_unchecked() noexcept
 		{
 			auto ptr = this->m_ptr;
@@ -835,11 +844,11 @@ public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->data());
+		return const_iterator(this->m_sth, this->data());
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->data() + this->size());
+		return const_iterator(this->m_sth, this->data() + this->size());
 	}
 	const_reverse_iterator rbegin() const noexcept
 	{
@@ -871,13 +880,13 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(&(this->m_sth), this->mut_data());
+		return iterator(this->m_sth, this->mut_data());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->mut_data() + this->size());
+		return iterator(this->m_sth, this->mut_data() + this->size());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
@@ -1088,58 +1097,58 @@ public:
 	template<typename ...paramsT>
 	iterator emplace(const_iterator tins, paramsT &&...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::emplace_back, ::std::forward<paramsT>(params)...);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	iterator insert(const_iterator tins, const value_type &value)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, value);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	iterator insert(const_iterator tins, value_type &&value)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, ::std::move(value));
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	// N.B. The parameter pack is a non-standard extension.
 	template<typename ...paramsT>
 	iterator insert(const_iterator tins, size_type n, const paramsT &...params)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, n, params...);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	iterator insert(const_iterator tins, initializer_list<value_type> init)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, init);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
 	iterator insert(const_iterator tins, inputT first, inputT last)
 	{
-		const auto tpos = static_cast<size_type>(tins.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, ::std::move(first), ::std::move(last));
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst, const_iterator tlast)
 	{
-		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
-		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
+		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
 		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
-		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->data());
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
 		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), ptr);
+		return iterator(this->m_sth, ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type and parameter are non-standard extensions.

@@ -576,6 +576,15 @@ namespace details_cow_hashmap
 			this->do_reset(nullptr);
 		}
 
+		constexpr operator const storage_handle * () const noexcept
+		{
+			return this;
+		}
+		operator storage_handle * () noexcept
+		{
+			return this;
+		}
+
 		void share_with(const storage_handle &other) noexcept
 		{
 			const auto ptr = other.m_ptr;
@@ -998,11 +1007,11 @@ public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(&(this->m_sth), details_cow_hashmap::need_adjust, this->do_get_table());
+		return const_iterator(this->m_sth, details_cow_hashmap::need_adjust, this->do_get_table());
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(&(this->m_sth), this->do_get_table() + this->slot_count());
+		return const_iterator(this->m_sth, this->do_get_table() + this->slot_count());
 	}
 
 	const_iterator cbegin() const noexcept
@@ -1018,13 +1027,13 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(&(this->m_sth), details_cow_hashmap::need_adjust, this->do_mut_table());
+		return iterator(this->m_sth, details_cow_hashmap::need_adjust, this->do_mut_table());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(&(this->m_sth), this->do_mut_table() + this->slot_count());
+		return iterator(this->m_sth, this->do_mut_table() + this->slot_count());
 	}
 
 	// capacity
@@ -1106,13 +1115,13 @@ public:
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, value);
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
+		return ::std::make_pair(iterator(this->m_sth, result.first), false);
 	}
 	pair<iterator, bool> insert(value_type &&value)
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, ::std::move(value));
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), false);
+		return ::std::make_pair(iterator(this->m_sth, result.first), false);
 	}
 	// N.B. The return type is a non-standard extension.
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
@@ -1158,7 +1167,7 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
 	}
 	template<typename ...paramsT>
 	pair<iterator, bool> try_emplace(key_type &&key, paramsT &&...params)
@@ -1166,7 +1175,7 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
 	}
 	// N.B. The hint is ignored.
 	template<typename ...paramsT>
@@ -1189,7 +1198,7 @@ public:
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
 	}
 	template<typename yvalueT>
 	pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
@@ -1199,7 +1208,7 @@ public:
 		if(result.second == false) {
 			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
 		}
-		return ::std::make_pair(iterator(&(this->m_sth), result.first), result.second);
+		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
 	}
 	// N.B. The hint is ignored.
 	template<typename yvalueT>
@@ -1217,17 +1226,17 @@ public:
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst, const_iterator tlast)
 	{
-		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
-		const auto tn = static_cast<size_type>(tlast.tell_owned_by(&(this->m_sth)) - tfirst.tell());
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
+		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
 		const auto slot = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(&(this->m_sth), slot);
+		return iterator(this->m_sth, slot);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
-		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(&(this->m_sth)) - this->do_get_table());
+		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
 		const auto slot = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(&(this->m_sth), details_cow_hashmap::need_adjust, slot);
+		return iterator(this->m_sth, details_cow_hashmap::need_adjust, slot);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type differs from `std::unordered_map`.
@@ -1249,7 +1258,7 @@ public:
 			return this->end();
 		}
 		const auto slot = this->do_get_table() + toff;
-		return const_iterator(&(this->m_sth), slot);
+		return const_iterator(this->m_sth, slot);
 	}
 	iterator find(const key_type &key)
 	{
@@ -1258,7 +1267,7 @@ public:
 			return this->mut_end();
 		}
 		const auto slot = this->do_mut_table() + toff;
-		return iterator(&(this->m_sth), slot);
+		return iterator(this->m_sth, slot);
 	}
 	// N.B. The return type differs from `std::unordered_map`.
 	bool count(const key_type &key) const

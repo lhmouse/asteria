@@ -289,6 +289,15 @@ namespace details_cow_string
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 
+		constexpr operator const storage_handle * () const noexcept
+		{
+			return this;
+		}
+		operator storage_handle * () noexcept
+		{
+			return this;
+		}
+
 		value_type * mut_data_unchecked() noexcept
 		{
 			const auto ptr = this->m_ptr;
