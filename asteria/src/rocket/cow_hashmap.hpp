@@ -1091,7 +1091,8 @@ public:
 	}
 	void rehash(size_type n)
 	{
-		this->reserve(n);
+		const auto cnt = this->size();
+		this->do_reallocate(0, 0, this->slot_count(), noadl::max(cnt, n));
 	}
 
 	// 26.5.4.4, modifiers
