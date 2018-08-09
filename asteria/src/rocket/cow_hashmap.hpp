@@ -221,7 +221,7 @@ namespace details_cow_hashmap
 	{
 		// This function may return a null pointer if the table is full.
 		template<typename xpointerT, typename predT>
-		typename copy_const_from<value_handle<allocatorT>, decltype(*(::std::declval<const xpointerT &>()))>::type * operator()(xpointerT ptr, size_t hval, predT &&pred) const
+		typename copy_const_from<value_handle<allocatorT>, decltype(*(::std::declval<xpointerT &>()))>::type * operator()(xpointerT ptr, size_t hval, predT &&pred) const
 		{
 			const auto nslot = ptr->max_nelem_for_nblk(ptr->nblk);
 			if(nslot == 0) {
