@@ -58,7 +58,7 @@ using ::std::size_t;
 using ::std::ptrdiff_t;
 using ::std::nullptr_t;
 
-template<typename keyT, typename mappedT, typename hasherT, typename equalT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
+template<typename keyT, typename mappedT, typename hashT, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
 class cow_hashmap;
 
 namespace details_cow_hashmap
@@ -282,12 +282,12 @@ namespace details_cow_hashmap
 		}
 	};
 
-	template<typename allocatorT, typename hasherT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
+	template<typename allocatorT, typename hashT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
 	struct copy_storage_helper
 	{
 		// This is the generic version.
 		template<typename xpointerT, typename ypointerT>
-		void operator()(xpointerT ptr, const hasherT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
+		void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
@@ -312,12 +312,12 @@ namespace details_cow_hashmap
 			}
 		}
 	};
-	template<typename allocatorT, typename hasherT>
-	struct copy_storage_helper<allocatorT, hasherT, false>
+	template<typename allocatorT, typename hashT>
+	struct copy_storage_helper<allocatorT, hashT, false>
 	{
 		// This specialization is used when `allocatorT::value_type` is not copy-constructible.
 		template<typename xpointerT, typename ypointerT>
-		ROCKET_NORETURN void operator()(xpointerT /*ptr*/, const hasherT & /*hf*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+		ROCKET_NORETURN void operator()(xpointerT /*ptr*/, const hashT & /*hf*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
 		{
 			// `allocatorT::value_type` is not copy-constructible.
 			// Throw an exception unconditionally, even when there is nothing to copy.
@@ -325,12 +325,12 @@ namespace details_cow_hashmap
 		}
 	};
 
-	template<typename allocatorT, typename hasherT>
+	template<typename allocatorT, typename hashT>
 	struct move_storage_helper
 	{
 		// This is the generic version.
 		template<typename xpointerT, typename ypointerT>
-		void operator()(xpointerT ptr, const hasherT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
+		void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
@@ -362,19 +362,19 @@ namespace details_cow_hashmap
 		}
 	};
 
-	template<typename allocatorT, typename hasherT, typename equalT>
+	template<typename allocatorT, typename hashT, typename eqT>
 	class storage_handle
 		: private allocator_wrapper_base_for<allocatorT>::type
-		, private conditional<is_same<hasherT, allocatorT>::value,
-		                      ebo_placeholder<0>, typename allocator_wrapper_base_for<hasherT>::type>::type
-		, private conditional<is_same<equalT, allocatorT>::value || is_same<equalT, hasherT>::value,
-		                      ebo_placeholder<1>, typename allocator_wrapper_base_for<equalT>::type>::type
+		, private conditional<is_same<hashT, allocatorT>::value,
+		                      ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type
+		, private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+		                      ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
 	{
 	public:
 		using allocator_type   = allocatorT;
 		using value_type       = typename allocator_type::value_type;
-		using hasher           = hasherT;
-		using key_equal        = equalT;
+		using hasher           = hashT;
+		using key_equal        = eqT;
 		using handle_type      = value_handle<allocator_type>;
 		using size_type        = typename allocator_traits<allocator_type>::size_type;
 		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -395,18 +395,18 @@ namespace details_cow_hashmap
 	public:
 		storage_handle(const allocator_type &alloc, const hasher &hf, const key_equal &eq)
 			: allocator_base(alloc)
-			, conditional<is_same<hasherT, allocatorT>::value,
+			, conditional<is_same<hashT, allocatorT>::value,
 			              ebo_placeholder<0>, hasher_base>::type(hf)
-			, conditional<is_same<equalT, allocatorT>::value || is_same<equalT, hasherT>::value,
+			, conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
 			              ebo_placeholder<1>, key_equal_base>::type(eq)
 			, m_ptr(nullptr)
 		{
 		}
 		storage_handle(allocator_type &&alloc, const hasher &hf, const key_equal &eq)
 			: allocator_base(::std::move(alloc))
-			, conditional<is_same<hasherT, allocatorT>::value,
+			, conditional<is_same<hashT, allocatorT>::value,
 			              ebo_placeholder<0>, hasher_base>::type(hf)
-			, conditional<is_same<equalT, allocatorT>::value || is_same<equalT, hasherT>::value,
+			, conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
 			              ebo_placeholder<1>, key_equal_base>::type(eq)
 			, m_ptr(nullptr)
 		{
@@ -816,7 +816,7 @@ namespace details_cow_hashmap
 	}
 }
 
-template<typename keyT, typename mappedT, typename hasherT, typename equalT, typename allocatorT>
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT>
 class cow_hashmap
 {
 	static_assert(is_array<keyT>::value == false, "`keyT` must not be an array type.");
@@ -828,8 +828,8 @@ public:
 	using key_type        = keyT;
 	using mapped_type     = mappedT;
 	using value_type      = pair<const key_type, mapped_type>;
-	using hasher          = hasherT;
-	using key_equal       = equalT;
+	using hasher          = hashT;
+	using key_equal       = eqT;
 	using allocator_type  = allocatorT;
 
 	using size_type        = typename allocator_traits<allocator_type>::size_type;
