@@ -473,7 +473,7 @@ namespace details_cow_vector
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			auto nelem = ptr->nelem;
-			for(auto i = size_type(0); i < n; ++i) {
+			for(auto i = n; i != 0; --i) {
 				ptr->nelem = (nelem -= 1);
 				allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
 			}
