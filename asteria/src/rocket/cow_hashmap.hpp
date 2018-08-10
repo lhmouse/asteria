@@ -1113,15 +1113,17 @@ public:
 	// 26.5.4.4, modifiers
 	pair<iterator, bool> insert(const value_type &value)
 	{
-		this->do_reserve_more(1);
-		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, value);
-		return ::std::make_pair(iterator(this->m_sth, result.first), false);
+		return this->try_emplace(value.first, value.second);
 	}
 	pair<iterator, bool> insert(value_type &&value)
 	{
-		this->do_reserve_more(1);
-		const auto result = this->m_sth.keyed_emplace_unchecked(value.first, ::std::move(value));
-		return ::std::make_pair(iterator(this->m_sth, result.first), false);
+		return this->try_emplace(value.first, ::std::move(value.second));
+	}
+	// N.B. This is a non-standard extension.
+	template<typename yvalueT>
+	pair<iterator, bool> insert(pair<key_type, yvalueT> &&value)
+	{
+		return this->try_emplace(::std::move(value.first), ::std::move(value.second));
 	}
 	// N.B. The return type is a non-standard extension.
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
@@ -1193,22 +1195,22 @@ public:
 	template<typename yvalueT>
 	pair<iterator, bool> insert_or_assign(const key_type &key, yvalueT &&yvalue)
 	{
-		this->do_reserve_more(1);
-		const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
-		if(result.second == false) {
-			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
+		const auto result = this->try_emplace(key, ::std::forward<yvalueT>(yvalue));
+		if(result.second){
+			return result;
 		}
-		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
+		*(result.first.tell()) = ::std::forward<yvalueT>(yvalue);
+		return result;
 	}
 	template<typename yvalueT>
 	pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
 	{
-		this->do_reserve_more(1);
-		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
-		if(result.second == false) {
-			result.first->get()->second = ::std::forward<yvalueT>(yvalue);
+		const auto result = this->try_emplace(::std::move(key), ::std::forward<yvalueT>(yvalue));
+		if(result.second){
+			return result;
 		}
-		return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
+		*(result.first.tell()) = ::std::forward<yvalueT>(yvalue);
+		return result;
 	}
 	// N.B. The hint is ignored.
 	template<typename yvalueT>
