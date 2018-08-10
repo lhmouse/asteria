@@ -1031,10 +1031,10 @@ public:
 			return *this;
 		}
 		this->do_reserve_more(n);
-		auto i = size_type(0);
+		auto i = n;
 		do {
 			this->m_sth.emplace_back_unchecked(params...);
-		} while(++i != n);
+		} while(--i != 0);
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
