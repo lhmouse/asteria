@@ -231,7 +231,7 @@ namespace details_cow_hashmap
 			// Check the first element.
 			const auto seed = static_cast<::std::uint64_t>(hval) * 0xA17870F5D4F51B49;
 			// Conversion between an unsigned integer type and a floating point type results in performance penalty.
-			// For values known to be non-negative, an intermediate cast to a signed integer type will mitigate this.
+			// For a value known to be non-negative, an intermediate cast to a signed integer type will mitigate this.
 			const auto ratio = static_cast<double>(static_cast<::std::int_fast64_t>(seed / 2)) / 0x1p63;
 			ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
 			const auto roffset = static_cast<double>(static_cast<::std::int_fast64_t>(nslot)) * ratio;
