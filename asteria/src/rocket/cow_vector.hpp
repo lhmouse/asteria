@@ -523,7 +523,8 @@ namespace details_cow_vector
 		{
 			const auto ref = this->m_ref;
 			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-			const auto dist = static_cast<size_t>(ptr - ref->data());
+			const auto c_data = (ref->size() != 0) ? ref->data() : nullptr;
+			const auto dist = static_cast<size_t>(ptr - c_data);
 			ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
 			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
 			return ptr;
