@@ -834,7 +834,7 @@ private:
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
 		if(tn == cnt_old) {
-			this->do_deallocate();
+			this->clear();
 			return nullptr;
 		}
 		if(this->unique() == false) {
