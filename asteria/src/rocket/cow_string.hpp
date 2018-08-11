@@ -835,15 +835,17 @@ private:
 			return npos;
 		}
 		const auto rlen = len - n;
-		for(auto i = noadl::min(from, rlen + 1); i - 1 != rlen; ++i) {
-			const auto ts = this->data() + i;
-			if(pred(ts)) {
-				ROCKET_ASSERT(i < len);
-				ROCKET_ASSERT(i != npos);
-				return i;
+		const auto ptr = this->c_str();
+		auto cur = noadl::min(from, rlen + 1) - 1;
+		do {
+			if(cur == rlen) {
+				return npos;
 			}
-		}
-		return npos;
+			++cur;
+		} while(pred(ptr + cur) == false);
+		ROCKET_ASSERT(cur <= len);
+		ROCKET_ASSERT(cur != npos);
+		return cur;
 	}
 	template<typename predT>
 	size_type do_find_backwards_if(size_type to, size_type n, predT pred) const
@@ -853,15 +855,17 @@ private:
 			return npos;
 		}
 		const auto rlen = len - n;
-		for(auto i = noadl::min(rlen, to); i + 1 != 0; --i) {
-			const auto ts = this->data() + i;
-			if(pred(ts)) {
-				ROCKET_ASSERT(i < len);
-				ROCKET_ASSERT(i != npos);
-				return i;
+		const auto ptr = this->c_str();
+		auto cur = noadl::min(rlen, to) + 1;
+		do {
+			if(cur == 0) {
+				return npos;
 			}
-		}
-		return npos;
+			--cur;
+		} while(pred(ptr + cur) == false);
+		ROCKET_ASSERT(cur <= len);
+		ROCKET_ASSERT(cur != npos);
+		return cur;
 	}
 
 public:
