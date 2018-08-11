@@ -29,6 +29,7 @@ inline typeT exchange(typeT &ref, withT &&with)
 	ref = ::std::forward<withT>(with);
 	return old;
 }
+
 template<typename lhsT, typename rhsT>
 inline void adl_swap(lhsT &lhs, rhsT &rhs)
 {
