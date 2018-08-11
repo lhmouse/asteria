@@ -1805,9 +1805,9 @@ struct basic_cow_string<charT, traitsT, allocatorT>::hash
 	result_type operator()(const argument_type &str) const noexcept
 	{
 		// This implements the 32-bit FNV-1a hash algorithm.
-		char32_t reg = 2166136261;
+		auto reg = ::std::uint_fast32_t(2166136261u);
 		for(typename basic_cow_string::size_type i = 0; i < str.size(); ++i) {
-			reg ^= static_cast<char32_t>(traits_type::to_int_type(str[i]));
+			reg ^= static_cast<::std::uint_fast32_t>(traits_type::to_int_type(str[i]));
 			reg *= 16777619u;
 		}
 		return static_cast<result_type>(reg);
