@@ -484,6 +484,7 @@ namespace details_cow_vector
 	class vector_iterator
 	{
 		friend vectorT;
+		friend vector_iterator<vectorT, const valueT>;
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
@@ -1071,7 +1072,7 @@ public:
 		const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
 		this->do_reserve_more(1);
 		if(srpos < len_old) {
-			const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data_unchecked() + srpos);
+			const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data_unchecked()[srpos]);
 			return *ptr;
 		}
 		const auto ptr = this->m_sth.emplace_back_unchecked(value);
