@@ -483,8 +483,10 @@ namespace details_cow_vector
 	template<typename vectorT, typename valueT>
 	class vector_iterator
 	{
+		template<typename, typename>
+		friend class vector_iterator;
+
 		friend vectorT;
-		friend vector_iterator<vectorT, const valueT>;
 
 	public:
 		using iterator_category  = ::std::random_access_iterator_tag;
@@ -831,6 +833,10 @@ private:
 		const auto cnt_old = this->size();
 		ROCKET_ASSERT(tpos <= cnt_old);
 		ROCKET_ASSERT(tn <= cnt_old - tpos);
+		if(tn == cnt_old) {
+			this->do_deallocate();
+			return nullptr;
+		}
 		if(this->unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
 			return ptr + tpos;
@@ -1067,11 +1073,11 @@ public:
 	// N.B. The return type is a non-standard extension.
 	reference push_back(const value_type &value)
 	{
-		const auto len_old = this->size();
+		const auto cnt_old = this->size();
 		// Check for overlapped elements before `do_reserve_more()`.
 		const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
 		this->do_reserve_more(1);
-		if(srpos < len_old) {
+		if(srpos < cnt_old) {
 			const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data_unchecked()[srpos]);
 			return *ptr;
 		}
@@ -1205,6 +1211,9 @@ public:
 	// 26.3.11.4, data access
 	const value_type * data() const noexcept
 	{
+		if(this->empty()) {
+			return nullptr;
+		}
 		return this->m_sth.data();
 	}
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.

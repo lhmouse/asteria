@@ -312,6 +312,9 @@ namespace details_cow_string
 	template<typename stringT, typename charT>
 	class string_iterator
 	{
+		template<typename, typename>
+		friend class string_iterator;
+
 		friend stringT;
 
 	public:
@@ -746,11 +749,12 @@ private:
 	// Add a null terminator at `ptr[len]` then set `len` there.
 	void do_set_length(size_type len) noexcept
 	{
-		ROCKET_ASSERT(this->m_sth.unique());
 		ROCKET_ASSERT(len <= this->m_sth.capacity());
 		const auto ptr = this->m_sth.mut_data_unchecked();
-		ROCKET_ASSERT(ptr == this->m_ptr);
-		traits_type::assign(ptr[len], value_type());
+		if(ptr) {
+			ROCKET_ASSERT(ptr == this->m_ptr);
+			traits_type::assign(ptr[len], value_type());
+		}
 		this->m_len = len;
 	}
 	// Deallocate any dynamic storage.
@@ -808,6 +812,10 @@ private:
 		const auto len_old = this->size();
 		ROCKET_ASSERT(tpos <= len_old);
 		ROCKET_ASSERT(tn <= len_old - tpos);
+		if(tn == len_old) {
+			this->do_deallocate();
+			return nullptr;
+		}
 		if(this->unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
 			return ptr + tpos;
@@ -994,7 +1002,7 @@ public:
 		const auto len = this->size();
 		// Reading from the character at `size()` is permitted.
 		ROCKET_ASSERT(pos <= len);
-		return this->data()[pos];
+		return this->c_str()[pos];
 	}
 	const_reference at(size_type pos) const
 	{
@@ -1127,7 +1135,7 @@ public:
 		auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
 		const auto dist = noadl::estimate_distance(first, last);
 		other.do_reserve_more(dist);
-		noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &) { other.push_back(ref); });
+		noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { other.push_back(*it); });
 		this->assign(::std::move(other));
 		return *this;
 	}
@@ -1422,6 +1430,9 @@ public:
 	// 24.3.2.7, string operations
 	const value_type * data() const noexcept
 	{
+		if(this->empty()) {
+			return nullptr;
+		}
 		return this->m_ptr;
 	}
 	// Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
@@ -1438,7 +1449,7 @@ public:
 	}
 	const value_type * c_str() const noexcept
 	{
-		return this->data();
+		return this->m_ptr;
 	}
 
 	// N.B. The return type differs from `std::basic_string`.
