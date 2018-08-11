@@ -30,6 +30,7 @@
  * 4. The constructor taking a sole const pointer is made `explicit`.
  * 5. The assignment operator taking a character and the one taking a const pointer are not provided.
  * 6. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
+ * 7. `data()` returns a null pointer if the string is empty.
  */
 
 namespace rocket
@@ -537,16 +538,16 @@ namespace details_cow_string
 		}
 		template<typename allocatorT>
 		explicit shallow(const basic_cow_string<charT, traitsT, allocatorT> &str) noexcept
-			: m_ptr(str.data()), m_len(str.size())
+			: m_ptr(str.c_str()), m_len(str.length())
 		{
 		}
 
 	public:
-		const char_type * data() const noexcept
+		const char_type * c_str() const noexcept
 		{
 			return this->m_ptr;
 		}
-		size_type size() const noexcept
+		size_type length() const noexcept
 		{
 			return this->m_len;
 		}
@@ -647,7 +648,7 @@ private:
 public:
 	// 24.3.2.2, construct/copy/destroy
 	basic_cow_string(shallow sh, const allocator_type &alloc = allocator_type()) noexcept
-		: m_sth(alloc), m_ptr(sh.data()), m_len(sh.size())
+		: m_sth(alloc), m_ptr(sh.c_str()), m_len(sh.length())
 	{
 	}
 	explicit basic_cow_string(const allocator_type &alloc) noexcept
@@ -738,7 +739,7 @@ private:
 		const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
 		if(ptr == nullptr) {
 			// The storage has been deallocated.
-			this->m_ptr = shallow().data();
+			this->m_ptr = shallow().c_str();
 			return nullptr;
 		}
 		ROCKET_ASSERT(this->m_sth.unique());
@@ -761,7 +762,7 @@ private:
 	void do_deallocate() noexcept
 	{
 		this->m_sth.deallocate();
-		this->m_ptr = shallow().data();
+		this->m_ptr = shallow().c_str();
 		this->m_len = 0;
 	}
 
@@ -1015,19 +1016,19 @@ public:
 			noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
 			                          static_cast<long long>(pos), static_cast<long long>(len));
 		}
-		return this->data()[pos];
+		return this->c_str()[pos];
 	}
 	const_reference front() const noexcept
 	{
 		const auto len = this->size();
 		ROCKET_ASSERT(len > 0);
-		return this->data()[0];
+		return this->c_str()[0];
 	}
 	const_reference back() const noexcept
 	{
 		const auto len = this->size();
 		ROCKET_ASSERT(len > 0);
-		return this->data()[len - 1];
+		return this->c_str()[len - 1];
 	}
 	// There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
 	// N.B. This is a non-standard extension.
@@ -1079,11 +1080,11 @@ public:
 
 	basic_cow_string & append(shallow sh)
 	{
-		return this->append(sh.data(), sh.size());
+		return this->append(sh.c_str(), sh.length());
 	}
 	basic_cow_string & append(const basic_cow_string & other, size_type pos = 0, size_type n = npos)
 	{
-		return this->append(other.data() + pos, other.do_clamp_substr(pos, n));
+		return this->append(other.c_str() + pos, other.do_clamp_substr(pos, n));
 	}
 	basic_cow_string & append(const value_type *s, size_type n)
 	{
@@ -1092,7 +1093,7 @@ public:
 		}
 		const auto len_old = this->size();
 		// Check for overlapped strings before `do_reserve_more()`.
-		const auto srpos = static_cast<uintptr_t>(s - this->data());
+		const auto srpos = static_cast<uintptr_t>(s - this->c_str());
 		this->do_reserve_more(n);
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		if(srpos < len_old) {
@@ -1201,15 +1202,15 @@ public:
 	basic_cow_string & assign(basic_cow_string &&other) noexcept
 	{
 		this->m_sth.share_with(::std::move(other.m_sth));
-		this->m_ptr = noadl::exchange(other.m_ptr, shallow().data());
+		this->m_ptr = noadl::exchange(other.m_ptr, shallow().c_str());
 		this->m_len = noadl::exchange(other.m_len, size_type(0));
 		return *this;
 	}
 	basic_cow_string & assign(shallow sh) noexcept
 	{
 		this->m_sth.deallocate();
-		this->m_ptr = sh.data();
-		this->m_len = sh.size();
+		this->m_ptr = sh.c_str();
+		this->m_len = sh.length();
 		return *this;
 	}
 	basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos)
@@ -1419,7 +1420,7 @@ public:
 	size_type copy(value_type *s, size_type tn, size_type tpos = 0) const
 	{
 		const auto rlen = this->do_clamp_substr(tpos, tn);
-		traits_type::copy(s, this->data() + tpos, rlen);
+		traits_type::copy(s, this->c_str() + tpos, rlen);
 		return rlen;
 	}
 
@@ -1474,16 +1475,16 @@ public:
 
 	size_type find(shallow sh, size_type from = 0) const noexcept
 	{
-		return this->find(sh.data(), from, sh.size());
+		return this->find(sh.c_str(), from, sh.length());
 	}
 	size_type find(const basic_cow_string &other, size_type from = 0) const noexcept
 	{
-		return this->find(other.data(), from, other.size());
+		return this->find(other.c_str(), from, other.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type find(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const
 	{
-		return this->find(other.data() + pos, from, other.do_clamp_substr(pos, n));
+		return this->find(other.c_str() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find(const value_type *s, size_type from, size_type n) const noexcept
 	{
@@ -1500,16 +1501,16 @@ public:
 
 	size_type rfind(shallow sh, size_type to = npos) const noexcept
 	{
-		return this->rfind(sh.data(), to, sh.size());
+		return this->rfind(sh.c_str(), to, sh.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type rfind(const basic_cow_string &other, size_type to = npos) const noexcept
 	{
-		return this->rfind(other.data(), to, other.size());
+		return this->rfind(other.c_str(), to, other.length());
 	}
 	size_type rfind(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const
 	{
-		return this->rfind(other.data() + pos, to, other.do_clamp_substr(pos, n));
+		return this->rfind(other.c_str() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type rfind(const value_type *s, size_type to, size_type n) const noexcept
 	{
@@ -1526,16 +1527,16 @@ public:
 
 	size_type find_first_of(shallow sh, size_type from = 0) const noexcept
 	{
-		return this->find_first_of(sh.data(), from, sh.size());
+		return this->find_first_of(sh.c_str(), from, sh.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type find_first_of(const basic_cow_string &other, size_type from = 0) const noexcept
 	{
-		return this->find_first_of(other.data(), from, other.size());
+		return this->find_first_of(other.c_str(), from, other.length());
 	}
 	size_type find_first_of(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const
 	{
-		return this->find_first_of(other.data() + pos, from, other.do_clamp_substr(pos, n));
+		return this->find_first_of(other.c_str() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find_first_of(const value_type *s, size_type from, size_type n) const noexcept
 	{
@@ -1552,16 +1553,16 @@ public:
 
 	size_type find_last_of(shallow sh, size_type to = npos) const noexcept
 	{
-		return this->find_last_of(sh.data(), to, sh.size());
+		return this->find_last_of(sh.c_str(), to, sh.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type find_last_of(const basic_cow_string &other, size_type to = npos) const noexcept
 	{
-		return this->find_last_of(other.data(), to, other.size());
+		return this->find_last_of(other.c_str(), to, other.length());
 	}
 	size_type find_last_of(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const
 	{
-		return this->find_last_of(other.data() + pos, to, other.do_clamp_substr(pos, n));
+		return this->find_last_of(other.c_str() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type find_last_of(const value_type *s, size_type to, size_type n) const noexcept
 	{
@@ -1578,16 +1579,16 @@ public:
 
 	size_type find_first_not_of(shallow sh, size_type from = 0) const noexcept
 	{
-		return this->find_first_not_of(sh.data(), from, sh.size());
+		return this->find_first_not_of(sh.c_str(), from, sh.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type find_first_not_of(const basic_cow_string &other, size_type from = 0) const noexcept
 	{
-		return this->find_first_not_of(other.data(), from, other.size());
+		return this->find_first_not_of(other.c_str(), from, other.length());
 	}
 	size_type find_first_not_of(const basic_cow_string &other, size_type from, size_type pos, size_type n = npos) const
 	{
-		return this->find_first_not_of(other.data() + pos, from, other.do_clamp_substr(pos, n));
+		return this->find_first_not_of(other.c_str() + pos, from, other.do_clamp_substr(pos, n));
 	}
 	size_type find_first_not_of(const value_type *s, size_type from, size_type n) const noexcept
 	{
@@ -1604,16 +1605,16 @@ public:
 
 	size_type find_last_not_of(shallow sh, size_type to = npos) const noexcept
 	{
-		return this->find_last_not_of(sh.data(), to, sh.size());
+		return this->find_last_not_of(sh.c_str(), to, sh.length());
 	}
 	// N.B. This is a non-standard extension.
 	size_type find_last_not_of(const basic_cow_string &other, size_type to = npos) const noexcept
 	{
-		return this->find_last_not_of(other.data(), to, other.size());
+		return this->find_last_not_of(other.c_str(), to, other.length());
 	}
 	size_type find_last_not_of(const basic_cow_string &other, size_type to, size_type pos, size_type n = npos) const
 	{
-		return this->find_last_not_of(other.data() + pos, to, other.do_clamp_substr(pos, n));
+		return this->find_last_not_of(other.c_str() + pos, to, other.do_clamp_substr(pos, n));
 	}
 	size_type find_last_not_of(const value_type *s, size_type to, size_type n) const noexcept
 	{
@@ -1652,21 +1653,21 @@ public:
 
 	int compare(shallow sh) const noexcept
 	{
-		return this->compare(sh.data(), sh.size());
+		return this->compare(sh.c_str(), sh.length());
 	}
 	int compare(const basic_cow_string &other) const noexcept
 	{
-		return this->compare(other.data(), other.size());
+		return this->compare(other.c_str(), other.length());
 	}
 	// N.B. This is a non-standard extension.
 	int compare(const basic_cow_string &other, size_type pos, size_type n = npos) const
 	{
-		return this->compare(other.data() + pos, other.do_clamp_substr(pos, n));
+		return this->compare(other.c_str() + pos, other.do_clamp_substr(pos, n));
 	}
 	// N.B. This is a non-standard extension.
 	int compare(const value_type *s, size_type n) const noexcept
 	{
-		return comparator::relation(this->data(), this->size(), s, n);
+		return comparator::relation(this->c_str(), this->length(), s, n);
 	}
 	int compare(const value_type *s) const noexcept
 	{
@@ -1674,16 +1675,16 @@ public:
 	}
 	int compare(size_type tpos, size_type tn, shallow sh) const
 	{
-		return this->compare(tpos, tn, sh.data(), sh.size());
+		return this->compare(tpos, tn, sh.c_str(), sh.length());
 	}
 	// N.B. The last two parameters are non-standard extensions.
 	int compare(size_type tpos, size_type tn, const basic_cow_string &other, size_type pos = 0, size_type n = npos) const
 	{
-		return this->compare(tpos, tn, other.data() + pos, other.do_clamp_substr(pos, n));
+		return this->compare(tpos, tn, other.c_str() + pos, other.do_clamp_substr(pos, n));
 	}
 	int compare(size_type tpos, size_type tn, const value_type *s, size_type n) const
 	{
-		return comparator::relation(this->data() + tpos, this->do_clamp_substr(tpos, tn), s, n);
+		return comparator::relation(this->c_str() + tpos, this->do_clamp_substr(tpos, tn), s, n);
 	}
 	int compare(size_type tpos, size_type tn, const value_type *s) const
 	{
@@ -1713,20 +1714,20 @@ public:
 	// N.B. These are extensions but might be standardized in C++20.
 	bool starts_with(shallow sh) const noexcept
 	{
-		return this->starts_with(sh.data(), sh.size());
+		return this->starts_with(sh.c_str(), sh.length());
 	}
 	bool starts_with(const basic_cow_string &other) const noexcept
 	{
-		return this->starts_with(other.data(), other.size());
+		return this->starts_with(other.c_str(), other.length());
 	}
 	// N.B. This is a non-standard extension.
 	bool starts_with(const basic_cow_string &other, size_type pos, size_type n = npos) const
 	{
-		return this->starts_with(other.data() + pos, other.do_clamp_substr(pos, n));
+		return this->starts_with(other.c_str() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool starts_with(const value_type *s, size_type n) const noexcept
 	{
-		return (n <= this->size()) && (traits_type::compare(this->data(), s, n) == 0);
+		return (n <= this->length()) && (traits_type::compare(this->c_str(), s, n) == 0);
 	}
 	bool starts_with(const value_type *s) const noexcept
 	{
@@ -1739,20 +1740,20 @@ public:
 
 	bool ends_with(shallow sh) const noexcept
 	{
-		return this->ends_with(sh.data(), sh.size());
+		return this->ends_with(sh.c_str(), sh.length());
 	}
 	bool ends_with(const basic_cow_string &other) const noexcept
 	{
-		return this->ends_with(other.data(), other.size());
+		return this->ends_with(other.c_str(), other.length());
 	}
 	// N.B. This is a non-standard extension.
 	bool ends_with(const basic_cow_string &other, size_type pos, size_type n = npos) const
 	{
-		return this->ends_with(other.data() + pos, other.do_clamp_substr(pos, n));
+		return this->ends_with(other.c_str() + pos, other.do_clamp_substr(pos, n));
 	}
 	bool ends_with(const value_type *s, size_type n) const noexcept
 	{
-		return (n <= this->size()) && (traits_type::compare(this->data() + this->size() - n, s, n) == 0);
+		return (n <= this->length()) && (traits_type::compare(this->c_str() + this->length() - n, s, n) == 0);
 	}
 	bool ends_with(const value_type *s) const noexcept
 	{
@@ -1773,7 +1774,7 @@ struct basic_cow_string<charT, traitsT, allocatorT>::equal_to
 
 	result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
 	{
-		if(lhs.data() == rhs.data()) {
+		if(lhs.c_str() == rhs.c_str()) {
 			return true;
 		}
 		if(lhs.size() != rhs.size()) {
@@ -1829,8 +1830,8 @@ inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...>
 {
 	auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
 	res.reserve(lhs.size() + rhs.size());
-	res.append(lhs.data(), lhs.size());
-	res.append(rhs.data(), rhs.size());
+	res.append(lhs.c_str(), lhs.length());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1839,7 +1840,7 @@ inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...>
 	auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
 	const auto rhs_len = basic_cow_string<paramsT...>::traits_type::length(rhs);
 	res.reserve(lhs.size() + rhs_len);
-	res.append(lhs.data(), lhs.size());
+	res.append(lhs.c_str(), lhs.length());
 	res.append(rhs, rhs_len);
 	return res;
 }
@@ -1848,7 +1849,7 @@ inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...>
 {
 	auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
 	res.reserve(lhs.size() + 1);
-	res.append(lhs.data(), lhs.size());
+	res.append(lhs.c_str(), lhs.length());
 	res.push_back(rhs);
 	return res;
 }
@@ -1858,7 +1859,7 @@ inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs
 {
 	auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
 	res.assign(::std::move(lhs));
-	res.append(rhs.data(), rhs.size());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1884,8 +1885,8 @@ inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT.
 {
 	auto &&res = basic_cow_string<paramsT...>(rhs.get_allocator());
 	res.reserve(lhs.size() + rhs.size());
-	res.append(lhs.data(), lhs.size());
-	res.append(rhs.data(), rhs.size());
+	res.append(lhs.c_str(), lhs.length());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1895,7 +1896,7 @@ inline basic_cow_string<paramsT...> operator+(const typename basic_cow_string<pa
 	const auto lhs_len = basic_cow_string<paramsT...>::traits_type::length(lhs);
 	res.reserve(lhs_len + rhs.size());
 	res.append(lhs, lhs_len);
-	res.append(rhs.data(), rhs.size());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1904,7 +1905,7 @@ inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT.
 	auto &&res = basic_cow_string<paramsT...>(rhs.get_allocator());
 	res.reserve(1 + rhs.size());
 	res.push_back(lhs);
-	res.append(rhs.data(), rhs.size());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 
@@ -1913,7 +1914,7 @@ inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT.
 {
 	auto &&res = basic_cow_string<paramsT...>(::std::move(rhs.get_allocator()));
 	res.assign(::std::move(rhs));
-	res.insert(0, lhs.data(), lhs.size());
+	res.insert(0, lhs.c_str(), lhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1939,7 +1940,7 @@ inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...>
 {
 	auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
 	res.assign(typename basic_cow_string<paramsT...>::shallow(lhs));
-	res.append(rhs.data(), rhs.size());
+	res.append(rhs.c_str(), rhs.length());
 	return res;
 }
 template<typename ...paramsT>
@@ -1948,10 +1949,10 @@ inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs
 	auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
 	if(lhs.size() + rhs.size() <= lhs.capacity()) {
 		res.assign(::std::move(lhs));
-		res.append(rhs.data(), rhs.size());
+		res.append(rhs.c_str(), rhs.length());
 	} else {
 		res.assign(::std::move(rhs));
-		res.insert(0, lhs.data(), lhs.size());
+		res.insert(0, lhs.c_str(), lhs.length());
 	}
 	return res;
 }
@@ -1959,157 +1960,157 @@ inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs
 template<typename ...paramsT>
 inline bool operator==(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) == 0;
 }
 template<typename ...paramsT>
 inline bool operator!=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) != 0;
 }
 template<typename ...paramsT>
 inline bool operator<(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) < 0;
 }
 template<typename ...paramsT>
 inline bool operator>(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) > 0;
 }
 template<typename ...paramsT>
 inline bool operator<=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) <= 0;
 }
 template<typename ...paramsT>
 inline bool operator>=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) >= 0;
 }
 
 template<typename ...paramsT>
 inline bool operator==(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) == 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) == 0;
 }
 template<typename ...paramsT>
 inline bool operator!=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) != 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) != 0;
 }
 template<typename ...paramsT>
 inline bool operator<(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) < 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) < 0;
 }
 template<typename ...paramsT>
 inline bool operator>(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) > 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) > 0;
 }
 template<typename ...paramsT>
 inline bool operator<=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) <= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) <= 0;
 }
 template<typename ...paramsT>
 inline bool operator>=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) >= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) >= 0;
 }
 
 template<typename ...paramsT>
 inline bool operator==(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) == 0;
 }
 template<typename ...paramsT>
 inline bool operator!=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) != 0;
 }
 template<typename ...paramsT>
 inline bool operator<(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) < 0;
 }
 template<typename ...paramsT>
 inline bool operator>(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) > 0;
 }
 template<typename ...paramsT>
 inline bool operator<=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) <= 0;
 }
 template<typename ...paramsT>
 inline bool operator>=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) >= 0;
 }
 
 template<typename ...paramsT>
 inline bool operator==(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) == 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) == 0;
 }
 template<typename ...paramsT>
 inline bool operator!=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) != 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) != 0;
 }
 template<typename ...paramsT>
 inline bool operator<(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) < 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) < 0;
 }
 template<typename ...paramsT>
 inline bool operator>(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) > 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) > 0;
 }
 template<typename ...paramsT>
 inline bool operator<=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) <= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) <= 0;
 }
 template<typename ...paramsT>
 inline bool operator>=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) >= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.c_str(), rhs.length()) >= 0;
 }
 
 template<typename ...paramsT>
 inline bool operator==(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) == 0;
 }
 template<typename ...paramsT>
 inline bool operator!=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+	return basic_cow_string<paramsT...>::comparator::inequality(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) != 0;
 }
 template<typename ...paramsT>
 inline bool operator<(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) < 0;
 }
 template<typename ...paramsT>
 inline bool operator>(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) > 0;
 }
 template<typename ...paramsT>
 inline bool operator<=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) <= 0;
 }
 
 template<typename ...paramsT>
 inline bool operator>=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
 {
-	return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
+	return basic_cow_string<paramsT...>::comparator::relation(lhs.c_str(), lhs.length(), rhs.c_str(), rhs.length()) >= 0;
 }
 
 template<typename ...paramsT>
@@ -2238,7 +2239,7 @@ basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, co
 			}
 			streamsize written;
 			if((0 <= offset) && (offset < len)) {
-				written = os.rdbuf()->sputn(str.data() + offset, len - offset);
+				written = os.rdbuf()->sputn(str.c_str() + offset, len - offset);
 				if(written == 0) {
 					os.setstate(ios_base::failbit);
 					break;
