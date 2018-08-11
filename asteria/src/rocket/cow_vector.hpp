@@ -1031,10 +1031,7 @@ public:
 			return *this;
 		}
 		this->do_reserve_more(n);
-		auto i = n;
-		do {
-			this->m_sth.emplace_back_unchecked(params...);
-		} while(--i != 0);
+		noadl::ranged_do_while(size_type(0), n, [&](size_type) { this->m_sth.emplace_back_unchecked(params...); });
 		return *this;
 	}
 	// N.B. This is a non-standard extension.
@@ -1051,17 +1048,11 @@ public:
 		}
 		const auto dist = noadl::estimate_distance(first, last);
 		if(dist == 0){
-			auto it = ::std::move(first);
-			do {
-				this->emplace_back(*it);
-			} while(++it != last);
+			noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it); });
 			return *this;
 		}
 		this->do_reserve_more(dist);
-		auto it = ::std::move(first);
-		do {
-			this->m_sth.emplace_back_unchecked(*it);
-		} while(++it != last);
+		noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it); });
 		return *this;
 	}
 	// 26.3.11.5, modifiers
@@ -1090,7 +1081,7 @@ public:
 	reference push_back(value_type &&value)
 	{
 		this->do_reserve_more(1);
-		const auto ptr = this->m_sth.emplace_back_unchecked(value);
+		const auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
 		return *ptr;
 	}
 

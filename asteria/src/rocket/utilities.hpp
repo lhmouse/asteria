@@ -47,6 +47,22 @@ constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rh
 	return !(lhs < rhs) ? ::std::forward<lhsT>(lhs) : ::std::forward<rhsT>(rhs);
 }
 
+template<typename iteratorT, typename functionT>
+inline void ranged_for(iteratorT first, iteratorT last, functionT &&func)
+{
+	for(auto it = ::std::move(first); it != last; ++it) {
+		::std::forward<functionT>(func)(it);
+	}
+}
+template<typename iteratorT, typename functionT>
+inline void ranged_do_while(iteratorT first, iteratorT last, functionT &&func)
+{
+	auto it = ::std::move(first);
+	do {
+		::std::forward<functionT>(func)(it);
+	} while(++it != last);
+}
+
 namespace details_utilities
 {
 	template<typename iteratorT>

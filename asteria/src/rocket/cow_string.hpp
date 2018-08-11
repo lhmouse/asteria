@@ -1127,10 +1127,7 @@ public:
 		auto other = basic_cow_string(shallow(*this), this->m_sth.as_allocator());
 		const auto dist = noadl::estimate_distance(first, last);
 		other.do_reserve_more(dist);
-		auto it = ::std::move(first);
-		do {
-			other.push_back(*it);
-		} while(++it != last);
+		noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &) { other.push_back(ref); });
 		this->assign(::std::move(other));
 		return *this;
 	}
