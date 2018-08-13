@@ -941,7 +941,7 @@ public:
 	}
 	size_type length() const noexcept
 	{
-		return this->size();
+		return this->m_len;
 	}
 	size_type max_size() const noexcept
 	{
