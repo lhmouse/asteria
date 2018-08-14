@@ -610,7 +610,7 @@ namespace details_cow_hashmap
 					continue;
 				}
 				ptr->nelem -= 1;
-				// Destroy the element and deallicate its storage.
+				// Destroy the element and deallocate its storage.
 				allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
 				allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_type(1));
 			}
