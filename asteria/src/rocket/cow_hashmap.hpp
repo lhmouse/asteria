@@ -93,7 +93,7 @@ namespace details_cow_hashmap
 		{
 			return this->m_ptr;
 		}
-		pointer exchange(pointer ptr) noexcept
+		pointer set(pointer ptr) noexcept
 		{
 			return noadl::exchange(this->m_ptr, ptr);
 		}
@@ -106,11 +106,13 @@ namespace details_cow_hashmap
 		using handle_type      = value_handle<allocator_type>;
 		using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-		static constexpr size_type min_nblk_for_nelem(size_type nelem) noexcept
+		enum : size_type { npos = size_type(-1) };
+
+		static constexpr size_type min_nblk_for_nbkt(size_type nbkt) noexcept
 		{
-			return (nelem * sizeof(handle_type) + sizeof(handle_storage) - 1) / sizeof(handle_storage) + 1;
+			return (nbkt * sizeof(handle_type) + sizeof(handle_storage) - 1) / sizeof(handle_storage) + 1;
 		}
-		static constexpr size_type max_nelem_for_nblk(size_type nblk) noexcept
+		static constexpr size_type max_nbkt_for_nblk(size_type nblk) noexcept
 		{
 			return (nblk - 1) * sizeof(handle_storage) / sizeof(handle_type);
 		}
@@ -124,8 +126,11 @@ namespace details_cow_hashmap
 		handle_storage(const allocator_type &xalloc, size_type xnblk) noexcept
 			: alloc(xalloc), nblk(xnblk)
 		{
-			const auto nslot = this->max_nelem_for_nblk(this->nblk);
-			for(size_type i = 0; i < nslot; ++i) {
+			const auto nbkt = this->max_nbkt_for_nblk(this->nblk);
+			// `allocator_type::pointer` need not be a trivial type.
+			// The C++ standard requires that value-initialization of such an object shall not throw exceptions,
+			// and shall result in a null pointer.
+			for(auto i = size_type(0); i < nbkt; ++i) {
 				allocator_traits<allocator_type>::construct(this->alloc, this->data + i);
 			}
 			this->nelem = 0;
@@ -133,16 +138,17 @@ namespace details_cow_hashmap
 		}
 		~handle_storage()
 		{
-			const auto nslot = this->max_nelem_for_nblk(this->nblk);
-			for(size_type i = 0; i < nslot; ++i) {
-				const auto eptr = this->data[i].get();
-				if(eptr == nullptr) {
+			const auto nbkt = this->max_nbkt_for_nblk(this->nblk);
+			for(auto i = size_type(0); i < nbkt; ++i) {
+				const auto eptr = this->data[i].set(nullptr);
+				if(!eptr) {
 					continue;
 				}
 				allocator_traits<allocator_type>::destroy(this->alloc, noadl::unfancy(eptr));
 				allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_type(1));
 			}
-			for(size_type i = 0; i < nslot; ++i) {
+			// `allocator_type::pointer` need not be a trivial type.
+			for(auto i = size_type(0); i < nbkt; ++i) {
 				allocator_traits<allocator_type>::destroy(this->alloc, this->data + i);
 			}
 #ifdef ROCKET_DEBUG
@@ -154,131 +160,53 @@ namespace details_cow_hashmap
 		handle_storage & operator=(const handle_storage &) = delete;
 	};
 
-	template<typename typeT, typename otherT>
-	struct copy_const_from
-		: conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
-	{
-	};
-
-	ROCKET_SELECTANY extern constexpr unsigned short step_table[] = {
-		1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097,
-		1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223,
-		1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321,
-		1327, 1361, 1367, 1373, 1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459,
-		1471, 1481, 1483, 1487, 1489, 1493, 1499, 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571,
-		1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693,
-		1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801, 1811,
-		1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949,
-		1951, 1973, 1979, 1987, 1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069,
-		2081, 2083, 2087, 2089, 2099, 2111, 2113, 2129, 2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203,
-		2207, 2213, 2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281, 2287, 2293, 2297, 2309, 2311,
-		2333, 2339, 2341, 2347, 2351, 2357, 2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417, 2423,
-		2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539, 2543, 2549, 2551, 2557, 2579,
-		2591, 2593, 2609, 2617, 2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687, 2689, 2693,
-		2699, 2707, 2711, 2713, 2719, 2729, 2731, 2741, 2749, 2753, 2767, 2777, 2789, 2791, 2797, 2801,
-		2803, 2819, 2833, 2837, 2843, 2851, 2857, 2861, 2879, 2887, 2897, 2903, 2909, 2917, 2927, 2939,
-		2953, 2957, 2963, 2969, 2971, 2999, 3001, 3011, 3019, 3023, 3037, 3041, 3049, 3061, 3067, 3079,
-		3083, 3089, 3109, 3119, 3121, 3137, 3163, 3167, 3169, 3181, 3187, 3191, 3203, 3209, 3217, 3221,
-		3229, 3251, 3253, 3257, 3259, 3271, 3299, 3301, 3307, 3313, 3319, 3323, 3329, 3331, 3343, 3347,
-		3359, 3361, 3371, 3373, 3389, 3391, 3407, 3413, 3433, 3449, 3457, 3461, 3463, 3467, 3469, 3491,
-		3499, 3511, 3517, 3527, 3529, 3533, 3539, 3541, 3547, 3557, 3559, 3571, 3581, 3583, 3593, 3607,
-		3613, 3617, 3623, 3631, 3637, 3643, 3659, 3671, 3673, 3677, 3691, 3697, 3701, 3709, 3719, 3727,
-		3733, 3739, 3761, 3767, 3769, 3779, 3793, 3797, 3803, 3821, 3823, 3833, 3847, 3851, 3853, 3863,
-		3877, 3881, 3889, 3907, 3911, 3917, 3919, 3923, 3929, 3931, 3943, 3947, 3967, 3989, 4001, 4003,
-		4007, 4013, 4019, 4021, 4027, 4049, 4051, 4057, 4073, 4079, 4091, 4093, 4099, 4111, 4127, 4129,
-		4133, 4139, 4153, 4157, 4159, 4177, 4201, 4211, 4217, 4219, 4229, 4231, 4241, 4243, 4253, 4259,
-		4261, 4271, 4273, 4283, 4289, 4297, 4327, 4337, 4339, 4349, 4357, 4363, 4373, 4391, 4397, 4409,
-		4421, 4423, 4441, 4447, 4451, 4457, 4463, 4481, 4483, 4493, 4507, 4513, 4517, 4519, 4523, 4547,
-		4549, 4561, 4567, 4583, 4591, 4597, 4603, 4621, 4637, 4639, 4643, 4649, 4651, 4657, 4663, 4673,
-		4679, 4691, 4703, 4721, 4723, 4729, 4733, 4751, 4759, 4783, 4787, 4789, 4793, 4799, 4801, 4813,
-		4817, 4831, 4861, 4871, 4877, 4889, 4903, 4909, 4919, 4931, 4933, 4937, 4943, 4951, 4957, 4967,
-		4969, 4973, 4987, 4993, 4999, 5003, 5009, 5011, 5021, 5023, 5039, 5051, 5059, 5077, 5081, 5087,
-		5099, 5101, 5107, 5113, 5119, 5147, 5153, 5167, 5171, 5179, 5189, 5197, 5209, 5227, 5231, 5233,
-		5237, 5261, 5273, 5279, 5281, 5297, 5303, 5309, 5323, 5333, 5347, 5351, 5381, 5387, 5393, 5399,
-		5407, 5413, 5417, 5419, 5431, 5437, 5441, 5443, 5449, 5471, 5477, 5479, 5483, 5501, 5503, 5507,
-		5519, 5521, 5527, 5531, 5557, 5563, 5569, 5573, 5581, 5591, 5623, 5639, 5641, 5647, 5651, 5653,
-		5657, 5659, 5669, 5683, 5689, 5693, 5701, 5711, 5717, 5737, 5741, 5743, 5749, 5779, 5783, 5791,
-		5801, 5807, 5813, 5821, 5827, 5839, 5843, 5849, 5851, 5857, 5861, 5867, 5869, 5879, 5881, 5897,
-		5903, 5923, 5927, 5939, 5953, 5981, 5987, 6007, 6011, 6029, 6037, 6043, 6047, 6053, 6067, 6073,
-		6079, 6089, 6091, 6101, 6113, 6121, 6131, 6133, 6143, 6151, 6163, 6173, 6197, 6199, 6203, 6211,
-		6217, 6221, 6229, 6247, 6257, 6263, 6269, 6271, 6277, 6287, 6299, 6301, 6311, 6317, 6323, 6329,
-		6337, 6343, 6353, 6359, 6361, 6367, 6373, 6379, 6389, 6397, 6421, 6427, 6449, 6451, 6469, 6473,
-		6481, 6491, 6521, 6529, 6547, 6551, 6553, 6563, 6569, 6571, 6577, 6581, 6599, 6607, 6619, 6637,
-		6653, 6659, 6661, 6673, 6679, 6689, 6691, 6701, 6703, 6709, 6719, 6733, 6737, 6761, 6763, 6779,
-		6781, 6791, 6793, 6803, 6823, 6827, 6829, 6833, 6841, 6857, 6863, 6869, 6871, 6883, 6899, 6907,
-		6911, 6917, 6947, 6949, 6959, 6961, 6967, 6971, 6977, 6983, 6991, 6997, 7001, 7013, 7019, 7027,
-		7039, 7043, 7057, 7069, 7079, 7103, 7109, 7121, 7127, 7129, 7151, 7159, 7177, 7187, 7193, 7207,
-		7211, 7213, 7219, 7229, 7237, 7243, 7247, 7253, 7283, 7297, 7307, 7309, 7321, 7331, 7333, 7349,
-		7351, 7369, 7393, 7411, 7417, 7433, 7451, 7457, 7459, 7477, 7481, 7487, 7489, 7499, 7507, 7517,
-		7523, 7529, 7537, 7541, 7547, 7549, 7559, 7561, 7573, 7577, 7583, 7589, 7591, 7603, 7607, 7621,
-		7639, 7643, 7649, 7669, 7673, 7681, 7687, 7691, 7699, 7703, 7717, 7723, 7727, 7741, 7753, 7757,
-		7759, 7789, 7793, 7817, 7823, 7829, 7841, 7853, 7867, 7873, 7877, 7879, 7883, 7901, 7907, 7919,
-	};
-	static_assert(sizeof(step_table) / sizeof(step_table[0]) >= 512 + 64, "?");
-
 	template<typename allocatorT>
-	struct find_slot_helper
+	struct linear_prober
 	{
-		// This function may return a null pointer if the table is full.
+		using allocator_type   = allocatorT;
+		using handle_type      = value_handle<allocator_type>;
+		using size_type        = typename allocator_traits<allocator_type>::size_type;
+
 		template<typename xpointerT, typename predT>
-		typename copy_const_from<value_handle<allocatorT>, decltype(*(::std::declval<xpointerT &>()))>::type * operator()(xpointerT ptr, size_t hval, predT &&pred) const
+		size_type operator()(xpointerT ptr, size_t hval, predT &&pred) const
 		{
-			const auto nslot = ptr->max_nelem_for_nblk(ptr->nblk);
-			if(nslot == 0) {
-				// There is no element.
-				return nullptr;
-			}
-			// Check the first element.
-			const auto seed = static_cast<::std::uint64_t>(hval) * 0xA17870F5D4F51B49;
+			const auto nbkt = ptr->max_nbkt_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(nbkt != 0);
 			// Conversion between an unsigned integer type and a floating point type results in performance penalty.
-			// For a value known to be non-negative, an intermediate cast to a signed integer type will mitigate this.
+			// For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
+			const auto seed = static_cast<::std::uint64_t>(static_cast<::std::uint_fast64_t>(hval) * 0xA17870F5D4F51B49);
 			const auto ratio = static_cast<double>(static_cast<::std::int_fast64_t>(seed / 2)) / 0x1p63;
 			ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-			const auto roffset = static_cast<double>(static_cast<::std::int_fast64_t>(nslot)) * ratio;
-			ROCKET_ASSERT((0.0 <= roffset) && (roffset < static_cast<double>(nslot)));
-			const auto origin = static_cast<typename allocator_traits<allocatorT>::size_type>(static_cast<::std::int64_t>(roffset));
-			auto cur = origin;
-			// Stop when a null slot is encountered, or when the predicator function returns `true`.
-			const auto stop_here = [&] { return (ptr->data[cur].get() == nullptr) || ::std::forward<predT>(pred)(ptr->data[cur].get()->first); };
-			if(stop_here() == false) {
-				// A hash collision has been detected.
-				if(nslot == 1) {
-					// There is no more element to check.
-					return nullptr;
+			const auto origin = static_cast<size_type>(static_cast<::std::int_fast64_t>(static_cast<double>(static_cast<::std::int_fast64_t>(nbkt)) * ratio));
+			ROCKET_ASSERT((0 <= origin) && (origin < nbkt));
+			// Search for a slot using linear probing.
+			const auto stop_at = [&](size_type i)
+			{
+				// Stop when either a null pointer is encountered or the predicitor returns `true`.
+				const auto eptr = ptr->data[i].get();
+				if(!eptr) {
+					return true;
 				}
-				// Iterate the entire table using double hashing scheme.
-				// `step` and `nslot` shall be mutually prime.
-				size_t step;
-				cur = (seed >> 32) % 512;
-				for(;;) {
-					// Choose a prime number for `step`.
-					step = step_table[cur];
-					if(step > nslot) {
-						// Note that `(X + step) % nslot` is identically equal to `(X + step % nslot) % nslot`.
-						step %= nslot;
-						// `step` was a prime number before the modulus operation, so it cannot be zero now.
-						break;
-					}
-					// Ensure that `step` is not a divisor of `nslot`.
-					if(nslot % step != 0) {
-						// Here `step` cannot be equal to `nslot`, so it must be less than `nslot`.
-						break;
-					}
-					++cur;
+				if(::std::forward<predT>(pred)(eptr->first)) {
+					return true;
 				}
-				ROCKET_ASSERT((0 < step) && (step < nslot));
-				// Iterate the table, wrapping around as needed.
-				cur = origin;
-				do {
-					cur = (step < nslot - cur) ? (cur + step) : (cur - (nslot - step));
-					if(cur == origin) {
-						// No null slot or desired element has been found so far.
-						return nullptr;
-					}
-					ROCKET_ASSERT(cur < nslot);
-				} while(stop_here() == false);
+				ROCKET_ASSERT(i != ptr->npos);
+				return false;
+			};
+			// * Phase one: Probe from `origin` to the end of the table.
+			for(auto i = origin; i < nbkt; ++i) {
+				if(stop_at(i)) {
+					return i;
+				}
 			}
-			return ptr->data + cur;
+			// * Phase two: Probe from the beginning of the table to `origin`.
+			for(auto i = size_type(0); i < origin; ++i) {
+				if(stop_at(i)) {
+					return i;
+				}
+			}
+			// The table is full and no desired element has been found so far.
+			return ptr->npos;
 		}
 	};
 
@@ -291,12 +219,12 @@ namespace details_cow_hashmap
 		{
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
-				if(eptr_old == nullptr) {
+				if(!eptr_old) {
 					continue;
 				}
-				// Find a slot for the new element.
-				const auto slot = find_slot_helper<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
-				ROCKET_ASSERT(slot);
+				// Find a bucket for the new element.
+				const auto k = linear_prober<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
+				ROCKET_ASSERT(k < ptr->max_nbkt_for_nblk(ptr->nblk));
 				// Allocate a new element by copy-constructing from the old one.
 				const auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, static_cast<typename allocator_traits<allocatorT>::size_type>(1));
 				try {
@@ -305,9 +233,9 @@ namespace details_cow_hashmap
 					allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, static_cast<typename allocator_traits<allocatorT>::size_type>(1));
 					throw;
 				}
-				// Insert it at the new slot.
-				ROCKET_ASSERT(slot->get() == nullptr);
-				slot->exchange(eptr);
+				// Insert it at the new bucket.
+				const auto eptr_k = ptr->data[k].set(eptr);
+				ROCKET_ASSERT(!eptr_k);
 				ptr->nelem += 1;
 			}
 		}
@@ -334,19 +262,18 @@ namespace details_cow_hashmap
 		{
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
-				if(eptr_old == nullptr) {
+				if(!eptr_old) {
 					continue;
 				}
-				// Find a slot for the new element.
-				const auto slot = find_slot_helper<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
-				ROCKET_ASSERT(slot);
-				// Allocate a new element by copy-constructing from the old one.
-				const auto eptr = ptr_old->data[i].exchange(nullptr);
-				ROCKET_ASSERT(eptr);
+				// Find a bucket for the new element.
+				const auto k = linear_prober<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
+				ROCKET_ASSERT(k < ptr->max_nbkt_for_nblk(ptr->nblk));
+				// Detach the old element.
+				const auto eptr = ptr_old->data[i].set(nullptr);
 				ptr_old->nelem -= 1;
-				// Insert it at the new slot.
-				ROCKET_ASSERT(slot->get() == nullptr);
-				slot->exchange(eptr);
+				// Insert it at the new bucket.
+				const auto eptr_k = ptr->data[k].set(eptr);
+				ROCKET_ASSERT(!eptr_k);
 				ptr->nelem += 1;
 			}
 		}
@@ -380,6 +307,7 @@ namespace details_cow_hashmap
 		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
 		enum : size_type { max_load_factor_reciprocal = 2 };
+		enum : size_type { npos = handle_storage<allocator_type>::npos };
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -478,13 +406,13 @@ namespace details_cow_hashmap
 			}
 			return ptr->nref.load(::std::memory_order_relaxed) == 1;
 		}
-		size_type slot_count() const noexcept
+		size_type bucket_count() const noexcept
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr) {
 				return 0;
 			}
-			return storage::max_nelem_for_nblk(ptr->nblk);
+			return storage::max_nbkt_for_nblk(ptr->nblk);
 		}
 		size_type capacity() const noexcept
 		{
@@ -492,13 +420,13 @@ namespace details_cow_hashmap
 			if(ptr == nullptr) {
 				return 0;
 			}
-			return storage::max_nelem_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
+			return storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
 		}
 		size_type max_size() const noexcept
 		{
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-			return storage::max_nelem_for_nblk(max_nblk / 2) / max_load_factor_reciprocal;
+			return storage::max_nbkt_for_nblk(max_nblk / 2) / max_load_factor_reciprocal;
 		}
 		size_type check_size_add(size_type base, size_type add) const
 		{
@@ -513,8 +441,8 @@ namespace details_cow_hashmap
 		size_type round_up_capacity(size_type res_arg) const
 		{
 			const auto cap = this->check_size_add(0, res_arg);
-			const auto nblk = storage::min_nblk_for_nelem(cap * max_load_factor_reciprocal);
-			return storage::max_nelem_for_nblk(nblk) / max_load_factor_reciprocal;
+			const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
+			return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
 		}
 		const handle_type * data() const noexcept
 		{
@@ -541,7 +469,7 @@ namespace details_cow_hashmap
 			}
 			const auto cap = this->check_size_add(0, res_arg);
 			// Allocate an array of `storage` large enough for a header + `cap` instances of pointers.
-			const auto nblk = storage::min_nblk_for_nelem(cap * max_load_factor_reciprocal);
+			const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
 			auto st_alloc = storage_allocator(this->as_allocator());
 			const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
@@ -619,19 +547,21 @@ namespace details_cow_hashmap
 			return ptr->data;
 		}
 		template<typename ykeyT>
-		difference_type index_of_unchecked(const ykeyT &ykey) const
+		size_type index_of_unchecked(const ykeyT &ykey) const
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr) {
-				return -1;
+				return npos;
 			}
-			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
-			if((slot == nullptr) || (slot->get() == nullptr)) {
-				return -1;
+			const auto tpos = linear_prober<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
+			if(tpos == npos) {
+				return npos;
 			}
-			const auto toff = slot - ptr->data;
-			ROCKET_ASSERT(toff >= 0);
-			return toff;
+			const auto eptr = ptr->data[tpos].get();
+			if(!eptr) {
+				return npos;
+			}
+			return tpos;
 		}
 		template<typename ykeyT, typename ...paramsT>
 		pair<handle_type *, bool> keyed_emplace_unchecked(const ykeyT &ykey, paramsT &&...params)
@@ -640,51 +570,89 @@ namespace details_cow_hashmap
 			ROCKET_ASSERT(this->element_count() < this->capacity());
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
-			// Find a slot for the new element.
-			const auto slot = find_slot_helper<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
-			ROCKET_ASSERT(slot);
-			if(slot->get() != nullptr) {
+			// Find a bucket for the new element.
+			const auto tpos = linear_prober<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
+			ROCKET_ASSERT(tpos != npos);
+			auto eptr = ptr->data[tpos].get();
+			if(eptr) {
 				// A duplicate key has been found.
-				return ::std::make_pair(slot, false);
+				return ::std::make_pair(ptr->data + tpos, false);
 			}
 			// Allocate a new element.
-			const auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_type(1));
+			eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_type(1));
 			try {
 				allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), ::std::forward<paramsT>(params)...);
 			} catch(...) {
 				allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_type(1));
 				throw;
 			}
-			// Insert it at the new slot.
-			ROCKET_ASSERT(slot->get() == nullptr);
-			slot->exchange(eptr);
+			// Insert it at the new bucket.
+			const auto eptr_k = ptr->data[tpos].set(eptr);
+			ROCKET_ASSERT(!eptr_k);
 			ptr->nelem += 1;
-			return ::std::make_pair(slot, true);
+			return ::std::make_pair(ptr->data + tpos, true);
 		}
 		void erase_range_unchecked(size_type tpos, size_type tn) noexcept
 		{
 			ROCKET_ASSERT(this->unique());
-			ROCKET_ASSERT(tpos <= this->slot_count());
-			ROCKET_ASSERT(tn <= this->slot_count() - tpos);
+			ROCKET_ASSERT(tpos <= this->bucket_count());
+			ROCKET_ASSERT(tn <= this->bucket_count() - tpos);
 			if(tn == 0) {
 				return;
 			}
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
+			const auto nbkt = storage::max_nbkt_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(nbkt != 0);
 			for(auto i = tpos; i != tpos + tn; ++i) {
-				const auto eptr = ptr->data[i].exchange(nullptr);
-				if(eptr == nullptr) {
+				const auto eptr = ptr->data[i].set(nullptr);
+				if(!eptr) {
 					continue;
 				}
+				ptr->nelem -= 1;
 				// Destroy the element and deallicate its storage.
 				allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
 				allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_type(1));
 			}
+			// Relocate elements that are not placed in their immediate locations.
+			const auto stop_at = [&](size_type i)
+			{
+				// Detach the element then insert it back.
+				const auto eptr = ptr->data[i].set(nullptr);
+				if(!eptr) {
+					return true;
+				}
+				const auto k = linear_prober<allocator_type>()(ptr, this->as_hasher()(eptr->first), [](const typename value_type::first_type &) { return false; });
+				ROCKET_ASSERT(k < nbkt);
+				const auto eptr_k = ptr->data[k].set(eptr);
+				ROCKET_ASSERT(!eptr_k);
+				ROCKET_ASSERT(i != npos);
+				return false;
+			};
+			// * Phase one: Probe from `tpos + tn` to the end of the table.
+			for(auto i = tpos + tn; i < nbkt; ++i) {
+				if(stop_at(i)) {
+					return;
+				}
+			}
+			// * Phase two: Probe from the beginning of the table to `tpos`.
+			for(auto i = size_type(0); i < tpos; ++i) {
+				if(stop_at(i)) {
+					return;
+				}
+			}
 		}
 	};
 
-	// This informs the constructor of an iterator that the `slot` parameter might point to an empty slot.
-	constexpr struct need_adjust_tag { } need_adjust;
+	// Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
+	template<typename typeT, typename otherT>
+	struct copy_const_from
+		: conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
+	{
+	};
+
+	// Informs the constructor of an iterator that the `bkt` parameter might point to an empty bucket.
+	constexpr struct needs_adjust_tag { } needs_adjust;
 
 	template<typename hashmapT, typename valueT>
 	class hashmap_iterator
@@ -703,15 +671,15 @@ namespace details_cow_hashmap
 
 	private:
 		const parent_type *m_ref;
-		handle_type *m_slot;
+		handle_type *m_bkt;
 
 	private:
-		constexpr hashmap_iterator(const parent_type *ref, handle_type *slot) noexcept
-			: m_ref(ref), m_slot(slot)
+		constexpr hashmap_iterator(const parent_type *ref, handle_type *bkt) noexcept
+			: m_ref(ref), m_bkt(bkt)
 		{
 		}
-		hashmap_iterator(const parent_type *ref, need_adjust_tag, handle_type *hint) noexcept
-			: m_ref(ref), m_slot(this->do_adjust_forwards(hint))
+		hashmap_iterator(const parent_type *ref, needs_adjust_tag, handle_type *hint) noexcept
+			: m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
 		{
 		}
 
@@ -722,20 +690,20 @@ namespace details_cow_hashmap
 		}
 		template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
 		constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT> &other) noexcept
-			: hashmap_iterator(other.m_ref, other.m_slot)
+			: hashmap_iterator(other.m_ref, other.m_bkt)
 		{
 		}
 
 	private:
-		handle_type * do_assert_valid_slot(handle_type *slot, bool to_dereference) const noexcept
+		handle_type * do_assert_valid_bucket(handle_type *bkt, bool to_dereference) const noexcept
 		{
 			const auto ref = this->m_ref;
 			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-			const auto dist = static_cast<size_t>(slot - ref->data());
-			ROCKET_ASSERT_MSG(dist <= ref->slot_count(), "This iterator has been invalidated.");
-			ROCKET_ASSERT_MSG(!((dist < ref->slot_count()) && (slot->get() == nullptr)), "The element referenced by this iterator no longer exists.");
-			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->slot_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
-			return slot;
+			const auto dist = static_cast<size_t>(bkt - ref->data());
+			ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
+			ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && (bkt->get() == nullptr)), "The element referenced by this iterator no longer exists.");
+			ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
+			return bkt;
 		}
 		handle_type * do_adjust_forwards(handle_type *hint) const noexcept
 		{
@@ -744,12 +712,12 @@ namespace details_cow_hashmap
 			}
 			const auto ref = this->m_ref;
 			ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-			const auto end = ref->data() + ref->slot_count();
-			auto slot = hint;
-			while((slot != end) && (slot->get() == nullptr)) {
-				++slot;
+			const auto end = ref->data() + ref->bucket_count();
+			auto bkt = hint;
+			while((bkt != end) && (bkt->get() == nullptr)) {
+				++bkt;
 			}
-			return slot;
+			return bkt;
 		}
 
 	public:
@@ -760,7 +728,7 @@ namespace details_cow_hashmap
 
 		handle_type * tell() const noexcept
 		{
-			return this->do_assert_valid_slot(this->m_slot, false);
+			return this->do_assert_valid_bucket(this->m_bkt, false);
 		}
 		handle_type * tell_owned_by(const parent_type *ref) const noexcept
 		{
@@ -769,23 +737,23 @@ namespace details_cow_hashmap
 		}
 		hashmap_iterator & seek_next() noexcept
 		{
-			auto slot = this->do_assert_valid_slot(this->m_slot, false);
-			ROCKET_ASSERT_MSG(slot != this->m_ref->data() + this->m_ref->slot_count(), "The past-the-end iterator cannot be incremented.");
-			slot = this->do_adjust_forwards(slot + 1);
-			this->m_slot = this->do_assert_valid_slot(slot, false);
+			auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
+			ROCKET_ASSERT_MSG(bkt != this->m_ref->data() + this->m_ref->bucket_count(), "The past-the-end iterator cannot be incremented.");
+			bkt = this->do_adjust_forwards(bkt + 1);
+			this->m_bkt = this->do_assert_valid_bucket(bkt, false);
 			return *this;
 		}
 
 		reference operator*() const noexcept
 		{
-			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
-			const auto eptr = slot->get();
+			const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
+			const auto eptr = bkt->get();
 			return *eptr;
 		}
 		pointer operator->() const noexcept
 		{
-			const auto slot = this->do_assert_valid_slot(this->m_slot, true);
-			const auto eptr = slot->get();
+			const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
+			const auto eptr = bkt->get();
 			return noadl::unfancy(eptr);
 		}
 	};
@@ -942,8 +910,8 @@ private:
 	details_cow_hashmap::value_handle<allocator_type> * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
 	{
 		ROCKET_ASSERT(cnt_one <= off_two);
-		ROCKET_ASSERT(off_two <= this->m_sth.slot_count());
-		ROCKET_ASSERT(cnt_two <= this->m_sth.slot_count() - off_two);
+		ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());
+		ROCKET_ASSERT(cnt_two <= this->m_sth.bucket_count() - off_two);
 		const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
 		if(ptr == nullptr) {
 			// The storage has been deallocated.
@@ -968,7 +936,7 @@ private:
 			// Reserve more space for non-debug builds.
 			cap = noadl::max(cap, cnt + cnt / 2 + 7);
 #endif
-			this->do_reallocate(0, 0, this->slot_count(), cap);
+			this->do_reallocate(0, 0, this->bucket_count(), cap);
 		}
 		ROCKET_ASSERT(this->capacity() >= cap);
 	}
@@ -983,7 +951,7 @@ private:
 			return nullptr;
 		}
 		if(this->unique() == false) {
-			return this->do_reallocate(0, 0, this->slot_count(), this->size());
+			return this->do_reallocate(0, 0, this->bucket_count(), this->size());
 		}
 		return this->m_sth.mut_data_unchecked();
 	}
@@ -991,11 +959,11 @@ private:
 	details_cow_hashmap::value_handle<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto cnt_old = this->size();
-		const auto slot_cnt_old = this->slot_count();
-		ROCKET_ASSERT(tpos <= slot_cnt_old);
-		ROCKET_ASSERT(tn <= slot_cnt_old - tpos);
+		const auto nbkt_old = this->bucket_count();
+		ROCKET_ASSERT(tpos <= nbkt_old);
+		ROCKET_ASSERT(tn <= nbkt_old - tpos);
 		if(this->unique() == false) {
-			const auto ptr = this->do_reallocate(tpos, tpos + tn, slot_cnt_old - (tpos + tn), cnt_old);
+			const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
 			return ptr + tn;
 		}
 		const auto ptr = this->m_sth.mut_data_unchecked();
@@ -1007,11 +975,11 @@ public:
 	// iterators
 	const_iterator begin() const noexcept
 	{
-		return const_iterator(this->m_sth, details_cow_hashmap::need_adjust, this->do_get_table());
+		return const_iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_get_table());
 	}
 	const_iterator end() const noexcept
 	{
-		return const_iterator(this->m_sth, this->do_get_table() + this->slot_count());
+		return const_iterator(this->m_sth, this->do_get_table() + this->bucket_count());
 	}
 
 	const_iterator cbegin() const noexcept
@@ -1027,13 +995,13 @@ public:
 	// N.B. This is a non-standard extension.
 	iterator mut_begin()
 	{
-		return iterator(this->m_sth, details_cow_hashmap::need_adjust, this->do_mut_table());
+		return iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_mut_table());
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. This is a non-standard extension.
 	iterator mut_end()
 	{
-		return iterator(this->m_sth, this->do_mut_table() + this->slot_count());
+		return iterator(this->m_sth, this->do_mut_table() + this->bucket_count());
 	}
 
 	// capacity
@@ -1061,7 +1029,7 @@ public:
 		if((this->unique() != false) && (this->capacity() >= cap_new)) {
 			return;
 		}
-		this->do_reallocate(0, 0, this->slot_count(), cap_new);
+		this->do_reallocate(0, 0, this->bucket_count(), cap_new);
 		ROCKET_ASSERT(this->capacity() >= res_arg);
 	}
 	void shrink_to_fit()
@@ -1081,7 +1049,7 @@ public:
 			this->do_deallocate();
 			return;
 		}
-		this->m_sth.erase_range_unchecked(0, this->slot_count());
+		this->m_sth.erase_range_unchecked(0, this->bucket_count());
 	}
 	// N.B. This is a non-standard extension.
 	bool unique() const noexcept
@@ -1091,13 +1059,13 @@ public:
 
 	// hash policy
 	// N.B. This is a non-standard extension.
-	size_type slot_count() const noexcept
+	size_type bucket_count() const noexcept
 	{
-		return this->m_sth.slot_count();
+		return this->m_sth.bucket_count();
 	}
 	float load_factor() const noexcept
 	{
-		return static_cast<float>(static_cast<difference_type>(this->size())) / static_cast<float>(static_cast<difference_type>(this->slot_count()));
+		return static_cast<float>(static_cast<difference_type>(this->size())) / static_cast<float>(static_cast<difference_type>(this->bucket_count()));
 	}
 	// N.B. The `constexpr` specifier is a non-standard extension.
 	constexpr float max_load_factor() const noexcept
@@ -1107,7 +1075,7 @@ public:
 	void rehash(size_type n)
 	{
 		const auto cnt = this->size();
-		this->do_reallocate(0, 0, this->slot_count(), noadl::max(cnt, n));
+		this->do_reallocate(0, 0, this->bucket_count(), noadl::max(cnt, n));
 	}
 
 	// 26.5.4.4, modifiers
@@ -1230,52 +1198,52 @@ public:
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-		const auto slot = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(this->m_sth, slot);
+		const auto bkt = this->do_erase_no_bound_check(tpos, tn);
+		return iterator(this->m_sth, bkt);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-		const auto slot = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(this->m_sth, details_cow_hashmap::need_adjust, slot);
+		const auto bkt = this->do_erase_no_bound_check(tpos, 1);
+		return iterator(this->m_sth, details_cow_hashmap::needs_adjust, bkt);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type differs from `std::unordered_map`.
 	bool erase(const key_type &key)
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return false;
 		}
-		this->do_erase_no_bound_check(static_cast<size_type>(toff), 1);
+		this->do_erase_no_bound_check(tpos, 1);
 		return true;
 	}
 
 	// map operations
 	const_iterator find(const key_type &key) const
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return this->end();
 		}
-		const auto slot = this->do_get_table() + toff;
-		return const_iterator(this->m_sth, slot);
+		const auto bkt = this->do_get_table() + tpos;
+		return const_iterator(this->m_sth, bkt);
 	}
 	iterator find(const key_type &key)
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return this->mut_end();
 		}
-		const auto slot = this->do_mut_table() + toff;
-		return iterator(this->m_sth, slot);
+		const auto bkt = this->do_mut_table() + tpos;
+		return iterator(this->m_sth, bkt);
 	}
 	// N.B. The return type differs from `std::unordered_map`.
 	bool count(const key_type &key) const
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return false;
 		}
 		return true;
@@ -1284,23 +1252,23 @@ public:
 	// N.B. This is a non-standard extension.
 	const mapped_type * get(const key_type &key) const
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return nullptr;
 		}
-		const auto slot = this->do_get_table() + toff;
-		const auto eptr = slot->get();
+		const auto bkt = this->do_get_table() + tpos;
+		const auto eptr = bkt->get();
 		return ::std::addressof(eptr->second);
 	}
 	// N.B. This is a non-standard extension.
 	mapped_type * get(const key_type &key)
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			return nullptr;
 		}
-		const auto slot = this->do_mut_table() + toff;
-		const auto eptr = slot->get();
+		const auto bkt = this->do_mut_table() + tpos;
+		const auto eptr = bkt->get();
 		return ::std::addressof(eptr->second);
 	}
 
@@ -1310,8 +1278,8 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
-		const auto slot = result.first;
-		const auto eptr = slot->get();
+		const auto bkt = result.first;
+		const auto eptr = bkt->get();
 		return eptr->second;
 	}
 	mapped_type & operator[](key_type &&key)
@@ -1319,28 +1287,28 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
-		const auto slot = result.first;
-		const auto eptr = slot->get();
+		const auto bkt = result.first;
+		const auto eptr = bkt->get();
 		return eptr->second;
 	}
 	const mapped_type & at(const key_type &key) const
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto slot = this->do_get_table() + toff;
-		const auto eptr = slot->get();
+		const auto bkt = this->do_get_table() + tpos;
+		const auto eptr = bkt->get();
 		return eptr->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
-		const auto toff = this->m_sth.index_of_unchecked(key);
-		if(toff < 0) {
+		const auto tpos = this->m_sth.index_of_unchecked(key);
+		if(tpos == this->m_sth.npos) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto slot = this->do_mut_table() + toff;
-		const auto eptr = slot->get();
+		const auto bkt = this->do_mut_table() + tpos;
+		const auto eptr = bkt->get();
 		return eptr->second;
 	}
 
