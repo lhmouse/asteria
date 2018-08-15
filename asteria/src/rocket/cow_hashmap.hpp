@@ -547,7 +547,7 @@ namespace details_cow_hashmap
 		}
 
 		template<typename ykeyT>
-		difference_type find(const ykeyT &ykey) const
+		difference_type index_of(const ykeyT &ykey) const
 		{
 			const auto ptr = this->m_ptr;
 			if(ptr == nullptr) {
@@ -1225,7 +1225,7 @@ public:
 	template<typename ykeyT, typename enable_if<is_convertible<ykeyT, const_iterator>::value == false>::type * = nullptr>
 	bool erase(const ykeyT &key)
 	{
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return false;
 		}
@@ -1237,7 +1237,7 @@ public:
 	const_iterator find(const key_type &key) const
 	{
 		const auto ptr = this->do_get_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return this->end();
 		}
@@ -1246,7 +1246,7 @@ public:
 	iterator find(const key_type &key)
 	{
 		const auto ptr = this->do_mut_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return this->mut_end();
 		}
@@ -1255,7 +1255,7 @@ public:
 	// N.B. The return type differs from `std::unordered_map`.
 	bool count(const key_type &key) const
 	{
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return false;
 		}
@@ -1266,7 +1266,7 @@ public:
 	const mapped_type * get(const key_type &key) const
 	{
 		const auto ptr = this->do_get_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return nullptr;
 		}
@@ -1276,7 +1276,7 @@ public:
 	mapped_type * get(const key_type &key)
 	{
 		const auto ptr = this->do_mut_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			return nullptr;
 		}
@@ -1301,7 +1301,7 @@ public:
 	const mapped_type & at(const key_type &key) const
 	{
 		const auto ptr = this->do_get_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
@@ -1310,7 +1310,7 @@ public:
 	mapped_type & at(const key_type &key)
 	{
 		const auto ptr = this->do_mut_table();
-		const auto toff = this->m_sth.find(key);
+		const auto toff = this->m_sth.index_of(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
