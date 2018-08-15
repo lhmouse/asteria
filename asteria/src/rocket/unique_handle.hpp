@@ -32,7 +32,7 @@ using ::std::false_type;
 using ::std::true_type;
 
 template<typename handleT, typename closerT>
-class unique_handle;
+  class unique_handle;
 
 namespace details_unique_handle
 {

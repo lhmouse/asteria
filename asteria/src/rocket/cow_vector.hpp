@@ -52,7 +52,7 @@ using ::std::ptrdiff_t;
 using ::std::uintptr_t;
 
 template<typename valueT, typename allocatorT = allocator<valueT>>
-class cow_vector;
+  class cow_vector;
 
 namespace details_cow_vector
 {
@@ -494,8 +494,7 @@ namespace details_cow_vector
 	class vector_iterator
 	{
 		template<typename, typename>
-		friend class vector_iterator;
-
+		  friend class vector_iterator;
 		friend vectorT;
 
 	public:

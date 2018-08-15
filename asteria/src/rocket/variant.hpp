@@ -32,7 +32,7 @@ using ::std::true_type;
 using ::std::type_info;
 
 template<typename ...elementsT>
-class variant;
+  class variant;
 
 namespace details_variant
 {

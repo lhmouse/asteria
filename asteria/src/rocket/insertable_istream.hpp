@@ -13,7 +13,7 @@ namespace rocket
 using ::std::basic_istream;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-class basic_insertable_istream;
+  class basic_insertable_istream;
 
 template<typename charT, typename traitsT, typename allocatorT>
 class basic_insertable_istream
@@ -71,7 +71,7 @@ public:
 };
 
 template<typename charT, typename traitsT, typename allocatorT>
-basic_insertable_istream<charT, traitsT, allocatorT>::~basic_insertable_istream() = default;
+  basic_insertable_istream<charT, traitsT, allocatorT>::~basic_insertable_istream() = default;
 
 extern template class basic_insertable_istream<char>;
 extern template class basic_insertable_istream<wchar_t>;

@@ -59,7 +59,7 @@ using ::std::ptrdiff_t;
 using ::std::nullptr_t;
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
-class cow_hashmap;
+  class cow_hashmap;
 
 namespace details_cow_hashmap
 {
@@ -647,8 +647,7 @@ namespace details_cow_hashmap
 	class hashmap_iterator
 	{
 		template<typename, typename>
-		friend class hashmap_iterator;
-
+		  friend class hashmap_iterator;
 		friend hashmapT;
 
 	public:

@@ -16,7 +16,7 @@ using ::std::is_nothrow_constructible;
 using ::std::ptrdiff_t;
 
 template<typename elementT>
-class fill_iterator;
+  class fill_iterator;
 
 template<typename elementT>
 class fill_iterator

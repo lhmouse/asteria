@@ -59,7 +59,7 @@ using ::std::size_t;
 using ::std::ptrdiff_t;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-class basic_cow_string;
+  class basic_cow_string;
 
 namespace details_cow_string
 {
@@ -314,8 +314,7 @@ namespace details_cow_string
 	class string_iterator
 	{
 		template<typename, typename>
-		friend class string_iterator;
-
+		  friend class string_iterator;
 		friend stringT;
 
 	public:
@@ -497,7 +496,7 @@ namespace details_cow_string
 
 	// basic_cow_string::shallow
 	template<typename charT, typename traitsT>
-	class shallow;
+	  class shallow;
 
 	template<typename charT>
 	class shallow_base
@@ -507,7 +506,7 @@ namespace details_cow_string
 	};
 
 	template<typename charT>
-	constexpr charT shallow_base<charT>::s_empty[1];
+	  constexpr charT shallow_base<charT>::s_empty[1];
 
 	extern template class shallow_base<char>;
 	extern template class shallow_base<wchar_t>;
