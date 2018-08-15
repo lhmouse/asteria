@@ -948,17 +948,19 @@ private:
 		return this->m_sth.mut_data_unchecked();
 	}
 
-	void do_erase_no_bound_check(size_type tpos, size_type tn)
+	details_cow_hashmap::value_handle<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto cnt_old = this->size();
 		const auto nbkt_old = this->bucket_count();
 		ROCKET_ASSERT(tpos <= nbkt_old);
 		ROCKET_ASSERT(tn <= nbkt_old - tpos);
 		if(this->unique() == false) {
-			this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
-			return;
+			const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
+			return ptr + tpos;
 		}
+		const auto ptr = this->m_sth.mut_data_unchecked();
 		this->m_sth.erase_range_unchecked(tpos, tn);
+		return ptr + tn;
 	}
 
 public:
@@ -1204,19 +1206,19 @@ public:
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
-	// N.B. This function may invalidate iterators and references. Hence it returns `void`.
-	void erase(const_iterator tfirst, const_iterator tlast)
+	iterator erase(const_iterator tfirst, const_iterator tlast)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-		this->do_erase_no_bound_check(tpos, tn);
+		const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+		return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	// N.B. This function may invalidate iterators and references. Hence it returns `void`.
-	void erase(const_iterator tfirst)
+	iterator erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-		this->do_erase_no_bound_check(tpos, 1);
+		const auto ptr = this->do_erase_no_bound_check(tpos, 1);
+		return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type differs from `std::unordered_map`.
@@ -1239,8 +1241,7 @@ public:
 		if(toff < 0) {
 			return this->end();
 		}
-		const auto bkt = ptr + toff;
-		return const_iterator(this->m_sth, bkt);
+		return const_iterator(this->m_sth, ptr + toff);
 	}
 	iterator find(const key_type &key)
 	{
@@ -1249,8 +1250,7 @@ public:
 		if(toff < 0) {
 			return this->mut_end();
 		}
-		const auto bkt = ptr + toff;
-		return iterator(this->m_sth, bkt);
+		return iterator(this->m_sth, ptr + toff);
 	}
 	// N.B. The return type differs from `std::unordered_map`.
 	bool count(const key_type &key) const
@@ -1270,8 +1270,7 @@ public:
 		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = ptr + toff;
-		return ::std::addressof(bkt->get()->second);
+		return ::std::addressof(ptr[toff].get()->second);
 	}
 	// N.B. This is a non-standard extension.
 	mapped_type * get(const key_type &key)
@@ -1281,8 +1280,7 @@ public:
 		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = ptr + toff;
-		return ::std::addressof(bkt->get()->second);
+		return ::std::addressof(ptr[toff].get()->second);
 	}
 
 	// 26.5.4.3, element access
@@ -1291,16 +1289,14 @@ public:
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
-		const auto bkt = result.first;
-		return bkt->get()->second;
+		return result.first->get()->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
 		this->do_reserve_more(1);
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
-		const auto bkt = result.first;
-		return bkt->get()->second;
+		return result.first->get()->second;
 	}
 	const mapped_type & at(const key_type &key) const
 	{
@@ -1309,8 +1305,7 @@ public:
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = ptr + toff;
-		return bkt->get()->second;
+		return ptr[toff].get()->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
@@ -1319,8 +1314,7 @@ public:
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = ptr + toff;
-		return bkt->get()->second;
+		return ptr[toff].get()->second;
 	}
 
 	// N.B. This function is a non-standard extension.
