@@ -646,6 +646,9 @@ namespace details_cow_hashmap
 	template<typename hashmapT, typename valueT>
 	class hashmap_iterator
 	{
+		template<typename, typename>
+		friend class hashmap_iterator;
+
 		friend hashmapT;
 
 	public:
@@ -807,7 +810,9 @@ public:
 	{
 		this->m_sth.reallocate(0, 0, 0, res_arg);
 	}
-	cow_hashmap()
+	cow_hashmap() noexcept(noexcept(hasher()) && is_nothrow_copy_constructible<hasher>::value &&
+	                       noexcept(key_equal()) && is_nothrow_copy_constructible<key_equal>::value &&
+	                       noexcept(allocator_type()))
 		: cow_hashmap(0, hasher(), key_equal(), allocator_type())
 	{
 	}
@@ -850,14 +855,14 @@ public:
 		this->assign(::std::move(first), ::std::move(last));
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-	cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type &alloc = allocator_type())
-		: cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+	cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher &hf, const allocator_type &alloc)
+		: cow_hashmap(res_arg, hf, key_equal(), alloc)
 	{
 		this->assign(::std::move(first), ::std::move(last));
 	}
 	template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-	cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher &hf = hasher(), const allocator_type &alloc = allocator_type())
-		: cow_hashmap(res_arg, hf, key_equal(), alloc)
+	cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type &alloc)
+		: cow_hashmap(res_arg, hasher(), key_equal(), alloc)
 	{
 		this->assign(::std::move(first), ::std::move(last));
 	}
@@ -866,13 +871,13 @@ public:
 	{
 		this->assign(init);
 	}
-	cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type &alloc = allocator_type())
-		: cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+	cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher &hf, const allocator_type &alloc)
+		: cow_hashmap(res_arg, hf, key_equal(), alloc)
 	{
 		this->assign(init);
 	}
-	cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher &hf = hasher(), const allocator_type &alloc = allocator_type())
-		: cow_hashmap(res_arg, hf, key_equal(), alloc)
+	cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type &alloc)
+		: cow_hashmap(res_arg, hasher(), key_equal(), alloc)
 	{
 		this->assign(init);
 	}
@@ -943,19 +948,17 @@ private:
 		return this->m_sth.mut_data_unchecked();
 	}
 
-	details_cow_hashmap::value_handle<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
+	void do_erase_no_bound_check(size_type tpos, size_type tn)
 	{
 		const auto cnt_old = this->size();
 		const auto nbkt_old = this->bucket_count();
 		ROCKET_ASSERT(tpos <= nbkt_old);
 		ROCKET_ASSERT(tn <= nbkt_old - tpos);
 		if(this->unique() == false) {
-			const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
-			return ptr + tn;
+			this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
+			return;
 		}
-		const auto ptr = this->m_sth.mut_data_unchecked();
 		this->m_sth.erase_range_unchecked(tpos, tn);
-		return ptr + tn;
 	}
 
 public:
@@ -1075,8 +1078,14 @@ public:
 		return this->try_emplace(value.first, ::std::move(value.second));
 	}
 	// N.B. This is a non-standard extension.
-	template<typename yvalueT>
-	pair<iterator, bool> insert(pair<key_type, yvalueT> &&value)
+	template<typename ykeyT, typename yvalueT>
+	pair<iterator, bool> insert(const pair<ykeyT, yvalueT> &value)
+	{
+		return this->try_emplace(value.first, value.second);
+	}
+	// N.B. This is a non-standard extension.
+	template<typename ykeyT, typename yvalueT>
+	pair<iterator, bool> insert(pair<ykeyT, yvalueT> &&value)
 	{
 		return this->try_emplace(::std::move(value.first), ::std::move(value.second));
 	}
@@ -1117,6 +1126,20 @@ public:
 	{
 		return this->insert(::std::move(value)).first;
 	}
+	// N.B. This is a non-standard extension.
+	// N.B. The hint is ignored.
+	template<typename ykeyT, typename yvalueT>
+	iterator insert(const_iterator /*hint*/, const pair<ykeyT, yvalueT> &value)
+	{
+		return this->insert(value).first;
+	}
+	// N.B. This is a non-standard extension.
+	// N.B. The hint is ignored.
+	template<typename ykeyT, typename yvalueT>
+	iterator insert(const_iterator /*hint*/, pair<ykeyT, yvalueT> &&value)
+	{
+		return this->insert(::std::move(value)).first;
+	}
 
 	template<typename ...paramsT>
 	pair<iterator, bool> try_emplace(const key_type &key, paramsT &&...params)
@@ -1154,7 +1177,7 @@ public:
 		if(result.second){
 			return result;
 		}
-		*(result.first.tell()) = ::std::forward<yvalueT>(yvalue);
+		result.first.tell()->get()->second = ::std::forward<yvalueT>(yvalue);
 		return result;
 	}
 	template<typename yvalueT>
@@ -1164,40 +1187,41 @@ public:
 		if(result.second){
 			return result;
 		}
-		*(result.first.tell()) = ::std::forward<yvalueT>(yvalue);
+		result.first.tell()->get()->second = ::std::forward<yvalueT>(yvalue);
 		return result;
 	}
 	// N.B. The hint is ignored.
 	template<typename yvalueT>
-	pair<iterator, bool> insert_or_assign(const_iterator /*hint*/, const key_type &key, yvalueT &&yvalue)
+	iterator insert_or_assign(const_iterator /*hint*/, const key_type &key, yvalueT &&yvalue)
 	{
 		return this->insert_or_assign(key, ::std::forward<yvalueT>(yvalue)).first;
 	}
 	// N.B. The hint is ignored.
 	template<typename yvalueT>
-	pair<iterator, bool> insert_or_assign(const_iterator /*hint*/, key_type &&key, yvalueT &&yvalue)
+	iterator insert_or_assign(const_iterator /*hint*/, key_type &&key, yvalueT &&yvalue)
 	{
 		return this->insert_or_assign(::std::move(key), ::std::forward<yvalueT>(yvalue)).first;
 	}
 
 	// N.B. This function may throw `std::bad_alloc()`.
-	iterator erase(const_iterator tfirst, const_iterator tlast)
+	// N.B. This function may invalidate iterators and references. Hence it returns `void`.
+	void erase(const_iterator tfirst, const_iterator tlast)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
 		const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-		const auto bkt = this->do_erase_no_bound_check(tpos, tn);
-		return iterator(this->m_sth, bkt);
+		this->do_erase_no_bound_check(tpos, tn);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
-	iterator erase(const_iterator tfirst)
+	// N.B. This function may invalidate iterators and references. Hence it returns `void`.
+	void erase(const_iterator tfirst)
 	{
 		const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-		const auto bkt = this->do_erase_no_bound_check(tpos, 1);
-		return iterator(this->m_sth, details_cow_hashmap::needs_adjust, bkt);
+		this->do_erase_no_bound_check(tpos, 1);
 	}
 	// N.B. This function may throw `std::bad_alloc()`.
 	// N.B. The return type differs from `std::unordered_map`.
-	bool erase(const key_type &key)
+	template<typename ykeyT, typename enable_if<is_convertible<ykeyT, const_iterator>::value == false>::type * = nullptr>
+	bool erase(const ykeyT &key)
 	{
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
@@ -1210,20 +1234,22 @@ public:
 	// map operations
 	const_iterator find(const key_type &key) const
 	{
+		const auto ptr = this->do_get_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			return this->end();
 		}
-		const auto bkt = this->do_get_table() + toff;
+		const auto bkt = ptr + toff;
 		return const_iterator(this->m_sth, bkt);
 	}
 	iterator find(const key_type &key)
 	{
+		const auto ptr = this->do_mut_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			return this->mut_end();
 		}
-		const auto bkt = this->do_mut_table() + toff;
+		const auto bkt = ptr + toff;
 		return iterator(this->m_sth, bkt);
 	}
 	// N.B. The return type differs from `std::unordered_map`.
@@ -1239,21 +1265,23 @@ public:
 	// N.B. This is a non-standard extension.
 	const mapped_type * get(const key_type &key) const
 	{
+		const auto ptr = this->do_get_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = this->do_get_table() + toff;
+		const auto bkt = ptr + toff;
 		return ::std::addressof(bkt->get()->second);
 	}
 	// N.B. This is a non-standard extension.
 	mapped_type * get(const key_type &key)
 	{
+		const auto ptr = this->do_mut_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = this->do_mut_table() + toff;
+		const auto bkt = ptr + toff;
 		return ::std::addressof(bkt->get()->second);
 	}
 
@@ -1276,20 +1304,22 @@ public:
 	}
 	const mapped_type & at(const key_type &key) const
 	{
+		const auto ptr = this->do_get_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = this->do_get_table() + toff;
+		const auto bkt = ptr + toff;
 		return bkt->get()->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
+		const auto ptr = this->do_mut_table();
 		const auto toff = this->m_sth.find(key);
 		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = this->do_mut_table() + toff;
+		const auto bkt = ptr + toff;
 		return bkt->get()->second;
 	}
 
