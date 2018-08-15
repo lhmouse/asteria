@@ -130,7 +130,8 @@ public:
 	{
 		D_string value;
 	};
-	using Variant = rocket::variant<ROCKET_CDR(
+	using Variant = rocket::variant<
+	ROCKET_CDR(
 		, S_keyword          // 0
 		, S_punctuator       // 1
 		, S_identifier       // 2

@@ -26,7 +26,8 @@ public:
 		type_array     = 7,
 		type_object    = 8,
 	};
-	using Variant = rocket::variant<ROCKET_CDR(
+	using Variant = rocket::variant<
+	ROCKET_CDR(
 		, D_null      // 0
 		, D_boolean   // 1
 		, D_integer   // 2
