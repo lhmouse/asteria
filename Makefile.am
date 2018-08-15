@@ -47,7 +47,10 @@ pkginclude_HEADERS =	\
 	asteria/src/function_base.hpp	\
 	asteria/src/value.hpp	\
 	asteria/src/parser_result.hpp	\
-	asteria/src/token.hpp
+	asteria/src/token.hpp	\
+	asteria/src/reference_root.hpp	\
+	asteria/src/reference_designator.hpp	\
+	asteria/src/reference.hpp
 
 lib_LTLIBRARIES =	\
 	lib/libasteria.la
@@ -64,7 +67,10 @@ lib_libasteria_la_SOURCES =	\
 	asteria/src/opaque_base.cpp	\
 	asteria/src/function_base.cpp	\
 	asteria/src/value.cpp	\
-	asteria/src/token.cpp
+	asteria/src/token.cpp	\
+	asteria/src/reference_root.cpp	\
+	asteria/src/reference_designator.cpp	\
+	asteria/src/reference.cpp
 
 lib_libasteria_la_LDFLAGS =	\
 	-Wl,--no-undefined -no-undefined -version-info 0:0:0

@@ -26,24 +26,24 @@ using Double_precision  = double;
 using Cow_string        = rocket::cow_string;
 
 template<typename ElementT>
-using Vector = rocket::cow_vector<ElementT>;
+  using Vector = rocket::cow_vector<ElementT>;
 template<typename ElementT>
-using Dictionary = rocket::cow_hashmap<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
+  using Dictionary = rocket::cow_hashmap<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
 template<typename FirstT, typename SecondT>
-using Pair = std::pair<FirstT, SecondT>;
+  using Pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
-using Uptr = std::unique_ptr<ElementT>;
+  using Uptr = std::unique_ptr<ElementT>;
 
 template<typename ElementT>
-using Sptr = std::shared_ptr<ElementT>;
+  using Sptr = std::shared_ptr<ElementT>;
 template<typename ElementT>
-using Wptr = std::weak_ptr<ElementT>;
+  using Wptr = std::weak_ptr<ElementT>;
 
 template<typename ElementT>
-using Spcr = const Sptr<ElementT> &;
+  using Spcr = const Sptr<ElementT> &;
 template<typename ElementT>
-using Wpcr = const Wptr<ElementT> &;
+  using Wpcr = const Wptr<ElementT> &;
 
 // General utilities
 class Logger;
@@ -51,18 +51,14 @@ class Logger;
 // Lexical elements
 class Parser_result;
 class Token;
-class Initializer;
-class Expression_node;
-class Statement;
 
 // Runtime objects
 class Value;
-class Reference;
-class Exception;
 class Opaque_base;
 class Function_base;
-class Function;
-class Scope;
+class Reference_root;
+class Reference_segment;
+using Reference = Pair<Reference_root, Vector<Reference_segment>>;
 
 // Runtime data types exposed to users
 using D_null      = Nullptr;
