@@ -113,8 +113,11 @@ namespace details_cow_vector
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+			// Copy elements one by one.
 			auto nelem = ptr->nelem;
-			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(cnt <= cap - nelem);
 			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
@@ -140,9 +143,11 @@ namespace details_cow_vector
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
-			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(cnt <= cap - nelem);
 			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 			ptr->nelem = (nelem += cnt);
@@ -156,8 +161,11 @@ namespace details_cow_vector
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+			// Move elements one by one.
 			auto nelem = ptr->nelem;
-			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(cnt <= cap - nelem);
 			for(auto i = off; i != off + cnt; ++i) {
 				allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
@@ -172,9 +180,11 @@ namespace details_cow_vector
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
 			// Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
 			auto nelem = ptr->nelem;
-			const auto cap = ptr->max_nelem_for_nblk(ptr->nblk);
+			const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(cnt <= cap - nelem);
 			::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 #ifdef ROCKET_DEBUG
