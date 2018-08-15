@@ -106,8 +106,6 @@ namespace details_cow_hashmap
 		using handle_type      = value_handle<allocator_type>;
 		using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-		enum : size_type { npos = size_type(-1) };
-
 		static constexpr size_type min_nblk_for_nbkt(size_type nbkt) noexcept
 		{
 			return (nbkt * sizeof(handle_type) + sizeof(handle_storage) - 1) / sizeof(handle_storage) + 1;
@@ -145,7 +143,7 @@ namespace details_cow_hashmap
 					continue;
 				}
 				allocator_traits<allocator_type>::destroy(this->alloc, noadl::unfancy(eptr));
-				allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_type(1));
+				allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_t(1));
 			}
 			// `allocator_type::pointer` need not be a trivial type.
 			for(auto i = size_type(0); i < nbkt; ++i) {
@@ -160,53 +158,59 @@ namespace details_cow_hashmap
 		handle_storage & operator=(const handle_storage &) = delete;
 	};
 
+	// Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
+	template<typename typeT, typename otherT>
+	struct copy_const_from
+		: conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
+	{
+	};
+
 	template<typename allocatorT>
 	struct linear_prober
 	{
 		using allocator_type   = allocatorT;
 		using handle_type      = value_handle<allocator_type>;
 		using size_type        = typename allocator_traits<allocator_type>::size_type;
+		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
-		template<typename xpointerT, typename predT>
-		size_type operator()(xpointerT ptr, size_t hval, predT &&pred) const
+		template<typename xpointerT>
+		static size_type origin(xpointerT ptr, size_t hval)
 		{
-			const auto nbkt = ptr->max_nbkt_for_nblk(ptr->nblk);
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
+			const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(nbkt != 0);
 			// Conversion between an unsigned integer type and a floating point type results in performance penalty.
 			// For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
 			const auto seed = static_cast<::std::uint64_t>(static_cast<::std::uint_fast64_t>(hval) * 0xA17870F5D4F51B49);
 			const auto ratio = static_cast<double>(static_cast<::std::int_fast64_t>(seed / 2)) / 0x1p63;
 			ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-			const auto origin = static_cast<size_type>(static_cast<::std::int_fast64_t>(static_cast<double>(static_cast<::std::int_fast64_t>(nbkt)) * ratio));
-			ROCKET_ASSERT((0 <= origin) && (origin < nbkt));
-			// Search for a slot using linear probing.
-			const auto stop_at = [&](size_type i)
-			{
-				// Stop when either a null pointer is encountered or the predicitor returns `true`.
-				const auto eptr = ptr->data[i].get();
-				if(!eptr) {
-					return true;
-				}
-				if(::std::forward<predT>(pred)(eptr->first)) {
-					return true;
-				}
-				ROCKET_ASSERT(i != ptr->npos);
-				return false;
-			};
-			// * Phase one: Probe from `origin` to the end of the table.
-			for(auto i = origin; i < nbkt; ++i) {
-				if(stop_at(i)) {
-					return i;
+			const auto rorigin = static_cast<double>(static_cast<::std::int_fast64_t>(nbkt)) * ratio;
+			ROCKET_ASSERT((0 <= rorigin) && (rorigin < static_cast<double>(nbkt)));
+			return static_cast<size_type>(static_cast<::std::int_fast64_t>(rorigin));
+		}
+
+		template<typename xpointerT, typename predT>
+		static typename copy_const_from<handle_type, decltype(::std::declval<xpointerT &>())>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
+		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
+			const auto nbkt = ptr->max_nbkt_for_nblk(ptr->nblk);
+			ROCKET_ASSERT(nbkt != 0);
+			// Phase one: Probe from `first` to the end of the table.
+			for(auto i = first; i != nbkt; ++i) {
+				const auto bkt = ptr->data + i;
+				if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
+					return bkt;
 				}
 			}
-			// * Phase two: Probe from the beginning of the table to `origin`.
-			for(auto i = size_type(0); i < origin; ++i) {
-				if(stop_at(i)) {
-					return i;
+			// Phase two: Probe from the beginning of the table to `last`.
+			for(auto i = size_type(0); i != last; ++i) {
+				const auto bkt = ptr->data + i;
+				if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
+					return bkt;
 				}
 			}
 			// The table is full and no desired element has been found so far.
-			return ptr->npos;
+			return nullptr;
 		}
 	};
 
@@ -217,25 +221,28 @@ namespace details_cow_hashmap
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, handle_storage<allocatorT>>::value, "???");
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
 				if(!eptr_old) {
 					continue;
 				}
 				// Find a bucket for the new element.
-				const auto k = linear_prober<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
-				ROCKET_ASSERT(k < ptr->max_nbkt_for_nblk(ptr->nblk));
+				const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
+				const auto bkt = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
+				ROCKET_ASSERT(bkt);
 				// Allocate a new element by copy-constructing from the old one.
-				const auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, static_cast<typename allocator_traits<allocatorT>::size_type>(1));
+				auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
 				try {
 					allocator_traits<allocatorT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
 				} catch(...) {
-					allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, static_cast<typename allocator_traits<allocatorT>::size_type>(1));
+					allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
 					throw;
 				}
-				// Insert it at the new bucket.
-				const auto eptr_k = ptr->data[k].set(eptr);
-				ROCKET_ASSERT(!eptr_k);
+				// Insert it into the new bucket.
+				eptr = bkt->set(eptr);
+				ROCKET_ASSERT(!eptr);
 				ptr->nelem += 1;
 			}
 		}
@@ -260,20 +267,23 @@ namespace details_cow_hashmap
 		template<typename xpointerT, typename ypointerT>
 		void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
 		{
+			static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
+			static_assert(is_same<typename decay<decltype(*ptr_old)>::type, handle_storage<allocatorT>>::value, "???");
 			for(auto i = off; i != off + cnt; ++i) {
 				const auto eptr_old = ptr_old->data[i].get();
 				if(!eptr_old) {
 					continue;
 				}
 				// Find a bucket for the new element.
-				const auto k = linear_prober<allocatorT>()(ptr, hf(eptr_old->first), [](const typename allocatorT::value_type::first_type &) { return false; });
-				ROCKET_ASSERT(k < ptr->max_nbkt_for_nblk(ptr->nblk));
+				const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
+				const auto bkt = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
+				ROCKET_ASSERT(bkt);
 				// Detach the old element.
-				const auto eptr = ptr_old->data[i].set(nullptr);
+				auto eptr = ptr_old->data[i].set(nullptr);
 				ptr_old->nelem -= 1;
-				// Insert it at the new bucket.
-				const auto eptr_k = ptr->data[k].set(eptr);
-				ROCKET_ASSERT(!eptr_k);
+				// Insert it into the new bucket.
+				eptr = bkt->set(eptr);
+				ROCKET_ASSERT(!eptr);
 				ptr->nelem += 1;
 			}
 		}
@@ -307,7 +317,6 @@ namespace details_cow_hashmap
 		using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
 		enum : size_type { max_load_factor_reciprocal = 2 };
-		enum : size_type { npos = handle_storage<allocator_type>::npos };
 
 	private:
 		using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -537,6 +546,22 @@ namespace details_cow_hashmap
 			::std::swap(this->m_ptr, other.m_ptr);
 		}
 
+		template<typename ykeyT>
+		difference_type find(const ykeyT &ykey) const
+		{
+			const auto ptr = this->m_ptr;
+			if(ptr == nullptr) {
+				return -1;
+			}
+			const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
+			const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const value_handle<allocatorT> *tbkt) { return this->as_key_equal()(tbkt->get()->first, ykey); });
+			if(!bkt || !(bkt->get())) {
+				return -1;
+			}
+			const auto toff = bkt - ptr->data;
+			ROCKET_ASSERT(toff >= 0);
+			return toff;
+		}
 		handle_type * mut_data_unchecked() noexcept
 		{
 			const auto ptr = this->m_ptr;
@@ -546,23 +571,6 @@ namespace details_cow_hashmap
 			ROCKET_ASSERT(this->unique());
 			return ptr->data;
 		}
-		template<typename ykeyT>
-		size_type index_of_unchecked(const ykeyT &ykey) const
-		{
-			const auto ptr = this->m_ptr;
-			if(ptr == nullptr) {
-				return npos;
-			}
-			const auto tpos = linear_prober<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
-			if(tpos == npos) {
-				return npos;
-			}
-			const auto eptr = ptr->data[tpos].get();
-			if(!eptr) {
-				return npos;
-			}
-			return tpos;
-		}
 		template<typename ykeyT, typename ...paramsT>
 		pair<handle_type *, bool> keyed_emplace_unchecked(const ykeyT &ykey, paramsT &&...params)
 		{
@@ -571,26 +579,26 @@ namespace details_cow_hashmap
 			const auto ptr = this->m_ptr;
 			ROCKET_ASSERT(ptr);
 			// Find a bucket for the new element.
-			const auto tpos = linear_prober<allocator_type>()(ptr, this->as_hasher()(ykey), [&](const typename value_type::first_type &xkey) { return this->as_key_equal()(xkey, ykey); });
-			ROCKET_ASSERT(tpos != npos);
-			auto eptr = ptr->data[tpos].get();
-			if(eptr) {
+			const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
+			const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const value_handle<allocatorT> *tbkt) { return this->as_key_equal()(tbkt->get()->first, ykey); });
+			ROCKET_ASSERT(bkt);
+			if(bkt->get()) {
 				// A duplicate key has been found.
-				return ::std::make_pair(ptr->data + tpos, false);
+				return ::std::make_pair(bkt, false);
 			}
 			// Allocate a new element.
-			eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_type(1));
+			auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_t(1));
 			try {
 				allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), ::std::forward<paramsT>(params)...);
 			} catch(...) {
-				allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_type(1));
+				allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
 				throw;
 			}
-			// Insert it at the new bucket.
-			const auto eptr_k = ptr->data[tpos].set(eptr);
-			ROCKET_ASSERT(!eptr_k);
+			// Insert it into the new bucket.
+			eptr = bkt->set(eptr);
+			ROCKET_ASSERT(!eptr);
 			ptr->nelem += 1;
-			return ::std::make_pair(ptr->data + tpos, true);
+			return ::std::make_pair(bkt, true);
 		}
 		void erase_range_unchecked(size_type tpos, size_type tn) noexcept
 		{
@@ -604,6 +612,7 @@ namespace details_cow_hashmap
 			ROCKET_ASSERT(ptr);
 			const auto nbkt = storage::max_nbkt_for_nblk(ptr->nblk);
 			ROCKET_ASSERT(nbkt != 0);
+			// Erase all elements in [tpos,tpos+tn).
 			for(auto i = tpos; i != tpos + tn; ++i) {
 				const auto eptr = ptr->data[i].set(nullptr);
 				if(!eptr) {
@@ -612,43 +621,23 @@ namespace details_cow_hashmap
 				ptr->nelem -= 1;
 				// Destroy the element and deallocate its storage.
 				allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
-				allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_type(1));
+				allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_t(1));
 			}
 			// Relocate elements that are not placed in their immediate locations.
-			const auto stop_at = [&](size_type i)
-			{
-				// Detach the element then insert it back.
-				const auto eptr = ptr->data[i].set(nullptr);
-				if(!eptr) {
-					return true;
-				}
-				const auto k = linear_prober<allocator_type>()(ptr, this->as_hasher()(eptr->first), [](const typename value_type::first_type &) { return false; });
-				ROCKET_ASSERT(k < nbkt);
-				const auto eptr_k = ptr->data[k].set(eptr);
-				ROCKET_ASSERT(!eptr_k);
-				ROCKET_ASSERT(i != npos);
-				return false;
-			};
-			// * Phase one: Probe from `tpos + tn` to the end of the table.
-			for(auto i = tpos + tn; i < nbkt; ++i) {
-				if(stop_at(i)) {
-					return;
-				}
-			}
-			// * Phase two: Probe from the beginning of the table to `tpos`.
-			for(auto i = size_type(0); i < tpos; ++i) {
-				if(stop_at(i)) {
-					return;
-				}
-			}
+			linear_prober<allocator_type>::probe(ptr, tpos + tn, tpos,
+				[&](value_handle<allocator_type> *tbkt) {
+					// Remove the element from the old bucket.
+					auto eptr = tbkt->set(nullptr);
+					// Find a new bucket for it.
+					const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
+					const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
+					ROCKET_ASSERT(bkt);
+					// Insert it into the new bucket.
+					eptr = bkt->set(eptr);
+					ROCKET_ASSERT(!eptr);
+					return false;
+				});
 		}
-	};
-
-	// Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
-	template<typename typeT, typename otherT>
-	struct copy_const_from
-		: conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
-	{
 	};
 
 	// Informs the constructor of an iterator that the `bkt` parameter might point to an empty bucket.
@@ -747,14 +736,12 @@ namespace details_cow_hashmap
 		reference operator*() const noexcept
 		{
 			const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-			const auto eptr = bkt->get();
-			return *eptr;
+			return *(bkt->get());
 		}
 		pointer operator->() const noexcept
 		{
 			const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-			const auto eptr = bkt->get();
-			return noadl::unfancy(eptr);
+			return noadl::unfancy(bkt->get());
 		}
 	};
 
@@ -1212,38 +1199,38 @@ public:
 	// N.B. The return type differs from `std::unordered_map`.
 	bool erase(const key_type &key)
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return false;
 		}
-		this->do_erase_no_bound_check(tpos, 1);
+		this->do_erase_no_bound_check(static_cast<size_type>(toff), 1);
 		return true;
 	}
 
 	// map operations
 	const_iterator find(const key_type &key) const
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return this->end();
 		}
-		const auto bkt = this->do_get_table() + tpos;
+		const auto bkt = this->do_get_table() + toff;
 		return const_iterator(this->m_sth, bkt);
 	}
 	iterator find(const key_type &key)
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return this->mut_end();
 		}
-		const auto bkt = this->do_mut_table() + tpos;
+		const auto bkt = this->do_mut_table() + toff;
 		return iterator(this->m_sth, bkt);
 	}
 	// N.B. The return type differs from `std::unordered_map`.
 	bool count(const key_type &key) const
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return false;
 		}
 		return true;
@@ -1252,24 +1239,22 @@ public:
 	// N.B. This is a non-standard extension.
 	const mapped_type * get(const key_type &key) const
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = this->do_get_table() + tpos;
-		const auto eptr = bkt->get();
-		return ::std::addressof(eptr->second);
+		const auto bkt = this->do_get_table() + toff;
+		return ::std::addressof(bkt->get()->second);
 	}
 	// N.B. This is a non-standard extension.
 	mapped_type * get(const key_type &key)
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			return nullptr;
 		}
-		const auto bkt = this->do_mut_table() + tpos;
-		const auto eptr = bkt->get();
-		return ::std::addressof(eptr->second);
+		const auto bkt = this->do_mut_table() + toff;
+		return ::std::addressof(bkt->get()->second);
 	}
 
 	// 26.5.4.3, element access
@@ -1279,8 +1264,7 @@ public:
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(key), ::std::forward_as_tuple());
 		const auto bkt = result.first;
-		const auto eptr = bkt->get();
-		return eptr->second;
+		return bkt->get()->second;
 	}
 	mapped_type & operator[](key_type &&key)
 	{
@@ -1288,28 +1272,25 @@ public:
 		const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
 		                                                        ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
 		const auto bkt = result.first;
-		const auto eptr = bkt->get();
-		return eptr->second;
+		return bkt->get()->second;
 	}
 	const mapped_type & at(const key_type &key) const
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = this->do_get_table() + tpos;
-		const auto eptr = bkt->get();
-		return eptr->second;
+		const auto bkt = this->do_get_table() + toff;
+		return bkt->get()->second;
 	}
 	mapped_type & at(const key_type &key)
 	{
-		const auto tpos = this->m_sth.index_of_unchecked(key);
-		if(tpos == this->m_sth.npos) {
+		const auto toff = this->m_sth.find(key);
+		if(toff < 0) {
 			noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
 		}
-		const auto bkt = this->do_mut_table() + tpos;
-		const auto eptr = bkt->get();
-		return eptr->second;
+		const auto bkt = this->do_mut_table() + toff;
+		return bkt->get()->second;
 	}
 
 	// N.B. This function is a non-standard extension.
