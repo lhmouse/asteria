@@ -955,7 +955,7 @@ private:
 		ROCKET_ASSERT(tn <= nbkt_old - tpos);
 		if(this->unique() == false) {
 			const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
-			return ptr + tpos;
+			return ptr;
 		}
 		const auto ptr = this->m_sth.mut_data_unchecked();
 		this->m_sth.erase_range_unchecked(tpos, tn);
