@@ -13,8 +13,7 @@ namespace Asteria
 class Value
 {
 public:
-	enum Type
-		: std::uint8_t
+	enum Type : std::uint8_t
 	{
 		type_null      = 0,
 		type_boolean   = 1,
@@ -39,8 +38,7 @@ public:
 		, D_object    // 8
 	)>;
 
-	enum Comparison_result
-		: std::uint8_t
+	enum Comparison_result : std::uint8_t
 	{
 		comparison_unordered  = 0,
 		comparison_less       = 1,

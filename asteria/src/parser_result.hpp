@@ -12,8 +12,7 @@ namespace Asteria
 class Parser_result
 {
 public:
-	enum Error_code
-		: std::uint32_t
+	enum Error_code : std::uint32_t
 	{
 		error_code_success                              =   0,
 		// Category: encoding
