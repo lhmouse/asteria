@@ -57,9 +57,9 @@ class Value;
 class Opaque_base;
 class Function_base;
 class Reference_root;
-class Reference_segment;
+class Reference_designator;
 class Variable;
-using Reference = Pair<Reference_root, Vector<Reference_segment>>;
+using Reference = Pair<Reference_root, Vector<Reference_designator>>;
 
 // Runtime data types exposed to users
 using D_null      = Nullptr;

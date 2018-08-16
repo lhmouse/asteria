@@ -169,8 +169,8 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
       {
         const auto &array_lhs = lhs.as<D_array>();
         const auto &array_rhs = rhs.as<D_array>();
-        const auto len_min = std::min(array_lhs.size(), array_rhs.size());
-        for(std::size_t i = 0; i < len_min; ++i) {
+        const auto rlen = std::min(array_lhs.size(), array_rhs.size());
+        for(std::size_t i = 0; i < rlen; ++i) {
           const auto res = compare_values(array_lhs[i], array_rhs[i]);
           if(res != Value::comparison_equal) {
             return res;
@@ -381,8 +381,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
       {
         const auto &cand = value.as<D_string>();
         // string(5) "hello"
-        const auto len = cand.size();
-        os <<"string(" <<std::dec <<len <<") ";
+        os <<"string(" <<std::dec <<cand.size() <<") ";
         os <<Quote(cand);
         return;
       }
@@ -390,8 +389,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
       {
         const auto &cand = value.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        const auto dyn_type = typeid(*cand).name();
-        os <<"opaque(\"" <<dyn_type <<"\") ";
+        os <<"opaque(\"" <<typeid(*cand).name() <<"\") ";
         os <<Quote(cand->describe());
         return;
       }
@@ -399,8 +397,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
       {
         const auto &cand = value.as<D_function>();
         // function("typeid") "my function"
-        const auto dyn_type = typeid(*cand).name();
-        os <<"function(\"" <<dyn_type <<"\") ";
+        os <<"function(\"" <<typeid(*cand).name() <<"\") ";
         os <<Quote(cand->describe());
         return;
       }
@@ -412,8 +409,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         //   1 = integer 2,
         //   2 = integer 3,
         // ]
-        const auto len = cand.size();
-        os <<"array(" <<std::dec <<len <<") [";
+        os <<"array(" <<std::dec <<cand.size() <<") [";
         for(auto it = cand.begin(); it != cand.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
           os <<std::dec <<(it - cand.begin());
@@ -432,8 +428,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         //   "two" = integer 2,
         //   "three" = integer 3,
         // }
-        const auto len = cand.size();
-        os <<"object(" <<std::dec <<len <<") {";
+        os <<"object(" <<std::dec <<cand.size() <<") {";
         for(auto it = cand.begin(); it != cand.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
           os <<Quote(it->first);
