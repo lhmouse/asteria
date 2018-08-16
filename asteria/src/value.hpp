@@ -27,15 +27,15 @@ class Value
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , D_null      // 0
-        , D_boolean   // 1
-        , D_integer   // 2
-        , D_double    // 3
-        , D_string    // 4
-        , D_opaque    // 5
-        , D_function  // 6
-        , D_array     // 7
-        , D_object    // 8
+        , D_null      // 0,
+        , D_boolean   // 1,
+        , D_integer   // 2,
+        , D_double    // 3,
+        , D_string    // 4,
+        , D_opaque    // 5,
+        , D_function  // 6,
+        , D_array     // 7,
+        , D_object    // 8,
       )>;
 
     enum Comparison_result : std::uint8_t
@@ -91,17 +91,7 @@ class Value
         {
           m_variant.set(std::forward<CandidateT>(cand));
         }
-
-    void swap(Value &other) noexcept
-      {
-        m_variant.swap(other.m_variant);
-      }
   };
-
-inline void swap(Value &lhs, Value &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 extern const char * get_type_name(Value::Type type) noexcept;
 extern const char * get_value_type_name(const Value &value) noexcept;

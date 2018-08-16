@@ -166,7 +166,6 @@ class Token
       {
         return m_source_length;
       }
-
     Index which() const noexcept
       {
         return static_cast<Index>(m_variant.index());
@@ -181,17 +180,7 @@ class Token
         {
           return m_variant.as<ExpectT>();
         }
-
-    void swap(Token &other) noexcept
-      {
-        m_variant.swap(other.m_variant);
-      }
   };
-
-inline void swap(Token &lhs, Token &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str);
 
