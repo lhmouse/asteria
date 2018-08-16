@@ -38,6 +38,8 @@ int main()
 
     Value copy(root);
     copy.as<D_object>().try_emplace(D_string::shallow("new"), D_string("my string"));
+    copy.as<D_object>().try_emplace(D_string::shallow("empty_array"), D_array());
+    copy.as<D_object>().try_emplace(D_string::shallow("empty_object"), D_object());
 
     std::cerr <<root <<std::endl;
     ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

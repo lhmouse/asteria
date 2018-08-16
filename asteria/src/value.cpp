@@ -413,8 +413,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         //   2 = integer 3,
         // ]
         const auto len = cand.size();
-        os <<"array(" <<std::dec <<len <<") ";
-        os <<'[';
+        os <<"array(" <<std::dec <<len <<") [";
         for(auto it = cand.begin(); it != cand.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
           os <<std::dec <<(it - cand.begin());
@@ -422,12 +421,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
           dump_value(os, *it, indent_next + indent_increment, indent_increment);
           os <<',';
         }
-        if(cand.empty()) {
-          os <<' ';
-        } else {
-          os <<std::endl <<Indent(indent_next);
-        }
-        os <<']';
+        os <<std::endl <<Indent(indent_next) <<']';
         return;
       }
     case Value::type_object:
@@ -439,8 +433,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         //   "three" = integer 3,
         // }
         const auto len = cand.size();
-        os <<"object(" <<std::dec <<len <<") ";
-        os <<'{';
+        os <<"object(" <<std::dec <<len <<") {";
         for(auto it = cand.begin(); it != cand.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
           os <<Quote(it->first);
@@ -448,12 +441,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
           dump_value(os, it->second, indent_next + indent_increment, indent_increment);
           os <<',';
         }
-        if(cand.empty()) {
-          os <<' ';
-        } else {
-          os <<std::endl <<Indent(indent_next);
-        }
-        os <<'}';
+        os <<std::endl <<Indent(indent_next) <<'}';
         return;
       }
     default:
