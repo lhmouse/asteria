@@ -50,7 +50,8 @@ pkginclude_HEADERS =  \
   asteria/src/token.hpp  \
   asteria/src/reference_root.hpp  \
   asteria/src/reference_designator.hpp  \
-  asteria/src/reference.hpp
+  asteria/src/reference.hpp  \
+  asteria/src/variable.hpp
 
 lib_LTLIBRARIES =  \
   lib/libasteria.la
@@ -70,7 +71,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/token.cpp  \
   asteria/src/reference_root.cpp  \
   asteria/src/reference_designator.cpp  \
-  asteria/src/reference.cpp
+  asteria/src/reference.cpp  \
+  asteria/src/variable.cpp
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
@@ -84,6 +86,7 @@ bin_asteria_SOURCES =  \
 check_PROGRAMS = \
   test/utilities.test  \
   test/value.test  \
-  test/token.test
+  test/token.test  \
+  test/variable.test
 
 TESTS = ${check_PROGRAMS}
