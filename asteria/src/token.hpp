@@ -113,7 +113,7 @@ class Token
       };
     struct S_identifier
       {
-        Cow_string id;
+        String id;
       };
     struct S_integer_literal
       {
@@ -182,7 +182,7 @@ class Token
         }
   };
 
-extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str);
+extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const String &str);
 
 }
 

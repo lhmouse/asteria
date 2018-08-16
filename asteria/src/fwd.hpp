@@ -23,12 +23,12 @@ using Boolean           = bool;
 using Signed_integer    = std::int64_t;
 using Unsigned_integer  = std::uint64_t;
 using Double_precision  = double;
-using Cow_string        = rocket::cow_string;
+using String        = rocket::cow_string;
 
 template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
 template<typename ElementT>
-  using Dictionary = rocket::cow_hashmap<Cow_string, ElementT, Cow_string::hash, Cow_string::equal_to>;
+  using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
 template<typename FirstT, typename SecondT>
   using Pair = std::pair<FirstT, SecondT>;
 
@@ -66,7 +66,7 @@ using D_null      = Nullptr;
 using D_boolean   = Boolean;
 using D_integer   = Signed_integer;
 using D_double    = Double_precision;
-using D_string    = Cow_string;
+using D_string    = String;
 using D_opaque    = Sptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;
 using D_array     = Vector<Value>;

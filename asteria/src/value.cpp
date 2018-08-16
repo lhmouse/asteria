@@ -245,16 +245,16 @@ namespace
     class Quote
       {
       private:
-        Cow_string m_str;
+        String m_str;
 
       public:
-        explicit Quote(Cow_string str) noexcept
+        explicit Quote(String str) noexcept
           : m_str(std::move(str))
           {
           }
 
       public:
-        const Cow_string & get_str() const noexcept
+        const String & get_str() const noexcept
           {
             return m_str;
           }

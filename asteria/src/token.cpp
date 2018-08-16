@@ -17,7 +17,7 @@ Token::~Token() = default;
 
 namespace
   {
-    Parser_result do_validate_code_point_utf8(std::size_t line, const Cow_string &str, std::size_t column)
+    Parser_result do_validate_code_point_utf8(std::size_t line, const String &str, std::size_t column)
       {
         // Get a UTF code point.
         static constexpr unsigned char s_length_table[32] =
@@ -117,7 +117,7 @@ namespace
         return sign;
       }
 
-    Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str, std::size_t column)
+    Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const String &str, std::size_t column)
       {
         const auto char_head = str.at(column);
         switch(char_head) {
@@ -235,7 +235,7 @@ namespace
             // Get a string literal.
             const auto body_begin = column + 1;
             auto body_end = str.find(char_head, body_begin);
-            Cow_string value;
+            String value;
             if(char_head == '\'') {
               // Escape sequences do not have special meanings inside single quotation marks.
               if(body_end == str.npos) {
@@ -658,7 +658,7 @@ namespace
       }
   }
 
-Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const Cow_string &str)
+Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const String &str)
   {
     // Ensure the source string is valid UTF-8.
     std::size_t column = 0;

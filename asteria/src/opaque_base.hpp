@@ -21,7 +21,7 @@ class Opaque_base
     Opaque_base & operator=(const Opaque_base &) = delete;
 
   public:
-    virtual Cow_string describe() const = 0;
+    virtual String describe() const = 0;
   };
 
 }

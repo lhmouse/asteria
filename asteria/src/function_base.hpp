@@ -21,7 +21,7 @@ class Function_base
     Function_base & operator=(const Function_base &) = delete;
 
   public:
-    virtual Cow_string describe() const = 0;
+    virtual String describe() const = 0;
     virtual Reference invoke(Reference &&self, Vector<Reference> &&args) const = 0;
   };
 

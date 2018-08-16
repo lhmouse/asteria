@@ -10,7 +10,7 @@ using namespace Asteria;
 int main()
   {
     Vector<Token> tokens;
-    auto result = tokenize_line(tokens, 42, Cow_string::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* - 0x1_7.8:4p+4  .false ;-42e13"));
+    auto result = tokenize_line(tokens, 42, String::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* - 0x1_7.8:4p+4  .false ;-42e13"));
     ASTERIA_TEST_CHECK(result);
     ASTERIA_TEST_CHECK(tokens.at(0).as<Token::S_identifier>().id == "hh");
     ASTERIA_TEST_CHECK(tokens.at(1).as<Token::S_punctuator>().punct == Token::punctuator_inc);
