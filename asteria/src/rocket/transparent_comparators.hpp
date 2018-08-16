@@ -14,70 +14,64 @@ namespace rocket
 using ::std::true_type;
 
 struct transparent_equal_to
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() == ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) == ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() == ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) == ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 struct transparent_not_equal_to
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() != ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) != ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() != ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) != ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 struct transparent_less
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() < ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) < ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() < ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) < ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 struct transparent_greater
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() > ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) > ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() > ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) > ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 struct transparent_less_equal
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() <= ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) <= ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() <= ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) <= ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 struct transparent_greater_equal
-{
-	using is_transparent = true_type;
-
-	template<typename lhsT, typename rhsT>
-	constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() >= ::std::declval<rhsT>())
-	{
-		return ::std::forward<lhsT>(lhs) >= ::std::forward<rhsT>(rhs);
-	}
-};
+  {
+    template<typename lhsT, typename rhsT>
+      constexpr auto operator()(lhsT &&lhs, rhsT &&rhs) const -> decltype(::std::declval<lhsT>() >= ::std::declval<rhsT>())
+        {
+          return ::std::forward<lhsT>(lhs) >= ::std::forward<rhsT>(rhs);
+        }
+    using is_transparent = true_type;
+  };
 
 }
 

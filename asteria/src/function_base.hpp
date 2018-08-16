@@ -10,20 +10,20 @@ namespace Asteria
 {
 
 class Function_base
-{
-public:
-	Function_base() noexcept
-	{
-	}
-	virtual ~Function_base();
+  {
+  public:
+    Function_base() noexcept
+      {
+      }
+    virtual ~Function_base();
 
-	Function_base(const Function_base &) = delete;
-	Function_base & operator=(const Function_base &) = delete;
+    Function_base(const Function_base &) = delete;
+    Function_base & operator=(const Function_base &) = delete;
 
-public:
-	virtual Cow_string describe() const = 0;
-	virtual Reference invoke(Reference &&self, Vector<Reference> &&args) const = 0;
-};
+  public:
+    virtual Cow_string describe() const = 0;
+    virtual Reference invoke(Reference &&self, Vector<Reference> &&args) const = 0;
+  };
 
 }
 

@@ -16,7 +16,7 @@ AM_CONDITIONAL([ENABLE_WERROR], [test "${enable_werror}" != "no"])
 AC_ARG_ENABLE([debug-logs], AS_HELP_STRING([--enable-debug-logs], [output debug logs to stderr]))
 AM_CONDITIONAL([ENABLE_DEBUG_LOGS], [test "${enable_debug_logs}" == "yes"])
 AM_COND_IF([ENABLE_DEBUG_LOGS], [
-	AC_DEFINE([ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
+  AC_DEFINE([ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
 ])
 
 AC_CONFIG_FILES([Makefile])

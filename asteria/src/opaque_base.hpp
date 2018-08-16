@@ -10,19 +10,19 @@ namespace Asteria
 {
 
 class Opaque_base
-{
-public:
-	Opaque_base() noexcept
-	{
-	}
-	virtual ~Opaque_base();
+  {
+  public:
+    Opaque_base() noexcept
+      {
+      }
+    virtual ~Opaque_base();
 
-	Opaque_base(const Opaque_base &) = delete;
-	Opaque_base & operator=(const Opaque_base &) = delete;
+    Opaque_base(const Opaque_base &) = delete;
+    Opaque_base & operator=(const Opaque_base &) = delete;
 
-public:
-	virtual Cow_string describe() const = 0;
-};
+  public:
+    virtual Cow_string describe() const = 0;
+  };
 
 }
 

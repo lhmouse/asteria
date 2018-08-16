@@ -42,7 +42,6 @@
 
 namespace Asteria
 {
-	//
 }
 
 #endif
