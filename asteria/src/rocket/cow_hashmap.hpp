@@ -1099,17 +1099,11 @@ public:
 		}
 		const auto dist = noadl::estimate_distance(first, last);
 		if(dist == 0) {
-			auto it = ::std::move(first);
-			do {
-				this->insert(*it);
-			} while(++it != last);
+			noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->insert(*it); });
 			return *this;
 		}
 		this->do_reserve_more(dist);
-		auto it = ::std::move(first);
-		do {
-			this->m_sth.keyed_emplace_unchecked(it->first, *it);
-		} while(++it != last);
+		noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.keyed_emplace_unchecked(it->first, *it); });
 		return *this;
 	}
 	// N.B. The return type is a non-standard extension.
