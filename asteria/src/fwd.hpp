@@ -5,7 +5,7 @@
 #define ASTERIA_FWD_HPP_
 
 #include <type_traits> // so many...
-#include <utility> // std::move(), std::forward(), std::pair<>
+#include <utility> // std::move(), std::forward()
 #include <memory> // std::shared_ptr<>, std::weak_ptr<>
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
@@ -29,8 +29,6 @@ template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
 template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
-template<typename FirstT, typename SecondT>
-  using Pair = std::pair<FirstT, SecondT>;
 
 template<typename ElementT>
   using Uptr = std::unique_ptr<ElementT>;
@@ -58,8 +56,8 @@ class Opaque_base;
 class Function_base;
 class Reference_root;
 class Reference_designator;
+class Reference;
 class Variable;
-using Reference = Pair<Reference_root, Vector<Reference_designator>>;
 
 // Runtime data types exposed to users
 using D_null      = Nullptr;

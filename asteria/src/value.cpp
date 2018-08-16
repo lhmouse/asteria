@@ -42,10 +42,9 @@ const char * get_type_name(Value::Type type) noexcept
       std::terminate();
     }
   }
-const char * get_value_type_name(const Value &value) noexcept
+const char * get_type_name_of(const Value &value) noexcept
   {
-    const auto type = value.which();
-    return get_type_name(type);
+    return get_type_name(value.which());
   }
 
 bool test_value(const Value &value)
@@ -200,13 +199,13 @@ namespace
         unsigned m_num;
 
       public:
-        explicit constexpr Indent(unsigned num) noexcept
-          : m_num(num)
+        explicit constexpr Indent(unsigned xnum) noexcept
+          : m_num(xnum)
           {
           }
 
       public:
-        unsigned get_num() const noexcept
+        unsigned num() const noexcept
           {
             return m_num;
           }
@@ -220,7 +219,7 @@ namespace
         }
         try {
           using traits_type = std::ostream::traits_type;
-          const auto num = indent.get_num();
+          const auto num = indent.num();
           for(unsigned i = 0; i < num; ++i) {
             if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
               os.setstate(std::ios_base::failbit);
@@ -230,14 +229,8 @@ namespace
       finish:
           os.width(0);
         } catch(...) {
-          try {
-            os.setstate(std::ios_base::badbit);
-          } catch(std::ios_base::failure &) {
-            // Ignore this exception.
-          }
-          if(os.exceptions() & std::ios_base::badbit) {
-            throw;
-          }
+          // XXX: Relying on a private function is evil.
+          rocket::details_cow_string::handle_io_exception(os);
         }
         return os;
       }
@@ -248,13 +241,13 @@ namespace
         String m_str;
 
       public:
-        explicit Quote(String str) noexcept
-          : m_str(std::move(str))
+        explicit Quote(String xstr) noexcept
+          : m_str(std::move(xstr))
           {
           }
 
       public:
-        const String & get_str() const noexcept
+        const String & str() const noexcept
           {
             return m_str;
           }
@@ -268,7 +261,7 @@ namespace
         }
         try {
           using traits_type = std::ostream::traits_type;
-          const auto range = std::make_pair(quote.get_str().begin(), quote.get_str().end());
+          const auto range = std::make_pair(quote.str().begin(), quote.str().end());
           if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
             os.setstate(std::ios_base::failbit);
             goto finish;
@@ -332,14 +325,8 @@ namespace
       finish:
           os.width(0);
         } catch(...) {
-          try {
-            os.setstate(std::ios_base::badbit);
-          } catch(std::ios_base::failure &) {
-            // Ignore this exception.
-          }
-          if(os.exceptions() & std::ios_base::badbit) {
-            throw;
-          }
+          // XXX: Relying on a private function is evil.
+          rocket::details_cow_string::handle_io_exception(os);
         }
         return os;
       }

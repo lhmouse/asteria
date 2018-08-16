@@ -94,10 +94,11 @@ class Value
   };
 
 extern const char * get_type_name(Value::Type type) noexcept;
-extern const char * get_value_type_name(const Value &value) noexcept;
+extern const char * get_type_name_of(const Value &value) noexcept;
 
 extern bool test_value(const Value &value);
 extern Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept;
+
 extern void dump_value(std::ostream &os, const Value &value, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Value &value);
 
