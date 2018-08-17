@@ -84,6 +84,9 @@ class Reference_root
         }
   };
 
+extern const char * get_reference_category_name(Reference_root::Type type) noexcept;
+extern const char * get_reference_category_name_of(const Reference_root &root) noexcept;
+
 }
 
 #endif
