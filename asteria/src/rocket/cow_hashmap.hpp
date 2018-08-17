@@ -1169,22 +1169,22 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       template<typename yvalueT>
         pair<iterator, bool> insert_or_assign(const key_type &key, yvalueT &&yvalue)
           {
-            const auto result = this->try_emplace(key, ::std::forward<yvalueT>(yvalue));
-            if(result.second){
-              return result;
+            this->do_reserve_more(1);
+            const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
+            if(result.second == false) {
+              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
             }
-            result.first.tell()->get()->second = ::std::forward<yvalueT>(yvalue);
-            return result;
+            return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
           }
       template<typename yvalueT>
         pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
           {
-            const auto result = this->try_emplace(::std::move(key), ::std::forward<yvalueT>(yvalue));
-            if(result.second){
-              return result;
+            this->do_reserve_more(1);
+            const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
+            if(result.second == false) {
+              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
             }
-            result.first.tell()->get()->second = ::std::forward<yvalueT>(yvalue);
-            return result;
+            return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
           }
       // N.B. The hint is ignored.
       template<typename yvalueT>
@@ -1302,6 +1302,28 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           }
           return ::std::addressof(ptr[toff].get()->second);
         }
+      // N.B. This is a non-standard extension.
+      template<typename yvalueT>
+        pair<mapped_type *, bool> set(const key_type &key, yvalueT &&yvalue)
+          {
+            this->do_reserve_more(1);
+            const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
+            if(result.second == false) {
+              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
+            }
+            return ::std::make_pair(::std::addressof(result.first->get()->second), result.second);
+          }
+      // N.B. This is a non-standard extension.
+      template<typename yvalueT>
+        pair<mapped_type *, bool> set(key_type &&key, yvalueT &&yvalue)
+          {
+            this->do_reserve_more(1);
+            const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
+            if(result.second == false) {
+              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
+            }
+            return ::std::make_pair(::std::addressof(result.first->get()->second), result.second);
+          }
 
       // 26.5.4.3, element access
       mapped_type & operator[](const key_type &key)
