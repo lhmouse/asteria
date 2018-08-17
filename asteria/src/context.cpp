@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "context.hpp"
-#include "reference.hpp"
 
 namespace Asteria
 {
