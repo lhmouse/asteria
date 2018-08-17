@@ -18,7 +18,11 @@ class Reference
     Vector<Reference_member_designator> m_mdsgs;
 
   public:
-    explicit Reference(Reference_root &&root, Vector<Reference_member_designator> &&mdsgs = { })
+    Reference(Reference_root &&root)
+      : m_root(std::move(root)), m_mdsgs()
+      {
+      }
+    Reference(Reference_root &&root, Vector<Reference_member_designator> &&mdsgs)
       : m_root(std::move(root)), m_mdsgs(std::move(mdsgs))
       {
       }

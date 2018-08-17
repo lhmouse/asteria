@@ -4,15 +4,19 @@
 #include "precompiled.hpp"
 #include "exception.hpp"
 
-namespace Asteria {
+namespace Asteria
+{
 
 Exception::Exception(Exception &&) noexcept = default;
 Exception & Exception::operator=(Exception &&) noexcept = default;
 Exception::~Exception() = default;
 
 const char * Exception::what() const noexcept
-{
-	return "Asteria::Exception";
-}
+  {
+    if(nested_ptr()) {
+      return "Asteria::Exception with a nested exception";
+    }
+    return "Asteria::Exception";
+  }
 
 }
