@@ -99,8 +99,8 @@ namespace details_cow_hashmap
             }
         };
 
-      template<typename allocatorT>
-        struct handle_storage
+    template<typename allocatorT>
+      struct handle_storage
         {
           using allocator_type   = allocatorT;
           using handle_type      = value_handle<allocator_type>;
@@ -554,7 +554,10 @@ namespace details_cow_hashmap
                 return -1;
               }
               const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-              const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const value_handle<allocatorT> *tbkt) { return this->as_key_equal()(tbkt->get()->first, ykey); });
+              const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
+                [&](const value_handle<allocatorT> *tbkt) {
+                  return this->as_key_equal()(tbkt->get()->first, ykey);
+                });
               if(!bkt || !(bkt->get())) {
                 return -1;
               }
@@ -580,7 +583,10 @@ namespace details_cow_hashmap
                 ROCKET_ASSERT(ptr);
                 // Find a bucket for the new element.
                 const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-                const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const value_handle<allocatorT> *tbkt) { return this->as_key_equal()(tbkt->get()->first, ykey); });
+                const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
+                  [&](const value_handle<allocatorT> *tbkt) {
+                    return this->as_key_equal()(tbkt->get()->first, ykey);
+                  });
                 ROCKET_ASSERT(bkt);
                 if(bkt->get()) {
                   // A duplicate key has been found.
