@@ -58,6 +58,7 @@ class Reference_root;
 class Reference_designator;
 class Reference;
 class Variable;
+class Context;
 
 // Runtime data types exposed to users
 using D_null      = Null;

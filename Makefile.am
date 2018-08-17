@@ -52,7 +52,8 @@ pkginclude_HEADERS =  \
   asteria/src/reference_member_designator.hpp  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp	\
-  asteria/src/exception.hpp
+  asteria/src/exception.hpp  \
+  asteria/src/context.hpp
 
 lib_LTLIBRARIES =  \
   lib/libasteria.la
@@ -74,7 +75,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/reference_member_designator.cpp  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp	\
-  asteria/src/exception.cpp
+  asteria/src/exception.cpp  \
+  asteria/src/context.cpp
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
@@ -90,7 +92,8 @@ check_PROGRAMS = \
   test/value.test  \
   test/token.test  \
   test/variable.test  \
-  test/reference.test	\
-  test/exception.test
+  test/reference.test  \
+  test/exception.test  \
+  test/context.test
 
 TESTS = ${check_PROGRAMS}
