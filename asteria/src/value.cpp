@@ -38,8 +38,7 @@ const char * get_type_name(Value::Type type) noexcept
     case Value::type_object:
       return "object";
     default:
-      ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
-      std::terminate();
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
     }
   }
 const char * get_type_name_of(const Value &value) noexcept
@@ -87,8 +86,7 @@ bool test_value(const Value &value)
         return cand.empty() == false;
       }
     default:
-      ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
-      std::terminate();
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
     }
   }
 Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept
@@ -186,8 +184,7 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
     case Value::type_object:
       return Value::comparison_unordered;
     default:
-      ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
-      std::terminate();
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
     }
   }
 
@@ -427,8 +424,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         return;
       }
     default:
-      ASTERIA_DEBUG_LOG("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
-      std::terminate();
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
     }
   }
 std::ostream & operator<<(std::ostream &os, const Value &value)

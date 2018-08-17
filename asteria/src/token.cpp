@@ -226,8 +226,7 @@ namespace
               }
             }
             // There must be a bug in the punctuator table.
-            ASTERIA_DEBUG_LOG("The punctuator `", char_head, "` is not handled. This is probably a bug. Please report.");
-            std::terminate();
+            ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled. This is probably a bug. Please report.");
           }
 
         case '\"':  case '\'':

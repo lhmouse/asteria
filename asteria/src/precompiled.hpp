@@ -10,6 +10,7 @@
 
 #include <iterator>
 #include <utility>
+#include <exception>
 #include <stdexcept>
 #include <typeinfo>
 #include <iosfwd>
