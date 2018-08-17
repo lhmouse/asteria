@@ -51,7 +51,7 @@ class Context
         return m_named_refs.set(name, std::move(ref)).first;
       }
 
-    // N.B. If a named reference is found, this function materialize it. Otherwise `nullptr` is returned.
+    // N.B. If a named reference is found, this function materializes it. Otherwise `nullptr` is returned.
     Sptr<Variable> get_variable_opt(const String &name);
   };
 
