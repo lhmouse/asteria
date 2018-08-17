@@ -26,20 +26,20 @@ int main()
     Value third(std::move(arr));
 
     D_object obj;
-    obj.try_emplace(D_string::shallow("first"), std::move(first));
-    obj.try_emplace(D_string::shallow("second"), std::move(second));
+    obj.try_emplace(String::shallow("first"), std::move(first));
+    obj.try_emplace(String::shallow("second"), std::move(second));
     Value route(std::move(obj));
 
     obj.clear();
-    obj.try_emplace(D_string::shallow("third"), std::move(third));
-    obj.try_emplace(D_string::shallow("route"), std::move(route));
-    obj.try_emplace(D_string::shallow("world"), D_string("世界"));
+    obj.try_emplace(String::shallow("third"), std::move(third));
+    obj.try_emplace(String::shallow("route"), std::move(route));
+    obj.try_emplace(String::shallow("world"), D_string("世界"));
     Value root(std::move(obj));
 
     Value copy(root);
-    copy.as<D_object>().try_emplace(D_string::shallow("new"), D_string("my string"));
-    copy.as<D_object>().try_emplace(D_string::shallow("empty_array"), D_array());
-    copy.as<D_object>().try_emplace(D_string::shallow("empty_object"), D_object());
+    copy.as<D_object>().try_emplace(String::shallow("new"), D_string("my string"));
+    copy.as<D_object>().try_emplace(String::shallow("empty_array"), D_array());
+    copy.as<D_object>().try_emplace(String::shallow("empty_object"), D_object());
 
     std::cerr <<root <<std::endl;
     ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);

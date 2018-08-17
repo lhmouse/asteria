@@ -113,7 +113,7 @@ void throw_runtime_error(Logger &&logger)
     auto &stream = logger.get_stream();
     stream.set_caret(0);
     stream <<logger.get_func() <<": ";
-    ASTERIA_DEBUG_LOG("*** Throwing exception: ", stream.get_string());
+    ASTERIA_DEBUG_LOG("Throwing exception: ", stream.get_string());
     throw std::runtime_error(stream.get_string().c_str());
   }
 

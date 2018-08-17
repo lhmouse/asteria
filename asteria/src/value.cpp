@@ -38,7 +38,7 @@ const char * get_type_name(Value::Type type) noexcept
     case Value::type_object:
       return "object";
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered.");
     }
   }
 const char * get_type_name_of(const Value &value) noexcept
@@ -48,8 +48,7 @@ const char * get_type_name_of(const Value &value) noexcept
 
 bool test_value(const Value &value)
   {
-    const auto type = value.which();
-    switch(type) {
+    switch(value.which()) {
     case Value::type_null:
       return false;
     case Value::type_boolean:
@@ -86,25 +85,23 @@ bool test_value(const Value &value)
         return cand.empty() == false;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", value.which(), "` is encountered.");
     }
   }
 Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
-    const auto type_lhs = lhs.which();
-    const auto type_rhs = rhs.which();
-    if(type_lhs != type_rhs) {
-      if(type_lhs == Value::type_null) {
+    if(lhs.which() != rhs.which()) {
+      if(lhs.which() == Value::type_null) {
         return Value::comparison_less;
       }
-      if(type_rhs == Value::type_null) {
+      if(rhs.which() == Value::type_null) {
         return Value::comparison_greater;
       }
       return Value::comparison_unordered;
     }
     // If both operands have the same type, perform normal comparison.
-    switch(type_lhs) {
+    switch(lhs.which()) {
     case Value::type_null:
       return Value::comparison_equal;
     case Value::type_boolean:
@@ -184,7 +181,7 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
     case Value::type_object:
       return Value::comparison_unordered;
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type_lhs, "` is encountered. This is probably a bug. Please report.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.which(), "` is encountered.");
     }
   }
 
@@ -418,7 +415,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered. This is probably a bug. Please report.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered.");
     }
   }
 std::ostream & operator<<(std::ostream &os, const Value &value)

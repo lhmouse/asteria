@@ -22,9 +22,9 @@ int main()
     ASTERIA_TEST_CHECK(value.which() == Value::type_double);
     ASTERIA_TEST_CHECK(value.as<D_double>() == 1.5);
 
-    value.set(D_string(D_string::shallow("hello")));
+    value.set(D_string(String::shallow("hello")));
     ASTERIA_TEST_CHECK(value.which() == Value::type_string);
-    ASTERIA_TEST_CHECK(value.as<D_string>() == D_string::shallow("hello"));
+    ASTERIA_TEST_CHECK(value.as<D_string>() == String::shallow("hello"));
 
     D_array array;
     array.emplace_back(D_boolean(true));
@@ -32,15 +32,15 @@ int main()
     value.set(std::move(array));
     ASTERIA_TEST_CHECK(value.which() == Value::type_array);
     ASTERIA_TEST_CHECK(value.as<D_array>().at(0).as<D_boolean>() == true);
-    ASTERIA_TEST_CHECK(value.as<D_array>().at(1).as<D_string>() == D_string::shallow("world"));
+    ASTERIA_TEST_CHECK(value.as<D_array>().at(1).as<D_string>() == String::shallow("world"));
 
     D_object object;
-    object.try_emplace(D_string::shallow("one"), D_boolean(true));
-    object.try_emplace(D_string::shallow("two"), D_string("world"));
+    object.try_emplace(String::shallow("one"), D_boolean(true));
+    object.try_emplace(String::shallow("two"), D_string("world"));
     value.set(std::move(object));
     ASTERIA_TEST_CHECK(value.which() == Value::type_object);
-    ASTERIA_TEST_CHECK(value.as<D_object>().at(D_string::shallow("one")).as<D_boolean>() == true);
-    ASTERIA_TEST_CHECK(value.as<D_object>().at(D_string::shallow("two")).as<D_string>() == D_string::shallow("world"));
+    ASTERIA_TEST_CHECK(value.as<D_object>().at(String::shallow("one")).as<D_boolean>() == true);
+    ASTERIA_TEST_CHECK(value.as<D_object>().at(String::shallow("two")).as<D_string>() == String::shallow("world"));
 
     value.set(nullptr);
     Value cmp(nullptr);
@@ -95,8 +95,8 @@ int main()
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_unordered);
 
-    value.set(D_string(D_string::shallow("hello")));
-    cmp.set(D_string(D_string::shallow("world")));
+    value.set(D_string(String::shallow("hello")));
+    cmp.set(D_string(String::shallow("world")));
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_less);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_greater);
@@ -110,7 +110,7 @@ int main()
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_equal);
 
-    value.as<D_array>().mut(1).set(D_string(D_string::shallow("hello")));
+    value.as<D_array>().mut(1).set(D_string(String::shallow("hello")));
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_less);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_greater);
@@ -123,8 +123,8 @@ int main()
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_less);
 
     object.clear();
-    object.try_emplace(D_string::shallow("one"), D_boolean(true));
-    object.try_emplace(D_string::shallow("two"), D_string("world"));
+    object.try_emplace(String::shallow("one"), D_boolean(true));
+    object.try_emplace(String::shallow("two"), D_string("world"));
     value.set(std::move(object));
     cmp = value;
     ASTERIA_TEST_CHECK(compare_values(value, cmp) == Value::comparison_unordered);

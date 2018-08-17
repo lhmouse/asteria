@@ -226,7 +226,7 @@ namespace
               }
             }
             // There must be a bug in the punctuator table.
-            ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled. This is probably a bug. Please report.");
+            ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled.");
           }
 
         case '\"':  case '\'':
@@ -481,14 +481,14 @@ namespace
             }
             if(frac_begin == int_end) {
               // Parse the literal as an integer.
-              Unsigned_integer value = 0;
+              Unsigned value = 0;
               for(pos = int_begin; pos != int_end; ++pos) {
                 const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
                 if(ptr == nullptr) {
                   continue;
                 }
                 const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-                const auto bound = (std::numeric_limits<Unsigned_integer>::max() - digit_value) / radix;
+                const auto bound = (std::numeric_limits<Unsigned>::max() - digit_value) / radix;
                 if(value > bound) {
                   return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
                 }
@@ -510,12 +510,12 @@ namespace
               if(do_merge_sign(tokens_out, line, column)) {
                 value = -value;
               }
-              Token::S_integer_literal token_i = { static_cast<Signed_integer>(value) };
+              Token::S_integer_literal token_i = { static_cast<Signed>(value) };
               tokens_out.emplace_back(line, column, length, std::move(token_i));
               return Parser_result(line, column, length, Parser_result::error_code_success);
             }
             // Parse the literal as a floating-point number.
-            Double_precision value = 0;
+            Double value = 0;
             bool zero = true;
             for(pos = int_begin; pos != int_end; ++pos) {
               const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
@@ -533,7 +533,7 @@ namespace
             if(value_class == FP_INFINITE) {
               return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
             }
-            Double_precision mantissa = 0;
+            Double mantissa = 0;
             for(pos = frac_end; pos != frac_begin; --pos) {
               const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos - 1));
               if(ptr == nullptr) {
@@ -651,7 +651,7 @@ namespace
 
         default:
           // Fail to find a valid token.
-          ASTERIA_DEBUG_LOG("The character at the beginning of `", str.substr(column, 25), "` was not handled.");
+          ASTERIA_DEBUG_LOG("Character not handled: ", str.substr(column, 25));
           return Parser_result(line, column, 1, Parser_result::error_code_token_character_unrecognized);
         }
       }

@@ -18,12 +18,12 @@ namespace Asteria
 {
 
 // Aliases
-using Nullptr           = std::nullptr_t;
-using Boolean           = bool;
-using Signed_integer    = std::int64_t;
-using Unsigned_integer  = std::uint64_t;
-using Double_precision  = double;
-using String        = rocket::cow_string;
+using Null      = std::nullptr_t;
+using Boolean   = bool;
+using Signed    = std::int64_t;
+using Unsigned  = std::uint64_t;
+using Double    = double;
+using String    = rocket::cow_string;
 
 template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
@@ -60,10 +60,10 @@ class Reference;
 class Variable;
 
 // Runtime data types exposed to users
-using D_null      = Nullptr;
+using D_null      = Null;
 using D_boolean   = Boolean;
-using D_integer   = Signed_integer;
-using D_double    = Double_precision;
+using D_integer   = Signed;
+using D_double    = Double;
 using D_string    = String;
 using D_opaque    = Sptr<Opaque_base>;
 using D_function  = Sptr<const Function_base>;

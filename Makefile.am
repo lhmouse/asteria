@@ -49,7 +49,7 @@ pkginclude_HEADERS =  \
   asteria/src/parser_result.hpp  \
   asteria/src/token.hpp  \
   asteria/src/reference_root.hpp  \
-  asteria/src/reference_designator.hpp  \
+  asteria/src/reference_member_designator.hpp  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp
 
@@ -70,7 +70,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/value.cpp  \
   asteria/src/token.cpp  \
   asteria/src/reference_root.cpp  \
-  asteria/src/reference_designator.cpp  \
+  asteria/src/reference_member_designator.cpp  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp
 
@@ -87,6 +87,7 @@ check_PROGRAMS = \
   test/utilities.test  \
   test/value.test  \
   test/token.test  \
-  test/variable.test
+  test/variable.test  \
+  test/reference.test
 
 TESTS = ${check_PROGRAMS}

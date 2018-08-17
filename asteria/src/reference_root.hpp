@@ -16,27 +16,27 @@ class Reference_root
   public:
     enum Type : std::uint8_t
       {
-        type_constant   = 0,
-        type_rvalue     = 1,
-        type_lvalue     = 2,
+        type_constant         = 0,
+        type_temporary_value  = 1,
+        type_variable         = 2,
       };
     struct S_constant
       {
-        Value source;
+        Value src;
       };
-    struct S_rvalue
+    struct S_temporary_value
       {
         Value value;
       };
-    struct S_lvalue
+    struct S_variable
       {
         Sptr<Variable> var;
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_constant   // 0,
-        , S_rvalue     // 1,
-        , S_lvalue     // 2,
+        , S_constant         // 0,
+        , S_temporary_value  // 1,
+        , S_variable         // 2,
       )>;
 
   private:
@@ -83,9 +83,6 @@ class Reference_root
           m_variant.set(std::forward<CandidateT>(cand));
         }
   };
-
-extern const char * get_reference_category_name(Reference_root::Type type) noexcept;
-extern const char * get_reference_category_name_of(const Reference_root &root) noexcept;
 
 }
 

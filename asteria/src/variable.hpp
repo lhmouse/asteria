@@ -34,6 +34,10 @@ class Variable
       {
         return m_value;
       }
+    Value & get_value() noexcept
+      {
+        return m_value;
+      }
     void set_value(Value &&value)
       {
         if(m_immutable)  {
