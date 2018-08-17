@@ -71,4 +71,12 @@ int main()
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_double);
     ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
+    ref.clear_member_designators();
+    ref.push_member_designator(Reference_member_designator::S_array{ -1 });
+    ref.push_member_designator(Reference_member_designator::S_object{ String::shallow("my_key") });
+    val = read_reference(ref);
+    ASTERIA_TEST_CHECK(val.which() == Value::type_double);
+    ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
+    ref.push_member_designator(Reference_member_designator::S_object{ String::shallow("invalid_access") });
+    ASTERIA_TEST_CHECK_CATCH(val = read_reference(ref));
   }
