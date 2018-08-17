@@ -87,9 +87,9 @@ class Value
           return m_variant.as<ExpectT>();
         }
     template<typename CandidateT>
-      void set(CandidateT &&cand)
+      CandidateT & set(CandidateT &&cand)
         {
-          m_variant.set(std::forward<CandidateT>(cand));
+          return m_variant.set(std::forward<CandidateT>(cand));
         }
   };
 

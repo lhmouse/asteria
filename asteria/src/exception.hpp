@@ -35,9 +35,9 @@ class Exception
       {
         return m_ref;
       }
-    void set_reference(Reference &&ref) noexcept
+    Reference & set_reference(Reference &&ref) noexcept
       {
-        m_ref = std::move(ref);
+        return m_ref = std::move(ref);
       }
 
     // Overridden functions from `std::exception`.

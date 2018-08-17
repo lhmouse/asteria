@@ -39,9 +39,9 @@ class Reference
       {
         return m_root;
       }
-    void set_root(Reference_root &&root)
+    Reference_root & set_root(Reference_root &&root)
       {
-        m_root = std::move(root);
+        return m_root = std::move(root);
       }
 
     const Vector<Reference_member_designator> & get_member_designators() const noexcept
@@ -56,9 +56,9 @@ class Reference
       {
         m_mdsgs.clear();
       }
-    void push_member_designator(Reference_member_designator &&mdsg)
+    Reference_member_designator & push_member_designator(Reference_member_designator &&mdsg)
       {
-        m_mdsgs.emplace_back(std::move(mdsg));
+        return m_mdsgs.emplace_back(std::move(mdsg));
       }
     void pop_member_designator()
       {
