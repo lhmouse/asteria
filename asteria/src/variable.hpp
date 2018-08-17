@@ -27,7 +27,7 @@ class Variable
     Variable & operator=(const Variable &) = delete;
 
   private:
-    ROCKET_NORETURN void do_throw_immutable() const;
+    [[noreturn]] void do_throw_immutable() const;
 
   public:
     const Value & get_value() const noexcept

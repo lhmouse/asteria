@@ -252,7 +252,7 @@ namespace details_cow_hashmap
         {
           // This specialization is used when `allocatorT::value_type` is not copy-constructible.
           template<typename xpointerT, typename ypointerT>
-            ROCKET_NORETURN void operator()(xpointerT /*ptr*/, const hashT & /*hf*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+            [[noreturn]] void operator()(xpointerT /*ptr*/, const hashT & /*hf*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
               {
                 // `allocatorT::value_type` is not copy-constructible.
                 // Throw an exception unconditionally, even when there is nothing to copy.

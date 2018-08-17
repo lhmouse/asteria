@@ -194,7 +194,7 @@ namespace details_cow_vector
         {
           // This specialization is used when `allocatorT::value_type` is not copy-constructible.
           template<typename xpointerT, typename ypointerT>
-            ROCKET_NORETURN void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+            [[noreturn]] void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
               {
                 // Throw an exception unconditionally, even when there is nothing to copy.
                 noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");

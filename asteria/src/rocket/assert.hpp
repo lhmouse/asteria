@@ -9,7 +9,7 @@
 namespace rocket
 {
 
-ROCKET_NORETURN extern void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
+[[noreturn]] extern void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
 
 }
 

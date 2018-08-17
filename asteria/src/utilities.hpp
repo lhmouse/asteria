@@ -86,7 +86,7 @@ class Logger
 extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(Logger &&logger) noexcept;
 
-ROCKET_NORETURN extern void throw_runtime_error(Logger &&logger);
+[[noreturn]] extern void throw_runtime_error(Logger &&logger);
 
 }
 

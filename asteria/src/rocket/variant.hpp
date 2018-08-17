@@ -242,7 +242,7 @@ namespace details_variant
       };
 
     // This function silences the warning about `throw` statements inside a possible `noexcept` function.
-    ROCKET_NORETURN inline void rethrow_current_exception()
+    [[noreturn]] inline void rethrow_current_exception()
       {
         throw;
       }

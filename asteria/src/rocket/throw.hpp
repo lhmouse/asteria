@@ -9,10 +9,10 @@
 namespace rocket
 {
 
-ROCKET_FORMAT_CHECK(__gnu_printf__, 1, 2) ROCKET_NORETURN extern void throw_invalid_argument(const char *fmt, ...);
-ROCKET_FORMAT_CHECK(__gnu_printf__, 1, 2) ROCKET_NORETURN extern void throw_out_of_range(const char *fmt, ...);
-ROCKET_FORMAT_CHECK(__gnu_printf__, 1, 2) ROCKET_NORETURN extern void throw_length_error(const char *fmt, ...);
-ROCKET_FORMAT_CHECK(__gnu_printf__, 1, 2) ROCKET_NORETURN extern void throw_domain_error(const char *fmt, ...);
+ROCKET_FORMAT_CHECK(__printf__, 1, 2) [[noreturn]] extern void throw_invalid_argument(const char *fmt, ...);
+ROCKET_FORMAT_CHECK(__printf__, 1, 2) [[noreturn]] extern void throw_out_of_range(const char *fmt, ...);
+ROCKET_FORMAT_CHECK(__printf__, 1, 2) [[noreturn]] extern void throw_length_error(const char *fmt, ...);
+ROCKET_FORMAT_CHECK(__printf__, 1, 2) [[noreturn]] extern void throw_domain_error(const char *fmt, ...);
 
 }
 
