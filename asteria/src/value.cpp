@@ -341,48 +341,42 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
       {
         const auto &cand = value.as<D_boolean>();
         // boolean true
-        os <<"boolean ";
-        os <<std::boolalpha <<std::nouppercase <<cand;
+        os <<"boolean " <<std::boolalpha <<std::nouppercase <<cand;
         return;
       }
     case Value::type_integer:
       {
         const auto &cand = value.as<D_integer>();
         // integer 42
-        os <<"integer ";
-        os <<std::dec <<cand;
+        os <<"integer " <<std::dec <<cand;
         return;
       }
     case Value::type_double:
       {
         const auto &cand = value.as<D_double>();
         // double 123.456
-        os <<"double ";
-        os <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<cand;
+        os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<cand;
         return;
       }
     case Value::type_string:
       {
         const auto &cand = value.as<D_string>();
         // string(5) "hello"
-        os <<"string(" <<std::dec <<cand.size() <<") ";
-        os <<Quote(cand);
+        os <<"string(" <<std::dec <<cand.size() <<") " <<Quote(cand);
         return;
       }
     case Value::type_opaque:
       {
         const auto &cand = value.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*cand).name() <<"\") ";
-        os <<Quote(cand->describe());
+        os <<"opaque(\"" <<typeid(*cand).name() <<"\") " <<Quote(cand->describe());
         return;
       }
     case Value::type_function:
       {
         const auto &cand = value.as<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*cand).name() <<"\") ";
-        os <<Quote(cand->describe());
+        os <<"function(\"" <<typeid(*cand).name() <<"\") " <<Quote(cand->describe());
         return;
       }
     case Value::type_array:
