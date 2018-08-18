@@ -46,9 +46,10 @@ class Context
       {
         return m_named_refs.get(name);
       }
-    Reference * set_named_reference(const String &name, Reference &&ref)
+    Reference & set_named_reference(const String &name, Reference &&ref)
       {
-        return m_named_refs.set(name, std::move(ref)).first;
+        const auto ptr = m_named_refs.set(name, std::move(ref)).first;
+        return *ptr;
       }
   };
 
