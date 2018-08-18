@@ -38,16 +38,18 @@ class Variable
       {
         return m_value;
       }
-    Value & set_value(Value &&value)
+    bool is_immutable() const noexcept
+      {
+        return m_immutable;
+      }
+    Value & set_value(Value &&value, bool immutable = false)
       {
         if(m_immutable)  {
           do_throw_immutable();
         }
-        return m_value = std::move(value);
-      }
-    bool is_immutable() const noexcept
-      {
-        return m_immutable;
+        auto &res = m_value = std::move(value);
+        m_immutable = immutable;
+        return res;
       }
     bool & set_immutable(bool immutable = true) noexcept
       {

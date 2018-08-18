@@ -18,11 +18,7 @@ class Reference
     Vector<Reference_modifier> m_modifiers;
 
   public:
-    Reference(Reference_root &&root)
-      : m_root(std::move(root)), m_modifiers()
-      {
-      }
-    Reference(Reference_root &&root, Vector<Reference_modifier> &&modifiers)
+    Reference(Reference_root &&root, Vector<Reference_modifier> &&modifiers = { })
       : m_root(std::move(root)), m_modifiers(std::move(modifiers))
       {
       }
@@ -39,11 +35,6 @@ class Reference
       {
         return m_root;
       }
-    Reference_root & set_root(Reference_root &&root)
-      {
-        return m_root = std::move(root);
-      }
-
     const Vector<Reference_modifier> & get_modifiers() const noexcept
       {
         return m_modifiers;
@@ -51,6 +42,12 @@ class Reference
     Vector<Reference_modifier> & get_modifiers() noexcept
       {
         return m_modifiers;
+      }
+    Reference_root & set_root(Reference_root &&root, Vector<Reference_modifier> &&modifiers = { })
+      {
+        auto &res = m_root = std::move(root);
+        m_modifiers = std::move(modifiers);
+        return res;
       }
     void clear_modifiers() noexcept
       {
@@ -63,12 +60,6 @@ class Reference
     void pop_modifier()
       {
         m_modifiers.pop_back();
-      }
-
-    void set_root_and_modifiers(Reference_root &&root, Vector<Reference_modifier> &&modifiers)
-      {
-        m_root      = std::move(root);
-        m_modifiers = std::move(modifiers);
       }
   };
 
