@@ -1180,10 +1180,19 @@ Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
     for(const auto &node : expr) {
       evaluate_xpnode_partial(stack, node, ctx);
     }
-    if(stack.size() != 1) {
-      ASTERIA_THROW_RUNTIME_ERROR("Unbalanced expression.");
+    switch(stack.size()) {
+    case 0:
+      {
+        Reference_root::S_constant ref_c = { D_null() };
+        return Reference_root(std::move(ref_c));
+      }
+    case 1:
+      {
+        return std::move(stack.mut_front());
+      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
     }
-    return std::move(stack.mut_front());
   }
 
 }
