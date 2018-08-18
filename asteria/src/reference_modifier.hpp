@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_REFERENCE_MEMBER_DESIGNATOR_HPP_
-#define ASTERIA_REFERENCE_MEMBER_DESIGNATOR_HPP_
+#ifndef ASTERIA_REFERENCE_MODIFIER_HPP_
+#define ASTERIA_REFERENCE_MODIFIER_HPP_
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
@@ -10,26 +10,26 @@
 namespace Asteria
 {
 
-class Reference_member_designator
+class Reference_modifier
   {
   public:
     enum Type : std::uint8_t
       {
-        type_array   = 0,
-        type_object  = 1,
+        type_array_index  = 0,
+        type_object_key   = 1,
       };
-    struct S_array
+    struct S_array_index
       {
         Signed index;
       };
-    struct S_object
+    struct S_object_key
       {
         String key;
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_array   // 0,
-        , S_object  // 1,
+        , S_array_index  // 0,
+        , S_object_key   // 1,
       )>;
 
   private:
@@ -37,13 +37,13 @@ class Reference_member_designator
 
   public:
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
-      Reference_member_designator(CandidateT &&cand)
+      Reference_modifier(CandidateT &&cand)
         : m_variant(std::forward<CandidateT>(cand))
         {
         }
-    Reference_member_designator(Reference_member_designator &&) noexcept;
-    Reference_member_designator & operator=(Reference_member_designator &&) noexcept;
-    ~Reference_member_designator();
+    Reference_modifier(Reference_modifier &&) noexcept;
+    Reference_modifier & operator=(Reference_modifier &&) noexcept;
+    ~Reference_modifier();
 
   public:
     Type which() const noexcept

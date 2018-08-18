@@ -49,7 +49,7 @@ pkginclude_HEADERS =  \
   asteria/src/parser_result.hpp  \
   asteria/src/token.hpp  \
   asteria/src/reference_root.hpp  \
-  asteria/src/reference_member_designator.hpp  \
+  asteria/src/reference_modifier.hpp  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp	\
   asteria/src/exception.hpp  \
@@ -72,7 +72,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/value.cpp  \
   asteria/src/token.cpp  \
   asteria/src/reference_root.cpp  \
-  asteria/src/reference_member_designator.cpp  \
+  asteria/src/reference_modifier.cpp  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp	\
   asteria/src/exception.cpp  \

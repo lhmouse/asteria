@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "reference_root.hpp"
-#include "reference_member_designator.hpp"
+#include "reference_modifier.hpp"
 
 namespace Asteria
 {
@@ -15,15 +15,15 @@ class Reference
   {
   private:
     Reference_root m_root;
-    Vector<Reference_member_designator> m_mdsgs;
+    Vector<Reference_modifier> m_modifiers;
 
   public:
     Reference(Reference_root &&root)
-      : m_root(std::move(root)), m_mdsgs()
+      : m_root(std::move(root)), m_modifiers()
       {
       }
-    Reference(Reference_root &&root, Vector<Reference_member_designator> &&mdsgs)
-      : m_root(std::move(root)), m_mdsgs(std::move(mdsgs))
+    Reference(Reference_root &&root, Vector<Reference_modifier> &&modifiers)
+      : m_root(std::move(root)), m_modifiers(std::move(modifiers))
       {
       }
     Reference(Reference &&) noexcept;
@@ -44,25 +44,25 @@ class Reference
         return m_root = std::move(root);
       }
 
-    const Vector<Reference_member_designator> & get_member_designators() const noexcept
+    const Vector<Reference_modifier> & get_modifiers() const noexcept
       {
-        return m_mdsgs;
+        return m_modifiers;
       }
-    Vector<Reference_member_designator> & get_member_designators() noexcept
+    Vector<Reference_modifier> & get_modifiers() noexcept
       {
-        return m_mdsgs;
+        return m_modifiers;
       }
-    void clear_member_designators() noexcept
+    void clear_modifiers() noexcept
       {
-        m_mdsgs.clear();
+        m_modifiers.clear();
       }
-    Reference_member_designator & push_member_designator(Reference_member_designator &&mdsg)
+    Reference_modifier & push_modifier(Reference_modifier &&modifier)
       {
-        return m_mdsgs.emplace_back(std::move(mdsg));
+        return m_modifiers.emplace_back(std::move(modifier));
       }
-    void pop_member_designator()
+    void pop_modifier()
       {
-        m_mdsgs.pop_back();
+        m_modifiers.pop_back();
       }
   };
 

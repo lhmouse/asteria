@@ -42,13 +42,13 @@ class Context
       {
         return m_named_refs.get(name);
       }
-    Reference * get_named_reference_opt(const String &name)
+    Reference * get_named_reference_opt(const String &name) noexcept
       {
         return m_named_refs.get(name);
       }
-    Reference * set_named_reference(const String &name, Reference &&ref)
+    std::pair<Reference *, bool> set_named_reference(const String &name, Reference &&ref)
       {
-        return m_named_refs.set(name, std::move(ref)).first;
+        return m_named_refs.set(name, std::move(ref));
       }
   };
 

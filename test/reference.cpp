@@ -32,31 +32,31 @@ int main()
 
     ref.set_root(Reference_root::S_temporary_value { D_null() });
     materialize_reference(ref);
-    ref.push_member_designator(Reference_member_designator::S_array{ -3 });
+    ref.push_modifier(Reference_modifier::S_array_index { -3 });
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_null);
     write_reference(ref, D_integer(36));
-    ref.pop_member_designator();
-    ref.push_member_designator(Reference_member_designator::S_array{ 0 });
+    ref.pop_modifier();
+    ref.push_modifier(Reference_modifier::S_array_index { 0 });
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.as<D_integer>() == 36);
 
-    ref.clear_member_designators();
-    ref.push_member_designator(Reference_member_designator::S_array{ 2 });
-    ref.push_member_designator(Reference_member_designator::S_object{ String::shallow("my_key") });
+    ref.clear_modifiers();
+    ref.push_modifier(Reference_modifier::S_array_index { 2 });
+    ref.push_modifier(Reference_modifier::S_object_key { String::shallow("my_key") });
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_null);
     write_reference(ref, D_double(10.5));
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_double);
     ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
-    ref.clear_member_designators();
-    ref.push_member_designator(Reference_member_designator::S_array{ -1 });
-    ref.push_member_designator(Reference_member_designator::S_object{ String::shallow("my_key") });
+    ref.clear_modifiers();
+    ref.push_modifier(Reference_modifier::S_array_index { -1 });
+    ref.push_modifier(Reference_modifier::S_object_key { String::shallow("my_key") });
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_double);
     ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
-    ref.push_member_designator(Reference_member_designator::S_object{ String::shallow("invalid_access") });
+    ref.push_modifier(Reference_modifier::S_object_key { String::shallow("invalid_access") });
     ASTERIA_TEST_CHECK_CATCH(val = read_reference(ref));
   }

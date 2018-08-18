@@ -40,12 +40,12 @@ Value read_reference(const Reference &ref)
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` is encountered.");
     }
-    // Apply member designators.
-    for(const auto &mdsg : ref.get_member_designators()) {
-      switch(mdsg.which()) {
-      case Reference_member_designator::type_array:
+    // Apply modifiers.
+    for(const auto &modifier : ref.get_modifiers()) {
+      switch(modifier.which()) {
+      case Reference_modifier::type_array_index:
         {
-          const auto &cand = mdsg.as<Reference_member_designator::S_array>();
+          const auto &cand = modifier.as<Reference_modifier::S_array_index>();
           if(ptr->which() == Value::type_null) {
             return D_null();
           }
@@ -69,9 +69,9 @@ Value read_reference(const Reference &ref)
           ptr = std::addressof(array.at(static_cast<std::size_t>(rindex)));
           break;
         }
-      case Reference_member_designator::type_object:
+      case Reference_modifier::type_object_key:
         {
-          const auto &cand = mdsg.as<Reference_member_designator::S_object>();
+          const auto &cand = modifier.as<Reference_modifier::S_object_key>();
           if(ptr->which() == Value::type_null) {
             return D_null();
           }
@@ -88,7 +88,7 @@ Value read_reference(const Reference &ref)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference member designator type enumeration `", mdsg.which(), "` is encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` is encountered.");
       }
     }
     return *ptr;
@@ -120,12 +120,12 @@ void write_reference(const Reference &ref, Value &&value)
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` is encountered.");
     }
-    // Apply member designators.
-    for(const auto &mdsg : ref.get_member_designators()) {
-      switch(mdsg.which()) {
-      case Reference_member_designator::type_array:
+    // Apply modifiers.
+    for(const auto &modifier : ref.get_modifiers()) {
+      switch(modifier.which()) {
+      case Reference_modifier::type_array_index:
         {
-          const auto &cand = mdsg.as<Reference_member_designator::S_array>();
+          const auto &cand = modifier.as<Reference_modifier::S_array_index>();
           if(ptr->which() == Value::type_null) {
             ptr->set(D_array());
           }
@@ -163,9 +163,9 @@ void write_reference(const Reference &ref, Value &&value)
           ptr = std::addressof(array.mut(static_cast<std::size_t>(rindex)));
           break;
         }
-      case Reference_member_designator::type_object:
+      case Reference_modifier::type_object_key:
         {
-          const auto &cand = mdsg.as<Reference_member_designator::S_object>();
+          const auto &cand = modifier.as<Reference_modifier::S_object_key>();
           if(ptr->which() == Value::type_null) {
             ptr->set(D_object());
           }
@@ -181,7 +181,7 @@ void write_reference(const Reference &ref, Value &&value)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference member designator type enumeration `", mdsg.which(), "` is encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` is encountered.");
       }
     }
     *ptr = std::move(value);
@@ -198,7 +198,7 @@ void materialize_reference(Reference &ref)
     // Make `ref` a reference to this variable.
     Reference_root::S_variable ref_v = { std::move(var) };
     ref.set_root(std::move(ref_v));
-    ref.clear_member_designators();
+    ref.clear_modifiers();
   }
 
 }

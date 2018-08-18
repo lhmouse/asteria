@@ -55,7 +55,7 @@ class Value;
 class Opaque_base;
 class Function_base;
 class Reference_root;
-class Reference_designator;
+class Reference_modifier;
 class Reference;
 class Variable;
 class Context;
