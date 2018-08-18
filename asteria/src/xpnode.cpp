@@ -145,9 +145,9 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_branch>();
         // Bind both branches recursively.
-        auto btrue_bnd = bind_expression(cand.branch_true, ctx);
-        auto bfalse_bnd = bind_expression(cand.branch_false, ctx);
-        Xpnode::S_branch cand_bnd = { std::move(btrue_bnd), std::move(bfalse_bnd) };
+        auto branch_true_bnd = bind_expression(cand.branch_true, ctx);
+        auto branch_false_bnd = bind_expression(cand.branch_false, ctx);
+        Xpnode::S_branch cand_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(cand_bnd);
       }
     case Xpnode::index_function_call:
@@ -161,6 +161,32 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<Context> ctx)
         const auto &cand = node.as<Xpnode::S_operator_rpn>();
         // Copy it as-is.
         return cand;
+      }
+    case Xpnode::index_unnamed_array:
+      {
+        const auto &cand = node.as<Xpnode::S_unnamed_array>();
+        // Bind everything recursively.
+        Vector<Vector<Xpnode>> elems_bnd;
+        elems_bnd.reserve(cand.elems.size());
+        for(const auto &elem : cand.elems) {
+          auto elem_bnd = bind_expression(elem, ctx);
+          elems_bnd.emplace_back(std::move(elem_bnd));
+        }
+        Xpnode::S_unnamed_array cand_bnd = { std::move(elems_bnd) };
+        return std::move(cand_bnd);
+      }
+    case Xpnode::index_unnamed_object:
+      {
+        const auto &cand = node.as<Xpnode::S_unnamed_object>();
+        // Bind everything recursively.
+        Dictionary<Vector<Xpnode>> pairs_bnd;
+        pairs_bnd.reserve(cand.pairs.size());
+        for(const auto &pair : cand.pairs) {
+          auto second_bnd = bind_expression(pair.second, ctx);
+          pairs_bnd.insert_or_assign(pair.first, std::move(second_bnd));
+        }
+        Xpnode::S_unnamed_object cand_bnd = { std::move(pairs_bnd) };
+        return std::move(cand_bnd);
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.which(), "` has been encountered.");
@@ -519,8 +545,8 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
     case Xpnode::index_operator_rpn:
       {
         // Pop the first operand off the stack.
-        // For prefix operators, this is the RHS operand anyway.
-        // This is also the object where the result will stored.
+        // For prefix operators, this is actually the RHS operand anyway.
+        // This is also the object where the result will be stored.
         auto lhs = do_pop_reference(stack_inout);
         // Deal with individual operators.
         const auto &cand = node.as<Xpnode::S_operator_rpn>();
@@ -1099,6 +1125,38 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           ASTERIA_TERMINATE("An unknown operator type enumeration `", cand.xop, "` has been encountered.");
         }
         stack_inout.emplace_back(std::move(lhs));
+        return;
+      }
+    case Xpnode::index_unnamed_array:
+      {
+        const auto &cand = node.as<Xpnode::S_unnamed_array>();
+        // Create an array by evaluating elements recursively.
+        D_array array;
+        array.reserve(cand.elems.size());
+        for(const auto &elem : cand.elems) {
+          const auto result = evaluate_expression(elem, ctx);
+          auto value = read_reference(result);
+          array.emplace_back(std::move(value));
+        }
+        // The result is a temporary value.
+        Reference_root::S_temporary_value ref_c = { std::move(array) };
+        stack_inout.emplace_back(std::move(ref_c));
+        return;
+      }
+    case Xpnode::index_unnamed_object:
+      {
+        const auto &cand = node.as<Xpnode::S_unnamed_object>();
+        // Create an object by evaluating elements recursively.
+        D_object object;
+        object.reserve(cand.pairs.size());
+        for(const auto &pair : cand.pairs) {
+          const auto result = evaluate_expression(pair.second, ctx);
+          auto value = read_reference(result);
+          object.insert_or_assign(pair.first, std::move(value));
+        }
+        // The result is a temporary value.
+        Reference_root::S_temporary_value ref_c = { std::move(object) };
+        stack_inout.emplace_back(std::move(ref_c));
         return;
       }
     default:

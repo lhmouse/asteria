@@ -53,14 +53,16 @@ class Xpnode
 
     enum Index : std::uint8_t
       {
-        index_literal            = 0,
-        index_named_reference    = 1,
-        index_bound_reference    = 2,
-        index_subexpression      = 3,
-        index_lambda_definition  = 4,
-        index_branch             = 5,
-        index_function_call      = 6,
-        index_operator_rpn       = 7,
+        index_literal            =  0,
+        index_named_reference    =  1,
+        index_bound_reference    =  2,
+        index_subexpression      =  3,
+        index_lambda_definition  =  4,
+        index_branch             =  5,
+        index_function_call      =  6,
+        index_operator_rpn       =  7,
+        index_unnamed_array      =  8,
+        index_unnamed_object     =  9,
       };
     struct S_literal
       {
@@ -100,16 +102,26 @@ class Xpnode
         // This parameter is ignored for `++`, `--`, `[]`, `=` and all relational operators.
         bool compound_assign;
       };
+    struct S_unnamed_array
+      {
+        Vector<Vector<Xpnode>> elems;
+      };
+    struct S_unnamed_object
+      {
+        Dictionary<Vector<Xpnode>> pairs;
+      };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_literal            // 0,
-        , S_named_reference    // 1,
-        , S_bound_reference    // 2,
-        , S_subexpression      // 3,
-        , S_lambda_definition  // 4,
-        , S_branch             // 5,
-        , S_function_call      // 6,
-        , S_operator_rpn       // 7,
+        , S_literal            //  0,
+        , S_named_reference    //  1,
+        , S_bound_reference    //  2,
+        , S_subexpression      //  3,
+        , S_lambda_definition  //  4,
+        , S_branch             //  5,
+        , S_function_call      //  6,
+        , S_operator_rpn       //  7,
+        , S_unnamed_array      //  8,
+        , S_unnamed_object     //  9,
       )>;
 
   private:
