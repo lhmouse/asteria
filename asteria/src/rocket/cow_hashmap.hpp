@@ -647,7 +647,9 @@ namespace details_cow_hashmap
         };
 
     // Informs the constructor of an iterator that the `bkt` parameter might point to an empty bucket.
-    constexpr struct needs_adjust_tag { } needs_adjust;
+    constexpr struct needs_adjust_tag
+      {
+      } needs_adjust;
 
     template<typename hashmapT, typename valueT>
       class hashmap_iterator

@@ -589,8 +589,12 @@ namespace details_cow_string
         };
 
     // Replacement helpers.
-    constexpr struct append_tag       { } append;
-    constexpr struct push_back_tag    { } push_back;
+    constexpr struct append_tag
+      {
+      } append;
+    constexpr struct push_back_tag
+      {
+      } push_back;
 
     template<typename stringT, typename ...paramsT>
       inline void tagged_append(stringT *str, append_tag, paramsT &&...params)

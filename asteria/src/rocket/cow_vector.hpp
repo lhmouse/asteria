@@ -683,9 +683,15 @@ namespace details_cow_vector
         }
 
     // Insertion helpers.
-    constexpr struct append_tag       { } append;
-    constexpr struct emplace_back_tag { } emplace_back;
-    constexpr struct push_back_tag    { } push_back;
+    constexpr struct append_tag
+      {
+      } append;
+    constexpr struct emplace_back_tag
+      {
+      } emplace_back;
+    constexpr struct push_back_tag
+      {
+      } push_back;
 
     template<typename vectorT, typename ...paramsT>
       inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
