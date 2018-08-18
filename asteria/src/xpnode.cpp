@@ -518,12 +518,15 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       }
     case Xpnode::index_operator_rpn:
       {
+        // Pop the first operand off the stack.
+        // For prefix operators, this is the RHS operand anyway.
+        // This is also the object where the result will stored.
+        auto lhs = do_pop_reference(stack_inout);
+        // Deal with individual operators.
         const auto &cand = node.as<Xpnode::S_operator_rpn>();
         switch(cand.xop) {
         case Xpnode::xop_postfix_inc:
           {
-            // Pop the operand off the stack.
-            auto lhs = do_pop_reference(stack_inout);
             // Increment the operand and return the old value.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
@@ -542,13 +545,10 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_postfix_dec:
           {
-            // Pop the operand off the stack.
-            auto lhs = do_pop_reference(stack_inout);
             // Decrement the operand and return the old value.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
@@ -567,13 +567,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_postfix_at:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // The subscript operand shall have type `integer` or `string`.
             // `compound_assign` is ignored.
@@ -593,139 +591,119 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_pos:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Copy the operand to create an rvalue, then return it.
-            auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_integer)
+            auto lhs_value = read_reference(lhs);
+            if(lhs_value.which() == Value::type_integer)
               {
-                auto result = rhs_value.as<D_integer>();
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = lhs_value.as<D_integer>();
+                do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(rhs_value.which() == Value::type_string)
+            else if(lhs_value.which() == Value::type_string)
               {
-                auto result = rhs_value.as<D_double>();
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = lhs_value.as<D_double>();
+                do_set_result(lhs, cand.compound_assign, result);
               }
             else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", rhs_value, "`.");
+              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_neg:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Negate the operand to create an rvalue, then return it.
-            auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_integer)
+            auto lhs_value = read_reference(lhs);
+            if(lhs_value.which() == Value::type_integer)
               {
-                auto result = do_negate(rhs_value.as<D_integer>());
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = do_negate(lhs_value.as<D_integer>());
+                do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(rhs_value.which() == Value::type_string)
+            else if(lhs_value.which() == Value::type_string)
               {
-                auto result = do_negate(rhs_value.as<D_double>());
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = do_negate(lhs_value.as<D_double>());
+                do_set_result(lhs, cand.compound_assign, result);
               }
             else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", rhs_value, "`.");
+              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_notb:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Perform bitwise not operation on the operand to create an rvalue, then return it.
-            auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_boolean)
+            auto lhs_value = read_reference(lhs);
+            if(lhs_value.which() == Value::type_boolean)
               {
-                auto result = do_logical_not(rhs_value.as<D_boolean>());
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = do_logical_not(lhs_value.as<D_boolean>());
+                do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(rhs_value.which() == Value::type_integer)
+            else if(lhs_value.which() == Value::type_integer)
               {
-                auto result = do_bitwise_not(rhs_value.as<D_integer>());
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = do_bitwise_not(lhs_value.as<D_integer>());
+                do_set_result(lhs, cand.compound_assign, result);
               }
             else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", rhs_value, "`.");
+              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_notl:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = read_reference(lhs);
               {
-                auto result = do_logical_not(test_value(rhs_value));
-                do_set_result(rhs, cand.compound_assign, result);
+                auto result = do_logical_not(test_value(lhs_value));
+                do_set_result(lhs, cand.compound_assign, result);
               }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_inc:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Increment the operand and return it.
             // `compound_assign` is ignored.
-            auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_integer)
+            auto lhs_value = read_reference(lhs);
+            if(lhs_value.which() == Value::type_integer)
               {
-                auto result = do_add(rhs_value.as<D_integer>(), D_integer(1));
-                do_set_result(rhs, true, result);
+                auto result = do_add(lhs_value.as<D_integer>(), D_integer(1));
+                do_set_result(lhs, true, result);
               }
-            else if(rhs_value.which() == Value::type_double)
+            else if(lhs_value.which() == Value::type_double)
               {
-                auto result = do_add(rhs_value.as<D_double>(), D_double(1));
-                do_set_result(rhs, true, result);
+                auto result = do_add(lhs_value.as<D_double>(), D_double(1));
+                do_set_result(lhs, true, result);
               }
             else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", rhs_value, "`.");
+              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_prefix_dec:
           {
-            // Pop the operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
             // Decrement the operand and return it.
             // `compound_assign` is ignored.
-            auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_integer)
+            auto lhs_value = read_reference(lhs);
+            if(lhs_value.which() == Value::type_integer)
               {
-                auto result = do_subtract(rhs_value.as<D_integer>(), D_integer(1));
-                do_set_result(rhs, true, result);
+                auto result = do_subtract(lhs_value.as<D_integer>(), D_integer(1));
+                do_set_result(lhs, true, result);
               }
-            else if(rhs_value.which() == Value::type_double)
+            else if(lhs_value.which() == Value::type_double)
               {
-                auto result = do_subtract(rhs_value.as<D_double>(), D_double(1));
-                do_set_result(rhs, true, result);
+                auto result = do_subtract(lhs_value.as<D_double>(), D_double(1));
+                do_set_result(lhs, true, result);
               }
             else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", rhs_value, "`.");
+              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(rhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_eq:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
@@ -735,13 +713,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 auto result = compare_values(lhs_value, rhs_value);
                 do_set_result(lhs, false, result == Value::comparison_equal);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_ne:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
@@ -751,13 +727,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 auto result = compare_values(lhs_value, rhs_value);
                 do_set_result(lhs, false, result != Value::comparison_equal);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_lt:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
@@ -769,13 +743,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 }
                 do_set_result(lhs, false, result == Value::comparison_less);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_gt:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
@@ -787,13 +759,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 }
                 do_set_result(lhs, false, result == Value::comparison_greater);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_lte:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
@@ -805,13 +775,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 }
                 do_set_result(lhs, false, result != Value::comparison_greater);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_cmp_gte:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
@@ -823,13 +791,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
                 }
                 do_set_result(lhs, false, result != Value::comparison_less);
               }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_add:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` and `double` types, return the sum of both operands.
@@ -859,13 +825,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_sub:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` and `double` types, return the difference of both operands.
@@ -889,13 +853,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_mul:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the boolean type, return the logical AND'd result of both operands.
             // For the integer and double types, return the product of both operands.
@@ -930,13 +892,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_div:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the integer and double types, return the quotient of both operands.
             auto lhs_value = read_reference(lhs);
@@ -954,13 +914,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_mod:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the integer and double types, return the reminder of both operands.
             auto lhs_value = read_reference(lhs);
@@ -978,13 +936,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_sll:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -999,13 +955,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_srl:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -1020,13 +974,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_sla:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
@@ -1042,13 +994,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_sra:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
@@ -1063,13 +1013,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_andb:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical AND'd result of both operands.
             // For the `integer` type, return the bitwise AND'd result of both operands.
@@ -1088,13 +1036,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_orb:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` type, return the bitwise OR'd result of both operands.
@@ -1113,13 +1059,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_xorb:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` type, return the bitwise XOR'd result of both operands.
@@ -1138,25 +1082,24 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             else {
               ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
             }
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         case Xpnode::xop_infix_assign:
           {
-            // Pop two operands off the stack.
-            auto lhs = do_pop_reference(stack_inout);
+            // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Copy the operand referenced by `rhs` to `lhs`.
             // `compound_assign` is ignored.
             // N.B. This is one of the few operators that work on all types.
             auto rhs_value = read_reference(rhs);
             do_set_result(lhs, true, std::move(rhs_value));
-            stack_inout.emplace_back(std::move(lhs));
-            return;
+            break;
           }
         default:
           ASTERIA_TERMINATE("An unknown operator type enumeration `", cand.xop, "` has been encountered.");
         }
+        stack_inout.emplace_back(std::move(lhs));
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.which(), "` has been encountered.");
