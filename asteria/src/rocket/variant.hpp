@@ -189,7 +189,7 @@ namespace details_variant
         template<typename elementT>
           void operator()(elementT *ptr, void *src) const
             {
-              noadl::construct_at(ptr, ::std::move(*(static_cast<const elementT *>(src))));
+              noadl::construct_at(ptr, ::std::move(*(static_cast<elementT *>(src))));
             }
       };
     struct visitor_copy_assign
