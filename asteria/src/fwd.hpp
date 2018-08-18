@@ -39,9 +39,9 @@ template<typename ElementT>
   using Wptr = std::weak_ptr<ElementT>;
 
 template<typename ElementT>
-  using Spcr = const Sptr<ElementT> &;
+  using Spref = const Sptr<ElementT> &;
 template<typename ElementT>
-  using Wpcr = const Wptr<ElementT> &;
+  using Wpref = const Wptr<ElementT> &;
 
 // General utilities
 class Logger;
