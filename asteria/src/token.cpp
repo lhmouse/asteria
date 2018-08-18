@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "token.hpp"
-#include "parser_result.hpp"
 #include "utilities.hpp"
 #include <algorithm>
 #include <cfloat>
@@ -122,13 +121,12 @@ namespace
         const auto char_head = str.at(column);
         switch(char_head) {
         case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n':
+          // Ignore a series of spaces.
           {
-            // Ignore a series of spaces.
             const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
             const auto length = std::min(pos, str.size()) - column;
             return Parser_result(line, column, length, Parser_result::error_code_success);
           }
-
         case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
         case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
         case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
@@ -228,7 +226,6 @@ namespace
             // There must be a bug in the punctuator table.
             ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled.");
           }
-
         case '\"':  case '\'':
           // Get a string literal.
           {
@@ -376,7 +373,6 @@ namespace
             tokens_out.emplace_back(line, column, length, std::move(token_s));
             return Parser_result(line, column, length, Parser_result::error_code_success);
           }
-
         case '0':  case '1':  case '2':  case '3':  case '4':
         case '5':  case '6':  case '7':  case '8':  case '9':
           // Get a numeric literal.
@@ -568,7 +564,6 @@ namespace
             tokens_out.emplace_back(line, column, length, std::move(token_d));
             return Parser_result(line, column, length, Parser_result::error_code_success);
           }
-
         case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
         case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
         case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':

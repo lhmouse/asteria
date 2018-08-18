@@ -3,8 +3,6 @@
 
 #include "_test_init.hpp"
 #include "../src/context.hpp"
-#include "../src/value.hpp"
-#include "../src/reference.hpp"
 
 using namespace Asteria;
 

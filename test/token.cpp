@@ -3,7 +3,6 @@
 
 #include "_test_init.hpp"
 #include "../src/token.hpp"
-#include "../src/parser_result.hpp"
 
 using namespace Asteria;
 

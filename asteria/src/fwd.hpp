@@ -49,6 +49,8 @@ class Logger;
 // Lexical elements
 class Parser_result;
 class Token;
+class Xpnode;
+class Statement;
 
 // Runtime objects
 class Value;
