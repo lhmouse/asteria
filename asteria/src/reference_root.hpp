@@ -14,7 +14,7 @@ namespace Asteria
 class Reference_root
   {
   public:
-    enum Type : std::uint8_t
+    enum Index : std::uint8_t
       {
         type_constant         = 0,
         type_temporary_value  = 1,
@@ -53,9 +53,9 @@ class Reference_root
     ~Reference_root();
 
   public:
-    Type which() const noexcept
+    Index which() const noexcept
       {
-        return static_cast<Type>(m_variant.index());
+        return static_cast<Index>(m_variant.index());
       }
     template<typename ExpectT>
       const ExpectT * get_opt() const noexcept
