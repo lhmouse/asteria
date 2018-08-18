@@ -12,19 +12,19 @@
 3. Simple to use.
 4. Lightweight.
 5. Procedural.
-6. Easy to intergrate in a C++ project. (C++11 is required.)
-7. Native to C++ exceptions, particularly `std::bad_alloc`.
+6. Dynamically typed.
+7. Easy to intergrate in a C++ project. (C++11 is required.)
+8. Native to C++ exceptions, particularly `std::bad_alloc`.
 
 # Characteristics
 
 1. First-class functions.
-2. Dynamic typing.
-3. Closure functions (`lambda` expressions).
-4. Exceptions.
-5. Flexible syntax, similar to **C++** and **JavaScript**.
-6. Regular grammar.
-7. Passing by reference only, including the operand of a `throw` statement and the return value of a function.
-8. No garbage collector. Objects are managed using referencing counting. Non-user-defined types have been designed in such a way that circular reference is impossible.
+2. Closure functions (`lambda` expressions).
+3. Exceptions.
+4. Flexible syntax, similar to **C++** and **JavaScript**.
+5. Regular grammar.
+6. Passing by reference only, including the operand of a `throw` statement and the return value of a function.
+7. No garbage collector. Objects are managed using referencing counting. Non-user-defined types have been designed in such a way that circular reference is impossible.
 
 # License
 
