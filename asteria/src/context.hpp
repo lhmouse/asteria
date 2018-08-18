@@ -46,9 +46,9 @@ class Context
       {
         return m_named_refs.get(name);
       }
-    std::pair<Reference *, bool> set_named_reference(const String &name, Reference &&ref)
+    Reference * set_named_reference(const String &name, Reference &&ref)
       {
-        return m_named_refs.set(name, std::move(ref));
+        return m_named_refs.set(name, std::move(ref)).first;
       }
   };
 
