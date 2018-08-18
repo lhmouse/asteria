@@ -117,15 +117,15 @@ class Token
       };
     struct S_integer_literal
       {
-        D_integer value;
+        Unsigned value;
       };
     struct S_double_literal
       {
-        D_double value;
+        Double value;
       };
     struct S_string_literal
       {
-        D_string value;
+        String value;
       };
     using Variant = rocket::variant<
       ROCKET_CDR(

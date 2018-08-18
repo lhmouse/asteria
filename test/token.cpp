@@ -28,6 +28,6 @@ int main()
     ASTERIA_TEST_CHECK(tokens.at(13).as<Token::S_punctuator>().punct == Token::punctuator_dot);
     ASTERIA_TEST_CHECK(tokens.at(14).as<Token::S_keyword>().keyword == Token::keyword_false);
     ASTERIA_TEST_CHECK(tokens.at(15).as<Token::S_punctuator>().punct == Token::punctuator_semicolon);
-    ASTERIA_TEST_CHECK(tokens.at(16).as<Token::S_integer_literal>().value == -420000000000000);
+    ASTERIA_TEST_CHECK(tokens.at(16).as<Token::S_integer_literal>().value == -420000000000000u);
     ASTERIA_TEST_CHECK(tokens.size() == 17);
   }
