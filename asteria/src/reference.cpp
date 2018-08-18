@@ -51,7 +51,7 @@ Value read_reference(const Reference &ref)
             return D_null();
           }
           if(ptr->which() != Value::type_array) {
-            ASTERIA_THROW_RUNTIME_ERROR("Cannot read from index `", cand.index, "` of `", *ptr, "` which is not an array.");
+            ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           const auto &array = ptr->as<D_array>();
           auto rindex = cand.index;
@@ -77,7 +77,7 @@ Value read_reference(const Reference &ref)
             return D_null();
           }
           if(ptr->which() != Value::type_object) {
-            ASTERIA_THROW_RUNTIME_ERROR("Cannot read from key `", cand.key, "` of `", *ptr, "` which is not an object.");
+            ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           const auto &object = ptr->as<D_object>();
           auto rit = object.find(cand.key);
@@ -131,7 +131,7 @@ void write_reference(const Reference &ref, Value &&value)
             ptr->set(D_array());
           }
           if(ptr->which() != Value::type_array) {
-            ASTERIA_THROW_RUNTIME_ERROR("Cannot write to index `", cand.index, "` of `", *ptr, "` which is not an array.");
+            ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           auto &array = ptr->as<D_array>();
           auto rindex = cand.index;
@@ -171,7 +171,7 @@ void write_reference(const Reference &ref, Value &&value)
             ptr->set(D_object());
           }
           if(ptr->which() != Value::type_object) {
-            ASTERIA_THROW_RUNTIME_ERROR("Cannot write to key `", cand.key, "` of `", *ptr, "` which is not an object.");
+            ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           auto &object = ptr->as<D_object>();
           auto rpair = object.try_emplace(cand.key, D_null());

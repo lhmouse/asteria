@@ -51,6 +51,10 @@ class Reference
         m_modifiers = std::move(modifiers);
         return res;
       }
+    bool has_modifiers() const noexcept
+      {
+        return m_modifiers.empty() == false;
+      }
     void clear_modifiers() noexcept
       {
         m_modifiers.clear();
