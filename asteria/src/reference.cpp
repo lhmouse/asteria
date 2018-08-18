@@ -37,7 +37,7 @@ Value read_reference(const Reference &ref)
         break;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` is encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` has been encountered.");
     }
     // Apply modifiers.
     for(const auto &modifier : ref.get_modifiers()) {
@@ -87,7 +87,7 @@ Value read_reference(const Reference &ref)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` is encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` has been encountered.");
       }
     }
     return *ptr;
@@ -117,7 +117,7 @@ void write_reference(const Reference &ref, Value &&value)
         break;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` is encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` has been encountered.");
     }
     // Apply modifiers.
     for(const auto &modifier : ref.get_modifiers()) {
@@ -180,7 +180,7 @@ void write_reference(const Reference &ref, Value &&value)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` is encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` has been encountered.");
       }
     }
     *ptr = std::move(value);

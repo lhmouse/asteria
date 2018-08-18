@@ -38,7 +38,7 @@ const char * get_type_name(Value::Type type) noexcept
     case Value::type_object:
       return "object";
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
     }
   }
 
@@ -81,7 +81,7 @@ bool test_value(const Value &value)
         return cand.empty() == false;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", value.which(), "` is encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", value.which(), "` has been encountered.");
     }
   }
 Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept
@@ -177,7 +177,7 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
     case Value::type_object:
       return Value::comparison_unordered;
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.which(), "` is encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.which(), "` has been encountered.");
     }
   }
 
@@ -411,7 +411,7 @@ void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsi
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
     }
   }
 std::ostream & operator<<(std::ostream &os, const Value &value)
