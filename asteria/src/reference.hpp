@@ -68,7 +68,8 @@ class Reference
 
 extern Value read_reference(const Reference &ref);
 extern void write_reference(const Reference &ref, Value &&value);
-extern Sptr<Variable> materialize_reference(Reference &ref);
+
+extern void materialize_reference(Reference &ref);
 
 }
 

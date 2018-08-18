@@ -186,35 +186,19 @@ void write_reference(const Reference &ref, Value &&value)
     }
     *ptr = std::move(value);
   }
-Sptr<Variable> materialize_reference(Reference &ref)
+
+void materialize_reference(Reference &ref)
   {
-    switch(ref.get_root().which()) {
-    case Reference_root::type_constant:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_constant>();
-        // Create a variable by copying the constant.
-        auto var = std::make_shared<Variable>(Value(cand.src), false);
-        Reference_root::S_variable ref_v = { var };
-        ref.set_root(std::move(ref_v));
-        return std::move(var);
-      }
-    case Reference_root::type_temporary_value:
-      {
-        auto &cand = ref.get_root().as<Reference_root::S_temporary_value>();
-        // Create a variable by moving the temporary value.
-        auto var = std::make_shared<Variable>(std::move(cand.value), false);
-        Reference_root::S_variable ref_v = { var };
-        ref.set_root(std::move(ref_v));
-        return std::move(var);
-      }
-    case Reference_root::type_variable:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_variable>();
-        return cand.var;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` is encountered.");
+    if(ref.get_root().which() == Reference_root::type_variable) {
+      return;
     }
+    // Create a variable.
+    auto value = read_reference(ref);
+    auto var = std::make_shared<Variable>(read_reference(ref), false);
+    // Make `ref` a reference to this variable.
+    Reference_root::S_variable ref_v = { std::move(var) };
+    ref.set_root(std::move(ref_v));
+    ref.clear_member_designators();
   }
 
 }

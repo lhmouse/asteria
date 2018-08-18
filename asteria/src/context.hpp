@@ -42,7 +42,7 @@ class Context
       {
         return m_named_refs.get(name);
       }
-    Reference * get_named_reference_opt(const String &name) noexcept
+    Reference * get_named_reference_opt(const String &name)
       {
         return m_named_refs.get(name);
       }
@@ -50,9 +50,6 @@ class Context
       {
         return m_named_refs.set(name, std::move(ref)).first;
       }
-
-    // N.B. If a named reference is found, this function materializes it. Otherwise `nullptr` is returned.
-    Sptr<Variable> get_variable_opt(const String &name);
   };
 
 }
