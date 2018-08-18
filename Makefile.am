@@ -51,7 +51,7 @@ pkginclude_HEADERS =  \
   asteria/src/reference_root.hpp  \
   asteria/src/reference_modifier.hpp  \
   asteria/src/reference.hpp  \
-  asteria/src/variable.hpp	\
+  asteria/src/variable.hpp  \
   asteria/src/exception.hpp  \
   asteria/src/context.hpp
 
@@ -74,7 +74,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/reference_root.cpp  \
   asteria/src/reference_modifier.cpp  \
   asteria/src/reference.cpp  \
-  asteria/src/variable.cpp	\
+  asteria/src/variable.cpp  \
   asteria/src/exception.cpp  \
   asteria/src/context.cpp
 
