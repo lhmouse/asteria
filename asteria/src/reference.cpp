@@ -160,7 +160,7 @@ void write_reference(const Reference &ref, Value &&value)
             array.insert(array.end(), static_cast<std::size_t>(size_add), D_null());
             goto resized;
           }
-        resized:
+  resized:
           ptr = std::addressof(array.mut(static_cast<std::size_t>(rindex)));
           break;
         }
