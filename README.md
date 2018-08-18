@@ -18,13 +18,13 @@
 # Characteristics
 
 1. First-class functions.
-2. Closure functions (`lambda` expressions).
-3. Exceptions.
-4. Deterministic cleanup functions (`defer` statements).
-5. Flexible syntax similar to C++ and JavaScript.
+2. Dynamic typing.
+3. Closure functions (`lambda` expressions).
+4. Exceptions.
+5. Flexible syntax, similar to **C++** and **JavaScript**.
 6. Regular grammar.
 7. Passing by reference only, including the operand of a `throw` statement and the return value of a function.
-8. Explicit deep copying (an object is deep copied if and only if the `=` operator is used).
+8. No garbage collector. Objects are managed using referencing counting. Non-user-defined types have been designed in such a way that circular reference is impossible.
 
 # License
 
