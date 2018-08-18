@@ -114,7 +114,7 @@ unnamed-array ::=
 array-element-list-opt ::=
 	array-element-list | ""
 array-element-list ::=
-	array-element ( "," array-element-list-opt | "" )
+	expression ( "," array-element-list-opt | "" )
 unnamed-object ::=
 	"{" key-value-list-opt "}"
 key-value-list-opt ::=
