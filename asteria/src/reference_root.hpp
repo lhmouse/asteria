@@ -48,6 +48,8 @@ class Reference_root
         : m_variant(std::forward<CandidateT>(cand))
         {
         }
+    Reference_root(const Reference_root &) noexcept;
+    Reference_root & operator=(const Reference_root &) noexcept;
     Reference_root(Reference_root &&) noexcept;
     Reference_root & operator=(Reference_root &&) noexcept;
     ~Reference_root();

@@ -8,8 +8,13 @@ using namespace Asteria;
 
 int main()
   {
-    Reference ref(Reference_root::S_constant { D_string(String::shallow("meow")) });
+    auto ref = Reference(Reference_root::S_constant { D_string(String::shallow("meow")) });
     auto val = read_reference(ref);
+    ASTERIA_TEST_CHECK(val.which() == Value::type_string);
+    ASTERIA_TEST_CHECK(val.as<D_string>() == "meow");
+    ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
+    auto ref2 = ref;
+    val = read_reference(ref2);
     ASTERIA_TEST_CHECK(val.which() == Value::type_string);
     ASTERIA_TEST_CHECK(val.as<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
@@ -18,6 +23,10 @@ int main()
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.which() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.as<D_integer>() == 42);
+    ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
+    val = read_reference(ref2);
+    ASTERIA_TEST_CHECK(val.which() == Value::type_string);
+    ASTERIA_TEST_CHECK(val.as<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
 
     materialize_reference(ref);

@@ -22,6 +22,8 @@ class Reference
       : m_root(std::move(root)), m_modifiers(std::move(modifiers))
       {
       }
+    Reference(const Reference &) noexcept;
+    Reference & operator=(const Reference &) noexcept;
     Reference(Reference &&) noexcept;
     Reference & operator=(Reference &&) noexcept;
     ~Reference();

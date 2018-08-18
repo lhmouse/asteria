@@ -41,6 +41,8 @@ class Reference_modifier
         : m_variant(std::forward<CandidateT>(cand))
         {
         }
+    Reference_modifier(const Reference_modifier &) noexcept;
+    Reference_modifier & operator=(const Reference_modifier &) noexcept;
     Reference_modifier(Reference_modifier &&) noexcept;
     Reference_modifier & operator=(Reference_modifier &&) noexcept;
     ~Reference_modifier();
