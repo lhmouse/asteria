@@ -41,10 +41,6 @@ const char * get_type_name(Value::Type type) noexcept
       ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` is encountered.");
     }
   }
-const char * get_type_name_of(const Value &value) noexcept
-  {
-    return get_type_name(value.which());
-  }
 
 bool test_value(const Value &value)
   {
