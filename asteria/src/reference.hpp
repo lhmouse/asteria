@@ -64,6 +64,12 @@ class Reference
       {
         m_modifiers.pop_back();
       }
+
+    void set_root_and_modifiers(Reference_root &&root, Vector<Reference_modifier> &&modifiers)
+      {
+        m_root      = std::move(root);
+        m_modifiers = std::move(modifiers);
+      }
   };
 
 extern Value read_reference(const Reference &ref);
