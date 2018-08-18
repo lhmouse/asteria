@@ -1077,7 +1077,7 @@ template<typename valueT, typename allocatorT>
               return *this;
             }
             const auto dist = noadl::estimate_distance(first, last);
-            if(dist == 0){
+            if(dist == 0) {
               noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it); });
               return *this;
             }

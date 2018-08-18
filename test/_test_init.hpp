@@ -16,7 +16,7 @@
 
 #define ASTERIA_TEST_CHECK(expr_)  \
     do {  \
-      if(expr_){  \
+      if(expr_) {  \
         break;  \
       }  \
       ::std::cerr <<"ASTERIA_TEST_CHECK() failed: " <<#expr_ <<'\n'  \
@@ -29,15 +29,15 @@
 #define ASTERIA_TEST_CHECK_CATCH(expr_)  \
     do {  \
       try {  \
-        { expr_ ; };  \
-        ::std::cerr <<"ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " <<#expr_ <<'\n'  \
-                    <<"  File: " <<__FILE__ <<'\n'  \
-                    <<"  Line: " <<__LINE__ <<'\n'  \
-                    <<::std::flush;  \
-        ::std::terminate();  \
-      } catch(::std::exception & e_){  \
-        /* success */  \
+        static_cast<void>(expr_);  \
+      } catch(::std::exception &) {  \
+        break;  \
       }  \
+      ::std::cerr <<"ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " <<#expr_ <<'\n'  \
+                  <<"  File: " <<__FILE__ <<'\n'  \
+                  <<"  Line: " <<__LINE__ <<'\n'  \
+                  <<::std::flush;  \
+      ::std::terminate();  \
     } while(false)
 
 #endif
