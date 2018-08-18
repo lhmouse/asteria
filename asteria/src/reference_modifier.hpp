@@ -53,12 +53,12 @@ class Reference_modifier
         return static_cast<Index>(m_variant.index());
       }
     template<typename ExpectT>
-      const ExpectT * get_opt() const noexcept
+      const ExpectT * opt() const noexcept
         {
           return m_variant.get<ExpectT>();
         }
     template<typename ExpectT>
-      ExpectT * get_opt() noexcept
+      ExpectT * opt() noexcept
         {
           return m_variant.get<ExpectT>();
         }

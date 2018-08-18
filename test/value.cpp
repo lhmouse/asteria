@@ -12,7 +12,7 @@ int main()
     ASTERIA_TEST_CHECK(value.which() == Value::type_boolean);
     ASTERIA_TEST_CHECK(value.as<D_boolean>() == true);
     ASTERIA_TEST_CHECK_CATCH(value.as<D_string>());
-    ASTERIA_TEST_CHECK(value.get_opt<D_double>() == nullptr);
+    ASTERIA_TEST_CHECK(value.opt<D_double>() == nullptr);
 
     value.set(D_integer(42));
     ASTERIA_TEST_CHECK(value.which() == Value::type_integer);
