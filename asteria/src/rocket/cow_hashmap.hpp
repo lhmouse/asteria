@@ -1245,7 +1245,9 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           }
           return const_iterator(this->m_sth, ptr + toff);
         }
-      iterator find(const key_type &key)
+      // N.B. This function may throw `std::bad_alloc()`.
+      // N.B. This is a non-standard extension.
+      iterator find_mut(const key_type &key)
         {
           const auto ptr = this->do_mut_table();
           const auto toff = this->m_sth.index_of(key);
@@ -1267,7 +1269,9 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           tnext.seek_next();
           return ::std::make_pair(tcur, tnext);
         }
-      pair<iterator, iterator> equal_range(const key_type &key)
+      // N.B. This function may throw `std::bad_alloc()`.
+      // N.B. This is a non-standard extension.
+      pair<iterator, iterator> mut_equal_range(const key_type &key)
         {
           const auto ptr = this->do_mut_table();
           const auto toff = this->m_sth.index_of(key);
@@ -1301,7 +1305,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           return ::std::addressof(ptr[toff].get()->second);
         }
       // N.B. This is a non-standard extension.
-      mapped_type * get(const key_type &key)
+      mapped_type * get_mut(const key_type &key)
         {
           const auto ptr = this->do_mut_table();
           const auto toff = this->m_sth.index_of(key);
@@ -1357,7 +1361,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           }
           return ptr[toff].get()->second;
         }
-      mapped_type & at(const key_type &key)
+      // N.B. This is a non-standard extension.
+      mapped_type & mut(const key_type &key)
         {
           const auto ptr = this->do_mut_table();
           const auto toff = this->m_sth.index_of(key);
