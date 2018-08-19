@@ -170,7 +170,7 @@ namespace details_cow_string
               // If it has been decremented to zero, deallocate the block.
               auto st_alloc = storage_allocator(ptr->alloc);
               const auto nblk = ptr->nblk;
-              allocator_traits<storage_allocator>::destroy(st_alloc, noadl::unfancy(ptr));
+              noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
               ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
@@ -248,7 +248,7 @@ namespace details_cow_string
 #ifdef ROCKET_DEBUG
               ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-              allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), this->as_allocator(), nblk);
+              noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
               // Copy characters into the new block, then add a null character.
               ROCKET_ASSERT(len_one <= cap);
               traits_type::copy(ptr->data, src, len_one);

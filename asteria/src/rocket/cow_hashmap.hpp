@@ -372,7 +372,7 @@ namespace details_cow_hashmap
               // If it has been decremented to zero, deallocate the block.
               auto st_alloc = storage_allocator(ptr->alloc);
               const auto nblk = ptr->nblk;
-              allocator_traits<storage_allocator>::destroy(st_alloc, noadl::unfancy(ptr));
+              noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
               ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
@@ -484,7 +484,7 @@ namespace details_cow_hashmap
 #ifdef ROCKET_DEBUG
               ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-              allocator_traits<storage_allocator>::construct(st_alloc, noadl::unfancy(ptr), this->as_allocator(), nblk);
+              noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
               const auto ptr_old = this->m_ptr;
               if(ptr_old) {
                 try {
@@ -499,7 +499,7 @@ namespace details_cow_hashmap
                   }
                 } catch(...) {
                   // If an exception is thrown, deallocate the new block, then rethrow the exception.
-                  allocator_traits<storage_allocator>::destroy(st_alloc, noadl::unfancy(ptr));
+                  noadl::destroy_at(noadl::unfancy(ptr));
                   allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
                   throw;
                 }
