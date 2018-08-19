@@ -43,6 +43,10 @@ class Reference_root
     Variant m_variant;
 
   public:
+    Reference_root() noexcept
+      : m_variant(S_constant())
+      {
+      }
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
       Reference_root(CandidateT &&cand)
         : m_variant(std::forward<CandidateT>(cand))

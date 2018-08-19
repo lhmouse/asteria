@@ -1167,6 +1167,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
 Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
   {
     Vector<Xpnode> expr_bnd;
+    if(expr.empty()) {
+      return expr_bnd;
+    }
     expr_bnd.reserve(expr.size());
     for(const auto &node : expr) {
       auto node_bnd = bind_xpnode_partial(node, ctx);
@@ -1177,22 +1180,16 @@ Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
 Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
   {
     Vector<Reference> stack;
+    if(expr.empty()) {
+      return Reference();
+    }
     for(const auto &node : expr) {
       evaluate_xpnode_partial(stack, node, ctx);
     }
-    switch(stack.size()) {
-    case 0:
-      {
-        Reference_root::S_constant ref_c = { D_null() };
-        return Reference_root(std::move(ref_c));
-      }
-    case 1:
-      {
-        return std::move(stack.mut_front());
-      }
-    default:
+    if(stack.size() != 1) {
       ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
     }
+    return std::move(stack.mut_front());
   }
 
 }

@@ -50,6 +50,10 @@ class Value
     Variant m_variant;
 
   public:
+    Value() noexcept
+      : m_variant(D_null())
+      {
+      }
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
       Value(CandidateT &&cand)
         : m_variant(std::forward<CandidateT>(cand))

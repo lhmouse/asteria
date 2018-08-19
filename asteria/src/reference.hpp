@@ -18,6 +18,10 @@ class Reference
     Vector<Reference_modifier> m_modifiers;
 
   public:
+    Reference() noexcept
+      : m_root(), m_modifiers()
+      {
+      }
     Reference(Reference_root &&root, Vector<Reference_modifier> &&modifiers = { })
       : m_root(std::move(root)), m_modifiers(std::move(modifiers))
       {
