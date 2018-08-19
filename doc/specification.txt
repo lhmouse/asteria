@@ -10,8 +10,6 @@
 
 1.5. Closure Functions (Lambda Expressions)
 
-1.6. Deferred Functions
-
 2. Runtime Environments
 
 2.1. Types

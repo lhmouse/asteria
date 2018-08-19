@@ -49,7 +49,7 @@ variable-definition ::=
 equal-initializer-opt ::=
 	"=" expression | ""
 function-definition ::=
-	"function" identifier "(" parameter-list-opt ")" block
+	"func" identifier "(" parameter-list-opt ")" block
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
@@ -106,7 +106,7 @@ prefix-operator-expression ::=
 expression-initiator ::=
 	identifier | literal | lambda-expression | nested-expression | unnamed-array | unnamed-object
 lambda-expression ::=
-	"function" "(" parameter-list-opt ")" block
+	"func" "(" parameter-list-opt ")" block
 nested-expression ::=
 	"(" expression ")"
 unnamed-array ::=

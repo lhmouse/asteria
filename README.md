@@ -19,7 +19,7 @@
 # Characteristics
 
 1. First-class functions.
-2. Closure functions (`lambda` expressions).
+2. Closure functions (lambda expressions).
 3. Exceptions.
 4. Flexible syntax, similar to **C++** and **JavaScript**.
 5. Regular grammar.
