@@ -51,7 +51,7 @@ class Value
 
   public:
     Value() noexcept
-      : m_variant(D_null())
+      : m_variant()  // Initialize to `null`.
       {
       }
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>

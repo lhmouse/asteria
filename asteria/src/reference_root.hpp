@@ -44,7 +44,7 @@ class Reference_root
 
   public:
     Reference_root() noexcept
-      : m_variant(S_constant())
+      : m_variant()  // Initialize to a constant `null`.
       {
       }
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
