@@ -198,7 +198,7 @@ void materialize_reference(Reference &ref)
     auto var = std::make_shared<Variable>(read_reference(ref), false);
     // Make `ref` a reference to this variable.
     Reference_root::S_variable ref_v = { std::move(var) };
-    ref.set_root(std::move(ref_v), { });
+    ref.set_root(std::move(ref_v));
   }
 
 }
