@@ -1166,23 +1166,23 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
 
 Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
   {
-    Vector<Xpnode> expr_bnd;
     if(expr.empty()) {
-      return expr_bnd;
+      return { };
     }
+    Vector<Xpnode> expr_bnd;
     expr_bnd.reserve(expr.size());
     for(const auto &node : expr) {
       auto node_bnd = bind_xpnode_partial(node, ctx);
       expr_bnd.emplace_back(std::move(node_bnd));
     }
-    return expr_bnd;
+    return std::move(expr_bnd);
   }
 Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
   {
-    Vector<Reference> stack;
     if(expr.empty()) {
-      return Reference();
+      return { };
     }
+    Vector<Reference> stack;
     for(const auto &node : expr) {
       evaluate_xpnode_partial(stack, node, ctx);
     }
