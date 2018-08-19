@@ -5,8 +5,8 @@
 #define ASTERIA_FWD_HPP_
 
 #include <type_traits> // so many...
-#include <utility> // std::move(), std::forward()
-#include <memory> // std::shared_ptr<>, std::weak_ptr<>
+#include <utility> // std::move(), std::forward(), std::pair<>
+#include <memory> // std::shared_ptr<>, std::weak_ptr<>, std::make_shared()
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include "rocket/preprocessor_utilities.h"
@@ -27,11 +27,10 @@ using String    = rocket::cow_string;
 
 template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
+template<typename FirstT, typename SecondT>
+  using Bivector = rocket::cow_vector<std::pair<FirstT, SecondT>>;
 template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
-
-template<typename ElementT>
-  using Uptr = std::unique_ptr<ElementT>;
 
 template<typename ElementT>
   using Sptr = std::shared_ptr<ElementT>;
@@ -42,6 +41,12 @@ template<typename ElementT>
   using Spref = const Sptr<ElementT> &;
 template<typename ElementT>
   using Wpref = const Wptr<ElementT> &;
+
+template<typename ElementT, typename ...ParamsT>
+  inline Sptr<ElementT> allocate(ParamsT &&...params)
+    {
+      return std::make_shared<ElementT>(std::forward<ParamsT>(params)...);
+    }
 
 // General utilities
 class Logger;

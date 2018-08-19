@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    const auto ctx = std::make_shared<Context>(nullptr, false);
+    const auto ctx = allocate<Context>(nullptr, false);
     auto &cond = ctx->set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
     auto &dval = ctx->set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
     auto &ival = ctx->set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));

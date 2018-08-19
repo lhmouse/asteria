@@ -8,7 +8,7 @@ using namespace Asteria;
 
 int main()
   {
-    auto ctx = std::make_shared<Context>(nullptr, false);
+    auto ctx = allocate<Context>(nullptr, false);
 
     ctx->set_named_reference(String::shallow("test"), Reference(Reference_root::S_constant{ D_integer(42) }));
     auto ref = ctx->get_named_reference_opt(String::shallow("test"));
