@@ -2229,8 +2229,8 @@ template<typename charT, typename traitsT, typename allocatorT>
         using traits_type = typename basic_ostream<charT, traitsT>::traits_type;
         // Determine the minimum number of characters to insert.
         const auto width = os.width();
+        static_assert(sizeof(streamsize) >= sizeof(str.size()), "Casting `str.size()` to type `streamsize` would lose precision.");
         const auto len = static_cast<streamsize>(str.size());
-        ROCKET_ASSERT(len >= 0);
         auto len_rem = noadl::max(width, len);
         // Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
         auto offset = len - len_rem;
