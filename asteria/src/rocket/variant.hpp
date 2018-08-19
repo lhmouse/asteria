@@ -208,12 +208,12 @@ namespace details_variant
               *ptr = ::std::move(*(static_cast<elementT *>(src)));
             }
       };
-    struct visitor_destruct
+    struct visitor_destroy
       {
         template<typename elementT>
           void operator()(elementT *ptr) const
             {
-              noadl::destruct_at(ptr);
+              noadl::destroy_at(ptr);
             }
       };
     struct visitor_get_type_info
@@ -314,7 +314,7 @@ template<typename ...elementsT>
         this->m_index = index_new & 0x7FFFFFFF;
         // Destroy the old buffer and poison its contents.
         details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old,
-                                                      details_variant::visitor_destruct());
+                                                      details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
         ::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
 #endif
@@ -410,7 +410,7 @@ template<typename ...elementsT>
         {
           // Destroy the active element and poison all contents.
           details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                        details_variant::visitor_destruct());
+                                                        details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
           this->m_index = 0x6EEFDEAD;
           std::memset(m_buffers, '#', sizeof(m_buffers));
@@ -534,7 +534,7 @@ template<typename ...elementsT>
             // In case of an exception, the second object will not have been constructed.
             // Destroy the first object that has just been constructed, then rethrow the exception.
             details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                          details_variant::visitor_destruct());
+                                                          details_variant::visitor_destroy());
             details_variant::rethrow_current_exception();
           }
           // Destroy both elements.

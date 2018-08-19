@@ -100,7 +100,7 @@ template<typename elementT, typename ...paramsT>
       return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
     }
 template<typename elementT>
-  inline void destruct_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+  inline void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
     {
       ptr->~elementT();
     }
