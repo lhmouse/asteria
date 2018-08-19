@@ -134,9 +134,9 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<Context> ctx)
         Xpnode::S_subexpression cand_bnd = { std::move(expr_bnd) };
         return std::move(cand_bnd);
       }
-    case Xpnode::index_lambda_definition:
+    case Xpnode::index_closure_object:
       {
-        const auto &cand = node.as<Xpnode::S_lambda_definition>();
+        const auto &cand = node.as<Xpnode::S_closure_object>();
         // TODO
         std::terminate();
         (void)cand;
@@ -485,9 +485,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         stack_inout.emplace_back(std::move(ref));
         return;
       }
-    case Xpnode::index_lambda_definition:
+    case Xpnode::index_closure_object:
       {
-        const auto &cand = node.as<Xpnode::S_lambda_definition>();
+        const auto &cand = node.as<Xpnode::S_closure_object>();
         // TODO
         std::terminate();
         (void)cand;
