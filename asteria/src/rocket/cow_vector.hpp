@@ -303,11 +303,11 @@ namespace details_cow_vector
                 return;
               }
               // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-              const auto old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
-              ROCKET_ASSERT(old > 0);
-              if(old > 1) {
+              const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
+              if(nref_old > 1) {
                 return;
               }
+              ROCKET_ASSERT(nref_old == 1);
               // If it has been decremented to zero, deallocate the block.
               auto st_alloc = storage_allocator(ptr->alloc);
               const auto nblk = ptr->nblk;
@@ -431,8 +431,8 @@ namespace details_cow_vector
               const auto ptr = other.m_ptr;
               if(ptr) {
                 // Increment the reference count.
-                const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-                ROCKET_ASSERT(old > 0);
+                const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
+                ROCKET_ASSERT(nref_old >= 1);
               }
               this->do_reset(ptr);
             }
