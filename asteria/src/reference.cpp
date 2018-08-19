@@ -195,7 +195,7 @@ void materialize_reference(Reference &ref)
     }
     // Create a variable.
     auto value = read_reference(ref);
-    auto var = allocate<Variable>(read_reference(ref), false);
+    auto var = allocate<Variable>(std::move(value), false);
     // Make `ref` a reference to this variable.
     Reference_root::S_variable ref_v = { std::move(var) };
     ref.set_root(std::move(ref_v));
