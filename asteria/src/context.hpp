@@ -44,12 +44,11 @@ class Context
       }
     Reference * get_named_reference_opt(const String &name) noexcept
       {
-        return m_named_refs.get(name);
+        return m_named_refs.get_mut(name);
       }
     Reference & set_named_reference(const String &name, Reference &&ref)
       {
-        const auto ptr = m_named_refs.set(name, std::move(ref)).first;
-        return *ptr;
+        return *(m_named_refs.set(name, std::move(ref)).first);
       }
   };
 
