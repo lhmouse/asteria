@@ -127,10 +127,9 @@ namespace details_cow_hashmap {
           {
             const auto nbkt = max_nbkt_for_nblk(this->nblk);
             // `allocator_type::pointer` need not be a trivial type.
-            // The C++ standard requires that value-initialization of such an object shall not throw exceptions,
-            // and shall result in a null pointer.
+            // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
             for(auto i = size_type(0); i < nbkt; ++i) {
-              allocator_traits<allocator_type>::construct(this->alloc, this->data + i);
+              noadl::construct_at(this->data + i);
             }
             this->nelem = 0;
             this->nref.store(1, ::std::memory_order_release);
@@ -148,7 +147,7 @@ namespace details_cow_hashmap {
             }
             // `allocator_type::pointer` need not be a trivial type.
             for(auto i = size_type(0); i < nbkt; ++i) {
-              allocator_traits<allocator_type>::destroy(this->alloc, this->data + i);
+              noadl::destroy_at(this->data + i);
             }
 #ifdef ROCKET_DEBUG
             this->nelem = 0xEECD;
