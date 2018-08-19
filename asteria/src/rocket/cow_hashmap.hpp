@@ -508,63 +508,63 @@ namespace details_cow_hashmap
               this->do_reset(ptr);
               return ptr->data;
             }
-        void deallocate() noexcept
-          {
-            this->do_reset(nullptr);
-          }
-
-        constexpr operator const storage_handle * () const noexcept
-          {
-            return this;
-          }
-        operator storage_handle * () noexcept
-          {
-            return this;
-          }
-
-        void share_with(const storage_handle &other) noexcept
-          {
-            const auto ptr = other.m_ptr;
-            if(ptr) {
-              // Increment the reference count.
-              const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-              ROCKET_ASSERT(old > 0);
-            }
-            this->do_reset(ptr);
-          }
-        void share_with(storage_handle &&other) noexcept
-          {
-            const auto ptr = other.m_ptr;
-            if(ptr) {
-              // Detach the block.
-              other.m_ptr = nullptr;
-            }
-            this->do_reset(ptr);
-          }
-        void exchange_with(storage_handle &other) noexcept
-          {
-            ::std::swap(this->m_ptr, other.m_ptr);
-          }
-
-        template<typename ykeyT>
-          difference_type index_of(const ykeyT &ykey) const
+          void deallocate() noexcept
             {
-              const auto ptr = this->m_ptr;
-              if(ptr == nullptr) {
-                return -1;
-              }
-              const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-              const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
-                [&](const value_handle<allocatorT> *tbkt) {
-                  return this->as_key_equal()(tbkt->get()->first, ykey);
-                });
-              if(!bkt || !(bkt->get())) {
-                return -1;
-              }
-              const auto toff = bkt - ptr->data;
-              ROCKET_ASSERT(toff >= 0);
-              return toff;
+              this->do_reset(nullptr);
             }
+
+          constexpr operator const storage_handle * () const noexcept
+            {
+              return this;
+            }
+          operator storage_handle * () noexcept
+            {
+              return this;
+            }
+
+          void share_with(const storage_handle &other) noexcept
+            {
+              const auto ptr = other.m_ptr;
+              if(ptr) {
+                // Increment the reference count.
+                const auto old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
+                ROCKET_ASSERT(old > 0);
+              }
+              this->do_reset(ptr);
+            }
+          void share_with(storage_handle &&other) noexcept
+            {
+              const auto ptr = other.m_ptr;
+              if(ptr) {
+                // Detach the block.
+                other.m_ptr = nullptr;
+              }
+              this->do_reset(ptr);
+            }
+          void exchange_with(storage_handle &other) noexcept
+            {
+              ::std::swap(this->m_ptr, other.m_ptr);
+            }
+
+          template<typename ykeyT>
+            difference_type index_of(const ykeyT &ykey) const
+              {
+                const auto ptr = this->m_ptr;
+                if(ptr == nullptr) {
+                  return -1;
+                }
+                const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
+                const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
+                  [&](const value_handle<allocatorT> *tbkt) {
+                    return this->as_key_equal()(tbkt->get()->first, ykey);
+                  });
+                if(!bkt || !(bkt->get())) {
+                  return -1;
+                }
+                const auto toff = bkt - ptr->data;
+                ROCKET_ASSERT(toff >= 0);
+                return toff;
+              }
           handle_type * mut_data_unchecked() noexcept
             {
               const auto ptr = this->m_ptr;
