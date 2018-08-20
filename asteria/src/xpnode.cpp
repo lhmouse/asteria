@@ -81,7 +81,7 @@ const char * get_operator_name(Xpnode::Xop xop) noexcept
 
 namespace
   {
-    std::pair<Sptr<Context>, Reference *> do_name_lookup(Spref<Context> ctx, const String &name)
+    std::pair<Sptr<const Context>, const Reference *> do_name_lookup(Spref<const Context> ctx, const String &name)
       {
         auto qctx = ctx;
       loop:
@@ -97,7 +97,7 @@ namespace
       }
   }
 
-Xpnode bind_xpnode_partial(const Xpnode &node, Spref<Context> ctx)
+Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
   {
     switch(node.which()) {
     case Xpnode::index_literal:
@@ -446,7 +446,7 @@ namespace
       }
   }
 
-void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<Context> ctx)
+void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx)
   {
     switch(node.which()) {
     case Xpnode::index_literal:
@@ -1161,7 +1161,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
     }
   }
 
-Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
+Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx)
   {
     Vector<Xpnode> expr_bnd;
     expr_bnd.reserve(expr.size());
@@ -1171,7 +1171,7 @@ Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
     }
     return expr_bnd;
   }
-Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<Context> ctx)
+Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx)
   {
     if(expr.empty()) {
       return { };
