@@ -188,6 +188,11 @@ void write_reference(const Reference &ref, Value &&value)
     *ptr = std::move(value);
   }
 
+Reference reference_constant(Value &&value)
+  {
+    Reference_root::S_constant ref_c = { std::move(value) };
+    return Reference_root(std::move(ref_c));
+  }
 void materialize_reference(Reference &ref)
   {
     if(ref.get_root().which() == Reference_root::type_variable) {
