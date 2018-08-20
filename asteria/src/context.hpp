@@ -52,6 +52,8 @@ class Context
       }
   };
 
+extern void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference &&self, Vector<Reference> &&args);
+
 }
 
 #endif
