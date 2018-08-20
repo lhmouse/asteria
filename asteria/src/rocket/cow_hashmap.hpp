@@ -10,6 +10,7 @@
 #include <iterator> // std::iterator_traits<>, std::forward_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval(), std::pair<>
+#include <functional> // std::hash<>
 #include <cstddef> // std::size_t, std::ptrdiff_t, std::nullptr_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
@@ -21,14 +22,13 @@
 
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
- * 2. No default hash function is provided. You must provide your own hasher or write `std::hash` explicitly.
- * 3. The copy constructor and copy assignment operator will not throw exceptions.
- * 4. Comparison operators are not provided.
- * 5. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
- * 6. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
- * 7. `equal_range()` functions are not provided.
- * 8. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
- * 9. `erase()` may move elements around and invalidate iterators.
+ * 2. The copy constructor and copy assignment operator will not throw exceptions.
+ * 3. Comparison operators are not provided.
+ * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
+ * 5. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
+ * 6. `equal_range()` functions are not provided.
+ * 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
+ * 8. `erase()` may move elements around and invalidate iterators.
  */
 
 namespace rocket
@@ -54,11 +54,12 @@ using ::std::integral_constant;
 using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::pair;
+using ::std::hash;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 using ::std::nullptr_t;
 
-template<typename keyT, typename mappedT, typename hashT, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
+template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;
 
 namespace details_cow_hashmap
