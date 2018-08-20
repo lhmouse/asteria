@@ -17,11 +17,6 @@ class Abstract_opaque
       }
     virtual ~Abstract_opaque();
 
-    Abstract_opaque(const Abstract_opaque &)
-      = delete;
-    Abstract_opaque & operator=(const Abstract_opaque &)
-      = delete;
-
   public:
     virtual String describe() const = 0;
   };
