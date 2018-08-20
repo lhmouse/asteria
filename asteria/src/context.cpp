@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "context.hpp"
-#include "function_base.hpp"
+#include "abstract_function.hpp"
 #include "utilities.hpp"
 
 namespace Asteria
@@ -13,8 +13,8 @@ Context::~Context() = default;
 
 namespace
   {
-    class Argument_getter
-      : public Function_base
+    class Varg_getter
+      : public Abstract_function
       {
       private:
         String m_file;
@@ -22,7 +22,7 @@ namespace
         Vector<Reference> m_vargs;
 
       public:
-        Argument_getter(String file, Unsigned line, Vector<Reference> &&vargs)
+        Varg_getter(String file, Unsigned line, Vector<Reference> &&vargs)
           : m_file(std::move(file)), m_line(line), m_vargs(std::move(vargs))
           {
           }
@@ -45,7 +45,7 @@ namespace
                 {
                   const auto iref = read_reference(args.at(0));
                   if(iref.which() != Value::type_integer) {
-                    ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__args` must be of type `integer`.");
+                    ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__varg` must be of type `integer`.");
                   }
                   const auto index = static_cast<Signed>(iref.as<D_integer>());
                   auto rindex = index;
@@ -64,7 +64,7 @@ namespace
                   return m_vargs.at(static_cast<std::size_t>(rindex));
                 }
               default:
-                ASTERIA_THROW_RUNTIME_ERROR("`__args` accepts no more than one argument.");
+                ASTERIA_THROW_RUNTIME_ERROR("`__varg` accepts no more than one argument.");
               }
           }
       };
@@ -94,14 +94,14 @@ void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &p
         if((name == "this") || name.starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The parameter name `", name, "` is reserved.");
         }
-        ctx_out->set_named_reference(name, std::move(ref));
+        do_set_reference(ctx_out, name, [&] { return std::move(ref); });
       }
     }
     // Set up system variables.
     do_set_reference(ctx_out, String::shallow("__file"), [&] { return reference_constant(D_string(file)); });
     do_set_reference(ctx_out, String::shallow("__line"), [&] { return reference_constant(D_integer(line)); });
     do_set_reference(ctx_out, String::shallow("this"), [&] { return std::move(self); });
-    do_set_reference(ctx_out, String::shallow("__args"), [&] { return reference_constant(D_function(allocate<Argument_getter>(file, line, std::move(args)))); });
+    do_set_reference(ctx_out, String::shallow("__varg"), [&] { return reference_constant(D_function(allocate<Varg_getter>(file, line, std::move(args)))); });
   }
 
 }

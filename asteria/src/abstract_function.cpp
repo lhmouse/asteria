@@ -2,11 +2,11 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "function_base.hpp"
+#include "abstract_function.hpp"
 
 namespace Asteria
 {
 
-Function_base::~Function_base() = default;
+Abstract_function::~Abstract_function() = default;
 
 }

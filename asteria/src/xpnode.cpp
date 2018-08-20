@@ -4,7 +4,7 @@
 #include "precompiled.hpp"
 #include "xpnode.hpp"
 #include "context.hpp"
-#include "function_base.hpp"
+#include "abstract_function.hpp"
 #include "utilities.hpp"
 
 namespace Asteria

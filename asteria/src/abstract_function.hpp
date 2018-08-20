@@ -1,24 +1,24 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_FUNCTION_BASE_HPP_
-#define ASTERIA_FUNCTION_BASE_HPP_
+#ifndef ASTERIA_ABSTRACT_FUNCTION_HPP_
+#define ASTERIA_ABSTRACT_FUNCTION_HPP_
 
 #include "fwd.hpp"
 
 namespace Asteria
 {
 
-class Function_base
+class Abstract_function
   {
   public:
-    Function_base() noexcept
+    Abstract_function() noexcept
       {
       }
-    virtual ~Function_base();
+    virtual ~Abstract_function();
 
-    Function_base(const Function_base &) = delete;
-    Function_base & operator=(const Function_base &) = delete;
+    Abstract_function(const Abstract_function &) = delete;
+    Abstract_function & operator=(const Abstract_function &) = delete;
 
   public:
     virtual String describe() const = 0;

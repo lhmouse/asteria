@@ -3,8 +3,8 @@
 
 #include "precompiled.hpp"
 #include "value.hpp"
-#include "opaque_base.hpp"
-#include "function_base.hpp"
+#include "abstract_opaque.hpp"
+#include "abstract_function.hpp"
 #include "utilities.hpp"
 
 namespace Asteria

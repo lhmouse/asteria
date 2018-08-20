@@ -48,6 +48,22 @@ template<typename ElementT, typename ...ParamsT>
       return std::make_shared<ElementT>(std::forward<ParamsT>(params)...);
     }
 
+template<typename ResultT, typename SourceT>
+  inline Sptr<ResultT> static_pointer_cast(const Sptr<SourceT> &ptr) noexcept
+    {
+      return std::static_pointer_cast<ResultT>(ptr);
+    }
+template<typename ResultT, typename SourceT>
+  inline Sptr<ResultT> dynamic_pointer_cast(const Sptr<SourceT> &ptr) noexcept
+    {
+      return std::dynamic_pointer_cast<ResultT>(ptr);
+    }
+template<typename ResultT, typename SourceT>
+  inline Sptr<ResultT> const_pointer_cast(const Sptr<SourceT> &ptr) noexcept
+    {
+      return std::const_pointer_cast<ResultT>(ptr);
+    }
+
 // General utilities
 class Logger;
 
@@ -59,8 +75,8 @@ class Statement;
 
 // Runtime objects
 class Value;
-class Opaque_base;
-class Function_base;
+class Abstract_opaque;
+class Abstract_function;
 class Reference_root;
 class Reference_modifier;
 class Reference;
@@ -73,8 +89,8 @@ using D_boolean   = Boolean;
 using D_integer   = Signed;
 using D_double    = Double;
 using D_string    = String;
-using D_opaque    = Sptr<Opaque_base>;
-using D_function  = Sptr<const Function_base>;
+using D_opaque    = Sptr<Abstract_opaque>;
+using D_function  = Sptr<const Abstract_function>;
 using D_array     = Vector<Value>;
 using D_object    = Dictionary<Value>;
 

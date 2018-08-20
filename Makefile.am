@@ -43,8 +43,8 @@ pkginclude_rocket_HEADERS = \
 pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp  \
-  asteria/src/opaque_base.hpp  \
-  asteria/src/function_base.hpp  \
+  asteria/src/abstract_opaque.hpp  \
+  asteria/src/abstract_function.hpp  \
   asteria/src/value.hpp  \
   asteria/src/parser_result.hpp  \
   asteria/src/token.hpp  \
@@ -68,8 +68,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/rocket/insertable_iostream.cpp  \
   asteria/src/rocket/cow_string.cpp  \
   asteria/src/utilities.cpp  \
-  asteria/src/opaque_base.cpp  \
-  asteria/src/function_base.cpp  \
+  asteria/src/abstract_opaque.cpp  \
+  asteria/src/abstract_function.cpp  \
   asteria/src/value.cpp  \
   asteria/src/token.cpp  \
   asteria/src/reference_root.cpp  \

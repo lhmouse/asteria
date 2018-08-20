@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include "value.hpp"
-#include "opaque_base.hpp"
 #include <iostream>
 
 using namespace Asteria;

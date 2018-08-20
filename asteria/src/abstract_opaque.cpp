@@ -2,11 +2,11 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "opaque_base.hpp"
+#include "abstract_opaque.hpp"
 
 namespace Asteria
 {
 
-Opaque_base::~Opaque_base() = default;
+Abstract_opaque::~Abstract_opaque() = default;
 
 }
