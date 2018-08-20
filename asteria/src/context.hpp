@@ -13,13 +13,13 @@ namespace Asteria
 class Context
   {
   private:
-    const Sptr<Context> m_parent_opt;
+    const Sptr<const Context> m_parent_opt;
     const bool m_feigned;
 
     Dictionary<Reference> m_named_refs;
 
   public:
-    Context(Sptr<Context> parent_opt, bool feigned)
+    Context(Sptr<const Context> parent_opt, bool feigned)
       : m_parent_opt(std::move(parent_opt)), m_feigned(feigned)
       {
       }
@@ -29,7 +29,7 @@ class Context
     Context & operator=(const Context &) = delete;
 
   public:
-    Sptr<Context> get_parent_opt() const noexcept
+    Sptr<const Context> get_parent_opt() const noexcept
       {
         return m_parent_opt;
       }
