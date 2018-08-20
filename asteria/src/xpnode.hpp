@@ -82,9 +82,9 @@ class Xpnode
       };
     struct S_closure_function
       {
+        Vector<String> params;
         String src_file;
         Unsigned src_line;
-        Vector<String> params;
         // TODO Vector<Statement> body;
       };
     struct S_branch

@@ -453,7 +453,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       {
         const auto &cand = node.as<Xpnode::S_literal>();
         // Push the constant.
-        Reference_root::S_constant ref_c = { cand.value };
+        auto ref = reference_constant(Value(cand.value));
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }
