@@ -91,7 +91,8 @@ template<typename charT, typename traitsT, typename allocatorT>
     };
 
 template<typename charT, typename traitsT, typename allocatorT>
-  basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf() = default;
+  basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf()
+    = default;
 
 template<typename charT, typename traitsT, typename allocatorT>
   int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()

@@ -7,10 +7,15 @@
 namespace Asteria
 {
 
-Reference_root::Reference_root(const Reference_root &) noexcept = default;
-Reference_root & Reference_root::operator=(const Reference_root &) noexcept = default;
-Reference_root::Reference_root(Reference_root &&) noexcept = default;
-Reference_root & Reference_root::operator=(Reference_root &&) noexcept = default;
-Reference_root::~Reference_root() = default;
+Reference_root::Reference_root(const Reference_root &) noexcept
+  = default;
+Reference_root & Reference_root::operator=(const Reference_root &) noexcept
+  = default;
+Reference_root::Reference_root(Reference_root &&) noexcept
+  = default;
+Reference_root & Reference_root::operator=(Reference_root &&) noexcept
+  = default;
+Reference_root::~Reference_root()
+  = default;
 
 }

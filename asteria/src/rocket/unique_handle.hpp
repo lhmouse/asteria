@@ -66,8 +66,10 @@ namespace details_unique_handle
               this->reset(this->as_closer().null());
             }
 
-          stored_handle(const stored_handle &) = delete;
-          stored_handle & operator=(const stored_handle &) = delete;
+          stored_handle(const stored_handle &)
+            = delete;
+          stored_handle & operator=(const stored_handle &)
+            = delete;
 
         public:
           const closer_type & as_closer() const noexcept

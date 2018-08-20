@@ -71,7 +71,8 @@ template<typename charT, typename traitsT, typename allocatorT>
     };
 
 template<typename charT, typename traitsT, typename allocatorT>
-  basic_insertable_ostream<charT, traitsT, allocatorT>::~basic_insertable_ostream() = default;
+  basic_insertable_ostream<charT, traitsT, allocatorT>::~basic_insertable_ostream()
+    = default;
 
 extern template class basic_insertable_ostream<char>;
 extern template class basic_insertable_ostream<wchar_t>;

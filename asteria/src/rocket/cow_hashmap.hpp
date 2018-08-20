@@ -81,8 +81,10 @@ namespace details_cow_hashmap
             {
             }
 
-          value_handle(const value_handle &) = delete;
-          value_handle & operator=(const value_handle &) = delete;
+          value_handle(const value_handle &)
+            = delete;
+          value_handle & operator=(const value_handle &)
+            = delete;
 
         public:
           const_pointer get() const noexcept
@@ -154,8 +156,10 @@ namespace details_cow_hashmap
 #endif
             }
 
-          handle_storage(const handle_storage &) = delete;
-          handle_storage & operator=(const handle_storage &) = delete;
+          handle_storage(const handle_storage &)
+            = delete;
+          handle_storage & operator=(const handle_storage &)
+            = delete;
         };
 
     // Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
@@ -353,8 +357,10 @@ namespace details_cow_hashmap
               this->do_reset(nullptr);
             }
 
-          storage_handle(const storage_handle &) = delete;
-          storage_handle & operator=(const storage_handle &) = delete;
+          storage_handle(const storage_handle &)
+            = delete;
+          storage_handle & operator=(const storage_handle &)
+            = delete;
 
         private:
           void do_reset(storage_pointer ptr_new) noexcept

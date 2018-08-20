@@ -17,8 +17,10 @@ class Abstract_function
       }
     virtual ~Abstract_function();
 
-    Abstract_function(const Abstract_function &) = delete;
-    Abstract_function & operator=(const Abstract_function &) = delete;
+    Abstract_function(const Abstract_function &)
+      = delete;
+    Abstract_function & operator=(const Abstract_function &)
+      = delete;
 
   public:
     virtual String describe() const = 0;

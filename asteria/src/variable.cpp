@@ -8,7 +8,8 @@
 namespace Asteria
 {
 
-Variable::~Variable() = default;
+Variable::~Variable()
+  = default;
 
 void Variable::do_throw_immutable() const
   {

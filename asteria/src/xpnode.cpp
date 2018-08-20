@@ -10,9 +10,12 @@
 namespace Asteria
 {
 
-Xpnode::Xpnode(Xpnode &&) noexcept = default;
-Xpnode & Xpnode::operator=(Xpnode &&) noexcept = default;
-Xpnode::~Xpnode() = default;
+Xpnode::Xpnode(Xpnode &&) noexcept
+  = default;
+Xpnode & Xpnode::operator=(Xpnode &&) noexcept
+  = default;
+Xpnode::~Xpnode()
+  = default;
 
 const char * get_operator_name(Xpnode::Xop xop) noexcept
   {

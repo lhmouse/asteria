@@ -7,6 +7,7 @@
 namespace Asteria
 {
 
-Abstract_function::~Abstract_function() = default;
+Abstract_function::~Abstract_function()
+  = default;
 
 }

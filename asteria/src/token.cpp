@@ -10,9 +10,12 @@
 namespace Asteria
 {
 
-Token::Token(Token &&) noexcept = default;
-Token & Token::operator=(Token &&) noexcept = default;
-Token::~Token() = default;
+Token::Token(Token &&) noexcept
+  = default;
+Token & Token::operator=(Token &&) noexcept
+  = default;
+Token::~Token()
+  = default;
 
 namespace
   {

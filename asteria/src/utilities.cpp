@@ -14,7 +14,8 @@ Logger::Logger(const char *file, unsigned long line, const char *func) noexcept
   {
     m_stream <<std::boolalpha;
   }
-Logger::~Logger() = default;
+Logger::~Logger()
+  = default;
 
 void Logger::do_put(bool value)
   {

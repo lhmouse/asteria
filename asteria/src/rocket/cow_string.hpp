@@ -112,8 +112,10 @@ namespace details_cow_string
             {
             }
 
-          basic_storage(const basic_storage &) = delete;
-          basic_storage & operator=(const basic_storage &) = delete;
+          basic_storage(const basic_storage &)
+            = delete;
+          basic_storage & operator=(const basic_storage &)
+            = delete;
         };
 
     template<typename allocatorT, typename traitsT>
@@ -151,8 +153,10 @@ namespace details_cow_string
               this->do_reset(nullptr);
             }
 
-          storage_handle(const storage_handle &) = delete;
-          storage_handle & operator=(const storage_handle &) = delete;
+          storage_handle(const storage_handle &)
+            = delete;
+          storage_handle & operator=(const storage_handle &)
+            = delete;
 
         private:
           void do_reset(storage_pointer ptr_new) noexcept

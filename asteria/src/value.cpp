@@ -10,11 +10,16 @@
 namespace Asteria
 {
 
-Value::Value(const Value &) noexcept = default;
-Value & Value::operator=(const Value &) noexcept = default;
-Value::Value(Value &&) noexcept = default;
-Value & Value::operator=(Value &&) noexcept = default;
-Value::~Value() = default;
+Value::Value(const Value &) noexcept
+  = default;
+Value & Value::operator=(const Value &) noexcept
+  = default;
+Value::Value(Value &&) noexcept
+  = default;
+Value & Value::operator=(Value &&) noexcept
+  = default;
+Value::~Value()
+  = default;
 
 const char * get_type_name(Value::Type type) noexcept
   {

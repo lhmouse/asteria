@@ -23,8 +23,10 @@ class Variable
       }
     ~Variable();
 
-    Variable(const Variable &) = delete;
-    Variable & operator=(const Variable &) = delete;
+    Variable(const Variable &)
+      = delete;
+    Variable & operator=(const Variable &)
+      = delete;
 
   private:
     [[noreturn]] void do_throw_immutable() const;

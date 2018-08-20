@@ -9,11 +9,16 @@
 namespace Asteria
 {
 
-Reference::Reference(const Reference &) noexcept = default;
-Reference & Reference::operator=(const Reference &) noexcept = default;
-Reference::Reference(Reference &&) noexcept = default;
-Reference & Reference::operator=(Reference &&) noexcept = default;
-Reference::~Reference() = default;
+Reference::Reference(const Reference &) noexcept
+  = default;
+Reference & Reference::operator=(const Reference &) noexcept
+  = default;
+Reference::Reference(Reference &&) noexcept
+  = default;
+Reference & Reference::operator=(Reference &&) noexcept
+  = default;
+Reference::~Reference()
+  = default;
 
 Value read_reference(const Reference &ref)
   {

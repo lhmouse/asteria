@@ -7,6 +7,7 @@
 namespace Asteria
 {
 
-Abstract_opaque::~Abstract_opaque() = default;
+Abstract_opaque::~Abstract_opaque()
+  = default;
 
 }

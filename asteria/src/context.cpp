@@ -9,7 +9,8 @@
 namespace Asteria
 {
 
-Context::~Context() = default;
+Context::~Context()
+  = default;
 
 namespace
   {

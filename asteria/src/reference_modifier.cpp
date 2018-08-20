@@ -7,10 +7,15 @@
 namespace Asteria
 {
 
-Reference_modifier::Reference_modifier(const Reference_modifier &) noexcept = default;
-Reference_modifier & Reference_modifier::operator=(const Reference_modifier &) noexcept = default;
-Reference_modifier::Reference_modifier(Reference_modifier &&) noexcept = default;
-Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexcept = default;
-Reference_modifier::~Reference_modifier() = default;
+Reference_modifier::Reference_modifier(const Reference_modifier &) noexcept
+  = default;
+Reference_modifier & Reference_modifier::operator=(const Reference_modifier &) noexcept
+  = default;
+Reference_modifier::Reference_modifier(Reference_modifier &&) noexcept
+  = default;
+Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexcept
+  = default;
+Reference_modifier::~Reference_modifier()
+  = default;
 
 }

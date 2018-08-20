@@ -25,8 +25,10 @@ class Context
       }
     ~Context();
 
-    Context(const Context &) = delete;
-    Context & operator=(const Context &) = delete;
+    Context(const Context &)
+      = delete;
+    Context & operator=(const Context &)
+      = delete;
 
   public:
     Sptr<const Context> get_parent_opt() const noexcept
