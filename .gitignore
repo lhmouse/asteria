@@ -48,3 +48,5 @@ tmp
 *.save*
 *.swp
 *.*~
+*.orig
+*.rej
