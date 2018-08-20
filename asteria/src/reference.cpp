@@ -48,7 +48,7 @@ Value read_reference(const Reference &ref)
         {
           const auto &cand = modifier.as<Reference_modifier::S_array_index>();
           if(ptr->which() == Value::type_null) {
-            return D_null();
+            return Value();
           }
           if(ptr->which() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
@@ -61,11 +61,11 @@ Value read_reference(const Reference &ref)
           }
           if(rindex < 0) {
             ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            return D_null();
+            return Value();
           }
           if(rindex >= static_cast<Signed>(array.size())) {
             ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            return D_null();
+            return Value();
           }
           ptr = std::addressof(array.at(static_cast<std::size_t>(rindex)));
           break;
@@ -74,7 +74,7 @@ Value read_reference(const Reference &ref)
         {
           const auto &cand = modifier.as<Reference_modifier::S_object_key>();
           if(ptr->which() == Value::type_null) {
-            return D_null();
+            return Value();
           }
           if(ptr->which() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
@@ -83,7 +83,7 @@ Value read_reference(const Reference &ref)
           auto rit = object.find(cand.key);
           if(rit == object.end()) {
             ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", object);
-            return D_null();
+            return Value();
           }
           ptr = std::addressof(rit->second);
           break;
@@ -146,7 +146,7 @@ void write_reference(const Reference &ref, Value &&value)
               ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
             }
             ASTERIA_DEBUG_LOG("Prepending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.begin(), static_cast<std::size_t>(size_add), D_null());
+            array.insert(array.begin(), static_cast<std::size_t>(size_add));
             rindex = 0;
             goto resized;
           }
@@ -157,7 +157,7 @@ void write_reference(const Reference &ref, Value &&value)
               ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
             }
             ASTERIA_DEBUG_LOG("Appending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.end(), static_cast<std::size_t>(size_add), D_null());
+            array.insert(array.end(), static_cast<std::size_t>(size_add));
             goto resized;
           }
   resized:
@@ -174,7 +174,7 @@ void write_reference(const Reference &ref, Value &&value)
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           auto &object = ptr->as<D_object>();
-          auto rpair = object.try_emplace(cand.key, D_null());
+          auto rpair = object.try_emplace(cand.key);
           if(rpair.second == false) {
             ASTERIA_DEBUG_LOG("Key inserted: key = ", cand.key, ", object = ", object);
           }
