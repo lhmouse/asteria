@@ -21,6 +21,7 @@
 #include <type_traits>
 #include <atomic>
 #include <initializer_list>
+#include <functional>
 #include <array>
 
 #include <cstring>
