@@ -8,6 +8,7 @@
 #include <iterator> // std::iterator_traits<>
 #include <utility> // std::swap(), std::move(), std::forward()
 #include <new> // placement new
+#include <initializer_list> // std::initializer_list<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
 namespace rocket
@@ -19,6 +20,7 @@ using ::std::common_type;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_destructible;
 using ::std::iterator_traits;
+using ::std::initializer_list;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
@@ -103,6 +105,17 @@ template<typename elementT>
   inline void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
     {
       ptr->~elementT();
+    }
+
+template<typename elementT>
+  inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
+    {
+      for(auto ptr = init.begin(); ptr != init.end(); ++ptr) {
+        if(elem == *ptr) {
+          return true;
+        }
+      }
+      return false;
     }
 
 }
