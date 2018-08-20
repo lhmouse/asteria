@@ -528,14 +528,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           args.emplace_back(std::move(arg));
         }
         // Get the `this` reference.
-        auto self = callee;
-        if(self.has_modifiers()) {
+        Reference self;
+        if(callee.has_modifiers()) {
           // This is a member function.
+          self = callee;
           self.pop_modifier();
-        } else {
-          // This is a non-member function.
-          Reference_root::S_constant ref_c = { D_null() };
-          self.set_root(std::move(ref_c));
         }
         // Call the function and push the result as is.
         auto result = (*func)->invoke(std::move(self), std::move(args));
