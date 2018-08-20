@@ -5,22 +5,19 @@
 #define ASTERIA_ABSTRACT_FUNCTION_HPP_
 
 #include "fwd.hpp"
+#include "abstract_opaque.hpp"
 
 namespace Asteria
 {
 
 class Abstract_function
+  : public Abstract_opaque
   {
   public:
     Abstract_function() noexcept
       {
       }
-    virtual ~Abstract_function();
-
-    Abstract_function(const Abstract_function &)
-      = delete;
-    Abstract_function & operator=(const Abstract_function &)
-      = delete;
+    ~Abstract_function();
 
   public:
     virtual String describe() const = 0;
