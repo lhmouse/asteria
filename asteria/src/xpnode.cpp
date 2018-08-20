@@ -454,7 +454,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         const auto &cand = node.as<Xpnode::S_literal>();
         // Push the constant.
         auto ref = reference_constant(Value(cand.value));
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_inout.emplace_back(std::move(ref));
         return;
       }
     case Xpnode::index_named_reference:
