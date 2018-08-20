@@ -17,7 +17,7 @@ class Variable
     bool m_immutable;
 
   public:
-    explicit Variable(Value &&value, bool immutable = false)
+    explicit Variable(Value value, bool immutable = false)
       : m_value(std::move(value)), m_immutable(immutable)
       {
       }
@@ -42,7 +42,7 @@ class Variable
       {
         return m_immutable;
       }
-    Value & set_value(Value &&value, bool immutable = false)
+    Value & set_value(Value value, bool immutable = false)
       {
         if(m_immutable)  {
           do_throw_immutable();

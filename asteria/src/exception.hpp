@@ -18,7 +18,7 @@ class Exception
     Reference m_ref;
 
   public:
-    explicit Exception(Reference &&ref) noexcept
+    explicit Exception(Reference ref) noexcept
       : m_ref(std::move(ref))
       {
       }
@@ -35,7 +35,7 @@ class Exception
       {
         return m_ref;
       }
-    Reference & set_reference(Reference &&ref) noexcept
+    Reference & set_reference(Reference ref) noexcept
       {
         return m_ref = std::move(ref);
       }

@@ -46,13 +46,13 @@ class Context
       {
         return m_named_refs.get_mut(name);
       }
-    Reference & set_named_reference(const String &name, Reference &&ref)
+    Reference & set_named_reference(const String &name, Reference ref)
       {
         return *(m_named_refs.set(name, std::move(ref)).first);
       }
   };
 
-extern void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference &&self, Vector<Reference> &&args);
+extern void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args);
 
 }
 

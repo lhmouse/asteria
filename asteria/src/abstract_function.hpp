@@ -22,7 +22,7 @@ class Abstract_function
 
   public:
     virtual String describe() const = 0;
-    virtual Reference invoke(Reference &&self, Vector<Reference> &&args) const = 0;
+    virtual Reference invoke(Reference self, Vector<Reference> args) const = 0;
   };
 
 }

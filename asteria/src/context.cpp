@@ -32,7 +32,7 @@ namespace
           {
             return ASTERIA_FORMAT_STRING("variadic argument getter at \'", m_file, ':', m_line, "\'");
           }
-        Reference invoke(Reference && /*self*/, Vector<Reference> &&args) const override
+        Reference invoke(Reference /*self*/, Vector<Reference> args) const override
           {
             switch(args.size())
               {
@@ -80,7 +80,7 @@ namespace
         }
   }
 
-void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference &&self, Vector<Reference> &&args)
+void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
   {
     // Set up parameters.
     for(const auto &name : params) {

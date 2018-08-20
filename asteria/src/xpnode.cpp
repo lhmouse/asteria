@@ -204,7 +204,7 @@ namespace
         stack_inout.pop_back();
         return ref;
       }
-    void do_set_result(Reference &ref_inout, bool compound_assign, Value &&value)
+    void do_set_result(Reference &ref_inout, bool compound_assign, Value value)
       {
         if(compound_assign) {
           // Write the value through `ref_inout`, which is unchanged.
@@ -453,7 +453,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       {
         const auto &cand = node.as<Xpnode::S_literal>();
         // Push the constant.
-        auto ref = reference_constant(Value(cand.value));
+        auto ref = reference_constant(cand.value);
         stack_inout.emplace_back(std::move(ref));
         return;
       }

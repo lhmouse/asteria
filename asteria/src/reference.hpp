@@ -22,7 +22,7 @@ class Reference
       : m_root(), m_modifiers()
       {
       }
-    Reference(Reference_root &&root, Vector<Reference_modifier> &&modifiers = { })
+    Reference(Reference_root root, Vector<Reference_modifier> modifiers = { })
       : m_root(std::move(root)), m_modifiers(std::move(modifiers))
       {
       }
@@ -49,7 +49,7 @@ class Reference
       {
         return m_modifiers;
       }
-    Reference_root & set_root(Reference_root &&root, Vector<Reference_modifier> &&modifiers = { })
+    Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { })
       {
         auto &res = m_root = std::move(root);
         m_modifiers = std::move(modifiers);
@@ -63,7 +63,7 @@ class Reference
       {
         m_modifiers.clear();
       }
-    Reference_modifier & push_modifier(Reference_modifier &&modifier)
+    Reference_modifier & push_modifier(Reference_modifier modifier)
       {
         return m_modifiers.emplace_back(std::move(modifier));
       }
@@ -74,9 +74,9 @@ class Reference
   };
 
 extern Value read_reference(const Reference &ref);
-extern void write_reference(const Reference &ref, Value &&value);
+extern void write_reference(const Reference &ref, Value value);
 
-extern Reference reference_constant(Value &&value);
+extern Reference reference_constant(Value value);
 extern void materialize_reference(Reference &ref);
 
 }

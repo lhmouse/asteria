@@ -94,7 +94,7 @@ Value read_reference(const Reference &ref)
     }
     return *ptr;
   }
-void write_reference(const Reference &ref, Value &&value)
+void write_reference(const Reference &ref, Value value)
   {
     Value *ptr;
     // Get a pointer to the root value.
@@ -188,7 +188,7 @@ void write_reference(const Reference &ref, Value &&value)
     *ptr = std::move(value);
   }
 
-Reference reference_constant(Value &&value)
+Reference reference_constant(Value value)
   {
     Reference_root::S_constant ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
