@@ -16,15 +16,15 @@ class Reference_root
   public:
     enum Index : std::uint8_t
       {
-        type_constant         = 0,
-        type_temporary_value  = 1,
-        type_variable         = 2,
+        type_constant    = 0,
+        type_temp_value  = 1,
+        type_variable    = 2,
       };
     struct S_constant
       {
         Value src;
       };
-    struct S_temporary_value
+    struct S_temp_value
       {
         Value value;
       };
@@ -35,7 +35,7 @@ class Reference_root
     using Variant = rocket::variant<
       ROCKET_CDR(
         , S_constant         // 0,
-        , S_temporary_value  // 1,
+        , S_temp_value  // 1,
         , S_variable         // 2,
       )>;
 

@@ -5,6 +5,7 @@
 #include "xpnode.hpp"
 #include "context.hpp"
 #include "abstract_function.hpp"
+#include "instantiated_function.hpp"
 #include "utilities.hpp"
 
 namespace Asteria
@@ -118,8 +119,7 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
           return cand;
         }
         // Bind it.
-        const auto qref = pair.second;
-        Xpnode::S_bound_reference cand_bnd = { *qref };
+        Xpnode::S_bound_reference cand_bnd = { *(pair.second) };
         return std::move(cand_bnd);
       }
     case Xpnode::index_bound_reference:
@@ -139,9 +139,12 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
     case Xpnode::index_closure_function:
       {
         const auto &cand = node.as<Xpnode::S_closure_function>();
-        // TODO
-        std::terminate();
-        (void)cand;
+        // Bind the body recursively.
+        const auto ctx_feigned = allocate<Context>(ctx, true);
+        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
+        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Xpnode::S_closure_function cand_bnd = { cand.params, cand.file, cand.line, std::move(body_bnd) };
+        return std::move(cand_bnd);
       }
     case Xpnode::index_branch:
       {
@@ -206,6 +209,7 @@ namespace
         stack_inout.pop_back();
         return ref;
       }
+
     void do_set_result(Reference &ref_inout, bool compound_assign, Value value)
       {
         if(compound_assign) {
@@ -214,7 +218,7 @@ namespace
           return;
         }
         // Create an rvalue reference and assign it to `ref_inout`.
-        Reference_root::S_temporary_value ref_c = { std::move(value) };
+        Reference_root::S_temp_value ref_c = { std::move(value) };
         ref_inout.set_root(std::move(ref_c));
       }
 
@@ -468,8 +472,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in feigned contexts.");
         }
         // Push the reference found.
-        const auto qref = pair.second;
-        stack_inout.emplace_back(*qref);
+        stack_inout.emplace_back(*(pair.second));
         return;
       }
     case Xpnode::index_bound_reference:
@@ -490,25 +493,24 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
     case Xpnode::index_closure_function:
       {
         const auto &cand = node.as<Xpnode::S_closure_function>();
-        // TODO
-        std::terminate();
-        (void)cand;
+        // Instantiate the function.
+        auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, cand.body);
+        Reference_root::S_temp_value ref_c = { D_function(std::move(func)) };
+        stack_inout.emplace_back(std::move(ref_c));
+        return;
       }
     case Xpnode::index_branch:
       {
         const auto &cand = node.as<Xpnode::S_branch>();
         // Pop the condition off the stack.
         auto cond = do_pop_reference(stack_inout);
-        auto cond_value = read_reference(cond);
-        const auto branch = test_value(cond_value) ? &(cand.branch_true) : &(cand.branch_false);
-        if(branch->empty()) {
-          // If the branch taken is empty, push the condition instead.
-          stack_inout.emplace_back(std::move(cond));
-          return;
+        // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
+        // This means that if the branch taken is empty then `cond` is pushed.
+        const auto branch_taken = test_value(read_reference(cond)) ? std::ref(cand.branch_true) : std::ref(cand.branch_false);
+        if(branch_taken.get().empty() == false) {
+          cond = evaluate_expression(branch_taken, ctx);
         }
-        // Evaluate the branch and push the result;
-        auto result = evaluate_expression(*branch, ctx);
-        stack_inout.emplace_back(std::move(result));
+        stack_inout.emplace_back(std::move(cond));
         return;
       }
     case Xpnode::index_function_call:
@@ -1096,7 +1098,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           array.emplace_back(std::move(value));
         }
         // The result is a temporary value.
-        Reference_root::S_temporary_value ref_c = { std::move(array) };
+        Reference_root::S_temp_value ref_c = { std::move(array) };
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }
@@ -1112,7 +1114,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           object.insert_or_assign(pair.first, std::move(value));
         }
         // The result is a temporary value.
-        Reference_root::S_temporary_value ref_c = { std::move(object) };
+        Reference_root::S_temp_value ref_c = { std::move(object) };
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }

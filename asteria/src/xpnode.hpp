@@ -8,6 +8,7 @@
 #include "rocket/variant.hpp"
 #include "value.hpp"
 #include "reference.hpp"
+#include "statement.hpp"
 
 namespace Asteria
 {
@@ -83,9 +84,9 @@ class Xpnode
     struct S_closure_function
       {
         Vector<String> params;
-        String src_file;
-        Unsigned src_line;
-        // TODO Vector<Statement> body;
+        String file;
+        Unsigned line;
+        Vector<Statement> body;
       };
     struct S_branch
       {

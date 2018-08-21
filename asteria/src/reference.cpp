@@ -31,9 +31,9 @@ Value read_reference(const Reference &ref)
         ptr = &(cand.src);
         break;
       }
-    case Reference_root::type_temporary_value:
+    case Reference_root::type_temp_value:
       {
-        const auto &cand = ref.get_root().as<Reference_root::S_temporary_value>();
+        const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
         ptr = &(cand.value);
         break;
       }
@@ -109,9 +109,9 @@ void write_reference(const Reference &ref, Value value)
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src, "` cannot be modified.");
       }
-    case Reference_root::type_temporary_value:
+    case Reference_root::type_temp_value:
       {
-        const auto &cand = ref.get_root().as<Reference_root::S_temporary_value>();
+        const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", cand.value, "` cannot be modified.");
       }
     case Reference_root::type_variable:
@@ -206,6 +206,12 @@ void materialize_reference(Reference &ref)
     // Make `ref` a reference to this variable.
     Reference_root::S_variable ref_v = { std::move(var) };
     ref.set_root(std::move(ref_v));
+  }
+Reference indirect_reference_from(const Reference &parent, Reference_modifier modifier)
+  {
+    auto mod = parent.get_modifiers();
+    mod.emplace_back(std::move(modifier));
+    return Reference(parent.get_root(), std::move(mod));
   }
 
 }

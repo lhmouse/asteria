@@ -77,9 +77,9 @@ do-while-statement ::=
 while-statement ::=
 	"while" "(" expression ")" block
 for-statement ::=
-	"for" "(" statement expression-opt ";" expression-opt ")" block
+	"for" "(" ( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt ")" block
 for-each-statement ::=
-	"for" "each" "(" identifier "," identifier ":" expression ")" block
+	"for" "(" "each" identifier "," identifier ":" expression ")" block
 
 break-statement ::=
 	"break" ( "switch" | "while" | "for" ) ";"

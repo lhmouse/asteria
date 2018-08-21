@@ -54,7 +54,9 @@ pkginclude_HEADERS =  \
   asteria/src/variable.hpp  \
   asteria/src/exception.hpp  \
   asteria/src/context.hpp  \
-  asteria/src/xpnode.hpp
+  asteria/src/xpnode.hpp  \
+  asteria/src/statement.hpp  \
+  asteria/src/instantiated_function.hpp
 
 lib_LTLIBRARIES =  \
   lib/libasteria.la
@@ -78,7 +80,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/variable.cpp  \
   asteria/src/exception.cpp  \
   asteria/src/context.cpp  \
-  asteria/src/xpnode.cpp
+  asteria/src/xpnode.cpp  \
+  asteria/src/statement.cpp  \
+  asteria/src/instantiated_function.cpp
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
@@ -97,6 +101,7 @@ check_PROGRAMS = \
   test/reference.test  \
   test/exception.test  \
   test/context.test  \
-  test/xpnode.test
+  test/xpnode.test  \
+  test/statement.test
 
 TESTS = ${check_PROGRAMS}

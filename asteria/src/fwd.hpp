@@ -82,6 +82,7 @@ class Reference_modifier;
 class Reference;
 class Variable;
 class Context;
+class Instantiated_function;
 
 // Runtime data types exposed to users
 using D_null      = Null;
