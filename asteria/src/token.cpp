@@ -123,8 +123,8 @@ namespace
         const auto char_head = str.at(column);
         switch(char_head) {
         case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n':
-          // Ignore a series of spaces.
           {
+            // Ignore a series of spaces.
             const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
             const auto length = std::min(pos, str.size()) - column;
             return Parser_result(line, column, length, Parser_result::error_code_success);
@@ -132,8 +132,8 @@ namespace
         case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
         case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
         case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
-          // Get a punctuator.
           {
+            // Get a punctuator.
             struct Punctuator_element
               {
                 char first[7];
@@ -229,8 +229,8 @@ namespace
             ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled.");
           }
         case '\"':  case '\'':
-          // Get a string literal.
           {
+            // Get a string literal.
             const auto body_begin = column + 1;
             auto body_end = str.find(char_head, body_begin);
             String value;
@@ -377,8 +377,8 @@ namespace
           }
         case '0':  case '1':  case '2':  case '3':  case '4':
         case '5':  case '6':  case '7':  case '8':  case '9':
-          // Get a numeric literal.
           {
+            // Get a numeric literal.
             static constexpr char s_numeric_table[] = "_:00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
             static constexpr unsigned s_delim_count = 2;
             // Declare everything that will be calculated latter.
@@ -575,8 +575,8 @@ namespace
         case 'o':  case 'p':  case 'q':  case 'r':  case 's':  case 't':
         case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
         case '_':
-          // Get an identifier, then check whether it is a keyword.
           {
+            // Get an identifier, then check whether it is a keyword.
             struct Keyword_element
               {
                 char first[15];
@@ -647,7 +647,6 @@ namespace
             tokens_out.emplace_back(line, column, length, std::move(token_id));
             return Parser_result(line, column, length, Parser_result::error_code_success);
           }
-
         default:
           // Fail to find a valid token.
           ASTERIA_DEBUG_LOG("Character not handled: ", str.substr(column, 25));
