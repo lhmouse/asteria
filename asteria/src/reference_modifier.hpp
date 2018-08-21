@@ -48,7 +48,7 @@ class Reference_modifier
     ~Reference_modifier();
 
   public:
-    Index which() const noexcept
+    Index index() const noexcept
       {
         return static_cast<Index>(m_variant.index());
       }

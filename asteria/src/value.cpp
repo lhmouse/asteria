@@ -49,7 +49,7 @@ const char * get_type_name(Value::Type type) noexcept
 
 bool test_value(const Value &value)
   {
-    switch(value.which()) {
+    switch(value.type()) {
     case Value::type_null:
       return false;
     case Value::type_boolean:
@@ -86,23 +86,23 @@ bool test_value(const Value &value)
         return cand.empty() == false;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", value.which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", value.type(), "` has been encountered.");
     }
   }
 Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
-    if(lhs.which() != rhs.which()) {
-      if(lhs.which() == Value::type_null) {
+    if(lhs.type() != rhs.type()) {
+      if(lhs.type() == Value::type_null) {
         return Value::compare_less;
       }
-      if(rhs.which() == Value::type_null) {
+      if(rhs.type() == Value::type_null) {
         return Value::compare_greater;
       }
       return Value::compare_unordered;
     }
     // If both operands have the same type, perform normal comparison.
-    switch(lhs.which()) {
+    switch(lhs.type()) {
     case Value::type_null:
       return Value::compare_equal;
     case Value::type_boolean:
@@ -182,7 +182,7 @@ Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcep
     case Value::type_object:
       return Value::compare_unordered;
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.type(), "` has been encountered.");
     }
   }
 
@@ -329,7 +329,7 @@ namespace
 
 void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment)
   {
-    const auto type = value.which();
+    const auto type = value.type();
     switch(type) {
     case Value::type_null:
       // null

@@ -66,7 +66,7 @@ class Value
     ~Value();
 
   public:
-    Type which() const noexcept
+    Type type() const noexcept
       {
         return static_cast<Type>(m_variant.index());
       }

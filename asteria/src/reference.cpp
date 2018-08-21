@@ -24,7 +24,7 @@ Value read_reference(const Reference &ref)
   {
     const Value *ptr;
     // Get a pointer to the root value.
-    switch(ref.get_root().which()) {
+    switch(ref.get_root().index()) {
     case Reference_root::type_constant:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
@@ -44,18 +44,18 @@ Value read_reference(const Reference &ref)
         break;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
     for(const auto &modifier : ref.get_modifiers()) {
-      switch(modifier.which()) {
+      switch(modifier.index()) {
       case Reference_modifier::type_array_index:
         {
           const auto &cand = modifier.as<Reference_modifier::S_array_index>();
-          if(ptr->which() == Value::type_null) {
+          if(ptr->type() == Value::type_null) {
             return Value();
           }
-          if(ptr->which() != Value::type_array) {
+          if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           const auto &array = ptr->as<D_array>();
@@ -80,10 +80,10 @@ Value read_reference(const Reference &ref)
       case Reference_modifier::type_object_key:
         {
           const auto &cand = modifier.as<Reference_modifier::S_object_key>();
-          if(ptr->which() == Value::type_null) {
+          if(ptr->type() == Value::type_null) {
             return Value();
           }
-          if(ptr->which() != Value::type_object) {
+          if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           const auto &object = ptr->as<D_object>();
@@ -96,7 +96,7 @@ Value read_reference(const Reference &ref)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` has been encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
       }
     }
     return *ptr;
@@ -105,7 +105,7 @@ void write_reference(const Reference &ref, Value value)
   {
     Value *ptr;
     // Get a pointer to the root value.
-    switch(ref.get_root().which()) {
+    switch(ref.get_root().index()) {
     case Reference_root::type_constant:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
@@ -126,18 +126,18 @@ void write_reference(const Reference &ref, Value value)
         break;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
     for(const auto &modifier : ref.get_modifiers()) {
-      switch(modifier.which()) {
+      switch(modifier.index()) {
       case Reference_modifier::type_array_index:
         {
           const auto &cand = modifier.as<Reference_modifier::S_array_index>();
-          if(ptr->which() == Value::type_null) {
+          if(ptr->type() == Value::type_null) {
             ptr->set(D_array());
           }
-          if(ptr->which() != Value::type_array) {
+          if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           auto &array = ptr->as<D_array>();
@@ -173,10 +173,10 @@ void write_reference(const Reference &ref, Value value)
       case Reference_modifier::type_object_key:
         {
           const auto &cand = modifier.as<Reference_modifier::S_object_key>();
-          if(ptr->which() == Value::type_null) {
+          if(ptr->type() == Value::type_null) {
             ptr->set(D_object());
           }
-          if(ptr->which() != Value::type_object) {
+          if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           auto &object = ptr->as<D_object>();
@@ -188,7 +188,7 @@ void write_reference(const Reference &ref, Value value)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.which(), "` has been encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
       }
     }
     *ptr = std::move(value);
@@ -201,7 +201,7 @@ Reference reference_constant(Value value)
   }
 void materialize_reference(Reference &ref)
   {
-    if(ref.get_root().which() == Reference_root::type_variable) {
+    if(ref.get_root().index() == Reference_root::type_variable) {
       return;
     }
     // Create a variable.

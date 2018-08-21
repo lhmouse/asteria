@@ -13,7 +13,7 @@ int main()
     ctx->set_named_reference_opt(String::shallow("test"), Reference(Reference_root::S_constant{ D_integer(42) }));
     auto ref = ctx->get_named_reference_opt(String::shallow("test"));
     ASTERIA_TEST_CHECK(ref != nullptr);
-    ASTERIA_TEST_CHECK(ref->get_root().which() == Reference_root::type_constant);
+    ASTERIA_TEST_CHECK(ref->get_root().index() == Reference_root::type_constant);
     ASTERIA_TEST_CHECK(read_reference(*ref).as<D_integer>() == 42);
 
     ref = ctx->get_named_reference_opt(String::shallow("nonexistent"));

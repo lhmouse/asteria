@@ -45,7 +45,7 @@ namespace
               case 1:
                 {
                   const auto iref = read_reference(args.at(0));
-                  if(iref.which() != Value::type_integer) {
+                  if(iref.type() != Value::type_integer) {
                     ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__varg` must be of type `integer`.");
                   }
                   const auto index = static_cast<Signed>(iref.as<D_integer>());

@@ -102,7 +102,7 @@ namespace
 
 Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
   {
-    switch(node.which()) {
+    switch(node.index()) {
     case Xpnode::index_literal:
       {
         const auto &cand = node.as<Xpnode::S_literal>();
@@ -192,7 +192,7 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
         return std::move(cand_bnd);
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
   }
 
@@ -451,7 +451,7 @@ namespace
 
 void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx)
   {
-    switch(node.which()) {
+    switch(node.index()) {
     case Xpnode::index_literal:
       {
         const auto &cand = node.as<Xpnode::S_literal>();
@@ -556,13 +556,13 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Increment the operand and return the old value.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = lhs_value.as<D_integer>();
                 do_set_result(lhs, true, do_add(result, D_integer(1)));
                 do_set_result(lhs, false, result);
               }
-            else if(lhs_value.which() == Value::type_double)
+            else if(lhs_value.type() == Value::type_double)
               {
                 auto result = lhs_value.as<D_double>();
                 do_set_result(lhs, true, do_add(result, D_double(1)));
@@ -578,13 +578,13 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Decrement the operand and return the old value.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = lhs_value.as<D_integer>();
                 do_set_result(lhs, true, do_subtract(result, D_integer(1)));
                 do_set_result(lhs, false, result);
               }
-            else if(lhs_value.which() == Value::type_double)
+            else if(lhs_value.type() == Value::type_double)
               {
                 auto result = lhs_value.as<D_double>();
                 do_set_result(lhs, true, do_subtract(result, D_double(1)));
@@ -602,13 +602,13 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // The subscript operand shall have type `integer` or `string`.
             // `compound_assign` is ignored.
             auto rhs_value = read_reference(rhs);
-            if(rhs_value.which() == Value::type_integer)
+            if(rhs_value.type() == Value::type_integer)
               {
                 auto index = rhs_value.as<D_integer>();
                 Reference_modifier::S_array_index mod_c = { index };
                 lhs.push_modifier(std::move(mod_c));
               }
-            else if(rhs_value.which() == Value::type_string)
+            else if(rhs_value.type() == Value::type_string)
               {
                 auto key = rhs_value.as<D_string>();
                 Reference_modifier::S_object_key mod_c = { std::move(key) };
@@ -623,12 +623,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           {
             // Copy the operand to create an rvalue, then return it.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = lhs_value.as<D_integer>();
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(lhs_value.which() == Value::type_string)
+            else if(lhs_value.type() == Value::type_string)
               {
                 auto result = lhs_value.as<D_double>();
                 do_set_result(lhs, cand.compound_assign, result);
@@ -642,12 +642,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           {
             // Negate the operand to create an rvalue, then return it.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = do_negate(lhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(lhs_value.which() == Value::type_string)
+            else if(lhs_value.type() == Value::type_string)
               {
                 auto result = do_negate(lhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -661,12 +661,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           {
             // Perform bitwise not operation on the operand to create an rvalue, then return it.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_boolean)
+            if(lhs_value.type() == Value::type_boolean)
               {
                 auto result = do_logical_not(lhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if(lhs_value.which() == Value::type_integer)
+            else if(lhs_value.type() == Value::type_integer)
               {
                 auto result = do_bitwise_not(lhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -692,12 +692,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Increment the operand and return it.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = do_add(lhs_value.as<D_integer>(), D_integer(1));
                 do_set_result(lhs, true, result);
               }
-            else if(lhs_value.which() == Value::type_double)
+            else if(lhs_value.type() == Value::type_double)
               {
                 auto result = do_add(lhs_value.as<D_double>(), D_double(1));
                 do_set_result(lhs, true, result);
@@ -712,12 +712,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Decrement the operand and return it.
             // `compound_assign` is ignored.
             auto lhs_value = read_reference(lhs);
-            if(lhs_value.which() == Value::type_integer)
+            if(lhs_value.type() == Value::type_integer)
               {
                 auto result = do_subtract(lhs_value.as<D_integer>(), D_integer(1));
                 do_set_result(lhs, true, result);
               }
-            else if(lhs_value.which() == Value::type_double)
+            else if(lhs_value.type() == Value::type_double)
               {
                 auto result = do_subtract(lhs_value.as<D_double>(), D_double(1));
                 do_set_result(lhs, true, result);
@@ -828,22 +828,22 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_or(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_add(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_double) && (rhs_value.which() == Value::type_double))
+            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double))
               {
                 auto result = do_add(lhs_value.as<D_double>(), rhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_string) && (rhs_value.which() == Value::type_string))
+            else if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_string))
               {
                 auto result = do_concatenate(lhs_value.as<D_string>(), rhs_value.as<D_string>());
                 do_set_result(lhs, cand.compound_assign, std::move(result));
@@ -861,17 +861,17 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the `integer` and `double` types, return the difference of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_xor(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_subtract(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_double) && (rhs_value.which() == Value::type_double))
+            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double))
               {
                 auto result = do_subtract(lhs_value.as<D_double>(), rhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -890,27 +890,27 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_and(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_multiply(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_double) && (rhs_value.which() == Value::type_double))
+            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double))
               {
                 auto result = do_multiply(lhs_value.as<D_double>(), rhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_string) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_duplicate(lhs_value.as<D_string>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, std::move(result));
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_string))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_string))
               {
                 auto result = do_duplicate(rhs_value.as<D_string>(), lhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, std::move(result));
@@ -927,12 +927,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the integer and double types, return the quotient of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_divide(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_double) && (rhs_value.which() == Value::type_double))
+            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double))
               {
                 auto result = do_divide(lhs_value.as<D_double>(), rhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -949,12 +949,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the integer and double types, return the reminder of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_modulo(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_double) && (rhs_value.which() == Value::type_double))
+            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double))
               {
                 auto result = do_modulo(lhs_value.as<D_double>(), rhs_value.as<D_double>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -973,7 +973,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Both operands have to be integers.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_shift_left_logical(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -992,7 +992,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Both operands have to be integers.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_shift_right_logical(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1012,7 +1012,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Both operands have to be integers.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_shift_left_arithmetic(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1031,7 +1031,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // Both operands have to be integers.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_shift_right_arithmetic(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1049,12 +1049,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the `integer` type, return the bitwise AND'd result of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_and(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_bitwise_and(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1072,12 +1072,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the `integer` type, return the bitwise OR'd result of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_or(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_bitwise_or(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1095,12 +1095,12 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             // For the `integer` type, return the bitwise XOR'd result of both operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            if((lhs_value.which() == Value::type_boolean) && (rhs_value.which() == Value::type_boolean))
+            if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean))
               {
                 auto result = do_logical_xor(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
                 do_set_result(lhs, cand.compound_assign, result);
               }
-            else if((lhs_value.which() == Value::type_integer) && (rhs_value.which() == Value::type_integer))
+            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer))
               {
                 auto result = do_bitwise_xor(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
                 do_set_result(lhs, cand.compound_assign, result);
@@ -1160,7 +1160,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.which(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
   }
 

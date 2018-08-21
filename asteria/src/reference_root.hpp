@@ -59,7 +59,7 @@ class Reference_root
     ~Reference_root();
 
   public:
-    Index which() const noexcept
+    Index index() const noexcept
       {
         return static_cast<Index>(m_variant.index());
       }
