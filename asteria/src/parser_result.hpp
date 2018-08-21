@@ -17,9 +17,9 @@ class Parser_result
         error_code_success                              =   0,
         // Category: encoding
         error_code_utf8_code_unit_invalid               = 101,
-        error_code_utf8_code_point_truncated            = 102,
-        error_code_utf8_surrogates_disallowed           = 103,
-        error_code_utf_code_point_value_too_large       = 104,
+        error_code_utf_code_point_truncated             = 102,
+        error_code_utf_surrogates_disallowed            = 103,
+        error_code_utf_code_point_too_large             = 104,
         error_code_utf8_encoding_overlong               = 105,
         // Category: tokenizer
         error_code_token_character_unrecognized         = 201,
@@ -34,6 +34,8 @@ class Parser_result
         error_code_integer_literal_exponent_negative    = 210,
         error_code_double_literal_overflow              = 211,
         error_code_double_literal_underflow             = 212,
+        error_code_escape_utf_surrogates_disallowed     = 213,
+        error_code_escape_utf_code_point_too_large      = 214,
       };
 
   private:

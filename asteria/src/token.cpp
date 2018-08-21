@@ -40,7 +40,7 @@ namespace
           // Accumulate trailing code units.
           if(str.size() - column < length) {
             // No enough characters are provided.
-            return Parser_result(line, column, str.size() - column, Parser_result::error_code_utf8_code_point_truncated);
+            return Parser_result(line, column, str.size() - column, Parser_result::error_code_utf_code_point_truncated);
           }
           for(unsigned i = 1; i < length; ++i) {
             const char32_t next = static_cast<unsigned char>(str.at(column + i));
@@ -52,11 +52,11 @@ namespace
           }
           if((0xD800 <= code) && (code < 0xE000)) {
             // Surrogates are not allowed.
-            return Parser_result(line, column, length, Parser_result::error_code_utf8_surrogates_disallowed);
+            return Parser_result(line, column, length, Parser_result::error_code_utf_surrogates_disallowed);
           }
           if(code >= 0x110000) {
             // Code point value is too large.
-            return Parser_result(line, column, length, Parser_result::error_code_utf_code_point_value_too_large);
+            return Parser_result(line, column, length, Parser_result::error_code_utf_code_point_too_large);
           }
           // Re-encode it and check for overlong sequences.
           unsigned len_min;
@@ -337,14 +337,15 @@ namespace
                     }
                     if((0xD800 <= code) && (code < 0xE000)) {
                       // Surrogates are not allowed.
-                      return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf8_surrogates_disallowed);
+                      return Parser_result(line, body_end, seq_len, Parser_result::error_code_escape_utf_surrogates_disallowed);
                     }
                     if(code >= 0x110000) {
                       // Code point value is too large.
-                      return Parser_result(line, body_end, seq_len, Parser_result::error_code_utf_code_point_value_too_large);
+                      return Parser_result(line, body_end, seq_len, Parser_result::error_code_escape_utf_code_point_too_large);
                     }
                     // Encode it.
-                    const auto encode_one = [&](unsigned shift, unsigned mask) { value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask))); };
+                    const auto encode_one = [&](unsigned shift, unsigned mask)
+                      { value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask))); };
                     if(code < 0x80) {
                       encode_one( 0, 0xFF);
                     } else if(code < 0x800) {
