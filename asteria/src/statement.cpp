@@ -148,13 +148,15 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_break>();
         // Copy it as-is.
-        return cand;
+        Statement::S_break cand_bnd = { cand.target };
+        return std::move(cand_bnd);
       }
     case Statement::index_continue:
       {
         const auto &cand = stmt.as<Statement::S_continue>();
         // Copy it as-is.
-        return cand;
+        Statement::S_continue cand_bnd = { cand.target };
+        return std::move(cand_bnd);
       }
     case Statement::index_throw:
       {

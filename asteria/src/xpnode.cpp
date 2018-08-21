@@ -107,7 +107,8 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_literal>();
         // Copy it as-is.
-        return cand;
+        Xpnode::S_literal cand_bnd = { cand.value };
+        return std::move(cand_bnd);
       }
     case Xpnode::index_named_reference:
       {
@@ -116,7 +117,8 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
         const auto pair = do_name_lookup(ctx, cand.name);
         if(pair.first->is_feigned()) {
           // Don't bind it onto something in a feigned context.
-          return cand;
+          Xpnode::S_named_reference cand_bnd = { cand.name };
+          return std::move(cand_bnd);
         }
         // Bind it.
         Xpnode::S_bound_reference cand_bnd = { *(pair.second) };
@@ -126,7 +128,8 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_bound_reference>();
         // Copy it as-is.
-        return cand;
+        Xpnode::S_bound_reference cand_bnd = { cand.ref };
+        return std::move(cand_bnd);
       }
     case Xpnode::index_subexpression:
       {
@@ -159,13 +162,15 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_function_call>();
         // Copy it as-is.
-        return cand;
+        Xpnode::S_function_call cand_bnd = { cand.arg_cnt };
+        return std::move(cand_bnd);
       }
     case Xpnode::index_operator_rpn:
       {
         const auto &cand = node.as<Xpnode::S_operator_rpn>();
         // Copy it as-is.
-        return cand;
+        Xpnode::S_operator_rpn cand_bnd = { cand.xop, cand.compound_assign };
+        return std::move(cand_bnd);
       }
     case Xpnode::index_unnamed_array:
       {
