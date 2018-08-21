@@ -82,6 +82,7 @@ class Reference_modifier;
 class Reference;
 class Variable;
 class Context;
+class Variadic_arguer;
 class Instantiated_function;
 
 // Runtime data types exposed to users

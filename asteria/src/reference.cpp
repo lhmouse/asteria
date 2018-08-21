@@ -53,7 +53,7 @@ Value read_reference(const Reference &ref)
         {
           const auto &cand = modifier.as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
-            return Value();
+            return { };
           }
           if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
@@ -66,11 +66,11 @@ Value read_reference(const Reference &ref)
           }
           if(rindex < 0) {
             ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            return Value();
+            return { };
           }
           else if(rindex >= static_cast<Signed>(array.size())) {
             ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            return Value();
+            return { };
           }
           ptr = std::addressof(array.at(static_cast<std::size_t>(rindex)));
           break;
@@ -79,7 +79,7 @@ Value read_reference(const Reference &ref)
         {
           const auto &cand = modifier.as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
-            return Value();
+            return { };
           }
           if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
@@ -88,7 +88,7 @@ Value read_reference(const Reference &ref)
           auto rit = object.find(cand.key);
           if(rit == object.end()) {
             ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", object);
-            return Value();
+            return { };
           }
           ptr = std::addressof(rit->second);
           break;

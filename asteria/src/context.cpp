@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "context.hpp"
-#include "abstract_function.hpp"
+#include "variadic_arguer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria
@@ -14,64 +14,6 @@ Context::~Context()
 
 namespace
   {
-    class Varg_getter
-      : public Abstract_function
-      {
-      private:
-        String m_file;
-        Unsigned m_line;
-        Vector<Reference> m_vargs;
-
-      public:
-        Varg_getter(String file, Unsigned line, Vector<Reference> &&vargs)
-          : m_file(std::move(file)), m_line(line), m_vargs(std::move(vargs))
-          {
-          }
-
-      public:
-        String describe() const override
-          {
-            return ASTERIA_FORMAT_STRING("variadic argument getter at \'", m_file, ':', m_line, "\'");
-          }
-        Reference invoke(Reference /*self*/, Vector<Reference> args) const override
-          {
-            switch(args.size())
-              {
-              case 0:
-                {
-                  const auto nvarg = m_vargs.size();
-                  // When no argument is given, return the number of variadic arguments.
-                  return reference_constant(D_integer(nvarg));
-                }
-              case 1:
-                {
-                  const auto iref = read_reference(args.at(0));
-                  if(iref.type() != Value::type_integer) {
-                    ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__varg` must be of type `integer`.");
-                  }
-                  const auto index = static_cast<Signed>(iref.as<D_integer>());
-                  const auto nvarg = m_vargs.size();
-                  auto rindex = index;
-                  if(rindex < 0) {
-                    // Wrap negative indices.
-                    rindex += static_cast<Signed>(nvarg);
-                  }
-                  if(rindex < 0) {
-                    ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", index, ", nvarg = ", nvarg);
-                    return Reference();
-                  }
-                  if(rindex >= static_cast<Signed>(nvarg)){
-                    ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", index, ", nvarg = ", nvarg);
-                    return Reference();
-                  }
-                  return m_vargs.at(static_cast<std::size_t>(rindex));
-                }
-              default:
-                ASTERIA_THROW_RUNTIME_ERROR("`__varg` accepts no more than one argument.");
-              }
-          }
-      };
-
     template<typename GeneratorT>
       void do_set_reference(Spref<Context> ctx_out, const String &name, GeneratorT &&generator)
         {
@@ -101,7 +43,7 @@ void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &p
     do_set_reference(ctx_out, String::shallow("__file"), [&] { return reference_constant(D_string(file)); });
     do_set_reference(ctx_out, String::shallow("__line"), [&] { return reference_constant(D_integer(line)); });
     do_set_reference(ctx_out, String::shallow("__this"), [&] { return std::move(self); });
-    do_set_reference(ctx_out, String::shallow("__varg"), [&] { return reference_constant(D_function(allocate<Varg_getter>(file, line, std::move(args)))); });
+    do_set_reference(ctx_out, String::shallow("__varg"), [&] { return reference_constant(D_function(allocate<Variadic_arguer>(file, line, std::move(args)))); });
   }
 
 }
