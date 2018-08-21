@@ -22,8 +22,9 @@ class Reference
       : m_root(), m_modifiers()
       {
       }
-    Reference(Reference_root root, Vector<Reference_modifier> modifiers = { })
-      : m_root(std::move(root)), m_modifiers(std::move(modifiers))
+    template<typename RootT, typename std::enable_if<std::is_constructible<Reference_root, RootT &&>::value>::type * = nullptr>
+    Reference(RootT &&root, Vector<Reference_modifier> modifiers = { })
+      : m_root(std::forward<RootT>(root)), m_modifiers(std::move(modifiers))
       {
       }
     Reference(const Reference &) noexcept;
