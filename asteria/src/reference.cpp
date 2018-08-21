@@ -64,14 +64,16 @@ Value read_reference(const Reference &ref)
             // Wrap negative indices.
             rindex += static_cast<Signed>(array.size());
           }
-          if(rindex < 0) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            return Value();
-          }
-          if(rindex >= static_cast<Signed>(array.size())) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            return Value();
-          }
+          if(rindex < 0)
+            {
+              ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
+              return Value();
+            }
+          else if(rindex >= static_cast<Signed>(array.size()))
+            {
+              ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
+              return Value();
+            }
           ptr = std::addressof(array.at(static_cast<std::size_t>(rindex)));
           break;
         }
@@ -144,28 +146,27 @@ void write_reference(const Reference &ref, Value value)
             // Wrap negative indices.
             rindex += static_cast<Signed>(array.size());
           }
-          if(rindex < 0) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            const auto size_add = -static_cast<Unsigned>(rindex);
-            if(size_add >= array.max_size() - array.size()) {
-              ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
+          if(rindex < 0)
+            {
+              ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
+              const auto size_add = -static_cast<Unsigned>(rindex);
+              if(size_add >= array.max_size() - array.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
+              }
+              ASTERIA_DEBUG_LOG("Prepending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
+              array.insert(array.begin(), static_cast<std::size_t>(size_add));
+              rindex = 0;
             }
-            ASTERIA_DEBUG_LOG("Prepending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.begin(), static_cast<std::size_t>(size_add));
-            rindex = 0;
-            goto resized;
-          }
-          if(rindex >= static_cast<Signed>(array.size())) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            const auto size_add = static_cast<Unsigned>(rindex) + 1 - array.size();
-            if(size_add >= array.max_size() - array.size()) {
-              ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
+          else if(rindex >= static_cast<Signed>(array.size()))
+            {
+              ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
+              const auto size_add = static_cast<Unsigned>(rindex) + 1 - array.size();
+              if(size_add >= array.max_size() - array.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
+              }
+              ASTERIA_DEBUG_LOG("Appending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
+              array.insert(array.end(), static_cast<std::size_t>(size_add));
             }
-            ASTERIA_DEBUG_LOG("Appending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.end(), static_cast<std::size_t>(size_add));
-            goto resized;
-          }
-  resized:
           ptr = std::addressof(array.mut(static_cast<std::size_t>(rindex)));
           break;
         }
