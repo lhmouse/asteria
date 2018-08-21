@@ -225,8 +225,11 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
         ctx_inout->set_named_reference_opt(cand.name, Reference());
-        // Instantiate the function.
-        auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, cand.body);
+        // Bind the function body recursively.
+        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
+        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
+        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
         auto var = allocate<Variable>(D_function(std::move(func)), true);
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };

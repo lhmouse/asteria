@@ -493,8 +493,11 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
     case Xpnode::index_closure_function:
       {
         const auto &cand = node.as<Xpnode::S_closure_function>();
-        // Instantiate the function.
-        auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, cand.body);
+        // Bind the function body recursively.
+        const auto ctx_feigned = allocate<Context>(ctx, true);
+        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
+        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
         Reference_root::S_temp_value ref_c = { D_function(std::move(func)) };
         stack_inout.emplace_back(std::move(ref_c));
         return;
