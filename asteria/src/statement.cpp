@@ -441,7 +441,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
               // Create a fresh context for this loop.
               ctx_next = allocate<Context>(ctx_inout, false);
             }
-            const auto &key = it->first;
+            const auto key = std::ref(it->first);
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_string(key));
             ctx_next->set_named_reference_opt(cand.key_name, ref_out);
