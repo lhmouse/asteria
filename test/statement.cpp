@@ -10,11 +10,11 @@ using namespace Asteria;
 int main()
   {
     Vector<Statement> text;
-    // var i = 0;
+    // var res = 0;
     Vector<Xpnode> expr;
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
-    text.emplace_back(Statement::S_var_def { String::shallow("i"), false, std::move(expr) });
-    // const data = [ 1,2,3,2*5 ];
+    text.emplace_back(Statement::S_var_def { String::shallow("res"), false, std::move(expr) });
+    // const data = [ 1, 2, 3, 2 * 5 ];
     Vector<Vector<Xpnode>> elems;
     for(int i = 1; i <= 3; ++i) {
       expr.clear();
@@ -29,8 +29,8 @@ int main()
     expr.clear();
     expr.emplace_back(Xpnode::S_unnamed_array { std::move(elems) });
     text.emplace_back(Statement::S_var_def { String::shallow("data"), true, std::move(expr) });
-    // for(each k, v in data){
-    //   i += k * v;
+    // for(each k, v in data) {
+    //   res += k * v;
     // }
     Vector<Xpnode> range;
     range.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
@@ -38,19 +38,52 @@ int main()
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("k") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("v") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    expr.emplace_back(Xpnode::S_named_reference { String::shallow("i") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     Vector<Statement> body;
     body.emplace_back(Statement::S_expression { std::move(expr) });
     text.emplace_back(Statement::S_for_each { String::shallow("k"), String::shallow("v"), std::move(range), std::move(body) });
+    // for(var j = 0; j <= 3; ++j) {
+    //   res += data[j];
+    //   if(data[j] == 2) {
+    //     break;
+    //   }
+    // }
+    body.clear();
+    expr.clear();
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
+    body.emplace_back(Statement::S_expression { std::move(expr) });
+    expr.clear();
+    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
+    Vector<Statement> branch_true;
+    branch_true.emplace_back(Statement::S_break { Statement::target_scope_unspec });
+    body.emplace_back(Statement::S_if { std::move(expr), std::move(branch_true), { } });
+    expr.clear();
+    expr.emplace_back(Xpnode::S_literal { D_integer(0) });
+    Vector<Xpnode> cond;
+    cond.emplace_back(Xpnode::S_literal { D_integer(3) });
+    cond.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    cond.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_lte, false });
+    Vector<Xpnode> step;
+    step.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
+    text.emplace_back(Statement::S_for { String::shallow("j"), false, std::move(expr), std::move(cond), std::move(step), std::move(body) });
 
     auto ctx = allocate<Context>(nullptr, false);
     Reference ref;
     auto status = execute_block_in_place(ref, ctx, text);
     ASTERIA_TEST_CHECK(status == Statement::status_next);
-    auto qref = ctx->get_named_reference_opt(String::shallow("i"));
+    auto qref = ctx->get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
-    ASTERIA_TEST_CHECK(read_reference(*qref).as<D_integer>() == 38);
+    ASTERIA_TEST_CHECK(read_reference(*qref).as<D_integer>() == 41);
     qref = ctx->get_named_reference_opt(String::shallow("data"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().size() == 4);
@@ -61,5 +94,7 @@ int main()
     qref = ctx->get_named_reference_opt(String::shallow("k"));
     ASTERIA_TEST_CHECK(qref == nullptr);
     qref = ctx->get_named_reference_opt(String::shallow("v"));
+    ASTERIA_TEST_CHECK(qref == nullptr);
+    qref = ctx->get_named_reference_opt(String::shallow("j"));
     ASTERIA_TEST_CHECK(qref == nullptr);
   }

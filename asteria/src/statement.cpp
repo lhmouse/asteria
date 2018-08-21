@@ -372,13 +372,13 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         for(;;) {
           // Check the loop condition.
           if(cand.cond.empty() == false) {
-            ref_out = evaluate_expression(cand.cond, ctx_inout);
+            ref_out = evaluate_expression(cand.cond, ctx_next);
             if(test_value(read_reference(ref_out)) == false) {
               break;
             }
           }
           // Execute the loop body.
-          const auto status = execute_block(ref_out, cand.body, ctx_inout);
+          const auto status = execute_block(ref_out, cand.body, ctx_next);
           if(rocket::is_any_of(status, { Statement::status_break_unspec, Statement::status_break_for })) {
             // Break out of the body as requested.
             break;
