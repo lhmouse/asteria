@@ -285,10 +285,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             if(kstmt.index() == Statement::index_var_def) {
               const auto &kcand = kstmt.as<Statement::S_var_def>();
               ctx_next->set_named_reference_opt(kcand.name, Reference());
+              ASTERIA_DEBUG_LOG("Skipped named variable: name = ", kcand.name, ", immutable = ", kcand.immutable);
             }
             else if(kstmt.index() == Statement::index_func_def) {
               const auto &kcand = kstmt.as<Statement::S_func_def>();
               ctx_next->set_named_reference_opt(kcand.name, Reference());
+              ASTERIA_DEBUG_LOG("Skipped named function: name = ", kcand.name, ", file:line = ", kcand.file, ':', kcand.line);
             }
           }
         }
@@ -365,7 +367,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
           // Reset the reference.
           Reference_root::S_variable ref_c = { std::move(var) };
           ctx_next->set_named_reference_opt(cand.var_name, std::move(ref_c));
-          ASTERIA_DEBUG_LOG("Created `for`-scoped variable: name = ", cand.var_name, ", immutable = ", cand.var_immutable);
+          ASTERIA_DEBUG_LOG("Created named variable with `for` scope: name = ", cand.var_name, ", immutable = ", cand.var_immutable);
         }
         for(;;) {
           // Check the loop condition.
@@ -413,10 +415,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_integer(index));
             ctx_next->set_named_reference_opt(cand.key_name, ref_out);
-            // Initialize the per-loop mapped reference.
+            ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
+            // Initialize the per-loop value reference.
             Reference_modifier::S_array_index refmod_c = { index };
             ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
             ctx_next->set_named_reference_opt(cand.mapped_name, ref_out);
+            ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.
             const auto status = execute_block_in_place(ref_out, ctx_next, cand.body);
             if(rocket::is_any_of(status, { Statement::status_break_unspec, Statement::status_break_for })) {
@@ -441,10 +445,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_string(key));
             ctx_next->set_named_reference_opt(cand.key_name, ref_out);
-            // Initialize the per-loop mapped reference.
+            ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
+            // Initialize the per-loop value reference.
             Reference_modifier::S_object_key refmod_c = { key };
             ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
             ctx_next->set_named_reference_opt(cand.mapped_name, ref_out);
+            ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.
             const auto status = execute_block_in_place(ref_out, ctx_next, cand.body);
             if(rocket::is_any_of(status, { Statement::status_break_unspec, Statement::status_break_for })) {
@@ -501,11 +507,13 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             // Copy the reference into the scope.
             ref_out = e.get_reference();
             ctx_next->set_named_reference_opt(cand.except_name, ref_out);
+            ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
           } catch(std::exception &e) {
             // Create a temporary string.
             Reference_root::S_temp_value ref_c = { D_string(e.what()) };
             ref_out.set_root(std::move(ref_c));
             ctx_next->set_named_reference_opt(cand.except_name, ref_out);
+            ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
           }
           // Execute the `catch` body.
           const auto status = execute_block(ref_out, cand.body_catch, ctx_next);
