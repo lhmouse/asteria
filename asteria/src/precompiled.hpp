@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <climits>
+#include <cfloat>
 #include <cmath>
 
 #include "rocket/compatibility.h"

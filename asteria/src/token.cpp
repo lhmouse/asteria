@@ -5,7 +5,6 @@
 #include "token.hpp"
 #include "utilities.hpp"
 #include <algorithm>
-#include <cfloat>
 
 namespace Asteria
 {
