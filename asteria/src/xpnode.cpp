@@ -737,7 +737,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                do_set_result(lhs, false, result == Value::comparison_equal);
+                do_set_result(lhs, false, result == Value::compare_equal);
               }
             break;
           }
@@ -751,7 +751,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                do_set_result(lhs, false, result != Value::comparison_equal);
+                do_set_result(lhs, false, result != Value::compare_equal);
               }
             break;
           }
@@ -764,10 +764,10 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                if(result == Value::comparison_unordered) {
+                if(result == Value::compare_unordered) {
                   ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
                 }
-                do_set_result(lhs, false, result == Value::comparison_less);
+                do_set_result(lhs, false, result == Value::compare_less);
               }
             break;
           }
@@ -780,10 +780,10 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                if(result == Value::comparison_unordered) {
+                if(result == Value::compare_unordered) {
                   ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
                 }
-                do_set_result(lhs, false, result == Value::comparison_greater);
+                do_set_result(lhs, false, result == Value::compare_greater);
               }
             break;
           }
@@ -796,10 +796,10 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                if(result == Value::comparison_unordered) {
+                if(result == Value::compare_unordered) {
                   ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
                 }
-                do_set_result(lhs, false, result != Value::comparison_greater);
+                do_set_result(lhs, false, result != Value::compare_greater);
               }
             break;
           }
@@ -812,10 +812,10 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             auto rhs_value = read_reference(rhs);
               {
                 auto result = compare_values(lhs_value, rhs_value);
-                if(result == Value::comparison_unordered) {
+                if(result == Value::compare_unordered) {
                   ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
                 }
-                do_set_result(lhs, false, result != Value::comparison_less);
+                do_set_result(lhs, false, result != Value::compare_less);
               }
             break;
           }

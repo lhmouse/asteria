@@ -38,12 +38,12 @@ class Value
         , D_object    // 8,
       )>;
 
-    enum Comparison_result : std::uint8_t
+    enum Compare_result : std::uint8_t
       {
-        comparison_unordered  = 0,
-        comparison_less       = 1,
-        comparison_equal      = 2,
-        comparison_greater    = 3,
+        compare_unordered  = 0,
+        compare_less       = 1,
+        compare_equal      = 2,
+        compare_greater    = 3,
       };
 
   private:
@@ -100,7 +100,7 @@ class Value
 extern const char * get_type_name(Value::Type type) noexcept;
 
 extern bool test_value(const Value &value);
-extern Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept;
+extern Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcept;
 
 extern void dump_value(std::ostream &os, const Value &value, unsigned indent_next = 0, unsigned indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Value &value);

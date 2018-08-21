@@ -77,7 +77,7 @@ namespace
           if(ctx_out->is_feigned() == false) {
             ref = std::forward<GeneratorT>(generator)();
           }
-          ctx_out->set_named_reference(name, std::move(ref));
+          ctx_out->set_named_reference_opt(name, std::move(ref));
         }
   }
 

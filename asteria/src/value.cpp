@@ -89,60 +89,60 @@ bool test_value(const Value &value)
       ASTERIA_TERMINATE("An unknown value type enumeration `", value.which(), "` has been encountered.");
     }
   }
-Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noexcept
+Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
     if(lhs.which() != rhs.which()) {
       if(lhs.which() == Value::type_null) {
-        return Value::comparison_less;
+        return Value::compare_less;
       }
       if(rhs.which() == Value::type_null) {
-        return Value::comparison_greater;
+        return Value::compare_greater;
       }
-      return Value::comparison_unordered;
+      return Value::compare_unordered;
     }
     // If both operands have the same type, perform normal comparison.
     switch(lhs.which()) {
     case Value::type_null:
-      return Value::comparison_equal;
+      return Value::compare_equal;
     case Value::type_boolean:
       {
         const auto &cand_lhs = lhs.as<D_boolean>();
         const auto &cand_rhs = rhs.as<D_boolean>();
         if(cand_lhs < cand_rhs) {
-          return Value::comparison_less;
+          return Value::compare_less;
         }
         if(cand_lhs > cand_rhs) {
-          return Value::comparison_greater;
+          return Value::compare_greater;
         }
-        return Value::comparison_equal;
+        return Value::compare_equal;
       }
     case Value::type_integer:
       {
         const auto &cand_lhs = lhs.as<D_integer>();
         const auto &cand_rhs = rhs.as<D_integer>();
         if(cand_lhs < cand_rhs) {
-          return Value::comparison_less;
+          return Value::compare_less;
         }
         if(cand_lhs > cand_rhs) {
-          return Value::comparison_greater;
+          return Value::compare_greater;
         }
-        return Value::comparison_equal;
+        return Value::compare_equal;
       }
     case Value::type_double:
       {
         const auto &cand_lhs = lhs.as<D_double>();
         const auto &cand_rhs = rhs.as<D_double>();
         if(std::isunordered(cand_lhs, cand_rhs)) {
-          return Value::comparison_unordered;
+          return Value::compare_unordered;
         }
         if(std::isless(cand_lhs, cand_rhs)) {
-          return Value::comparison_less;
+          return Value::compare_less;
         }
         if(std::isgreater(cand_lhs, cand_rhs)) {
-          return Value::comparison_greater;
+          return Value::compare_greater;
         }
-        return Value::comparison_equal;
+        return Value::compare_equal;
       }
     case Value::type_string:
       {
@@ -150,16 +150,16 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
         const auto &cand_rhs = rhs.as<D_string>();
         const int cmp = cand_lhs.compare(cand_rhs);
         if(cmp < 0) {
-          return Value::comparison_less;
+          return Value::compare_less;
         }
         if(cmp > 0) {
-          return Value::comparison_greater;
+          return Value::compare_greater;
         }
-        return Value::comparison_equal;
+        return Value::compare_equal;
       }
     case Value::type_opaque:
     case Value::type_function:
-      return Value::comparison_unordered;
+      return Value::compare_unordered;
     case Value::type_array:
       {
         const auto &array_lhs = lhs.as<D_array>();
@@ -167,20 +167,20 @@ Value::Comparison_result compare_values(const Value &lhs, const Value &rhs) noex
         const auto rlen = std::min(array_lhs.size(), array_rhs.size());
         for(std::size_t i = 0; i < rlen; ++i) {
           const auto res = compare_values(array_lhs[i], array_rhs[i]);
-          if(res != Value::comparison_equal) {
+          if(res != Value::compare_equal) {
             return res;
           }
         }
         if(array_lhs.size() < array_rhs.size()) {
-          return Value::comparison_less;
+          return Value::compare_less;
         }
         if(array_lhs.size() > array_rhs.size()) {
-          return Value::comparison_greater;
+          return Value::compare_greater;
         }
-        return Value::comparison_equal;
+        return Value::compare_equal;
       }
     case Value::type_object:
-      return Value::comparison_unordered;
+      return Value::compare_unordered;
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.which(), "` has been encountered.");
     }

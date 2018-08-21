@@ -10,10 +10,10 @@ using namespace Asteria;
 int main()
   {
     const auto ctx = allocate<Context>(nullptr, false);
-    auto &cond = ctx->set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
-    auto &dval = ctx->set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
-    auto &ival = ctx->set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
-    auto &aval = ctx->set_named_reference(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     }));
+    auto &cond = *(ctx->set_named_reference_opt(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      })).first);
+    auto &dval = *(ctx->set_named_reference_opt(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) })).first);
+    auto &ival = *(ctx->set_named_reference_opt(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  })).first);
+    auto &aval = *(ctx->set_named_reference_opt(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     })).first);
 
     materialize_reference(cond);
     materialize_reference(dval);

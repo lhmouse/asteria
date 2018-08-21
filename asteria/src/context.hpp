@@ -55,7 +55,7 @@ class Context
         return m_named_refs.get_mut(name);
       }
     template<typename ...ParamsT, typename std::enable_if<std::is_constructible<Reference, ParamsT &&...>::value>::type * = nullptr>
-      std::pair<Reference *, bool> set_named_reference(const String &name, ParamsT &&...params)
+      std::pair<Reference *, bool> set_named_reference_opt(const String &name, ParamsT &&...params)
         {
           if(name.empty()) {
             return std::make_pair(nullptr, false);

@@ -10,7 +10,7 @@ int main()
   {
     auto ctx = allocate<Context>(nullptr, false);
 
-    ctx->set_named_reference(String::shallow("test"), Reference(Reference_root::S_constant{ D_integer(42) }));
+    ctx->set_named_reference_opt(String::shallow("test"), Reference(Reference_root::S_constant{ D_integer(42) }));
     auto ref = ctx->get_named_reference_opt(String::shallow("test"));
     ASTERIA_TEST_CHECK(ref != nullptr);
     ASTERIA_TEST_CHECK(ref->get_root().which() == Reference_root::type_constant);
