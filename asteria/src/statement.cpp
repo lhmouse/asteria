@@ -136,7 +136,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         const auto &cand = stmt.as<Statement::S_try>();
         // The `try` branch needs no special treatement.
         auto body_try_bnd = bind_block(cand.body_try, ctx_inout);
-        // The exception variable shall not outlast the loop body.
+        // The exception variable shall not outlast the `catch` body.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
         ctx_feigned->set_named_reference_opt(cand.except_name, Reference());
         // Bind the `catch` branch recursively.
