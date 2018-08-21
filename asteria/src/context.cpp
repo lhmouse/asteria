@@ -39,8 +39,9 @@ namespace
               {
               case 0:
                 {
+                  const auto nvarg = m_vargs.size();
                   // When no argument is given, return the number of variadic arguments.
-                  return reference_constant(static_cast<D_integer>(m_vargs.size()));
+                  return reference_constant(D_integer(nvarg));
                 }
               case 1:
                 {
@@ -49,17 +50,18 @@ namespace
                     ASTERIA_THROW_RUNTIME_ERROR("The argument passed to `__varg` must be of type `integer`.");
                   }
                   const auto index = static_cast<Signed>(iref.as<D_integer>());
+                  const auto nvarg = m_vargs.size();
                   auto rindex = index;
                   if(rindex < 0) {
                     // Wrap negative indices.
-                    rindex += static_cast<Signed>(m_vargs.size());
+                    rindex += static_cast<Signed>(nvarg);
                   }
                   if(rindex < 0) {
-                    ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", index, ", vargs = ", m_vargs.size());
+                    ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", index, ", nvarg = ", nvarg);
                     return Reference();
                   }
-                  if(rindex >= static_cast<Signed>(m_vargs.size())){
-                    ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", index, ", vargs = ", m_vargs.size());
+                  if(rindex >= static_cast<Signed>(nvarg)){
+                    ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", index, ", nvarg = ", nvarg);
                     return Reference();
                   }
                   return m_vargs.at(static_cast<std::size_t>(rindex));
@@ -92,16 +94,13 @@ void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &p
         args.erase(args.begin());
       }
       if(name.empty() == false) {
-        if((name == "this") || name.starts_with("__")) {
-          ASTERIA_THROW_RUNTIME_ERROR("The parameter name `", name, "` is reserved.");
-        }
         do_set_reference(ctx_out, name, [&] { return std::move(ref); });
       }
     }
     // Set up system variables.
     do_set_reference(ctx_out, String::shallow("__file"), [&] { return reference_constant(D_string(file)); });
     do_set_reference(ctx_out, String::shallow("__line"), [&] { return reference_constant(D_integer(line)); });
-    do_set_reference(ctx_out, String::shallow("this"), [&] { return std::move(self); });
+    do_set_reference(ctx_out, String::shallow("__this"), [&] { return std::move(self); });
     do_set_reference(ctx_out, String::shallow("__varg"), [&] { return reference_constant(D_function(allocate<Varg_getter>(file, line, std::move(args)))); });
   }
 

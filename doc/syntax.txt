@@ -104,7 +104,7 @@ prefix-operator-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
 
 expression-initiator ::=
-	identifier | literal | closure-function | nested-expression | unnamed-array | unnamed-object
+	identifier | literal | "this" | closure-function | nested-expression | unnamed-array | unnamed-object
 closure-function ::=
 	"func" "(" parameter-list-opt ")" block
 nested-expression ::=

@@ -40,6 +40,7 @@ class Token
         keyword_false     = 21,
         keyword_nan       = 22,
         keyword_infinity  = 23,
+        keyword_this      = 24,
       };
     enum Punctuator : std::uint8_t
       {

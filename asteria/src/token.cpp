@@ -606,6 +606,7 @@ namespace
                 { "null",      Token::keyword_null      },
                 { "return",    Token::keyword_return    },
                 { "switch",    Token::keyword_switch    },
+                { "this",      Token::keyword_this      },
                 { "throw",     Token::keyword_throw     },
                 { "true",      Token::keyword_true      },
                 { "try",       Token::keyword_try       },
