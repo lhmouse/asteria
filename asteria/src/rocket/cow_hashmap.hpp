@@ -562,9 +562,8 @@ namespace details_cow_hashmap
                 }
                 const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
                 const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
-                  [&](const value_handle<allocatorT> *tbkt) {
-                    return this->as_key_equal()(tbkt->get()->first, ykey);
-                  });
+                  [&](const value_handle<allocatorT> *tbkt)
+                    { return this->as_key_equal()(tbkt->get()->first, ykey); });
                 if(!bkt || !(bkt->get())) {
                   return -1;
                 }
@@ -591,9 +590,8 @@ namespace details_cow_hashmap
                 // Find a bucket for the new element.
                 const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
                 const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
-                  [&](const value_handle<allocatorT> *tbkt) {
-                    return this->as_key_equal()(tbkt->get()->first, ykey);
-                  });
+                  [&](const value_handle<allocatorT> *tbkt)
+                    { return this->as_key_equal()(tbkt->get()->first, ykey); });
                 ROCKET_ASSERT(bkt);
                 if(bkt->get()) {
                   // A duplicate key has been found.
@@ -638,18 +636,19 @@ namespace details_cow_hashmap
               }
               // Relocate elements that are not placed in their immediate locations.
               linear_prober<allocator_type>::probe(ptr, tpos + tn, tpos,
-                [&](value_handle<allocator_type> *tbkt) {
-                  // Remove the element from the old bucket.
-                  auto eptr = tbkt->set(nullptr);
-                  // Find a new bucket for it.
-                  const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
-                  const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
-                  ROCKET_ASSERT(bkt);
-                  // Insert it into the new bucket.
-                  eptr = bkt->set(eptr);
-                  ROCKET_ASSERT(!eptr);
-                  return false;
-                });
+                [&](value_handle<allocator_type> *tbkt)
+                  {
+                    // Remove the element from the old bucket.
+                    auto eptr = tbkt->set(nullptr);
+                    // Find a new bucket for it.
+                    const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
+                    const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
+                    ROCKET_ASSERT(bkt);
+                    // Insert it into the new bucket.
+                    eptr = bkt->set(eptr);
+                    ROCKET_ASSERT(!eptr);
+                    return false;
+                  });
             }
         };
 
