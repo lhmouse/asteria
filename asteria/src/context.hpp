@@ -42,27 +42,19 @@ class Context
 
     const Reference * get_named_reference_opt(const String &name) const noexcept
       {
-        if(name.empty()) {
-          return nullptr;
-        }
         return m_named_refs.get(name);
       }
     Reference * get_named_reference_opt(const String &name) noexcept
       {
-        if(name.empty()) {
-          return nullptr;
-        }
         return m_named_refs.get_mut(name);
       }
-    template<typename ...ParamsT, typename std::enable_if<std::is_constructible<Reference, ParamsT &&...>::value>::type * = nullptr>
-      std::pair<Reference *, bool> set_named_reference_opt(const String &name, ParamsT &&...params)
-        {
-          if(name.empty()) {
-            return std::make_pair(nullptr, false);
-          }
-          return m_named_refs.set(name, std::forward<ParamsT>(params)...);
-        }
+    Reference & set_named_reference(const String &name, Reference ref)
+      {
+        return *(m_named_refs.set(name, std::move(ref)).first);
+      }
   };
+
+extern bool is_name_reserved(const String &name);
 
 extern void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args);
 

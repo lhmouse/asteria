@@ -116,11 +116,11 @@ array-element-list-opt ::=
 array-element-list ::=
 	expression ( "," array-element-list-opt | "" )
 unnamed-object ::=
-	"{" key-value-list-opt "}"
-key-value-list-opt ::=
-	key-value-list | ""
-key-value-list ::=
-	( string-literal | identifier ) "=" expression ( "," key-value-list-opt | "" )
+	"{" key-mapped-list-opt "}"
+key-mapped-list-opt ::=
+	key-mapped-list | ""
+key-mapped-list ::=
+	( string-literal | identifier ) "=" expression ( "," key-mapped-list-opt | "" )
 
 expression-trailer-opt ::=
 	expression-trailer | ""

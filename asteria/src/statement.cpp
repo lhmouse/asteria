@@ -19,6 +19,21 @@ Statement & Statement::operator=(Statement &&) noexcept
 Statement::~Statement()
   = default;
 
+namespace
+  {
+    template<typename ...ParamsT>
+      void do_safe_set_named_reference(Spref<Context> ctx_inout, const char *desc, const String &name, ParamsT &&...params)
+        {
+          if(is_name_reserved(name)) {
+            ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
+          }
+          if(name.empty()) {
+            return;
+          }
+          ctx_inout->set_named_reference(name, Reference(std::forward<ParamsT>(params)...));
+        }
+  }
+
 Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt)
   {
     if(ctx_inout->is_feigned() == false) {
@@ -37,7 +52,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
-        ctx_inout->set_named_reference_opt(cand.name, Reference());
+        do_safe_set_named_reference(ctx_inout, "variable", cand.name);
         // Bind the initializer recursively.
         auto init_bnd = bind_expression(cand.init, ctx_inout);
         Statement::S_var_def cand_bnd = { cand.name, cand.immutable, std::move(init_bnd) };
@@ -47,7 +62,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
-        ctx_inout->set_named_reference_opt(cand.name, Reference());
+        do_safe_set_named_reference(ctx_inout, "function", cand.name);
         // Bind the function body recursively.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
         initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
@@ -105,7 +120,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         const auto &cand = stmt.as<Statement::S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        ctx_feigned->set_named_reference_opt(cand.var_name, Reference());
+        do_safe_set_named_reference(ctx_feigned, "`for` variable", cand.var_name);
         // Bind the loop variable initializer, condition, step expression and loop loop body recursively.
         auto var_init_bnd = bind_expression(cand.var_init, ctx_feigned);
         auto cond_bnd = bind_expression(cand.cond, ctx_feigned);
@@ -121,8 +136,8 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         const auto &cand = stmt.as<Statement::S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        ctx_feigned->set_named_reference_opt(cand.key_name, Reference());
-        ctx_feigned->set_named_reference_opt(cand.mapped_name, Reference());
+        do_safe_set_named_reference(ctx_feigned, "`for each` key", cand.key_name);
+        do_safe_set_named_reference(ctx_feigned, "`for each` reference", cand.mapped_name);
         // Bind the range initializer and loop body recursively.
         auto range_init_bnd = bind_expression(cand.range_init, ctx_feigned);
         // It should be safe to use `bind_block_in_place()` in place of `bind_block()` here, as the body is only ever iterated once.
@@ -138,7 +153,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         auto body_try_bnd = bind_block(cand.body_try, ctx_inout);
         // The exception variable shall not outlast the `catch` body.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        ctx_feigned->set_named_reference_opt(cand.except_name, Reference());
+        do_safe_set_named_reference(ctx_feigned, "exception", cand.except_name);
         // Bind the `catch` branch recursively.
         auto body_catch_bnd = bind_block_in_place(ctx_feigned, cand.body_catch);
         Statement::S_try cand_bnd = { std::move(body_try_bnd), cand.except_name, std::move(body_catch_bnd) };
@@ -209,7 +224,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         const auto &cand = stmt.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        ctx_inout->set_named_reference_opt(cand.name, Reference());
+        do_safe_set_named_reference(ctx_inout, "variable", cand.name);
         // Create a variable using the initializer.
         ref_out = evaluate_expression(cand.init, ctx_inout);
         auto value = read_reference(ref_out);
@@ -217,7 +232,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };
         ref_out.set_root(std::move(ref_c));
-        ctx_inout->set_named_reference_opt(cand.name, ref_out);
+        do_safe_set_named_reference(ctx_inout, "variable", cand.name, ref_out);
         ASTERIA_DEBUG_LOG("Created named variable: name = ", cand.name, ", immutable = ", cand.immutable);
         return Statement::status_next;
       }
@@ -226,7 +241,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         const auto &cand = stmt.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        ctx_inout->set_named_reference_opt(cand.name, Reference());
+        do_safe_set_named_reference(ctx_inout, "function", cand.name);
         // Bind the function body recursively.
         const auto ctx_feigned = allocate<Context>(ctx_inout, true);
         initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
@@ -236,7 +251,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };
         ref_out.set_root(std::move(ref_c));
-        ctx_inout->set_named_reference_opt(cand.name, ref_out);
+        do_safe_set_named_reference(ctx_inout, "function", cand.name, ref_out);
         ASTERIA_DEBUG_LOG("Created named function: name = ", cand.name, ", file:line = ", cand.file, ':', cand.line);
         return Statement::status_next;
       }
@@ -289,12 +304,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
           for(const auto &kstmt : it->second) {
             if(kstmt.index() == Statement::index_var_def) {
               const auto &kcand = kstmt.as<Statement::S_var_def>();
-              ctx_next->set_named_reference_opt(kcand.name, Reference());
+              do_safe_set_named_reference(ctx_next, "variable", kcand.name);
               ASTERIA_DEBUG_LOG("Skipped named variable: name = ", kcand.name, ", immutable = ", kcand.immutable);
             }
             else if(kstmt.index() == Statement::index_func_def) {
               const auto &kcand = kstmt.as<Statement::S_func_def>();
-              ctx_next->set_named_reference_opt(kcand.name, Reference());
+              do_safe_set_named_reference(ctx_next, "function", kcand.name);
               ASTERIA_DEBUG_LOG("Skipped named function: name = ", kcand.name, ", file:line = ", kcand.file, ':', kcand.line);
             }
           }
@@ -363,7 +378,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         auto ctx_next = allocate<Context>(ctx_inout, false);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        ctx_next->set_named_reference_opt(cand.var_name, Reference());
+        do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name);
         // Create a variable using the initializer.
         ref_out = evaluate_expression(cand.var_init, ctx_next);
         if(cand.var_name.empty() == false) {
@@ -371,7 +386,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
           auto var = allocate<Variable>(std::move(value), cand.var_immutable);
           // Reset the reference.
           Reference_root::S_variable ref_c = { std::move(var) };
-          ctx_next->set_named_reference_opt(cand.var_name, std::move(ref_c));
+          do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name, std::move(ref_c));
           ASTERIA_DEBUG_LOG("Created named variable with `for` scope: name = ", cand.var_name, ", immutable = ", cand.var_immutable);
         }
         for(;;) {
@@ -403,8 +418,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // The key and mapped variables shall not outlast the loop body.
         auto ctx_next = allocate<Context>(ctx_inout, false);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        ctx_next->set_named_reference_opt(cand.key_name, Reference());
-        ctx_next->set_named_reference_opt(cand.mapped_name, Reference());
+        do_safe_set_named_reference(ctx_next, "`for each` key", cand.key_name);
+        do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name);
         // Calculate the range using the initializer.
         ref_out = evaluate_expression(cand.range_init, ctx_next);
         const auto mapped_base = ref_out;
@@ -419,12 +434,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             const auto index = static_cast<Signed>(it - array.begin());
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_integer(index));
-            ctx_next->set_named_reference_opt(cand.key_name, ref_out);
+            do_safe_set_named_reference(ctx_next, "`for each` key", cand.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_array_index refmod_c = { index };
             ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
-            ctx_next->set_named_reference_opt(cand.mapped_name, ref_out);
+            do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name, ref_out);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.
             const auto status = execute_block_in_place(ref_out, ctx_next, cand.body);
@@ -449,12 +464,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             const auto &key = it->first;
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_string(key));
-            ctx_next->set_named_reference_opt(cand.key_name, ref_out);
+            do_safe_set_named_reference(ctx_next, "`for each` key", cand.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_object_key refmod_c = { key };
             ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
-            ctx_next->set_named_reference_opt(cand.mapped_name, ref_out);
+            do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name, ref_out);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.
             const auto status = execute_block_in_place(ref_out, ctx_next, cand.body);
@@ -511,15 +526,13 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             }
             // Copy the reference into the scope.
             ref_out = e.get_reference();
-            ctx_next->set_named_reference_opt(cand.except_name, ref_out);
-            ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
           } catch(std::exception &e) {
             // Create a temporary string.
             Reference_root::S_temp_value ref_c = { D_string(e.what()) };
             ref_out.set_root(std::move(ref_c));
-            ctx_next->set_named_reference_opt(cand.except_name, ref_out);
-            ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
           }
+          do_safe_set_named_reference(ctx_next, "exception", cand.except_name, ref_out);
+          ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
           // Execute the `catch` body.
           const auto status = execute_block(ref_out, cand.body_catch, ctx_next);
           if(status != Statement::status_next) {

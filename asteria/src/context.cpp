@@ -12,16 +12,21 @@ namespace Asteria
 Context::~Context()
   = default;
 
+bool is_name_reserved(const String &name)
+  {
+    return name.starts_with("__");
+  }
+
 namespace
   {
     template<typename GeneratorT>
-      void do_set_reference(Spref<Context> ctx_out, const String &name, GeneratorT &&generator)
+      void do_set_reference(Spref<Context> ctx_out, const String &name, GeneratorT &&gen)
         {
           Reference ref;
           if(ctx_out->is_feigned() == false) {
-            ref = std::forward<GeneratorT>(generator)();
+            ref = std::forward<GeneratorT>(gen)();
           }
-          ctx_out->set_named_reference_opt(name, std::move(ref));
+          ctx_out->set_named_reference(name, std::move(ref));
         }
   }
 
@@ -36,6 +41,9 @@ void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &p
         args.erase(args.begin());
       }
       if(name.empty() == false) {
+        if(is_name_reserved(name)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
+        }
         do_set_reference(ctx_out, name, [&] { return std::move(ref); });
       }
     }
