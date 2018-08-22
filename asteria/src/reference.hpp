@@ -52,9 +52,9 @@ class Reference
       }
     Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { })
       {
-        auto &res = m_root = std::move(root);
+        m_root = std::move(root);
         m_modifiers = std::move(modifiers);
-        return res;
+        return m_root;
       }
     bool has_modifiers() const noexcept
       {

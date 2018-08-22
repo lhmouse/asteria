@@ -46,12 +46,12 @@ class Variable
       }
     Value & set_value(Value value, bool immutable = false)
       {
-        if(m_immutable)  {
+        if(m_immutable) {
           do_throw_immutable();
         }
-        auto &res = m_value = std::move(value);
+        m_value = std::move(value);
         m_immutable = immutable;
-        return res;
+        return m_value;
       }
     bool & set_immutable(bool immutable = true) noexcept
       {
