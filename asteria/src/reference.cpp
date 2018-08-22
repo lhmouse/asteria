@@ -47,11 +47,11 @@ Value read_reference(const Reference &ref)
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
-    for(const auto &modifier : ref.get_modifiers()) {
-      switch(modifier.index()) {
+    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
+      switch(modit->index()) {
       case Reference_modifier::type_array_index:
         {
-          const auto &cand = modifier.as<Reference_modifier::S_array_index>();
+          const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
             return { };
           }
@@ -77,7 +77,7 @@ Value read_reference(const Reference &ref)
         }
       case Reference_modifier::type_object_key:
         {
-          const auto &cand = modifier.as<Reference_modifier::S_object_key>();
+          const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
             return { };
           }
@@ -94,7 +94,7 @@ Value read_reference(const Reference &ref)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modit->index(), "` has been encountered.");
       }
     }
     return *ptr;
@@ -127,11 +127,11 @@ void write_reference(const Reference &ref, Value value)
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
-    for(const auto &modifier : ref.get_modifiers()) {
-      switch(modifier.index()) {
+    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
+      switch(modit->index()) {
       case Reference_modifier::type_array_index:
         {
-          const auto &cand = modifier.as<Reference_modifier::S_array_index>();
+          const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
             ptr->set(D_array());
           }
@@ -168,7 +168,7 @@ void write_reference(const Reference &ref, Value value)
         }
       case Reference_modifier::type_object_key:
         {
-          const auto &cand = modifier.as<Reference_modifier::S_object_key>();
+          const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
             ptr->set(D_object());
           }
@@ -184,7 +184,7 @@ void write_reference(const Reference &ref, Value value)
           break;
         }
       default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modit->index(), "` has been encountered.");
       }
     }
     *ptr = std::move(value);
