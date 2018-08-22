@@ -25,19 +25,19 @@ Value read_reference(const Reference &ref)
     const Value *ptr;
     // Get a pointer to the root value.
     switch(ref.get_root().index()) {
-    case Reference_root::type_constant:
+    case Reference_root::index_constant:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
         ptr = &(cand.src);
         break;
       }
-    case Reference_root::type_temp_value:
+    case Reference_root::index_temp_value:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
         ptr = &(cand.value);
         break;
       }
-    case Reference_root::type_variable:
+    case Reference_root::index_variable:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_variable>();
         ptr = &(cand.var->get_value());
@@ -49,7 +49,7 @@ Value read_reference(const Reference &ref)
     // Apply modifiers.
     for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
       switch(modit->index()) {
-      case Reference_modifier::type_array_index:
+      case Reference_modifier::index_array_index:
         {
           const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
@@ -76,7 +76,7 @@ Value read_reference(const Reference &ref)
           ptr = &(*rit);
           break;
         }
-      case Reference_modifier::type_object_key:
+      case Reference_modifier::index_object_key:
         {
           const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
@@ -100,22 +100,22 @@ Value read_reference(const Reference &ref)
     }
     return *ptr;
   }
-void write_reference(const Reference &ref, Value value)
+Value & write_reference(const Reference &ref, Value value)
   {
     Value *ptr;
     // Get a pointer to the root value.
     switch(ref.get_root().index()) {
-    case Reference_root::type_constant:
+    case Reference_root::index_constant:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src, "` cannot be modified.");
       }
-    case Reference_root::type_temp_value:
+    case Reference_root::index_temp_value:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", cand.value, "` cannot be modified.");
       }
-    case Reference_root::type_variable:
+    case Reference_root::index_variable:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_variable>();
         if(cand.var->is_immutable()) {
@@ -130,7 +130,7 @@ void write_reference(const Reference &ref, Value value)
     // Apply modifiers.
     for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
       switch(modit->index()) {
-      case Reference_modifier::type_array_index:
+      case Reference_modifier::index_array_index:
         {
           const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
@@ -168,7 +168,7 @@ void write_reference(const Reference &ref, Value value)
           ptr = &(*rit);
           break;
         }
-      case Reference_modifier::type_object_key:
+      case Reference_modifier::index_object_key:
         {
           const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
@@ -190,6 +190,7 @@ void write_reference(const Reference &ref, Value value)
       }
     }
     *ptr = std::move(value);
+    return *ptr;
   }
 Value unset_reference(const Reference &ref)
   {
@@ -199,17 +200,17 @@ Value unset_reference(const Reference &ref)
     Value *ptr;
     // Get a pointer to the root value.
     switch(ref.get_root().index()) {
-    case Reference_root::type_constant:
+    case Reference_root::index_constant:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src, "` cannot be modified.");
       }
-    case Reference_root::type_temp_value:
+    case Reference_root::index_temp_value:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", cand.value, "` cannot be modified.");
       }
-    case Reference_root::type_variable:
+    case Reference_root::index_variable:
       {
         const auto &cand = ref.get_root().as<Reference_root::S_variable>();
         if(cand.var->is_immutable()) {
@@ -225,7 +226,7 @@ Value unset_reference(const Reference &ref)
     Value value;
     for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
       switch(modit->index()) {
-      case Reference_modifier::type_array_index:
+      case Reference_modifier::index_array_index:
         {
           const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
@@ -257,7 +258,7 @@ Value unset_reference(const Reference &ref)
           ptr = &(*rit);
           break;
         }
-      case Reference_modifier::type_object_key:
+      case Reference_modifier::index_object_key:
         {
           const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
@@ -297,23 +298,37 @@ Reference reference_temp_value(Value value)
     Reference_root::S_temp_value ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
   }
-void materialize_reference(Reference &ref)
-  {
-    if(ref.get_root().index() == Reference_root::type_variable) {
-      return;
-    }
-    // Create a variable.
-    auto value = read_reference(ref);
-    auto var = allocate<Variable>(std::move(value), false);
-    // Make `ref` a reference to this variable.
-    Reference_root::S_variable ref_v = { std::move(var) };
-    ref.set_root(std::move(ref_v));
-  }
 Reference indirect_reference_from(const Reference &parent, Reference_modifier modifier)
   {
     auto mod = parent.get_modifiers();
     mod.emplace_back(std::move(modifier));
     return Reference(parent.get_root(), std::move(mod));
+  }
+
+Reference & materialize_reference(Reference &ref)
+  {
+    if(ref.get_root().index() == Reference_root::index_variable) {
+      return ref;
+    }
+    auto value = read_reference(ref);
+    auto var = allocate<Variable>(std::move(value), false);
+    Reference_root::S_variable ref_c = { std::move(var) };
+    ref.set_root(std::move(ref_c));
+    return ref;
+  }
+Reference & dematerialize_reference(Reference &ref)
+  {
+    if(ref.get_root().index() != Reference_root::index_variable) {
+      return ref;
+    }
+    const auto &cand = ref.get_root().as<Reference_root::S_variable>();
+    if(cand.var.unique() == false) {
+      return ref;
+    }
+    auto value = read_reference(ref);
+    Reference_root::S_temp_value ref_c = { std::move(value) };
+    ref.set_root(std::move(ref_c));
+    return ref;
   }
 
 }

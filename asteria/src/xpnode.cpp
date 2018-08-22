@@ -553,8 +553,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           auto arg = do_pop_reference(stack_inout);
           args.emplace_back(std::move(arg));
         }
-        // Call the function and push the result as is.
+        // Call the function and de-materialize the result.
         auto result = do_traced_call(cand.file, cand.line, *qfunc, std::move(self), std::move(args));
+        dematerialize_reference(result);
         stack_inout.emplace_back(std::move(result));
         return;
       }

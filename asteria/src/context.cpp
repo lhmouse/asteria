@@ -44,13 +44,13 @@ void initialize_function_context(Spref<Context> ctx_out, const Vector<String> &p
         if(is_name_reserved(name)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
         }
-        do_set_reference(ctx_out, name, [&] { return std::move(ref); });
+        do_set_reference(ctx_out, name, [&] { return std::move(materialize_reference(ref)); });
       }
     }
     // Set up system variables.
     do_set_reference(ctx_out, String::shallow("__file"), [&] { return reference_constant(D_string(file)); });
     do_set_reference(ctx_out, String::shallow("__line"), [&] { return reference_constant(D_integer(line)); });
-    do_set_reference(ctx_out, String::shallow("__this"), [&] { return std::move(self); });
+    do_set_reference(ctx_out, String::shallow("__this"), [&] { return std::move(materialize_reference(self)); });
     do_set_reference(ctx_out, String::shallow("__varg"), [&] { return reference_constant(D_function(allocate<Variadic_arguer>(file, line, std::move(args)))); });
   }
 
