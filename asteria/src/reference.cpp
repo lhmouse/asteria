@@ -72,7 +72,7 @@ Value read_reference(const Reference &ref)
             ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
             return { };
           }
-          ptr = std::addressof(array.at(static_cast<std::size_t>(rindex)));
+          ptr = &(array.at(static_cast<std::size_t>(rindex)));
           break;
         }
       case Reference_modifier::type_object_key:
@@ -90,7 +90,7 @@ Value read_reference(const Reference &ref)
             ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", object);
             return { };
           }
-          ptr = std::addressof(rit->second);
+          ptr = &(rit->second);
           break;
         }
       default:
@@ -163,7 +163,7 @@ void write_reference(const Reference &ref, Value value)
             ASTERIA_DEBUG_LOG("Appending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
             array.insert(array.end(), static_cast<std::size_t>(size_add));
           }
-          ptr = std::addressof(array.mut(static_cast<std::size_t>(rindex)));
+          ptr = &(array.mut(static_cast<std::size_t>(rindex)));
           break;
         }
       case Reference_modifier::type_object_key:
@@ -180,7 +180,7 @@ void write_reference(const Reference &ref, Value value)
           if(rpair.second == false) {
             ASTERIA_DEBUG_LOG("Key inserted: key = ", cand.key, ", object = ", object);
           }
-          ptr = std::addressof(rpair.first->second);
+          ptr = &(rpair.first->second);
           break;
         }
       default:
