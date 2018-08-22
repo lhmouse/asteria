@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#include "exception.hpp"
+#include "runtime_error.hpp"
 #include <iostream> // std::cerr
 #include <time.h> // ::time_t, ::time(), ::asctime_r()
 
@@ -120,7 +120,7 @@ void throw_runtime_error(Logger &&logger)
     oss.set_caret(0);
     oss <<logger.get_func() <<": ";
     auto str = oss.extract_string();
-    throw std::runtime_error(str.c_str());
+    throw Runtime_error(std::move(str));
   }
 
 }

@@ -66,6 +66,8 @@ template<typename ResultT, typename SourceT>
 
 // General utilities
 class Logger;
+class Exception;
+class Runtime_error;
 
 // Lexical elements
 class Parser_result;
