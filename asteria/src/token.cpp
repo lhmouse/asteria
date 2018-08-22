@@ -329,7 +329,7 @@ namespace
                       const auto digit = str.at(body_end + i);
                       static constexpr char s_hex_table[] = "00112233445566778899AaBbCcDdEeFf";
                       const auto ptr = std::char_traits<char>::find(s_hex_table, 32, digit);
-                      if(ptr == nullptr) {
+                      if(!ptr) {
                         return Parser_result(line, body_end, i, Parser_result::error_code_escape_sequence_invalid_hex);
                       }
                       const auto digit_value = static_cast<unsigned char>((ptr - s_hex_table) / 2);
@@ -382,7 +382,7 @@ namespace
             // Get a numeric literal.
             static constexpr char s_numeric_table[] = "_:00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
             static constexpr unsigned s_delim_count = 2;
-            // Declare everything that will be calculated latter.
+            // Declare everything that will be calculated later.
             // 0) The integral part is required. The fractional and exponent parts are optional.
             // 1) If `frac_begin` equals `int_end` then there is no fractional part.
             // 2) If `exp_begin` equals `frac_end` then there is no exponent part.
@@ -464,7 +464,7 @@ namespace
             std::int32_t exp = 0;
             for(pos = exp_begin; pos != exp_end; ++pos) {
               const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, 20, str.at(pos));
-              if(ptr == nullptr) {
+              if(!ptr) {
                 continue;
               }
               const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
@@ -483,7 +483,7 @@ namespace
               Unsigned value = 0;
               for(pos = int_begin; pos != int_end; ++pos) {
                 const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-                if(ptr == nullptr) {
+                if(!ptr) {
                   continue;
                 }
                 const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
@@ -520,7 +520,7 @@ namespace
             bool zero = true;
             for(pos = int_begin; pos != int_end; ++pos) {
               const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-              if(ptr == nullptr) {
+              if(!ptr) {
                 continue;
               }
               const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
@@ -537,7 +537,7 @@ namespace
             Double mantissa = 0;
             for(pos = frac_end; pos != frac_begin; --pos) {
               const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos - 1));
-              if(ptr == nullptr) {
+              if(!ptr) {
                 continue;
               }
               const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
