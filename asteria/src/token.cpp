@@ -83,8 +83,7 @@ namespace
         if(tokens_inout.empty()) {
           return false;
         }
-        const auto &token_sign = tokens_inout.back();
-        auto cand_punct = token_sign.opt<Token::S_punctuator>();
+        auto cand_punct = tokens_inout.back().opt<Token::S_punctuator>();
         if(cand_punct == nullptr) {
           return false;
         }
@@ -93,16 +92,15 @@ namespace
         }
         const bool sign = cand_punct->punct == Token::punctuator_sub;
         // Don't merge them if they are not contiguous.
-        if(token_sign.get_source_line() != line) {
+        if(tokens_inout.back().get_source_line() != line) {
           return false;
         }
-        if(token_sign.get_source_column() + token_sign.get_source_length() != column) {
+        if(tokens_inout.back().get_source_column() + tokens_inout.back().get_source_length() != column) {
           return false;
         }
         // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
         if(tokens_inout.size() >= 2) {
-          const auto &token_prev = tokens_inout.rbegin()[1];
-          cand_punct = token_prev.opt<Token::S_punctuator>();
+          cand_punct = tokens_inout.rbegin()[1].opt<Token::S_punctuator>();
           if(cand_punct == nullptr) {
             return false;
           }
