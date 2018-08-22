@@ -68,4 +68,13 @@ int main()
     ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
     ref.push_modifier(Reference_modifier::S_object_key { String::shallow("invalid_access") });
     ASTERIA_TEST_CHECK_CATCH(val = read_reference(ref));
+
+    ref.pop_modifier();
+    val = unset_reference(ref);
+    ASTERIA_TEST_CHECK(val.type() == Value::type_double);
+    ASTERIA_TEST_CHECK(val.as<D_double>() == 10.5);
+    val = read_reference(ref);
+    ASTERIA_TEST_CHECK(val.type() == Value::type_null);
+    val = unset_reference(ref);
+    ASTERIA_TEST_CHECK(val.type() == Value::type_null);
   }
