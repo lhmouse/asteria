@@ -20,10 +20,6 @@ Exception::~Exception()
 
 const char * Exception::what() const noexcept
   {
-    const auto neptr = nested_ptr();
-    if(neptr) {
-      return "Asteria::Exception with a nested exception";
-    }
     return "Asteria::Exception";
   }
 

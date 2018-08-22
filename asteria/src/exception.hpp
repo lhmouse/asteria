@@ -12,7 +12,7 @@ namespace Asteria
 {
 
 class Exception
-  : public virtual std::exception, public virtual std::nested_exception
+  : public virtual std::exception
   {
   private:
     Reference m_ref;
