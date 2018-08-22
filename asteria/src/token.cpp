@@ -116,6 +116,52 @@ namespace
         return sign;
       }
 
+    struct Punctuator_element
+      {
+        char first[7];
+        Token::Punctuator second;
+      };
+    static_assert(sizeof(Punctuator_element) % 8 == 0, "`Punctuator_element` is misaligned.");
+
+    struct Punctuator_comparator
+      {
+        bool operator()(const Punctuator_element &lhs, const Punctuator_element &rhs) const noexcept
+          {
+            return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
+          }
+        bool operator()(char lhs, const Punctuator_element &rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs, rhs.first[0]);
+          }
+        bool operator()(const Punctuator_element &lhs, char rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs.first[0], rhs);
+          }
+      };
+
+    struct Keyword_element
+      {
+        char first[15];
+        Token::Keyword second;
+      };
+    static_assert(sizeof(Keyword_element) % 8 == 0, "`Keyword_element` is misaligned.");
+
+    struct Keyword_comparator
+      {
+        bool operator()(const Keyword_element &lhs, const Keyword_element &rhs) const noexcept
+          {
+            return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
+          }
+        bool operator()(char lhs, const Keyword_element &rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs, rhs.first[0]);
+          }
+        bool operator()(const Keyword_element &lhs, char rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs.first[0], rhs);
+          }
+      };
+
     Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const String &str, std::size_t column)
       {
         const auto char_head = str.at(column);
@@ -132,12 +178,6 @@ namespace
         case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
           {
             // Get a punctuator.
-            struct Punctuator_element
-              {
-                char first[7];
-                Token::Punctuator second;
-              };
-            static_assert(sizeof(Punctuator_element) % 8 == 0, "`Punctuator_element` is misaligned.");
             // Remember to keep this table sorted!
             static constexpr Punctuator_element s_punctuator_table[] =
               {
@@ -191,21 +231,6 @@ namespace
                 { "||=",   Token::punctuator_orl_eq      },
                 { "}",     Token::punctuator_brace_cl    },
                 { "~",     Token::punctuator_notb        },
-              };
-            struct Punctuator_comparator
-              {
-                bool operator()(const Punctuator_element &lhs, const Punctuator_element &rhs) const noexcept
-                  {
-                    return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
-                  }
-                bool operator()(char lhs, const Punctuator_element &rhs) const noexcept
-                  {
-                    return std::char_traits<char>::lt(lhs, rhs.first[0]);
-                  }
-                bool operator()(const Punctuator_element &lhs, char rhs) const noexcept
-                  {
-                    return std::char_traits<char>::lt(lhs.first[0], rhs);
-                  }
               };
 #ifdef ROCKET_DEBUG
             ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuator_table), std::end(s_punctuator_table), Punctuator_comparator()));
@@ -576,12 +601,6 @@ namespace
         case '_':
           {
             // Get an identifier, then check whether it is a keyword.
-            struct Keyword_element
-              {
-                char first[15];
-                Token::Keyword second;
-              };
-            static_assert(sizeof(Keyword_element) % 8 == 0, "`Keyword_element` is misaligned.");
             // Remember to keep this table sorted!
             static constexpr Keyword_element s_keyword_table[] =
               {
@@ -611,21 +630,6 @@ namespace
                 { "unset",     Token::keyword_unset     },
                 { "var",       Token::keyword_var       },
                 { "while",     Token::keyword_while     },
-              };
-            struct Keyword_comparator
-              {
-                bool operator()(const Keyword_element &lhs, const Keyword_element &rhs) const noexcept
-                  {
-                    return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
-                  }
-                bool operator()(char lhs, const Keyword_element &rhs) const noexcept
-                  {
-                    return std::char_traits<char>::lt(lhs, rhs.first[0]);
-                  }
-                bool operator()(const Keyword_element &lhs, char rhs) const noexcept
-                  {
-                    return std::char_traits<char>::lt(lhs.first[0], rhs);
-                  }
               };
 #ifdef ROCKET_DEBUG
             ROCKET_ASSERT(std::is_sorted(std::begin(s_keyword_table), std::end(s_keyword_table), Keyword_comparator()));
