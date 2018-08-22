@@ -7,7 +7,6 @@
 #include "reference.hpp"
 #include "backtracer.hpp"
 #include "exception.hpp"
-#include <iostream>
 
 using namespace Asteria;
 
@@ -53,11 +52,8 @@ int main()
     copy.as<D_object>().try_emplace(String::shallow("empty_array"), D_array());
     copy.as<D_object>().try_emplace(String::shallow("empty_object"), D_object());
 
-    std::cerr <<root <<std::endl;
-    ASTERIA_DEBUG_LOG("---> ", "hello: ", 42);
-    std::cerr <<copy <<std::endl;
-    ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
-    std::cerr <<root <<std::endl;
+    ASTERIA_DEBUG_LOG("---> ", root);
+    ASTERIA_DEBUG_LOG("<--- ", copy);
 
     try {
       test_throw(0);

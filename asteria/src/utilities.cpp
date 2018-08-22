@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
+#include "exception.hpp"
 #include <iostream> // std::cerr
 #include <time.h> // ::time_t, ::time(), ::asctime_r()
 
@@ -92,7 +93,7 @@ bool are_debug_logs_enabled() noexcept
   }
 bool write_log_to_stderr(Logger &&logger) noexcept
   try {
-    auto &stream = logger.get_stream();
+    auto &oss = logger.get_stream();
     ::time_t now;
     ::time(&now);
     char time_str[26];
@@ -102,20 +103,24 @@ bool write_log_to_stderr(Logger &&logger) noexcept
     ::ctime_r(&now, time_str);
 #endif
     time_str[24] = 0;
-    stream.set_caret(0);
-    stream <<"[" <<time_str <<"] " <<logger.get_file() <<":" <<logger.get_line() <<" ## ";
-    std::cerr <<stream.get_string() <<std::endl;
+    oss.set_caret(0);
+    oss <<"[" <<time_str <<"] " <<logger.get_file() <<':' <<logger.get_line() <<" ## ";
+    auto str = oss.extract_string();
+    for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
+      str.insert(i + 1, 1, '\t');
+    }
+    std::cerr <<str <<std::endl;
     return true;
   } catch(...) {
     return false;
   }
 void throw_runtime_error(Logger &&logger)
   {
-    auto &stream = logger.get_stream();
-    stream.set_caret(0);
-    stream <<logger.get_func() <<": ";
-    ASTERIA_DEBUG_LOG("Throwing exception: ", stream.get_string());
-    throw std::runtime_error(stream.get_string().c_str());
+    auto &oss = logger.get_stream();
+    oss.set_caret(0);
+    oss <<"Runtime Error in `" <<logger.get_func() <<"`: ";
+    auto str = oss.extract_string();
+    throw std::runtime_error(str.c_str());
   }
 
 }
