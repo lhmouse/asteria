@@ -952,9 +952,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       details_cow_hashmap::value_handle<allocator_type> * do_mut_table()
         {
-          if(this->empty()) {
-            return nullptr;
-          }
           if(this->unique() == false) {
             return this->do_reallocate(0, 0, this->bucket_count(), this->size());
           }
