@@ -78,6 +78,7 @@ extern Value read_reference(const Reference &ref);
 extern void write_reference(const Reference &ref, Value value);
 
 extern Reference reference_constant(Value value);
+extern Reference reference_temp_value(Value value);
 extern void materialize_reference(Reference &ref);
 extern Reference indirect_reference_from(const Reference &parent, Reference_modifier modifier);
 

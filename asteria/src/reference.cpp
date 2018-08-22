@@ -195,6 +195,11 @@ Reference reference_constant(Value value)
     Reference_root::S_constant ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
   }
+Reference reference_temp_value(Value value)
+  {
+    Reference_root::S_temp_value ref_c = { std::move(value) };
+    return Reference_root(std::move(ref_c));
+  }
 void materialize_reference(Reference &ref)
   {
     if(ref.get_root().index() == Reference_root::type_variable) {
