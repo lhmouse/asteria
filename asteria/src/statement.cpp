@@ -530,6 +530,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
             elem.set(String::shallow("line"), D_integer(pair.second));
             backtrace.emplace_back(std::move(elem));
           }
+          ASTERIA_DEBUG_LOG("Exception backtrace:\n", backtrace);
           ref_out = reference_temp_value(std::move(backtrace));
           do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
