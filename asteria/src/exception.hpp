@@ -22,8 +22,6 @@ class Exception
       : m_ref(std::move(ref))
       {
       }
-    Exception(const Exception &) noexcept;
-    Exception & operator=(const Exception &) noexcept;
     Exception(Exception &&) noexcept;
     Exception & operator=(Exception &&) noexcept;
     ~Exception();

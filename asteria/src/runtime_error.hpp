@@ -5,25 +5,22 @@
 #define ASTERIA_RUNTIME_ERROR_HPP_
 
 #include "fwd.hpp"
-#include <stdexcept>
+#include <exception>
 
 namespace Asteria
 {
 
 class Runtime_error
-  : public virtual std::runtime_error
+  : public virtual std::exception
   {
   private:
     String m_msg;
 
   public:
     explicit Runtime_error(String msg) noexcept
-      : std::runtime_error(""),
-        m_msg(std::move(msg))
+      : m_msg(std::move(msg))
       {
       }
-    Runtime_error(const Runtime_error &) noexcept;
-    Runtime_error & operator=(const Runtime_error &) noexcept;
     Runtime_error(Runtime_error &&) noexcept;
     Runtime_error & operator=(Runtime_error &&) noexcept;
     ~Runtime_error();
