@@ -29,6 +29,9 @@ class Exception
     ~Exception();
 
   public:
+    // Overridden functions from `std::exception`.
+    const char * what() const noexcept override;
+
     const Reference & get_reference() const noexcept
       {
         return m_ref;
@@ -41,9 +44,6 @@ class Exception
       {
         return m_ref = std::move(ref);
       }
-
-    // Overridden functions from `std::exception`.
-    const char * what() const noexcept override;
   };
 
 }
