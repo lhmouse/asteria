@@ -610,6 +610,7 @@ namespace
                 { "throw",     Token::keyword_throw     },
                 { "true",      Token::keyword_true      },
                 { "try",       Token::keyword_try       },
+                { "unset",     Token::keyword_unset     },
                 { "var",       Token::keyword_var       },
                 { "while",     Token::keyword_while     },
               };

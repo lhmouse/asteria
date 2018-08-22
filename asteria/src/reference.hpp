@@ -76,6 +76,7 @@ class Reference
 
 extern Value read_reference(const Reference &ref);
 extern void write_reference(const Reference &ref, Value value);
+extern Value unset_reference(const Reference &ref);
 
 extern Reference reference_constant(Value value);
 extern Reference reference_temp_value(Value value);

@@ -101,7 +101,7 @@ expression ::=
 	prefix-operator-expression | expression-initiator expression-trailer-opt
 
 prefix-operator-expression ::=
-	( "+" | "-" | "~" | "!" | "++" | "--" ) expression
+	( "+" | "-" | "~" | "!" | "++" | "--" | "unset" ) expression
 
 expression-initiator ::=
 	identifier | literal | "this" | closure-function | nested-expression | unnamed-array | unnamed-object

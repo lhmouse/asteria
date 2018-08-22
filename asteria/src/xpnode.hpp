@@ -29,6 +29,7 @@ class Xpnode
         xop_prefix_notl    = 33, // !
         xop_prefix_inc     = 34, // ++
         xop_prefix_dec     = 35, // --
+        xop_prefix_unset   = 36, // unset
         // Infix relational operators
         xop_infix_cmp_eq   = 50, // ==
         xop_infix_cmp_ne   = 51, // !=
