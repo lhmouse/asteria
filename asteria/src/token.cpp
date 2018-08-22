@@ -508,7 +508,7 @@ namespace
               }
               if(do_merge_sign(tokens_out, line, column)) {
                 // Negate the unsigned value.
-                // We ignore about one's complement systems, as POSIX does.
+                // We ignore one's complement systems, as POSIX does.
                 value = -value;
               }
               Token::S_integer_literal token_i = { value };
