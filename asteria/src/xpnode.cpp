@@ -6,6 +6,7 @@
 #include "context.hpp"
 #include "abstract_function.hpp"
 #include "instantiated_function.hpp"
+#include "backtracer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria
@@ -162,7 +163,7 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_function_call>();
         // Copy it as-is.
-        Xpnode::S_function_call cand_bnd = { cand.arg_cnt };
+        Xpnode::S_function_call cand_bnd = { cand.file, cand.line, cand.arg_cnt };
         return std::move(cand_bnd);
       }
     case Xpnode::index_operator_rpn:
@@ -223,8 +224,14 @@ namespace
           return;
         }
         // Create an rvalue reference and assign it to `ref_inout`.
-        Reference_root::S_temp_value ref_c = { std::move(value) };
-        ref_inout.set_root(std::move(ref_c));
+        ref_inout = reference_temp_value(std::move(value));
+      }
+
+    Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
+      try {
+        return func->invoke(std::move(self), std::move(args));
+      } catch(...) {
+        throw Backtracer(file, line);
       }
 
     // `boolean` operations
@@ -503,8 +510,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
         auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
         auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
-        Reference_root::S_temp_value ref_c = { D_function(std::move(func)) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_inout.emplace_back(reference_temp_value(D_function(std::move(func))));
         return;
       }
     case Xpnode::index_branch:
@@ -528,9 +534,15 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         auto callee = do_pop_reference(stack_inout);
         auto callee_value = read_reference(callee);
         // Make sure it is really a function.
-        const auto func = callee_value.opt<D_function>();
-        if(!func) {
+        const auto qfunc = callee_value.opt<D_function>();
+        if(!qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("`", callee_value, "` is not a function and cannot be called.");
+        }
+        // Obtain the `this` reference.
+        Reference self;
+        if(callee.has_modifiers()) {
+          self = callee;
+          self.pop_modifier();
         }
         // Allocate the argument vector.
         Vector<Reference> args;
@@ -539,15 +551,8 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           auto arg = do_pop_reference(stack_inout);
           args.emplace_back(std::move(arg));
         }
-        // Get the `this` reference.
-        Reference self;
-        if(callee.has_modifiers()) {
-          // This is a member function.
-          self = callee;
-          self.pop_modifier();
-        }
         // Call the function and push the result as is.
-        auto result = (*func)->invoke(std::move(self), std::move(args));
+        auto result = do_traced_call(cand.file, cand.line, *qfunc, std::move(self), std::move(args));
         stack_inout.emplace_back(std::move(result));
         return;
       }
@@ -1074,9 +1079,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           auto value = read_reference(result);
           array.emplace_back(std::move(value));
         }
-        // The result is a temporary value.
-        Reference_root::S_temp_value ref_c = { std::move(array) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_inout.emplace_back(reference_temp_value(std::move(array)));
         return;
       }
     case Xpnode::index_unnamed_object:
@@ -1090,9 +1093,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
           auto value = read_reference(result);
           object.insert_or_assign(pair.first, std::move(value));
         }
-        // The result is a temporary value.
-        Reference_root::S_temp_value ref_c = { std::move(object) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_inout.emplace_back(reference_temp_value(std::move(object)));
         return;
       }
     default:

@@ -57,7 +57,8 @@ pkginclude_HEADERS =  \
   asteria/src/variadic_arguer.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/statement.hpp  \
-  asteria/src/instantiated_function.hpp
+  asteria/src/instantiated_function.hpp  \
+  asteria/src/backtracer.hpp
 
 lib_LTLIBRARIES =  \
   lib/libasteria.la
@@ -84,7 +85,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/variadic_arguer.cpp  \
   asteria/src/xpnode.cpp  \
   asteria/src/statement.cpp  \
-  asteria/src/instantiated_function.cpp
+  asteria/src/instantiated_function.cpp  \
+  asteria/src/backtracer.cpp
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0

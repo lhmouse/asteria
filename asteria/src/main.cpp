@@ -4,9 +4,22 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include "value.hpp"
+#include "reference.hpp"
+#include "backtracer.hpp"
+#include "exception.hpp"
 #include <iostream>
 
 using namespace Asteria;
+
+void test_throw(unsigned i)
+  try {
+    if(i < 10) {
+      test_throw(i + 1);
+      throw Exception(reference_constant(D_string("some exception")));
+    }
+  } catch(...){
+    throw Backtracer(String::shallow("test_file"), i);
+  }
 
 int main()
   {
@@ -45,4 +58,18 @@ int main()
     std::cerr <<copy <<std::endl;
     ASTERIA_DEBUG_LOG("<--- ", "good bye: ", 43);
     std::cerr <<root <<std::endl;
+
+    try {
+      test_throw(0);
+    } catch(...) {
+      Bivector<String, Unsigned> bt;
+      try {
+        unpack_backtrace_and_rethrow(bt, std::current_exception());
+      } catch(Exception &e) {
+        ASTERIA_DEBUG_LOG("Caught: ", read_reference(e.get_reference()));
+        for(auto it = bt.rbegin(); it != bt.rend(); ++it) {
+          ASTERIA_DEBUG_LOG("  inside ", it->first, ':', it->second);
+        }
+      }
+    }
   }

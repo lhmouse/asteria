@@ -7,6 +7,7 @@
 #include "variable.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"
+#include "backtracer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria
@@ -493,6 +494,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
       {
         const auto &cand = stmt.as<Statement::S_try>();
         try {
+          // Execute the `try` body.
+          // This is straightforward and hopefully zero-cost if no exception is thrown.
           const auto status = execute_block(ref_out, cand.body_try, ctx_inout);
           if(status != Statement::status_next) {
             // Forward anything unexpected to the caller.
@@ -502,37 +505,33 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
           // The exception variable shall not outlast the loop body.
           auto ctx_next = allocate<Context>(ctx_inout, false);
           // Identify the dynamic type of the exception.
+          Bivector<String, Unsigned> btv;
           try {
-            throw;
-          } catch(Exception &e) {
+            unpack_backtrace_and_rethrow(btv, std::current_exception());
+          }
+          catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", read_reference(e.get_reference()));
-            // Print exceptions nested, if any.
-            auto neptr = e.nested_ptr();
-            if(neptr) {
-              static constexpr char s_prefix[] = "which contains a nested ";
-              int prefix_width = static_cast<int>(std::strlen(s_prefix));
-              do {
-                prefix_width += 2;
-                try {
-                  std::rethrow_exception(neptr);
-                } catch(Exception &ne) {
-                  ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`Asteria::Exception`: ", read_reference(ne.get_reference()));
-                  neptr = ne.nested_ptr();
-                } catch(std::exception &ne) {
-                  ASTERIA_DEBUG_LOG(std::setw(prefix_width), s_prefix, "`std::exception`: ", e.what());
-                  neptr = nullptr;
-                }
-              } while(neptr);
-            }
             // Copy the reference into the scope.
             ref_out = e.get_reference();
-          } catch(std::exception &e) {
+          }
+          catch(std::exception &e) {
+            ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
-            Reference_root::S_temp_value ref_c = { D_string(e.what()) };
-            ref_out.set_root(std::move(ref_c));
+            ref_out = reference_temp_value(D_string(e.what()));
           }
           do_safe_set_named_reference(ctx_next, "exception", cand.except_name, ref_out);
           ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", cand.except_name);
+          // Initialize the backtrace array.
+          D_array backtrace;
+          backtrace.reserve(btv.size());
+          for(auto &pair : btv) {
+            D_object elem;
+            elem.set(String::shallow("file"), D_string(std::move(pair.first)));
+            elem.set(String::shallow("line"), D_integer(pair.second));
+            backtrace.emplace_back(std::move(elem));
+          }
+          ref_out = reference_temp_value(std::move(backtrace));
+          do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
           const auto status = execute_block(ref_out, cand.body_catch, ctx_next);
           if(status != Statement::status_next) {

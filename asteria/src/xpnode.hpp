@@ -95,6 +95,8 @@ class Xpnode
       };
     struct S_function_call
       {
+        String file;
+        Unsigned line;
         std::size_t arg_cnt;
       };
     struct S_operator_rpn
