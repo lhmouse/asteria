@@ -118,7 +118,7 @@ void throw_runtime_error(Logger &&logger)
   {
     auto &oss = logger.get_stream();
     oss.set_caret(0);
-    oss <<"Runtime Error in `" <<logger.get_func() <<"`: ";
+    oss <<logger.get_func() <<": ";
     auto str = oss.extract_string();
     throw std::runtime_error(str.c_str());
   }
