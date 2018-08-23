@@ -16,7 +16,7 @@ void test_throw(unsigned i)
       test_throw(i + 1);
       throw Exception(reference_constant(D_string("some exception")));
     }
-  } catch(...){
+  } catch(...) {
     throw Backtracer(String::shallow("test_file"), i);
   }
 

@@ -47,7 +47,7 @@ Value read_reference(const Reference &ref)
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
+    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
       switch(modit->index()) {
       case Reference_modifier::index_array_index:
         {
@@ -128,7 +128,7 @@ Value & write_reference(const Reference &ref, Value value)
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
+    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
       switch(modit->index()) {
       case Reference_modifier::index_array_index:
         {
@@ -224,7 +224,7 @@ Value unset_reference(const Reference &ref)
     }
     // Apply modifiers.
     Value value;
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit){
+    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
       switch(modit->index()) {
       case Reference_modifier::index_array_index:
         {

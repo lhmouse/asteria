@@ -18,7 +18,7 @@ String Variadic_arguer::describe() const
 Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) const
   {
     const auto nvarg = m_vargs.size();
-    switch(args.size()){
+    switch(args.size()) {
     case 1:
       {
         const auto ivalue = read_reference(args.at(0));
@@ -36,7 +36,7 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
           ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", index, ", nvarg = ", nvarg);
           return { };
         }
-        if(rindex >= static_cast<Signed>(nvarg)){
+        if(rindex >= static_cast<Signed>(nvarg)) {
           ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", index, ", nvarg = ", nvarg);
           return { };
         }
