@@ -9,8 +9,7 @@
 
 namespace Asteria {
 
-class Backtracer
-  : public virtual std::nested_exception
+class Backtracer : public virtual std::nested_exception
   {
   private:
     String m_file;

@@ -10,8 +10,7 @@
 
 namespace Asteria {
 
-class Instantiated_function
-  : public Abstract_function
+class Instantiated_function : public Abstract_function
   {
   private:
     Vector<String> m_params;

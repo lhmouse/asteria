@@ -35,8 +35,7 @@ template<typename handleT, typename closerT>
 
 namespace details_unique_handle {
   template<typename handleT, typename closerT>
-    class stored_handle
-      : private allocator_wrapper_base_for<closerT>::type
+    class stored_handle : private allocator_wrapper_base_for<closerT>::type
       {
       public:
         using handle_type  = handleT;

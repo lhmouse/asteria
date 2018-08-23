@@ -117,8 +117,7 @@ namespace details_cow_string {
       };
 
   template<typename allocatorT, typename traitsT>
-    class storage_handle
-      : private allocator_wrapper_base_for<allocatorT>::type
+    class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
       {
       public:
         using allocator_type   = allocatorT;
@@ -516,8 +515,7 @@ namespace details_cow_string {
   extern template class shallow_base<char32_t>;
 
   template<typename charT, typename traitsT>
-    class shallow
-      : public shallow_base<charT>
+    class shallow : public shallow_base<charT>
       {
       public:
         using char_type    = charT;

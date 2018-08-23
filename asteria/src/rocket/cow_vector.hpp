@@ -259,8 +259,7 @@ namespace details_cow_vector {
       };
 
   template<typename allocatorT>
-    class storage_handle
-      : private allocator_wrapper_base_for<allocatorT>::type
+    class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
       {
       public:
         using allocator_type   = allocatorT;

@@ -10,8 +10,7 @@
 
 namespace Asteria {
 
-class Variadic_arguer
-  : public Abstract_function
+class Variadic_arguer : public Abstract_function
   {
   private:
     String m_file;

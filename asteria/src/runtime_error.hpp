@@ -9,8 +9,7 @@
 
 namespace Asteria {
 
-class Runtime_error
-  : public virtual std::exception
+class Runtime_error : public virtual std::exception
   {
   private:
     String m_msg;

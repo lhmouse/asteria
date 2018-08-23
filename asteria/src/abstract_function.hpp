@@ -9,8 +9,7 @@
 
 namespace Asteria {
 
-class Abstract_function
-  : public Abstract_opaque
+class Abstract_function : public Abstract_opaque
   {
   public:
     Abstract_function() noexcept
