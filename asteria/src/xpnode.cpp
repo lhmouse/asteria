@@ -105,6 +105,9 @@ namespace
 
 Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
   {
+    if(ctx->is_feigned() == false) {
+      ASTERIA_THROW_RUNTIME_ERROR("`bind_xpnode_partial()` cannot be called on a genuine context.");
+    }
     switch(node.index()) {
     case Xpnode::index_literal:
       {
@@ -468,6 +471,9 @@ namespace
 
 void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx)
   {
+    if(ctx->is_feigned() != false) {
+      ASTERIA_THROW_RUNTIME_ERROR("`evaluate_xpnode_partial()` cannot be called on a feigned context.");
+    }
     switch(node.index()) {
     case Xpnode::index_literal:
       {
