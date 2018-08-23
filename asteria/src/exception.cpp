@@ -17,9 +17,4 @@ Exception & Exception::operator=(Exception &&) noexcept
 Exception::~Exception()
   = default;
 
-const char * Exception::what() const noexcept
-  {
-    return "Asteria::Exception";
-  }
-
 }

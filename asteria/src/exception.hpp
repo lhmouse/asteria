@@ -27,8 +27,10 @@ class Exception : public virtual std::exception
     ~Exception();
 
   public:
-    // Overridden functions from `std::exception`.
-    const char * what() const noexcept override;
+    const char * what() const noexcept override
+      {
+        return "Asteria::Exception";
+      }
 
     const Reference & get_reference() const noexcept
       {

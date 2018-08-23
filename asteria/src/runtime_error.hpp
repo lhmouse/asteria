@@ -26,7 +26,6 @@ class Runtime_error : public virtual std::exception
     ~Runtime_error();
 
   public:
-    // Overridden functions from `std::runtime_error`.
     const char * what() const noexcept override;
   };
 
