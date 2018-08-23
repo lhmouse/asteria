@@ -55,7 +55,8 @@ class Variable
       }
     bool & set_immutable(bool immutable = true) noexcept
       {
-        return m_immutable = immutable;
+        m_immutable = immutable;
+        return m_immutable;
       }
   };
 

@@ -42,7 +42,8 @@ class Exception
       }
     Reference & set_reference(Reference ref) noexcept
       {
-        return m_ref = std::move(ref);
+        m_ref = std::move(ref);
+        return m_ref;
       }
   };
 
