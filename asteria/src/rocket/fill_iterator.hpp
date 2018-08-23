@@ -9,8 +9,7 @@
 #include <utility> // std::forward()
 #include <cstddef> // std::ptrdiff_t
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::is_nothrow_constructible;
 using ::std::ptrdiff_t;

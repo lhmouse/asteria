@@ -6,8 +6,7 @@
 #include <cstdarg>
 #include <cstdio>
 
-namespace rocket
-{
+namespace rocket {
 
 #define VSNPRINTF(buf_, fmt_)    \
     do {    \

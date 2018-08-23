@@ -7,8 +7,7 @@
 #include "abstract_function.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Value::Value(const Value &) noexcept
   = default;
@@ -186,146 +185,145 @@ Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcep
     }
   }
 
-namespace
-  {
-    class Indent
-      {
-      private:
-        unsigned m_num;
+namespace {
+  class Indent
+    {
+    private:
+      unsigned m_num;
 
-      public:
-        explicit constexpr Indent(unsigned xnum) noexcept
-          : m_num(xnum)
-          {
-          }
-
-      public:
-        unsigned num() const noexcept
-          {
-            return m_num;
-          }
-      };
-
-    inline std::ostream & operator<<(std::ostream &os, const Indent &indent)
-      {
-        const std::ostream::sentry sentry(os);
-        if(!sentry) {
-          return os;
+    public:
+      explicit constexpr Indent(unsigned xnum) noexcept
+        : m_num(xnum)
+        {
         }
-        try {
-          using traits_type = std::ostream::traits_type;
-          const auto num = indent.num();
-          for(unsigned i = 0; i < num; ++i) {
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
-              os.setstate(std::ios_base::failbit);
-              goto finish;
-            }
-          }
-      finish:
-          os.width(0);
-        } catch(...) {
-          // XXX: Relying on a private function is evil.
-          rocket::details_cow_string::handle_io_exception(os);
+
+    public:
+      unsigned num() const noexcept
+        {
+          return m_num;
         }
+    };
+
+  inline std::ostream & operator<<(std::ostream &os, const Indent &indent)
+    {
+      const std::ostream::sentry sentry(os);
+      if(!sentry) {
         return os;
       }
-
-    class Quote
-      {
-      private:
-        String m_str;
-
-      public:
-        explicit Quote(String xstr) noexcept
-          : m_str(std::move(xstr))
-          {
-          }
-
-      public:
-        const String & str() const noexcept
-          {
-            return m_str;
-          }
-      };
-
-    inline std::ostream & operator<<(std::ostream &os, const Quote &quote)
-      {
-        const std::ostream::sentry sentry(os);
-        if(!sentry) {
-          return os;
-        }
-        try {
-          using traits_type = std::ostream::traits_type;
-          const auto range = std::make_pair(quote.str().begin(), quote.str().end());
-          if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+      try {
+        using traits_type = std::ostream::traits_type;
+        const auto num = indent.num();
+        for(unsigned i = 0; i < num; ++i) {
+          if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
             os.setstate(std::ios_base::failbit);
             goto finish;
           }
-          for(auto it = range.first; it != range.second; ++it) {
-            std::streamsize n_wr;
-            const int ch = *it & 0xFF;
-            switch(ch) {
-            case '\"':
-              n_wr = os.rdbuf()->sputn("\\\"", 2);
-              break;
-            case '\'':
-              n_wr = os.rdbuf()->sputn("\\\'", 2);
-              break;
-            case '\\':
-              n_wr = os.rdbuf()->sputn("\\\\", 2);
-              break;
-            case '\a':
-              n_wr = os.rdbuf()->sputn("\\a", 2);
-              break;
-            case '\b':
-              n_wr = os.rdbuf()->sputn("\\b", 2);
-              break;
-            case '\f':
-              n_wr = os.rdbuf()->sputn("\\f", 2);
-              break;
-            case '\n':
-              n_wr = os.rdbuf()->sputn("\\n", 2);
-              break;
-            case '\r':
-              n_wr = os.rdbuf()->sputn("\\r", 2);
-              break;
-            case '\t':
-              n_wr = os.rdbuf()->sputn("\\t", 2);
-              break;
-            case '\v':
-              n_wr = os.rdbuf()->sputn("\\v", 2);
-              break;
-            default:
-              if((0x20 <= ch) && (ch <= 0x7E)) {
-                const bool failed = traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof());
-                n_wr = failed ? 0 : 1;
-              } else {
-                static constexpr char s_hex_table[] = "0123456789ABCDEF";
-                char temp[4] = "\\x";
-                temp[2] = s_hex_table[(ch >> 4) & 0x0F];
-                temp[3] = s_hex_table[(ch >> 0) & 0x0F];
-                n_wr = os.rdbuf()->sputn(temp, 4);
-              }
-              break;
+        }
+    finish:
+        os.width(0);
+      } catch(...) {
+        // XXX: Relying on a private function is evil.
+        rocket::details_cow_string::handle_io_exception(os);
+      }
+      return os;
+    }
+
+  class Quote
+    {
+    private:
+      String m_str;
+
+    public:
+      explicit Quote(String xstr) noexcept
+        : m_str(std::move(xstr))
+        {
+        }
+
+    public:
+      const String & str() const noexcept
+        {
+          return m_str;
+        }
+    };
+
+  inline std::ostream & operator<<(std::ostream &os, const Quote &quote)
+    {
+      const std::ostream::sentry sentry(os);
+      if(!sentry) {
+        return os;
+      }
+      try {
+        using traits_type = std::ostream::traits_type;
+        const auto range = std::make_pair(quote.str().begin(), quote.str().end());
+        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+          os.setstate(std::ios_base::failbit);
+          goto finish;
+        }
+        for(auto it = range.first; it != range.second; ++it) {
+          std::streamsize n_wr;
+          const int ch = *it & 0xFF;
+          switch(ch) {
+          case '\"':
+            n_wr = os.rdbuf()->sputn("\\\"", 2);
+            break;
+          case '\'':
+            n_wr = os.rdbuf()->sputn("\\\'", 2);
+            break;
+          case '\\':
+            n_wr = os.rdbuf()->sputn("\\\\", 2);
+            break;
+          case '\a':
+            n_wr = os.rdbuf()->sputn("\\a", 2);
+            break;
+          case '\b':
+            n_wr = os.rdbuf()->sputn("\\b", 2);
+            break;
+          case '\f':
+            n_wr = os.rdbuf()->sputn("\\f", 2);
+            break;
+          case '\n':
+            n_wr = os.rdbuf()->sputn("\\n", 2);
+            break;
+          case '\r':
+            n_wr = os.rdbuf()->sputn("\\r", 2);
+            break;
+          case '\t':
+            n_wr = os.rdbuf()->sputn("\\t", 2);
+            break;
+          case '\v':
+            n_wr = os.rdbuf()->sputn("\\v", 2);
+            break;
+          default:
+            if((0x20 <= ch) && (ch <= 0x7E)) {
+              const bool failed = traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof());
+              n_wr = failed ? 0 : 1;
+            } else {
+              static constexpr char s_hex_table[] = "0123456789ABCDEF";
+              char temp[4] = "\\x";
+              temp[2] = s_hex_table[(ch >> 4) & 0x0F];
+              temp[3] = s_hex_table[(ch >> 0) & 0x0F];
+              n_wr = os.rdbuf()->sputn(temp, 4);
             }
-            if(n_wr == 0) {
-              os.setstate(std::ios_base::failbit);
-              goto finish;
-            }
+            break;
           }
-          if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+          if(n_wr == 0) {
             os.setstate(std::ios_base::failbit);
             goto finish;
           }
-      finish:
-          os.width(0);
-        } catch(...) {
-          // XXX: Relying on a private function is evil.
-          rocket::details_cow_string::handle_io_exception(os);
         }
-        return os;
+        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+          os.setstate(std::ios_base::failbit);
+          goto finish;
+        }
+    finish:
+        os.width(0);
+      } catch(...) {
+        // XXX: Relying on a private function is evil.
+        rocket::details_cow_string::handle_io_exception(os);
       }
-  }
+      return os;
+    }
+}
 
 void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment)
   {

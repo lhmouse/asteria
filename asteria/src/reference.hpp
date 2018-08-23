@@ -8,8 +8,7 @@
 #include "reference_root.hpp"
 #include "reference_modifier.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Reference
   {

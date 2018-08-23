@@ -21,8 +21,7 @@
  *    3) `Closer().close(h)` closes the handle `h`. Null handle values will not be passed to this function.
  */
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::is_array;
 using ::std::is_trivial;
@@ -34,79 +33,78 @@ using ::std::true_type;
 template<typename handleT, typename closerT>
   class unique_handle;
 
-namespace details_unique_handle
-  {
-    template<typename handleT, typename closerT>
-      class stored_handle
-        : private allocator_wrapper_base_for<closerT>::type
-        {
-        public:
-          using handle_type  = handleT;
-          using closer_type  = closerT;
+namespace details_unique_handle {
+  template<typename handleT, typename closerT>
+    class stored_handle
+      : private allocator_wrapper_base_for<closerT>::type
+      {
+      public:
+        using handle_type  = handleT;
+        using closer_type  = closerT;
 
-        private:
-          using closer_base = typename allocator_wrapper_base_for<closerT>::type;
+      private:
+        using closer_base = typename allocator_wrapper_base_for<closerT>::type;
 
-        private:
-          handle_type m_h;
+      private:
+        handle_type m_h;
 
-        public:
-          explicit stored_handle(const closer_type &close) noexcept
-            : closer_base(close),
-              m_h(this->as_closer().null())
-            {
-            }
-          explicit stored_handle(closer_type &&close) noexcept
-            : closer_base(::std::move(close)),
-              m_h(this->as_closer().null())
-            {
-            }
-          ~stored_handle()
-            {
-              this->reset(this->as_closer().null());
-            }
+      public:
+        explicit stored_handle(const closer_type &close) noexcept
+          : closer_base(close),
+            m_h(this->as_closer().null())
+          {
+          }
+        explicit stored_handle(closer_type &&close) noexcept
+          : closer_base(::std::move(close)),
+            m_h(this->as_closer().null())
+          {
+          }
+        ~stored_handle()
+          {
+            this->reset(this->as_closer().null());
+          }
 
-          stored_handle(const stored_handle &)
-            = delete;
-          stored_handle & operator=(const stored_handle &)
-            = delete;
+        stored_handle(const stored_handle &)
+          = delete;
+        stored_handle & operator=(const stored_handle &)
+          = delete;
 
-        public:
-          const closer_type & as_closer() const noexcept
-            {
-              return static_cast<const closer_base &>(*this);
-            }
-          closer_type & as_closer() noexcept
-            {
-              return static_cast<closer_base &>(*this);
-            }
+      public:
+        const closer_type & as_closer() const noexcept
+          {
+            return static_cast<const closer_base &>(*this);
+          }
+        closer_type & as_closer() noexcept
+          {
+            return static_cast<closer_base &>(*this);
+          }
 
-          bool test() const noexcept
-            {
-              return this->as_closer().is_null(this->m_h) == false;
+        bool test() const noexcept
+          {
+            return this->as_closer().is_null(this->m_h) == false;
+          }
+        handle_type get() const noexcept
+          {
+            return this->m_h;
+          }
+        handle_type release() noexcept
+          {
+            return noadl::exchange(this->m_h, this->as_closer().null());
+          }
+        void reset(handle_type h_new) noexcept
+          {
+            const auto h_old = noadl::exchange(this->m_h, h_new);
+            if(this->as_closer().is_null(h_old)) {
+              return;
             }
-          handle_type get() const noexcept
-            {
-              return this->m_h;
-            }
-          handle_type release() noexcept
-            {
-              return noadl::exchange(this->m_h, this->as_closer().null());
-            }
-          void reset(handle_type h_new) noexcept
-            {
-              const auto h_old = noadl::exchange(this->m_h, h_new);
-              if(this->as_closer().is_null(h_old)) {
-                return;
-              }
-              this->as_closer().close(h_old);
-            }
-          void exchange(stored_handle &other) noexcept
-            {
-              ::std::swap(this->m_h, other.m_h);
-            }
-        };
-  }
+            this->as_closer().close(h_old);
+          }
+        void exchange(stored_handle &other) noexcept
+          {
+            ::std::swap(this->m_h, other.m_h);
+          }
+      };
+}
 
 template<typename handleT, typename closerT>
   class unique_handle

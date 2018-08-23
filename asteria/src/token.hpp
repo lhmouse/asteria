@@ -8,8 +8,7 @@
 #include "rocket/variant.hpp"
 #include "parser_result.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Token
   {

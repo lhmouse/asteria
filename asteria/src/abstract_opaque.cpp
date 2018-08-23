@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "abstract_opaque.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Abstract_opaque::~Abstract_opaque()
   = default;

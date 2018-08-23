@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Reference_modifier
   {

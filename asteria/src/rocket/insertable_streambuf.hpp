@@ -8,8 +8,7 @@
 #include <utility> // std::move()
 #include "cow_string.hpp"
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::ios_base;
 using ::std::basic_streambuf;

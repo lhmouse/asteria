@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "exception.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Exception::Exception(const Exception &) noexcept
   = default;

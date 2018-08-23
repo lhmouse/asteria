@@ -7,8 +7,7 @@
 #include <iostream> // std::cerr
 #include <time.h> // ::time_t, ::time(), ::asctime_r()
 
-namespace Asteria
-{
+namespace Asteria {
 
 Logger::Logger(const char *file, unsigned long line, const char *func) noexcept
   : m_file(file), m_line(line), m_func(func)

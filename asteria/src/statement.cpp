@@ -10,8 +10,7 @@
 #include "backtracer.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Statement::Statement(Statement &&) noexcept
   = default;
@@ -20,20 +19,19 @@ Statement & Statement::operator=(Statement &&) noexcept
 Statement::~Statement()
   = default;
 
-namespace
-  {
-    template<typename ...ParamsT>
-      void do_safe_set_named_reference(Spref<Context> ctx_inout, const char *desc, const String &name, ParamsT &&...params)
-        {
-          if(is_name_reserved(name)) {
-            ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
-          }
-          if(name.empty()) {
-            return;
-          }
-          ctx_inout->set_named_reference(name, Reference(std::forward<ParamsT>(params)...));
+namespace {
+  template<typename ...ParamsT>
+    void do_safe_set_named_reference(Spref<Context> ctx_inout, const char *desc, const String &name, ParamsT &&...params)
+      {
+        if(is_name_reserved(name)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
         }
-  }
+        if(name.empty()) {
+          return;
+        }
+        ctx_inout->set_named_reference(name, Reference(std::forward<ParamsT>(params)...));
+      }
+}
 
 Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt)
   {

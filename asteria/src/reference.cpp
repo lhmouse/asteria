@@ -6,8 +6,7 @@
 #include "variable.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Reference::Reference(const Reference &) noexcept
   = default;

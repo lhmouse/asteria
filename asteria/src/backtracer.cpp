@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "backtracer.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Backtracer::Backtracer(const Backtracer &) noexcept
   = default;

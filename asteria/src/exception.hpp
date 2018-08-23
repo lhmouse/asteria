@@ -8,8 +8,7 @@
 #include "reference.hpp"
 #include <exception>
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Exception
   : public virtual std::exception

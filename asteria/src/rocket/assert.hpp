@@ -6,8 +6,7 @@
 
 #include "compatibility.h"
 
-namespace rocket
-{
+namespace rocket {
 
 [[noreturn]] extern void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
 

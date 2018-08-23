@@ -9,8 +9,7 @@
 #include <iomanip>
 #include <exception>
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Logger
   {

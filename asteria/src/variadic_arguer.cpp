@@ -5,8 +5,7 @@
 #include "variadic_arguer.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Variadic_arguer::~Variadic_arguer()
   = default;

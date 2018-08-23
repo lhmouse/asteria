@@ -7,8 +7,7 @@
 #include "insertable_streambuf.hpp"
 #include <istream> // std::basic_iostream<>
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::basic_iostream;
 

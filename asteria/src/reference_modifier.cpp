@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "reference_modifier.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Reference_modifier::Reference_modifier(const Reference_modifier &) noexcept
   = default;

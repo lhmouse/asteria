@@ -9,8 +9,7 @@
 #include "backtracer.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Xpnode::Xpnode(Xpnode &&) noexcept
   = default;
@@ -85,23 +84,22 @@ const char * get_operator_name(Xpnode::Xop xop) noexcept
     }
   }
 
-namespace
-  {
-    std::pair<Sptr<const Context>, const Reference *> do_name_lookup(Spref<const Context> ctx, const String &name)
-      {
-        auto qctx = ctx;
-      loop:
-        auto qref = qctx->get_named_reference_opt(name);
-        if(!qref) {
-          qctx = qctx->get_parent_opt();
-          if(!qctx) {
-            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared.");
-          }
-          goto loop;
+namespace {
+  std::pair<Sptr<const Context>, const Reference *> do_name_lookup(Spref<const Context> ctx, const String &name)
+    {
+      auto qctx = ctx;
+    loop:
+      auto qref = qctx->get_named_reference_opt(name);
+      if(!qref) {
+        qctx = qctx->get_parent_opt();
+        if(!qctx) {
+          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared.");
         }
-        return std::make_pair(std::move(qctx), qref);
+        goto loop;
       }
-  }
+      return std::make_pair(std::move(qctx), qref);
+    }
+}
 
 Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
   {
@@ -209,266 +207,265 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
     }
   }
 
-namespace
-  {
-    Reference do_pop_reference(Vector<Reference> &stack_inout)
-      {
-        if(stack_inout.empty()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack is empty, which means the expression is probably invalid.");
-        }
-        auto ref = std::move(stack_inout.mut_back());
-        stack_inout.pop_back();
-        return ref;
+namespace {
+  Reference do_pop_reference(Vector<Reference> &stack_inout)
+    {
+      if(stack_inout.empty()) {
+        ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack is empty, which means the expression is probably invalid.");
       }
+      auto ref = std::move(stack_inout.mut_back());
+      stack_inout.pop_back();
+      return ref;
+    }
 
-    void do_set_result(Reference &ref_inout, bool compound_assign, Value value)
-      {
-        if(compound_assign) {
-          // Write the value through `ref_inout`, which is unchanged.
-          write_reference(ref_inout, std::move(value));
-          return;
-        }
-        // Create an rvalue reference and assign it to `ref_inout`.
-        ref_inout = reference_temp_value(std::move(value));
+  void do_set_result(Reference &ref_inout, bool compound_assign, Value value)
+    {
+      if(compound_assign) {
+        // Write the value through `ref_inout`, which is unchanged.
+        write_reference(ref_inout, std::move(value));
+        return;
       }
+      // Create an rvalue reference and assign it to `ref_inout`.
+      ref_inout = reference_temp_value(std::move(value));
+    }
 
-    Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
-      try {
-        return func->invoke(std::move(self), std::move(args));
-      } catch(...) {
-        ASTERIA_DEBUG_LOG("  Forwarding exception thrown insode \'", file, ':', line, "\'...");
-        throw Backtracer(file, line);
-      }
+  Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
+    try {
+      return func->invoke(std::move(self), std::move(args));
+    } catch(...) {
+      ASTERIA_DEBUG_LOG("  Forwarding exception thrown insode \'", file, ':', line, "\'...");
+      throw Backtracer(file, line);
+    }
 
-    // `boolean` operations
-    D_boolean do_logical_not(D_boolean rhs)
-      {
-        return !rhs;
-      }
-    D_boolean do_logical_and(D_boolean lhs, D_boolean rhs)
-      {
-        return lhs & rhs;
-      }
-    D_boolean do_logical_or(D_boolean lhs, D_boolean rhs)
-      {
-        return lhs | rhs;
-      }
-    D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs)
-      {
-        return lhs ^ rhs;
-      }
+  // `boolean` operations
+  D_boolean do_logical_not(D_boolean rhs)
+    {
+      return !rhs;
+    }
+  D_boolean do_logical_and(D_boolean lhs, D_boolean rhs)
+    {
+      return lhs & rhs;
+    }
+  D_boolean do_logical_or(D_boolean lhs, D_boolean rhs)
+    {
+      return lhs | rhs;
+    }
+  D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs)
+    {
+      return lhs ^ rhs;
+    }
 
-    // `integer` operations
-    D_integer do_negate(D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs == limits::min()) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
-        }
-        return -rhs;
+  // `integer` operations
+  D_integer do_negate(D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs == limits::min()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
       }
-    D_integer do_add(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if((rhs >= 0) ? (lhs > limits::max() - rhs) : (lhs < limits::min() - rhs)) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        return lhs + rhs;
+      return -rhs;
+    }
+  D_integer do_add(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if((rhs >= 0) ? (lhs > limits::max() - rhs) : (lhs < limits::min() - rhs)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
       }
-    D_integer do_subtract(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if((rhs >= 0) ? (lhs < limits::min() + rhs) : (lhs > limits::max() + rhs)) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        return lhs - rhs;
+      return lhs + rhs;
+    }
+  D_integer do_subtract(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if((rhs >= 0) ? (lhs < limits::min() + rhs) : (lhs > limits::max() + rhs)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
       }
-    D_integer do_multiply(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if((lhs == 0) || (rhs == 0)) {
-            return 0;
-        }
-        if((lhs == 1) || (rhs == 1)) {
-            return lhs ^ rhs ^ 1;
-        }
-        if((lhs == limits::min()) || (rhs == limits::min())) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        if((lhs == -1) || (rhs == -1)) {
-            return -(lhs ^ rhs ^ -1);
-        }
-        const auto slhs = (rhs >= 0) ? lhs : -lhs;
-        const auto arhs = std::abs(rhs);
-        if((slhs >= 0) ? (slhs > limits::max() / arhs) : (slhs < limits::min() / arhs)) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        return slhs * arhs;
+      return lhs - rhs;
+    }
+  D_integer do_multiply(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if((lhs == 0) || (rhs == 0)) {
+          return 0;
       }
-    D_integer do_divide(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs == 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
-        }
-        if((lhs == limits::min()) && (rhs == -1)) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        return lhs / rhs;
+      if((lhs == 1) || (rhs == 1)) {
+          return lhs ^ rhs ^ 1;
       }
-    D_integer do_modulo(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs == 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
-        }
-        if((lhs == limits::min()) && (rhs == -1)) {
-            ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
-        }
-        return lhs % rhs;
+      if((lhs == limits::min()) || (rhs == limits::min())) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
       }
+      if((lhs == -1) || (rhs == -1)) {
+          return -(lhs ^ rhs ^ -1);
+      }
+      const auto slhs = (rhs >= 0) ? lhs : -lhs;
+      const auto arhs = std::abs(rhs);
+      if((slhs >= 0) ? (slhs > limits::max() / arhs) : (slhs < limits::min() / arhs)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
+      }
+      return slhs * arhs;
+    }
+  D_integer do_divide(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs == 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
+      }
+      if((lhs == limits::min()) && (rhs == -1)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
+      }
+      return lhs / rhs;
+    }
+  D_integer do_modulo(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs == 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
+      }
+      if((lhs == limits::min()) && (rhs == -1)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
+      }
+      return lhs % rhs;
+    }
 
-    D_integer do_shift_left_logical(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs < 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
-        }
-        if(rhs > limits::digits) {
-            return 0;
-        }
-        auto reg = static_cast<Unsigned>(lhs);
-        reg <<= rhs;
-        return static_cast<D_integer>(reg);
+  D_integer do_shift_left_logical(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
       }
-    D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs < 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
-        }
-        if(rhs > limits::digits) {
-            return 0;
-        }
-        auto reg = static_cast<Unsigned>(lhs);
-        reg >>= rhs;
-        return static_cast<D_integer>(reg);
+      if(rhs > limits::digits) {
+          return 0;
       }
-    D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs < 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
-        }
-        if(rhs > limits::digits) {
-            ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
-        }
-        const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
-        auto reg = static_cast<Unsigned>(lhs);
-        const auto mask_out = (reg >> bits_rem) << bits_rem;
-        const auto mask_sign = -(reg >> limits::digits) << bits_rem;
-        if(mask_out != mask_sign) {
-            ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
-        }
-        reg <<= rhs;
-        return static_cast<D_integer>(reg);
+      auto reg = static_cast<Unsigned>(lhs);
+      reg <<= rhs;
+      return static_cast<D_integer>(reg);
+    }
+  D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
       }
-    D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
-      {
-        using limits = std::numeric_limits<D_integer>;
-        if(rhs < 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
-        }
-        if(rhs > limits::digits) {
-            ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
-        }
-        const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
-        auto reg = static_cast<Unsigned>(lhs);
-        const auto mask_in = -(reg >> limits::digits) << bits_rem;
-        reg >>= rhs;
-        reg |= mask_in;
-        return static_cast<D_integer>(reg);
+      if(rhs > limits::digits) {
+          return 0;
       }
+      auto reg = static_cast<Unsigned>(lhs);
+      reg >>= rhs;
+      return static_cast<D_integer>(reg);
+    }
+  D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+      }
+      if(rhs > limits::digits) {
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
+      }
+      const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
+      auto reg = static_cast<Unsigned>(lhs);
+      const auto mask_out = (reg >> bits_rem) << bits_rem;
+      const auto mask_sign = -(reg >> limits::digits) << bits_rem;
+      if(mask_out != mask_sign) {
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
+      }
+      reg <<= rhs;
+      return static_cast<D_integer>(reg);
+    }
+  D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
+    {
+      using limits = std::numeric_limits<D_integer>;
+      if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+      }
+      if(rhs > limits::digits) {
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
+      }
+      const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
+      auto reg = static_cast<Unsigned>(lhs);
+      const auto mask_in = -(reg >> limits::digits) << bits_rem;
+      reg >>= rhs;
+      reg |= mask_in;
+      return static_cast<D_integer>(reg);
+    }
 
-    D_integer do_bitwise_not(D_integer rhs)
-      {
-        return ~rhs;
-      }
-    D_integer do_bitwise_and(D_integer lhs, D_integer rhs)
-      {
-        return lhs & rhs;
-      }
-    D_integer do_bitwise_or(D_integer lhs, D_integer rhs)
-      {
-        return lhs | rhs;
-      }
-    D_integer do_bitwise_xor(D_integer lhs, D_integer rhs)
-      {
-        return lhs ^ rhs;
-      }
+  D_integer do_bitwise_not(D_integer rhs)
+    {
+      return ~rhs;
+    }
+  D_integer do_bitwise_and(D_integer lhs, D_integer rhs)
+    {
+      return lhs & rhs;
+    }
+  D_integer do_bitwise_or(D_integer lhs, D_integer rhs)
+    {
+      return lhs | rhs;
+    }
+  D_integer do_bitwise_xor(D_integer lhs, D_integer rhs)
+    {
+      return lhs ^ rhs;
+    }
 
-    // `double` operations
-    D_double do_negate(D_double rhs)
-      {
-        return -rhs;
-      }
-    D_double do_add(D_double lhs, D_double rhs)
-      {
-        return lhs + rhs;
-      }
-    D_double do_subtract(D_double lhs, D_double rhs)
-      {
-        return lhs - rhs;
-      }
-    D_double do_multiply(D_double lhs, D_double rhs)
-      {
-        return lhs * rhs;
-      }
-    D_double do_divide(D_double lhs, D_double rhs)
-      {
-        return lhs / rhs;
-      }
-    D_double do_modulo(D_double lhs, D_double rhs)
-      {
-        return std::fmod(lhs, rhs);
-      }
+  // `double` operations
+  D_double do_negate(D_double rhs)
+    {
+      return -rhs;
+    }
+  D_double do_add(D_double lhs, D_double rhs)
+    {
+      return lhs + rhs;
+    }
+  D_double do_subtract(D_double lhs, D_double rhs)
+    {
+      return lhs - rhs;
+    }
+  D_double do_multiply(D_double lhs, D_double rhs)
+    {
+      return lhs * rhs;
+    }
+  D_double do_divide(D_double lhs, D_double rhs)
+    {
+      return lhs / rhs;
+    }
+  D_double do_modulo(D_double lhs, D_double rhs)
+    {
+      return std::fmod(lhs, rhs);
+    }
 
-    D_string do_concatenate(const D_string &lhs, const D_string &rhs)
-      {
-        D_string res;
-        res.reserve(lhs.size() + rhs.size());
-        res.append(lhs);
-        res.append(rhs);
-        return res;
+  D_string do_concatenate(const D_string &lhs, const D_string &rhs)
+    {
+      D_string res;
+      res.reserve(lhs.size() + rhs.size());
+      res.append(lhs);
+      res.append(rhs);
+      return res;
+    }
+  D_string do_duplicate(const D_string &lhs, D_integer rhs)
+    {
+      if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
       }
-    D_string do_duplicate(const D_string &lhs, D_integer rhs)
-      {
-        if(rhs < 0) {
-            ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
-        }
-        D_string res;
-        if(rhs == 0) {
-            return res;
-        }
-        const auto count = static_cast<Unsigned>(rhs);
-        if(lhs.size() > res.max_size() / count) {
-            ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
-        }
-        res.reserve(lhs.size() * static_cast<std::size_t>(count));
-        auto mask = static_cast<Unsigned>(1) << 63;
-        for(;;) {
-            if(count & mask) {
-                res.append(lhs);
-            }
-            mask >>= 1;
-            if(mask == 0) {
-                break;
-            }
-            res.append(res);
-        }
-        return res;
+      D_string res;
+      if(rhs == 0) {
+          return res;
       }
-  }
+      const auto count = static_cast<Unsigned>(rhs);
+      if(lhs.size() > res.max_size() / count) {
+          ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
+      }
+      res.reserve(lhs.size() * static_cast<std::size_t>(count));
+      auto mask = static_cast<Unsigned>(1) << 63;
+      for(;;) {
+          if(count & mask) {
+              res.append(lhs);
+          }
+          mask >>= 1;
+          if(mask == 0) {
+              break;
+          }
+          res.append(res);
+      }
+      return res;
+    }
+}
 
 void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx)
   {

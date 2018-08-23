@@ -5,8 +5,7 @@
 #include <exception>
 #include <cstdio>
 
-namespace rocket
-{
+namespace rocket {
 
 void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept
   {

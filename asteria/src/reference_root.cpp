@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "reference_root.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Reference_root::Reference_root(const Reference_root &) noexcept
   = default;

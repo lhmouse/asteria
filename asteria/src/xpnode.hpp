@@ -10,8 +10,7 @@
 #include "reference.hpp"
 #include "statement.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Xpnode
   {

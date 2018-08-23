@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "runtime_error.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Runtime_error::Runtime_error(const Runtime_error &) noexcept
   = default;

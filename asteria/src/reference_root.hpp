@@ -8,8 +8,7 @@
 #include "rocket/variant.hpp"
 #include "value.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Reference_root
   {

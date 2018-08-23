@@ -42,8 +42,7 @@
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 }
 
 #endif

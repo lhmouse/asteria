@@ -8,8 +8,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::true_type;
 

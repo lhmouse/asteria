@@ -4,8 +4,7 @@
 #include "precompiled.hpp"
 #include "abstract_function.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Abstract_function::~Abstract_function()
   = default;

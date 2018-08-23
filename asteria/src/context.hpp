@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include "reference.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Context
   {

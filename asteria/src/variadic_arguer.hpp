@@ -8,8 +8,7 @@
 #include "abstract_function.hpp"
 #include "reference.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Variadic_arguer
   : public Abstract_function

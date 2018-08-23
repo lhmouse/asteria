@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include <exception>
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Backtracer
   : public virtual std::nested_exception

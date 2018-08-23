@@ -9,8 +9,7 @@
 #include <utility> // std::move(), std::declval()
 #include "utilities.hpp"
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::allocator_traits;
 using ::std::conditional;
@@ -18,45 +17,44 @@ using ::std::false_type;
 using ::std::true_type;
 using ::std::remove_reference;
 
-namespace details_allocator_utilities
-  {
-    template<typename typeT>
-      struct is_final
+namespace details_allocator_utilities {
+  template<typename typeT>
+    struct is_final
 #ifdef __cpp_lib_is_final
-        : ::std::is_final<typeT>
+      : ::std::is_final<typeT>
 #else
-        : false_type
+      : false_type
 #endif
-        {
-        };
+      {
+      };
 
-    template<typename allocatorT>
-      class final_wrapper
-        {
-        private:
-          allocatorT m_alloc;
+  template<typename allocatorT>
+    class final_wrapper
+      {
+      private:
+        allocatorT m_alloc;
 
-        public:
-          explicit final_wrapper(const allocatorT &alloc) noexcept
-            : m_alloc(alloc)
-            {
-            }
-          explicit final_wrapper(allocatorT &&alloc) noexcept
-            : m_alloc(::std::move(alloc))
-            {
-            }
+      public:
+        explicit final_wrapper(const allocatorT &alloc) noexcept
+          : m_alloc(alloc)
+          {
+          }
+        explicit final_wrapper(allocatorT &&alloc) noexcept
+          : m_alloc(::std::move(alloc))
+          {
+          }
 
-        public:
-          operator const allocatorT & () const noexcept
-            {
-              return this->m_alloc;
-            }
-          operator allocatorT & () noexcept
-            {
-              return this->m_alloc;
-            }
-        };
-  }
+      public:
+        operator const allocatorT & () const noexcept
+          {
+            return this->m_alloc;
+          }
+        operator allocatorT & () noexcept
+          {
+            return this->m_alloc;
+          }
+      };
+}
 
 template<typename allocatorT>
   struct allocator_wrapper_base_for

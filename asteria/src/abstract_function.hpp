@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include "abstract_opaque.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Abstract_function
   : public Abstract_opaque

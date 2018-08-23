@@ -3,8 +3,7 @@
 
 #include "insertable_streambuf.hpp"
 
-namespace rocket
-{
+namespace rocket {
 
 template class basic_insertable_streambuf<char>;
 template class basic_insertable_streambuf<wchar_t>;

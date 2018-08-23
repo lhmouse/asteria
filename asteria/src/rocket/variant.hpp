@@ -11,8 +11,7 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 
-namespace rocket
-{
+namespace rocket {
 
 using ::std::common_type;
 using ::std::is_convertible;
@@ -34,218 +33,216 @@ using ::std::type_info;
 template<typename ...elementsT>
   class variant;
 
-namespace details_variant
-  {
-    template<unsigned indexT, typename ...typesT>
-      struct type_getter
-        {
-        };
-    template<typename firstT, typename ...remainingT>
-      struct type_getter<0, firstT, remainingT...>
-        : common_type<firstT>
-        {
-        };
-    template<unsigned indexT, typename firstT, typename ...remainingT>
-      struct type_getter<indexT, firstT, remainingT...>
-        : type_getter<indexT - 1, remainingT...>
-        {
-        };
-
-    template<unsigned indexT, typename expectT, typename ...typesT>
-      struct type_finder
-        {
-        };
-    template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-      struct type_finder<indexT, expectT, firstT, remainingT...>
-        : type_finder<indexT + 1, expectT, remainingT...>
-        {
-        };
-    template<unsigned indexT, typename expectT, typename ...remainingT>
-      struct type_finder<indexT, expectT, expectT, remainingT...>
-        : integral_constant<unsigned, indexT>
-        {
-        };
-
-    template<typename ...typesT>
-      struct conjunction
-        : true_type
-        {
-        };
-    template<typename firstT, typename ...remainingT>
-      struct conjunction<firstT, remainingT...>
-        : conditional<firstT::value, conjunction<remainingT...>, false_type>::type
-        {
-        };
-
-    template<typename expectT, typename ...typesT>
-      struct has_type_recursive
-        : false_type
-        {
-        };
-    template<typename expectT, typename firstT, typename ...remainingT>
-      struct has_type_recursive<expectT, firstT, remainingT...>
-        : has_type_recursive<expectT, remainingT...>
-        {
-        };
-    template<typename expectT, typename ...remainingT>
-      struct has_type_recursive<expectT, expectT, remainingT...>
-        : true_type
-        {
-        };
-    template<typename expectT, typename ...elementsT, typename ...remainingT>
-      struct has_type_recursive<expectT, variant<elementsT...>, remainingT...>
-        : conditional<has_type_recursive<expectT, elementsT...>::value, true_type, has_type_recursive<expectT, remainingT...>>::type
-        {
-        };
-    template<typename ...elementsT, typename ...remainingT>
-      struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...>
-        : true_type
-        {
-        };
-
-    template<unsigned indexT, typename expectT, typename ...typesT>
-      struct recursive_type_finder
-        {
-        };
-    template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-      struct recursive_type_finder<indexT, expectT, firstT, remainingT...>
-        : conditional<has_type_recursive<expectT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, expectT, remainingT...>>::type
-        {
-        };
-
-    template<size_t firstT, size_t ...remainingT>
-      struct max_of
-        : max_of<firstT, max_of<remainingT...>::value>
-        {
-        };
-    template<size_t firstT>
-      struct max_of<firstT>
-        : integral_constant<size_t, firstT>
-        {
-        };
-    template<size_t firstT, size_t secondT>
-      struct max_of<firstT, secondT>
-        : integral_constant<size_t, !(firstT < secondT) ? firstT : secondT>
-        {
-        };
-
-    template<typename ...elementsT>
-      struct basic_storage
-        {
-          // The `+ 0` parts are necessary to work around a bug in GCC 4.8.
-          alignas(max_of<alignof(elementsT)...>::value + 0) char bytes[max_of<sizeof(elementsT)...>::value + 0];
-        };
-
-    namespace details_is_nothrow_swappable
+namespace details_variant {
+  template<unsigned indexT, typename ...typesT>
+    struct type_getter
       {
-        using ::std::swap;
+      };
+  template<typename firstT, typename ...remainingT>
+    struct type_getter<0, firstT, remainingT...>
+      : common_type<firstT>
+      {
+      };
+  template<unsigned indexT, typename firstT, typename ...remainingT>
+    struct type_getter<indexT, firstT, remainingT...>
+      : type_getter<indexT - 1, remainingT...>
+      {
+      };
 
-        template<typename typeT>
-          struct is_nothrow_swappable
-            : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
-            {
-            };
-      }
+  template<unsigned indexT, typename expectT, typename ...typesT>
+    struct type_finder
+      {
+      };
+  template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
+    struct type_finder<indexT, expectT, firstT, remainingT...>
+      : type_finder<indexT + 1, expectT, remainingT...>
+      {
+      };
+  template<unsigned indexT, typename expectT, typename ...remainingT>
+    struct type_finder<indexT, expectT, expectT, remainingT...>
+      : integral_constant<unsigned, indexT>
+      {
+      };
+
+  template<typename ...typesT>
+    struct conjunction
+      : true_type
+      {
+      };
+  template<typename firstT, typename ...remainingT>
+    struct conjunction<firstT, remainingT...>
+      : conditional<firstT::value, conjunction<remainingT...>, false_type>::type
+      {
+      };
+
+  template<typename expectT, typename ...typesT>
+    struct has_type_recursive
+      : false_type
+      {
+      };
+  template<typename expectT, typename firstT, typename ...remainingT>
+    struct has_type_recursive<expectT, firstT, remainingT...>
+      : has_type_recursive<expectT, remainingT...>
+      {
+      };
+  template<typename expectT, typename ...remainingT>
+    struct has_type_recursive<expectT, expectT, remainingT...>
+      : true_type
+      {
+      };
+  template<typename expectT, typename ...elementsT, typename ...remainingT>
+    struct has_type_recursive<expectT, variant<elementsT...>, remainingT...>
+      : conditional<has_type_recursive<expectT, elementsT...>::value, true_type, has_type_recursive<expectT, remainingT...>>::type
+      {
+      };
+  template<typename ...elementsT, typename ...remainingT>
+    struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...>
+      : true_type
+      {
+      };
+
+  template<unsigned indexT, typename expectT, typename ...typesT>
+    struct recursive_type_finder
+      {
+      };
+  template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
+    struct recursive_type_finder<indexT, expectT, firstT, remainingT...>
+      : conditional<has_type_recursive<expectT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, expectT, remainingT...>>::type
+      {
+      };
+
+  template<size_t firstT, size_t ...remainingT>
+    struct max_of
+      : max_of<firstT, max_of<remainingT...>::value>
+      {
+      };
+  template<size_t firstT>
+    struct max_of<firstT>
+      : integral_constant<size_t, firstT>
+      {
+      };
+  template<size_t firstT, size_t secondT>
+    struct max_of<firstT, secondT>
+      : integral_constant<size_t, !(firstT < secondT) ? firstT : secondT>
+      {
+      };
+
+  template<typename ...elementsT>
+    struct basic_storage
+      {
+        // The `+ 0` parts are necessary to work around a bug in GCC 4.8.
+        alignas(max_of<alignof(elementsT)...>::value + 0) char bytes[max_of<sizeof(elementsT)...>::value + 0];
+      };
+
+  namespace details_is_nothrow_swappable {
+    using ::std::swap;
 
     template<typename typeT>
       struct is_nothrow_swappable
-        : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
+        : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
         {
         };
+  }
 
-    template<typename ...elementsT>
-      struct visit_helper
-        {
-          template<typename voidT, typename visitorT, typename ...paramsT>
-            void operator()(voidT * /*stor*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const
-              {
-                ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
+  template<typename typeT>
+    struct is_nothrow_swappable
+      : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
+      {
+      };
+
+  template<typename ...elementsT>
+    struct visit_helper
+      {
+        template<typename voidT, typename visitorT, typename ...paramsT>
+          void operator()(voidT * /*stor*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const
+            {
+              ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
+            }
+      };
+  template<typename firstT, typename ...remainingT>
+    struct visit_helper<firstT, remainingT...>
+      {
+        template<typename voidT, typename visitorT, typename ...paramsT>
+          void operator()(voidT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const
+            {
+              if(expect == 0) {
+                ::std::forward<visitorT>(visitor)(reinterpret_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
+              } else {
+                visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
               }
-        };
-    template<typename firstT, typename ...remainingT>
-      struct visit_helper<firstT, remainingT...>
-        {
-          template<typename voidT, typename visitorT, typename ...paramsT>
-            void operator()(voidT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const
-              {
-                if(expect == 0) {
-                  ::std::forward<visitorT>(visitor)(reinterpret_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
-                } else {
-                  visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
-                }
-              }
-        };
-
-    struct visitor_copy_construct
-      {
-        template<typename elementT>
-          void operator()(elementT *ptr, const void *src) const
-            {
-              noadl::construct_at(ptr, *(static_cast<const elementT *>(src)));
-            }
-      };
-    struct visitor_move_construct
-      {
-        template<typename elementT>
-          void operator()(elementT *ptr, void *src) const
-            {
-              noadl::construct_at(ptr, ::std::move(*(static_cast<elementT *>(src))));
-            }
-      };
-    struct visitor_copy_assign
-      {
-        template<typename elementT>
-          void operator()(elementT *ptr, const void *src) const
-            {
-              *ptr = *(static_cast<const elementT *>(src));
-            }
-      };
-    struct visitor_move_assign
-      {
-        template<typename elementT>
-          void operator()(elementT *ptr, void *src) const
-            {
-              *ptr = ::std::move(*(static_cast<elementT *>(src)));
-            }
-      };
-    struct visitor_destroy
-      {
-        template<typename elementT>
-          void operator()(elementT *ptr) const
-            {
-              noadl::destroy_at(ptr);
-            }
-      };
-    struct visitor_get_type_info
-      {
-        template<typename elementT>
-          void operator()(const elementT *ptr, const type_info **ti) const
-            {
-              *ti = &(typeid(*ptr));
-            }
-      };
-    struct visitor_wrapper
-      {
-        template<typename elementT, typename nextT>
-          void operator()(elementT *ptr, nextT &&next) const
-            {
-              ::std::forward<nextT>(next)(*ptr);
-            }
-      };
-    struct visitor_swap
-      {
-        template<typename elementT, typename sourceT>
-          void operator()(elementT *ptr, sourceT *src) const
-            {
-              noadl::adl_swap(*ptr, *(static_cast<elementT *>(src)));
             }
       };
 
-    // This function silences the warning about `throw` statements inside a possible `noexcept` function.
-    [[noreturn]] inline void rethrow_current_exception()
-      {
-        throw;
-      }
+  struct visitor_copy_construct
+    {
+      template<typename elementT>
+        void operator()(elementT *ptr, const void *src) const
+          {
+            noadl::construct_at(ptr, *(static_cast<const elementT *>(src)));
+          }
+    };
+  struct visitor_move_construct
+    {
+      template<typename elementT>
+        void operator()(elementT *ptr, void *src) const
+          {
+            noadl::construct_at(ptr, ::std::move(*(static_cast<elementT *>(src))));
+          }
+    };
+  struct visitor_copy_assign
+    {
+      template<typename elementT>
+        void operator()(elementT *ptr, const void *src) const
+          {
+            *ptr = *(static_cast<const elementT *>(src));
+          }
+    };
+  struct visitor_move_assign
+    {
+      template<typename elementT>
+        void operator()(elementT *ptr, void *src) const
+          {
+            *ptr = ::std::move(*(static_cast<elementT *>(src)));
+          }
+    };
+  struct visitor_destroy
+    {
+      template<typename elementT>
+        void operator()(elementT *ptr) const
+          {
+            noadl::destroy_at(ptr);
+          }
+    };
+  struct visitor_get_type_info
+    {
+      template<typename elementT>
+        void operator()(const elementT *ptr, const type_info **ti) const
+          {
+            *ti = &(typeid(*ptr));
+          }
+    };
+  struct visitor_wrapper
+    {
+      template<typename elementT, typename nextT>
+        void operator()(elementT *ptr, nextT &&next) const
+          {
+            ::std::forward<nextT>(next)(*ptr);
+          }
+    };
+  struct visitor_swap
+    {
+      template<typename elementT, typename sourceT>
+        void operator()(elementT *ptr, sourceT *src) const
+          {
+            noadl::adl_swap(*ptr, *(static_cast<elementT *>(src)));
+          }
+    };
+
+  // This function silences the warning about `throw` statements inside a possible `noexcept` function.
+  [[noreturn]] inline void rethrow_current_exception()
+    {
+      throw;
+    }
 }
 
 template<typename ...elementsT>

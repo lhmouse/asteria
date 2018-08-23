@@ -8,8 +8,7 @@
 #include "abstract_function.hpp"
 #include "statement.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Instantiated_function
   : public Abstract_function

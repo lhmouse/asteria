@@ -9,8 +9,7 @@
 #include "xpnode.hpp"
 #include "reference.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Statement
   {

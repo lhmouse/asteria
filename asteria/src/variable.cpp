@@ -5,8 +5,7 @@
 #include "variable.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Variable::~Variable()
   = default;

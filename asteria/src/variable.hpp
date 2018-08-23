@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include "value.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Variable
   {

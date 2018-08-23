@@ -11,8 +11,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
-namespace rocket
-{
+namespace rocket {
 
 namespace noadl = ::rocket;
 
@@ -66,28 +65,27 @@ template<typename iteratorT, typename functionT, typename ...paramsT>
       } while(++it != last);
     }
 
-namespace details_utilities
-  {
-    template<typename iteratorT>
-      constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
-        {
-          return 0;
+namespace details_utilities {
+  template<typename iteratorT>
+    constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+      {
+        return 0;
+      }
+  template<typename iteratorT>
+    inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
+      {
+        size_t total = 0;
+        for(auto it = ::std::move(first); it != last; ++it) {
+          ++total;
         }
-    template<typename iteratorT>
-      inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
-        {
-          size_t total = 0;
-          for(auto it = ::std::move(first); it != last; ++it) {
-            ++total;
-          }
-          return total;
-        }
-    template<typename iteratorT>
-      constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
-        {
-          return static_cast<size_t>(last - first);
-        }
-  }
+        return total;
+      }
+  template<typename iteratorT>
+    constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
+      {
+        return static_cast<size_t>(last - first);
+      }
+}
 
 template<typename iteratorT>
   constexpr size_t estimate_distance(iteratorT first, iteratorT last)

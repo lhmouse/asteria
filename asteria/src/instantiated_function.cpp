@@ -6,8 +6,7 @@
 #include "context.hpp"
 #include "utilities.hpp"
 
-namespace Asteria
-{
+namespace Asteria {
 
 Instantiated_function::~Instantiated_function()
   = default;

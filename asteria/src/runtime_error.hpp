@@ -7,8 +7,7 @@
 #include "fwd.hpp"
 #include <exception>
 
-namespace Asteria
-{
+namespace Asteria {
 
 class Runtime_error
   : public virtual std::exception
