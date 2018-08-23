@@ -5,7 +5,14 @@
 #include "utilities.hpp"
 #include "runtime_error.hpp"
 #include <iostream> // std::cerr
-#include <time.h> // ::time_t, ::time(), ::asctime_r()
+#include <time.h> // ::time_t, ::localtime()
+#include <stdio.h> // ::sprintf()
+
+#ifdef _WIN32
+#  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
+#else
+#  include <sys/time.h> // ::timeval, ::gettimeofday()
+#endif
 
 namespace Asteria {
 
@@ -93,17 +100,25 @@ bool are_debug_logs_enabled() noexcept
 bool write_log_to_stderr(Formatter &&fmt) noexcept
   try {
     auto &oss = fmt.get_stream();
-    ::time_t now;
-    ::time(&now);
-    char time_str[26];
+    char time_str[64];
+    {
 #ifdef _WIN32
-    ::ctime_s(time_str, sizeof(time_str), &now);
+      ::SYSTEMTIME s;
+      ::GetSystemTime(&s);
+      ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                          s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
 #else
-    ::ctime_r(&now, time_str);
+      ::timeval t;
+      int err = ::gettimeofday(&t, nullptr);
+      ROCKET_ASSERT(err == 0);
+      ::tm s;
+      ::localtime_r(&(t.tv_sec), &s);
+      ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                          s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, int(t.tv_usec) / 1000);
 #endif
-    time_str[24] = 0;
+    }
     oss.set_caret(0);
-    oss <<"[" <<time_str <<"] " <<fmt.get_file() <<':' <<fmt.get_line() <<" ## ";
+    oss <<time_str <<" @ " <<fmt.get_file() <<':' <<fmt.get_line() <<" $ ";
     auto str = oss.extract_string();
     for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
       str.insert(i + 1, 1, '\t');
