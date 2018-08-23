@@ -184,7 +184,7 @@ class Token
         }
   };
 
-extern Parser_result tokenize_line(Vector<Token> &tokens_out, std::size_t line, const String &str);
+extern Parser_result tokenize_line_no_comment(Vector<Token> &tokens_out, std::size_t line, const String &str);
 
 }
 
