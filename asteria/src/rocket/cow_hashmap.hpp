@@ -803,8 +803,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
       using size_type        = typename allocator_traits<allocator_type>::size_type;
       using difference_type  = typename allocator_traits<allocator_type>::difference_type;
-      using const_pointer    = typename allocator_traits<allocator_type>::const_pointer;
-      using pointer          = typename allocator_traits<allocator_type>::pointer;
       using const_reference  = const value_type &;
       using reference        = value_type &;
 
