@@ -1502,7 +1502,17 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       size_type find(value_type ch, size_type from = 0) const noexcept
         {
-          return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
+          // This can be optimized.
+          if(from >= this->length()) {
+            return npos;
+          }
+          const auto ptr = traits_type::find(this->c_str() + from, this->length() - from, ch);
+          if(!ptr) {
+            return npos;
+          }
+          const auto tpos = static_cast<size_type>(ptr - this->c_str());
+          ROCKET_ASSERT(tpos < npos);
+          return tpos;
         }
 
       size_type rfind(shallow sh, size_type to = npos) const noexcept
