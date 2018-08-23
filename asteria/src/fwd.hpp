@@ -83,7 +83,9 @@ class Reference_root;
 class Reference_modifier;
 class Reference;
 class Variable;
-class Context;
+class Abstract_context;
+class Analytic_context;
+class Executive_context;
 class Variadic_arguer;
 class Instantiated_function;
 

@@ -158,11 +158,11 @@ class Xpnode
 
 extern const char * get_operator_name(Xpnode::Xop xop) noexcept;
 
-extern Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx);
-extern void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx);
+extern Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx);
+extern Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx);
 
-extern Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx);
-extern Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx);
+extern void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, const Executive_context &ctx);
+extern Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx);
 
 }
 

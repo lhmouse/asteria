@@ -176,13 +176,13 @@ class Statement
         }
   };
 
-extern Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt);
-extern Vector<Statement> bind_block_in_place(Spref<Context> ctx_inout, const Vector<Statement> &block);
-extern Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> ctx_inout, const Statement &stmt);
-extern Statement::Status execute_block_in_place(Reference &ref_out, Spref<Context> ctx_inout, const Vector<Statement> &block);
+extern Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &stmt);
+extern Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<Statement> &block);
+extern Vector<Statement> bind_block(const Vector<Statement> &block, const Analytic_context &ctx);
 
-extern Vector<Statement> bind_block(const Vector<Statement> &block, Spref<const Context> ctx);
-extern Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, Spref<const Context> ctx);
+extern Statement::Status execute_statement_partial(Reference &ref_out, Executive_context &ctx_inout, const Statement &stmt);
+extern Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &ctx_inout, const Vector<Statement> &block);
+extern Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, const Executive_context &ctx);
 
 }
 

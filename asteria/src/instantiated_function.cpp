@@ -3,7 +3,7 @@
 
 #include "precompiled.hpp"
 #include "instantiated_function.hpp"
-#include "context.hpp"
+#include "executive_context.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -18,8 +18,8 @@ String Instantiated_function::describe() const
 Reference Instantiated_function::invoke(Reference self, Vector<Reference> args) const
   {
     // Create an orphan context.
-    const auto ctx_next = allocate<Context>(nullptr, false);
-    initialize_function_context(ctx_next, m_params, m_file, m_line, std::move(self), std::move(std::move(args)));
+    Executive_context ctx_next;
+    initialize_executive_function_context(ctx_next, m_params, m_file, m_line, std::move(self), std::move(std::move(args)));
     // Execute the function body.
     Reference ref;
     const auto status = execute_block_in_place(ref, ctx_next, m_body);

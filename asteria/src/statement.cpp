@@ -3,7 +3,8 @@
 
 #include "precompiled.hpp"
 #include "statement.hpp"
-#include "context.hpp"
+#include "analytic_context.hpp"
+#include "executive_context.hpp"
 #include "variable.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"
@@ -20,24 +21,20 @@ Statement::~Statement()
   = default;
 
 namespace {
-  template<typename ...ParamsT>
-    void do_safe_set_named_reference(Spref<Context> ctx_inout, const char *desc, const String &name, ParamsT &&...params)
-      {
-        if(is_name_reserved(name)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
-        }
-        if(name.empty()) {
-          return;
-        }
-        ctx_inout->set_named_reference(name, Reference(std::forward<ParamsT>(params)...));
+  void do_safe_set_named_reference(Abstract_context &ctx_inout, const char *desc, const String &name, Reference ref)
+    {
+      if(is_name_reserved(name)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
       }
+      if(name.empty()) {
+        return;
+      }
+      ctx_inout.set_named_reference(name, std::move(ref));
+    }
 }
 
-Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt)
+Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &stmt)
   {
-    if(ctx_inout->is_feigned() == false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`bind_statement_partial()` cannot be called on a genuine context.");
-    }
     switch(stmt.index()) {
     case Statement::index_expression:
       {
@@ -51,7 +48,7 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_inout, "variable", cand.name);
+        do_safe_set_named_reference(ctx_inout, "variable", cand.name, { });
         // Bind the initializer recursively.
         auto init_bnd = bind_expression(cand.init, ctx_inout);
         Statement::S_var_def cand_bnd = { cand.name, cand.immutable, std::move(init_bnd) };
@@ -61,11 +58,11 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_inout, "function", cand.name);
+        do_safe_set_named_reference(ctx_inout, "function", cand.name, { });
         // Bind the function body recursively.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
-        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Analytic_context ctx_next(&ctx_inout);
+        initialize_analytic_function_context(ctx_next, cand.params);
+        auto body_bnd = bind_block_in_place(ctx_next, cand.body);
         Statement::S_func_def cand_bnd = { cand.name, cand.params, cand.file, cand.line, std::move(body_bnd) };
         return std::move(cand_bnd);
       }
@@ -85,12 +82,12 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         // Bind the control expression and all clauses recursively.
         auto ctrl_bnd = bind_expression(cand.ctrl, ctx_inout);
         // Note that all `switch` clauses share the same context.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
+        Analytic_context ctx_next(&ctx_inout);
         Bivector<Vector<Xpnode>, Vector<Statement>> clauses_bnd;
         clauses_bnd.reserve(cand.clauses.size());
         for(const auto &pair : cand.clauses) {
-          auto first_bnd = bind_expression(pair.first, ctx_feigned);
-          auto second_bnd = bind_block_in_place(ctx_feigned, pair.second);
+          auto first_bnd = bind_expression(pair.first, ctx_next);
+          auto second_bnd = bind_block_in_place(ctx_next, pair.second);
           clauses_bnd.emplace_back(std::move(first_bnd), std::move(second_bnd));
         }
         Statement::S_switch cand_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
@@ -118,15 +115,13 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        do_safe_set_named_reference(ctx_feigned, "`for` variable", cand.var_name);
-        // Bind the loop variable initializer, condition, step expression and loop loop body recursively.
-        auto var_init_bnd = bind_expression(cand.var_init, ctx_feigned);
-        auto cond_bnd = bind_expression(cand.cond, ctx_feigned);
-        auto step_bnd = bind_expression(cand.step, ctx_feigned);
-        // It should be safe to use `bind_block_in_place()` in place of `bind_block()` here, as the body is only ever iterated once.
-        // Otherwises a fresh context has to be created for each iteration.
-        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Analytic_context ctx_next(&ctx_inout);
+        do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name, { });
+        // Bind the loop variable initializer, condition, step expression and loop body recursively.
+        auto var_init_bnd = bind_expression(cand.var_init, ctx_next);
+        auto cond_bnd = bind_expression(cand.cond, ctx_next);
+        auto step_bnd = bind_expression(cand.step, ctx_next);
+        auto body_bnd = bind_block(cand.body, ctx_next);
         Statement::S_for cand_bnd = { cand.var_name, cand.var_immutable, std::move(var_init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
         return std::move(cand_bnd);
       }
@@ -134,14 +129,12 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       {
         const auto &cand = stmt.as<Statement::S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        do_safe_set_named_reference(ctx_feigned, "`for each` key", cand.key_name);
-        do_safe_set_named_reference(ctx_feigned, "`for each` reference", cand.mapped_name);
+        Analytic_context ctx_next(&ctx_inout);
+        do_safe_set_named_reference(ctx_next, "`for each` key", cand.key_name, { });
+        do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name, { });
         // Bind the range initializer and loop body recursively.
-        auto range_init_bnd = bind_expression(cand.range_init, ctx_feigned);
-        // It should be safe to use `bind_block_in_place()` in place of `bind_block()` here, as the body is only ever iterated once.
-        // Otherwises a fresh context has to be created for each iteration.
-        auto body_bnd = bind_block(cand.body, ctx_feigned);
+        auto range_init_bnd = bind_expression(cand.range_init, ctx_next);
+        auto body_bnd = bind_block(cand.body, ctx_next);
         Statement::S_for_each cand_bnd = { cand.key_name, cand.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
         return std::move(cand_bnd);
       }
@@ -151,10 +144,10 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
         // The `try` branch needs no special treatement.
         auto body_try_bnd = bind_block(cand.body_try, ctx_inout);
         // The exception variable shall not outlast the `catch` body.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        do_safe_set_named_reference(ctx_feigned, "exception", cand.except_name);
+        Analytic_context ctx_next(&ctx_inout);
+        do_safe_set_named_reference(ctx_next, "exception", cand.except_name, { });
         // Bind the `catch` branch recursively.
-        auto body_catch_bnd = bind_block_in_place(ctx_feigned, cand.body_catch);
+        auto body_catch_bnd = bind_block_in_place(ctx_next, cand.body_catch);
         Statement::S_try cand_bnd = { std::move(body_try_bnd), cand.except_name, std::move(body_catch_bnd) };
         return std::move(cand_bnd);
       }
@@ -192,11 +185,8 @@ Statement bind_statement_partial(Spref<Context> ctx_inout, const Statement &stmt
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");
     }
   }
-Vector<Statement> bind_block_in_place(Spref<Context> ctx_inout, const Vector<Statement> &block)
+Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<Statement> &block)
   {
-    if(ctx_inout->is_feigned() == false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`bind_block_in_place()` cannot be called on a genuine context.");
-    }
     Vector<Statement> block_bnd;
     block_bnd.reserve(block.size());
     for(const auto &stmt : block) {
@@ -205,11 +195,14 @@ Vector<Statement> bind_block_in_place(Spref<Context> ctx_inout, const Vector<Sta
     }
     return block_bnd;
   }
-Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> ctx_inout, const Statement &stmt)
+Vector<Statement> bind_block(const Vector<Statement> &block, const Analytic_context &ctx)
   {
-    if(ctx_inout->is_feigned() != false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`execute_statement_partial()` cannot be called on a feigned context.");
-    }
+    Analytic_context ctx_next(&ctx);
+    return bind_block_in_place(ctx_next, block);
+  }
+
+Statement::Status execute_statement_partial(Reference &ref_out, Executive_context &ctx_inout, const Statement &stmt)
+  {
     switch(stmt.index()) {
     case Statement::index_expression:
       {
@@ -223,7 +216,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         const auto &cand = stmt.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_inout, "variable", cand.name);
+        do_safe_set_named_reference(ctx_inout, "variable", cand.name, { });
         // Create a variable using the initializer.
         ref_out = evaluate_expression(cand.init, ctx_inout);
         auto value = read_reference(ref_out);
@@ -240,11 +233,11 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         const auto &cand = stmt.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_inout, "function", cand.name);
+        do_safe_set_named_reference(ctx_inout, "function", cand.name, { });
         // Bind the function body recursively.
-        const auto ctx_feigned = allocate<Context>(ctx_inout, true);
-        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
-        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Analytic_context ctx_next(&ctx_inout);
+        initialize_analytic_function_context(ctx_next, cand.params);
+        auto body_bnd = bind_block_in_place(ctx_next, cand.body);
         auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
         auto var = allocate<Variable>(D_function(std::move(func)), true);
         // Reset the reference.
@@ -277,38 +270,43 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
         // and there is no match `case` clause, we will have to jump back into half of the scope. To simplify design,
         // a nested scope is created when a `default` clause is encountered. When jumping to the `default` scope, we
         // simply discard the new scope.
-        auto ctx_next = allocate<Context>(ctx_inout, false);
-        auto ctx_probing = ctx_next;
+        Executive_context ctx_first(&ctx_inout);
+        Executive_context ctx_second(&ctx_first);
+        auto ctx_next = std::ref(ctx_first);
+        // There is a 'match' at the end of the clause array initially.
         auto match = cand.clauses.end();
+        // This is a pointer to where new references are created.
+        auto ctx_test = ctx_next;
         for(auto it = cand.clauses.begin(); it != cand.clauses.end(); ++it) {
           if(it->first.empty()) {
             // This is a `default` clause.
             if(match != cand.clauses.end()) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses exist in the same `switch` statement.");
             }
-            ctx_probing = allocate<Context>(ctx_next, false);
+            // From now on, all declarations go into the second context.
             match = it;
+            ctx_test = std::ref(ctx_second);
           } else {
             // This is a `case` clause.
             ref_out = evaluate_expression(it->first, ctx_next);
             const auto value_comp = read_reference(ref_out);
             if(compare_values(value_ctrl, value_comp) == Value::compare_equal) {
-              ctx_next = ctx_probing;
+              // If this is a match, we resume from wherever `ctx_test` is pointing.
               match = it;
+              ctx_next = ctx_test;
               break;
             }
           }
-          // Skip the clause.
-          // If there are any definitions in it, initialize the declared objects to `null`.
+          // Create null references for declarations in the clause skipped.
           for(const auto &kstmt : it->second) {
             if(kstmt.index() == Statement::index_var_def) {
               const auto &kcand = kstmt.as<Statement::S_var_def>();
-              do_safe_set_named_reference(ctx_next, "variable", kcand.name);
+              do_safe_set_named_reference(ctx_test, "variable", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named variable: name = ", kcand.name, ", immutable = ", kcand.immutable);
             }
             else if(kstmt.index() == Statement::index_func_def) {
               const auto &kcand = kstmt.as<Statement::S_func_def>();
-              do_safe_set_named_reference(ctx_next, "function", kcand.name);
+              do_safe_set_named_reference(ctx_test, "function", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named function: name = ", kcand.name, ", file:line = ", kcand.file, ':', kcand.line);
             }
           }
@@ -375,9 +373,9 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
       {
         const auto &cand = stmt.as<Statement::S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
-        auto ctx_next = allocate<Context>(ctx_inout, false);
+        Executive_context ctx_next(&ctx_inout);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name);
+        do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name, { });
         // Create a variable using the initializer.
         ref_out = evaluate_expression(cand.var_init, ctx_next);
         if(cand.var_name.empty() == false) {
@@ -415,21 +413,18 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
       {
         const auto &cand = stmt.as<Statement::S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
-        auto ctx_next = allocate<Context>(ctx_inout, false);
+        Executive_context ctx_for(&ctx_inout);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_next, "`for each` key", cand.key_name);
-        do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name);
+        do_safe_set_named_reference(ctx_for, "`for each` key", cand.key_name, { });
+        do_safe_set_named_reference(ctx_for, "`for each` reference", cand.mapped_name, { });
         // Calculate the range using the initializer.
-        ref_out = evaluate_expression(cand.range_init, ctx_next);
+        ref_out = evaluate_expression(cand.range_init, ctx_for);
         const auto mapped_base = ref_out;
         const auto range_value = read_reference(ref_out);
         if(range_value.type() == Value::type_array) {
           const auto &array = range_value.as<D_array>();
           for(auto it = array.begin(); it != array.end(); ++it) {
-            if(!ctx_next) {
-              // Create a fresh context for this loop.
-              ctx_next = allocate<Context>(ctx_inout, false);
-            }
+            Executive_context ctx_next(&ctx_for);
             const auto index = static_cast<Signed>(it - array.begin());
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_integer(index));
@@ -450,16 +445,12 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
               // Forward anything unexpected to the caller.
               return status;
             }
-            ctx_next.reset();
           }
         }
         else if(range_value.type() == Value::type_object) {
           const auto &object = range_value.as<D_object>();
           for(auto it = object.begin(); it != object.end(); ++it) {
-            if(!ctx_next) {
-              // Create a fresh context for this loop.
-              ctx_next = allocate<Context>(ctx_inout, false);
-            }
+            Executive_context ctx_next(&ctx_for);
             const auto &key = it->first;
             // Initialize the per-loop key constant.
             ref_out = reference_constant(D_string(key));
@@ -480,7 +471,6 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
               // Forward anything unexpected to the caller.
               return status;
             }
-            ctx_next.reset();
           }
         }
         else {
@@ -501,7 +491,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
           }
         } catch(...) {
           // The exception variable shall not outlast the loop body.
-          auto ctx_next = allocate<Context>(ctx_inout, false);
+          Executive_context ctx_next(&ctx_inout);
           // Identify the dynamic type of the exception.
           Bivector<String, Unsigned> btv;
           try {
@@ -584,40 +574,21 @@ Statement::Status execute_statement_partial(Reference &ref_out, Spref<Context> c
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");
     }
   }
-Statement::Status execute_block_in_place(Reference &ref_out, Spref<Context> ctx_inout, const Vector<Statement> &block)
+Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &ctx_inout, const Vector<Statement> &block)
   {
-    if(ctx_inout->is_feigned() != false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`execute_block_in_place()` cannot be called on a feigned context.");
-    }
     for(const auto &stmt : block) {
-      const auto exrs = execute_statement_partial(ref_out, ctx_inout, stmt);
-      if(exrs != Statement::status_next) {
+      const auto status = execute_statement_partial(ref_out, ctx_inout, stmt);
+      if(status != Statement::status_next) {
         // Forward anything unexpected to the caller.
-        return exrs;
+        return status;
       }
     }
     return Statement::status_next;
   }
-
-Vector<Statement> bind_block(const Vector<Statement> &block, Spref<const Context> ctx)
+Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, const Executive_context &ctx)
   {
-    if(block.empty()) {
-      return { };
-    }
-    // Feign a context and bind the block onto it.
-    // The context is destroyed before this function returns.
-    const auto ctx_working = std::make_shared<Context>(ctx, true);
-    return bind_block_in_place(ctx_working, block);
-  }
-Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, Spref<const Context> ctx)
-  {
-    if(block.empty()) {
-      return Statement::status_next;
-    }
-    // Create a context and execute the block in it.
-    // The context is destroyed before this function returns.
-    const auto ctx_working = std::make_shared<Context>(ctx, false);
-    return execute_block_in_place(ref_out, ctx_working, block);
+    Executive_context ctx_next(&ctx);
+    return execute_block_in_place(ref_out, ctx_next, block);
   }
 
 }

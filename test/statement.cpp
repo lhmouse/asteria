@@ -3,7 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../src/statement.hpp"
-#include "../src/context.hpp"
+#include "../src/executive_context.hpp"
 
 using namespace Asteria;
 
@@ -77,24 +77,24 @@ int main()
     step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
     text.emplace_back(Statement::S_for { String::shallow("j"), false, std::move(expr), std::move(cond), std::move(step), std::move(body) });
 
-    auto ctx = allocate<Context>(nullptr, false);
+    Executive_context ctx;
     Reference ref;
     auto status = execute_block_in_place(ref, ctx, text);
     ASTERIA_TEST_CHECK(status == Statement::status_next);
-    auto qref = ctx->get_named_reference_opt(String::shallow("res"));
+    auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_integer>() == 41);
-    qref = ctx->get_named_reference_opt(String::shallow("data"));
+    qref = ctx.get_named_reference_opt(String::shallow("data"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().size() == 4);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().at(0).as<D_integer>() ==  1);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().at(1).as<D_integer>() ==  2);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().at(2).as<D_integer>() ==  3);
     ASTERIA_TEST_CHECK(read_reference(*qref).as<D_array>().at(3).as<D_integer>() == 10);
-    qref = ctx->get_named_reference_opt(String::shallow("k"));
+    qref = ctx.get_named_reference_opt(String::shallow("k"));
     ASTERIA_TEST_CHECK(qref == nullptr);
-    qref = ctx->get_named_reference_opt(String::shallow("v"));
+    qref = ctx.get_named_reference_opt(String::shallow("v"));
     ASTERIA_TEST_CHECK(qref == nullptr);
-    qref = ctx->get_named_reference_opt(String::shallow("j"));
+    qref = ctx.get_named_reference_opt(String::shallow("j"));
     ASTERIA_TEST_CHECK(qref == nullptr);
   }

@@ -3,7 +3,8 @@
 
 #include "precompiled.hpp"
 #include "xpnode.hpp"
-#include "context.hpp"
+#include "analytic_context.hpp"
+#include "executive_context.hpp"
 #include "abstract_function.hpp"
 #include "instantiated_function.hpp"
 #include "backtracer.hpp"
@@ -85,27 +86,24 @@ const char * get_operator_name(Xpnode::Xop xop) noexcept
   }
 
 namespace {
-  std::pair<Sptr<const Context>, const Reference *> do_name_lookup(Spref<const Context> ctx, const String &name)
+  std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Abstract_context &ctx, const String &name)
     {
-      auto qctx = ctx;
+      auto qctx = &ctx;
     loop:
       auto qref = qctx->get_named_reference_opt(name);
       if(!qref) {
         qctx = qctx->get_parent_opt();
         if(!qctx) {
-          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared.");
+          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
         }
         goto loop;
       }
-      return std::make_pair(std::move(qctx), qref);
+      return std::make_pair(qctx, qref);
     }
 }
 
-Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
+Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx)
   {
-    if(ctx->is_feigned() == false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`bind_xpnode_partial()` cannot be called on a genuine context.");
-    }
     switch(node.index()) {
     case Xpnode::index_literal:
       {
@@ -119,8 +117,8 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
         const auto &cand = node.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, cand.name);
-        if(pair.first->is_feigned()) {
-          // Don't bind it onto something in a feigned context.
+        if(pair.first->is_analytic()) {
+          // Don't bind it onto something in a analytic context.
           Xpnode::S_named_reference cand_bnd = { cand.name };
           return std::move(cand_bnd);
         }
@@ -147,9 +145,9 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
       {
         const auto &cand = node.as<Xpnode::S_closure_function>();
         // Bind the body recursively.
-        const auto ctx_feigned = allocate<Context>(ctx, true);
-        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
-        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Analytic_context ctx_next(&ctx);
+        initialize_analytic_function_context(ctx_next, cand.params);
+        auto body_bnd = bind_block_in_place(ctx_next, cand.body);
         Xpnode::S_closure_function cand_bnd = { cand.params, cand.file, cand.line, std::move(body_bnd) };
         return std::move(cand_bnd);
       }
@@ -205,6 +203,16 @@ Xpnode bind_xpnode_partial(const Xpnode &node, Spref<const Context> ctx)
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
+  }
+Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx)
+  {
+    Vector<Xpnode> expr_bnd;
+    expr_bnd.reserve(expr.size());
+    for(const auto &node : expr) {
+      auto node_bnd = bind_xpnode_partial(node, ctx);
+      expr_bnd.emplace_back(std::move(node_bnd));
+    }
+    return expr_bnd;
   }
 
 namespace {
@@ -467,11 +475,8 @@ namespace {
     }
 }
 
-void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, Spref<const Context> ctx)
+void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, const Executive_context &ctx)
   {
-    if(ctx->is_feigned() != false) {
-      ASTERIA_THROW_RUNTIME_ERROR("`evaluate_xpnode_partial()` cannot be called on a feigned context.");
-    }
     switch(node.index()) {
     case Xpnode::index_literal:
       {
@@ -486,8 +491,8 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         const auto &cand = node.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, cand.name);
-        if(pair.first->is_feigned()) {
-          ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in feigned contexts.");
+        if(pair.first->is_analytic()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
         }
         // Push the reference found.
         stack_inout.emplace_back(*(pair.second));
@@ -512,9 +517,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       {
         const auto &cand = node.as<Xpnode::S_closure_function>();
         // Bind the function body recursively.
-        const auto ctx_feigned = allocate<Context>(ctx, true);
-        initialize_function_context(ctx_feigned, cand.params, cand.file, cand.line, { }, { });
-        auto body_bnd = bind_block_in_place(ctx_feigned, cand.body);
+        Analytic_context ctx_next(&ctx);
+        initialize_analytic_function_context(ctx_next, cand.params);
+        auto body_bnd = bind_block_in_place(ctx_next, cand.body);
         auto func = allocate<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
         stack_inout.emplace_back(reference_temp_value(D_function(std::move(func))));
         return;
@@ -1129,18 +1134,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
   }
-
-Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx)
-  {
-    Vector<Xpnode> expr_bnd;
-    expr_bnd.reserve(expr.size());
-    for(const auto &node : expr) {
-      auto node_bnd = bind_xpnode_partial(node, ctx);
-      expr_bnd.emplace_back(std::move(node_bnd));
-    }
-    return expr_bnd;
-  }
-Reference evaluate_expression(const Vector<Xpnode> &expr, Spref<const Context> ctx)
+Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx)
   {
     if(expr.empty()) {
       return { };

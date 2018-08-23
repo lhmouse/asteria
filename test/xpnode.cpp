@@ -3,21 +3,20 @@
 
 #include "_test_init.hpp"
 #include "../src/xpnode.hpp"
-#include "../src/context.hpp"
+#include "../src/executive_context.hpp"
 
 using namespace Asteria;
 
 int main()
   {
-    const auto ctx = allocate<Context>(nullptr, false);
-    auto &cond = ctx->set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
-    auto &dval = ctx->set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
-    auto &ival = ctx->set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
-    auto &aval = ctx->set_named_reference(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     }));
-
+    Executive_context ctx;
+    auto &cond = ctx.set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
     materialize_reference(cond);
+    auto &dval = ctx.set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
     materialize_reference(dval);
+    auto &ival = ctx.set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
     materialize_reference(ival);
+    auto &aval = ctx.set_named_reference(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     }));
     materialize_reference(aval);
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");

@@ -54,8 +54,9 @@ pkginclude_HEADERS =  \
   asteria/src/variable.hpp  \
   asteria/src/exception.hpp  \
   asteria/src/runtime_error.hpp  \
-  asteria/src/context.hpp  \
-  asteria/src/variadic_arguer.hpp  \
+  asteria/src/abstract_context.hpp  \
+  asteria/src/analytic_context.hpp  \
+  asteria/src/executive_context.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/statement.hpp  \
   asteria/src/instantiated_function.hpp  \
@@ -83,7 +84,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/variable.cpp  \
   asteria/src/exception.cpp  \
   asteria/src/runtime_error.cpp  \
-  asteria/src/context.cpp  \
+  asteria/src/abstract_context.cpp  \
+  asteria/src/analytic_context.cpp  \
+  asteria/src/executive_context.cpp  \
   asteria/src/variadic_arguer.cpp  \
   asteria/src/xpnode.cpp  \
   asteria/src/statement.cpp  \
@@ -106,7 +109,7 @@ check_PROGRAMS = \
   test/variable.test  \
   test/reference.test  \
   test/exception.test  \
-  test/context.test  \
+  test/executive_context.test  \
   test/xpnode.test  \
   test/statement.test
 
