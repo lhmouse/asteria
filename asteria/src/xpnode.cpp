@@ -236,6 +236,7 @@ namespace
       try {
         return func->invoke(std::move(self), std::move(args));
       } catch(...) {
+        ASTERIA_DEBUG_LOG("  Forwarding exception thrown insode \'", file, ':', line, "\'...");
         throw Backtracer(file, line);
       }
 
