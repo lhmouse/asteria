@@ -9,75 +9,75 @@
 
 namespace Asteria {
 
-Logger::Logger(const char *file, unsigned long line, const char *func) noexcept
+Formatter::Formatter(const char *file, unsigned long line, const char *func) noexcept
   : m_file(file), m_line(line), m_func(func)
   {
     m_stream <<std::boolalpha;
   }
-Logger::~Logger()
+Formatter::~Formatter()
   = default;
 
-void Logger::do_put(bool value)
+void Formatter::do_put(bool value)
   {
     m_stream <<value;
   }
-void Logger::do_put(char value)
+void Formatter::do_put(char value)
   {
     m_stream <<value;
   }
-void Logger::do_put(signed char value)
+void Formatter::do_put(signed char value)
   {
     m_stream <<static_cast<int>(value);
   }
-void Logger::do_put(unsigned char value)
+void Formatter::do_put(unsigned char value)
   {
     m_stream <<static_cast<unsigned>(value);
   }
-void Logger::do_put(short value)
+void Formatter::do_put(short value)
   {
     m_stream <<static_cast<int>(value);
   }
-void Logger::do_put(unsigned short value)
+void Formatter::do_put(unsigned short value)
   {
     m_stream <<static_cast<unsigned>(value);
   }
-void Logger::do_put(int value)
+void Formatter::do_put(int value)
   {
     m_stream <<value;
   }
-void Logger::do_put(unsigned value)
+void Formatter::do_put(unsigned value)
   {
     m_stream <<value;
   }
-void Logger::do_put(long value)
+void Formatter::do_put(long value)
   {
     m_stream <<value;
   }
-void Logger::do_put(unsigned long value)
+void Formatter::do_put(unsigned long value)
   {
     m_stream <<value;
   }
-void Logger::do_put(long long value)
+void Formatter::do_put(long long value)
   {
     m_stream <<value;
   }
-void Logger::do_put(unsigned long long value)
+void Formatter::do_put(unsigned long long value)
   {
     m_stream <<value;
   }
-void Logger::do_put(const char *value)
+void Formatter::do_put(const char *value)
   {
     m_stream <<value;
   }
-void Logger::do_put(const signed char *value)
+void Formatter::do_put(const signed char *value)
   {
     m_stream <<static_cast<const void *>(value);
   }
-void Logger::do_put(const unsigned char *value)
+void Formatter::do_put(const unsigned char *value)
   {
     m_stream <<static_cast<const void *>(value);
   }
-void Logger::do_put(const void *value)
+void Formatter::do_put(const void *value)
   {
     m_stream <<value;
   }
@@ -90,9 +90,9 @@ bool are_debug_logs_enabled() noexcept
     return false;
 #endif
   }
-bool write_log_to_stderr(Logger &&logger) noexcept
+bool write_log_to_stderr(Formatter &&fmt) noexcept
   try {
-    auto &oss = logger.get_stream();
+    auto &oss = fmt.get_stream();
     ::time_t now;
     ::time(&now);
     char time_str[26];
@@ -103,7 +103,7 @@ bool write_log_to_stderr(Logger &&logger) noexcept
 #endif
     time_str[24] = 0;
     oss.set_caret(0);
-    oss <<"[" <<time_str <<"] " <<logger.get_file() <<':' <<logger.get_line() <<" ## ";
+    oss <<"[" <<time_str <<"] " <<fmt.get_file() <<':' <<fmt.get_line() <<" ## ";
     auto str = oss.extract_string();
     for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
       str.insert(i + 1, 1, '\t');
@@ -113,11 +113,11 @@ bool write_log_to_stderr(Logger &&logger) noexcept
   } catch(...) {
     return false;
   }
-void throw_runtime_error(Logger &&logger)
+void throw_runtime_error(Formatter &&fmt)
   {
-    auto &oss = logger.get_stream();
+    auto &oss = fmt.get_stream();
     oss.set_caret(0);
-    oss <<logger.get_func() <<": ";
+    oss <<fmt.get_func() <<": ";
     auto str = oss.extract_string();
     throw Runtime_error(std::move(str));
   }

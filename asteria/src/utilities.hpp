@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Logger
+class Formatter
   {
   private:
     const char *const m_file;
@@ -21,8 +21,8 @@ class Logger
     rocket::insertable_ostream m_stream;
 
   public:
-    Logger(const char *file, unsigned long line, const char *func) noexcept;
-    ~Logger();
+    Formatter(const char *file, unsigned long line, const char *func) noexcept;
+    ~Formatter();
 
   private:
     template<typename ValueT>
@@ -73,7 +73,7 @@ class Logger
 
   public:
     template<typename ValueT>
-      Logger & operator,(const ValueT &value) noexcept
+      Formatter & operator,(const ValueT &value) noexcept
         try {
           this->do_put(value);
           return *this;
@@ -83,16 +83,16 @@ class Logger
   };
 
 extern bool are_debug_logs_enabled() noexcept;
-extern bool write_log_to_stderr(Logger &&logger) noexcept;
-
-[[noreturn]] extern void throw_runtime_error(Logger &&logger);
+extern bool write_log_to_stderr(Formatter &&fmt) noexcept;
+[[noreturn]] extern void throw_runtime_error(Formatter &&fmt);
 
 }
 
-#define ASTERIA_CREATE_LOGGER(...)            (::std::move((::Asteria::Logger(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__)))
-#define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_LOGGER(__VA_ARGS__).get_stream().extract_string())
-#define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(ASTERIA_CREATE_LOGGER(__VA_ARGS__)))
-#define ASTERIA_TERMINATE(...)                (::Asteria::write_log_to_stderr(ASTERIA_CREATE_LOGGER("FATAL ERROR: ", __VA_ARGS__)), ::std::terminate())
-#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(ASTERIA_CREATE_LOGGER(__VA_ARGS__)))
+#define ASTERIA_CREATE_FORMATTER(...)         (::std::move((::Asteria::Formatter(__FILE__, __LINE__, ROCKET_FUNCSIG), __VA_ARGS__)))
+
+#define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).get_stream().extract_string())
+#define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
+#define ASTERIA_TERMINATE(...)                (::Asteria::write_log_to_stderr(ASTERIA_CREATE_FORMATTER("FATAL ERROR: ", __VA_ARGS__)), ::std::terminate())
+#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
 
 #endif

@@ -64,7 +64,7 @@ template<typename ResultT, typename SourceT>
     }
 
 // General utilities
-class Logger;
+class Formatter;
 class Exception;
 class Runtime_error;
 class Backtracer;
