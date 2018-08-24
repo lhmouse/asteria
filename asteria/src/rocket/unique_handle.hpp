@@ -231,68 +231,6 @@ template<typename handleT, typename closerT>
     }
 
 template<typename handleT, typename closerT>
-  inline bool operator==(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs == rhs.get();
-    }
-template<typename handleT, typename closerT>
-  inline bool operator!=(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs != rhs.get();
-    }
-template<typename handleT, typename closerT>
-  inline bool operator<(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs < rhs.get();
-    }
-template<typename handleT, typename closerT>
-  inline bool operator>(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs > rhs.get();
-    }
-template<typename handleT, typename closerT>
-  inline bool operator<=(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs <= rhs.get();
-    }
-template<typename handleT, typename closerT>
-  inline bool operator>=(handleT lhs, const unique_handle<handleT, closerT> &rhs) noexcept
-    {
-      return lhs >= rhs.get();
-    }
-
-template<typename handleT, typename closerT>
-  inline bool operator==(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() == rhs;
-    }
-template<typename handleT, typename closerT>
-  inline bool operator!=(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() != rhs;
-    }
-template<typename handleT, typename closerT>
-  inline bool operator<(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() < rhs;
-    }
-template<typename handleT, typename closerT>
-  inline bool operator>(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() > rhs;
-    }
-template<typename handleT, typename closerT>
-  inline bool operator<=(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() <= rhs;
-    }
-template<typename handleT, typename closerT>
-  inline bool operator>=(const unique_handle<handleT, closerT> &lhs, handleT rhs) noexcept
-    {
-      return lhs.get() >= rhs;
-    }
-
-template<typename handleT, typename closerT>
   inline void swap(unique_handle<handleT, closerT> &lhs, unique_handle<handleT, closerT> &rhs) noexcept
     {
       lhs.swap(rhs);
