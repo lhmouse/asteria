@@ -49,6 +49,11 @@ namespace details_unique_handle {
         handle_type m_h;
 
       public:
+        stored_handle() noexcept
+          : closer_base(),
+            m_h(this->as_closer().null())
+          {
+          }
         explicit stored_handle(const closer_type &close) noexcept
           : closer_base(close),
             m_h(this->as_closer().null())
@@ -123,7 +128,7 @@ template<typename handleT, typename closerT>
     public:
       // 23.11.1.2.1, constructors
       unique_handle() noexcept(noexcept(closer_type()))
-        : m_sth(closer_type())
+        : m_sth()
         {
         }
       explicit unique_handle(const closer_type &close) noexcept
