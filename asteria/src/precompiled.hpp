@@ -43,6 +43,7 @@
 #include "rocket/cow_hashmap.hpp"
 
 namespace Asteria {
+
 }
 
 #endif

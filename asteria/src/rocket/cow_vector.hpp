@@ -54,6 +54,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
   class cow_vector;
 
 namespace details_cow_vector {
+
   template<typename allocatorT>
     struct basic_storage
       {
@@ -709,6 +710,7 @@ namespace details_cow_vector {
       {
         vec->push_back(::std::forward<paramsT>(params)...);
       }
+
 }
 
 template<typename valueT, typename allocatorT>

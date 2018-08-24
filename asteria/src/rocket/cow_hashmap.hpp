@@ -62,6 +62,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
   class cow_hashmap;
 
 namespace details_cow_hashmap {
+
   template<typename allocatorT>
     class value_handle
       {
@@ -782,6 +783,7 @@ namespace details_cow_hashmap {
       {
         return lhs.tell() != rhs.tell();
       }
+
 }
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT>

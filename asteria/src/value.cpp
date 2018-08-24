@@ -186,6 +186,7 @@ Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcep
   }
 
 namespace {
+
   class Indent
     {
     private:
@@ -323,6 +324,7 @@ namespace {
       }
       return os;
     }
+
 }
 
 void dump_value(std::ostream &os, const Value &value, unsigned indent_next, unsigned indent_increment)

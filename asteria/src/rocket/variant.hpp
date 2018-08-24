@@ -34,6 +34,7 @@ template<typename ...elementsT>
   class variant;
 
 namespace details_variant {
+
   template<unsigned indexT, typename ...typesT>
     struct type_getter
       {
@@ -135,6 +136,7 @@ namespace details_variant {
       };
 
   namespace details_is_nothrow_swappable {
+
     using ::std::swap;
 
     template<typename typeT>
@@ -142,6 +144,7 @@ namespace details_variant {
         : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
         {
         };
+
   }
 
   template<typename typeT>
@@ -243,6 +246,7 @@ namespace details_variant {
     {
       throw;
     }
+
 }
 
 template<typename ...elementsT>

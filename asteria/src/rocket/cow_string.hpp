@@ -61,6 +61,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
   class basic_cow_string;
 
 namespace details_cow_string {
+
   template<typename charT, typename traitsT>
     void handle_io_exception(basic_ios<charT, traitsT> &ios)
       {
@@ -606,6 +607,7 @@ namespace details_cow_string {
       {
         str->push_back(::std::forward<paramsT>(params)...);
       }
+
 }
 
 template<typename charT, typename traitsT, typename allocatorT>

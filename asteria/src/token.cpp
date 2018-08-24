@@ -16,6 +16,7 @@ Token::~Token()
   = default;
 
 namespace {
+
   Parser_result do_validate_code_point_utf8(std::size_t line, const String &str, std::size_t column)
     {
       // Get a UTF code point.
@@ -638,6 +639,7 @@ namespace {
         return Parser_result(line, column, 1, Parser_result::error_code_token_character_unrecognized);
       }
     }
+
 }
 
 Parser_result tokenize_line_no_comment(Vector<Token> &tokens_out, std::size_t line, const String &str)

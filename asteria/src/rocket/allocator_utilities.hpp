@@ -18,6 +18,7 @@ using ::std::true_type;
 using ::std::remove_reference;
 
 namespace details_allocator_utilities {
+
   template<typename typeT>
     struct is_final
 #ifdef __cpp_lib_is_final
@@ -54,6 +55,7 @@ namespace details_allocator_utilities {
             return this->m_alloc;
           }
       };
+
 }
 
 template<typename allocatorT>

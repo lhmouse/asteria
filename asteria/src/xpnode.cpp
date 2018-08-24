@@ -86,6 +86,7 @@ const char * get_operator_name(Xpnode::Xop xop) noexcept
   }
 
 namespace {
+
   std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Abstract_context &ctx, const String &name)
     {
       auto qctx = &ctx;
@@ -100,6 +101,7 @@ namespace {
       }
       return std::make_pair(qctx, qref);
     }
+
 }
 
 Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx)
@@ -216,6 +218,7 @@ Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_contex
   }
 
 namespace {
+
   Reference do_pop_reference(Vector<Reference> &stack_inout)
     {
       if(stack_inout.empty()) {
@@ -473,6 +476,7 @@ namespace {
       }
       return res;
     }
+
 }
 
 void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, const Executive_context &ctx)

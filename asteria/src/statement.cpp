@@ -21,6 +21,7 @@ Statement::~Statement()
   = default;
 
 namespace {
+
   void do_safe_set_named_reference(Abstract_context &ctx_inout, const char *desc, const String &name, Reference ref)
     {
       if(is_name_reserved(name)) {
@@ -31,6 +32,7 @@ namespace {
       }
       ctx_inout.set_named_reference(name, std::move(ref));
     }
+
 }
 
 Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &stmt)

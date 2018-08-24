@@ -66,6 +66,7 @@ template<typename iteratorT, typename functionT, typename ...paramsT>
     }
 
 namespace details_utilities {
+
   template<typename iteratorT>
     constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
       {
@@ -85,6 +86,7 @@ namespace details_utilities {
       {
         return static_cast<size_t>(last - first);
       }
+
 }
 
 template<typename iteratorT>
