@@ -11,7 +11,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval(), std::pair<>
 #include <functional> // std::hash<>
-#include <cstddef> // std::size_t, std::ptrdiff_t, std::nullptr_t
+#include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -56,7 +56,6 @@ using ::std::pair;
 using ::std::hash;
 using ::std::size_t;
 using ::std::ptrdiff_t;
-using ::std::nullptr_t;
 
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;
