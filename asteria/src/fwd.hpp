@@ -13,6 +13,7 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
+#include "rocket/intrusive_ptr.hpp"
 
 namespace Asteria {
 

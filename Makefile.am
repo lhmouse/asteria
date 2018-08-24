@@ -38,7 +38,8 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/unique_handle.hpp  \
   asteria/src/rocket/cow_string.hpp  \
   asteria/src/rocket/cow_vector.hpp  \
-  asteria/src/rocket/cow_hashmap.hpp
+  asteria/src/rocket/cow_hashmap.hpp  \
+  asteria/src/rocket/intrusive_ptr.hpp
 
 pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
@@ -73,6 +74,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/rocket/insertable_ostream.cpp  \
   asteria/src/rocket/insertable_iostream.cpp  \
   asteria/src/rocket/cow_string.cpp  \
+  asteria/src/rocket/intrusive_ptr.cpp  \
   asteria/src/utilities.cpp  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
