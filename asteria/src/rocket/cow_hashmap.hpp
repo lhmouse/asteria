@@ -353,7 +353,7 @@ namespace details_cow_hashmap {
           }
         ~storage_handle()
           {
-            this->do_reset(nullptr);
+            this->do_reset(storage_pointer());
           }
 
         storage_handle(const storage_handle &)
@@ -365,7 +365,7 @@ namespace details_cow_hashmap {
         void do_reset(storage_pointer ptr_new) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-            if(ptr == nullptr) {
+            if(!ptr) {
               return;
             }
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
@@ -415,7 +415,7 @@ namespace details_cow_hashmap {
         bool unique() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return false;
             }
             return ptr->nref.load(::std::memory_order_relaxed) == 1;
@@ -423,7 +423,7 @@ namespace details_cow_hashmap {
         size_type bucket_count() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return 0;
             }
             return storage::max_nbkt_for_nblk(ptr->nblk);
@@ -431,7 +431,7 @@ namespace details_cow_hashmap {
         size_type capacity() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return 0;
             }
             return storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
@@ -461,7 +461,7 @@ namespace details_cow_hashmap {
         const handle_type * data() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return nullptr;
             }
             return ptr->data;
@@ -469,7 +469,7 @@ namespace details_cow_hashmap {
         size_type element_count() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return 0;
             }
             return ptr->nelem;
@@ -478,7 +478,7 @@ namespace details_cow_hashmap {
           {
             if(res_arg == 0) {
               // Deallocate the block.
-              this->do_reset(nullptr);
+              this->do_reset(storage_pointer());
               return nullptr;
             }
             const auto cap = this->check_size_add(0, res_arg);
@@ -515,7 +515,7 @@ namespace details_cow_hashmap {
           }
         void deallocate() noexcept
           {
-            this->do_reset(nullptr);
+            this->do_reset(storage_pointer());
           }
 
         constexpr operator const storage_handle * () const noexcept
@@ -542,7 +542,7 @@ namespace details_cow_hashmap {
             const auto ptr = other.m_ptr;
             if(ptr) {
               // Detach the block.
-              other.m_ptr = nullptr;
+              other.m_ptr = storage_pointer();
             }
             this->do_reset(ptr);
           }
@@ -555,7 +555,7 @@ namespace details_cow_hashmap {
           difference_type index_of(const ykeyT &ykey) const
             {
               const auto ptr = this->m_ptr;
-              if(ptr == nullptr) {
+              if(!ptr) {
                 return -1;
               }
               const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
@@ -572,7 +572,7 @@ namespace details_cow_hashmap {
         handle_type * mut_data_unchecked() noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return nullptr;
             }
             ROCKET_ASSERT(this->unique());
@@ -915,7 +915,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());
           ROCKET_ASSERT(cnt_two <= this->m_sth.bucket_count() - off_two);
           const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
-          if(ptr == nullptr) {
+          if(!ptr) {
             // The storage has been deallocated.
             return nullptr;
           }

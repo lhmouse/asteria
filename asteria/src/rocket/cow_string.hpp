@@ -148,7 +148,7 @@ namespace details_cow_string {
           }
         ~storage_handle()
           {
-            this->do_reset(nullptr);
+            this->do_reset(storage_pointer());
           }
 
         storage_handle(const storage_handle &)
@@ -160,7 +160,7 @@ namespace details_cow_string {
         void do_reset(storage_pointer ptr_new) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-            if(ptr == nullptr) {
+            if(!ptr) {
               return;
             }
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
@@ -192,7 +192,7 @@ namespace details_cow_string {
         bool unique() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return false;
             }
             return ptr->nref.load(::std::memory_order_relaxed) == 1;
@@ -200,7 +200,7 @@ namespace details_cow_string {
         size_type capacity() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return 0;
             }
             return storage::max_nchar_for_nblk(ptr->nblk);
@@ -230,7 +230,7 @@ namespace details_cow_string {
         const value_type * data() const noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return nullptr;
             }
             return ptr->data;
@@ -239,7 +239,7 @@ namespace details_cow_string {
           {
             if(res_arg == 0) {
               // Deallocate the block.
-              this->do_reset(nullptr);
+              this->do_reset(storage_pointer());
               return nullptr;
             }
             const auto cap = this->check_size_add(0, res_arg);
@@ -265,7 +265,7 @@ namespace details_cow_string {
           }
         void deallocate() noexcept
           {
-            this->do_reset(nullptr);
+            this->do_reset(storage_pointer());
           }
 
         void share_with(const storage_handle &other) noexcept
@@ -283,7 +283,7 @@ namespace details_cow_string {
             const auto ptr = other.m_ptr;
             if(ptr) {
               // Detach the block.
-              other.m_ptr = nullptr;
+              other.m_ptr = storage_pointer();
             }
             this->do_reset(ptr);
           }
@@ -304,7 +304,7 @@ namespace details_cow_string {
         value_type * mut_data_unchecked() noexcept
           {
             const auto ptr = this->m_ptr;
-            if(ptr == nullptr) {
+            if(!ptr) {
               return nullptr;
             }
             ROCKET_ASSERT(this->unique());
@@ -741,7 +741,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           ROCKET_ASSERT(off_two <= this->m_len);
           ROCKET_ASSERT(len_two <= this->m_len - off_two);
           const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
-          if(ptr == nullptr) {
+          if(!ptr) {
             // The storage has been deallocated.
             this->m_ptr = shallow().c_str();
             return nullptr;
