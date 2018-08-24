@@ -16,6 +16,7 @@ using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
 using ::std::remove_reference;
+using ::std::is_nothrow_constructible;
 
 namespace details_allocator_utilities {
 
@@ -36,6 +37,10 @@ namespace details_allocator_utilities {
         allocatorT m_alloc;
 
       public:
+        final_wrapper() noexcept(is_nothrow_constructible<allocatorT>::value)
+          : m_alloc()
+          {
+          }
         explicit final_wrapper(const allocatorT &alloc) noexcept
           : m_alloc(alloc)
           {
