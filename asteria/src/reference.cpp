@@ -21,8 +21,8 @@ Reference::~Reference()
 
 Value read_reference(const Reference &ref)
   {
-    const Value *ptr;
     // Get a pointer to the root value.
+    const Value *ptr;
     switch(ref.get_root().index()) {
     case Reference_root::index_constant:
       {
@@ -101,8 +101,8 @@ Value read_reference(const Reference &ref)
   }
 Value & write_reference(const Reference &ref, Value value)
   {
-    Value *ptr;
     // Get a pointer to the root value.
+    Value *ptr;
     switch(ref.get_root().index()) {
     case Reference_root::index_constant:
       {
@@ -196,8 +196,9 @@ Value unset_reference(const Reference &ref)
     if(ref.has_modifiers() == false) {
       ASTERIA_THROW_RUNTIME_ERROR("Only array or object members may be `unset`.");
     }
-    Value *ptr;
+    Value value;
     // Get a pointer to the root value.
+    Value *ptr;
     switch(ref.get_root().index()) {
     case Reference_root::index_constant:
       {
@@ -222,7 +223,6 @@ Value unset_reference(const Reference &ref)
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
     }
     // Apply modifiers.
-    Value value;
     for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
       switch(modit->index()) {
       case Reference_modifier::index_array_index:
