@@ -304,11 +304,11 @@ namespace details_cow_hashmap {
       };
 
   template<typename allocatorT, typename hashT, typename eqT>
-    class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
-      , private conditional<is_same<hashT, allocatorT>::value,
-                            ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type
-      , private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
-                            ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
+    class storage_handle : private allocator_wrapper_base_for<allocatorT>::type,
+                           private conditional<is_same<hashT, allocatorT>::value,
+                                               ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
+                           private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+                                               ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
       {
       public:
         using allocator_type   = allocatorT;
@@ -334,21 +334,21 @@ namespace details_cow_hashmap {
 
       public:
         storage_handle(const allocator_type &alloc, const hasher &hf, const key_equal &eq)
-          : allocator_base(alloc)
-          , conditional<is_same<hashT, allocatorT>::value,
-                        ebo_placeholder<0>, hasher_base>::type(hf)
-          , conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
-                        ebo_placeholder<1>, key_equal_base>::type(eq)
-          , m_ptr(nullptr)
+          : allocator_base(alloc),
+            conditional<is_same<hashT, allocatorT>::value,
+                        ebo_placeholder<0>, hasher_base>::type(hf),
+            conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+                        ebo_placeholder<1>, key_equal_base>::type(eq),
+            m_ptr(nullptr)
           {
           }
         storage_handle(allocator_type &&alloc, const hasher &hf, const key_equal &eq)
-          : allocator_base(::std::move(alloc))
-          , conditional<is_same<hashT, allocatorT>::value,
-                        ebo_placeholder<0>, hasher_base>::type(hf)
-          , conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
-                        ebo_placeholder<1>, key_equal_base>::type(eq)
-          , m_ptr(nullptr)
+          : allocator_base(::std::move(alloc)),
+            conditional<is_same<hashT, allocatorT>::value,
+                        ebo_placeholder<0>, hasher_base>::type(hf),
+            conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+                        ebo_placeholder<1>, key_equal_base>::type(eq),
+            m_ptr(nullptr)
           {
           }
         ~storage_handle()

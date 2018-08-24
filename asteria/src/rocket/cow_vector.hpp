@@ -278,13 +278,13 @@ namespace details_cow_vector {
 
       public:
         explicit storage_handle(const allocator_type &alloc) noexcept
-          : allocator_base(alloc)
-          , m_ptr(nullptr)
+          : allocator_base(alloc),
+            m_ptr(nullptr)
           {
           }
         explicit storage_handle(allocator_type &&alloc) noexcept
-          : allocator_base(::std::move(alloc))
-          , m_ptr(nullptr)
+          : allocator_base(::std::move(alloc)),
+            m_ptr(nullptr)
           {
           }
         ~storage_handle()

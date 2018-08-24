@@ -41,8 +41,8 @@ namespace details_variant {
       };
   template<typename firstT, typename ...remainingT>
     struct type_getter<0, firstT, remainingT...>
-      : common_type<firstT>
       {
+        using type = firstT;
       };
   template<unsigned indexT, typename firstT, typename ...remainingT>
     struct type_getter<indexT, firstT, remainingT...>

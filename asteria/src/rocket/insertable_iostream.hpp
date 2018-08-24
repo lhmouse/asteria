@@ -29,13 +29,13 @@ template<typename charT, typename traitsT, typename allocatorT>
 
     public:
       explicit basic_insertable_iostream(ios_base::openmode which = ios_base::in | ios_base::out)
-        : basic_iostream<charT, traitsT>(&(this->m_sb))
-        , m_sb(which)
+        : basic_iostream<charT, traitsT>(&(this->m_sb)),
+          m_sb(which)
         {
         }
       explicit basic_insertable_iostream(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
-        : basic_iostream<charT, traitsT>(&(this->m_sb))
-        , m_sb(::std::move(str), which)
+        : basic_iostream<charT, traitsT>(&(this->m_sb)),
+          m_sb(::std::move(str), which)
         {
         }
       ~basic_insertable_iostream() override;
