@@ -63,7 +63,7 @@ Value unset_reference(const Reference &ref)
     for(std::size_t i = 0; i < nmod - 1; ++i) {
       const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, false, nullptr);
       if(!ptr) {
-        ROCKET_ASSERT(false);
+        return { };
       }
       cur = std::ref(*ptr);
     }

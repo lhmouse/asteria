@@ -117,7 +117,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         if(erased_out_opt){
           *erased_out_opt = std::move(rit[0]);
           array.erase(rit);
-          return nullptr;
+          return erased_out_opt;
         }
         return &(rit[0]);
       }
@@ -146,7 +146,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         if(erased_out_opt){
           *erased_out_opt = std::move(rit->second);
           object.erase(rit);
-          return nullptr;
+          return erased_out_opt;
         }
         return &(rit->second);
       }
