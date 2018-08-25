@@ -214,22 +214,22 @@ template<typename ...paramsT>
       return lhs.get() != rhs.get();
     }
 template<typename ...paramsT>
-  inline bool operator<(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
+  inline bool operator<(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs)
     {
       return lhs.get() < rhs.get();
     }
 template<typename ...paramsT>
-  inline bool operator>(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
+  inline bool operator>(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs)
     {
       return lhs.get() > rhs.get();
     }
 template<typename ...paramsT>
-  inline bool operator<=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
+  inline bool operator<=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs)
     {
       return lhs.get() <= rhs.get();
     }
 template<typename ...paramsT>
-  inline bool operator>=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
+  inline bool operator>=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs)
     {
       return lhs.get() >= rhs.get();
     }
