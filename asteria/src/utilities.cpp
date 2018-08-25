@@ -89,14 +89,6 @@ void Formatter::do_put(const void *value)
     m_stream <<value;
   }
 
-bool are_debug_logs_enabled() noexcept
-  {
-#ifdef ENABLE_DEBUG_LOGS
-    return true;
-#else
-    return false;
-#endif
-  }
 bool write_log_to_stderr(Formatter &&fmt) noexcept
   try {
     auto &oss = fmt.get_stream();
@@ -128,6 +120,7 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
   } catch(...) {
     return false;
   }
+
 void throw_runtime_error(Formatter &&fmt)
   {
     auto &oss = fmt.get_stream();

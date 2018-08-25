@@ -82,8 +82,17 @@ class Formatter
         }
   };
 
-extern bool are_debug_logs_enabled() noexcept;
+constexpr bool are_debug_logs_enabled() noexcept
+  {
+#ifdef ENABLE_DEBUG_LOGS
+    return true;
+#else
+    return false;
+#endif
+  }
+
 extern bool write_log_to_stderr(Formatter &&fmt) noexcept;
+
 [[noreturn]] extern void throw_runtime_error(Formatter &&fmt);
 
 }
