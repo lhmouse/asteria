@@ -37,21 +37,21 @@ namespace details_allocator_utilities {
         allocatorT m_alloc;
 
       public:
-        final_wrapper() noexcept(is_nothrow_constructible<allocatorT>::value)
+        constexpr final_wrapper() noexcept(is_nothrow_constructible<allocatorT>::value)
           : m_alloc()
           {
           }
-        explicit final_wrapper(const allocatorT &alloc) noexcept
+        explicit constexpr final_wrapper(const allocatorT &alloc) noexcept
           : m_alloc(alloc)
           {
           }
-        explicit final_wrapper(allocatorT &&alloc) noexcept
+        explicit constexpr final_wrapper(allocatorT &&alloc) noexcept
           : m_alloc(::std::move(alloc))
           {
           }
 
       public:
-        operator const allocatorT & () const noexcept
+        constexpr operator const allocatorT & () const noexcept
           {
             return this->m_alloc;
           }
