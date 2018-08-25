@@ -1968,8 +1968,7 @@ template<typename ...paramsT>
       if(lhs.size() + rhs.size() <= lhs.capacity()) {
         res.assign(::std::move(lhs));
         res.append(rhs.c_str(), rhs.length());
-      }
-      else {
+      } else {
         res.assign(::std::move(rhs));
         res.insert(0, lhs.c_str(), lhs.length());
       }
@@ -2223,8 +2222,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           is.setstate(ios_base::failbit);
         }
         is.width(0);
-      }
-      catch(...) {
+      } catch(...) {
         details_cow_string::handle_io_exception(is);
       }
       return is;
@@ -2275,8 +2273,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           offset += written;
         }
         os.width(0);
-      }
-      catch(...) {
+      } catch(...) {
         details_cow_string::handle_io_exception(os);
       }
       return os;
@@ -2323,8 +2320,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         if(!eol && str.empty()) {
           is.setstate(ios_base::failbit);
         }
-      }
-      catch(...) {
+      } catch(...) {
         details_cow_string::handle_io_exception(is);
       }
       return is;
