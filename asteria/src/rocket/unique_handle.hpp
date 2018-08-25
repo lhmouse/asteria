@@ -84,10 +84,6 @@ namespace details_unique_handle {
             return static_cast<closer_base &>(*this);
           }
 
-        bool test() const noexcept
-          {
-            return this->as_closer().is_null(this->m_h) == false;
-          }
         handle_type get() const noexcept
           {
             return this->m_h;
@@ -177,7 +173,7 @@ template<typename handleT, typename closerT>
         }
       explicit operator bool () const noexcept
         {
-          return this->m_sth.test();
+          return !(this->m_sth.as_closer().is_null(this->m_sth.get()));
         }
 
       // 23.11.1.2.5, modifiers
