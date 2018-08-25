@@ -904,7 +904,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       cow_hashmap & operator=(initializer_list<value_type> init)
         {
-          return this->assign(init);
+          this->assign(init);
+          return *this;
         }
 
     private:

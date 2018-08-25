@@ -802,7 +802,8 @@ template<typename valueT, typename allocatorT>
         }
       cow_vector & operator=(initializer_list<value_type> init)
         {
-          return this->assign(init);
+          this->assign(init);
+          return *this;
         }
 
     private:

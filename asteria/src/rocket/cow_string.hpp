@@ -716,7 +716,8 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string & operator=(shallow sh) noexcept
         {
-          return this->assign(sh);
+          this->assign(sh);
+          return *this;
         }
       basic_cow_string & operator=(const basic_cow_string &other) noexcept
         {
@@ -732,7 +733,8 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string & operator=(initializer_list<value_type> init)
         {
-          return this->assign(init);
+          this->assign(init);
+          return *this;
         }
 
     private:
