@@ -1463,6 +1463,17 @@ template<typename ...paramsT>
       return rhs.cend();
     }
 
+template<typename ...paramsT>
+  inline bool empty(const cow_hashmap<paramsT...> &rhs) noexcept
+    {
+      return rhs.empty();
+    }
+template<typename ...paramsT>
+  inline typename cow_hashmap<paramsT...>::size_type size(const cow_hashmap<paramsT...> &rhs) noexcept
+    {
+      return rhs.size();
+    }
+
 }
 
 #endif

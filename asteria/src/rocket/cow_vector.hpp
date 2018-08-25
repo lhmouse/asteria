@@ -1315,6 +1315,17 @@ template<typename ...paramsT>
       return rhs.crend();
     }
 
+template<typename ...paramsT>
+  inline bool empty(const cow_vector<paramsT...> &rhs) noexcept
+    {
+      return rhs.empty();
+    }
+template<typename ...paramsT>
+  inline typename cow_vector<paramsT...>::size_type size(const cow_vector<paramsT...> &rhs) noexcept
+    {
+      return rhs.size();
+    }
+
 }
 
 #endif

@@ -2179,6 +2179,17 @@ template<typename ...paramsT>
       return rhs.crend();
     }
 
+template<typename ...paramsT>
+  inline bool empty(const basic_cow_string<paramsT...> &rhs) noexcept
+    {
+      return rhs.empty();
+    }
+template<typename ...paramsT>
+  inline typename basic_cow_string<paramsT...>::size_type size(const basic_cow_string<paramsT...> &rhs) noexcept
+    {
+      return rhs.size();
+    }
+
 template<typename charT, typename traitsT, typename allocatorT>
   basic_istream<charT, traitsT> & operator>>(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str)
     {
