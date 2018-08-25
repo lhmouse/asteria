@@ -136,14 +136,14 @@ namespace details_cow_string {
         storage_pointer m_ptr;
 
       public:
-        explicit storage_handle(const allocator_type &alloc) noexcept
+        explicit constexpr storage_handle(const allocator_type &alloc) noexcept
           : allocator_base(alloc),
-            m_ptr(nullptr)
+            m_ptr()
           {
           }
-        explicit storage_handle(allocator_type &&alloc) noexcept
+        explicit constexpr storage_handle(allocator_type &&alloc) noexcept
           : allocator_base(::std::move(alloc)),
-            m_ptr(nullptr)
+            m_ptr()
           {
           }
         ~storage_handle()
