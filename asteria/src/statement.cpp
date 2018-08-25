@@ -183,6 +183,20 @@ Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &s
         Statement::S_return cand_bnd = { std::move(expr_bnd) };
         return std::move(cand_bnd);
       }
+    case Statement::index_export:
+      {
+        const auto &cand = stmt.as<Statement::S_export>();
+        // Copy it as-is.
+        Statement::S_export cand_bnd = { cand.name };
+        return std::move(cand_bnd);
+      }
+    case Statement::index_import:
+      {
+        const auto &cand = stmt.as<Statement::S_import>();
+        // Copy it as-is.
+        Statement::S_import cand_bnd = { cand.path };
+        return std::move(cand_bnd);
+      }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");
     }
@@ -571,6 +585,20 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         // Evaluate the expression.
         ref_out = evaluate_expression(cand.expr, ctx_inout);
         return Statement::status_return;
+      }
+    case Statement::index_export:
+      {
+        const auto &cand = stmt.as<Statement::S_export>();
+        // TODO
+        ASTERIA_TERMINATE("TODO : `export` has not been implemented yet.");
+        (void)cand;
+      }
+    case Statement::index_import:
+      {
+        const auto &cand = stmt.as<Statement::S_import>();
+        // TODO
+        ASTERIA_TERMINATE("TODO : `import` has not been implemented yet.");
+        (void)cand;
       }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");

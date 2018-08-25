@@ -1,5 +1,5 @@
 document ::=
-	statement-list-opt
+	statement-or-directive-list-opt
 
 identifier ::=
 	PCRE([A-Za-z_][0-9A-Za-z_]*)
@@ -148,3 +148,16 @@ subscripting-trailer ::=
 	"[" expression "]" expression-trailer-opt
 member-access-trailer ::=
 	"." identifier expression-trailer-opt
+
+statement-or-directive-list-opt ::=
+	statement-or-directive-list | ""
+statement-or-directive-list ::=
+	statement-or-directive statement-or-directive-list-opt
+statement-or-directive ::=
+	export-directive | import-directive |
+	statement
+
+export-directive ::=
+	"export" identifier ";"
+import-directive ::=
+	"import" string-literal ";"

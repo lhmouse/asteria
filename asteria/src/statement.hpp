@@ -50,6 +50,8 @@ class Statement
         index_continue    = 11,
         index_throw       = 12,
         index_return      = 13,
+        index_export      = 14,
+        index_import      = 15,
       };
     struct S_expression
       {
@@ -128,6 +130,14 @@ class Statement
       {
         Vector<Xpnode> expr;
       };
+    struct S_export
+      {
+        String name;
+      };
+    struct S_import
+      {
+        String path;
+      };
     using Variant = rocket::variant<
       ROCKET_CDR(
         , S_expression  //  0,
@@ -144,6 +154,8 @@ class Statement
         , S_continue    // 11,
         , S_throw       // 12,
         , S_return      // 13,
+        , S_export      // 14,
+        , S_import      // 15,
       )>;
 
   private:
