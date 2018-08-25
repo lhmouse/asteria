@@ -517,7 +517,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", read_reference(e.get_reference()));
             // Copy the reference into the scope.
-            ref_out = e.get_reference();
+            ref_out = dematerialize_reference(e.get_reference());
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
