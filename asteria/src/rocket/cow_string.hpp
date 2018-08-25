@@ -2192,12 +2192,12 @@ template<typename charT, typename traitsT, typename allocatorT>
       str.erase();
       // Determine the maximum number of characters to extract.
       const auto width = is.width();
+      // This locale object is used by `std::isspace()`.
+      const auto loc = is.getloc();
       try {
-        // This locale object is used by `std::isspace()`.
-        const auto loc = is.getloc();
         // Extract characters and append them to `str`.
+        auto ich = is.rdbuf()->sgetc();
         for(;;) {
-          const auto ich = is.rdbuf()->sgetc();
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
             is.setstate(ios_base::eofbit);
             break;
@@ -2216,7 +2216,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             break;
           }
           str.push_back(ch);
-          is.rdbuf()->sbumpc();
+          ich = is.rdbuf()->snextc();
         }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
@@ -2297,8 +2297,8 @@ template<typename charT, typename traitsT, typename allocatorT>
       // Extract characters and append them to `str`.
       bool eol = false;
       try {
+        auto ich = is.rdbuf()->sgetc();
         for(;;) {
-          const auto ich = is.rdbuf()->sgetc();
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
             is.setstate(ios_base::eofbit);
             break;
@@ -2315,7 +2315,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             break;
           }
           str.push_back(ch);
-          is.rdbuf()->sbumpc();
+          ich = is.rdbuf()->snextc();
         }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
