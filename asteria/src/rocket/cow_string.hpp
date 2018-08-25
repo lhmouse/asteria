@@ -651,7 +651,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 
     public:
       // 24.3.2.2, construct/copy/destroy
-      basic_cow_string(shallow sh, const allocator_type &alloc = allocator_type()) noexcept
+      basic_cow_string(shallow sh, const allocator_type &alloc) noexcept
         : m_sth(alloc), m_ptr(sh.c_str()), m_len(sh.length())
         {
         }
@@ -661,6 +661,10 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string() noexcept(noexcept(allocator_type()))
         : basic_cow_string(shallow(), allocator_type())
+        {
+        }
+      basic_cow_string(shallow sh) noexcept(noexcept(allocator_type()))
+        : basic_cow_string(sh, allocator_type())
         {
         }
       basic_cow_string(const basic_cow_string &other) noexcept
