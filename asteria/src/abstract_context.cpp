@@ -11,7 +11,7 @@ Abstract_context::~Abstract_context()
 
 bool is_name_reserved(const String &name)
   {
-    return name.starts_with("__");
+    return name.empty() || name.starts_with("__");
   }
 
 }
