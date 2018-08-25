@@ -99,7 +99,7 @@ namespace details_intrusive_ptr {
 }
 
 template<typename elementT, typename deleterT>
-  class intrusive_base : private virtual details_intrusive_ptr::refcount_base
+  class intrusive_base : protected virtual details_intrusive_ptr::refcount_base
     {
       template<typename, typename>
         friend class details_intrusive_ptr::stored_pointer;
