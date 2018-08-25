@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "reference.hpp"
-#include "variable.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -310,7 +309,7 @@ Reference & materialize_reference(Reference &ref)
       return ref;
     }
     auto value = read_reference(ref);
-    auto var = allocate<Variable>(std::move(value), false);
+    auto var = rocket::make_intrusive<Variable>(std::move(value), false);
     Reference_root::S_variable ref_c = { std::move(var) };
     ref.set_root(std::move(ref_c));
     return ref;

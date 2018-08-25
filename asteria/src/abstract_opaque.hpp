@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Abstract_opaque
+class Abstract_opaque : public Sbase<Abstract_opaque>
   {
   public:
     Abstract_opaque() noexcept

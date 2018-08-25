@@ -33,36 +33,9 @@ template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
 
 template<typename ElementT>
-  using Sptr = std::shared_ptr<ElementT>;
+  using Sbase = rocket::intrusive_base<ElementT>;
 template<typename ElementT>
-  using Wptr = std::weak_ptr<ElementT>;
-
-template<typename ElementT>
-  using Spref = const Sptr<ElementT> &;
-template<typename ElementT>
-  using Wpref = const Wptr<ElementT> &;
-
-template<typename ElementT, typename ...ParamsT>
-  inline Sptr<ElementT> allocate(ParamsT &&...params)
-    {
-      return std::make_shared<ElementT>(std::forward<ParamsT>(params)...);
-    }
-
-template<typename ResultT, typename SourceT>
-  inline Sptr<ResultT> static_pointer_cast(const Sptr<SourceT> &ptr) noexcept
-    {
-      return std::static_pointer_cast<ResultT>(ptr);
-    }
-template<typename ResultT, typename SourceT>
-  inline Sptr<ResultT> dynamic_pointer_cast(const Sptr<SourceT> &ptr) noexcept
-    {
-      return std::dynamic_pointer_cast<ResultT>(ptr);
-    }
-template<typename ResultT, typename SourceT>
-  inline Sptr<ResultT> const_pointer_cast(const Sptr<SourceT> &ptr) noexcept
-    {
-      return std::const_pointer_cast<ResultT>(ptr);
-    }
+  using Sptr = rocket::intrusive_ptr<ElementT>;
 
 // General utilities
 class Formatter;

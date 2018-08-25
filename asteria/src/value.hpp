@@ -6,6 +6,8 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "abstract_opaque.hpp"
+#include "abstract_function.hpp"
 
 namespace Asteria {
 

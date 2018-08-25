@@ -99,7 +99,7 @@ namespace details_intrusive_ptr {
 }
 
 template<typename elementT, typename deleterT>
-  class intrusive_base : private details_intrusive_ptr::refcount_base
+  class intrusive_base : private virtual details_intrusive_ptr::refcount_base
     {
       template<typename, typename>
         friend class details_intrusive_ptr::stored_pointer;
@@ -120,6 +120,7 @@ template<typename elementT, typename deleterT>
         {
           return this->refcount_base::reference_count();
         }
+
       template<typename yelementT = elementT, typename ydeleterT = deleterT>
         intrusive_ptr<const yelementT, ydeleterT> share_this() const
           {
@@ -207,7 +208,7 @@ namespace details_intrusive_ptr {
             if(!ptr) {
               return 0;
             }
-            return ptr->refcount_base::use_count();
+            return ptr->refcount_base::reference_count();
           }
         pointer get() const noexcept
           {
@@ -375,6 +376,14 @@ template<typename elementT, typename deleterT>
 
     public:
       // 23.11.1.2.4, observers
+      bool unique() const noexcept
+        {
+          return this->m_sth.use_count() == 1;
+        }
+      long use_count() const noexcept
+        {
+          return this->m_sth.use_count();
+        }
       pointer get() const noexcept
         {
           return this->m_sth.get();
