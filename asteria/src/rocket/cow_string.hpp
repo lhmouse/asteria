@@ -1139,7 +1139,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           ROCKET_ASSERT(first <= last);
           return this->append(first, static_cast<size_type>(last - first));
         }
-      template<typename inputT,  typename enable_if<is_convertible<inputT, const value_type *>::value == false, typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
+      template<typename inputT, typename enable_if<is_convertible<inputT, const value_type *>::value == false, typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
         basic_cow_string & append(inputT first, inputT last)
           {
             if(first == last) {
@@ -2187,44 +2187,45 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return is;
       }
+      using traits_type = typename basic_istream<charT, traitsT>::traits_type;
+      // Clear the contents of `str`.
+      str.erase();
+      // Determine the maximum number of characters to extract.
+      const auto width = is.width();
       try {
-        using traits_type = typename basic_istream<charT, traitsT>::traits_type;
-        // Clear the contents of `str`.
-        str.erase();
-        // Determine the maximum number of characters to extract.
-        const auto width = is.width();
-        auto len_max = width;
-        if(len_max <= 0) {
-          len_max = static_cast<streamsize>(str.max_size());
-          ROCKET_ASSERT(len_max > 0);
-        }
         // This locale object is used by `std::isspace()`.
         const auto loc = is.getloc();
         // Extract characters and append them to `str`.
-        auto ich = is.rdbuf()->sgetc();
         for(;;) {
+          const auto ich = is.rdbuf()->sgetc();
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
             is.setstate(ios_base::eofbit);
             break;
           }
-          if(static_cast<streamsize>(str.size()) >= len_max) {
-            break;
+          if(width > 0) {
+            if(static_cast<streamsize>(str.size()) >= width) {
+              break;
+            }
+          } else {
+            if(str.size() >= str.max_size()) {
+              break;
+            }
           }
           const auto ch = traits_type::to_char_type(ich);
           if(::std::isspace<charT>(ch, loc)) {
             break;
           }
           str.push_back(ch);
-          ich = is.rdbuf()->snextc();
+          is.rdbuf()->sbumpc();
         }
-        // If this function extracts no characters, set `std::ios_base::failbit`.
-        if(str.empty()) {
-          is.setstate(ios_base::failbit);
-        }
-        is.width(0);
       } catch(...) {
         details_cow_string::handle_io_exception(is);
       }
+      // If this function extracts no characters, set `std::ios_base::failbit`.
+      if(str.empty()) {
+        is.setstate(ios_base::failbit);
+      }
+      is.width(0);
       return is;
     }
 
@@ -2239,18 +2240,18 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return os;
       }
+      using traits_type = typename basic_ostream<charT, traitsT>::traits_type;
+      // Determine the minimum number of characters to insert.
+      const auto width = os.width();
+      static_assert(sizeof(streamsize) >= sizeof(str.size()), "Casting `str.size()` to type `streamsize` would lose precision.");
+      const auto len = static_cast<streamsize>(str.size());
+      auto len_rem = noadl::max(width, len);
+      auto offset = len - len_rem;
+      if((os.flags() & ios_base::adjustfield) == ios_base::left) {
+        offset = 0;
+      }
       try {
-        using traits_type = typename basic_ostream<charT, traitsT>::traits_type;
-        // Determine the minimum number of characters to insert.
-        const auto width = os.width();
-        static_assert(sizeof(streamsize) >= sizeof(str.size()), "Casting `str.size()` to type `streamsize` would lose precision.");
-        const auto len = static_cast<streamsize>(str.size());
-        auto len_rem = noadl::max(width, len);
         // Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
-        auto offset = len - len_rem;
-        if((os.flags() & ios_base::adjustfield) == ios_base::left) {
-          offset = 0;
-        }
         for(;;) {
           if(len_rem <= 0) {
             break;
@@ -2272,10 +2273,10 @@ template<typename charT, typename traitsT, typename allocatorT>
           len_rem -= written;
           offset += written;
         }
-        os.width(0);
       } catch(...) {
         details_cow_string::handle_io_exception(os);
       }
+      os.width(0);
       return os;
     }
 
@@ -2290,14 +2291,14 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return is;
       }
+      using traits_type = typename basic_istream<charT, traitsT>::traits_type;
+      // Clear the contents of `str`.
+      str.erase();
+      // Extract characters and append them to `str`.
+      bool eol = false;
       try {
-        using traits_type = typename basic_istream<charT, traitsT>::traits_type;
-        // Clear the contents of `str`.
-        str.erase();
-        // Extract characters and append them to `str`.
-        auto ich = is.rdbuf()->sgetc();
-        bool eol = false;
         for(;;) {
+          const auto ich = is.rdbuf()->sgetc();
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
             is.setstate(ios_base::eofbit);
             break;
@@ -2305,7 +2306,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto ch = traits_type::to_char_type(ich);
           if(traits_type::eq(ch, delim)) {
             // Discard the delimiter.
-            ich = is.rdbuf()->snextc();
+            is.rdbuf()->sbumpc();
             eol = true;
             break;
           }
@@ -2314,14 +2315,14 @@ template<typename charT, typename traitsT, typename allocatorT>
             break;
           }
           str.push_back(ch);
-          ich = is.rdbuf()->snextc();
-        }
-        // If this function extracts no characters, set `std::ios_base::failbit`.
-        if(!eol && str.empty()) {
-          is.setstate(ios_base::failbit);
+          is.rdbuf()->sbumpc();
         }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
+      }
+      // If this function extracts no characters, set `std::ios_base::failbit`.
+      if(!eol && str.empty()) {
+        is.setstate(ios_base::failbit);
       }
       return is;
     }
