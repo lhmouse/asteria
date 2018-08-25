@@ -53,7 +53,7 @@ Value read_reference(const Reference &ref)
           if(ptr->type() == Value::type_null) {
             return { };
           }
-          if(ptr->type() != Value::type_array) {
+          else if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           const auto &array = ptr->as<D_array>();
@@ -80,7 +80,7 @@ Value read_reference(const Reference &ref)
           if(ptr->type() == Value::type_null) {
             return { };
           }
-          if(ptr->type() != Value::type_object) {
+          else if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           const auto &object = ptr->as<D_object>();
@@ -134,7 +134,7 @@ Value & write_reference(const Reference &ref, Value value)
           if(ptr->type() == Value::type_null) {
             ptr->set(D_array());
           }
-          if(ptr->type() != Value::type_array) {
+          else if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           auto &array = ptr->as<D_array>();
@@ -172,7 +172,7 @@ Value & write_reference(const Reference &ref, Value value)
           if(ptr->type() == Value::type_null) {
             ptr->set(D_object());
           }
-          if(ptr->type() != Value::type_object) {
+          else if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           auto &object = ptr->as<D_object>();
@@ -228,9 +228,9 @@ Value unset_reference(const Reference &ref)
         {
           const auto &cand = modit->as<Reference_modifier::S_array_index>();
           if(ptr->type() == Value::type_null) {
-            ptr->set(D_array());
+            return { };
           }
-          if(ptr->type() != Value::type_array) {
+          else if(ptr->type() != Value::type_array) {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
           }
           auto &array = ptr->as<D_array>();
@@ -260,9 +260,9 @@ Value unset_reference(const Reference &ref)
         {
           const auto &cand = modit->as<Reference_modifier::S_object_key>();
           if(ptr->type() == Value::type_null) {
-            ptr->set(D_object());
+            return { };
           }
-          if(ptr->type() != Value::type_object) {
+          else if(ptr->type() != Value::type_object) {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
           }
           auto &object = ptr->as<D_object>();
