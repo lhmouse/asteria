@@ -29,6 +29,7 @@ using ::std::decay;
 using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
+using ::std::is_nothrow_constructible;
 
 template<typename handleT, typename closerT>
   class unique_handle;
@@ -49,7 +50,7 @@ namespace details_unique_handle {
         handle_type m_h;
 
       public:
-        constexpr stored_handle() noexcept
+        constexpr stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
           : closer_base(),
             m_h(this->as_closer().null())
           {
@@ -123,7 +124,7 @@ template<typename handleT, typename closerT>
 
     public:
       // 23.11.1.2.1, constructors
-      constexpr unique_handle() noexcept(noexcept(closer_type()))
+      constexpr unique_handle() noexcept(is_nothrow_constructible<closer_type>::value)
         : m_sth()
         {
         }
@@ -131,30 +132,32 @@ template<typename handleT, typename closerT>
         : m_sth(close)
         {
         }
-      explicit unique_handle(handle_type h) noexcept(noexcept(closer_type()))
-        : m_sth(closer_type())
+      explicit unique_handle(handle_type h) noexcept(is_nothrow_constructible<closer_type>::value)
+        : unique_handle()
         {
           this->reset(h);
         }
       unique_handle(handle_type h, const closer_type &close) noexcept
-        : m_sth(close)
+        : unique_handle(close)
         {
           this->reset(h);
         }
       unique_handle(unique_handle &&other) noexcept
-        : m_sth(::std::move(other.m_sth.as_closer()))
+        : unique_handle(::std::move(other.m_sth.as_closer()))
         {
-          this->reset(other.release());
+          this->reset(other.m_sth.release());
         }
       unique_handle(unique_handle &&other, const closer_type &close) noexcept
-        : m_sth(close)
+        : unique_handle(close)
         {
-          this->reset(other.release());
+          this->reset(other.m_sth.release());
         }
       // 23.11.1.2.3, assignment
       unique_handle & operator=(unique_handle &&other) noexcept
         {
-          return this->reset(other.release());
+          this->reset(other.m_sth.release());
+          allocator_move_assigner<closer_type, true>()(this->m_sth.as_closer(), ::std::move(other.m_sth.as_closer()));
+          return *this;
         }
 
     public:
@@ -195,44 +198,44 @@ template<typename handleT, typename closerT>
 
       void swap(unique_handle &other) noexcept
         {
-          allocator_swapper<closer_type, true>()(this->m_sth.as_closer(), other.m_sth.as_closer());
           this->m_sth.exchange(other.m_sth);
+          allocator_swapper<closer_type, true>()(this->m_sth.as_closer(), other.m_sth.as_closer());
         }
     };
 
-template<typename handleT, typename closerT>
-  inline bool operator==(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator==(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() == rhs.get();
     }
-template<typename handleT, typename closerT>
-  inline bool operator!=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator!=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() != rhs.get();
     }
-template<typename handleT, typename closerT>
-  inline bool operator<(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator<(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() < rhs.get();
     }
-template<typename handleT, typename closerT>
-  inline bool operator>(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator>(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() > rhs.get();
     }
-template<typename handleT, typename closerT>
-  inline bool operator<=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator<=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() <= rhs.get();
     }
-template<typename handleT, typename closerT>
-  inline bool operator>=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline bool operator>=(const unique_handle<paramsT...> &lhs, const unique_handle<paramsT...> &rhs) noexcept
     {
       return lhs.get() >= rhs.get();
     }
 
-template<typename handleT, typename closerT>
-  inline void swap(unique_handle<handleT, closerT> &lhs, unique_handle<handleT, closerT> &rhs) noexcept
+template<typename ...paramsT>
+  inline void swap(unique_handle<paramsT...> &lhs, unique_handle<paramsT...> &rhs) noexcept
     {
       lhs.swap(rhs);
     }
