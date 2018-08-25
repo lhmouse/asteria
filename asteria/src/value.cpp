@@ -86,7 +86,7 @@ bool test_value(const Value &value)
       ASTERIA_TERMINATE("An unknown value type enumeration `", value.type(), "` has been encountered.");
     }
   }
-Value::Compare_result compare_values(const Value &lhs, const Value &rhs) noexcept
+Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
     if(lhs.type() != rhs.type()) {
