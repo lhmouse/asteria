@@ -790,13 +790,15 @@ template<typename valueT, typename allocatorT>
         }
       cow_vector & operator=(const cow_vector &other) noexcept
         {
+          this->assign(other);
           allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-          return this->assign(other);
+          return *this;
         }
       cow_vector & operator=(cow_vector &&other) noexcept
         {
+          this->assign(::std::move(other));
           allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
-          return this->assign(::std::move(other));
+          return *this;
         }
       cow_vector & operator=(initializer_list<value_type> init)
         {
@@ -1228,8 +1230,8 @@ template<typename valueT, typename allocatorT>
 
       void swap(cow_vector &other) noexcept
         {
-          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
           this->m_sth.exchange_with(other.m_sth);
+          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         }
 
       // 26.3.11.4, data access
