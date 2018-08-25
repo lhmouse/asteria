@@ -414,7 +414,7 @@ template<typename ...elementsT>
                                                         details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
           this->m_index = 0x6EEFDEAD;
-          std::memset(m_buffers, '#', sizeof(m_buffers));
+          ::std::memset(m_buffers, '#', sizeof(m_buffers));
 #endif
         }
 
