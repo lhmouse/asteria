@@ -319,11 +319,13 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
               const auto &kcand = kstmt.as<Statement::S_var_def>();
               do_safe_set_named_reference(ctx_test, "variable", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named variable: name = ", kcand.name, ", immutable = ", kcand.immutable);
+              continue;
             }
-            else if(kstmt.index() == Statement::index_func_def) {
+            if(kstmt.index() == Statement::index_func_def) {
               const auto &kcand = kstmt.as<Statement::S_func_def>();
               do_safe_set_named_reference(ctx_test, "function", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named function: name = ", kcand.name, ", file:line = ", kcand.file, ':', kcand.line);
+              continue;
             }
           }
         }
@@ -462,8 +464,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
               return status;
             }
           }
-        }
-        else if(range_value.type() == Value::type_object) {
+        } else if(range_value.type() == Value::type_object) {
           const auto &object = range_value.as<D_object>();
           for(auto it = object.begin(); it != object.end(); ++it) {
             Executive_context ctx_next(&ctx_for);
@@ -488,8 +489,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
               return status;
             }
           }
-        }
-        else {
+        } else {
           ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", get_type_name(range_value.type()), "`.");
         }
         return Statement::status_next;
@@ -512,13 +512,11 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           Bivector<String, Unsigned> btv;
           try {
             unpack_backtrace_and_rethrow(btv, std::current_exception());
-          }
-          catch(Exception &e) {
+          } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", read_reference(e.get_reference()));
             // Copy the reference into the scope.
             ref_out = e.get_reference();
-          }
-          catch(std::exception &e) {
+          } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
             ref_out = reference_temp_value(D_string(e.what()));
@@ -552,10 +550,10 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         if(cand.target == Statement::target_scope_switch) {
           return Statement::status_break_switch;
         }
-        else if(cand.target == Statement::target_scope_while) {
+        if(cand.target == Statement::target_scope_while) {
           return Statement::status_break_while;
         }
-        else if(cand.target == Statement::target_scope_for) {
+        if(cand.target == Statement::target_scope_for) {
           return Statement::status_break_for;
         }
         return Statement::status_break_unspec;
@@ -566,7 +564,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         if(cand.target == Statement::target_scope_while) {
           return Statement::status_continue_while;
         }
-        else if(cand.target == Statement::target_scope_for) {
+        if(cand.target == Statement::target_scope_for) {
           return Statement::status_continue_for;
         }
         return Statement::status_continue_unspec;

@@ -590,16 +590,15 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
               auto result = lhs_value.as<D_integer>();
               do_set_result(lhs, true, do_add(result, D_integer(1)));
               do_set_result(lhs, false, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_double) {
+            if(lhs_value.type() == Value::type_double) {
               auto result = lhs_value.as<D_double>();
               do_set_result(lhs, true, do_add(result, D_double(1)));
               do_set_result(lhs, false, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_postfix_dec:
           {
@@ -610,16 +609,15 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
               auto result = lhs_value.as<D_integer>();
               do_set_result(lhs, true, do_subtract(result, D_integer(1)));
               do_set_result(lhs, false, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_double) {
+            if(lhs_value.type() == Value::type_double) {
               auto result = lhs_value.as<D_double>();
               do_set_result(lhs, true, do_subtract(result, D_double(1)));
               do_set_result(lhs, false, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_postfix_at:
           {
@@ -633,16 +631,15 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
               auto index = rhs_value.as<D_integer>();
               Reference_modifier::S_array_index mod_c = { index };
               lhs.push_modifier(std::move(mod_c));
+              break;
             }
-            else if(rhs_value.type() == Value::type_string) {
+            if(rhs_value.type() == Value::type_string) {
               auto key = rhs_value.as<D_string>();
               Reference_modifier::S_object_key mod_c = { std::move(key) };
               lhs.push_modifier(std::move(mod_c));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
           }
         case Xpnode::xop_prefix_pos:
           {
@@ -659,15 +656,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_negate(lhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_string) {
+            if(lhs_value.type() == Value::type_string) {
               auto result = do_negate(lhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_prefix_notb:
           {
@@ -676,15 +672,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if(lhs_value.type() == Value::type_boolean) {
               auto result = do_logical_not(lhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_integer) {
+            if(lhs_value.type() == Value::type_integer) {
               auto result = do_bitwise_not(lhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_prefix_notl:
           {
@@ -703,15 +698,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_add(lhs_value.as<D_integer>(), D_integer(1));
               do_set_result(lhs, true, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_double) {
+            if(lhs_value.type() == Value::type_double) {
               auto result = do_add(lhs_value.as<D_double>(), D_double(1));
               do_set_result(lhs, true, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_prefix_dec:
           {
@@ -721,15 +715,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_subtract(lhs_value.as<D_integer>(), D_integer(1));
               do_set_result(lhs, true, std::move(result));
+              break;
             }
-            else if(lhs_value.type() == Value::type_double) {
+            if(lhs_value.type() == Value::type_double) {
               auto result = do_subtract(lhs_value.as<D_double>(), D_double(1));
               do_set_result(lhs, true, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "`.");
           }
         case Xpnode::xop_prefix_unset:
           {
@@ -836,23 +829,24 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_add(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
+            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
               auto result = do_add(lhs_value.as<D_double>(), rhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_string)) {
+            if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_string)) {
               auto result = do_concatenate(lhs_value.as<D_string>(), rhs_value.as<D_string>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_sub:
           {
@@ -865,19 +859,19 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_subtract(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
+            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
               auto result = do_subtract(lhs_value.as<D_double>(), rhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_mul:
           {
@@ -891,27 +885,29 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_multiply(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
+            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
               auto result = do_multiply(lhs_value.as<D_double>(), rhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_duplicate(lhs_value.as<D_string>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_string)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_string)) {
               auto result = do_duplicate(rhs_value.as<D_string>(), lhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_div:
           {
@@ -923,15 +919,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_divide(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
+            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
               auto result = do_divide(lhs_value.as<D_double>(), rhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_mod:
           {
@@ -943,15 +938,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_modulo(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
+            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
               auto result = do_modulo(lhs_value.as<D_double>(), rhs_value.as<D_double>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_sll:
           {
@@ -965,11 +959,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_logical(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_srl:
           {
@@ -983,11 +975,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_logical(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_sla:
           {
@@ -1002,11 +992,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_arithmetic(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_sra:
           {
@@ -1020,11 +1008,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_arithmetic(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_andb:
           {
@@ -1037,15 +1023,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_and(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_orb:
           {
@@ -1058,15 +1043,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_or(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_xorb:
           {
@@ -1079,15 +1063,14 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.as<D_boolean>(), rhs_value.as<D_boolean>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
+            if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_xor(lhs_value.as<D_integer>(), rhs_value.as<D_integer>());
               do_set_result(lhs, cand.compound_assign, std::move(result));
+              break;
             }
-            else {
-              ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
-            }
-            break;
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(cand.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
         case Xpnode::xop_infix_assign:
           {
