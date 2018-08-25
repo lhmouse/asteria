@@ -2194,12 +2194,14 @@ template<typename charT, typename traitsT, typename allocatorT>
       const auto width = is.width();
       // This locale object is used by `std::isspace()`.
       const auto loc = is.getloc();
+      // We need to set stream state bits outside the `try` block.
+      auto state = ios_base::goodbit;
       try {
         // Extract characters and append them to `str`.
         auto ich = is.rdbuf()->sgetc();
         for(;;) {
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
-            is.setstate(ios_base::eofbit);
+            state |= ios_base::eofbit;
             break;
           }
           if(width > 0) {
@@ -2218,12 +2220,15 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
+        if(str.empty()) {
+          state |= ios_base::failbit;
+        }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
+        state &= ~ios_base::badbit;
       }
-      // If this function extracts no characters, set `std::ios_base::failbit`.
-      if(str.empty()) {
-        is.setstate(ios_base::failbit);
+      if(state != ios_base::goodbit) {
+        is.setstate(state);
       }
       is.width(0);
       return is;
@@ -2250,6 +2255,8 @@ template<typename charT, typename traitsT, typename allocatorT>
       if((os.flags() & ios_base::adjustfield) == ios_base::left) {
         offset = 0;
       }
+      // We need to set stream state bits outside the `try` block.
+      auto state = ios_base::goodbit;
       try {
         // Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
         for(;;) {
@@ -2260,12 +2267,12 @@ template<typename charT, typename traitsT, typename allocatorT>
           if((0 <= offset) && (offset < len)) {
             written = os.rdbuf()->sputn(str.c_str() + offset, len - offset);
             if(written == 0) {
-              os.setstate(ios_base::failbit);
+              state |= ios_base::failbit;
               break;
             }
           } else {
             if(traits_type::eq_int_type(os.rdbuf()->sputc(os.fill()), traits_type::eof())) {
-              os.setstate(ios_base::failbit);
+              state |= ios_base::failbit;
               break;
             }
             written = 1;
@@ -2275,6 +2282,10 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       } catch(...) {
         details_cow_string::handle_io_exception(os);
+        state &= ~ios_base::badbit;
+      }
+      if(state != ios_base::goodbit) {
+        os.setstate(state);
       }
       os.width(0);
       return os;
@@ -2292,37 +2303,41 @@ template<typename charT, typename traitsT, typename allocatorT>
         return is;
       }
       using traits_type = typename basic_istream<charT, traitsT>::traits_type;
-      // Clear the contents of `str`.
+      // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
       str.erase();
-      // Extract characters and append them to `str`.
-      bool eol = false;
+      // We need to set stream state bits outside the `try` block.
+      auto state = ios_base::goodbit;
       try {
+        // Extract characters and append them to `str`.
         auto ich = is.rdbuf()->sgetc();
+        bool eol = false;
         for(;;) {
           if(traits_type::eq_int_type(ich, traits_type::eof())) {
-            is.setstate(ios_base::eofbit);
+            state |= ios_base::eofbit;
             break;
           }
           const auto ch = traits_type::to_char_type(ich);
-          if(traits_type::eq(ch, delim)) {
-            // Discard the delimiter.
+          eol = traits_type::eq(ch, delim);
+          if(eol) {
             is.rdbuf()->sbumpc();
-            eol = true;
             break;
           }
           if(str.size() >= str.max_size()) {
-            is.setstate(ios_base::failbit);
+            state |= ios_base::failbit;
             break;
           }
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
+        if(!eol && str.empty()) {
+          state |= ios_base::failbit;
+        }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
+        state &= ~ios_base::badbit;
       }
-      // If this function extracts no characters, set `std::ios_base::failbit`.
-      if(!eol && str.empty()) {
-        is.setstate(ios_base::failbit);
+      if(state != ios_base::goodbit) {
+        is.setstate(state);
       }
       return is;
     }
