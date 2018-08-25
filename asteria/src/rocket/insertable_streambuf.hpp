@@ -21,14 +21,18 @@ template<typename charT, typename traitsT, typename allocatorT>
   class basic_insertable_streambuf : public basic_streambuf<charT, traitsT>
     {
     public:
-      using string_type      = basic_cow_string<charT, traitsT, allocatorT>;
-      using allocator_type   = typename string_type::allocator_type;
+      using char_type       = charT;
+      using traits_type     = traitsT;
+      using allocator_type  = allocatorT;
+
+      using int_type   = typename traits_type::int_type;
+      using pos_type   = typename traits_type::pos_type;
+      using off_type   = typename traits_type::off_type;
+
+      // N.B. These are non-standard extensions.
+      using string_type      = basic_cow_string<char_type, traits_type, allocator_type>;
       using size_type        = typename string_type::size_type;
       using difference_type  = typename string_type::difference_type;
-
-      using traits_type  = typename basic_streambuf<charT, traitsT>::traits_type;
-      using char_type    = typename basic_streambuf<charT, traitsT>::char_type;
-      using int_type     = typename basic_streambuf<charT, traitsT>::int_type;
 
     private:
       string_type m_str;

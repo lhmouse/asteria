@@ -18,14 +18,22 @@ template<typename charT, typename traitsT, typename allocatorT>
   class basic_insertable_ostream : public basic_ostream<charT, traitsT>
     {
     public:
-      using string_type  = typename basic_insertable_streambuf<charT, traitsT>::string_type;
-      using size_type    = typename basic_insertable_streambuf<charT, traitsT>::size_type;
-      using traits_type  = typename basic_ostream<charT, traitsT>::traits_type;
-      using char_type    = typename basic_ostream<charT, traitsT>::char_type;
-      using int_type     = typename basic_ostream<charT, traitsT>::int_type;
+      using char_type       = charT;
+      using traits_type     = traitsT;
+      using allocator_type  = allocatorT;
+
+      using int_type   = typename traits_type::int_type;
+      using pos_type   = typename traits_type::pos_type;
+      using off_type   = typename traits_type::off_type;
+
+      // N.B. These are non-standard extensions.
+      using streambuf_type   = basic_insertable_streambuf<char_type, traits_type, allocator_type>;
+      using string_type      = basic_cow_string<char_type, traits_type, allocator_type>;
+      using size_type        = typename string_type::size_type;
+      using difference_type  = typename string_type::difference_type;
 
     private:
-      basic_insertable_streambuf<charT, traitsT> m_sb;
+      streambuf_type m_sb;
 
     public:
       explicit basic_insertable_ostream(ios_base::openmode which = ios_base::out)
@@ -41,9 +49,9 @@ template<typename charT, typename traitsT, typename allocatorT>
       ~basic_insertable_ostream() override;
 
     public:
-      basic_insertable_streambuf<charT, traitsT> * rdbuf() const noexcept
+      streambuf_type * rdbuf() const noexcept
         {
-          return const_cast<basic_insertable_streambuf<charT, traitsT> *>(&(this->m_sb));
+          return const_cast<streambuf_type *>(&(this->m_sb));
         }
 
       const string_type & get_string() const noexcept
