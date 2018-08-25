@@ -659,11 +659,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         : basic_cow_string(shallow(), alloc)
         {
         }
-      basic_cow_string() noexcept(noexcept(allocator_type()))
-        : basic_cow_string(shallow(), allocator_type())
-        {
-        }
-      basic_cow_string(shallow sh) noexcept(noexcept(allocator_type()))
+      basic_cow_string(shallow sh = shallow()) noexcept(noexcept(allocator_type()))
         : basic_cow_string(sh, allocator_type())
         {
         }
