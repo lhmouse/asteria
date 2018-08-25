@@ -20,270 +20,57 @@ Reference::~Reference()
 
 Value read_reference(const Reference &ref)
   {
-    // Get a pointer to the root value.
-    const Value *ptr;
-    switch(ref.get_root().index()) {
-    case Reference_root::index_constant:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_constant>();
-        ptr = &(cand.src);
-        break;
-      }
-    case Reference_root::index_temp_value:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
-        ptr = &(cand.value);
-        break;
-      }
-    case Reference_root::index_variable:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_variable>();
-        ptr = &(cand.var->get_value());
-        break;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
-    }
+    const auto nmod = ref.get_modifier_count();
+    // Dereference the root.
+    auto cur = std::ref(dereference_root_readonly_partial(ref.get_root()));
     // Apply modifiers.
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
-      switch(modit->index()) {
-      case Reference_modifier::index_array_index:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_array_index>();
-          if(ptr->type() == Value::type_null) {
-            return { };
-          }
-          else if(ptr->type() != Value::type_array) {
-            ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
-          }
-          const auto &array = ptr->as<D_array>();
-          auto rindex = cand.index;
-          if(rindex < 0) {
-            // Wrap negative indices.
-            rindex += static_cast<Signed>(array.size());
-          }
-          if(rindex < 0) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            return { };
-          }
-          else if(rindex >= static_cast<Signed>(array.size())) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            return { };
-          }
-          const auto rit = array.begin() + static_cast<std::ptrdiff_t>(rindex);
-          ptr = &(*rit);
-          break;
-        }
-      case Reference_modifier::index_object_key:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_object_key>();
-          if(ptr->type() == Value::type_null) {
-            return { };
-          }
-          else if(ptr->type() != Value::type_object) {
-            ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
-          }
-          const auto &object = ptr->as<D_object>();
-          const auto rit = object.find(cand.key);
-          if(rit == object.end()) {
-            ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", object);
-            return { };
-          }
-          ptr = &(rit->second);
-          break;
-        }
-      default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modit->index(), "` has been encountered.");
+    for(std::size_t i = 0; i < nmod; ++i) {
+      const auto ptr = apply_reference_modifier_readonly_partial_opt(ref.get_modifier(i), cur);
+      if(!ptr) {
+        return { };
       }
+      cur = std::ref(*ptr);
     }
-    return *ptr;
+    // Return a reference to the current value.
+    return cur;
   }
 Value & write_reference(const Reference &ref, Value value)
   {
-    // Get a pointer to the root value.
-    Value *ptr;
-    switch(ref.get_root().index()) {
-    case Reference_root::index_constant:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_constant>();
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src, "` cannot be modified.");
-      }
-    case Reference_root::index_temp_value:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
-        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", cand.value, "` cannot be modified.");
-      }
-    case Reference_root::index_variable:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_variable>();
-        if(cand.var->is_immutable()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", cand.var->get_value(), "` is immutable and cannot be modified.");
-        }
-        ptr = &(cand.var->get_value());
-        break;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
-    }
+    const auto nmod = ref.get_modifier_count();
+    // Dereference the root.
+    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
     // Apply modifiers.
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
-      switch(modit->index()) {
-      case Reference_modifier::index_array_index:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_array_index>();
-          if(ptr->type() == Value::type_null) {
-            ptr->set(D_array());
-          }
-          else if(ptr->type() != Value::type_array) {
-            ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
-          }
-          auto &array = ptr->as<D_array>();
-          auto rindex = cand.index;
-          if(rindex < 0) {
-            // Wrap negative indices.
-            rindex += static_cast<Signed>(array.size());
-          }
-          if(rindex < 0) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            const auto size_add = -static_cast<Unsigned>(rindex);
-            if(size_add >= array.max_size() - array.size()) {
-              ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
-            }
-            ASTERIA_DEBUG_LOG("Prepending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.begin(), static_cast<std::size_t>(size_add));
-            rindex = 0;
-          }
-          else if(rindex >= static_cast<Signed>(array.size())) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            const auto size_add = static_cast<Unsigned>(rindex) + 1 - array.size();
-            if(size_add >= array.max_size() - array.size()) {
-              ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", array.size(), "` by `", size_add, "` would exceed system resource limits.");
-            }
-            ASTERIA_DEBUG_LOG("Appending `null` elements to the array: size = ", array.size(), ", size_add = ", size_add);
-            array.insert(array.end(), static_cast<std::size_t>(size_add));
-          }
-          const auto rit = array.mut_begin() + static_cast<std::ptrdiff_t>(rindex);
-          ptr = &(*rit);
-          break;
-        }
-      case Reference_modifier::index_object_key:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_object_key>();
-          if(ptr->type() == Value::type_null) {
-            ptr->set(D_object());
-          }
-          else if(ptr->type() != Value::type_object) {
-            ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
-          }
-          auto &object = ptr->as<D_object>();
-          const auto rpair = object.try_emplace(cand.key);
-          if(rpair.second == false) {
-            ASTERIA_DEBUG_LOG("Key inserted: key = ", cand.key, ", object = ", object);
-          }
-          ptr = &(rpair.first->second);
-          break;
-        }
-      default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modit->index(), "` has been encountered.");
+    for(std::size_t i = 0; i < nmod; ++i) {
+      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, true, nullptr);
+      if(!ptr) {
+        ROCKET_ASSERT(false);
       }
+      cur = std::ref(*ptr);
     }
-    *ptr = std::move(value);
-    return *ptr;
+    // Set the new value.
+    cur.get() = std::move(value);
+    return cur;
   }
 Value unset_reference(const Reference &ref)
   {
-    if(ref.has_modifiers() == false) {
-      ASTERIA_THROW_RUNTIME_ERROR("Only array or object members may be `unset`.");
+    const auto nmod = ref.get_modifier_count();
+    if(nmod == 0) {
+      ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
     }
-    Value value;
-    // Get a pointer to the root value.
-    Value *ptr;
-    switch(ref.get_root().index()) {
-    case Reference_root::index_constant:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_constant>();
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", cand.src, "` cannot be modified.");
+    // Dereference the root.
+    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
+    // Apply modifiers except the last one.
+    for(std::size_t i = 0; i < nmod - 1; ++i) {
+      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, false, nullptr);
+      if(!ptr) {
+        ROCKET_ASSERT(false);
       }
-    case Reference_root::index_temp_value:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_temp_value>();
-        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", cand.value, "` cannot be modified.");
-      }
-    case Reference_root::index_variable:
-      {
-        const auto &cand = ref.get_root().as<Reference_root::S_variable>();
-        if(cand.var->is_immutable()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", cand.var->get_value(), "` is immutable and cannot be modified.");
-        }
-        ptr = &(cand.var->get_value());
-        break;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", ref.get_root().index(), "` has been encountered.");
+      cur = std::ref(*ptr);
     }
-    // Apply modifiers.
-    for(auto modit = ref.get_modifiers().begin(); modit != ref.get_modifiers().end(); ++modit) {
-      switch(modit->index()) {
-      case Reference_modifier::index_array_index:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_array_index>();
-          if(ptr->type() == Value::type_null) {
-            return { };
-          }
-          else if(ptr->type() != Value::type_array) {
-            ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", *ptr, "` because it is not an array.");
-          }
-          auto &array = ptr->as<D_array>();
-          auto rindex = cand.index;
-          if(rindex < 0) {
-            // Wrap negative indices.
-            rindex += static_cast<Signed>(array.size());
-          }
-          if(rindex < 0) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-            return { };
-          }
-          else if(rindex >= static_cast<Signed>(array.size())) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-            return { };
-          }
-          const auto rit = array.mut_begin() + static_cast<std::ptrdiff_t>(rindex);
-          if(modit == ref.get_modifiers().end() - 1) {
-            value = std::move(*rit);
-            array.erase(rit);
-            break;
-          }
-          ptr = &(*rit);
-          break;
-        }
-      case Reference_modifier::index_object_key:
-        {
-          const auto &cand = modit->as<Reference_modifier::S_object_key>();
-          if(ptr->type() == Value::type_null) {
-            return { };
-          }
-          else if(ptr->type() != Value::type_object) {
-            ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", *ptr, "` because it is not an object.");
-          }
-          auto &object = ptr->as<D_object>();
-          const auto rit = object.find_mut(cand.key);
-          if(rit == object.end()) {
-            ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", object);
-            return { };
-          }
-          if(modit == ref.get_modifiers().end() - 1) {
-            value = std::move(rit->second);
-            object.erase(rit);
-            break;
-          }
-          ptr = &(rit->second);
-          break;
-        }
-      default:
-        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modit->index(), "` has been encountered.");
-      }
-    }
-    return std::move(value);
+    // Erase the element referenced by the last modifier.
+    Value erased;
+    apply_reference_modifier_mutable_partial_opt(ref.get_modifier(nmod - 1), cur, false, &erased);
+    return erased;
   }
 
 Reference reference_constant(Value value)
@@ -295,12 +82,6 @@ Reference reference_temp_value(Value value)
   {
     Reference_root::S_temp_value ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
-  }
-Reference indirect_reference_from(const Reference &parent, Reference_modifier modifier)
-  {
-    auto mod = parent.get_modifiers();
-    mod.emplace_back(std::move(modifier));
-    return Reference(parent.get_root(), std::move(mod));
   }
 
 Reference & materialize_reference(Reference &ref)

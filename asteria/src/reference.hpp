@@ -41,23 +41,23 @@ class Reference
       {
         return m_root;
       }
-    const Vector<Reference_modifier> & get_modifiers() const noexcept
+    std::size_t get_modifier_count() const noexcept
       {
-        return m_modifiers;
+        return m_modifiers.size();
       }
-    Vector<Reference_modifier> & get_modifiers() noexcept
+    const Reference_modifier & get_modifier(std::size_t pos) const
       {
-        return m_modifiers;
+        return m_modifiers.at(pos);
+      }
+    Reference_modifier & get_modifier(std::size_t pos)
+      {
+        return m_modifiers.mut(pos);
       }
     Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { })
       {
         m_root = std::move(root);
         m_modifiers = std::move(modifiers);
         return m_root;
-      }
-    bool has_modifiers() const noexcept
-      {
-        return m_modifiers.empty() == false;
       }
     void clear_modifiers() noexcept
       {
@@ -79,7 +79,6 @@ extern Value unset_reference(const Reference &ref);
 
 extern Reference reference_constant(Value value);
 extern Reference reference_temp_value(Value value);
-extern Reference indirect_reference_from(const Reference &parent, Reference_modifier modifier);
 
 extern Reference & materialize_reference(Reference &ref);
 extern Reference & dematerialize_reference(Reference &ref);

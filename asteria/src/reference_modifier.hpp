@@ -31,13 +31,6 @@ class Reference_modifier
         , S_object_key   // 1,
       )>;
 
-    enum Disposition : std::uint8_t
-      {
-        disposition_none    = 0,
-        disposition_create  = 1,
-        disposition_remove  = 2,
-      };
-
   private:
     Variant m_variant;
 
@@ -86,7 +79,7 @@ class Reference_modifier
   };
 
 extern const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modifier &modifier, const Value &parent);
-extern Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, Reference_modifier::Disposition disp);
+extern Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt);
 
 }
 

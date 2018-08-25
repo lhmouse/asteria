@@ -40,7 +40,7 @@ const Value & dereference_root_readonly_partial(const Reference_root &root) noex
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", root.index(), "` has been encountered.");
     }
   }
-Value & dereference_root_mutable_partial(Reference_root &root)
+Value & dereference_root_mutable_partial(const Reference_root &root)
   {
     switch(root.index()) {
     case Reference_root::index_constant:

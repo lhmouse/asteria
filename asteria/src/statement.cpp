@@ -450,7 +450,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_array_index refmod_c = { index };
-            ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
+            ref_out = mapped_base;
+            ref_out.push_modifier(std::move(refmod_c));
             do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name, ref_out);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.
@@ -475,7 +476,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", cand.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_object_key refmod_c = { key };
-            ref_out = indirect_reference_from(mapped_base, std::move(refmod_c));
+            ref_out = mapped_base;
+            ref_out.push_modifier(std::move(refmod_c));
             do_safe_set_named_reference(ctx_next, "`for each` reference", cand.mapped_name, ref_out);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", cand.mapped_name);
             // Execute the loop body.

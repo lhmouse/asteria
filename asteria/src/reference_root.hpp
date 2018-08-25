@@ -91,7 +91,7 @@ class Reference_root
   };
 
 extern const Value & dereference_root_readonly_partial(const Reference_root &root) noexcept;
-extern Value & dereference_root_mutable_partial(Reference_root &root);
+extern Value & dereference_root_mutable_partial(const Reference_root &root);
 
 }
 

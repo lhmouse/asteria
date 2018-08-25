@@ -46,7 +46,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
           return nullptr;
         }
         const auto rit = array.begin() + static_cast<std::ptrdiff_t>(rindex);
-        return &(*rit);
+        return &(rit[0]);
       }
     case Reference_modifier::index_object_key:
       {
@@ -69,14 +69,14 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
       ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
     }
   }
-Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, Reference_modifier::Disposition disp)
+Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt)
   {
     switch(modifier.index()) {
     case Reference_modifier::index_array_index:
       {
         const auto &cand = modifier.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
-          if(disp != Reference_modifier::disposition_create) {
+          if(!creates) {
             return nullptr;
           }
           parent.set(D_array());
@@ -92,7 +92,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         }
         if(rindex < 0) {
           ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", array);
-          if(disp != Reference_modifier::disposition_create) {
+          if(!creates) {
             return nullptr;
           }
           const auto size_add = static_cast<Unsigned>(0) - static_cast<Unsigned>(rindex);
@@ -104,7 +104,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         }
         if(rindex >= static_cast<Signed>(array.size())) {
           ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", array);
-          if(disp != Reference_modifier::disposition_create) {
+          if(!creates) {
             return nullptr;
           }
           const auto size_add = static_cast<Unsigned>(rindex) + 1 - array.size();
@@ -114,17 +114,18 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
           array.insert(array.end(), static_cast<std::size_t>(size_add));
         }
         const auto rit = array.mut_begin() + static_cast<std::ptrdiff_t>(rindex);
-        if(disp == Reference_modifier::disposition_remove) {
+        if(erased_out_opt){
+          *erased_out_opt = std::move(rit[0]);
           array.erase(rit);
           return nullptr;
         }
-        return &(*rit);
+        return &(rit[0]);
       }
     case Reference_modifier::index_object_key:
       {
         const auto &cand = modifier.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
-          if(disp != Reference_modifier::disposition_create) {
+          if(!creates) {
             return nullptr;
           }
           parent.set(D_object());
@@ -134,7 +135,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         }
         auto &object = parent.as<D_object>();
         auto rit = D_object::iterator();
-        if(disp != Reference_modifier::disposition_create) {
+        if(!creates) {
           rit = object.find_mut(cand.key);
           if(rit == object.end()) {
             return nullptr;
@@ -142,7 +143,8 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         } else {
           rit = object.try_emplace(cand.key).first;
         }
-        if(disp == Reference_modifier::disposition_remove) {
+        if(erased_out_opt){
+          *erased_out_opt = std::move(rit->second);
           object.erase(rit);
           return nullptr;
         }

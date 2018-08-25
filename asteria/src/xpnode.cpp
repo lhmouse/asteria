@@ -555,7 +555,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         }
         // Obtain the `this` reference.
         Reference self;
-        if(callee.has_modifiers()) {
+        if(callee.get_modifier_count() != 0) {
           self = callee;
           self.pop_modifier();
         }
