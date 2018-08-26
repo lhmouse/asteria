@@ -337,7 +337,7 @@ template<typename ...elementsT>
         variant(elementT &&elem)
           : m_turnout(0)
           {
-            // This overload enables construction using the candidate of a nested variant.
+            // This overload enables construction using a candidate of nested variants.
             constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
             using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
             // Construct the element in-place.
@@ -364,7 +364,7 @@ template<typename ...elementsT>
       template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
         variant & operator=(elementT &&elem)
           {
-            // This overload, unlike `set()`, enables assignment using the candidate of a nested variant.
+            // This overload, unlike `set()`, enables assignment using a candidate of nested variants.
             constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
             using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
             if(this->m_index == eindex) {
@@ -475,7 +475,7 @@ template<typename ...elementsT>
       template<typename elementT, typename ...paramsT>
         elementT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
           {
-            // This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
+            // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
             constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
             using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
             // Construct the active element using perfect forwarding, then destroy the old element.
@@ -487,7 +487,7 @@ template<typename ...elementsT>
       template<typename elementT>
         elementT & set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
           {
-            // This overload, unlike `operator=()`, does not accept the candidate of a nested variant.
+            // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
             constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
             using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
             if(this->m_index == eindex) {
