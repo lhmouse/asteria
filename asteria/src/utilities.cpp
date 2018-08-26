@@ -5,13 +5,11 @@
 #include "utilities.hpp"
 #include "runtime_error.hpp"
 #include <iostream> // std::cerr
-#include <time.h> // ::time_t, ::localtime()
+#include <time.h> // ::time_t, ::clock_gettime(), ::localtime()
 #include <stdio.h> // ::sprintf()
 
 #ifdef _WIN32
 #  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
-#else
-#  include <sys/time.h> // ::timeval, ::gettimeofday()
 #endif
 
 namespace Asteria {
@@ -98,15 +96,15 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
       ::SYSTEMTIME s;
       ::GetSystemTime(&s);
       ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                          s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
+                s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
 #else
-      ::timeval t;
-      int err = ::gettimeofday(&t, nullptr);
+      ::timespec t;
+      int err = ::clock_gettime(CLOCK_REALTIME, &t);
       ROCKET_ASSERT(err == 0);
       ::tm s;
       ::localtime_r(&(t.tv_sec), &s);
       ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                          s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, int(t.tv_usec) / 1000);
+                s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
 #endif
     }
     oss.set_caret(0);
