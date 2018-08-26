@@ -2198,12 +2198,10 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return is;
       }
-      using traits_type = typename basic_istream<charT, traitsT>::traits_type;
-      // Clear the contents of `str`.
+      // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
       str.erase();
-      // Determine the maximum number of characters to extract.
+      // Copy stream parameters.
       const auto width = is.width();
-      // This locale object is used by `std::isspace()`.
       const auto loc = is.getloc();
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
@@ -2211,20 +2209,16 @@ template<typename charT, typename traitsT, typename allocatorT>
         // Extract characters and append them to `str`.
         auto ich = is.rdbuf()->sgetc();
         for(;;) {
-          if(traits_type::eq_int_type(ich, traits_type::eof())) {
+          if(traitsT::eq_int_type(ich, traitsT::eof())) {
             state |= ios_base::eofbit;
             break;
           }
-          if(width > 0) {
-            if(static_cast<streamsize>(str.size()) >= width) {
-              break;
-            }
-          } else {
-            if(str.size() >= str.max_size()) {
-              break;
-            }
+          const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
+                                          : (str.size() >= str.max_size());
+          if(enough) {
+            break;
           }
-          const auto ch = traits_type::to_char_type(ich);
+          const auto ch = traitsT::to_char_type(ich);
           if(::std::isspace<charT>(ch, loc)) {
             break;
           }
@@ -2256,39 +2250,28 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return os;
       }
-      using traits_type = typename basic_ostream<charT, traitsT>::traits_type;
-      // Determine the minimum number of characters to insert.
+      // Copy stream parameters.
       const auto width = os.width();
-      static_assert(sizeof(streamsize) >= sizeof(str.size()), "Casting `str.size()` to type `streamsize` would lose precision.");
+      const auto fill = os.fill();
+      const auto left = (os.flags() & ios_base::adjustfield) == ios_base::left;
       const auto len = static_cast<streamsize>(str.size());
-      auto len_rem = noadl::max(width, len);
-      auto offset = len - len_rem;
-      if((os.flags() & ios_base::adjustfield) == ios_base::left) {
-        offset = 0;
-      }
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
       try {
         // Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
+        auto remaining = noadl::max(width, len);
+        auto offset = left ? 0 : (len - remaining);
         for(;;) {
-          if(len_rem <= 0) {
+          const auto written = ((0 <= offset) && (offset < len)) ? os.rdbuf()->sputn(str.c_str() + offset, len - offset)
+                                                                 : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
+          if(written == 0) {
+            state |= ios_base::failbit;
             break;
           }
-          streamsize written;
-          if((0 <= offset) && (offset < len)) {
-            written = os.rdbuf()->sputn(str.c_str() + offset, len - offset);
-            if(written == 0) {
-              state |= ios_base::failbit;
-              break;
-            }
-          } else {
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(os.fill()), traits_type::eof())) {
-              state |= ios_base::failbit;
-              break;
-            }
-            written = 1;
+          remaining -= written;
+          if(remaining == 0) {
+            break;
           }
-          len_rem -= written;
           offset += written;
         }
       } catch(...) {
@@ -2313,7 +2296,6 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!sentry) {
         return is;
       }
-      using traits_type = typename basic_istream<charT, traitsT>::traits_type;
       // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
       str.erase();
       // We need to set stream state bits outside the `try` block.
@@ -2323,12 +2305,12 @@ template<typename charT, typename traitsT, typename allocatorT>
         auto ich = is.rdbuf()->sgetc();
         bool eol = false;
         for(;;) {
-          if(traits_type::eq_int_type(ich, traits_type::eof())) {
+          if(traitsT::eq_int_type(ich, traitsT::eof())) {
             state |= ios_base::eofbit;
             break;
           }
-          const auto ch = traits_type::to_char_type(ich);
-          eol = traits_type::eq(ch, delim);
+          const auto ch = traitsT::to_char_type(ich);
+          eol = traitsT::eq(ch, delim);
           if(eol) {
             is.rdbuf()->sbumpc();
             break;
