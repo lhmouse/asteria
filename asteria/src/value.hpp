@@ -103,7 +103,7 @@ extern const char * get_type_name(Value::Type type) noexcept;
 extern bool test_value(const Value &value);
 extern Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept;
 
-extern void dump_value(std::ostream &os, const Value &value, unsigned indent_next = 0, unsigned indent_increment = 2);
+extern void dump_value(std::ostream &os, const Value &value, std::size_t indent_next = 0, std::size_t indent_increment = 2);
 extern std::ostream & operator<<(std::ostream &os, const Value &value);
 
 }
