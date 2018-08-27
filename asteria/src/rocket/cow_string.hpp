@@ -837,7 +837,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 
       // These are generic implementations for `{find,rfind,find_{first,last}{,_not}_of}()` functions.
       template<typename predT>
-        size_type do_xfind_if(size_type first, size_type last, int step, predT pred) const
+        size_type do_xfind_if(size_type first, size_type last, ptrdiff_t step, predT pred) const
           {
             auto cur = first;
             for(;;) {
