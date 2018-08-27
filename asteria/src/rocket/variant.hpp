@@ -16,6 +16,7 @@ namespace rocket {
 using ::std::common_type;
 using ::std::is_convertible;
 using ::std::decay;
+using ::std::remove_cv;
 using ::std::enable_if;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_assignable;
@@ -476,7 +477,7 @@ template<typename ...elementsT>
         elementT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
           {
             // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
-            constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
+            constexpr auto eindex = details_variant::type_finder<0, typename remove_cv<elementT>::type, elementsT...>::value;
             using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
             // Construct the active element using perfect forwarding, then destroy the old element.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
