@@ -37,10 +37,6 @@ class Reference
       {
         return m_root;
       }
-    Reference_root & get_root() noexcept
-      {
-        return m_root;
-      }
     std::size_t get_modifier_count() const noexcept
       {
         return m_modifiers.size();
@@ -48,10 +44,6 @@ class Reference
     const Reference_modifier & get_modifier(std::size_t pos) const
       {
         return m_modifiers.at(pos);
-      }
-    Reference_modifier & get_modifier(std::size_t pos)
-      {
-        return m_modifiers.mut(pos);
       }
     Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { })
       {
@@ -63,10 +55,11 @@ class Reference
       {
         m_modifiers.clear();
       }
-    Reference_modifier & push_modifier(Reference_modifier modifier)
-      {
-        return m_modifiers.emplace_back(std::move(modifier));
-      }
+    template<typename ModifierT, typename std::enable_if<std::is_constructible<Reference_modifier, ModifierT &&>::value>::type * = nullptr>
+      Reference_modifier & push_modifier(ModifierT &&modifier)
+        {
+          return m_modifiers.emplace_back(std::forward<ModifierT>(modifier));
+        }
     void pop_modifier()
       {
         m_modifiers.pop_back();

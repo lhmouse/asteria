@@ -69,24 +69,9 @@ class Reference_root
           return m_variant.get<ExpectT>();
         }
     template<typename ExpectT>
-      ExpectT * opt() noexcept
-        {
-          return m_variant.get<ExpectT>();
-        }
-    template<typename ExpectT>
       const ExpectT & as() const
         {
           return m_variant.as<ExpectT>();
-        }
-    template<typename ExpectT>
-      ExpectT & as()
-        {
-          return m_variant.as<ExpectT>();
-        }
-    template<typename CandidateT>
-      CandidateT & set(CandidateT &&cand)
-        {
-          return m_variant.set(std::forward<CandidateT>(cand));
         }
   };
 
