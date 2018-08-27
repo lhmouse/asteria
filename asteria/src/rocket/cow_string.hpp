@@ -837,6 +837,24 @@ template<typename charT, typename traitsT, typename allocatorT>
 
       // These are generic implementations for `{find,rfind,find_{first,last}{,_not}_of}()` functions.
       template<typename predT>
+        size_type do_xfind_if(size_type first, size_type last, int step, predT pred) const
+          {
+            auto cur = first;
+            for(;;) {
+              const auto ptr = this->c_str() + cur;
+              if(pred(ptr)) {
+                ROCKET_ASSERT(cur != npos);
+                break;
+              }
+              if(cur == last) {
+                cur = npos;
+                break;
+              }
+              cur += static_cast<size_type>(step);
+            }
+            return cur;
+          }
+      template<typename predT>
         size_type do_find_forwards_if(size_type from, size_type n, predT pred) const
           {
             const auto len = this->size();
@@ -844,17 +862,10 @@ template<typename charT, typename traitsT, typename allocatorT>
               return npos;
             }
             const auto rlen = len - n;
-            const auto ptr = this->c_str();
-            auto cur = noadl::min(from, rlen + 1) - 1;
-            do {
-              if(cur == rlen) {
-                return npos;
-              }
-              ++cur;
-            } while(pred(ptr + cur) == false);
-            ROCKET_ASSERT(cur <= len);
-            ROCKET_ASSERT(cur != npos);
-            return cur;
+            if(from > rlen) {
+              return npos;
+            }
+            return this->do_xfind_if(from, rlen, +1, ::std::move(pred));
           }
       template<typename predT>
         size_type do_find_backwards_if(size_type to, size_type n, predT pred) const
@@ -864,17 +875,10 @@ template<typename charT, typename traitsT, typename allocatorT>
               return npos;
             }
             const auto rlen = len - n;
-            const auto ptr = this->c_str();
-            auto cur = noadl::min(rlen, to) + 1;
-            do {
-              if(cur == 0) {
-                return npos;
-              }
-              --cur;
-            } while(pred(ptr + cur) == false);
-            ROCKET_ASSERT(cur <= len);
-            ROCKET_ASSERT(cur != npos);
-            return cur;
+            if(to > rlen) {
+              return this->do_xfind_if(rlen, 0, -1, ::std::move(pred));
+            }
+            return this->do_xfind_if(to, 0, -1, ::std::move(pred));
           }
 
     public:
