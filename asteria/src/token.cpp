@@ -525,8 +525,8 @@ namespace {
             return Parser_result(line, column, length, Parser_result::error_code_integer_literal_overflow);
           }
           Double mantissa = 0;
-          for(pos = frac_end; pos != frac_begin; --pos) {
-            const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos - 1));
+          for(pos = frac_end - 1; pos != frac_begin - 1; --pos) {
+            const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
             if(!ptr) {
               continue;
             }
