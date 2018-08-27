@@ -4,11 +4,12 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include "runtime_error.hpp"
-#include <time.h> // ::time_t, ::clock_gettime(), ::localtime()
-#include <stdio.h> // ::sprintf(), ::fputs(), stderr
+#include <cstdio> // std::snprintf(), std::fputs(), stderr
 
 #ifdef _WIN32
 #  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
+#else
+#  include <time.h> // ::timespec, ::clock_gettime(), ::localtime()
 #endif
 
 namespace Asteria {
@@ -89,24 +90,38 @@ void Formatter::do_put(const void *value)
 
 namespace {
 
-  int do_print_time(char *str)
+  int do_print_time(char *str, std::size_t cap)
     {
       int len;
 #ifdef _WIN32
       ::SYSTEMTIME s;
       ::GetSystemTime(&s);
-      len = ::sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                      s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
+      len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                          s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
 #else
       ::timespec t;
       int err = ::clock_gettime(CLOCK_REALTIME, &t);
       ROCKET_ASSERT(err == 0);
       ::tm s;
       ::localtime_r(&(t.tv_sec), &s);
-      len = ::sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                      s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
+      len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                          s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
 #endif
       return len;
+    }
+
+  void do_replace_all(String &str, char ch, const char *reps)
+    {
+      const auto repn = std::strlen(reps);
+      auto pos = std::size_t(0);
+      do {
+        pos = str.find(ch, pos);
+        if(pos == str.npos) {
+          break;
+        }
+        str.replace(pos, 1, reps, repn);
+        pos += repn;
+      } while(true);
     }
 
 }
@@ -116,16 +131,15 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
     auto &oss = fmt.get_stream();
     oss.set_caret(0);
     char time_str[64];
-    do_print_time(time_str);
+    do_print_time(time_str, sizeof(time_str));
     oss <<time_str <<" $$ ";
     oss.set_caret(String::npos);
     oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line();
     auto str = oss.extract_string();
-    for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
-      str.insert(i + 1, 1, '\t');
-    }
+    do_replace_all(str, '\n', "\n\t");
+    do_replace_all(str, '\0', "[NUL]");
     str.push_back('\n');
-    ::fwrite(str.c_str(), 1, str.size(), stderr);
+    std::fputs(str.c_str(), stderr);
     return true;
   } catch(...) {
     return false;
