@@ -21,7 +21,6 @@ void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std
   {
     auto eptr = etop;
     do {
-      ROCKET_ASSERT(eptr);
       try {
         std::rethrow_exception(eptr);
       } catch(Backtracer &e) {
