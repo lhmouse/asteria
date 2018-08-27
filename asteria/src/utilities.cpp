@@ -4,9 +4,8 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include "runtime_error.hpp"
-#include <iostream> // std::cerr
 #include <time.h> // ::time_t, ::clock_gettime(), ::localtime()
-#include <stdio.h> // ::sprintf()
+#include <stdio.h> // ::sprintf(), ::fputs(), stderr
 
 #ifdef _WIN32
 #  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
@@ -120,12 +119,13 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
     do_print_time(time_str);
     oss <<time_str <<" $$ ";
     oss.set_caret(String::npos);
-    oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line()
+    oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line();
     auto str = oss.extract_string();
     for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
       str.insert(i + 1, 1, '\t');
     }
-    std::cerr <<str <<std::endl;
+    str.push_back('\n');
+    ::fwrite(str.c_str(), 1, str.size(), stderr);
     return true;
   } catch(...) {
     return false;
