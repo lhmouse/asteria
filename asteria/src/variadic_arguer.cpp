@@ -21,22 +21,22 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
     case 1:
       {
         const auto ivalue = read_reference(args.at(0));
-        if(ivalue.type() != Value::type_integer) {
+        const auto qindex = ivalue.opt<D_integer>();
+        if(!qindex) {
           ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
         }
-        const auto index = ivalue.as<D_integer>();
         // Return the argument at the given index.
-        auto rindex = index;
+        auto rindex = *qindex;
         if(rindex < 0) {
           // Wrap negative indices.
           rindex += static_cast<Signed>(nvarg);
         }
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", index, ", nvarg = ", nvarg);
+          ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", *qindex, ", nvarg = ", nvarg);
           return { };
         }
         if(rindex >= static_cast<Signed>(nvarg)) {
-          ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", index, ", nvarg = ", nvarg);
+          ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", *qindex, ", nvarg = ", nvarg);
           return { };
         }
         return m_vargs.at(static_cast<std::size_t>(rindex));
