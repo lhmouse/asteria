@@ -258,7 +258,8 @@ namespace details_intrusive_ptr {
               if(!ptr) {
                 return nullptr;
               }
-              sourceptrT(::std::forward<sourceptrT>(iptr)).release();
+              auto tptr = ::std::forward<sourceptrT>(iptr);
+              tptr.release();
               return resultptrT(ptr);
             }
       };
