@@ -223,6 +223,46 @@ namespace details_intrusive_ptr {
           }
       };
 
+  struct static_caster
+    {
+      template<typename resultT, typename sourceT>
+        static constexpr resultT do_cast(sourceT &&src)
+          {
+            return static_cast<resultT>(::std::forward<sourceT>(src));
+          }
+    };
+  struct dynamic_caster
+    {
+      template<typename resultT, typename sourceT>
+        static constexpr resultT do_cast(sourceT &&src)
+          {
+            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+          }
+    };
+  struct const_caster
+    {
+      template<typename resultT, typename sourceT>
+        static constexpr resultT do_cast(sourceT &&src)
+          {
+            return const_cast<resultT>(::std::forward<sourceT>(src));
+          }
+    };
+
+  template<typename resultptrT, typename casterT>
+    struct pointer_cast_helper
+      {
+        template<typename sourceptrT>
+          resultptrT operator()(sourceptrT &&iptr) const
+            {
+              const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(iptr.get());
+              if(!ptr) {
+                return nullptr;
+              }
+              sourceptrT(::std::forward<sourceptrT>(iptr)).release();
+              return resultptrT(ptr);
+            }
+      };
+
 }
 
 template<typename elementT, typename deleterT>
@@ -510,6 +550,39 @@ template<typename elementT, typename deleterT>
 template<typename elementT, typename deleterT>
   intrusive_base<elementT, deleterT>::~intrusive_base()
     = default;
+
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> static_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::static_caster>()(iptr);
+    }
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> static_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::static_caster>()(::std::move(iptr));
+    }
+
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> dynamic_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::dynamic_caster>()(iptr);
+    }
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> dynamic_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::dynamic_caster>()(::std::move(iptr));
+    }
+
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> const_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::const_caster>()(iptr);
+    }
+template<typename resultT, typename sourceT, typename ...paramsT>
+  inline intrusive_ptr<resultT, paramsT...> const_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::const_caster>()(::std::move(iptr));
+    }
 
 template<typename elementT, typename ...paramsT>
   inline intrusive_ptr<elementT> make_intrusive(paramsT &&...params)
