@@ -94,51 +94,27 @@ namespace details_intrusive_ptr {
         }
     };
 
-  template<typename elementT, typename deleterT>
-    class stored_pointer;
-}
-
-template<typename elementT, typename deleterT>
-  class intrusive_base : protected virtual details_intrusive_ptr::refcount_base
-    {
-      template<typename, typename>
-        friend class details_intrusive_ptr::stored_pointer;
-
-    private:
-      template<typename yelementT, typename ydeleterT, typename cvthisT>
-        static intrusive_ptr<yelementT, ydeleterT> do_share_this(cvthisT *cvthis);
-
-    public:
-      ~intrusive_base() override;
-
-    public:
-      bool unique() const noexcept
-        {
-          return this->refcount_base::reference_count() == 1;
-        }
-      long use_count() const noexcept
-        {
-          return this->refcount_base::reference_count();
-        }
-
-      template<typename yelementT = elementT, typename ydeleterT = deleterT>
-        intrusive_ptr<const yelementT, ydeleterT> share_this() const
-          {
-            return this->do_share_this<const yelementT, ydeleterT>(this);
-          }
-      template<typename yelementT = elementT, typename ydeleterT = deleterT>
-        intrusive_ptr<yelementT, ydeleterT> share_this()
-          {
-            return this->do_share_this<yelementT, ydeleterT>(this);
-          }
-    };
-
-namespace details_intrusive_ptr {
-
   template<typename ...unusedT>
     struct make_void
       {
         using type = void;
+      };
+
+  template<typename resultT, typename sourceT, typename = void>
+    struct static_cast_or_dynamic_cast_helper
+      {
+        constexpr resultT operator()(sourceT &&src) const
+          {
+            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
+  template<typename resultT, typename sourceT>
+    struct static_cast_or_dynamic_cast_helper<resultT, sourceT, typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
+      {
+        constexpr resultT operator()(sourceT &&src) const
+          {
+            return static_cast<resultT>(::std::forward<sourceT>(src));
+          }
       };
 
   template<typename elementT, typename deleterT, typename = void>
@@ -248,6 +224,41 @@ namespace details_intrusive_ptr {
       };
 
 }
+
+template<typename elementT, typename deleterT>
+  class intrusive_base : protected virtual details_intrusive_ptr::refcount_base
+    {
+      template<typename, typename>
+        friend class details_intrusive_ptr::stored_pointer;
+
+    private:
+      template<typename yelementT, typename ydeleterT, typename cvthisT>
+        static intrusive_ptr<yelementT, ydeleterT> do_share_this(cvthisT *cvthis);
+
+    public:
+      ~intrusive_base() override;
+
+    public:
+      bool unique() const noexcept
+        {
+          return this->refcount_base::reference_count() == 1;
+        }
+      long use_count() const noexcept
+        {
+          return this->refcount_base::reference_count();
+        }
+
+      template<typename yelementT = elementT, typename ydeleterT = deleterT>
+        intrusive_ptr<const yelementT, ydeleterT> share_this() const
+          {
+            return this->do_share_this<const yelementT, ydeleterT>(this);
+          }
+      template<typename yelementT = elementT, typename ydeleterT = deleterT>
+        intrusive_ptr<yelementT, ydeleterT> share_this()
+          {
+            return this->do_share_this<yelementT, ydeleterT>(this);
+          }
+    };
 
 template<typename elementT, typename deleterT>
   class intrusive_ptr
@@ -482,27 +493,6 @@ template<typename ...paramsT>
     {
       lhs.swap(rhs);
     }
-
-namespace details_intrusive_ptr {
-
-  template<typename resultT, typename sourceT, typename = void>
-    struct static_cast_or_dynamic_cast_helper
-      {
-        constexpr resultT operator()(sourceT &&src) const
-          {
-            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
-          }
-      };
-  template<typename resultT, typename sourceT>
-    struct static_cast_or_dynamic_cast_helper<resultT, sourceT, typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
-      {
-        constexpr resultT operator()(sourceT &&src) const
-          {
-            return static_cast<resultT>(::std::forward<sourceT>(src));
-          }
-      };
-
-}
 
 template<typename elementT, typename deleterT>
   template<typename yelementT, typename ydeleterT, typename cvthisT>
