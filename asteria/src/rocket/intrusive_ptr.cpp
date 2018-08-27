@@ -9,7 +9,10 @@ namespace details_intrusive_ptr {
 
   refcount_base::~refcount_base()
     {
-      ROCKET_ASSERT(this->m_nref.load(::std::memory_order_relaxed) <= 1);
+      // The reference count shall be either zero or one here.
+      if(this->m_nref.load(::std::memory_order_relaxed) > 1) {
+        ::std::terminate();
+      }
     }
 
 }
