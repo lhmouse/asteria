@@ -12,10 +12,10 @@ namespace rocket {
 using ::std::basic_iostream;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-  class basic_insertable_iostream;
+  class basic_insertable_stream;
 
 template<typename charT, typename traitsT, typename allocatorT>
-  class basic_insertable_iostream : public basic_iostream<charT, traitsT>
+  class basic_insertable_stream : public basic_iostream<charT, traitsT>
     {
     public:
       using char_type       = charT;
@@ -36,17 +36,20 @@ template<typename charT, typename traitsT, typename allocatorT>
       streambuf_type m_sb;
 
     public:
-      explicit basic_insertable_iostream(ios_base::openmode which = ios_base::in | ios_base::out)
-        : basic_iostream<charT, traitsT>(&(this->m_sb)),
-          m_sb(which)
+      explicit basic_insertable_stream(string_type str, size_type caret = string_type::npos, ios_base::openmode which = ios_base::in | ios_base::out)
+        : basic_iostream<char_type, traits_type>(&(this->m_sb)),
+          m_sb(::std::move(str), caret, which)
         {
         }
-      explicit basic_insertable_iostream(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
-        : basic_iostream<charT, traitsT>(&(this->m_sb)),
-          m_sb(::std::move(str), which)
+      basic_insertable_stream()
+        : basic_insertable_stream(string_type())
         {
         }
-      ~basic_insertable_iostream() override;
+      basic_insertable_stream(ios_base::openmode which)
+        : basic_insertable_stream(string_type(), string_type::npos, which)
+        {
+        }
+      ~basic_insertable_stream() override;
 
     public:
       streambuf_type * rdbuf() const noexcept
@@ -77,14 +80,14 @@ template<typename charT, typename traitsT, typename allocatorT>
     };
 
 template<typename charT, typename traitsT, typename allocatorT>
-  basic_insertable_iostream<charT, traitsT, allocatorT>::~basic_insertable_iostream()
+  basic_insertable_stream<charT, traitsT, allocatorT>::~basic_insertable_stream()
     = default;
 
-extern template class basic_insertable_iostream<char>;
-extern template class basic_insertable_iostream<wchar_t>;
+extern template class basic_insertable_stream<char>;
+extern template class basic_insertable_stream<wchar_t>;
 
-using insertable_iostream  = basic_insertable_iostream<char>;
-using insertable_wiostream = basic_insertable_iostream<wchar_t>;
+using insertable_stream  = basic_insertable_stream<char>;
+using insertable_wstream = basic_insertable_stream<wchar_t>;
 
 }
 

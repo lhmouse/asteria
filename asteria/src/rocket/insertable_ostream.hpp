@@ -36,14 +36,17 @@ template<typename charT, typename traitsT, typename allocatorT>
       streambuf_type m_sb;
 
     public:
-      explicit basic_insertable_ostream(ios_base::openmode which = ios_base::out)
-        : basic_ostream<charT, traitsT>(&(this->m_sb)),
-          m_sb(which | ios_base::out)
+      explicit basic_insertable_ostream(string_type str, size_type caret = string_type::npos, ios_base::openmode which = ios_base::out)
+        : basic_ostream<char_type, traits_type>(&(this->m_sb)),
+          m_sb(::std::move(str), caret, which | ios_base::out)
         {
         }
-      explicit basic_insertable_ostream(string_type str, ios_base::openmode which = ios_base::out)
-        : basic_ostream<charT, traitsT>(&(this->m_sb)),
-          m_sb(::std::move(str), which | ios_base::out)
+      basic_insertable_ostream()
+        : basic_insertable_ostream(string_type())
+        {
+        }
+      basic_insertable_ostream(ios_base::openmode which)
+        : basic_insertable_ostream(string_type(), string_type::npos, which)
         {
         }
       ~basic_insertable_ostream() override;

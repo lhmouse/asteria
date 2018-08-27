@@ -31,7 +31,7 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/insertable_streambuf.hpp  \
   asteria/src/rocket/insertable_istream.hpp  \
   asteria/src/rocket/insertable_ostream.hpp  \
-  asteria/src/rocket/insertable_iostream.hpp  \
+  asteria/src/rocket/insertable_stream.hpp  \
   asteria/src/rocket/variant.hpp  \
   asteria/src/rocket/fill_iterator.hpp  \
   asteria/src/rocket/transparent_comparators.hpp  \
@@ -72,7 +72,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/rocket/insertable_streambuf.cpp  \
   asteria/src/rocket/insertable_istream.cpp  \
   asteria/src/rocket/insertable_ostream.cpp  \
-  asteria/src/rocket/insertable_iostream.cpp  \
+  asteria/src/rocket/insertable_stream.cpp  \
   asteria/src/rocket/cow_string.cpp  \
   asteria/src/rocket/intrusive_ptr.cpp  \
   asteria/src/utilities.cpp  \

@@ -36,16 +36,20 @@ template<typename charT, typename traitsT, typename allocatorT>
 
     private:
       string_type m_str;
-      ios_base::openmode m_which;
       size_type m_caret;
+      ios_base::openmode m_which;
 
     public:
-      explicit basic_insertable_streambuf(ios_base::openmode which = ios_base::in | ios_base::out)
-        : m_str(), m_which(which), m_caret(string_type::npos)
+      explicit basic_insertable_streambuf(string_type str, size_type caret = string_type::npos, ios_base::openmode which = ios_base::in | ios_base::out)
+        : m_str(::std::move(str)), m_caret(caret), m_which(which)
         {
         }
-      explicit basic_insertable_streambuf(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
-        : m_str(::std::move(str)), m_which(which), m_caret(string_type::npos)
+      basic_insertable_streambuf()
+        : basic_insertable_streambuf(string_type())
+        {
+        }
+      basic_insertable_streambuf(ios_base::openmode which)
+        : basic_insertable_streambuf(string_type(), string_type::npos, which)
         {
         }
       ~basic_insertable_streambuf() override;
