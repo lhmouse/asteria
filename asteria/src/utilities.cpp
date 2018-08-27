@@ -20,7 +20,8 @@ Formatter::Formatter(const char *file, unsigned long line, const char *func) noe
     m_stream <<std::boolalpha;
   }
 Formatter::~Formatter()
-  = default;
+  {
+  }
 
 void Formatter::do_put(bool value)
   {
@@ -87,28 +88,39 @@ void Formatter::do_put(const void *value)
     m_stream <<value;
   }
 
-bool write_log_to_stderr(Formatter &&fmt) noexcept
-  try {
-    auto &oss = fmt.get_stream();
-    char time_str[64];
+namespace {
+
+  int do_print_time(char *str)
     {
+      int len;
 #ifdef _WIN32
       ::SYSTEMTIME s;
       ::GetSystemTime(&s);
-      ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
+      len = ::sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                      s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
 #else
       ::timespec t;
       int err = ::clock_gettime(CLOCK_REALTIME, &t);
       ROCKET_ASSERT(err == 0);
       ::tm s;
       ::localtime_r(&(t.tv_sec), &s);
-      ::sprintf(time_str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
+      len = ::sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                      s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
 #endif
+      return len;
     }
+
+}
+
+bool write_log_to_stderr(Formatter &&fmt) noexcept
+  try {
+    auto &oss = fmt.get_stream();
     oss.set_caret(0);
-    oss <<time_str <<" @ " <<fmt.get_file() <<':' <<fmt.get_line() <<" $ ";
+    char time_str[64];
+    do_print_time(time_str);
+    oss <<time_str <<" $$ ";
+    oss.set_caret(String::npos);
+    oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line()
     auto str = oss.extract_string();
     for(auto i = str.find('\n'); i != str.npos; i = str.find('\n', i + 2)) {
       str.insert(i + 1, 1, '\t');

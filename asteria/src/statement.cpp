@@ -201,6 +201,7 @@ Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &s
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");
     }
   }
+
 Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<Statement> &block)
   {
     Vector<Statement> block_bnd;
@@ -211,6 +212,7 @@ Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<
     }
     return block_bnd;
   }
+
 Vector<Statement> bind_block(const Vector<Statement> &block, const Analytic_context &ctx)
   {
     Analytic_context ctx_next(&ctx);
@@ -604,6 +606,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
       ASTERIA_TERMINATE("An unknown statement type enumeration `", stmt.index(), "` has been encountered.");
     }
   }
+
 Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &ctx_inout, const Vector<Statement> &block)
   {
     for(const auto &stmt : block) {
@@ -615,6 +618,7 @@ Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &
     }
     return Statement::status_next;
   }
+
 Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, const Executive_context &ctx)
   {
     Executive_context ctx_next(&ctx);

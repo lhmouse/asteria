@@ -69,6 +69,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
       ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
     }
   }
+
 Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt)
   {
     switch(modifier.index()) {

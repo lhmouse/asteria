@@ -14,6 +14,7 @@ String Variadic_arguer::describe() const
   {
     return ASTERIA_FORMAT_STRING("variadic argument accessor at \'", m_file, ':', m_line, "\'");
   }
+
 Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) const
   {
     const auto nvarg = m_vargs.size();

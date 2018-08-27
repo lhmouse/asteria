@@ -92,7 +92,6 @@ constexpr bool are_debug_logs_enabled() noexcept
   }
 
 extern bool write_log_to_stderr(Formatter &&fmt) noexcept;
-
 [[noreturn]] extern void throw_runtime_error(Formatter &&fmt);
 
 }

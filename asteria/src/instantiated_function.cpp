@@ -15,6 +15,7 @@ String Instantiated_function::describe() const
   {
     return ASTERIA_FORMAT_STRING("function defined at \'", m_file, ':', m_line, "\'");
   }
+
 Reference Instantiated_function::invoke(Reference self, Vector<Reference> args) const
   {
     // Create an orphan context.

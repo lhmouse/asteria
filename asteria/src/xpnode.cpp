@@ -206,6 +206,7 @@ Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx)
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
   }
+
 Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx)
   {
     Vector<Xpnode> expr_bnd;
@@ -248,25 +249,26 @@ namespace {
       throw Backtracer(file, line);
     }
 
-  // `boolean` operations
   D_boolean do_logical_not(D_boolean rhs)
     {
       return !rhs;
     }
+
   D_boolean do_logical_and(D_boolean lhs, D_boolean rhs)
     {
       return lhs & rhs;
     }
+
   D_boolean do_logical_or(D_boolean lhs, D_boolean rhs)
     {
       return lhs | rhs;
     }
+
   D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs)
     {
       return lhs ^ rhs;
     }
 
-  // `integer` operations
   D_integer do_negate(D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -275,6 +277,7 @@ namespace {
       }
       return -rhs;
     }
+
   D_integer do_add(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -283,6 +286,7 @@ namespace {
       }
       return lhs + rhs;
     }
+
   D_integer do_subtract(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -291,6 +295,7 @@ namespace {
       }
       return lhs - rhs;
     }
+
   D_integer do_multiply(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -313,6 +318,7 @@ namespace {
       }
       return slhs * arhs;
     }
+
   D_integer do_divide(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -324,6 +330,7 @@ namespace {
       }
       return lhs / rhs;
     }
+
   D_integer do_modulo(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -349,6 +356,7 @@ namespace {
       reg <<= rhs;
       return static_cast<D_integer>(reg);
     }
+
   D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -362,6 +370,7 @@ namespace {
       reg >>= rhs;
       return static_cast<D_integer>(reg);
     }
+
   D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -381,6 +390,7 @@ namespace {
       reg <<= rhs;
       return static_cast<D_integer>(reg);
     }
+
   D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
     {
       using limits = std::numeric_limits<D_integer>;
@@ -402,40 +412,47 @@ namespace {
     {
       return ~rhs;
     }
+
   D_integer do_bitwise_and(D_integer lhs, D_integer rhs)
     {
       return lhs & rhs;
     }
+
   D_integer do_bitwise_or(D_integer lhs, D_integer rhs)
     {
       return lhs | rhs;
     }
+
   D_integer do_bitwise_xor(D_integer lhs, D_integer rhs)
     {
       return lhs ^ rhs;
     }
 
-  // `double` operations
   D_double do_negate(D_double rhs)
     {
       return -rhs;
     }
+
   D_double do_add(D_double lhs, D_double rhs)
     {
       return lhs + rhs;
     }
+
   D_double do_subtract(D_double lhs, D_double rhs)
     {
       return lhs - rhs;
     }
+
   D_double do_multiply(D_double lhs, D_double rhs)
     {
       return lhs * rhs;
     }
+
   D_double do_divide(D_double lhs, D_double rhs)
     {
       return lhs / rhs;
     }
+
   D_double do_modulo(D_double lhs, D_double rhs)
     {
       return std::fmod(lhs, rhs);
@@ -449,6 +466,7 @@ namespace {
       res.append(rhs);
       return res;
     }
+
   D_string do_duplicate(const D_string &lhs, D_integer rhs)
     {
       if(rhs < 0) {
@@ -1121,6 +1139,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", node.index(), "` has been encountered.");
     }
   }
+
 Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx)
   {
     if(expr.empty()) {

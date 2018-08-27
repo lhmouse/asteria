@@ -34,6 +34,7 @@ Value read_reference(const Reference &ref)
     // Return a reference to the current value.
     return cur;
   }
+
 Value & write_reference(const Reference &ref, Value value)
   {
     const auto nmod = ref.get_modifier_count();
@@ -51,6 +52,7 @@ Value & write_reference(const Reference &ref, Value value)
     cur.get() = std::move(value);
     return cur;
   }
+
 Value unset_reference(const Reference &ref)
   {
     const auto nmod = ref.get_modifier_count();
@@ -78,6 +80,7 @@ Reference reference_constant(Value value)
     Reference_root::S_constant ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
   }
+
 Reference reference_temp_value(Value value)
   {
     Reference_root::S_temp_value ref_c = { std::move(value) };
@@ -95,6 +98,7 @@ Reference & materialize_reference(Reference &ref)
     ref.set_root(std::move(ref_c));
     return ref;
   }
+
 Reference & dematerialize_reference(Reference &ref)
   {
     if(ref.get_root().index() != Reference_root::index_variable) {

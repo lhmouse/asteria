@@ -86,6 +86,7 @@ bool test_value(const Value &value)
       ASTERIA_TERMINATE("An unknown value type enumeration `", value.type(), "` has been encountered.");
     }
   }
+
 Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
@@ -432,6 +433,7 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
     }
   }
+
 std::ostream & operator<<(std::ostream &os, const Value &value)
   {
     dump_value(os, value);
