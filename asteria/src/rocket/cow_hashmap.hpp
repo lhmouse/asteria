@@ -1296,49 +1296,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           return true;
         }
 
-      // N.B. This is a non-standard extension.
-      const mapped_type * get(const key_type &key) const
-        {
-          const auto ptr = this->do_get_table();
-          const auto toff = this->m_sth.index_of(key);
-          if(toff < 0) {
-            return nullptr;
-          }
-          return ::std::addressof(ptr[toff].get()->second);
-        }
-      // N.B. This is a non-standard extension.
-      mapped_type * get_mut(const key_type &key)
-        {
-          const auto ptr = this->do_mut_table();
-          const auto toff = this->m_sth.index_of(key);
-          if(toff < 0) {
-            return nullptr;
-          }
-          return ::std::addressof(ptr[toff].get()->second);
-        }
-      // N.B. This is a non-standard extension.
-      template<typename yvalueT>
-        pair<mapped_type *, bool> set(const key_type &key, yvalueT &&yvalue)
-          {
-            this->do_reserve_more(1);
-            const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
-            if(result.second == false) {
-              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
-            }
-            return ::std::make_pair(::std::addressof(result.first->get()->second), result.second);
-          }
-      // N.B. This is a non-standard extension.
-      template<typename yvalueT>
-        pair<mapped_type *, bool> set(key_type &&key, yvalueT &&yvalue)
-          {
-            this->do_reserve_more(1);
-            const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
-            if(result.second == false) {
-              result.first->get()->second = ::std::forward<yvalueT>(yvalue);
-            }
-            return ::std::make_pair(::std::addressof(result.first->get()->second), result.second);
-          }
-
       // 26.5.4.3, element access
       mapped_type & operator[](const key_type &key)
         {

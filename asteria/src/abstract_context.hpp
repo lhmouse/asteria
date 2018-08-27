@@ -32,15 +32,24 @@ class Abstract_context
 
     const Reference * get_named_reference_opt(const String &name) const noexcept
       {
-        return m_named_refs.get(name);
+        const auto it = m_named_refs.find(name);
+        if(it == m_named_refs.end()) {
+          return nullptr;
+        }
+        return &(it->second);
       }
     Reference * get_named_reference_opt(const String &name) noexcept
       {
-        return m_named_refs.get_mut(name);
+        const auto it = m_named_refs.find_mut(name);
+        if(it == m_named_refs.end()) {
+          return nullptr;
+        }
+        return &(it->second);
       }
     Reference & set_named_reference(const String &name, Reference ref)
       {
-        return *(m_named_refs.set(name, std::move(ref)).first);
+        const auto pair = m_named_refs.insert_or_assign(name, std::move(ref));
+        return pair.first->second;
       }
   };
 

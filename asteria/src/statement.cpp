@@ -530,8 +530,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           backtrace.reserve(btv.size());
           for(auto &pair : btv) {
             D_object elem;
-            elem.set(String::shallow("file"), D_string(std::move(pair.first)));
-            elem.set(String::shallow("line"), D_integer(pair.second));
+            elem.insert_or_assign(String::shallow("file"), D_string(std::move(pair.first)));
+            elem.insert_or_assign(String::shallow("line"), D_integer(pair.second));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", backtrace);
