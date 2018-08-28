@@ -72,7 +72,7 @@ Value unset_reference(const Reference &ref)
     // Erase the element referenced by the last modifier.
     Value erased;
     apply_reference_modifier_mutable_partial_opt(ref.get_modifier(nmod - 1), cur, false, &erased);
-    return erased;
+    return std::move(erased);
   }
 
 Reference reference_constant(Value value)
