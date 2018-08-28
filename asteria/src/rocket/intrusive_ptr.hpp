@@ -4,7 +4,6 @@
 #ifndef ROCKET_INTRUSIVE_PTR_HPP_
 #define ROCKET_INTRUSIVE_PTR_HPP_
 
-#include <memory> // std::default_delete<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval()
@@ -14,11 +13,10 @@
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
-#include "allocator_utilities.hpp"
+#include "utilities.hpp"
 
 namespace rocket {
 
-using ::std::default_delete;
 using ::std::atomic;
 using ::std::remove_reference;
 using ::std::remove_pointer;
@@ -33,10 +31,10 @@ using ::std::add_lvalue_reference;
 using ::std::basic_ostream;
 using ::std::nullptr_t;
 
-template<typename elementT, typename deleterT = default_delete<elementT>>
+template<typename elementT>
   class intrusive_base;
 
-template<typename elementT, typename deleterT = default_delete<elementT>>
+template<typename elementT>
   class intrusive_ptr;
 
 namespace details_intrusive_ptr {
@@ -117,45 +115,19 @@ namespace details_intrusive_ptr {
           }
       };
 
-  template<typename elementT, typename deleterT, typename = void>
-    struct pointer_selector
-      {
-        using type = elementT *;
-      };
-  template<typename elementT, typename deleterT>
-    struct pointer_selector<elementT, deleterT, typename make_void<typename remove_reference<deleterT>::type::pointer>::type>
-      {
-        using type = typename remove_reference<deleterT>::type::pointer;
-      };
-
-  template<typename elementT, typename deleterT>
-    class stored_pointer : private allocator_wrapper_base_for<deleterT>::type
+  template<typename elementT>
+    class stored_pointer
       {
       public:
         using element_type  = elementT;
-        using deleter_type  = deleterT;
-        using pointer       = typename pointer_selector<element_type, deleter_type>::type;
-
-      private:
-        using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
+        using pointer       = element_type *;
 
       private:
         pointer m_ptr;
 
       public:
-        constexpr stored_pointer() noexcept(is_nothrow_constructible<deleter_type>::value)
-          : deleter_base(),
-            m_ptr()
-          {
-          }
-        explicit constexpr stored_pointer(const deleter_type &del) noexcept
-          : deleter_base(del),
-            m_ptr()
-          {
-          }
-        explicit constexpr stored_pointer(deleter_type &&del) noexcept
-          : deleter_base(::std::move(del)),
-            m_ptr()
+        constexpr stored_pointer() noexcept
+          : m_ptr()
           {
           }
         ~stored_pointer()
@@ -169,15 +141,6 @@ namespace details_intrusive_ptr {
           = delete;
 
       public:
-        const deleter_type & as_deleter() const noexcept
-          {
-            return static_cast<const deleter_base &>(*this);
-          }
-        deleter_type & as_deleter() noexcept
-          {
-            return static_cast<deleter_base &>(*this);
-          }
-
         long use_count() const noexcept
           {
             const auto ptr = this->m_ptr;
@@ -215,7 +178,7 @@ namespace details_intrusive_ptr {
             if(ptr->refcount_base::drop_reference() == false) {
               return;
             }
-            this->as_deleter()(ptr);
+            delete ptr;
           }
         void exchange(stored_pointer &other) noexcept
           {
@@ -266,15 +229,15 @@ namespace details_intrusive_ptr {
 
 }
 
-template<typename elementT, typename deleterT>
+template<typename elementT>
   class intrusive_base : protected virtual details_intrusive_ptr::refcount_base
     {
       template<typename, typename>
         friend class details_intrusive_ptr::stored_pointer;
 
     private:
-      template<typename yelementT, typename ydeleterT, typename cvthisT>
-        static intrusive_ptr<yelementT, ydeleterT> do_share_this(cvthisT *cvthis);
+      template<typename yelementT, typename cvthisT>
+        static intrusive_ptr<yelementT> do_share_this(cvthisT *cvthis);
 
     public:
       ~intrusive_base() override;
@@ -289,102 +252,62 @@ template<typename elementT, typename deleterT>
           return this->refcount_base::reference_count();
         }
 
-      template<typename yelementT = elementT, typename ydeleterT = deleterT>
-        intrusive_ptr<const yelementT, ydeleterT> share_this() const
+      template<typename yelementT = elementT>
+        intrusive_ptr<const yelementT> share_this() const
           {
-            return this->do_share_this<const yelementT, ydeleterT>(this);
+            return this->do_share_this<const yelementT>(this);
           }
-      template<typename yelementT = elementT, typename ydeleterT = deleterT>
-        intrusive_ptr<yelementT, ydeleterT> share_this()
+      template<typename yelementT = elementT>
+        intrusive_ptr<yelementT> share_this()
           {
-            return this->do_share_this<yelementT, ydeleterT>(this);
+            return this->do_share_this<yelementT>(this);
           }
     };
 
-template<typename elementT, typename deleterT>
+template<typename elementT>
   class intrusive_ptr
     {
       static_assert(is_array<elementT>::value == false, "`elementT` must not be an array type.");
-      static_assert(is_reference<deleterT>::value == false, "`intrusive_ptr` does not accept reference types as deleters.");
 
-      template<typename, typename>
+      template<typename>
         friend class intrusive_ptr;
 
     public:
       using element_type  = elementT;
-      using deleter_type  = deleterT;
-      using pointer       = typename details_intrusive_ptr::pointer_selector<element_type, deleter_type>::type;
+      using pointer       = element_type *;
 
     private:
-      details_intrusive_ptr::stored_pointer<element_type, deleter_type> m_sth;
+      details_intrusive_ptr::stored_pointer<element_type> m_sth;
 
     public:
-      constexpr intrusive_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+      constexpr intrusive_ptr(nullptr_t = nullptr) noexcept
         : m_sth()
         {
         }
-      explicit constexpr intrusive_ptr(const deleter_type &del) noexcept
-        : m_sth(del)
-        {
-        }
-      explicit intrusive_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
+      explicit intrusive_ptr(pointer ptr) noexcept
         : intrusive_ptr()
         {
           this->reset(ptr);
         }
       intrusive_ptr(const intrusive_ptr &other) noexcept
-        : intrusive_ptr(other.m_sth.as_deleter())
-        {
-          this->reset(other.m_sth.copy_release());
-        }
-      intrusive_ptr(const intrusive_ptr &other, const deleter_type &del) noexcept
-        : intrusive_ptr(del)
+        : intrusive_ptr()
         {
           this->reset(other.m_sth.copy_release());
         }
       intrusive_ptr(intrusive_ptr &&other) noexcept
-        : intrusive_ptr(::std::move(other.m_sth.as_deleter()))
+        : intrusive_ptr()
         {
           this->reset(other.m_sth.release());
         }
-      intrusive_ptr(intrusive_ptr &&other, const deleter_type &del) noexcept
-        : intrusive_ptr(del)
-        {
-          this->reset(other.m_sth.release());
-        }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr(const intrusive_ptr<yelementT, ydeleterT> &other) noexcept
-          : intrusive_ptr(other.m_sth.as_deleter())
+      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        intrusive_ptr(const intrusive_ptr<yelementT> &other) noexcept
+          : intrusive_ptr()
           {
             this->reset(other.m_sth.copy_release());
           }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr(const intrusive_ptr<yelementT, ydeleterT> &other, const deleter_type &del) noexcept
-          : intrusive_ptr(del)
-          {
-            this->reset(other.m_sth.copy_release());
-          }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr(intrusive_ptr<yelementT, ydeleterT> &&other) noexcept
-          : intrusive_ptr(::std::move(other.m_sth.as_deleter()))
-          {
-            this->reset(other.m_sth.release());
-          }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr(intrusive_ptr<yelementT, ydeleterT> &&other, const deleter_type &del) noexcept
-          : intrusive_ptr(del)
+      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        intrusive_ptr(intrusive_ptr<yelementT> &&other) noexcept
+          : intrusive_ptr()
           {
             this->reset(other.m_sth.release());
           }
@@ -396,33 +319,23 @@ template<typename elementT, typename deleterT>
       intrusive_ptr & operator=(const intrusive_ptr &other) noexcept
         {
           this->reset(other.m_sth.copy_release());
-          allocator_copy_assigner<deleter_type, true>()(this->m_sth.as_deleter(), other.m_sth.as_deleter());
           return *this;
         }
       intrusive_ptr & operator=(intrusive_ptr &&other) noexcept
         {
           this->reset(other.m_sth.release());
-          allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
           return *this;
         }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr & operator=(const intrusive_ptr<yelementT, ydeleterT> &other) noexcept
+      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        intrusive_ptr & operator=(const intrusive_ptr<yelementT> &other) noexcept
           {
             this->reset(other.m_sth.copy_release());
-            allocator_copy_assigner<deleter_type, true>()(this->m_sth.as_deleter(), other.m_sth.as_deleter());
             return *this;
           }
-      template<typename yelementT, typename ydeleterT,
-               typename enable_if<is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                                  is_convertible<typename intrusive_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value
-                                 >::type * = nullptr>
-        intrusive_ptr & operator=(intrusive_ptr<yelementT, ydeleterT> &&other) noexcept
+      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        intrusive_ptr & operator=(intrusive_ptr<yelementT> &&other) noexcept
           {
             this->reset(other.m_sth.release());
-            allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
             return *this;
           }
 
@@ -472,72 +385,71 @@ template<typename elementT, typename deleterT>
       void swap(intrusive_ptr &other) noexcept
         {
           this->m_sth.exchange(other.m_sth);
-          allocator_swapper<deleter_type, true>()(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         }
     };
 
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator==(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs) noexcept
+template<typename xelementT, typename yelementT>
+  inline bool operator==(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs) noexcept
     {
       return lhs.get() == rhs.get();
     }
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator!=(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs) noexcept
+template<typename xelementT, typename yelementT>
+  inline bool operator!=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs) noexcept
     {
       return lhs.get() != rhs.get();
     }
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator<(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs)
+template<typename xelementT, typename yelementT>
+  inline bool operator<(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
     {
       return lhs.get() < rhs.get();
     }
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator>(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs)
+template<typename xelementT, typename yelementT>
+  inline bool operator>(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
     {
       return lhs.get() > rhs.get();
     }
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator<=(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs)
+template<typename xelementT, typename yelementT>
+  inline bool operator<=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
     {
       return lhs.get() <= rhs.get();
     }
-template<typename xelementT, typename yelementT, typename ...paramsT>
-  inline bool operator>=(const intrusive_ptr<xelementT, paramsT...> &lhs, const intrusive_ptr<yelementT, paramsT...> &rhs)
+template<typename xelementT, typename yelementT>
+  inline bool operator>=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
     {
       return lhs.get() >= rhs.get();
     }
 
-template<typename ...paramsT>
-  inline bool operator==(const intrusive_ptr<paramsT...> &lhs, nullptr_t) noexcept
+template<typename elementT>
+  inline bool operator==(const intrusive_ptr<elementT> &lhs, nullptr_t) noexcept
     {
       return !(lhs.get());
     }
-template<typename ...paramsT>
-  inline bool operator!=(const intrusive_ptr<paramsT...> &lhs, nullptr_t) noexcept
+template<typename elementT>
+  inline bool operator!=(const intrusive_ptr<elementT> &lhs, nullptr_t) noexcept
     {
       return !!(lhs.get());
     }
 
-template<typename ...paramsT>
-  inline bool operator==(nullptr_t, const intrusive_ptr<paramsT...> &rhs) noexcept
+template<typename elementT>
+  inline bool operator==(nullptr_t, const intrusive_ptr<elementT> &rhs) noexcept
     {
       return !(rhs.get());
     }
-template<typename ...paramsT>
-  inline bool operator!=(nullptr_t, const intrusive_ptr<paramsT...> &rhs) noexcept
+template<typename elementT>
+  inline bool operator!=(nullptr_t, const intrusive_ptr<elementT> &rhs) noexcept
     {
       return !!(rhs.get());
     }
 
-template<typename ...paramsT>
-  inline void swap(intrusive_ptr<paramsT...> &lhs, intrusive_ptr<paramsT...> &rhs) noexcept
+template<typename elementT>
+  inline void swap(intrusive_ptr<elementT> &lhs, intrusive_ptr<elementT> &rhs) noexcept
     {
       lhs.swap(rhs);
     }
 
-template<typename elementT, typename deleterT>
-  template<typename yelementT, typename ydeleterT, typename cvthisT>
-    inline intrusive_ptr<yelementT, ydeleterT> intrusive_base<elementT, deleterT>::do_share_this(cvthisT *cvthis)
+template<typename elementT>
+  template<typename yelementT, typename cvthisT>
+    inline intrusive_ptr<yelementT> intrusive_base<elementT>::do_share_this(cvthisT *cvthis)
       {
         const auto ptr = details_intrusive_ptr::static_cast_or_dynamic_cast_helper<yelementT *, intrusive_base *>()(+cvthis);
         if(!ptr) {
@@ -545,44 +457,44 @@ template<typename elementT, typename deleterT>
                                     typeid(yelementT).name(), typeid(*cvthis).name());
         }
         cvthis->refcount_base::add_reference();
-        return intrusive_ptr<yelementT, ydeleterT>(ptr);
+        return intrusive_ptr<yelementT>(ptr);
       }
 
-template<typename elementT, typename deleterT>
-  intrusive_base<elementT, deleterT>::~intrusive_base()
+template<typename elementT>
+  intrusive_base<elementT>::~intrusive_base()
     = default;
 
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> static_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> static_pointer_cast(const intrusive_ptr<sourceT> &iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::static_caster>()(iptr);
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::static_caster>()(iptr);
     }
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> static_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> static_pointer_cast(intrusive_ptr<sourceT> &&iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::static_caster>()(::std::move(iptr));
-    }
-
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> dynamic_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
-    {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::dynamic_caster>()(iptr);
-    }
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> dynamic_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
-    {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::dynamic_caster>()(::std::move(iptr));
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::static_caster>()(::std::move(iptr));
     }
 
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> const_pointer_cast(const intrusive_ptr<sourceT, paramsT...> &iptr)
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> dynamic_pointer_cast(const intrusive_ptr<sourceT> &iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::const_caster>()(iptr);
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::dynamic_caster>()(iptr);
     }
-template<typename resultT, typename sourceT, typename ...paramsT>
-  inline intrusive_ptr<resultT, paramsT...> const_pointer_cast(intrusive_ptr<sourceT, paramsT...> &&iptr)
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> dynamic_pointer_cast(intrusive_ptr<sourceT> &&iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT, paramsT...>, details_intrusive_ptr::const_caster>()(::std::move(iptr));
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::dynamic_caster>()(::std::move(iptr));
+    }
+
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> const_pointer_cast(const intrusive_ptr<sourceT> &iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::const_caster>()(iptr);
+    }
+template<typename resultT, typename sourceT>
+  inline intrusive_ptr<resultT> const_pointer_cast(intrusive_ptr<sourceT> &&iptr)
+    {
+      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::const_caster>()(::std::move(iptr));
     }
 
 template<typename elementT, typename ...paramsT>
@@ -591,8 +503,8 @@ template<typename elementT, typename ...paramsT>
       return intrusive_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
     }
 
-template<typename charT, typename traitsT, typename ...paramsT>
-  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const intrusive_ptr<paramsT...> &iptr)
+template<typename charT, typename traitsT, typename elementT>
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const intrusive_ptr<elementT> &iptr)
     {
       return os << iptr.get();
     }
