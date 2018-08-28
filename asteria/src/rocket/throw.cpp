@@ -14,7 +14,7 @@ namespace rocket {
       va_start(ap_, fmt_);    \
       ::std::vsnprintf((buf_), sizeof(buf_), (fmt_), ap_);    \
       va_end(ap_);    \
-    } while(0)
+    } while(false)
 
 void throw_invalid_argument(const char *fmt, ...)
   {
