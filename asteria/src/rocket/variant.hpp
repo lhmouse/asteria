@@ -31,7 +31,7 @@ using ::std::false_type;
 using ::std::true_type;
 using ::std::type_info;
 
-template<typename ...elementsT>
+template<typename ...altsT>
   class variant;
 
 namespace details_variant {
@@ -51,17 +51,17 @@ namespace details_variant {
       {
       };
 
-  template<unsigned indexT, typename expectT, typename ...typesT>
+  template<unsigned indexT, typename targetT, typename ...typesT>
     struct type_finder
       {
       };
-  template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-    struct type_finder<indexT, expectT, firstT, remainingT...>
-      : type_finder<indexT + 1, expectT, remainingT...>
+  template<unsigned indexT, typename targetT, typename firstT, typename ...remainingT>
+    struct type_finder<indexT, targetT, firstT, remainingT...>
+      : type_finder<indexT + 1, targetT, remainingT...>
       {
       };
-  template<unsigned indexT, typename expectT, typename ...remainingT>
-    struct type_finder<indexT, expectT, expectT, remainingT...>
+  template<unsigned indexT, typename targetT, typename ...remainingT>
+    struct type_finder<indexT, targetT, targetT, remainingT...>
       : integral_constant<unsigned, indexT>
       {
       };
@@ -77,39 +77,39 @@ namespace details_variant {
       {
       };
 
-  template<typename expectT, typename ...typesT>
+  template<typename targetT, typename ...typesT>
     struct has_type_recursive
       : false_type
       {
       };
-  template<typename expectT, typename firstT, typename ...remainingT>
-    struct has_type_recursive<expectT, firstT, remainingT...>
-      : has_type_recursive<expectT, remainingT...>
+  template<typename targetT, typename firstT, typename ...remainingT>
+    struct has_type_recursive<targetT, firstT, remainingT...>
+      : has_type_recursive<targetT, remainingT...>
       {
       };
-  template<typename expectT, typename ...remainingT>
-    struct has_type_recursive<expectT, expectT, remainingT...>
+  template<typename targetT, typename ...remainingT>
+    struct has_type_recursive<targetT, targetT, remainingT...>
       : true_type
       {
       };
-  template<typename expectT, typename ...elementsT, typename ...remainingT>
-    struct has_type_recursive<expectT, variant<elementsT...>, remainingT...>
-      : conditional<has_type_recursive<expectT, elementsT...>::value, true_type, has_type_recursive<expectT, remainingT...>>::type
+  template<typename targetT, typename ...altsT, typename ...remainingT>
+    struct has_type_recursive<targetT, variant<altsT...>, remainingT...>
+      : conditional<has_type_recursive<targetT, altsT...>::value, true_type, has_type_recursive<targetT, remainingT...>>::type
       {
       };
-  template<typename ...elementsT, typename ...remainingT>
-    struct has_type_recursive<variant<elementsT...>, variant<elementsT...>, remainingT...>
+  template<typename ...altsT, typename ...remainingT>
+    struct has_type_recursive<variant<altsT...>, variant<altsT...>, remainingT...>
       : true_type
       {
       };
 
-  template<unsigned indexT, typename expectT, typename ...typesT>
+  template<unsigned indexT, typename targetT, typename ...typesT>
     struct recursive_type_finder
       {
       };
-  template<unsigned indexT, typename expectT, typename firstT, typename ...remainingT>
-    struct recursive_type_finder<indexT, expectT, firstT, remainingT...>
-      : conditional<has_type_recursive<expectT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, expectT, remainingT...>>::type
+  template<unsigned indexT, typename targetT, typename firstT, typename ...remainingT>
+    struct recursive_type_finder<indexT, targetT, firstT, remainingT...>
+      : conditional<has_type_recursive<targetT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, targetT, remainingT...>>::type
       {
       };
 
@@ -129,11 +129,11 @@ namespace details_variant {
       {
       };
 
-  template<typename ...elementsT>
+  template<typename ...altsT>
     struct basic_storage
       {
         // The `+ 0` parts are necessary to work around a bug in GCC 4.8.
-        alignas(max_of<alignof(elementsT)...>::value + 0) char bytes[max_of<sizeof(elementsT)...>::value + 0];
+        alignas(max_of<alignof(altsT)...>::value + 0) char bytes[max_of<sizeof(altsT)...>::value + 0];
       };
 
   namespace details_is_nothrow_swappable {
@@ -154,11 +154,11 @@ namespace details_variant {
       {
       };
 
-  template<typename ...elementsT>
+  template<typename ...altsT>
     struct visit_helper
       {
         template<typename voidT, typename visitorT, typename ...paramsT>
-          void operator()(voidT * /*stor*/, unsigned /*expect*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const
+          void operator()(voidT * /*stor*/, unsigned /*index*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const
             {
               ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
             }
@@ -167,78 +167,78 @@ namespace details_variant {
     struct visit_helper<firstT, remainingT...>
       {
         template<typename voidT, typename visitorT, typename ...paramsT>
-          void operator()(voidT *stor, unsigned expect, visitorT &&visitor, paramsT &&...params) const
+          void operator()(voidT *stor, unsigned index, visitorT &&visitor, paramsT &&...params) const
             {
-              if(expect == 0) {
+              if(index == 0) {
                 ::std::forward<visitorT>(visitor)(reinterpret_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
               } else {
-                visit_helper<remainingT...>()(stor, expect - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
+                visit_helper<remainingT...>()(stor, index - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
               }
             }
       };
 
   struct visitor_copy_construct
     {
-      template<typename elementT>
-        void operator()(elementT *ptr, const void *src) const
+      template<typename altT>
+        void operator()(altT *ptr, const void *src) const
           {
-            noadl::construct_at(ptr, *(static_cast<const elementT *>(src)));
+            noadl::construct_at(ptr, *(static_cast<const altT *>(src)));
           }
     };
   struct visitor_move_construct
     {
-      template<typename elementT>
-        void operator()(elementT *ptr, void *src) const
+      template<typename altT>
+        void operator()(altT *ptr, void *src) const
           {
-            noadl::construct_at(ptr, ::std::move(*(static_cast<elementT *>(src))));
+            noadl::construct_at(ptr, ::std::move(*(static_cast<altT *>(src))));
           }
     };
   struct visitor_copy_assign
     {
-      template<typename elementT>
-        void operator()(elementT *ptr, const void *src) const
+      template<typename altT>
+        void operator()(altT *ptr, const void *src) const
           {
-            *ptr = *(static_cast<const elementT *>(src));
+            *ptr = *(static_cast<const altT *>(src));
           }
     };
   struct visitor_move_assign
     {
-      template<typename elementT>
-        void operator()(elementT *ptr, void *src) const
+      template<typename altT>
+        void operator()(altT *ptr, void *src) const
           {
-            *ptr = ::std::move(*(static_cast<elementT *>(src)));
+            *ptr = ::std::move(*(static_cast<altT *>(src)));
           }
     };
   struct visitor_destroy
     {
-      template<typename elementT>
-        void operator()(elementT *ptr) const
+      template<typename altT>
+        void operator()(altT *ptr) const
           {
             noadl::destroy_at(ptr);
           }
     };
   struct visitor_get_type_info
     {
-      template<typename elementT>
-        void operator()(const elementT *ptr, const type_info **ti) const
+      template<typename altT>
+        void operator()(const altT *ptr, const type_info **ti) const
           {
             *ti = &(typeid(*ptr));
           }
     };
   struct visitor_wrapper
     {
-      template<typename elementT, typename nextT>
-        void operator()(elementT *ptr, nextT &&next) const
+      template<typename altT, typename nextT>
+        void operator()(altT *ptr, nextT &&next) const
           {
             ::std::forward<nextT>(next)(*ptr);
           }
     };
   struct visitor_swap
     {
-      template<typename elementT, typename sourceT>
-        void operator()(elementT *ptr, sourceT *src) const
+      template<typename altT, typename sourceT>
+        void operator()(altT *ptr, sourceT *src) const
           {
-            noadl::adl_swap(*ptr, *(static_cast<elementT *>(src)));
+            noadl::adl_swap(*ptr, *(static_cast<altT *>(src)));
           }
     };
 
@@ -250,36 +250,36 @@ namespace details_variant {
 
 }
 
-template<typename ...elementsT>
+template<typename ...altsT>
   class variant
     {
-      static_assert(details_variant::conjunction<is_nothrow_destructible<elementsT>...>::value, "Destructors of candidate types are not allowed to throw exceptions.");
+      static_assert(details_variant::conjunction<is_nothrow_destructible<altsT>...>::value, "Destructors of candidate types are not allowed to throw exceptions.");
 
     public:
       template<unsigned indexT>
         struct at
-          : details_variant::type_getter<indexT, elementsT...>
+          : details_variant::type_getter<indexT, altsT...>
           {
           };
-      template<typename elementT>
+      template<typename altT>
         struct index_of
-          : details_variant::type_finder<0, elementT, elementsT...>
+          : details_variant::type_finder<0, altT, altsT...>
           {
           };
 
       template<typename ...addT>
         struct prepend
-          : common_type<variant<addT..., elementsT...>>
+          : common_type<variant<addT..., altsT...>>
           {
           };
       template<typename ...addT>
         struct append
-          : common_type<variant<elementsT..., addT...>>
+          : common_type<variant<altsT..., addT...>>
           {
           };
 
     private:
-      using storage = details_variant::basic_storage<elementsT...>;
+      using storage = details_variant::basic_storage<altsT...>;
 
     private:
       unsigned m_turnout : 1;
@@ -315,104 +315,104 @@ template<typename ...elementsT>
         const unsigned index_old = this->m_index;
         this->m_index = index_new & 0x7FFFFFFF;
         // Destroy the old buffer and poison its contents.
-        details_variant::visit_helper<elementsT...>()(this->m_buffers + turnout_old, index_old,
-                                                      details_variant::visitor_destroy());
+        details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
+                                                  details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
         ::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
 #endif
       }
 
     public:
-      variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, elementsT...>::type>::value)
+      variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, altsT...>::type>::value)
         : m_turnout(0)
         {
-          // Value-initialize the first element.
+          // Value-initialize the first alternative.
           constexpr auto eindex = unsigned(0);
-          using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-          // Default-construct the first element in-place.
+          using etype = typename details_variant::type_getter<eindex, altsT...>::type;
+          // Default-construct the first alternative in-place.
           const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
           noadl::construct_at(ptr);
           this->m_index = 0;
         }
-      template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
-        variant(elementT &&elem)
+      template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
+        variant(altT &&elem)
           : m_turnout(0)
           {
             // This overload enables construction using a candidate of nested variants.
-            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-            // Construct the element in-place.
+            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
+            // Construct the alternative in-place.
             const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-            noadl::construct_at(ptr, ::std::forward<elementT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(elem));
             this->m_index = eindex;
           }
-      variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<elementsT>...>::value)
+      variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<altsT>...>::value)
         : m_turnout(0)
         {
-          // Copy-construct the active element from `other`.
-          details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                        details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+          // Copy-construct the active alternative from `other`.
+          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
+                                                    details_variant::visitor_copy_construct(), other.do_get_front_buffer());
           this->m_index = other.m_index;
         }
-      variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<elementsT>...>::value)
+      variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<altsT>...>::value)
         : m_turnout(0)
         {
-          // Move-construct the active element from `other`.
-          details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                        details_variant::visitor_move_construct(), other.do_get_front_buffer());
+          // Move-construct the active alternative from `other`.
+          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
+                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
           this->m_index = other.m_index;
         }
-      template<typename elementT, typename enable_if<details_variant::has_type_recursive<typename decay<elementT>::type, elementsT...>::value>::type * = nullptr>
-        variant & operator=(elementT &&elem)
+      template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
+        variant & operator=(altT &&elem)
           {
             // This overload, unlike `set()`, enables assignment using a candidate of nested variants.
-            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<elementT>::type, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index == eindex) {
-              // Assign the active element using perfect forwarding.
+              // Assign the active alternative using perfect forwarding.
               const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<elementT>(elem);
+              *ptr = ::std::forward<altT>(elem);
               return *this;
             }
-            // Construct the active element using perfect forwarding, then destroy the old element.
+            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<elementT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(elem));
             this->do_set_up_new_buffer(eindex);
             return *this;
           }
-      variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<elementsT>..., is_nothrow_copy_constructible<elementsT>...>::value)
+      variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<altsT>..., is_nothrow_copy_constructible<altsT>...>::value)
         {
           if(this->m_index == other.m_index) {
-            // Copy-assign the active element from `other`
-            details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                          details_variant::visitor_copy_assign(), other.do_get_front_buffer());
+            // Copy-assign the active alternative from `other`
+            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
+                                                      details_variant::visitor_copy_assign(), other.do_get_front_buffer());
             return *this;
           }
-          // Copy-construct the active element from `other`, then destroy the old element.
-          details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                        details_variant::visitor_copy_construct(), other.do_get_front_buffer());
+          // Copy-construct the active alternative from `other`, then destroy the old alternative.
+          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
+                                                    details_variant::visitor_copy_construct(), other.do_get_front_buffer());
           this->do_set_up_new_buffer(other.m_index);
           return *this;
         }
-      variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
+      variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
         {
           if(this->m_index == other.m_index) {
-            // Move-assign the active element from `other`
-            details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                          details_variant::visitor_move_assign(), other.do_get_front_buffer());
+            // Move-assign the active alternative from `other`
+            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
+                                                      details_variant::visitor_move_assign(), other.do_get_front_buffer());
             return *this;
           }
-          // Move-construct the active element from `other`, then destroy the old element.
-          details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                        details_variant::visitor_move_construct(), other.do_get_front_buffer());
+          // Move-construct the active alternative from `other`, then destroy the old alternative.
+          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
+                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
           this->do_set_up_new_buffer(other.m_index);
           return *this;
         }
       ~variant()
         {
-          // Destroy the active element and poison all contents.
-          details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                        details_variant::visitor_destroy());
+          // Destroy the active alternative and poison all contents.
+          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
+                                                    details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
           this->m_index = 0x6EEFDEAD;
           ::std::memset(m_buffers, '#', sizeof(m_buffers));
@@ -422,84 +422,84 @@ template<typename ...elementsT>
     public:
       unsigned index() const noexcept
         {
-          ROCKET_ASSERT(this->m_index < sizeof...(elementsT));
+          ROCKET_ASSERT(this->m_index < sizeof...(altsT));
           return this->m_index;
         }
       const type_info & type() const noexcept
         {
           auto ti = static_cast<const type_info *>(nullptr);
-          details_variant::visit_helper<const elementsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                              details_variant::visitor_get_type_info(), &ti);
+          details_variant::visit_helper<const altsT...>()(this->do_get_front_buffer(), this->m_index,
+                                                          details_variant::visitor_get_type_info(), &ti);
           ROCKET_ASSERT(ti);
           return *ti;
         }
-      template<typename elementT>
-        const elementT * get() const noexcept
+      template<typename altT>
+        const altT * get() const noexcept
           {
-            constexpr auto eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+            constexpr auto eindex = details_variant::type_finder<0, altT, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index != eindex) {
               return nullptr;
             }
             return static_cast<const etype *>(this->do_get_front_buffer());
           }
-      template<typename elementT>
-        elementT * get() noexcept
+      template<typename altT>
+        altT * get() noexcept
           {
-            constexpr auto eindex = details_variant::type_finder<0, elementT, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+            constexpr auto eindex = details_variant::type_finder<0, altT, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index != eindex) {
               return nullptr;
             }
             return static_cast<etype *>(this->do_get_front_buffer());
           }
-      template<typename elementT>
-        const elementT & as() const
+      template<typename altT>
+        const altT & as() const
           {
-            const auto ptr = this->get<elementT>();
+            const auto ptr = this->get<altT>();
             if(!ptr) {
               noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                            static_cast<int>(index_of<elementT>::value), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
+                                            static_cast<int>(index_of<altT>::value), typeid(altT).name(), static_cast<int>(this->index()), this->type().name());
             }
             return *ptr;
           }
-      template<typename elementT>
-        elementT & as()
+      template<typename altT>
+        altT & as()
           {
-            const auto ptr = this->get<elementT>();
+            const auto ptr = this->get<altT>();
             if(!ptr) {
               noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                            static_cast<int>(index_of<elementT>::value), typeid(elementT).name(), static_cast<int>(this->index()), this->type().name());
+                                            static_cast<int>(index_of<altT>::value), typeid(altT).name(), static_cast<int>(this->index()), this->type().name());
             }
             return *ptr;
           }
-      template<typename elementT, typename ...paramsT>
-        elementT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+      template<typename altT, typename ...paramsT>
+        altT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<altT, paramsT &&...>::value)
           {
             // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
-            constexpr auto eindex = details_variant::type_finder<0, typename remove_cv<elementT>::type, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
-            // Construct the active element using perfect forwarding, then destroy the old element.
+            constexpr auto eindex = details_variant::type_finder<0, typename remove_cv<altT>::type, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
+            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
             noadl::construct_at(ptr, ::std::forward<paramsT>(params)...);
             this->do_set_up_new_buffer(eindex);
             return *ptr;
           }
-      template<typename elementT>
-        elementT & set(elementT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
+      template<typename altT>
+        altT & set(altT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
           {
             // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
-            constexpr auto eindex = details_variant::type_finder<0, typename decay<elementT>::type, elementsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, elementsT...>::type;
+            constexpr auto eindex = details_variant::type_finder<0, typename decay<altT>::type, altsT...>::value;
+            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index == eindex) {
-              // Assign the active element using perfect forwarding.
+              // Assign the active alternative using perfect forwarding.
               const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<elementT>(elem);
+              *ptr = ::std::forward<altT>(elem);
               return *ptr;
             }
-            // Construct the active element using perfect forwarding, then destroy the old element.
+            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<elementT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(elem));
             this->do_set_up_new_buffer(eindex);
             return *ptr;
           }
@@ -507,47 +507,47 @@ template<typename ...elementsT>
       template<typename visitorT>
         void visit(visitorT &&visitor) const
           {
-            details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                          details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
+                                                      details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
           }
       template<typename visitorT>
         void visit(visitorT &&visitor)
           {
-            details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                          details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
+            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
+                                                      details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
           }
 
-      void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<elementsT>..., is_nothrow_move_constructible<elementsT>...>::value)
+      void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
         {
           if(this->m_index == other.m_index) {
-            // Swap the active elements.
-            details_variant::visit_helper<elementsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                          details_variant::visitor_swap(), other.do_get_front_buffer());
+            // Swap the active alternatives.
+            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
+                                                      details_variant::visitor_swap(), other.do_get_front_buffer());
             return;
           }
-          // Move-construct the active element in `*this` from `other`.
-          details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                        details_variant::visitor_move_construct(), other.do_get_front_buffer());
+          // Move-construct the active alternative in `*this` from `other`.
+          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
+                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
           try {
-            // Move-construct the active element in `other` from `*this`.
-            details_variant::visit_helper<elementsT...>()(other.do_get_back_buffer(), this->m_index,
-                                                          details_variant::visitor_move_construct(), this->do_get_front_buffer());
+            // Move-construct the active alternative in `other` from `*this`.
+            details_variant::visit_helper<altsT...>()(other.do_get_back_buffer(), this->m_index,
+                                                      details_variant::visitor_move_construct(), this->do_get_front_buffer());
           } catch(...) {
             // In case of an exception, the second object will not have been constructed.
             // Destroy the first object that has just been constructed, then rethrow the exception.
-            details_variant::visit_helper<elementsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                          details_variant::visitor_destroy());
+            details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
+                                                      details_variant::visitor_destroy());
             details_variant::rethrow_current_exception();
           }
-          // Destroy both elements.
+          // Destroy both alternatives.
           const unsigned this_index = this->m_index;
           this->do_set_up_new_buffer(other.m_index);
           other.do_set_up_new_buffer(this_index);
         }
     };
 
-template<typename ...elementsT>
-  void swap(variant<elementsT...> &lhs, variant<elementsT...> &other) noexcept(noexcept(lhs.swap(other)))
+template<typename ...altsT>
+  void swap(variant<altsT...> &lhs, variant<altsT...> &other) noexcept(noexcept(lhs.swap(other)))
     {
       lhs.swap(other);
     }
