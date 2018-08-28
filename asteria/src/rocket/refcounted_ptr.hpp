@@ -232,7 +232,7 @@ namespace details_refcounted_ptr {
 template<typename elementT>
   class refcounted_base : protected virtual details_refcounted_ptr::refcount_base
     {
-      template<typename, typename>
+      template<typename>
         friend class details_refcounted_ptr::stored_pointer;
 
     private:
