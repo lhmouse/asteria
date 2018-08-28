@@ -8,6 +8,7 @@
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval()
+#include <exception> // std::terminate()
 #include <iosfwd> // std::basic_ostream<>
 #include <cstddef> // std::nullptr_t
 #include <typeinfo>
@@ -61,7 +62,13 @@ namespace details_refcounted_ptr {
         {
           return *this;
         }
-      virtual ~refcount_base();
+      ~refcount_base()
+        {
+          // The reference count shall be either zero or one here.
+          if(this->m_nref.load(::std::memory_order_relaxed) > 1) {
+            ::std::terminate();
+          }
+        }
 
     public:
       long reference_count() const noexcept
@@ -257,9 +264,6 @@ template<typename elementT, typename deleterT>
     protected:
       using refcount_base  = details_refcounted_ptr::refcount_base;
       using deleter_base   = typename allocator_wrapper_base_for<deleter_type>::type;
-
-    public:
-      ~refcounted_base() override;
 
     public:
       const deleter_type & as_deleter() const noexcept
@@ -486,10 +490,6 @@ template<typename elementT>
     {
       lhs.swap(rhs);
     }
-
-template<typename elementT, typename deleterT>
-  refcounted_base<elementT, deleterT>::~refcounted_base()
-    = default;
 
 template<typename resultT, typename sourceT>
   inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &iptr)

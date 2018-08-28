@@ -74,7 +74,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/rocket/insertable_ostream.cpp  \
   asteria/src/rocket/insertable_stream.cpp  \
   asteria/src/rocket/cow_string.cpp  \
-  asteria/src/rocket/refcounted_ptr.cpp  \
   asteria/src/utilities.cpp  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
