@@ -91,10 +91,10 @@ namespace {
       }
       const bool sign = cand_punct->punct == Token::punctuator_sub;
       // Don't merge them if they are not contiguous.
-      if(tokens_inout.back().get_source_line() != line) {
+      if(tokens_inout.back().get_line() != line) {
         return false;
       }
-      if(tokens_inout.back().get_source_column() + tokens_inout.back().get_source_length() != column) {
+      if(tokens_inout.back().get_column() + tokens_inout.back().get_length() != column) {
         return false;
       }
       // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.

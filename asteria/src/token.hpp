@@ -142,15 +142,15 @@ class Token
       )>;
 
   private:
-    std::size_t m_source_line;
-    std::size_t m_source_column;
-    std::size_t m_source_length;
+    std::size_t m_line;
+    std::size_t m_column;
+    std::size_t m_length;
     Variant m_variant;
 
   public:
     template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
-      Token(std::size_t source_line, std::size_t source_column, std::size_t source_length, CandidateT &&cand)
-        : m_source_line(source_line), m_source_column(source_column), m_source_length(source_length), m_variant(std::forward<CandidateT>(cand))
+      Token(std::size_t line, std::size_t column, std::size_t length, CandidateT &&cand)
+        : m_line(line), m_column(column), m_length(length), m_variant(std::forward<CandidateT>(cand))
         {
         }
     Token(Token &&) noexcept;
@@ -158,17 +158,17 @@ class Token
     ~Token();
 
   public:
-    std::size_t get_source_line() const noexcept
+    std::size_t get_line() const noexcept
       {
-        return m_source_line;
+        return m_line;
       }
-    std::size_t get_source_column() const noexcept
+    std::size_t get_column() const noexcept
       {
-        return m_source_column;
+        return m_column;
       }
-    std::size_t get_source_length() const noexcept
+    std::size_t get_length() const noexcept
       {
-        return m_source_length;
+        return m_length;
       }
     Index index() const noexcept
       {
