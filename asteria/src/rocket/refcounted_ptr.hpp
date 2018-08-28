@@ -1,8 +1,8 @@
 /// This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_INTRUSIVE_PTR_HPP_
-#define ROCKET_INTRUSIVE_PTR_HPP_
+#ifndef ROCKET_REFCOUNTED_PTR_HPP_
+#define ROCKET_REFCOUNTED_PTR_HPP_
 
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
@@ -32,12 +32,12 @@ using ::std::basic_ostream;
 using ::std::nullptr_t;
 
 template<typename elementT>
-  class intrusive_base;
+  class refcounted_base;
 
 template<typename elementT>
-  class intrusive_ptr;
+  class refcounted_ptr;
 
-namespace details_intrusive_ptr {
+namespace details_refcounted_ptr {
 
   class refcount_base
     {
@@ -230,17 +230,17 @@ namespace details_intrusive_ptr {
 }
 
 template<typename elementT>
-  class intrusive_base : protected virtual details_intrusive_ptr::refcount_base
+  class refcounted_base : protected virtual details_refcounted_ptr::refcount_base
     {
       template<typename, typename>
-        friend class details_intrusive_ptr::stored_pointer;
+        friend class details_refcounted_ptr::stored_pointer;
 
     private:
       template<typename yelementT, typename cvthisT>
-        static intrusive_ptr<yelementT> do_share_this(cvthisT *cvthis);
+        static refcounted_ptr<yelementT> do_share_this(cvthisT *cvthis);
 
     public:
-      ~intrusive_base() override;
+      ~refcounted_base() override;
 
     public:
       bool unique() const noexcept
@@ -253,87 +253,87 @@ template<typename elementT>
         }
 
       template<typename yelementT = elementT>
-        intrusive_ptr<const yelementT> share_this() const
+        refcounted_ptr<const yelementT> share_this() const
           {
             return this->do_share_this<const yelementT>(this);
           }
       template<typename yelementT = elementT>
-        intrusive_ptr<yelementT> share_this()
+        refcounted_ptr<yelementT> share_this()
           {
             return this->do_share_this<yelementT>(this);
           }
     };
 
 template<typename elementT>
-  class intrusive_ptr
+  class refcounted_ptr
     {
       static_assert(is_array<elementT>::value == false, "`elementT` must not be an array type.");
 
       template<typename>
-        friend class intrusive_ptr;
+        friend class refcounted_ptr;
 
     public:
       using element_type  = elementT;
       using pointer       = element_type *;
 
     private:
-      details_intrusive_ptr::stored_pointer<element_type> m_sth;
+      details_refcounted_ptr::stored_pointer<element_type> m_sth;
 
     public:
-      constexpr intrusive_ptr(nullptr_t = nullptr) noexcept
+      constexpr refcounted_ptr(nullptr_t = nullptr) noexcept
         : m_sth()
         {
         }
-      explicit intrusive_ptr(pointer ptr) noexcept
-        : intrusive_ptr()
+      explicit refcounted_ptr(pointer ptr) noexcept
+        : refcounted_ptr()
         {
           this->reset(ptr);
         }
-      intrusive_ptr(const intrusive_ptr &other) noexcept
-        : intrusive_ptr()
+      refcounted_ptr(const refcounted_ptr &other) noexcept
+        : refcounted_ptr()
         {
           this->reset(other.m_sth.copy_release());
         }
-      intrusive_ptr(intrusive_ptr &&other) noexcept
-        : intrusive_ptr()
+      refcounted_ptr(refcounted_ptr &&other) noexcept
+        : refcounted_ptr()
         {
           this->reset(other.m_sth.release());
         }
-      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-        intrusive_ptr(const intrusive_ptr<yelementT> &other) noexcept
-          : intrusive_ptr()
+      template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr(const refcounted_ptr<yelementT> &other) noexcept
+          : refcounted_ptr()
           {
             this->reset(other.m_sth.copy_release());
           }
-      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-        intrusive_ptr(intrusive_ptr<yelementT> &&other) noexcept
-          : intrusive_ptr()
+      template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr(refcounted_ptr<yelementT> &&other) noexcept
+          : refcounted_ptr()
           {
             this->reset(other.m_sth.release());
           }
-      intrusive_ptr & operator=(nullptr_t) noexcept
+      refcounted_ptr & operator=(nullptr_t) noexcept
         {
           this->reset();
           return *this;
         }
-      intrusive_ptr & operator=(const intrusive_ptr &other) noexcept
+      refcounted_ptr & operator=(const refcounted_ptr &other) noexcept
         {
           this->reset(other.m_sth.copy_release());
           return *this;
         }
-      intrusive_ptr & operator=(intrusive_ptr &&other) noexcept
+      refcounted_ptr & operator=(refcounted_ptr &&other) noexcept
         {
           this->reset(other.m_sth.release());
           return *this;
         }
-      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-        intrusive_ptr & operator=(const intrusive_ptr<yelementT> &other) noexcept
+      template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr & operator=(const refcounted_ptr<yelementT> &other) noexcept
           {
             this->reset(other.m_sth.copy_release());
             return *this;
           }
-      template<typename yelementT, typename enable_if<is_convertible<typename intrusive_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-        intrusive_ptr & operator=(intrusive_ptr<yelementT> &&other) noexcept
+      template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr & operator=(refcounted_ptr<yelementT> &&other) noexcept
           {
             this->reset(other.m_sth.release());
             return *this;
@@ -382,129 +382,129 @@ template<typename elementT>
           this->m_sth.reset(ptr);
         }
 
-      void swap(intrusive_ptr &other) noexcept
+      void swap(refcounted_ptr &other) noexcept
         {
           this->m_sth.exchange(other.m_sth);
         }
     };
 
 template<typename xelementT, typename yelementT>
-  inline bool operator==(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs) noexcept
+  inline bool operator==(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs) noexcept
     {
       return lhs.get() == rhs.get();
     }
 template<typename xelementT, typename yelementT>
-  inline bool operator!=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs) noexcept
+  inline bool operator!=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs) noexcept
     {
       return lhs.get() != rhs.get();
     }
 template<typename xelementT, typename yelementT>
-  inline bool operator<(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
+  inline bool operator<(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
     {
       return lhs.get() < rhs.get();
     }
 template<typename xelementT, typename yelementT>
-  inline bool operator>(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
+  inline bool operator>(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
     {
       return lhs.get() > rhs.get();
     }
 template<typename xelementT, typename yelementT>
-  inline bool operator<=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
+  inline bool operator<=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
     {
       return lhs.get() <= rhs.get();
     }
 template<typename xelementT, typename yelementT>
-  inline bool operator>=(const intrusive_ptr<xelementT> &lhs, const intrusive_ptr<yelementT> &rhs)
+  inline bool operator>=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
     {
       return lhs.get() >= rhs.get();
     }
 
 template<typename elementT>
-  inline bool operator==(const intrusive_ptr<elementT> &lhs, nullptr_t) noexcept
+  inline bool operator==(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
     {
       return !(lhs.get());
     }
 template<typename elementT>
-  inline bool operator!=(const intrusive_ptr<elementT> &lhs, nullptr_t) noexcept
+  inline bool operator!=(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
     {
       return !!(lhs.get());
     }
 
 template<typename elementT>
-  inline bool operator==(nullptr_t, const intrusive_ptr<elementT> &rhs) noexcept
+  inline bool operator==(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
     {
       return !(rhs.get());
     }
 template<typename elementT>
-  inline bool operator!=(nullptr_t, const intrusive_ptr<elementT> &rhs) noexcept
+  inline bool operator!=(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
     {
       return !!(rhs.get());
     }
 
 template<typename elementT>
-  inline void swap(intrusive_ptr<elementT> &lhs, intrusive_ptr<elementT> &rhs) noexcept
+  inline void swap(refcounted_ptr<elementT> &lhs, refcounted_ptr<elementT> &rhs) noexcept
     {
       lhs.swap(rhs);
     }
 
 template<typename elementT>
   template<typename yelementT, typename cvthisT>
-    inline intrusive_ptr<yelementT> intrusive_base<elementT>::do_share_this(cvthisT *cvthis)
+    inline refcounted_ptr<yelementT> refcounted_base<elementT>::do_share_this(cvthisT *cvthis)
       {
-        const auto ptr = details_intrusive_ptr::static_cast_or_dynamic_cast_helper<yelementT *, intrusive_base *>()(+cvthis);
+        const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcounted_base *>()(+cvthis);
         if(!ptr) {
-          noadl::throw_domain_error("intrusive_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+          noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
                                     typeid(yelementT).name(), typeid(*cvthis).name());
         }
         cvthis->refcount_base::add_reference();
-        return intrusive_ptr<yelementT>(ptr);
+        return refcounted_ptr<yelementT>(ptr);
       }
 
 template<typename elementT>
-  intrusive_base<elementT>::~intrusive_base()
+  refcounted_base<elementT>::~refcounted_base()
     = default;
 
 template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> static_pointer_cast(const intrusive_ptr<sourceT> &iptr)
+  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::static_caster>()(iptr);
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(iptr);
     }
 template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> static_pointer_cast(intrusive_ptr<sourceT> &&iptr)
+  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::static_caster>()(::std::move(iptr));
-    }
-
-template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> dynamic_pointer_cast(const intrusive_ptr<sourceT> &iptr)
-    {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::dynamic_caster>()(iptr);
-    }
-template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> dynamic_pointer_cast(intrusive_ptr<sourceT> &&iptr)
-    {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::dynamic_caster>()(::std::move(iptr));
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(iptr));
     }
 
 template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> const_pointer_cast(const intrusive_ptr<sourceT> &iptr)
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::const_caster>()(iptr);
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(iptr);
     }
 template<typename resultT, typename sourceT>
-  inline intrusive_ptr<resultT> const_pointer_cast(intrusive_ptr<sourceT> &&iptr)
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&iptr)
     {
-      return details_intrusive_ptr::pointer_cast_helper<intrusive_ptr<resultT>, details_intrusive_ptr::const_caster>()(::std::move(iptr));
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(iptr));
+    }
+
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &iptr)
+    {
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(iptr);
+    }
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&iptr)
+    {
+      return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(::std::move(iptr));
     }
 
 template<typename elementT, typename ...paramsT>
-  inline intrusive_ptr<elementT> make_intrusive(paramsT &&...params)
+  inline refcounted_ptr<elementT> make_refcounted(paramsT &&...params)
     {
-      return intrusive_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+      return refcounted_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
     }
 
 template<typename charT, typename traitsT, typename elementT>
-  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const intrusive_ptr<elementT> &iptr)
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const refcounted_ptr<elementT> &iptr)
     {
       return os << iptr.get();
     }

@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#include "intrusive_ptr.hpp"
+#include "refcounted_ptr.hpp"
 
 namespace rocket {
 
-namespace details_intrusive_ptr {
+namespace details_refcounted_ptr {
 
   refcount_base::~refcount_base()
     {

@@ -31,7 +31,7 @@ void initialize_executive_function_context(Executive_context &ctx_out, const Vec
     ctx_out.set_named_reference(String::shallow("__file"), reference_constant(D_string(file)));
     ctx_out.set_named_reference(String::shallow("__line"), reference_constant(D_integer(line)));
     ctx_out.set_named_reference(String::shallow("__this"), std::move(materialize_reference(self)));
-    ctx_out.set_named_reference(String::shallow("__varg"), reference_constant(D_function(rocket::make_intrusive<Variadic_arguer>(file, line, std::move(args)))));
+    ctx_out.set_named_reference(String::shallow("__varg"), reference_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
   }
 
 }

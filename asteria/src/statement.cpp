@@ -238,7 +238,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         // Create a variable using the initializer.
         ref_out = evaluate_expression(cand.init, ctx_inout);
         auto value = read_reference(ref_out);
-        auto var = rocket::make_intrusive<Variable>(std::move(value), cand.immutable);
+        auto var = rocket::make_refcounted<Variable>(std::move(value), cand.immutable);
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };
         ref_out.set_root(std::move(ref_c));
@@ -256,8 +256,8 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         Analytic_context ctx_next(&ctx_inout);
         initialize_analytic_function_context(ctx_next, cand.params);
         auto body_bnd = bind_block_in_place(ctx_next, cand.body);
-        auto func = rocket::make_intrusive<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
-        auto var = rocket::make_intrusive<Variable>(D_function(std::move(func)), true);
+        auto func = rocket::make_refcounted<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
+        auto var = rocket::make_refcounted<Variable>(D_function(std::move(func)), true);
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };
         ref_out.set_root(std::move(ref_c));
@@ -400,7 +400,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         ref_out = evaluate_expression(cand.var_init, ctx_next);
         if(cand.var_name.empty() == false) {
           auto value = read_reference(ref_out);
-          auto var = rocket::make_intrusive<Variable>(std::move(value), cand.var_immutable);
+          auto var = rocket::make_refcounted<Variable>(std::move(value), cand.var_immutable);
           // Reset the reference.
           Reference_root::S_variable ref_c = { std::move(var) };
           do_safe_set_named_reference(ctx_next, "`for` variable", cand.var_name, std::move(ref_c));

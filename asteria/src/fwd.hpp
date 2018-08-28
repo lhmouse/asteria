@@ -13,7 +13,7 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
-#include "rocket/intrusive_ptr.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
@@ -33,9 +33,9 @@ template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
 
 template<typename ElementT>
-  using Sbase = rocket::intrusive_base<ElementT>;
+  using Sbase = rocket::refcounted_base<ElementT>;
 template<typename ElementT>
-  using Sptr = rocket::intrusive_ptr<ElementT>;
+  using Sptr = rocket::refcounted_ptr<ElementT>;
 
 // General utilities
 class Formatter;

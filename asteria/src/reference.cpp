@@ -93,7 +93,7 @@ Reference & materialize_reference(Reference &ref)
       return ref;
     }
     auto value = read_reference(ref);
-    auto var = rocket::make_intrusive<Variable>(std::move(value), false);
+    auto var = rocket::make_refcounted<Variable>(std::move(value), false);
     Reference_root::S_variable ref_c = { std::move(var) };
     ref.set_root(std::move(ref_c));
     return ref;

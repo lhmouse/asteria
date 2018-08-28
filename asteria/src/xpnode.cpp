@@ -540,7 +540,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         Analytic_context ctx_next(&ctx);
         initialize_analytic_function_context(ctx_next, cand.params);
         auto body_bnd = bind_block_in_place(ctx_next, cand.body);
-        auto func = rocket::make_intrusive<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
+        auto func = rocket::make_refcounted<Instantiated_function>(cand.params, cand.file, cand.line, std::move(body_bnd));
         stack_inout.emplace_back(reference_temp_value(D_function(std::move(func))));
         return;
       }
