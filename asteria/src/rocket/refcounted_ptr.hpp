@@ -4,6 +4,7 @@
 #ifndef ROCKET_REFCOUNTED_PTR_HPP_
 #define ROCKET_REFCOUNTED_PTR_HPP_
 
+#include <memory> // std::default_delete<>
 #include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval()
@@ -14,12 +15,15 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
+#include "allocator_utilities.hpp"
 
 namespace rocket {
 
+using ::std::default_delete;
 using ::std::atomic;
 using ::std::remove_reference;
 using ::std::remove_pointer;
+using ::std::remove_cv;
 using ::std::enable_if;
 using ::std::conditional;
 using ::std::is_nothrow_constructible;
@@ -31,7 +35,7 @@ using ::std::add_lvalue_reference;
 using ::std::basic_ostream;
 using ::std::nullptr_t;
 
-template<typename elementT>
+template<typename elementT, typename deleterT = default_delete<elementT>>
   class refcounted_base;
 
 template<typename elementT>
@@ -178,7 +182,11 @@ namespace details_refcounted_ptr {
             if(ptr->refcount_base::drop_reference() == false) {
               return;
             }
-            delete ptr;
+            // Remove cv-qualifiers, then move-construct the deleter out of the object,
+            // which is used to delete the object thereafter.
+            const auto nkptr = const_cast<typename remove_cv<element_type>::type *>(ptr);
+            auto tdel = ::std::move(nkptr->do_get_deleter_fgaldxemwbpsuvkjtynrzociqh());
+            ::std::move(tdel)(nkptr);
           }
         void exchange(stored_pointer &other) noexcept
           {
@@ -229,20 +237,39 @@ namespace details_refcounted_ptr {
 
 }
 
-template<typename elementT>
-  class refcounted_base : protected virtual details_refcounted_ptr::refcount_base
+template<typename elementT, typename deleterT>
+  class refcounted_base : protected virtual details_refcounted_ptr::refcount_base, private virtual allocator_wrapper_base_for<deleterT>::type
     {
       template<typename>
         friend class details_refcounted_ptr::stored_pointer;
 
-    private:
-      template<typename yelementT, typename cvthisT>
-        static refcounted_ptr<yelementT> do_share_this(cvthisT *cvthis);
+    public:
+      using element_type  = elementT;
+      using deleter_type  = deleterT;
+
+    protected:
+      using refcount_base  = details_refcounted_ptr::refcount_base;
+      using deleter_base   = typename allocator_wrapper_base_for<deleter_type>::type;
 
     public:
       ~refcounted_base() override;
 
+    private:
+      deleter_type & do_get_deleter_fgaldxemwbpsuvkjtynrzociqh() noexcept
+        {
+          return this->as_deleter();
+        }
+
     public:
+      const deleter_type & as_deleter() const noexcept
+        {
+          return static_cast<const deleter_base &>(*this);
+        }
+      deleter_type & as_deleter() noexcept
+        {
+          return static_cast<deleter_base &>(*this);
+        }
+
       bool unique() const noexcept
         {
           return this->refcount_base::reference_count() == 1;
@@ -255,12 +282,24 @@ template<typename elementT>
       template<typename yelementT = elementT>
         refcounted_ptr<const yelementT> share_this() const
           {
-            return this->do_share_this<const yelementT>(this);
+            const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcounted_base *>(this);
+            if(!ptr) {
+              noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+                                        typeid(yelementT).name(), typeid(*this).name());
+            }
+            this->refcount_base::add_reference();
+            return refcounted_ptr<const yelementT>(ptr);
           }
       template<typename yelementT = elementT>
         refcounted_ptr<yelementT> share_this()
           {
-            return this->do_share_this<yelementT>(this);
+            const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcounted_base *>(this);
+            if(!ptr) {
+              noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+                                        typeid(yelementT).name(), typeid(*this).name());
+            }
+            this->refcount_base::add_reference();
+            return refcounted_ptr<yelementT>(ptr);
           }
     };
 
@@ -447,21 +486,8 @@ template<typename elementT>
       lhs.swap(rhs);
     }
 
-template<typename elementT>
-  template<typename yelementT, typename cvthisT>
-    inline refcounted_ptr<yelementT> refcounted_base<elementT>::do_share_this(cvthisT *cvthis)
-      {
-        const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcounted_base *>()(+cvthis);
-        if(!ptr) {
-          noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                    typeid(yelementT).name(), typeid(*cvthis).name());
-        }
-        cvthis->refcount_base::add_reference();
-        return refcounted_ptr<yelementT>(ptr);
-      }
-
-template<typename elementT>
-  refcounted_base<elementT>::~refcounted_base()
+template<typename elementT, typename deleterT>
+  refcounted_base<elementT, deleterT>::~refcounted_base()
     = default;
 
 template<typename resultT, typename sourceT>
