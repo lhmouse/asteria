@@ -541,8 +541,7 @@ namespace details_cow_vector {
           {
             const auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto c_data = (ref->size() != 0) ? ref->data() : nullptr;
-            const auto dist = static_cast<size_t>(ptr - c_data);
+            const auto dist = static_cast<size_t>(ptr - ref->data());
             ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
             return ptr;
@@ -860,10 +859,6 @@ template<typename valueT, typename allocatorT>
           const auto cnt_old = this->size();
           ROCKET_ASSERT(tpos <= cnt_old);
           ROCKET_ASSERT(tn <= cnt_old - tpos);
-          if(tn == cnt_old) {
-            this->clear();
-            return nullptr;
-          }
           if(this->unique() == false) {
             const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
             return ptr + tpos;
@@ -1238,20 +1233,14 @@ template<typename valueT, typename allocatorT>
       // 26.3.11.4, data access
       const value_type * data() const noexcept
         {
-          if(this->empty()) {
-            return nullptr;
-          }
           return this->m_sth.data();
         }
       // Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
       // N.B. This is a non-standard extension.
       value_type * mut_data()
         {
-          if(this->empty()) {
-            return nullptr;
-          }
           if(this->unique() == false) {
-            return this->do_reallocate(0, 0, this->size(), this->size());
+            return this->do_reallocate(0, 0, this->size(), this->size() | 1);
           }
           return this->m_sth.mut_data_unchecked();
         }

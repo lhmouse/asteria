@@ -809,7 +809,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
             const auto len_add = this->size() - len_old;
             const auto len_sfx = len_old - (tpos + tn);
-            this->do_reserve_more(len_sfx);
+            this->do_reserve_more(len_sfx | 1);
             const auto ptr = this->m_sth.mut_data_unchecked();
             traits_type::copy(ptr + len_old + len_add, ptr + tpos + tn, len_sfx);
             traits_type::move(ptr + tpos, ptr + len_old, len_add + len_sfx);
@@ -821,10 +821,6 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto len_old = this->size();
           ROCKET_ASSERT(tpos <= len_old);
           ROCKET_ASSERT(tn <= len_old - tpos);
-          if(tn == len_old) {
-            this->clear();
-            return nullptr;
-          }
           if(this->unique() == false) {
             const auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
             return ptr + tpos;
@@ -949,7 +945,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       size_type size() const noexcept
         {
-        return this->m_len;
+          return this->m_len;
         }
       size_type length() const noexcept
         {
@@ -1447,20 +1443,14 @@ template<typename charT, typename traitsT, typename allocatorT>
       // 24.3.2.7, string operations
       const value_type * data() const noexcept
         {
-          if(this->empty()) {
-            return nullptr;
-          }
           return this->m_ptr;
         }
       // Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
       // N.B. This is a non-standard extension.
       value_type * mut_data()
         {
-          if(this->empty()) {
-            return nullptr;
-          }
           if(this->unique() == false) {
-            return this->do_reallocate(0, 0, this->size(), this->size());
+            return this->do_reallocate(0, 0, this->size(), this->size() | 1);
           }
           return this->m_sth.mut_data_unchecked();
         }
