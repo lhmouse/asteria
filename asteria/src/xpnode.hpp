@@ -130,9 +130,9 @@ class Xpnode
     Variant m_variant;
 
   public:
-    template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
-      Xpnode(CandidateT &&cand)
-        : m_variant(std::forward<CandidateT>(cand))
+    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+      Xpnode(AltT &&alt)
+        : m_variant(std::forward<AltT>(alt))
         {
         }
     Xpnode(Xpnode &&) noexcept;
@@ -144,15 +144,15 @@ class Xpnode
       {
         return static_cast<Index>(m_variant.index());
       }
-    template<typename ExpectT>
-      const ExpectT * opt() const noexcept
+    template<typename AltT>
+      const AltT * opt() const noexcept
         {
-          return m_variant.get<ExpectT>();
+          return m_variant.get<AltT>();
         }
-    template<typename ExpectT>
-      const ExpectT & as() const
+    template<typename AltT>
+      const AltT & as() const
         {
-          return m_variant.as<ExpectT>();
+          return m_variant.as<AltT>();
         }
   };
 

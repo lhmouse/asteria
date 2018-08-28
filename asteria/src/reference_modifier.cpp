@@ -24,25 +24,25 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
     switch(modifier.index()) {
     case Reference_modifier::index_array_index:
       {
-        const auto &cand = modifier.as<Reference_modifier::S_array_index>();
+        const auto &alt = modifier.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
         const auto qarr = parent.opt<D_array>();
         if(!qarr) {
-          ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", parent, "` because it is not an array.");
+          ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
         }
-        auto rindex = cand.index;
+        auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
           rindex += static_cast<Signed>(qarr->size());
         }
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", array = ", *qarr);
           return nullptr;
         }
         if(rindex >= static_cast<Signed>(qarr->size())) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", array = ", *qarr);
           return nullptr;
         }
         const auto rit = qarr->begin() + static_cast<std::ptrdiff_t>(rindex);
@@ -50,17 +50,17 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &cand = modifier.as<Reference_modifier::S_object_key>();
+        const auto &alt = modifier.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
         const auto qobj = parent.opt<D_object>();
         if(!qobj) {
-          ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", parent, "` because it is not an object.");
+          ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
         }
-        const auto rit = qobj->find(cand.key);
+        const auto rit = qobj->find(alt.key);
         if(rit == qobj->end()) {
-          ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", *qobj);
+          ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", object = ", *qobj);
           return nullptr;
         }
         return &(rit->second);
@@ -75,7 +75,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
     switch(modifier.index()) {
     case Reference_modifier::index_array_index:
       {
-        const auto &cand = modifier.as<Reference_modifier::S_array_index>();
+        const auto &alt = modifier.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;
@@ -84,15 +84,15 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         }
         const auto qarr = parent.opt<D_array>();
         if(!qarr) {
-          ASTERIA_THROW_RUNTIME_ERROR("Index `", cand.index, "` cannot be applied to `", parent, "` because it is not an array.");
+          ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
         }
-        auto rindex = cand.index;
+        auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
           rindex += static_cast<Signed>(qarr->size());
         }
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", cand.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", array = ", *qarr);
           if(!creates) {
             return nullptr;
           }
@@ -104,7 +104,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
           rindex = 0;
         }
         if(rindex >= static_cast<Signed>(qarr->size())) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", cand.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", array = ", *qarr);
           if(!creates) {
             return nullptr;
           }
@@ -124,7 +124,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &cand = modifier.as<Reference_modifier::S_object_key>();
+        const auto &alt = modifier.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;
@@ -133,19 +133,19 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         }
         const auto qobj = parent.opt<D_object>();
         if(!qobj) {
-          ASTERIA_THROW_RUNTIME_ERROR("Key `", cand.key, "` cannot be applied to `", parent, "` because it is not an object.");
+          ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
         }
         auto rit = D_object::iterator();
         if(!creates) {
-          rit = qobj->find_mut(cand.key);
+          rit = qobj->find_mut(alt.key);
           if(rit == qobj->end()) {
-            ASTERIA_DEBUG_LOG("Object key was not found: key = ", cand.key, ", object = ", *qobj);
+            ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", object = ", *qobj);
             return nullptr;
           }
         } else {
-          const auto result = qobj->try_emplace(cand.key);
+          const auto result = qobj->try_emplace(alt.key);
           if(result.second) {
-            ASTERIA_DEBUG_LOG("New object key has been created: key = ", cand.key, ", object = ", *qobj);
+            ASTERIA_DEBUG_LOG("New object key has been created: key = ", alt.key, ", object = ", *qobj);
           }
           rit = result.first;
         }

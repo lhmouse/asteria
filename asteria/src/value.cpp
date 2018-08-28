@@ -51,36 +51,36 @@ bool test_value(const Value &value)
       return false;
     case Value::type_boolean:
       {
-        const auto &cand = value.as<D_boolean>();
-        return cand;
+        const auto &alt = value.as<D_boolean>();
+        return alt;
       }
     case Value::type_integer:
       {
-        const auto &cand = value.as<D_integer>();
-        return cand != 0;
+        const auto &alt = value.as<D_integer>();
+        return alt != 0;
       }
     case Value::type_double:
       {
-        const auto &cand = value.as<D_double>();
-        return std::fpclassify(cand) != FP_ZERO;
+        const auto &alt = value.as<D_double>();
+        return std::fpclassify(alt) != FP_ZERO;
       }
     case Value::type_string:
       {
-        const auto &cand = value.as<D_string>();
-        return cand.empty() == false;
+        const auto &alt = value.as<D_string>();
+        return alt.empty() == false;
       }
     case Value::type_opaque:
     case Value::type_function:
       return true;
     case Value::type_array:
       {
-        const auto &cand = value.as<D_array>();
-        return cand.empty() == false;
+        const auto &alt = value.as<D_array>();
+        return alt.empty() == false;
       }
     case Value::type_object:
       {
-        const auto &cand = value.as<D_object>();
-        return cand.empty() == false;
+        const auto &alt = value.as<D_object>();
+        return alt.empty() == false;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", value.type(), "` has been encountered.");
@@ -351,58 +351,58 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       return;
     case Value::type_boolean:
       {
-        const auto &cand = value.as<D_boolean>();
+        const auto &alt = value.as<D_boolean>();
         // boolean true
-        os <<"boolean " <<std::boolalpha <<std::nouppercase <<cand;
+        os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
     case Value::type_integer:
       {
-        const auto &cand = value.as<D_integer>();
+        const auto &alt = value.as<D_integer>();
         // integer 42
-        os <<"integer " <<std::dec <<cand;
+        os <<"integer " <<std::dec <<alt;
         return;
       }
     case Value::type_double:
       {
-        const auto &cand = value.as<D_double>();
+        const auto &alt = value.as<D_double>();
         // double 123.456
-        os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<cand;
+        os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<alt;
         return;
       }
     case Value::type_string:
       {
-        const auto &cand = value.as<D_string>();
+        const auto &alt = value.as<D_string>();
         // string(5) "hello"
-        os <<"string(" <<std::dec <<cand.size() <<") " <<Quote(cand);
+        os <<"string(" <<std::dec <<alt.size() <<") " <<Quote(alt);
         return;
       }
     case Value::type_opaque:
       {
-        const auto &cand = value.as<D_opaque>();
+        const auto &alt = value.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*cand).name() <<"\") " <<Quote(cand->describe());
+        os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_function:
       {
-        const auto &cand = value.as<D_function>();
+        const auto &alt = value.as<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*cand).name() <<"\") " <<Quote(cand->describe());
+        os <<"function(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_array:
       {
-        const auto &cand = value.as<D_array>();
+        const auto &alt = value.as<D_array>();
         // array(3) = [
         //   0 = integer 1,
         //   1 = integer 2,
         //   2 = integer 3,
         // ]
-        os <<"array(" <<std::dec <<cand.size() <<") [";
-        for(auto it = cand.begin(); it != cand.end(); ++it) {
+        os <<"array(" <<std::dec <<alt.size() <<") [";
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
-          os <<std::dec <<(it - cand.begin());
+          os <<std::dec <<(it - alt.begin());
           os <<" = ";
           dump_value(os, *it, indent_next + indent_increment, indent_increment);
           os <<',';
@@ -412,14 +412,14 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       }
     case Value::type_object:
       {
-        const auto &cand = value.as<D_object>();
+        const auto &alt = value.as<D_object>();
         // object(3) = {
         //   "one" = integer 1,
         //   "two" = integer 2,
         //   "three" = integer 3,
         // }
-        os <<"object(" <<std::dec <<cand.size() <<") {";
-        for(auto it = cand.begin(); it != cand.end(); ++it) {
+        os <<"object(" <<std::dec <<alt.size() <<") {";
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
           os <<std::endl <<Indent(indent_next + indent_increment);
           os <<Quote(it->first);
           os <<" = ";

@@ -148,9 +148,9 @@ class Token
     Variant m_variant;
 
   public:
-    template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
-      Token(std::size_t line, std::size_t column, std::size_t length, CandidateT &&cand)
-        : m_line(line), m_column(column), m_length(length), m_variant(std::forward<CandidateT>(cand))
+    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+      Token(std::size_t line, std::size_t column, std::size_t length, AltT &&alt)
+        : m_line(line), m_column(column), m_length(length), m_variant(std::forward<AltT>(alt))
         {
         }
     Token(Token &&) noexcept;
@@ -174,15 +174,15 @@ class Token
       {
         return static_cast<Index>(m_variant.index());
       }
-    template<typename ExpectT>
-      const ExpectT * opt() const noexcept
+    template<typename AltT>
+      const AltT * opt() const noexcept
         {
-          return m_variant.get<ExpectT>();
+          return m_variant.get<AltT>();
         }
-    template<typename ExpectT>
-      const ExpectT & as() const
+    template<typename AltT>
+      const AltT & as() const
         {
-          return m_variant.as<ExpectT>();
+          return m_variant.as<AltT>();
         }
   };
 

@@ -55,9 +55,9 @@ class Value
       : m_variant()  // Initialize to `null`.
       {
       }
-    template<typename CandidateT, typename std::enable_if<std::is_constructible<Variant, CandidateT &&>::value>::type * = nullptr>
-      Value(CandidateT &&cand)
-        : m_variant(std::forward<CandidateT>(cand))
+    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+      Value(AltT &&alt)
+        : m_variant(std::forward<AltT>(alt))
         {
         }
     Value(const Value &) noexcept;
@@ -71,30 +71,30 @@ class Value
       {
         return static_cast<Type>(m_variant.index());
       }
-    template<typename ExpectT>
-      const ExpectT * opt() const noexcept
+    template<typename AltT>
+      const AltT * opt() const noexcept
         {
-          return m_variant.get<ExpectT>();
+          return m_variant.get<AltT>();
         }
-    template<typename ExpectT>
-      ExpectT * opt() noexcept
+    template<typename AltT>
+      AltT * opt() noexcept
         {
-          return m_variant.get<ExpectT>();
+          return m_variant.get<AltT>();
         }
-    template<typename ExpectT>
-      const ExpectT & as() const
+    template<typename AltT>
+      const AltT & as() const
         {
-          return m_variant.as<ExpectT>();
+          return m_variant.as<AltT>();
         }
-    template<typename ExpectT>
-      ExpectT & as()
+    template<typename AltT>
+      AltT & as()
         {
-          return m_variant.as<ExpectT>();
+          return m_variant.as<AltT>();
         }
-    template<typename CandidateT>
-      CandidateT & set(CandidateT &&cand)
+    template<typename AltT>
+      AltT & set(AltT &&alt)
         {
-          return m_variant.set(std::forward<CandidateT>(cand));
+          return m_variant.set(std::forward<AltT>(alt));
         }
   };
 
