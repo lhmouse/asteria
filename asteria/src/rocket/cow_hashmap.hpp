@@ -940,7 +940,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
             // Reserve more space for non-debug builds.
             cap = noadl::max(cap, cnt + cnt / 2 + 7);
 #endif
-            this->do_reallocate(0, 0, this->bucket_count(), cap);
+            this->do_reallocate(0, 0, this->bucket_count(), cap | 1);
           }
           ROCKET_ASSERT(this->capacity() >= cap);
         }

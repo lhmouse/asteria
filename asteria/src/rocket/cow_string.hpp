@@ -784,7 +784,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             // Reserve more space for non-debug builds.
             cap = noadl::max(cap, len + len / 2 + 31);
 #endif
-            this->do_reallocate(0, 0, len, cap);
+            this->do_reallocate(0, 0, len, cap | 1);
           }
           ROCKET_ASSERT(this->capacity() >= cap);
         }
@@ -809,7 +809,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
             const auto len_add = this->size() - len_old;
             const auto len_sfx = len_old - (tpos + tn);
-            this->do_reserve_more(len_sfx | 1);
+            this->do_reserve_more(len_sfx);
             const auto ptr = this->m_sth.mut_data_unchecked();
             traits_type::copy(ptr + len_old + len_add, ptr + tpos + tn, len_sfx);
             traits_type::move(ptr + tpos, ptr + len_old, len_add + len_sfx);
