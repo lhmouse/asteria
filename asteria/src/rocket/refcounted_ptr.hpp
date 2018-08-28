@@ -144,6 +144,13 @@ namespace details_refcounted_ptr {
         stored_pointer & operator=(const stored_pointer &)
           = delete;
 
+      private:
+        template<typename yelementT, typename deleterT>
+          deleterT & do_locate_deleter(refcounted_base<yelementT, deleterT> *ptr) const
+            {
+              return ptr->as_deleter();
+            }
+
       public:
         long use_count() const noexcept
           {
@@ -185,7 +192,7 @@ namespace details_refcounted_ptr {
             // Remove cv-qualifiers, then move-construct the deleter out of the object,
             // which is used to delete the object thereafter.
             const auto nkptr = const_cast<typename remove_cv<element_type>::type *>(ptr);
-            auto tdel = ::std::move(nkptr->do_get_deleter_fgaldxemwbpsuvkjtynrzociqh());
+            auto tdel = ::std::move(this->do_locate_deleter(nkptr));
             ::std::move(tdel)(nkptr);
           }
         void exchange(stored_pointer &other) noexcept
@@ -253,12 +260,6 @@ template<typename elementT, typename deleterT>
 
     public:
       ~refcounted_base() override;
-
-    private:
-      deleter_type & do_get_deleter_fgaldxemwbpsuvkjtynrzociqh() noexcept
-        {
-          return this->as_deleter();
-        }
 
     public:
       const deleter_type & as_deleter() const noexcept
