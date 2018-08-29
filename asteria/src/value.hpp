@@ -47,6 +47,9 @@ class Value
         compare_greater    = 3,
       };
 
+  public:
+    static const char * get_type_name(Type type) noexcept;
+
   private:
     Variant m_stor;
 
@@ -97,15 +100,18 @@ class Value
         {
           return m_stor.set(std::forward<AltT>(alt));
         }
+
+  public:
+    bool test() const noexcept;
+    Compare compare(const Value &other) const noexcept;
+    void dump(std::ostream &os, std::size_t indent_next = 0, std::size_t indent_increment = 2) const;
   };
 
-extern const char * get_type_name(Value::Type type) noexcept;
-
-extern bool test_value(const Value &value);
-extern Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept;
-
-extern void dump_value(std::ostream &os, const Value &value, std::size_t indent_next = 0, std::size_t indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Value &value);
+inline std::ostream & operator<<(std::ostream &os, const Value &value)
+  {
+    value.dump(os);
+    return os;
+  }
 
 }
 

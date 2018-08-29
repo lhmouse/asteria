@@ -272,7 +272,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         const auto &alt = stmt.check<Statement::S_if>();
         // Evaluate the condition and pick a branch.
         ref_out = evaluate_expression(alt.cond, ctx_inout);
-        const auto branch_taken = test_value(read_reference(ref_out)) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch_taken = read_reference(ref_out).test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = execute_block(ref_out, branch_taken, ctx_inout);
         if(status != Statement::status_next) {
           return status;
@@ -310,7 +310,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
             // This is a `case` clause.
             ref_out = evaluate_expression(it->first, ctx_next);
             const auto value_comp = read_reference(ref_out);
-            if(compare_values(value_ctrl, value_comp) == Value::compare_equal) {
+            if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
               match = it;
               ctx_next = ctx_test;
@@ -363,7 +363,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           }
           // Check the loop condition.
           ref_out = evaluate_expression(alt.cond, ctx_inout);
-          if(test_value(read_reference(ref_out)) == false) {
+          if(read_reference(ref_out).test() == false) {
              break;
           }
         }
@@ -375,7 +375,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         for(;;) {
           // Check the loop condition.
           ref_out = evaluate_expression(alt.cond, ctx_inout);
-          if(test_value(read_reference(ref_out)) == false) {
+          if(read_reference(ref_out).test() == false) {
             break;
           }
           // Execute the loop body.
@@ -412,7 +412,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           // Check the loop condition.
           if(alt.cond.empty() == false) {
             ref_out = evaluate_expression(alt.cond, ctx_next);
-            if(test_value(read_reference(ref_out)) == false) {
+            if(read_reference(ref_out).test() == false) {
               break;
             }
           }
@@ -496,7 +496,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
             }
           }
         } else {
-          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", get_type_name(range_value.type()), "`.");
+          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
         }
         return Statement::status_next;
       }

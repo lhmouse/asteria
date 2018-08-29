@@ -542,7 +542,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         auto cond = do_pop_reference(stack_inout);
         // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
         // This means that if the branch taken is empty then `cond` is pushed.
-        const auto branch_taken = test_value(read_reference(cond)) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch_taken = read_reference(cond).test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         if(branch_taken.get().empty() == false) {
           cond = evaluate_expression(branch_taken, ctx);
         }
@@ -696,7 +696,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = read_reference(lhs);
-            auto result = do_logical_not(test_value(lhs_value));
+            auto result = lhs_value.test() == false;
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
@@ -749,7 +749,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             auto result = comp == Value::compare_equal;
             do_set_result(lhs, false, result);
             break;
@@ -762,7 +762,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             auto result = comp != Value::compare_equal;
             do_set_result(lhs, false, result);
             break;
@@ -774,7 +774,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
             }
@@ -789,7 +789,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
             }
@@ -804,7 +804,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
             }
@@ -819,7 +819,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Throw an exception in case of unordered operands.
             auto lhs_value = read_reference(lhs);
             auto rhs_value = read_reference(rhs);
-            auto comp = compare_values(lhs_value, rhs_value);
+            auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
             }
