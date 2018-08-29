@@ -24,7 +24,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
     switch(modifier.index()) {
     case Reference_modifier::index_array_index:
       {
-        const auto &alt = modifier.as<Reference_modifier::S_array_index>();
+        const auto &alt = modifier.check<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -50,7 +50,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &alt = modifier.as<Reference_modifier::S_object_key>();
+        const auto &alt = modifier.check<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -75,7 +75,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
     switch(modifier.index()) {
     case Reference_modifier::index_array_index:
       {
-        const auto &alt = modifier.as<Reference_modifier::S_array_index>();
+        const auto &alt = modifier.check<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;
@@ -124,7 +124,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &alt = modifier.as<Reference_modifier::S_object_key>();
+        const auto &alt = modifier.check<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;

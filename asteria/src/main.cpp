@@ -48,9 +48,9 @@ int main()
     Value root(std::move(obj));
 
     Value copy(root);
-    copy.as<D_object>().try_emplace(String::shallow("new"), D_string("my string"));
-    copy.as<D_object>().try_emplace(String::shallow("empty_array"), D_array());
-    copy.as<D_object>().try_emplace(String::shallow("empty_object"), D_object());
+    copy.check<D_object>().try_emplace(String::shallow("new"), D_string("my string"));
+    copy.check<D_object>().try_emplace(String::shallow("empty_array"), D_array());
+    copy.check<D_object>().try_emplace(String::shallow("empty_object"), D_object());
 
     ASTERIA_DEBUG_LOG("---> ", root);
     ASTERIA_DEBUG_LOG("<--- ", copy);

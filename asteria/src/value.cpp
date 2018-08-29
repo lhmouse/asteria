@@ -51,22 +51,22 @@ bool test_value(const Value &value)
       return false;
     case Value::type_boolean:
       {
-        const auto &alt = value.as<D_boolean>();
+        const auto &alt = value.check<D_boolean>();
         return alt;
       }
     case Value::type_integer:
       {
-        const auto &alt = value.as<D_integer>();
+        const auto &alt = value.check<D_integer>();
         return alt != 0;
       }
     case Value::type_double:
       {
-        const auto &alt = value.as<D_double>();
+        const auto &alt = value.check<D_double>();
         return std::fpclassify(alt) != FP_ZERO;
       }
     case Value::type_string:
       {
-        const auto &alt = value.as<D_string>();
+        const auto &alt = value.check<D_string>();
         return alt.empty() == false;
       }
     case Value::type_opaque:
@@ -74,12 +74,12 @@ bool test_value(const Value &value)
       return true;
     case Value::type_array:
       {
-        const auto &alt = value.as<D_array>();
+        const auto &alt = value.check<D_array>();
         return alt.empty() == false;
       }
     case Value::type_object:
       {
-        const auto &alt = value.as<D_object>();
+        const auto &alt = value.check<D_object>();
         return alt.empty() == false;
       }
     default:
@@ -105,8 +105,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       return Value::compare_equal;
     case Value::type_boolean:
       {
-        const auto &cand_lhs = lhs.as<D_boolean>();
-        const auto &cand_rhs = rhs.as<D_boolean>();
+        const auto &cand_lhs = lhs.check<D_boolean>();
+        const auto &cand_rhs = rhs.check<D_boolean>();
         if(cand_lhs < cand_rhs) {
           return Value::compare_less;
         }
@@ -117,8 +117,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_integer:
       {
-        const auto &cand_lhs = lhs.as<D_integer>();
-        const auto &cand_rhs = rhs.as<D_integer>();
+        const auto &cand_lhs = lhs.check<D_integer>();
+        const auto &cand_rhs = rhs.check<D_integer>();
         if(cand_lhs < cand_rhs) {
           return Value::compare_less;
         }
@@ -129,8 +129,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_double:
       {
-        const auto &cand_lhs = lhs.as<D_double>();
-        const auto &cand_rhs = rhs.as<D_double>();
+        const auto &cand_lhs = lhs.check<D_double>();
+        const auto &cand_rhs = rhs.check<D_double>();
         if(std::isunordered(cand_lhs, cand_rhs)) {
           return Value::compare_unordered;
         }
@@ -144,8 +144,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_string:
       {
-        const auto &cand_lhs = lhs.as<D_string>();
-        const auto &cand_rhs = rhs.as<D_string>();
+        const auto &cand_lhs = lhs.check<D_string>();
+        const auto &cand_rhs = rhs.check<D_string>();
         const int cmp = cand_lhs.compare(cand_rhs);
         if(cmp < 0) {
           return Value::compare_less;
@@ -160,8 +160,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       return Value::compare_unordered;
     case Value::type_array:
       {
-        const auto &array_lhs = lhs.as<D_array>();
-        const auto &array_rhs = rhs.as<D_array>();
+        const auto &array_lhs = lhs.check<D_array>();
+        const auto &array_rhs = rhs.check<D_array>();
         const auto rlen = std::min(array_lhs.size(), array_rhs.size());
         for(std::size_t i = 0; i < rlen; ++i) {
           const auto res = compare_values(array_lhs[i], array_rhs[i]);
@@ -351,49 +351,49 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       return;
     case Value::type_boolean:
       {
-        const auto &alt = value.as<D_boolean>();
+        const auto &alt = value.check<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
     case Value::type_integer:
       {
-        const auto &alt = value.as<D_integer>();
+        const auto &alt = value.check<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
     case Value::type_double:
       {
-        const auto &alt = value.as<D_double>();
+        const auto &alt = value.check<D_double>();
         // double 123.456
         os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<alt;
         return;
       }
     case Value::type_string:
       {
-        const auto &alt = value.as<D_string>();
+        const auto &alt = value.check<D_string>();
         // string(5) "hello"
         os <<"string(" <<std::dec <<alt.size() <<") " <<Quote(alt);
         return;
       }
     case Value::type_opaque:
       {
-        const auto &alt = value.as<D_opaque>();
+        const auto &alt = value.check<D_opaque>();
         // opaque("typeid") "my opaque"
         os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_function:
       {
-        const auto &alt = value.as<D_function>();
+        const auto &alt = value.check<D_function>();
         // function("typeid") "my function"
         os <<"function(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_array:
       {
-        const auto &alt = value.as<D_array>();
+        const auto &alt = value.check<D_array>();
         // array(3) = [
         //   0 = integer 1,
         //   1 = integer 2,
@@ -412,7 +412,7 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       }
     case Value::type_object:
       {
-        const auto &alt = value.as<D_object>();
+        const auto &alt = value.check<D_object>();
         // object(3) = {
         //   "one" = integer 1,
         //   "two" = integer 2,

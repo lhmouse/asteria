@@ -104,7 +104,7 @@ Reference & dematerialize_reference(Reference &ref)
     if(ref.get_root().index() != Reference_root::index_variable) {
       return ref;
     }
-    const auto &alt = ref.get_root().as<Reference_root::S_variable>();
+    const auto &alt = ref.get_root().check<Reference_root::S_variable>();
     if(alt.var.unique() == false) {
       return ref;
     }

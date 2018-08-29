@@ -23,17 +23,17 @@ const Value & dereference_root_readonly_partial(const Reference_root &root) noex
     switch(root.index()) {
     case Reference_root::index_constant:
       {
-        const auto &alt = root.as<Reference_root::S_constant>();
+        const auto &alt = root.check<Reference_root::S_constant>();
         return alt.src;
       }
     case Reference_root::index_temp_value:
       {
-        const auto &alt = root.as<Reference_root::S_temp_value>();
+        const auto &alt = root.check<Reference_root::S_temp_value>();
         return alt.value;
       }
     case Reference_root::index_variable:
       {
-        const auto &alt = root.as<Reference_root::S_variable>();
+        const auto &alt = root.check<Reference_root::S_variable>();
         return alt.var->get_value();
       }
     default:
@@ -46,17 +46,17 @@ Value & dereference_root_mutable_partial(const Reference_root &root)
     switch(root.index()) {
     case Reference_root::index_constant:
       {
-        const auto &alt = root.as<Reference_root::S_constant>();
+        const auto &alt = root.check<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
       }
     case Reference_root::index_temp_value:
       {
-        const auto &alt = root.as<Reference_root::S_temp_value>();
+        const auto &alt = root.check<Reference_root::S_temp_value>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", alt.value, "` cannot be modified.");
       }
     case Reference_root::index_variable:
       {
-        const auto &alt = root.as<Reference_root::S_variable>();
+        const auto &alt = root.check<Reference_root::S_variable>();
         if(alt.var->is_immutable()) {
           ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", alt.var->get_value(), "` is immutable and cannot be modified.");
         }

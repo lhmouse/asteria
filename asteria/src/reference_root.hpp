@@ -69,7 +69,7 @@ class Reference_root
           return m_variant.get<AltT>();
         }
     template<typename AltT>
-      const AltT & as() const
+      const AltT & check() const
         {
           return m_variant.as<AltT>();
         }

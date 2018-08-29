@@ -49,22 +49,22 @@ int main()
 
     auto result = evaluate_expression(expr, ctx);
     auto value = read_reference(dval);
-    ASTERIA_TEST_CHECK(value.as<D_double>() == 2.5);
+    ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
     value = read_reference(ival);
-    ASTERIA_TEST_CHECK(value.as<D_integer>() == 3);
+    ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = read_reference(aval);
-    ASTERIA_TEST_CHECK(value.as<D_array>().at(1).as<D_double>() == 1.75);
+    ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_double>() == 1.75);
     value = read_reference(result);
-    ASTERIA_TEST_CHECK(value.as<D_double>() == 1.75);
+    ASTERIA_TEST_CHECK(value.check<D_double>() == 1.75);
 
     write_reference(cond, D_integer(42));
     result = evaluate_expression(expr, ctx);
     value = read_reference(dval);
-    ASTERIA_TEST_CHECK(value.as<D_double>() == 2.5);
+    ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
     value = read_reference(ival);
-    ASTERIA_TEST_CHECK(value.as<D_integer>() == 3);
+    ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = read_reference(aval);
-    ASTERIA_TEST_CHECK(value.as<D_array>().at(1).as<D_string>() == "hello,hello,hello,");
+    ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == "hello,hello,hello,");
     value = read_reference(result);
-    ASTERIA_TEST_CHECK(value.as<D_string>() == "hello,hello,hello,");
+    ASTERIA_TEST_CHECK(value.check<D_string>() == "hello,hello,hello,");
  }

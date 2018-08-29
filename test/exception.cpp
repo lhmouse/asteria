@@ -15,13 +15,13 @@ int main()
       } catch(Exception &e) {
         const auto val = read_reference(e.get_reference());
         ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
-        ASTERIA_TEST_CHECK(val.as<D_integer>() == 42);
+        ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);
         e.set_reference(Reference(Reference_root::S_temp_value { D_string(String::shallow("hello")) }));
         throw;
       }
     } catch(Exception &e) {
       const auto val = read_reference(e.get_reference());
       ASTERIA_TEST_CHECK(val.type() == Value::type_string);
-      ASTERIA_TEST_CHECK(val.as<D_string>() == "hello");
+      ASTERIA_TEST_CHECK(val.check<D_string>() == "hello");
     }
   }
