@@ -335,7 +335,7 @@ template<typename ...altsT>
           this->m_index = 0;
         }
       template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
-        variant(altT &&elem)
+        variant(altT &&alt)
           : m_turnout(0)
           {
             // This overload enables construction using a candidate of nested variants.
@@ -343,7 +343,7 @@ template<typename ...altsT>
             using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             // Construct the alternative in-place.
             const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(alt));
             this->m_index = eindex;
           }
       variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<altsT>...>::value)
@@ -363,7 +363,7 @@ template<typename ...altsT>
           this->m_index = other.m_index;
         }
       template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
-        variant & operator=(altT &&elem)
+        variant & operator=(altT &&alt)
           {
             // This overload, unlike `set()`, enables assignment using a candidate of nested variants.
             constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
@@ -371,12 +371,12 @@ template<typename ...altsT>
             if(this->m_index == eindex) {
               // Assign the active alternative using perfect forwarding.
               const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<altT>(elem);
+              *ptr = ::std::forward<altT>(alt);
               return *this;
             }
             // Construct the active alternative using perfect forwarding, then destroy the old alternative.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(alt));
             this->do_set_up_new_buffer(eindex);
             return *this;
           }
@@ -486,7 +486,7 @@ template<typename ...altsT>
             return *ptr;
           }
       template<typename altT>
-        altT & set(altT &&elem) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
+        altT & set(altT &&alt) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
           {
             // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
             constexpr auto eindex = details_variant::type_finder<0, typename decay<altT>::type, altsT...>::value;
@@ -494,12 +494,12 @@ template<typename ...altsT>
             if(this->m_index == eindex) {
               // Assign the active alternative using perfect forwarding.
               const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<altT>(elem);
+              *ptr = ::std::forward<altT>(alt);
               return *ptr;
             }
             // Construct the active alternative using perfect forwarding, then destroy the old alternative.
             const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(elem));
+            noadl::construct_at(ptr, ::std::forward<altT>(alt));
             this->do_set_up_new_buffer(eindex);
             return *ptr;
           }
