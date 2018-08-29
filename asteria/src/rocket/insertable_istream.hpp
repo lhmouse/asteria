@@ -32,11 +32,13 @@ template<typename charT, typename traitsT, typename allocatorT>
       using size_type        = typename string_type::size_type;
       using difference_type  = typename string_type::difference_type;
 
+      enum : size_type { npos = string_type::npos };
+
     private:
       streambuf_type m_sb;
 
     public:
-      explicit basic_insertable_istream(string_type str, size_type caret = string_type::npos, ios_base::openmode which = ios_base::in)
+      explicit basic_insertable_istream(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in)
         : basic_istream<char_type, traits_type>(&(this->m_sb)),
           m_sb(::std::move(str), caret, which | ios_base::in)
         {
@@ -46,7 +48,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
         }
       basic_insertable_istream(ios_base::openmode which)
-        : basic_insertable_istream(string_type(), string_type::npos, which)
+        : basic_insertable_istream(string_type(), npos, which)
         {
         }
       ~basic_insertable_istream() override;
@@ -65,7 +67,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->rdbuf()->get_caret();
         }
-      void set_string(string_type str, size_type caret = string_type::npos) noexcept
+      void set_string(string_type str, size_type caret = npos) noexcept
         {
           return this->rdbuf()->set_string(::std::move(str), caret);
         }

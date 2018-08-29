@@ -34,13 +34,15 @@ template<typename charT, typename traitsT, typename allocatorT>
       using size_type        = typename string_type::size_type;
       using difference_type  = typename string_type::difference_type;
 
+      enum : size_type { npos = string_type::npos };
+
     private:
       string_type m_str;
       size_type m_caret;
       ios_base::openmode m_which;
 
     public:
-      explicit basic_insertable_streambuf(string_type str, size_type caret = string_type::npos, ios_base::openmode which = ios_base::in | ios_base::out)
+      explicit basic_insertable_streambuf(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
         : m_str(::std::move(str)), m_caret(caret), m_which(which)
         {
         }
@@ -49,7 +51,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
         }
       basic_insertable_streambuf(ios_base::openmode which)
-        : basic_insertable_streambuf(string_type(), string_type::npos, which)
+        : basic_insertable_streambuf(string_type(), npos, which)
         {
         }
       ~basic_insertable_streambuf() override;
@@ -76,7 +78,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->m_caret;
         }
-      void set_string(string_type str, size_type caret = string_type::npos) noexcept(noexcept(m_str = ::std::move(m_str)))
+      void set_string(string_type str, size_type caret = npos) noexcept(noexcept(m_str = ::std::move(m_str)))
         {
           this->basic_insertable_streambuf::sync();
           this->m_str = ::std::move(str);
@@ -91,7 +93,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           string_type str;
           this->basic_insertable_streambuf::sync();
           this->m_str.swap(str);
-          this->m_caret = string_type::npos;
+          this->m_caret = npos;
           return str;
         }
     };
@@ -186,7 +188,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->basic_insertable_streambuf::sync();
         // Write the string provided as a single operation.
         const auto n_put = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
-        if(this->m_caret == string_type::npos) {
+        if(this->m_caret == npos) {
           // Append the string provided to the internal buffer.
           this->m_str.insert(this->m_str.size(), s, n_put);
         } else {
@@ -210,7 +212,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         // Tidy the get area, as the internal buffer is subject to reallocation.
         this->basic_insertable_streambuf::sync();
         // Write the character provided as a single operation.
-        if(this->m_caret == string_type::npos) {
+        if(this->m_caret == npos) {
           // Append the character provided to the internal buffer.
           this->m_str.push_back(traits_type::to_char_type(c));
         } else {
