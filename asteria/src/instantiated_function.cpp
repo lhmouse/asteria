@@ -21,7 +21,7 @@ Reference Instantiated_function::invoke(Reference self, Vector<Reference> args) 
   {
     // Create an orphan context.
     Executive_context ctx_next;
-    initialize_executive_function_context(ctx_next, m_params, m_file, m_line, std::move(self), std::move(std::move(args)));
+    ctx_next.initialize_for_function(m_params, m_file, m_line, std::move(self), std::move(std::move(args)));
     // Execute the function body.
     Reference ref;
     const auto status = execute_block_in_place(ref, ctx_next, m_body);
