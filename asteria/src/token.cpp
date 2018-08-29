@@ -644,7 +644,7 @@ namespace {
 
 }
 
-Parser_result tokenize_line_no_comment(Vector<Token> &tokens_out, std::size_t line, const String &str)
+Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, std::size_t line, const String &str)
   {
     // Ensure the source string is valid UTF-8.
     std::size_t column = 0;
