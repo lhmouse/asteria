@@ -55,11 +55,10 @@ class Reference
       {
         m_modifiers.clear();
       }
-    template<typename ModifierT, typename std::enable_if<std::is_constructible<Reference_modifier, ModifierT &&>::value>::type * = nullptr>
-      Reference_modifier & push_modifier(ModifierT &&modifier)
-        {
-          return m_modifiers.emplace_back(std::forward<ModifierT>(modifier));
-        }
+    Reference_modifier & push_modifier(Reference_modifier modifier)
+      {
+        return m_modifiers.emplace_back(std::move(modifier));
+      }
     void pop_modifier()
       {
         m_modifiers.pop_back();
