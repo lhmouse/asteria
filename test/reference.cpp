@@ -30,7 +30,8 @@ int main()
     ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
 
     materialize_reference(ref);
-    ASTERIA_TEST_CHECK(ref.get_root().index() == Reference_root::index_variable);
+    ASTERIA_TEST_CHECK(ref.get_root().is_lvalue());
+    ASTERIA_TEST_CHECK(ref.get_root().is_unique());
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);

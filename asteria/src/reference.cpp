@@ -43,7 +43,7 @@ Value read_reference(const Reference &ref)
   {
     const auto nmod = ref.get_modifier_count();
     // Dereference the root.
-    auto cur = std::ref(dereference_root_readonly_partial(ref.get_root()));
+    auto cur = std::ref(ref.get_root().dereference_readonly());
     // Apply modifiers.
     for(std::size_t i = 0; i < nmod; ++i) {
       const auto ptr = apply_reference_modifier_readonly_partial_opt(ref.get_modifier(i), cur);
@@ -60,7 +60,7 @@ Value & write_reference(const Reference &ref, Value value)
   {
     const auto nmod = ref.get_modifier_count();
     // Dereference the root.
-    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
+    auto cur = std::ref(ref.get_root().dereference_mutable());
     // Apply modifiers.
     for(std::size_t i = 0; i < nmod; ++i) {
       const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, true, nullptr);
@@ -81,7 +81,7 @@ Value unset_reference(const Reference &ref)
       ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
     }
     // Dereference the root.
-    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
+    auto cur = std::ref(ref.get_root().dereference_mutable());
     // Apply modifiers except the last one.
     for(std::size_t i = 0; i < nmod - 1; ++i) {
       const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, false, nullptr);
@@ -110,7 +110,7 @@ Reference reference_temp_value(Value value)
 
 Reference & materialize_reference(Reference &ref)
   {
-    if(ref.get_root().index() == Reference_root::index_variable) {
+    if(ref.get_root().is_lvalue() != false) {
       return ref;
     }
     auto value = read_reference(ref);
@@ -122,11 +122,7 @@ Reference & materialize_reference(Reference &ref)
 
 Reference & dematerialize_reference(Reference &ref)
   {
-    if(ref.get_root().index() != Reference_root::index_variable) {
-      return ref;
-    }
-    const auto &alt = ref.get_root().check<Reference_root::S_variable>();
-    if(alt.var.unique() == false) {
+    if(ref.get_root().is_unique() == false) {
       return ref;
     }
     auto value = read_reference(ref);

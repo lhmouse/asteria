@@ -60,24 +60,12 @@ class Reference_root
     Reference_root & operator=(Reference_root &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_variant.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_variant.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_variant.as<AltT>();
-        }
-  };
+    const Value & dereference_readonly() const;
+    Value & dereference_mutable() const;
 
-extern const Value & dereference_root_readonly_partial(const Reference_root &root) noexcept;
-extern Value & dereference_root_mutable_partial(const Reference_root &root);
+    bool is_lvalue() const noexcept;
+    bool is_unique() const noexcept;
+  };
 
 }
 
