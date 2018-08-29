@@ -14,7 +14,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target_scope : std::uint8_t
+    enum Target : std::uint8_t
       {
         target_scope_unspec  = 0,
         target_scope_switch  = 1,
@@ -116,11 +116,11 @@ class Statement
       };
     struct S_break
       {
-        Target_scope target;
+        Target target;
       };
     struct S_continue
       {
-        Target_scope target;
+        Target target;
       };
     struct S_throw
       {
