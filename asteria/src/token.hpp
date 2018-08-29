@@ -153,9 +153,10 @@ class Token
         : m_line(line), m_column(column), m_length(length), m_variant(std::forward<AltT>(alt))
         {
         }
+    ~Token();
+
     Token(Token &&) noexcept;
     Token & operator=(Token &&) noexcept;
-    ~Token();
 
   public:
     Unsigned get_line() const noexcept

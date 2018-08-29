@@ -20,11 +20,12 @@ class Backtracer : public virtual std::nested_exception
       : m_file(std::move(file)), m_line(line)
       {
       }
+    ~Backtracer();
+
     Backtracer(const Backtracer &) noexcept;
     Backtracer & operator=(const Backtracer &) noexcept;
     Backtracer(Backtracer &&) noexcept;
     Backtracer & operator=(Backtracer &&) noexcept;
-    ~Backtracer();
 
   public:
     const String & get_file() const noexcept

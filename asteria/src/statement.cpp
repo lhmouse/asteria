@@ -13,11 +13,13 @@
 
 namespace Asteria {
 
+Statement::~Statement()
+  {
+  }
+
 Statement::Statement(Statement &&) noexcept
   = default;
 Statement & Statement::operator=(Statement &&) noexcept
-  = default;
-Statement::~Statement()
   = default;
 
 namespace {

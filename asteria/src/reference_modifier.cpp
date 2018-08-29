@@ -8,6 +8,10 @@
 
 namespace Asteria {
 
+Reference_modifier::~Reference_modifier()
+  {
+  }
+
 Reference_modifier::Reference_modifier(const Reference_modifier &) noexcept
   = default;
 Reference_modifier & Reference_modifier::operator=(const Reference_modifier &) noexcept
@@ -15,8 +19,6 @@ Reference_modifier & Reference_modifier::operator=(const Reference_modifier &) n
 Reference_modifier::Reference_modifier(Reference_modifier &&) noexcept
   = default;
 Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexcept
-  = default;
-Reference_modifier::~Reference_modifier()
   = default;
 
 const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modifier &modifier, const Value &parent)

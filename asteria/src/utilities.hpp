@@ -24,6 +24,11 @@ class Formatter
     Formatter(const char *file, unsigned long line, const char *func) noexcept;
     ~Formatter();
 
+    Formatter(const Formatter &)
+      = delete;
+    Formatter & operator=(const Formatter &)
+      = delete;
+
   private:
     template<typename ValueT>
       void do_put(const ValueT &value)

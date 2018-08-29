@@ -135,9 +135,10 @@ class Xpnode
         : m_variant(std::forward<AltT>(alt))
         {
         }
+    ~Xpnode();
+
     Xpnode(Xpnode &&) noexcept;
     Xpnode & operator=(Xpnode &&) noexcept;
-    ~Xpnode();
 
   public:
     Index index() const noexcept

@@ -6,6 +6,10 @@
 
 namespace Asteria {
 
+Exception::~Exception()
+  {
+  }
+
 Exception::Exception(const Exception &) noexcept
   = default;
 Exception & Exception::operator=(const Exception &) noexcept
@@ -13,8 +17,6 @@ Exception & Exception::operator=(const Exception &) noexcept
 Exception::Exception(Exception &&) noexcept
   = default;
 Exception & Exception::operator=(Exception &&) noexcept
-  = default;
-Exception::~Exception()
   = default;
 
 }

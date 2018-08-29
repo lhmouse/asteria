@@ -8,7 +8,8 @@
 namespace Asteria {
 
 Analytic_context::~Analytic_context()
-  = default;
+  {
+  }
 
 void initialize_analytic_function_context(Analytic_context &ctx_out, const Vector<String> &params)
   {

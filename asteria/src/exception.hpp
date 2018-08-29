@@ -20,11 +20,12 @@ class Exception : public virtual std::exception
       : m_ref(std::move(ref))
       {
       }
+    ~Exception();
+
     Exception(const Exception &) noexcept;
     Exception & operator=(const Exception &) noexcept;
     Exception(Exception &&) noexcept;
     Exception & operator=(Exception &&) noexcept;
-    ~Exception();
 
   public:
     const char * what() const noexcept override

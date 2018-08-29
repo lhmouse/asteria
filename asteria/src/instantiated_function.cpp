@@ -9,7 +9,8 @@
 namespace Asteria {
 
 Instantiated_function::~Instantiated_function()
-  = default;
+  {
+  }
 
 String Instantiated_function::describe() const
   {

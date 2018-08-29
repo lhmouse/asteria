@@ -19,11 +19,12 @@ class Runtime_error : public virtual std::exception
       : m_msg(std::move(msg))
       {
       }
+    ~Runtime_error();
+
     Runtime_error(const Runtime_error &) noexcept;
     Runtime_error & operator=(const Runtime_error &) noexcept;
     Runtime_error(Runtime_error &&) noexcept;
     Runtime_error & operator=(Runtime_error &&) noexcept;
-    ~Runtime_error();
 
   public:
     const char * what() const noexcept override;

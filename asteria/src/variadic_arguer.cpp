@@ -8,7 +8,8 @@
 namespace Asteria {
 
 Variadic_arguer::~Variadic_arguer()
-  = default;
+  {
+  }
 
 String Variadic_arguer::describe() const
   {

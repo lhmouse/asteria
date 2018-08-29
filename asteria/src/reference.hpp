@@ -26,11 +26,12 @@ class Reference
       : m_root(std::forward<RootT>(root)), m_modifiers(std::move(modifiers))
       {
       }
+    ~Reference();
+
     Reference(const Reference &) noexcept;
     Reference & operator=(const Reference &) noexcept;
     Reference(Reference &&) noexcept;
     Reference & operator=(Reference &&) noexcept;
-    ~Reference();
 
   public:
     const Reference_root & get_root() const noexcept

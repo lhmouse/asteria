@@ -167,9 +167,10 @@ class Statement
         : m_variant(std::forward<AltT>(alt))
         {
         }
+    ~Statement();
+
     Statement(Statement &&) noexcept;
     Statement & operator=(Statement &&) noexcept;
-    ~Statement();
 
   public:
     Index index() const noexcept

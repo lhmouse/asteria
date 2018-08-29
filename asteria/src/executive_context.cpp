@@ -9,7 +9,8 @@
 namespace Asteria {
 
 Executive_context::~Executive_context()
-  = default;
+  {
+  }
 
 void initialize_executive_function_context(Executive_context &ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
   {

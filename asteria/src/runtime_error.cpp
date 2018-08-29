@@ -6,6 +6,10 @@
 
 namespace Asteria {
 
+Runtime_error::~Runtime_error()
+  {
+  }
+
 Runtime_error::Runtime_error(const Runtime_error &) noexcept
   = default;
 Runtime_error & Runtime_error::operator=(const Runtime_error &) noexcept
@@ -13,8 +17,6 @@ Runtime_error & Runtime_error::operator=(const Runtime_error &) noexcept
 Runtime_error::Runtime_error(Runtime_error &&) noexcept
   = default;
 Runtime_error & Runtime_error::operator=(Runtime_error &&) noexcept
-  = default;
-Runtime_error::~Runtime_error()
   = default;
 
 const char * Runtime_error::what() const noexcept

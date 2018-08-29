@@ -60,11 +60,12 @@ class Value
         : m_variant(std::forward<AltT>(alt))
         {
         }
+    ~Value();
+
     Value(const Value &) noexcept;
     Value & operator=(const Value &) noexcept;
     Value(Value &&) noexcept;
     Value & operator=(Value &&) noexcept;
-    ~Value();
 
   public:
     Type type() const noexcept

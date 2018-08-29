@@ -6,6 +6,10 @@
 
 namespace Asteria {
 
+Backtracer::~Backtracer()
+  {
+  }
+
 Backtracer::Backtracer(const Backtracer &) noexcept
   = default;
 Backtracer & Backtracer::operator=(const Backtracer &) noexcept
@@ -13,8 +17,6 @@ Backtracer & Backtracer::operator=(const Backtracer &) noexcept
 Backtracer::Backtracer(Backtracer &&) noexcept
   = default;
 Backtracer & Backtracer::operator=(Backtracer &&) noexcept
-  = default;
-Backtracer::~Backtracer()
   = default;
 
 void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop)

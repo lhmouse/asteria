@@ -7,7 +7,8 @@
 namespace Asteria {
 
 Abstract_context::~Abstract_context()
-  = default;
+  {
+  }
 
 bool is_name_reserved(const String &name)
   {

@@ -8,11 +8,13 @@
 
 namespace Asteria {
 
+Token::~Token()
+  {
+  }
+
 Token::Token(Token &&) noexcept
   = default;
 Token & Token::operator=(Token &&) noexcept
-  = default;
-Token::~Token()
   = default;
 
 namespace {

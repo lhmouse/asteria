@@ -52,11 +52,12 @@ class Reference_root
         : m_variant(std::forward<AltT>(alt))
         {
         }
+    ~Reference_root();
+
     Reference_root(const Reference_root &) noexcept;
     Reference_root & operator=(const Reference_root &) noexcept;
     Reference_root(Reference_root &&) noexcept;
     Reference_root & operator=(Reference_root &&) noexcept;
-    ~Reference_root();
 
   public:
     Index index() const noexcept
