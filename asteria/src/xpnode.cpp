@@ -569,6 +569,9 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         if(!qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("`", callee_value, "` is not a function and cannot be called.");
         }
+        if(!*qfunc) {
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer has been made.");
+        }
         // Obtain the `this` reference.
         Reference self;
         if(callee.get_modifier_count() != 0) {
