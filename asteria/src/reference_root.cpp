@@ -28,9 +28,9 @@ const Value & Reference_root::dereference_readonly() const
         const auto &alt = this->m_stor.as<Reference_root::S_constant>();
         return alt.src;
       }
-    case Reference_root::index_temp_value:
+    case Reference_root::index_temporary:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_temp_value>();
+        const auto &alt = this->m_stor.as<Reference_root::S_temporary>();
         return alt.value;
       }
     case Reference_root::index_variable:
@@ -51,9 +51,9 @@ Value & Reference_root::dereference_mutable() const
         const auto &alt = this->m_stor.as<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
       }
-    case Reference_root::index_temp_value:
+    case Reference_root::index_temporary:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_temp_value>();
+        const auto &alt = this->m_stor.as<Reference_root::S_temporary>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", alt.value, "` cannot be modified.");
       }
     case Reference_root::index_variable:

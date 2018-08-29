@@ -58,7 +58,7 @@ extern Value & write_reference(const Reference &ref, Value value);
 extern Value unset_reference(const Reference &ref);
 
 extern Reference reference_constant(Value value);
-extern Reference reference_temp_value(Value value);
+extern Reference reference_temporary(Value value);
 
 extern Reference & materialize_reference(Reference &ref);
 extern Reference & dematerialize_reference(Reference &ref);

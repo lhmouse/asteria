@@ -19,7 +19,7 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(write_reference(ref, D_boolean(true)));
 
-    ref.set_root(Reference_root::S_temp_value { D_integer(42) });
+    ref.set_root(Reference_root::S_temporary { D_integer(42) });
     val = read_reference(ref);
     ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);
@@ -40,7 +40,7 @@ int main()
     ASTERIA_TEST_CHECK(val.type() == Value::type_boolean);
     ASTERIA_TEST_CHECK(val.check<D_boolean>() == true);
 
-    ref.set_root(Reference_root::S_temp_value { D_null() });
+    ref.set_root(Reference_root::S_temporary { D_null() });
     materialize_reference(ref);
     ref.push_modifier(Reference_modifier::S_array_index { -3 });
     val = read_reference(ref);

@@ -229,7 +229,7 @@ namespace {
         return;
       }
       // Create an rvalue reference and assign it to `ref_inout`.
-      ref_inout = reference_temp_value(std::move(value));
+      ref_inout = reference_temporary(std::move(value));
     }
 
   Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
@@ -532,7 +532,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
-        stack_inout.emplace_back(reference_temp_value(D_function(std::move(func))));
+        stack_inout.emplace_back(reference_temporary(D_function(std::move(func))));
         return;
       }
     case Xpnode::index_branch:
@@ -1110,7 +1110,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           auto value = read_reference(result);
           array.emplace_back(std::move(value));
         }
-        stack_inout.emplace_back(reference_temp_value(std::move(array)));
+        stack_inout.emplace_back(reference_temporary(std::move(array)));
         return;
       }
     case Xpnode::index_unnamed_object:
@@ -1124,7 +1124,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           auto value = read_reference(result);
           object.insert_or_assign(pair.first, std::move(value));
         }
-        stack_inout.emplace_back(reference_temp_value(std::move(object)));
+        stack_inout.emplace_back(reference_temporary(std::move(object)));
         return;
       }
     default:

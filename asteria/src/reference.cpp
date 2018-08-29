@@ -102,9 +102,9 @@ Reference reference_constant(Value value)
     return Reference_root(std::move(ref_c));
   }
 
-Reference reference_temp_value(Value value)
+Reference reference_temporary(Value value)
   {
-    Reference_root::S_temp_value ref_c = { std::move(value) };
+    Reference_root::S_temporary ref_c = { std::move(value) };
     return Reference_root(std::move(ref_c));
   }
 
@@ -126,7 +126,7 @@ Reference & dematerialize_reference(Reference &ref)
       return ref;
     }
     auto value = read_reference(ref);
-    Reference_root::S_temp_value ref_c = { std::move(value) };
+    Reference_root::S_temporary ref_c = { std::move(value) };
     ref.set_root(std::move(ref_c));
     return ref;
   }

@@ -508,7 +508,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
-            ref_out = reference_temp_value(D_string(e.what()));
+            ref_out = reference_temporary(D_string(e.what()));
           }
           do_safe_set_named_reference(ctx_next, "exception", alt.except_name, ref_out);
           ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", alt.except_name);
@@ -522,7 +522,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          ref_out = reference_temp_value(std::move(backtrace));
+          ref_out = reference_temporary(std::move(backtrace));
           do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
           const auto status = execute_block(ref_out, alt.body_catch, ctx_next);
