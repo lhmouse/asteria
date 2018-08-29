@@ -17,7 +17,7 @@ bool Analytic_context::is_analytic() const noexcept
   }
 const Abstract_context * Analytic_context::get_parent_opt() const noexcept
   {
-    return m_parent_opt;
+    return this->m_parent_opt;
   }
 
 void Analytic_context::initialize_for_function(const Vector<String> &params)

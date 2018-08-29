@@ -202,7 +202,7 @@ namespace {
     public:
       std::size_t num() const noexcept
         {
-          return m_num;
+          return this->m_num;
         }
     };
 
@@ -249,7 +249,7 @@ namespace {
     public:
       const String & str() const noexcept
         {
-          return m_str;
+          return this->m_str;
         }
     };
 

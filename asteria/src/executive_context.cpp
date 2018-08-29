@@ -18,7 +18,7 @@ bool Executive_context::is_analytic() const noexcept
   }
 const Executive_context * Executive_context::get_parent_opt() const noexcept
   {
-    return m_parent_opt;
+    return this->m_parent_opt;
   }
 
 void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
