@@ -12,7 +12,7 @@ int main()
     ctx.set_named_reference(String::shallow("test"), Reference(Reference_root::S_constant{ D_integer(42) }));
     auto qref = ctx.get_named_reference_opt(String::shallow("test"));
     ASTERIA_TEST_CHECK(qref != nullptr);
-    ASTERIA_TEST_CHECK(read_reference(*qref).check<D_integer>() == 42);
+    ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 42);
 
     qref = ctx.get_named_reference_opt(String::shallow("nonexistent"));
     ASTERIA_TEST_CHECK(qref == nullptr);

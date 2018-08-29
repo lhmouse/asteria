@@ -14,7 +14,7 @@ void test_throw(unsigned i)
   try {
     if(i < 10) {
       test_throw(i + 1);
-      throw Exception(reference_constant(D_string("some exception")));
+      throw Exception(Reference::make_constant(D_string("some exception")));
     }
   } catch(...) {
     throw Backtracer(String::shallow("test_file"), i);
@@ -62,7 +62,7 @@ int main()
       try {
         Backtracer::unpack_backtrace_and_rethrow(bt, std::current_exception());
       } catch(Exception &e) {
-        ASTERIA_DEBUG_LOG("Caught: ", read_reference(e.get_reference()));
+        ASTERIA_DEBUG_LOG("Caught: ", e.get_reference().read());
         for(auto it = bt.rbegin(); it != bt.rend(); ++it) {
           ASTERIA_DEBUG_LOG("  inside ", it->first, ':', it->second);
         }

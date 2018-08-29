@@ -34,14 +34,14 @@ void Executive_context::initialize_for_function(const Vector<String> &params, co
         if(is_name_reserved(name)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
         }
-        this->set_named_reference(name, std::move(materialize_reference(ref)));
+        this->set_named_reference(name, std::move(ref.materialize()));
       }
     }
     // Set up system variables.
-    this->set_named_reference(String::shallow("__file"), reference_constant(D_string(file)));
-    this->set_named_reference(String::shallow("__line"), reference_constant(D_integer(line)));
-    this->set_named_reference(String::shallow("__this"), std::move(materialize_reference(self)));
-    this->set_named_reference(String::shallow("__varg"), reference_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
+    this->set_named_reference(String::shallow("__file"), Reference::make_constant(D_string(file)));
+    this->set_named_reference(String::shallow("__line"), Reference::make_constant(D_integer(line)));
+    this->set_named_reference(String::shallow("__this"), std::move(self.materialize()));
+    this->set_named_reference(String::shallow("__varg"), Reference::make_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
   }
 
 }

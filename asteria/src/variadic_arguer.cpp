@@ -22,7 +22,7 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
     switch(args.size()) {
     case 1:
       {
-        const auto ivalue = read_reference(args.at(0));
+        const auto ivalue = args.at(0).read();
         const auto qindex = ivalue.opt<D_integer>();
         if(!qindex) {
           ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
@@ -45,7 +45,7 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
       }
     case 0:
       // Return the number of variadic arguments.
-      return reference_constant(D_integer(nvarg));
+      return Reference::make_constant(D_integer(nvarg));
     default:
       ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
     }

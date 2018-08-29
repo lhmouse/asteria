@@ -225,11 +225,11 @@ namespace {
     {
       if(compound_assign) {
         // Write the value through `ref_inout`, which is unchanged.
-        write_reference(ref_inout, std::move(value));
+        ref_inout.write(std::move(value));
         return;
       }
       // Create an rvalue reference and assign it to `ref_inout`.
-      ref_inout = reference_temporary(std::move(value));
+      ref_inout = Reference::make_temporary(std::move(value));
     }
 
   Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
@@ -493,7 +493,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       {
         const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Push the constant.
-        auto ref = reference_constant(alt.value);
+        auto ref = Reference::make_constant(alt.value);
         stack_inout.emplace_back(std::move(ref));
         return;
       }
@@ -532,7 +532,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
-        stack_inout.emplace_back(reference_temporary(D_function(std::move(func))));
+        stack_inout.emplace_back(Reference::make_temporary(D_function(std::move(func))));
         return;
       }
     case Xpnode::index_branch:
@@ -542,7 +542,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         auto cond = do_pop_reference(stack_inout);
         // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
         // This means that if the branch taken is empty then `cond` is pushed.
-        const auto branch_taken = read_reference(cond).test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         if(branch_taken.get().empty() == false) {
           cond = evaluate_expression(branch_taken, ctx);
         }
@@ -554,7 +554,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Pop the callee off the stack.
         auto callee = do_pop_reference(stack_inout);
-        auto callee_value = read_reference(callee);
+        auto callee_value = callee.read();
         // Make sure it is really a function.
         const auto qfunc = callee_value.opt<D_function>();
         if(!qfunc) {
@@ -578,7 +578,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         }
         // Call the function and de-materialize the result.
         auto result = do_traced_call(alt.file, alt.line, *qfunc, std::move(self), std::move(args));
-        dematerialize_reference(result);
+        result.dematerialize();
         stack_inout.emplace_back(std::move(result));
         return;
       }
@@ -595,7 +595,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Increment the operand and return the old value.
             // `compound_assign` is ignored.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = lhs_value.check<D_integer>();
               do_set_result(lhs, true, do_add(result, D_integer(1)));
@@ -614,7 +614,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Decrement the operand and return the old value.
             // `compound_assign` is ignored.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = lhs_value.check<D_integer>();
               do_set_result(lhs, true, do_subtract(result, D_integer(1)));
@@ -635,8 +635,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // The subscript operand shall have type `integer` or `string`.
             // `compound_assign` is ignored.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if(rhs_value.type() == Value::type_integer) {
               auto index = rhs_value.check<D_integer>();
               Reference_modifier::S_array_index mod_c = { index };
@@ -655,14 +655,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Copy the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
-            auto result = read_reference(lhs);
+            auto result = lhs.read();
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
         case Xpnode::xop_prefix_neg:
           {
             // Negate the operand to create an rvalue, then return it.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_negate(lhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -678,7 +678,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         case Xpnode::xop_prefix_notb:
           {
             // Perform bitwise not operation on the operand to create an rvalue, then return it.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_boolean) {
               auto result = do_logical_not(lhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -695,7 +695,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             auto result = lhs_value.test() == false;
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
@@ -704,7 +704,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Increment the operand and return it.
             // `compound_assign` is ignored.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_add(lhs_value.check<D_integer>(), D_integer(1));
               do_set_result(lhs, true, std::move(result));
@@ -721,7 +721,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Decrement the operand and return it.
             // `compound_assign` is ignored.
-            auto lhs_value = read_reference(lhs);
+            auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = do_subtract(lhs_value.check<D_integer>(), D_integer(1));
               do_set_result(lhs, true, std::move(result));
@@ -737,7 +737,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         case Xpnode::xop_prefix_unset:
           {
             // Unset the reference and return the value unset.
-            auto result = unset_reference(lhs);
+            auto result = lhs.unset();
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
@@ -747,8 +747,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             auto result = comp == Value::compare_equal;
             do_set_result(lhs, false, result);
@@ -760,8 +760,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             auto result = comp != Value::compare_equal;
             do_set_result(lhs, false, result);
@@ -772,8 +772,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
@@ -787,8 +787,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
@@ -802,8 +802,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
@@ -817,8 +817,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // Throw an exception in case of unordered operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             auto comp = lhs_value.compare(rhs_value);
             if(comp == Value::compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs_value, "` and `", rhs_value, "` are uncomparable.");
@@ -834,8 +834,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` and `double` types, return the sum of both operands.
             // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -864,8 +864,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` and `double` types, return the difference of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -890,8 +890,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // For the boolean type, return the logical AND'd result of both operands.
             // For the integer and double types, return the product of both operands.
             // If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -924,8 +924,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the integer and double types, return the quotient of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_divide(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -943,8 +943,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the integer and double types, return the reminder of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_modulo(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -964,8 +964,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_logical(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -980,8 +980,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_logical(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -997,8 +997,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
             // If a bit unequal to the sign bit would be shifted into or across the sign bit, an exception is thrown.
             // Both operands have to be integers.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_arithmetic(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -1013,8 +1013,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
             // Both operands have to be integers.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_arithmetic(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -1028,8 +1028,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical AND'd result of both operands.
             // For the `integer` type, return the bitwise AND'd result of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -1048,8 +1048,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` type, return the bitwise OR'd result of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -1068,8 +1068,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` type, return the bitwise XOR'd result of both operands.
-            auto lhs_value = read_reference(lhs);
-            auto rhs_value = read_reference(rhs);
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
@@ -1089,7 +1089,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Copy the operand referenced by `rhs` to `lhs`.
             // `compound_assign` is ignored.
             // N.B. This is one of the few operators that work on all types.
-            auto result = read_reference(rhs);
+            auto result = rhs.read();
             do_set_result(lhs, true, std::move(result));
             break;
           }
@@ -1107,10 +1107,10 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         array.reserve(alt.elems.size());
         for(const auto &elem : alt.elems) {
           const auto result = evaluate_expression(elem, ctx);
-          auto value = read_reference(result);
+          auto value = result.read();
           array.emplace_back(std::move(value));
         }
-        stack_inout.emplace_back(reference_temporary(std::move(array)));
+        stack_inout.emplace_back(Reference::make_temporary(std::move(array)));
         return;
       }
     case Xpnode::index_unnamed_object:
@@ -1121,10 +1121,10 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         object.reserve(alt.pairs.size());
         for(const auto &pair : alt.pairs) {
           const auto result = evaluate_expression(pair.second, ctx);
-          auto value = read_reference(result);
+          auto value = result.read();
           object.insert_or_assign(pair.first, std::move(value));
         }
-        stack_inout.emplace_back(reference_temporary(std::move(object)));
+        stack_inout.emplace_back(Reference::make_temporary(std::move(object)));
         return;
       }
     default:

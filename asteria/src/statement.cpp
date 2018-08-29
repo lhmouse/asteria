@@ -222,7 +222,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         do_safe_set_named_reference(ctx_inout, "variable", alt.name, { });
         // Create a variable using the initializer.
         ref_out = evaluate_expression(alt.init, ctx_inout);
-        auto value = read_reference(ref_out);
+        auto value = ref_out.read();
         auto var = rocket::make_refcounted<Variable>(std::move(value), alt.immutable);
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };
@@ -255,7 +255,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         const auto &alt = this->m_stor.as<Statement::S_if>();
         // Evaluate the condition and pick a branch.
         ref_out = evaluate_expression(alt.cond, ctx_inout);
-        const auto branch_taken = read_reference(ref_out).test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch_taken = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = execute_block(ref_out, branch_taken, ctx_inout);
         if(status != Statement::status_next) {
           return status;
@@ -267,7 +267,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         const auto &alt = this->m_stor.as<Statement::S_switch>();
         // Evaluate the control expression.
         ref_out = evaluate_expression(alt.ctrl, ctx_inout);
-        const auto value_ctrl = read_reference(ref_out);
+        const auto value_ctrl = ref_out.read();
         // Note that all `switch` clauses share the same context.
         // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
         // and there is no match `case` clause, we will have to jump back into half of the scope. To simplify design,
@@ -292,7 +292,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
           } else {
             // This is a `case` clause.
             ref_out = evaluate_expression(it->first, ctx_next);
-            const auto value_comp = read_reference(ref_out);
+            const auto value_comp = ref_out.read();
             if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
               match = it;
@@ -346,7 +346,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
           }
           // Check the loop condition.
           ref_out = evaluate_expression(alt.cond, ctx_inout);
-          if(read_reference(ref_out).test() == false) {
+          if(ref_out.read().test() == false) {
              break;
           }
         }
@@ -358,7 +358,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         for(;;) {
           // Check the loop condition.
           ref_out = evaluate_expression(alt.cond, ctx_inout);
-          if(read_reference(ref_out).test() == false) {
+          if(ref_out.read().test() == false) {
             break;
           }
           // Execute the loop body.
@@ -384,7 +384,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         // Create a variable using the initializer.
         ref_out = evaluate_expression(alt.var_init, ctx_next);
         if(alt.var_name.empty() == false) {
-          auto value = read_reference(ref_out);
+          auto value = ref_out.read();
           auto var = rocket::make_refcounted<Variable>(std::move(value), alt.var_immutable);
           // Reset the reference.
           Reference_root::S_variable ref_c = { std::move(var) };
@@ -395,7 +395,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
           // Check the loop condition.
           if(alt.cond.empty() == false) {
             ref_out = evaluate_expression(alt.cond, ctx_next);
-            if(read_reference(ref_out).test() == false) {
+            if(ref_out.read().test() == false) {
               break;
             }
           }
@@ -425,14 +425,14 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         // Calculate the range using the initializer.
         ref_out = evaluate_expression(alt.range_init, ctx_for);
         const auto mapped_base = ref_out;
-        const auto range_value = read_reference(ref_out);
+        const auto range_value = ref_out.read();
         if(range_value.type() == Value::type_array) {
           const auto &array = range_value.check<D_array>();
           for(auto it = array.begin(); it != array.end(); ++it) {
             Executive_context ctx_next(&ctx_for);
             const auto index = static_cast<Signed>(it - array.begin());
             // Initialize the per-loop key constant.
-            ref_out = reference_constant(D_integer(index));
+            ref_out = Reference::make_constant(D_integer(index));
             do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
@@ -458,7 +458,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
             Executive_context ctx_next(&ctx_for);
             const auto key = std::ref(it->first);
             // Initialize the per-loop key constant.
-            ref_out = reference_constant(D_string(key));
+            ref_out = Reference::make_constant(D_string(key));
             do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
@@ -502,13 +502,13 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
           try {
             Backtracer::unpack_backtrace_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {
-            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", read_reference(e.get_reference()));
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference().read());
             // Copy the reference into the scope.
-            ref_out = dematerialize_reference(e.get_reference());
+            ref_out = e.get_reference().dematerialize();
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
-            ref_out = reference_temporary(D_string(e.what()));
+            ref_out = Reference::make_temporary(D_string(e.what()));
           }
           do_safe_set_named_reference(ctx_next, "exception", alt.except_name, ref_out);
           ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", alt.except_name);
@@ -522,7 +522,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          ref_out = reference_temporary(std::move(backtrace));
+          ref_out = Reference::make_temporary(std::move(backtrace));
           do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
           const auto status = execute_block(ref_out, alt.body_catch, ctx_next);
@@ -563,7 +563,7 @@ Statement::Status Statement::execute(Reference &ref_out, Executive_context &ctx_
         const auto &alt = this->m_stor.as<Statement::S_throw>();
         // Evaluate the expression.
         ref_out = evaluate_expression(alt.expr, ctx_inout);
-        ASTERIA_DEBUG_LOG("Throwing exception: ", read_reference(ref_out));
+        ASTERIA_DEBUG_LOG("Throwing exception: ", ref_out.read());
         throw Exception(ref_out);
       }
     case Statement::index_return:

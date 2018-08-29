@@ -12,6 +12,10 @@ namespace Asteria {
 
 class Reference
   {
+  public:
+    static Reference make_constant(Value value);
+    static Reference make_temporary(Value value);
+
   private:
     Reference_root m_root;
     Vector<Reference_modifier> m_modifiers;
@@ -36,32 +40,29 @@ class Reference
   public:
     const Reference_root & get_root() const noexcept
       {
-        return m_root;
+        return this->m_root;
       }
     std::size_t get_modifier_count() const noexcept
       {
-        return m_modifiers.size();
+        return this->m_modifiers.size();
       }
     const Reference_modifier & get_modifier(std::size_t pos) const
       {
-        return m_modifiers.at(pos);
+        return this->m_modifiers.at(pos);
       }
 
     Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { });
     void clear_modifiers() noexcept;
     Reference_modifier & push_modifier(Reference_modifier modifier);
     void pop_modifier();
+
+    Value read() const;
+    Value & write(Value value) const;
+    Value unset() const;
+
+    Reference & materialize();
+    Reference & dematerialize();
   };
-
-extern Value read_reference(const Reference &ref);
-extern Value & write_reference(const Reference &ref, Value value);
-extern Value unset_reference(const Reference &ref);
-
-extern Reference reference_constant(Value value);
-extern Reference reference_temporary(Value value);
-
-extern Reference & materialize_reference(Reference &ref);
-extern Reference & dematerialize_reference(Reference &ref);
 
 }
 

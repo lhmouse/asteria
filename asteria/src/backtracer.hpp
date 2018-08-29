@@ -28,11 +28,11 @@ class Backtracer : public virtual std::nested_exception
   public:
     const String & get_file() const noexcept
       {
-        return m_file;
+        return this->m_file;
       }
     Unsigned get_line() const noexcept
       {
-        return m_line;
+        return this->m_line;
       }
   };
 
