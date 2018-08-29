@@ -14,9 +14,9 @@ namespace Asteria {
 class Formatter
   {
   private:
-    const char *const m_file;
-    const unsigned long m_line;
-    const char *const m_func;
+    const char *m_file;
+    unsigned long m_line;
+    const char *m_func;
 
     rocket::insertable_ostream m_stream;
 
@@ -33,7 +33,7 @@ class Formatter
     template<typename ValueT>
       void do_put(const ValueT &value)
         {
-          m_stream <<value;
+          this->m_stream <<value;
         }
 
     void do_put(bool value);
@@ -56,24 +56,24 @@ class Formatter
   public:
     const char * get_file() const noexcept
       {
-        return m_file;
+        return this->m_file;
       }
     unsigned long get_line() const noexcept
       {
-        return m_line;
+        return this->m_line;
       }
     const char * get_func() const noexcept
       {
-        return m_func;
+        return this->m_func;
       }
 
     const rocket::insertable_ostream & get_stream() const noexcept
       {
-        return m_stream;
+        return this->m_stream;
       }
     rocket::insertable_ostream & get_stream() noexcept
       {
-        return m_stream;
+        return this->m_stream;
       }
 
   public:

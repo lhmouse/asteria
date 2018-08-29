@@ -17,7 +17,7 @@ namespace Asteria {
 Formatter::Formatter(const char *file, unsigned long line, const char *func) noexcept
   : m_file(file), m_line(line), m_func(func)
   {
-    m_stream <<std::boolalpha;
+    this->m_stream <<std::boolalpha;
   }
 Formatter::~Formatter()
   {
@@ -25,67 +25,67 @@ Formatter::~Formatter()
 
 void Formatter::do_put(bool value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(char value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(signed char value)
   {
-    m_stream <<static_cast<int>(value);
+    this->m_stream <<static_cast<int>(value);
   }
 void Formatter::do_put(unsigned char value)
   {
-    m_stream <<static_cast<unsigned>(value);
+    this->m_stream <<static_cast<unsigned>(value);
   }
 void Formatter::do_put(short value)
   {
-    m_stream <<static_cast<int>(value);
+    this->m_stream <<static_cast<int>(value);
   }
 void Formatter::do_put(unsigned short value)
   {
-    m_stream <<static_cast<unsigned>(value);
+    this->m_stream <<static_cast<unsigned>(value);
   }
 void Formatter::do_put(int value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(unsigned value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(long value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(unsigned long value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(long long value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(unsigned long long value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(const char *value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 void Formatter::do_put(const signed char *value)
   {
-    m_stream <<static_cast<const void *>(value);
+    this->m_stream <<static_cast<const void *>(value);
   }
 void Formatter::do_put(const unsigned char *value)
   {
-    m_stream <<static_cast<const void *>(value);
+    this->m_stream <<static_cast<const void *>(value);
   }
 void Formatter::do_put(const void *value)
   {
-    m_stream <<value;
+    this->m_stream <<value;
   }
 
 namespace {
