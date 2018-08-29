@@ -253,8 +253,6 @@ namespace details_variant {
 template<typename ...altsT>
   class variant
     {
-      static_assert(details_variant::conjunction<is_nothrow_destructible<altsT>...>::value, "Destructors of candidate types are not allowed to throw exceptions.");
-
     public:
       template<unsigned indexT>
         struct at
@@ -283,37 +281,37 @@ template<typename ...altsT>
 
     private:
       unsigned m_turnout : 1;
-      unsigned m_index : 31;
+      unsigned m_index : 15;
       storage m_buffers[2];
 
     private:
       const void * do_get_front_buffer() const noexcept
         {
-          const unsigned turnout = this->m_turnout;
+          const auto turnout = this->m_turnout;
           return this->m_buffers + turnout;
         }
       void * do_get_front_buffer() noexcept
         {
-          const unsigned turnout = this->m_turnout;
+          const auto turnout = this->m_turnout;
           return this->m_buffers + turnout;
         }
       const void * do_get_back_buffer() const noexcept
         {
-          const unsigned turnout = this->m_turnout;
+          const auto turnout = this->m_turnout;
           return this->m_buffers + (turnout ^ 1);
         }
       void * do_get_back_buffer() noexcept
         {
-          const unsigned turnout = this->m_turnout;
+          const auto turnout = this->m_turnout;
           return this->m_buffers + (turnout ^ 1);
         }
 
       void do_set_up_new_buffer(unsigned index_new) noexcept
         {
-          const unsigned turnout_old = this->m_turnout;
-          this->m_turnout = (turnout_old ^ 1) & 1;
-          const unsigned index_old = this->m_index;
-          this->m_index = index_new & 0x7FFFFFFF;
+          const auto turnout_old = this->m_turnout;
+          this->m_turnout = (turnout_old ^ 1) & 0x0001;
+          const auto index_old = this->m_index;
+          this->m_index = index_new & 0x7FFF;
           // Destroy the old buffer and poison its contents.
           details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
                                                     details_variant::visitor_destroy());
@@ -338,7 +336,7 @@ template<typename ...altsT>
         variant(altT &&alt)
           : m_turnout(0)
           {
-            // This overload enables construction using a candidate of nested variants.
+            // This overload enables construction using an alternative of nested variants.
             constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
             using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             // Construct the alternative in-place.
@@ -365,7 +363,7 @@ template<typename ...altsT>
       template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
         variant & operator=(altT &&alt)
           {
-            // This overload, unlike `set()`, enables assignment using a candidate of nested variants.
+            // This overload, unlike `set()`, enables assignment using an alternative of nested variants.
             constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
             using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index == eindex) {
@@ -414,7 +412,7 @@ template<typename ...altsT>
           details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
                                                     details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
-          this->m_index = 0x6EEFDEAD;
+          this->m_index = 0x6EAD;
           ::std::memset(m_buffers, '#', sizeof(m_buffers));
 #endif
         }
@@ -476,7 +474,7 @@ template<typename ...altsT>
       template<typename altT, typename ...paramsT>
         altT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<altT, paramsT &&...>::value)
           {
-            // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
+            // This overload, unlike `operator=()`, does not accept an alternative of nested variants.
             constexpr auto eindex = details_variant::type_finder<0, typename remove_cv<altT>::type, altsT...>::value;
             using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             // Construct the active alternative using perfect forwarding, then destroy the old alternative.
@@ -488,7 +486,7 @@ template<typename ...altsT>
       template<typename altT>
         altT & set(altT &&alt) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
           {
-            // This overload, unlike `operator=()`, does not accept a candidate of nested variants.
+            // This overload, unlike `operator=()`, does not accept an alternative of nested variants.
             constexpr auto eindex = details_variant::type_finder<0, typename decay<altT>::type, altsT...>::value;
             using etype = typename details_variant::type_getter<eindex, altsT...>::type;
             if(this->m_index == eindex) {
@@ -540,7 +538,7 @@ template<typename ...altsT>
             details_variant::rethrow_current_exception();
           }
           // Destroy both alternatives.
-          const unsigned this_index = this->m_index;
+          const auto this_index = this->m_index;
           this->do_set_up_new_buffer(other.m_index);
           other.do_set_up_new_buffer(this_index);
         }
