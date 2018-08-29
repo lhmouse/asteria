@@ -46,7 +46,7 @@ Value read_reference(const Reference &ref)
     auto cur = std::ref(ref.get_root().dereference_readonly());
     // Apply modifiers.
     for(std::size_t i = 0; i < nmod; ++i) {
-      const auto ptr = apply_reference_modifier_readonly_partial_opt(ref.get_modifier(i), cur);
+      const auto ptr = ref.get_modifier(i).apply_readonly_opt(cur);
       if(!ptr) {
         return { };
       }
@@ -63,7 +63,7 @@ Value & write_reference(const Reference &ref, Value value)
     auto cur = std::ref(ref.get_root().dereference_mutable());
     // Apply modifiers.
     for(std::size_t i = 0; i < nmod; ++i) {
-      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, true, nullptr);
+      const auto ptr = ref.get_modifier(i).apply_mutable_opt(cur, true, nullptr);
       if(!ptr) {
         ROCKET_ASSERT(false);
       }
@@ -84,7 +84,7 @@ Value unset_reference(const Reference &ref)
     auto cur = std::ref(ref.get_root().dereference_mutable());
     // Apply modifiers except the last one.
     for(std::size_t i = 0; i < nmod - 1; ++i) {
-      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, false, nullptr);
+      const auto ptr = ref.get_modifier(i).apply_mutable_opt(cur, false, nullptr);
       if(!ptr) {
         return { };
       }
@@ -92,7 +92,7 @@ Value unset_reference(const Reference &ref)
     }
     // Erase the element referenced by the last modifier.
     Value erased;
-    apply_reference_modifier_mutable_partial_opt(ref.get_modifier(nmod - 1), cur, false, &erased);
+    ref.get_modifier(nmod - 1).apply_mutable_opt(cur, false, &erased);
     return std::move(erased);
   }
 

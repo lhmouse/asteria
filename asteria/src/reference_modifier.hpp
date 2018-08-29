@@ -48,24 +48,9 @@ class Reference_modifier
     Reference_modifier & operator=(Reference_modifier &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_stor.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_stor.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_stor.as<AltT>();
-        }
+    const Value * apply_readonly_opt(const Value &parent) const;
+    Value * apply_mutable_opt(Value &parent, bool creates, Value *erased_out_opt) const;
   };
-
-extern const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modifier &modifier, const Value &parent);
-extern Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt);
 
 }
 
