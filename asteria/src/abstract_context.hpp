@@ -30,27 +30,9 @@ class Abstract_context
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
 
-    const Reference * get_named_reference_opt(const String &name) const noexcept
-      {
-        const auto it = m_named_refs.find(name);
-        if(it == m_named_refs.end()) {
-          return nullptr;
-        }
-        return &(it->second);
-      }
-    Reference * get_named_reference_opt(const String &name) noexcept
-      {
-        const auto it = m_named_refs.find_mut(name);
-        if(it == m_named_refs.end()) {
-          return nullptr;
-        }
-        return &(it->second);
-      }
-    Reference & set_named_reference(const String &name, Reference ref)
-      {
-        const auto pair = m_named_refs.insert_or_assign(name, std::move(ref));
-        return pair.first->second;
-      }
+    const Reference * get_named_reference_opt(const String &name) const noexcept;
+    Reference * get_named_reference_opt(const String &name) noexcept;
+    Reference & set_named_reference(const String &name, Reference ref);
   };
 
 extern bool is_name_reserved(const String &name);

@@ -22,17 +22,7 @@ class Exception : public virtual std::exception
       }
     ~Exception();
 
-    Exception(const Exception &) noexcept;
-    Exception & operator=(const Exception &) noexcept;
-    Exception(Exception &&) noexcept;
-    Exception & operator=(Exception &&) noexcept;
-
   public:
-    const char * what() const noexcept override
-      {
-        return "Asteria::Exception";
-      }
-
     const Reference & get_reference() const noexcept
       {
         return m_ref;
@@ -41,11 +31,10 @@ class Exception : public virtual std::exception
       {
         return m_ref;
       }
-    Reference & set_reference(Reference ref) noexcept
-      {
-        m_ref = std::move(ref);
-        return m_ref;
-      }
+
+    const char * what() const noexcept override;
+
+    Reference & set_reference(Reference ref) noexcept;
   };
 
 }

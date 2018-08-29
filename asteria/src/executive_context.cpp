@@ -12,6 +12,15 @@ Executive_context::~Executive_context()
   {
   }
 
+bool Executive_context::is_analytic() const noexcept
+  {
+    return false;
+  }
+const Executive_context * Executive_context::get_parent_opt() const noexcept
+  {
+    return m_parent_opt;
+  }
+
 void initialize_executive_function_context(Executive_context &ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
   {
     // Set up parameters.

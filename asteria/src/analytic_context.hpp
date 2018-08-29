@@ -27,14 +27,8 @@ class Analytic_context : public Abstract_context
       = delete;
 
   public:
-    bool is_analytic() const noexcept override
-      {
-        return true;
-      }
-    const Abstract_context * get_parent_opt() const noexcept override
-      {
-        return m_parent_opt;
-      }
+    bool is_analytic() const noexcept override;
+    const Abstract_context * get_parent_opt() const noexcept override;
   };
 
 extern void initialize_analytic_function_context(Analytic_context &ctx_out, const Vector<String> &params);

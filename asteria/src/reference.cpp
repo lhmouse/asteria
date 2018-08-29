@@ -20,6 +20,25 @@ Reference::Reference(Reference &&) noexcept
 Reference & Reference::operator=(Reference &&) noexcept
   = default;
 
+Reference_root & Reference::set_root(Reference_root root, Vector<Reference_modifier> modifiers)
+  {
+    m_root = std::move(root);
+    m_modifiers = std::move(modifiers);
+    return m_root;
+  }
+void Reference::clear_modifiers() noexcept
+  {
+    m_modifiers.clear();
+  }
+Reference_modifier & Reference::push_modifier(Reference_modifier modifier)
+  {
+    return m_modifiers.emplace_back(std::move(modifier));
+  }
+void Reference::pop_modifier()
+  {
+    m_modifiers.pop_back();
+  }
+
 Value read_reference(const Reference &ref)
   {
     const auto nmod = ref.get_modifier_count();

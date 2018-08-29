@@ -22,11 +22,6 @@ class Backtracer : public virtual std::nested_exception
       }
     ~Backtracer();
 
-    Backtracer(const Backtracer &) noexcept;
-    Backtracer & operator=(const Backtracer &) noexcept;
-    Backtracer(Backtracer &&) noexcept;
-    Backtracer & operator=(Backtracer &&) noexcept;
-
   public:
     const String & get_file() const noexcept
       {

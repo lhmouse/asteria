@@ -10,15 +10,6 @@ Backtracer::~Backtracer()
   {
   }
 
-Backtracer::Backtracer(const Backtracer &) noexcept
-  = default;
-Backtracer & Backtracer::operator=(const Backtracer &) noexcept
-  = default;
-Backtracer::Backtracer(Backtracer &&) noexcept
-  = default;
-Backtracer & Backtracer::operator=(Backtracer &&) noexcept
-  = default;
-
 void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop)
   {
     auto eptr = etop;

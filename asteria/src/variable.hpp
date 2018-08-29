@@ -27,9 +27,6 @@ class Variable : public Sbase<Variable>
     Variable & operator=(const Variable &)
       = delete;
 
-  private:
-    [[noreturn]] void do_throw_immutable() const;
-
   public:
     const Value & get_value() const noexcept
       {
@@ -43,20 +40,9 @@ class Variable : public Sbase<Variable>
       {
         return m_immutable;
       }
-    Value & set_value(Value value, bool immutable = false)
-      {
-        if(m_immutable) {
-          do_throw_immutable();
-        }
-        m_value = std::move(value);
-        m_immutable = immutable;
-        return m_value;
-      }
-    bool & set_immutable(bool immutable = true) noexcept
-      {
-        m_immutable = immutable;
-        return m_immutable;
-      }
+
+    Value & set_value(Value value, bool immutable = false);
+    bool & set_immutable(bool immutable = true) noexcept;
   };
 
 }

@@ -10,15 +10,6 @@ Runtime_error::~Runtime_error()
   {
   }
 
-Runtime_error::Runtime_error(const Runtime_error &) noexcept
-  = default;
-Runtime_error & Runtime_error::operator=(const Runtime_error &) noexcept
-  = default;
-Runtime_error::Runtime_error(Runtime_error &&) noexcept
-  = default;
-Runtime_error & Runtime_error::operator=(Runtime_error &&) noexcept
-  = default;
-
 const char * Runtime_error::what() const noexcept
   {
     return m_msg.c_str();

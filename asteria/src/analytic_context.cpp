@@ -11,6 +11,15 @@ Analytic_context::~Analytic_context()
   {
   }
 
+bool Analytic_context::is_analytic() const noexcept
+  {
+    return true;
+  }
+const Abstract_context * Analytic_context::get_parent_opt() const noexcept
+  {
+    return m_parent_opt;
+  }
+
 void initialize_analytic_function_context(Analytic_context &ctx_out, const Vector<String> &params)
   {
     // Set up parameters.

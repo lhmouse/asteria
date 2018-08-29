@@ -27,14 +27,8 @@ class Executive_context : public Abstract_context
       = delete;
 
   public:
-    bool is_analytic() const noexcept override
-      {
-        return false;
-      }
-    const Executive_context * get_parent_opt() const noexcept override
-      {
-        return m_parent_opt;
-      }
+    bool is_analytic() const noexcept override;
+    const Executive_context * get_parent_opt() const noexcept override;
   };
 
 extern void initialize_executive_function_context(Executive_context &ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args);

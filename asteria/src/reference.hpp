@@ -22,10 +22,10 @@ class Reference
       {
       }
     template<typename RootT, typename std::enable_if<std::is_constructible<Reference_root, RootT &&>::value>::type * = nullptr>
-    Reference(RootT &&root, Vector<Reference_modifier> modifiers = { })
-      : m_root(std::forward<RootT>(root)), m_modifiers(std::move(modifiers))
-      {
-      }
+      Reference(RootT &&root, Vector<Reference_modifier> modifiers = { })
+        : m_root(std::forward<RootT>(root)), m_modifiers(std::move(modifiers))
+        {
+        }
     ~Reference();
 
     Reference(const Reference &) noexcept;
@@ -46,24 +46,10 @@ class Reference
       {
         return m_modifiers.at(pos);
       }
-    Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { })
-      {
-        m_root = std::move(root);
-        m_modifiers = std::move(modifiers);
-        return m_root;
-      }
-    void clear_modifiers() noexcept
-      {
-        m_modifiers.clear();
-      }
-    Reference_modifier & push_modifier(Reference_modifier modifier)
-      {
-        return m_modifiers.emplace_back(std::move(modifier));
-      }
-    void pop_modifier()
-      {
-        m_modifiers.pop_back();
-      }
+    Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { });
+    void clear_modifiers() noexcept;
+    Reference_modifier & push_modifier(Reference_modifier modifier);
+    void pop_modifier();
   };
 
 extern Value read_reference(const Reference &ref);

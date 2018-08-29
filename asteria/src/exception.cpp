@@ -10,13 +10,16 @@ Exception::~Exception()
   {
   }
 
-Exception::Exception(const Exception &) noexcept
-  = default;
-Exception & Exception::operator=(const Exception &) noexcept
-  = default;
-Exception::Exception(Exception &&) noexcept
-  = default;
-Exception & Exception::operator=(Exception &&) noexcept
-  = default;
+const char * Exception::what() const noexcept
+  {
+    return "Asteria::Exception";
+  }
+
+Reference & Exception::set_reference(Reference ref) noexcept
+  {
+    m_ref = std::move(ref);
+    return m_ref;
+  }
+
 
 }
