@@ -46,6 +46,7 @@ class Reference
       {
         return m_modifiers.at(pos);
       }
+
     Reference_root & set_root(Reference_root root, Vector<Reference_modifier> modifiers = { });
     void clear_modifiers() noexcept;
     Reference_modifier & push_modifier(Reference_modifier modifier);

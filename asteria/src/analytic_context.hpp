@@ -21,11 +21,6 @@ class Analytic_context : public Abstract_context
       }
     ~Analytic_context();
 
-    Analytic_context(const Analytic_context &)
-      = delete;
-    Analytic_context & operator=(const Analytic_context &)
-      = delete;
-
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;

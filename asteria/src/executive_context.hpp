@@ -21,11 +21,6 @@ class Executive_context : public Abstract_context
       }
     ~Executive_context();
 
-    Executive_context(const Executive_context &)
-      = delete;
-    Executive_context & operator=(const Executive_context &)
-      = delete;
-
   public:
     bool is_analytic() const noexcept override;
     const Executive_context * get_parent_opt() const noexcept override;
