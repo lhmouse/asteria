@@ -161,32 +161,48 @@ class Token
   public:
     Unsigned get_line() const noexcept
       {
-        return m_line;
+        return this->m_line;
       }
     Unsigned get_column() const noexcept
       {
-        return m_column;
+        return this->m_column;
       }
     std::size_t get_length() const noexcept
       {
-        return m_length;
+        return this->m_length;
       }
     Index index() const noexcept
       {
-        return static_cast<Index>(m_stor.index());
+        return static_cast<Index>(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_stor.get<AltT>();
+          return this->m_stor.get<AltT>();
+        }
+    template<typename AltT>
+      AltT * opt() noexcept
+        {
+          return this->m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_stor.as<AltT>();
+          return this->m_stor.as<AltT>();
+        }
+    template<typename AltT>
+      AltT & check()
+        {
+          return this->m_stor.as<AltT>();
+        }
+    template<typename AltT>
+      AltT & set(AltT &&alt)
+        {
+          return this->m_stor.set(std::forward<AltT>(alt));
         }
   };
 
+// TODO move these elsewhere
 extern Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str);
 
 }

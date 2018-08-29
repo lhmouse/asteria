@@ -73,35 +73,34 @@ class Value
   public:
     Type type() const noexcept
       {
-        return static_cast<Type>(m_stor.index());
+        return static_cast<Type>(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_stor.get<AltT>();
+          return this->m_stor.get<AltT>();
         }
     template<typename AltT>
       AltT * opt() noexcept
         {
-          return m_stor.get<AltT>();
+          return this->m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_stor.as<AltT>();
+          return this->m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & check()
         {
-          return m_stor.as<AltT>();
+          return this->m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & set(AltT &&alt)
         {
-          return m_stor.set(std::forward<AltT>(alt));
+          return this->m_stor.set(std::forward<AltT>(alt));
         }
 
-  public:
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, std::size_t indent_next = 0, std::size_t indent_increment = 2) const;
