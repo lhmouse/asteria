@@ -2256,6 +2256,9 @@ template<typename charT, typename traitsT, typename allocatorT>
         auto remaining = noadl::max(width, len);
         auto offset = left ? 0 : (len - remaining);
         for(;;) {
+          if(remaining == 0) {
+            break;
+          }
           const auto written = ((0 <= offset) && (offset < len)) ? os.rdbuf()->sputn(str.c_str() + offset, len - offset)
                                                                  : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
@@ -2263,9 +2266,6 @@ template<typename charT, typename traitsT, typename allocatorT>
             break;
           }
           remaining -= written;
-          if(remaining == 0) {
-            break;
-          }
           offset += written;
         }
       } catch(...) {
