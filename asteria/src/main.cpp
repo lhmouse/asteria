@@ -60,7 +60,7 @@ int main()
     } catch(...) {
       Bivector<String, Unsigned> bt;
       try {
-        unpack_backtrace_and_rethrow(bt, std::current_exception());
+        Backtracer::unpack_backtrace_and_rethrow(bt, std::current_exception());
       } catch(Exception &e) {
         ASTERIA_DEBUG_LOG("Caught: ", read_reference(e.get_reference()));
         for(auto it = bt.rbegin(); it != bt.rend(); ++it) {

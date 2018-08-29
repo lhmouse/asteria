@@ -517,7 +517,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           // Identify the dynamic type of the exception.
           Bivector<String, Unsigned> btv;
           try {
-            unpack_backtrace_and_rethrow(btv, std::current_exception());
+            Backtracer::unpack_backtrace_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", read_reference(e.get_reference()));
             // Copy the reference into the scope.

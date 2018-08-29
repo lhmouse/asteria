@@ -11,6 +11,9 @@ namespace Asteria {
 
 class Backtracer : public virtual std::nested_exception
   {
+  public:
+    [[noreturn]] static void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop);
+
   private:
     String m_file;
     Unsigned m_line;
@@ -32,8 +35,6 @@ class Backtracer : public virtual std::nested_exception
         return m_line;
       }
   };
-
-[[noreturn]] extern void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop);
 
 }
 
