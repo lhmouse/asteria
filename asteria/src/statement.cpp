@@ -65,7 +65,7 @@ Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &s
         do_safe_set_named_reference(ctx_inout, "function", alt.name, { });
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_inout);
-        initialize_analytic_function_context(ctx_next, alt.params);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         Statement::S_func_def cand_bnd = { alt.name, alt.params, alt.file, alt.line, std::move(body_bnd) };
         return std::move(cand_bnd);
@@ -256,7 +256,7 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
         do_safe_set_named_reference(ctx_inout, "function", alt.name, { });
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_inout);
-        initialize_analytic_function_context(ctx_next, alt.params);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         auto var = rocket::make_refcounted<Variable>(D_function(std::move(func)), true);

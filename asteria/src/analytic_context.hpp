@@ -24,9 +24,9 @@ class Analytic_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
-  };
 
-extern void initialize_analytic_function_context(Analytic_context &ctx_out, const Vector<String> &params);
+    void initialize_for_function(const Vector<String> &params);
+  };
 
 }
 

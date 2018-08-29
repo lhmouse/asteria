@@ -150,7 +150,7 @@ Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx)
         const auto &alt = node.check<Xpnode::S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
-        initialize_analytic_function_context(ctx_next, alt.params);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         Xpnode::S_closure_function cand_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
         return std::move(cand_bnd);
@@ -540,7 +540,7 @@ void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node,
         const auto &alt = node.check<Xpnode::S_closure_function>();
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx);
-        initialize_analytic_function_context(ctx_next, alt.params);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         stack_inout.emplace_back(reference_temp_value(D_function(std::move(func))));

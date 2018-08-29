@@ -20,22 +20,22 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
     return m_parent_opt;
   }
 
-void initialize_analytic_function_context(Analytic_context &ctx_out, const Vector<String> &params)
+void Analytic_context::initialize_for_function(const Vector<String> &params)
   {
     // Set up parameters.
     for(const auto &name : params) {
       if(name.empty() == false) {
-        if(ctx_out.is_name_reserved(name)) {
+        if(is_name_reserved(name)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
         }
-        ctx_out.set_named_reference(name, { });
+        this->set_named_reference(name, { });
       }
     }
     // Set up system variables.
-    ctx_out.set_named_reference(String::shallow("__file"), { });
-    ctx_out.set_named_reference(String::shallow("__line"), { });
-    ctx_out.set_named_reference(String::shallow("__this"), { });
-    ctx_out.set_named_reference(String::shallow("__varg"), { });
+    this->set_named_reference(String::shallow("__file"), { });
+    this->set_named_reference(String::shallow("__line"), { });
+    this->set_named_reference(String::shallow("__this"), { });
+    this->set_named_reference(String::shallow("__varg"), { });
   }
 
 }
