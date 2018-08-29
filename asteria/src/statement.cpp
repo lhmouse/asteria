@@ -26,7 +26,7 @@ namespace {
 
   void do_safe_set_named_reference(Abstract_context &ctx_inout, const char *desc, const String &name, Reference ref)
     {
-      if(is_name_reserved(name)) {
+      if(ctx_inout.is_name_reserved(name)) {
         ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
       }
       if(name.empty()) {

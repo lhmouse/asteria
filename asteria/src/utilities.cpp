@@ -133,7 +133,7 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
     char time_str[64];
     do_print_time(time_str, sizeof(time_str));
     oss <<time_str <<" $$ ";
-    oss.set_caret(String::npos);
+    oss.set_caret(oss.npos);
     oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line();
     auto str = oss.extract_string();
     do_replace_all(str, '\n', "\n\t");

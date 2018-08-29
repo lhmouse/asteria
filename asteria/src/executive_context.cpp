@@ -31,7 +31,7 @@ void initialize_executive_function_context(Executive_context &ctx_out, const Vec
         args.erase(args.begin());
       }
       if(name.empty() == false) {
-        if(is_name_reserved(name)) {
+        if(ctx_out.is_name_reserved(name)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
         }
         ctx_out.set_named_reference(name, std::move(materialize_reference(ref)));

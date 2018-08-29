@@ -25,7 +25,7 @@ void initialize_analytic_function_context(Analytic_context &ctx_out, const Vecto
     // Set up parameters.
     for(const auto &name : params) {
       if(name.empty() == false) {
-        if(is_name_reserved(name)) {
+        if(ctx_out.is_name_reserved(name)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
         }
         ctx_out.set_named_reference(name, { });
