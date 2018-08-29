@@ -1,4 +1,4 @@
-/// This file is part of Asteria.
+// This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #ifndef ROCKET_REFCOUNTED_PTR_HPP_
