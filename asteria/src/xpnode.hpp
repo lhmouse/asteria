@@ -126,6 +126,9 @@ class Xpnode
         , S_unnamed_object    //  9,
       )>;
 
+  public:
+    static const char * get_operator_name(Xop xop) noexcept;
+
   private:
     Variant m_variant;
 
@@ -141,28 +144,12 @@ class Xpnode
     Xpnode & operator=(Xpnode &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_variant.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_variant.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_variant.as<AltT>();
-        }
+    Xpnode bind_partial(const Analytic_context &ctx) const;
+    void evaluate_partial(Vector<Reference> &stack_inout, const Executive_context &ctx) const;
   };
 
-extern const char * get_operator_name(Xpnode::Xop xop) noexcept;
-
-extern Xpnode bind_xpnode_partial(const Xpnode &node, const Analytic_context &ctx);
+// XXX move these elsewhere
 extern Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx);
-
-extern void evaluate_xpnode_partial(Vector<Reference> &stack_inout, const Xpnode &node, const Executive_context &ctx);
 extern Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx);
 
 }
