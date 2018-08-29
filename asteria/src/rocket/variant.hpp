@@ -308,19 +308,19 @@ template<typename ...altsT>
           return this->m_buffers + (turnout ^ 1);
         }
 
-    void do_set_up_new_buffer(unsigned index_new) noexcept
-      {
-        const unsigned turnout_old = this->m_turnout;
-        this->m_turnout = (turnout_old ^ 1) & 1;
-        const unsigned index_old = this->m_index;
-        this->m_index = index_new & 0x7FFFFFFF;
-        // Destroy the old buffer and poison its contents.
-        details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
-                                                  details_variant::visitor_destroy());
+      void do_set_up_new_buffer(unsigned index_new) noexcept
+        {
+          const unsigned turnout_old = this->m_turnout;
+          this->m_turnout = (turnout_old ^ 1) & 1;
+          const unsigned index_old = this->m_index;
+          this->m_index = index_new & 0x7FFFFFFF;
+          // Destroy the old buffer and poison its contents.
+          details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
+                                                    details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
+          ::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
 #endif
-      }
+        }
 
     public:
       variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, altsT...>::type>::value)
