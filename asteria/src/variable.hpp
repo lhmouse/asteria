@@ -30,15 +30,15 @@ class Variable : public Sbase<Variable>
   public:
     const Value & get_value() const noexcept
       {
-        return m_value;
+        return this->m_value;
       }
     Value & get_value() noexcept
       {
-        return m_value;
+        return this->m_value;
       }
     bool is_immutable() const noexcept
       {
-        return m_immutable;
+        return this->m_immutable;
       }
 
     Value & set_value(Value value, bool immutable = false);
