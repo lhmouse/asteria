@@ -106,7 +106,7 @@ namespace {
 
 }
 
-Xpnode Xpnode::bind_partial(const Analytic_context &ctx) const
+Xpnode Xpnode::bind(const Analytic_context &ctx) const
   {
     switch(static_cast<Index>(this->m_variant.index())) {
     case Xpnode::index_literal:
@@ -486,7 +486,7 @@ namespace {
 
 }
 
-void Xpnode::evaluate_partial(Vector<Reference> &stack_inout, const Executive_context &ctx) const
+void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const
   {
     switch(static_cast<Index>(this->m_variant.index())) {
     case Xpnode::index_literal:
@@ -1137,7 +1137,7 @@ Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_contex
     Vector<Xpnode> expr_bnd;
     expr_bnd.reserve(expr.size());
     for(const auto &node : expr) {
-      auto node_bnd = node.bind_partial(ctx);
+      auto node_bnd = node.bind(ctx);
       expr_bnd.emplace_back(std::move(node_bnd));
     }
     return expr_bnd;
@@ -1150,7 +1150,7 @@ Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_contex
     }
     Vector<Reference> stack;
     for(const auto &node : expr) {
-      node.evaluate_partial(stack, ctx);
+      node.evaluate(stack, ctx);
     }
     if(stack.size() != 1) {
       ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");

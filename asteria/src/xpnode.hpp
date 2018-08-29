@@ -144,8 +144,8 @@ class Xpnode
     Xpnode & operator=(Xpnode &&) noexcept;
 
   public:
-    Xpnode bind_partial(const Analytic_context &ctx) const;
-    void evaluate_partial(Vector<Reference> &stack_inout, const Executive_context &ctx) const;
+    Xpnode bind(const Analytic_context &ctx) const;
+    void evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const;
   };
 
 // XXX move these elsewhere
