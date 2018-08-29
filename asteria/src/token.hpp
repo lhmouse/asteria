@@ -142,14 +142,14 @@ class Token
       )>;
 
   private:
-    std::size_t m_line;
-    std::size_t m_column;
+    Unsigned m_line;
+    Unsigned m_column;
     std::size_t m_length;
     Variant m_variant;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(std::size_t line, std::size_t column, std::size_t length, AltT &&alt)
+      Token(Unsigned line, Unsigned column, std::size_t length, AltT &&alt)
         : m_line(line), m_column(column), m_length(length), m_variant(std::forward<AltT>(alt))
         {
         }
@@ -158,11 +158,11 @@ class Token
     ~Token();
 
   public:
-    std::size_t get_line() const noexcept
+    Unsigned get_line() const noexcept
       {
         return m_line;
       }
-    std::size_t get_column() const noexcept
+    Unsigned get_column() const noexcept
       {
         return m_column;
       }
@@ -186,7 +186,7 @@ class Token
         }
   };
 
-extern Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, std::size_t line, const String &str);
+extern Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str);
 
 }
 

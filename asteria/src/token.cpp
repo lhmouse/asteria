@@ -17,7 +17,7 @@ Token::~Token()
 
 namespace {
 
-  Parser_result do_validate_code_point_utf8(std::size_t line, const String &str, std::size_t column)
+  Parser_result do_validate_code_point_utf8(Unsigned line, const String &str, Unsigned column)
     {
       // Get a UTF code point.
       static constexpr unsigned char s_length_table[32] =
@@ -76,7 +76,7 @@ namespace {
       return Parser_result(line, column, length, Parser_result::error_code_success);
     }
 
-  bool do_merge_sign(Vector<Token> &tokens_inout, std::size_t line, std::size_t column)
+  bool do_merge_sign(Vector<Token> &tokens_inout, Unsigned line, Unsigned column)
     {
       // The last token must be a positive or negative sign.
       if(tokens_inout.empty()) {
@@ -115,7 +115,7 @@ namespace {
       return sign;
     }
 
-  Parser_result do_get_token(Vector<Token> &tokens_out, std::size_t line, const String &str, std::size_t column)
+  Parser_result do_get_token(Vector<Token> &tokens_out, Unsigned line, const String &str, Unsigned column)
     {
       const auto char_head = str.at(column);
       switch(char_head) {
@@ -644,10 +644,10 @@ namespace {
 
 }
 
-Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, std::size_t line, const String &str)
+Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str)
   {
     // Ensure the source string is valid UTF-8.
-    std::size_t column = 0;
+    Unsigned column = 0;
     while(column < str.size()) {
       const auto result = do_validate_code_point_utf8(line, str, column);
       ROCKET_ASSERT(result.get_length() <= str.size() - column);

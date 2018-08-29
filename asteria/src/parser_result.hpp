@@ -38,23 +38,23 @@ class Parser_result
       };
 
   private:
-    std::size_t m_line;
-    std::size_t m_column;
+    Unsigned m_line;
+    Unsigned m_column;
     std::size_t m_length;
     Error_code m_error_code;
 
   public:
-    constexpr Parser_result(std::size_t line, std::size_t column, std::size_t length, Error_code error_code) noexcept
+    constexpr Parser_result(Unsigned line, Unsigned column, std::size_t length, Error_code error_code) noexcept
       : m_line(line), m_column(column), m_length(length), m_error_code(error_code)
       {
       }
 
   public:
-    std::size_t get_line() const noexcept
+    Unsigned get_line() const noexcept
       {
         return m_line;
       }
-    std::size_t get_column() const noexcept
+    Unsigned get_column() const noexcept
       {
         return m_column;
       }
