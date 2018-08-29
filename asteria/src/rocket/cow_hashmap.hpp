@@ -125,7 +125,7 @@ namespace details_cow_hashmap {
         handle_storage(const allocator_type &xalloc, size_type xnblk) noexcept
           : alloc(xalloc), nblk(xnblk)
           {
-            const auto nbkt = this->max_nbkt_for_nblk(this->nblk);
+            const auto nbkt = max_nbkt_for_nblk(this->nblk);
             // `allocator_type::pointer` need not be a trivial type.
             // The C++ standard requires that value-initialization of such an object shall not throw exceptions,
             // and shall result in a null pointer.
@@ -137,7 +137,7 @@ namespace details_cow_hashmap {
           }
         ~handle_storage()
           {
-            const auto nbkt = this->max_nbkt_for_nblk(this->nblk);
+            const auto nbkt = max_nbkt_for_nblk(this->nblk);
             for(auto i = size_type(0); i < nbkt; ++i) {
               const auto eptr = this->data[i].set(nullptr);
               if(!eptr) {
@@ -196,7 +196,7 @@ namespace details_cow_hashmap {
           static typename copy_const_from<handle_type, decltype(::std::declval<xpointerT &>())>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
             {
               static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
-              const auto nbkt = ptr->max_nbkt_for_nblk(ptr->nblk);
+              const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
               ROCKET_ASSERT(nbkt != 0);
               // Phase one: Probe from `first` to the end of the table.
               for(auto i = first; i != nbkt; ++i) {
