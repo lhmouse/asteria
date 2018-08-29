@@ -11,6 +11,9 @@ namespace Asteria {
 
 class Abstract_context
   {
+  public:
+    static bool is_name_reserved(const String &name);
+
   private:
     Dictionary<Reference> m_named_refs;
 
@@ -34,8 +37,6 @@ class Abstract_context
     Reference * get_named_reference_opt(const String &name) noexcept;
     Reference & set_named_reference(const String &name, Reference ref);
   };
-
-extern bool is_name_reserved(const String &name);
 
 }
 

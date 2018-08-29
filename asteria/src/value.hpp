@@ -47,17 +47,20 @@ class Value
         compare_greater    = 3,
       };
 
+  public:
+    static const char * get_type_name(Type type) noexcept;
+
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     Value() noexcept
-      : m_variant()  // Initialize to `null`.
+      : m_stor()  // Initialize to `null`.
       {
       }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Value(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Value();
@@ -70,42 +73,44 @@ class Value
   public:
     Type type() const noexcept
       {
-        return static_cast<Type>(m_variant.index());
+        return static_cast<Type>(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_variant.get<AltT>();
+          return this->m_stor.get<AltT>();
         }
     template<typename AltT>
       AltT * opt() noexcept
         {
-          return m_variant.get<AltT>();
+          return this->m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_variant.as<AltT>();
+          return this->m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & check()
         {
-          return m_variant.as<AltT>();
+          return this->m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & set(AltT &&alt)
         {
-          return m_variant.set(std::forward<AltT>(alt));
+          return this->m_stor.set(std::forward<AltT>(alt));
         }
+
+    bool test() const noexcept;
+    Compare compare(const Value &other) const noexcept;
+    void dump(std::ostream &os, std::size_t indent_next = 0, std::size_t indent_increment = 2) const;
   };
 
-extern const char * get_type_name(Value::Type type) noexcept;
-
-extern bool test_value(const Value &value);
-extern Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept;
-
-extern void dump_value(std::ostream &os, const Value &value, std::size_t indent_next = 0, std::size_t indent_increment = 2);
-extern std::ostream & operator<<(std::ostream &os, const Value &value);
+inline std::ostream & operator<<(std::ostream &os, const Value &value)
+  {
+    value.dump(os);
+    return os;
+  }
 
 }
 

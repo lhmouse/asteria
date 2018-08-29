@@ -21,12 +21,12 @@ Reference_modifier::Reference_modifier(Reference_modifier &&) noexcept
 Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexcept
   = default;
 
-const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modifier &modifier, const Value &parent)
+const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
   {
-    switch(modifier.index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Reference_modifier::index_array_index:
       {
-        const auto &alt = modifier.check<Reference_modifier::S_array_index>();
+        const auto &alt = this->m_stor.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -52,7 +52,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &alt = modifier.check<Reference_modifier::S_object_key>();
+        const auto &alt = this->m_stor.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -68,16 +68,16 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
         return &(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
-Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt)
+Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value *erased_out_opt) const
   {
-    switch(modifier.index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Reference_modifier::index_array_index:
       {
-        const auto &alt = modifier.check<Reference_modifier::S_array_index>();
+        const auto &alt = this->m_stor.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;
@@ -126,7 +126,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
       }
     case Reference_modifier::index_object_key:
       {
-        const auto &alt = modifier.check<Reference_modifier::S_object_key>();
+        const auto &alt = this->m_stor.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
           if(!creates) {
             return nullptr;
@@ -159,7 +159,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         return &(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", modifier.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 

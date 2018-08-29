@@ -7,6 +7,18 @@
 
 namespace Asteria {
 
+Reference Reference::make_constant(Value value)
+  {
+    Reference_root::S_constant ref_c = { std::move(value) };
+    return Reference_root(std::move(ref_c));
+  }
+
+Reference Reference::make_temporary(Value value)
+  {
+    Reference_root::S_temporary ref_c = { std::move(value) };
+    return Reference_root(std::move(ref_c));
+  }
+
 Reference::~Reference()
   {
   }
@@ -22,48 +34,47 @@ Reference & Reference::operator=(Reference &&) noexcept
 
 Reference_root & Reference::set_root(Reference_root root, Vector<Reference_modifier> modifiers)
   {
-    m_root = std::move(root);
-    m_modifiers = std::move(modifiers);
-    return m_root;
+    this->m_root = std::move(root);
+    this->m_modifiers = std::move(modifiers);
+    return this->m_root;
   }
 void Reference::clear_modifiers() noexcept
   {
-    m_modifiers.clear();
+    this->m_modifiers.clear();
   }
 Reference_modifier & Reference::push_modifier(Reference_modifier modifier)
   {
-    return m_modifiers.emplace_back(std::move(modifier));
+    return this->m_modifiers.emplace_back(std::move(modifier));
   }
 void Reference::pop_modifier()
   {
-    m_modifiers.pop_back();
+    this->m_modifiers.pop_back();
   }
 
-Value read_reference(const Reference &ref)
+Value Reference::read() const
   {
-    const auto nmod = ref.get_modifier_count();
     // Dereference the root.
-    auto cur = std::ref(dereference_root_readonly_partial(ref.get_root()));
+    auto cur = std::ref(this->get_root().dereference_readonly());
     // Apply modifiers.
-    for(std::size_t i = 0; i < nmod; ++i) {
-      const auto ptr = apply_reference_modifier_readonly_partial_opt(ref.get_modifier(i), cur);
+    const auto mend = this->m_modifiers.end();
+    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
+      const auto ptr = mit->apply_readonly_opt(cur);
       if(!ptr) {
         return { };
       }
       cur = std::ref(*ptr);
     }
-    // Return a reference to the current value.
+    // Return the value found.
     return cur;
   }
-
-Value & write_reference(const Reference &ref, Value value)
+Value & Reference::write(Value value) const
   {
-    const auto nmod = ref.get_modifier_count();
     // Dereference the root.
-    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
+    auto cur = std::ref(this->get_root().dereference_mutable());
     // Apply modifiers.
-    for(std::size_t i = 0; i < nmod; ++i) {
-      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, true, nullptr);
+    const auto mend = this->m_modifiers.end();
+    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
+      const auto ptr = mit->apply_mutable_opt(cur, true, nullptr);
       if(!ptr) {
         ROCKET_ASSERT(false);
       }
@@ -73,18 +84,17 @@ Value & write_reference(const Reference &ref, Value value)
     cur.get() = std::move(value);
     return cur;
   }
-
-Value unset_reference(const Reference &ref)
+Value Reference::unset() const
   {
-    const auto nmod = ref.get_modifier_count();
-    if(nmod == 0) {
+    if(this->m_modifiers.empty()) {
       ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
     }
     // Dereference the root.
-    auto cur = std::ref(dereference_root_mutable_partial(ref.get_root()));
-    // Apply modifiers except the last one.
-    for(std::size_t i = 0; i < nmod - 1; ++i) {
-      const auto ptr = apply_reference_modifier_mutable_partial_opt(ref.get_modifier(i), cur, false, nullptr);
+    auto cur = std::ref(this->get_root().dereference_mutable());
+    // Apply modifiers.
+    const auto mend = this->m_modifiers.end() - 1;
+    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
+      const auto ptr = mit->apply_mutable_opt(cur, false, nullptr);
       if(!ptr) {
         return { };
       }
@@ -92,47 +102,30 @@ Value unset_reference(const Reference &ref)
     }
     // Erase the element referenced by the last modifier.
     Value erased;
-    apply_reference_modifier_mutable_partial_opt(ref.get_modifier(nmod - 1), cur, false, &erased);
+    mend->apply_mutable_opt(cur, false, &erased);
     return std::move(erased);
   }
 
-Reference reference_constant(Value value)
+Reference & Reference::materialize()
   {
-    Reference_root::S_constant ref_c = { std::move(value) };
-    return Reference_root(std::move(ref_c));
-  }
-
-Reference reference_temp_value(Value value)
-  {
-    Reference_root::S_temp_value ref_c = { std::move(value) };
-    return Reference_root(std::move(ref_c));
-  }
-
-Reference & materialize_reference(Reference &ref)
-  {
-    if(ref.get_root().index() == Reference_root::index_variable) {
-      return ref;
+    if(this->get_root().is_lvalue() != false) {
+      return *this;
     }
-    auto value = read_reference(ref);
+    auto value = this->read();
     auto var = rocket::make_refcounted<Variable>(std::move(value), false);
     Reference_root::S_variable ref_c = { std::move(var) };
-    ref.set_root(std::move(ref_c));
-    return ref;
+    this->set_root(std::move(ref_c));
+    return *this;
   }
-
-Reference & dematerialize_reference(Reference &ref)
+Reference & Reference::dematerialize()
   {
-    if(ref.get_root().index() != Reference_root::index_variable) {
-      return ref;
+    if(this->get_root().is_unique() == false) {
+      return *this;
     }
-    const auto &alt = ref.get_root().check<Reference_root::S_variable>();
-    if(alt.var.unique() == false) {
-      return ref;
-    }
-    auto value = read_reference(ref);
-    Reference_root::S_temp_value ref_c = { std::move(value) };
-    ref.set_root(std::move(ref_c));
-    return ref;
+    auto value = this->read();
+    Reference_root::S_temporary ref_c = { std::move(value) };
+    this->set_root(std::move(ref_c));
+    return *this;
   }
 
 }

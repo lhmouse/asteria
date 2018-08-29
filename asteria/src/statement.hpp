@@ -159,12 +159,12 @@ class Statement
       )>;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Statement(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Statement();
@@ -173,27 +173,15 @@ class Statement
     Statement & operator=(Statement &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_variant.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_variant.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_variant.as<AltT>();
-        }
+    Statement bind(Analytic_context &ctx_inout) const;
+    Status execute(Reference &ref_out, Executive_context &ctx_inout) const;
   };
 
-extern Statement bind_statement_partial(Analytic_context &ctx_inout, const Statement &stmt);
+
+// TODO move these elsewhere
 extern Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<Statement> &block);
 extern Vector<Statement> bind_block(const Vector<Statement> &block, const Analytic_context &ctx);
 
-extern Statement::Status execute_statement_partial(Reference &ref_out, Executive_context &ctx_inout, const Statement &stmt);
 extern Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &ctx_inout, const Vector<Statement> &block);
 extern Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, const Executive_context &ctx);
 

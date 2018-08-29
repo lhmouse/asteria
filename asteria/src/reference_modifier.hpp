@@ -32,12 +32,12 @@ class Reference_modifier
       )>;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Reference_modifier(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Reference_modifier();
@@ -48,24 +48,9 @@ class Reference_modifier
     Reference_modifier & operator=(Reference_modifier &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_variant.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_variant.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_variant.as<AltT>();
-        }
+    const Value * apply_readonly_opt(const Value &parent) const;
+    Value * apply_mutable_opt(Value &parent, bool creates, Value *erased_out_opt) const;
   };
-
-extern const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modifier &modifier, const Value &parent);
-extern Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &modifier, Value &parent, bool creates, Value *erased_out_opt);
 
 }
 

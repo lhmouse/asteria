@@ -16,15 +16,15 @@ class Reference_root
   public:
     enum Index : std::uint8_t
       {
-        index_constant    = 0,
-        index_temp_value  = 1,
-        index_variable    = 2,
+        index_constant   = 0,
+        index_temporary  = 1,
+        index_variable   = 2,
       };
     struct S_constant
       {
         Value src;
       };
-    struct S_temp_value
+    struct S_temporary
       {
         Value value;
       };
@@ -34,22 +34,22 @@ class Reference_root
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_constant    // 0,
-        , S_temp_value  // 1,
-        , S_variable    // 2,
+        , S_constant   // 0,
+        , S_temporary  // 1,
+        , S_variable   // 2,
       )>;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     Reference_root() noexcept
-      : m_variant()  // Initialize to a constant `null`.
+      : m_stor()  // Initialize to a constant `null`.
       {
       }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Reference_root(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Reference_root();
@@ -60,24 +60,12 @@ class Reference_root
     Reference_root & operator=(Reference_root &&) noexcept;
 
   public:
-    Index index() const noexcept
-      {
-        return static_cast<Index>(m_variant.index());
-      }
-    template<typename AltT>
-      const AltT * opt() const noexcept
-        {
-          return m_variant.get<AltT>();
-        }
-    template<typename AltT>
-      const AltT & check() const
-        {
-          return m_variant.as<AltT>();
-        }
-  };
+    const Value & dereference_readonly() const;
+    Value & dereference_mutable() const;
 
-extern const Value & dereference_root_readonly_partial(const Reference_root &root) noexcept;
-extern Value & dereference_root_mutable_partial(const Reference_root &root);
+    bool is_lvalue() const noexcept;
+    bool is_unique() const noexcept;
+  };
 
 }
 

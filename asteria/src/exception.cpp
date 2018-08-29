@@ -17,8 +17,8 @@ const char * Exception::what() const noexcept
 
 Reference & Exception::set_reference(Reference ref) noexcept
   {
-    m_ref = std::move(ref);
-    return m_ref;
+    this->m_ref = std::move(ref);
+    return this->m_ref;
   }
 
 

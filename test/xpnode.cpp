@@ -11,13 +11,13 @@ int main()
   {
     Executive_context ctx;
     auto &cond = ctx.set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
-    materialize_reference(cond);
+    cond.materialize();
     auto &dval = ctx.set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
-    materialize_reference(dval);
+    dval.materialize();
     auto &ival = ctx.set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
-    materialize_reference(ival);
+    ival.materialize();
     auto &aval = ctx.set_named_reference(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     }));
-    materialize_reference(aval);
+    aval.materialize();
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
     // RPN:   cond ! ?: 1 aval [] =          ::= expr
@@ -48,23 +48,23 @@ int main()
       }
 
     auto result = evaluate_expression(expr, ctx);
-    auto value = read_reference(dval);
+    auto value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
-    value = read_reference(ival);
+    value = ival.read();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
-    value = read_reference(aval);
+    value = aval.read();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_double>() == 1.75);
-    value = read_reference(result);
+    value = result.read();
     ASTERIA_TEST_CHECK(value.check<D_double>() == 1.75);
 
-    write_reference(cond, D_integer(42));
+    cond.write(D_integer(42));
     result = evaluate_expression(expr, ctx);
-    value = read_reference(dval);
+    value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
-    value = read_reference(ival);
+    value = ival.read();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
-    value = read_reference(aval);
+    value = aval.read();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == "hello,hello,hello,");
-    value = read_reference(result);
+    value = result.read();
     ASTERIA_TEST_CHECK(value.check<D_string>() == "hello,hello,hello,");
  }

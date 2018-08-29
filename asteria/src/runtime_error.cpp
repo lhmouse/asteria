@@ -12,7 +12,7 @@ Runtime_error::~Runtime_error()
 
 const char * Runtime_error::what() const noexcept
   {
-    return m_msg.c_str();
+    return this->m_msg.c_str();
   }
 
 }

@@ -52,25 +52,25 @@ class Parser_result
   public:
     Unsigned get_line() const noexcept
       {
-        return m_line;
+        return this->m_line;
       }
     Unsigned get_column() const noexcept
       {
-        return m_column;
+        return this->m_column;
       }
     std::size_t get_length() const noexcept
       {
-        return m_length;
+        return this->m_length;
       }
     Error get_error() const noexcept
       {
-        return m_error;
+        return this->m_error;
       }
 
   public:
     explicit operator bool () const noexcept
       {
-        return m_error == error_success;
+        return this->m_error == error_success;
       }
   };
 

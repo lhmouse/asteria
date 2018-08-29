@@ -7,20 +7,7 @@
 
 namespace Asteria {
 
-Value::~Value()
-  {
-  }
-
-Value::Value(const Value &) noexcept
-  = default;
-Value & Value::operator=(const Value &) noexcept
-  = default;
-Value::Value(Value &&) noexcept
-  = default;
-Value & Value::operator=(Value &&) noexcept
-  = default;
-
-const char * get_type_name(Value::Type type) noexcept
+const char * Value::get_type_name(Value::Type type) noexcept
   {
     switch(type) {
     case Value::type_null:
@@ -46,29 +33,42 @@ const char * get_type_name(Value::Type type) noexcept
     }
   }
 
-bool test_value(const Value &value)
+Value::~Value()
   {
-    switch(value.type()) {
+  }
+
+Value::Value(const Value &) noexcept
+  = default;
+Value & Value::operator=(const Value &) noexcept
+  = default;
+Value::Value(Value &&) noexcept
+  = default;
+Value & Value::operator=(Value &&) noexcept
+  = default;
+
+bool Value::test() const noexcept
+  {
+    switch(this->type()) {
     case Value::type_null:
       return false;
     case Value::type_boolean:
       {
-        const auto &alt = value.check<D_boolean>();
+        const auto &alt = this->m_stor.as<D_boolean>();
         return alt;
       }
     case Value::type_integer:
       {
-        const auto &alt = value.check<D_integer>();
+        const auto &alt = this->m_stor.as<D_integer>();
         return alt != 0;
       }
     case Value::type_double:
       {
-        const auto &alt = value.check<D_double>();
+        const auto &alt = this->m_stor.as<D_double>();
         return std::fpclassify(alt) != FP_ZERO;
       }
     case Value::type_string:
       {
-        const auto &alt = value.check<D_string>();
+        const auto &alt = this->m_stor.as<D_string>();
         return alt.empty() == false;
       }
     case Value::type_opaque:
@@ -76,39 +76,39 @@ bool test_value(const Value &value)
       return true;
     case Value::type_array:
       {
-        const auto &alt = value.check<D_array>();
+        const auto &alt = this->m_stor.as<D_array>();
         return alt.empty() == false;
       }
     case Value::type_object:
       {
-        const auto &alt = value.check<D_object>();
+        const auto &alt = this->m_stor.as<D_object>();
         return alt.empty() == false;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", value.type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
-Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
+Value::Compare Value::compare(const Value &other) const noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
-    if(lhs.type() != rhs.type()) {
-      if(lhs.type() == Value::type_null) {
+    if(this->type() != other.type()) {
+      if(this->type() == Value::type_null) {
         return Value::compare_less;
       }
-      if(rhs.type() == Value::type_null) {
+      if(other.type() == Value::type_null) {
         return Value::compare_greater;
       }
       return Value::compare_unordered;
     }
     // If both operands have the same type, perform normal comparison.
-    switch(lhs.type()) {
+    switch(this->type()) {
     case Value::type_null:
       return Value::compare_equal;
     case Value::type_boolean:
       {
-        const auto &cand_lhs = lhs.check<D_boolean>();
-        const auto &cand_rhs = rhs.check<D_boolean>();
+        const auto &cand_lhs = this->check<D_boolean>();
+        const auto &cand_rhs = other.check<D_boolean>();
         if(cand_lhs < cand_rhs) {
           return Value::compare_less;
         }
@@ -119,8 +119,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_integer:
       {
-        const auto &cand_lhs = lhs.check<D_integer>();
-        const auto &cand_rhs = rhs.check<D_integer>();
+        const auto &cand_lhs = this->check<D_integer>();
+        const auto &cand_rhs = other.check<D_integer>();
         if(cand_lhs < cand_rhs) {
           return Value::compare_less;
         }
@@ -131,8 +131,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_double:
       {
-        const auto &cand_lhs = lhs.check<D_double>();
-        const auto &cand_rhs = rhs.check<D_double>();
+        const auto &cand_lhs = this->check<D_double>();
+        const auto &cand_rhs = other.check<D_double>();
         if(std::isunordered(cand_lhs, cand_rhs)) {
           return Value::compare_unordered;
         }
@@ -146,8 +146,8 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       }
     case Value::type_string:
       {
-        const auto &cand_lhs = lhs.check<D_string>();
-        const auto &cand_rhs = rhs.check<D_string>();
+        const auto &cand_lhs = this->check<D_string>();
+        const auto &cand_rhs = other.check<D_string>();
         const int cmp = cand_lhs.compare(cand_rhs);
         if(cmp < 0) {
           return Value::compare_less;
@@ -162,11 +162,11 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
       return Value::compare_unordered;
     case Value::type_array:
       {
-        const auto &array_lhs = lhs.check<D_array>();
-        const auto &array_rhs = rhs.check<D_array>();
+        const auto &array_lhs = this->check<D_array>();
+        const auto &array_rhs = other.check<D_array>();
         const auto rlen = std::min(array_lhs.size(), array_rhs.size());
         for(std::size_t i = 0; i < rlen; ++i) {
-          const auto res = compare_values(array_lhs[i], array_rhs[i]);
+          const auto res = array_lhs[i].compare(array_rhs[i]);
           if(res != Value::compare_equal) {
             return res;
           }
@@ -182,7 +182,7 @@ Value::Compare compare_values(const Value &lhs, const Value &rhs) noexcept
     case Value::type_object:
       return Value::compare_unordered;
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", lhs.type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
@@ -202,7 +202,7 @@ namespace {
     public:
       std::size_t num() const noexcept
         {
-          return m_num;
+          return this->m_num;
         }
     };
 
@@ -249,7 +249,7 @@ namespace {
     public:
       const String & str() const noexcept
         {
-          return m_str;
+          return this->m_str;
         }
     };
 
@@ -343,59 +343,58 @@ namespace {
 
 }
 
-void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, std::size_t indent_increment)
+void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_increment) const
   {
-    const auto type = value.type();
-    switch(type) {
+    switch(this->type()) {
     case Value::type_null:
       // null
       os <<"null";
       return;
     case Value::type_boolean:
       {
-        const auto &alt = value.check<D_boolean>();
+        const auto &alt = this->m_stor.as<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
     case Value::type_integer:
       {
-        const auto &alt = value.check<D_integer>();
+        const auto &alt = this->m_stor.as<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
     case Value::type_double:
       {
-        const auto &alt = value.check<D_double>();
+        const auto &alt = this->m_stor.as<D_double>();
         // double 123.456
         os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<alt;
         return;
       }
     case Value::type_string:
       {
-        const auto &alt = value.check<D_string>();
+        const auto &alt = this->m_stor.as<D_string>();
         // string(5) "hello"
         os <<"string(" <<std::dec <<alt.size() <<") " <<Quote(alt);
         return;
       }
     case Value::type_opaque:
       {
-        const auto &alt = value.check<D_opaque>();
+        const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
         os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_function:
       {
-        const auto &alt = value.check<D_function>();
+        const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
         os <<"function(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
     case Value::type_array:
       {
-        const auto &alt = value.check<D_array>();
+        const auto &alt = this->m_stor.as<D_array>();
         // array(3) = [
         //   0 = integer 1,
         //   1 = integer 2,
@@ -403,10 +402,8 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
         // ]
         os <<"array(" <<std::dec <<alt.size() <<") [";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<std::endl <<Indent(indent_next + indent_increment);
-          os <<std::dec <<(it - alt.begin());
-          os <<" = ";
-          dump_value(os, *it, indent_next + indent_increment, indent_increment);
+          os <<std::endl <<Indent(indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
+          it->dump(os, indent_next + indent_increment, indent_increment);
           os <<',';
         }
         os <<std::endl <<Indent(indent_next) <<']';
@@ -414,7 +411,7 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
       }
     case Value::type_object:
       {
-        const auto &alt = value.check<D_object>();
+        const auto &alt = this->m_stor.as<D_object>();
         // object(3) = {
         //   "one" = integer 1,
         //   "two" = integer 2,
@@ -422,24 +419,16 @@ void dump_value(std::ostream &os, const Value &value, std::size_t indent_next, s
         // }
         os <<"object(" <<std::dec <<alt.size() <<") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<std::endl <<Indent(indent_next + indent_increment);
-          os <<Quote(it->first);
-          os <<" = ";
-          dump_value(os, it->second, indent_next + indent_increment, indent_increment);
+          os <<std::endl <<Indent(indent_next + indent_increment) <<Quote(it->first) <<" = ";
+          it->second.dump(os, indent_next + indent_increment, indent_increment);
           os <<',';
         }
         os <<std::endl <<Indent(indent_next) <<'}';
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
-  }
-
-std::ostream & operator<<(std::ostream &os, const Value &value)
-  {
-    dump_value(os, value);
-    return os;
   }
 
 }

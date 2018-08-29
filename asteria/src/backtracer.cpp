@@ -6,12 +6,10 @@
 
 namespace Asteria {
 
-Backtracer::~Backtracer()
+void Backtracer::unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop)
   {
-  }
-
-void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop)
-  {
+    // Rethrow the exception. If `Backtracer` is caught, a new element is appended to `btv_out` and the nested
+    // exception is rethrown. This procedure is repeated until something other than `Backtracer` is thrown.
     auto eptr = etop;
     do {
       try {
@@ -21,6 +19,10 @@ void unpack_backtrace_and_rethrow(Bivector<String, Unsigned> &btv_out, const std
         eptr = e.nested_ptr();
       }
     } while(true);
+  }
+
+Backtracer::~Backtracer()
+  {
   }
 
 }

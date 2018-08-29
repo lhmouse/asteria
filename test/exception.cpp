@@ -10,17 +10,16 @@ int main()
   {
     try {
       try {
-        Reference ref(Reference_root::S_constant { D_integer(42) });
-        throw Exception(std::move(ref));
+        throw Exception(Reference_root::S_constant { D_integer(42) });
       } catch(Exception &e) {
-        const auto val = read_reference(e.get_reference());
+        const auto val = e.get_reference().read();
         ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
         ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);
-        e.set_reference(Reference(Reference_root::S_temp_value { D_string(String::shallow("hello")) }));
+        e.set_reference(Reference(Reference_root::S_temporary { D_string(String::shallow("hello")) }));
         throw;
       }
     } catch(Exception &e) {
-      const auto val = read_reference(e.get_reference());
+      const auto val = e.get_reference().read();
       ASTERIA_TEST_CHECK(val.type() == Value::type_string);
       ASTERIA_TEST_CHECK(val.check<D_string>() == "hello");
     }

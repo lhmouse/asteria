@@ -24,9 +24,9 @@ class Executive_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Executive_context * get_parent_opt() const noexcept override;
-  };
 
-extern void initialize_executive_function_context(Executive_context &ctx_out, const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args);
+    void initialize_for_function(const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args);
+  };
 
 }
 

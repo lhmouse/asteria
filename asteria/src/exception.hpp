@@ -23,16 +23,16 @@ class Exception : public virtual std::exception
     ~Exception();
 
   public:
+    const char * what() const noexcept override;
+
     const Reference & get_reference() const noexcept
       {
-        return m_ref;
+        return this->m_ref;
       }
     Reference & get_reference() noexcept
       {
-        return m_ref;
+        return this->m_ref;
       }
-
-    const char * what() const noexcept override;
 
     Reference & set_reference(Reference ref) noexcept;
   };
