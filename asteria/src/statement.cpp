@@ -25,7 +25,7 @@ namespace {
   void do_safe_set_named_reference(Abstract_context &ctx_inout, const char *desc, const String &name, Reference ref)
     {
       if(is_name_reserved(name)) {
-        ASTERIA_THROW_RUNTIME_ERROR("The ", desc, " name `", name, "` is reserved and cannot be used.");
+        ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
       }
       if(name.empty()) {
         return;
@@ -319,13 +319,13 @@ Statement::Status execute_statement_partial(Reference &ref_out, Executive_contex
           for(const auto &kstmt : it->second) {
             if(kstmt.index() == Statement::index_var_def) {
               const auto &kcand = kstmt.as<Statement::S_var_def>();
-              do_safe_set_named_reference(ctx_test, "variable", kcand.name, { });
+              do_safe_set_named_reference(ctx_test, "skipped variable", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named variable: name = ", kcand.name, ", immutable = ", kcand.immutable);
               continue;
             }
             if(kstmt.index() == Statement::index_func_def) {
               const auto &kcand = kstmt.as<Statement::S_func_def>();
-              do_safe_set_named_reference(ctx_test, "function", kcand.name, { });
+              do_safe_set_named_reference(ctx_test, "skipped function", kcand.name, { });
               ASTERIA_DEBUG_LOG("Skipped named function: name = ", kcand.name, ", file:line = ", kcand.file, ':', kcand.line);
               continue;
             }
