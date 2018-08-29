@@ -38,11 +38,11 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
           rindex += static_cast<Signed>(qarr->size());
         }
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
         if(rindex >= static_cast<Signed>(qarr->size())) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
         const auto rit = qarr->begin() + static_cast<std::ptrdiff_t>(rindex);
@@ -60,7 +60,7 @@ const Value * apply_reference_modifier_readonly_partial_opt(const Reference_modi
         }
         const auto rit = qobj->find(alt.key);
         if(rit == qobj->end()) {
-          ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", object = ", *qobj);
+          ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
           return nullptr;
         }
         return &(rit->second);
@@ -92,7 +92,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
           rindex += static_cast<Signed>(qarr->size());
         }
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
           if(!creates) {
             return nullptr;
           }
@@ -104,7 +104,7 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
           rindex = 0;
         }
         if(rindex >= static_cast<Signed>(qarr->size())) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", array = ", *qarr);
+          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           if(!creates) {
             return nullptr;
           }
@@ -139,13 +139,13 @@ Value * apply_reference_modifier_mutable_partial_opt(const Reference_modifier &m
         if(!creates) {
           rit = qobj->find_mut(alt.key);
           if(rit == qobj->end()) {
-            ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", object = ", *qobj);
+            ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
             return nullptr;
           }
         } else {
           const auto result = qobj->try_emplace(alt.key);
           if(result.second) {
-            ASTERIA_DEBUG_LOG("New object key has been created: key = ", alt.key, ", object = ", *qobj);
+            ASTERIA_DEBUG_LOG("New object key has been created: key = ", alt.key, ", parent = ", parent);
           }
           rit = result.first;
         }
