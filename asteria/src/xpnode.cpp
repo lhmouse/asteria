@@ -108,17 +108,17 @@ namespace {
 
 Xpnode Xpnode::bind(const Analytic_context &ctx) const
   {
-    switch(static_cast<Index>(this->m_variant.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Xpnode::index_literal:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_literal>();
+        const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Copy it as-is.
         Xpnode::S_literal cand_bnd = { alt.value };
         return std::move(cand_bnd);
       }
     case Xpnode::index_named_reference:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_named_reference>();
+        const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, alt.name);
         if(pair.first->is_analytic()) {
@@ -132,14 +132,14 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
     case Xpnode::index_bound_reference:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_bound_reference>();
+        const auto &alt = this->m_stor.as<Xpnode::S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference cand_bnd = { alt.ref };
         return std::move(cand_bnd);
       }
     case Xpnode::index_subexpression:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_subexpression>();
+        const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Bind the subexpression recursively.
         auto expr_bnd = bind_expression(alt.expr, ctx);
         Xpnode::S_subexpression cand_bnd = { std::move(expr_bnd) };
@@ -147,7 +147,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
     case Xpnode::index_closure_function:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_closure_function>();
+        const auto &alt = this->m_stor.as<Xpnode::S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
@@ -157,7 +157,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
     case Xpnode::index_branch:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_branch>();
+        const auto &alt = this->m_stor.as<Xpnode::S_branch>();
         // Bind both branches recursively.
         auto branch_true_bnd = bind_expression(alt.branch_true, ctx);
         auto branch_false_bnd = bind_expression(alt.branch_false, ctx);
@@ -166,21 +166,21 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
     case Xpnode::index_function_call:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_function_call>();
+        const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call cand_bnd = { alt.file, alt.line, alt.arg_cnt };
         return std::move(cand_bnd);
       }
     case Xpnode::index_operator_rpn:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_operator_rpn>();
+        const auto &alt = this->m_stor.as<Xpnode::S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn cand_bnd = { alt.xop, alt.compound_assign };
         return std::move(cand_bnd);
       }
     case Xpnode::index_unnamed_array:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_unnamed_array>();
+        const auto &alt = this->m_stor.as<Xpnode::S_unnamed_array>();
         // Bind everything recursively.
         Vector<Vector<Xpnode>> elems_bnd;
         elems_bnd.reserve(alt.elems.size());
@@ -193,7 +193,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
     case Xpnode::index_unnamed_object:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_unnamed_object>();
+        const auto &alt = this->m_stor.as<Xpnode::S_unnamed_object>();
         // Bind everything recursively.
         Dictionary<Vector<Xpnode>> pairs_bnd;
         pairs_bnd.reserve(alt.pairs.size());
@@ -205,7 +205,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         return std::move(cand_bnd);
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_variant.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
@@ -488,10 +488,10 @@ namespace {
 
 void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const
   {
-    switch(static_cast<Index>(this->m_variant.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Xpnode::index_literal:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_literal>();
+        const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Push the constant.
         auto ref = reference_constant(alt.value);
         stack_inout.emplace_back(std::move(ref));
@@ -499,7 +499,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_named_reference:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_named_reference>();
+        const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, alt.name);
         if(pair.first->is_analytic()) {
@@ -511,14 +511,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_bound_reference:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_bound_reference>();
+        const auto &alt = this->m_stor.as<Xpnode::S_bound_reference>();
         // Push the reference stored.
         stack_inout.emplace_back(alt.ref);
         return;
       }
     case Xpnode::index_subexpression:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_subexpression>();
+        const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Evaluate the subexpression recursively.
         auto ref = evaluate_expression(alt.expr, ctx);
         stack_inout.emplace_back(std::move(ref));
@@ -526,7 +526,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_closure_function:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_closure_function>();
+        const auto &alt = this->m_stor.as<Xpnode::S_closure_function>();
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
@@ -537,7 +537,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_branch:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_branch>();
+        const auto &alt = this->m_stor.as<Xpnode::S_branch>();
         // Pop the condition off the stack.
         auto cond = do_pop_reference(stack_inout);
         // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
@@ -551,7 +551,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_function_call:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_function_call>();
+        const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Pop the callee off the stack.
         auto callee = do_pop_reference(stack_inout);
         auto callee_value = read_reference(callee);
@@ -589,7 +589,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         // This is also the object where the result will be stored.
         auto lhs = do_pop_reference(stack_inout);
         // Deal with individual operators.
-        const auto &alt = this->m_variant.as<Xpnode::S_operator_rpn>();
+        const auto &alt = this->m_stor.as<Xpnode::S_operator_rpn>();
         switch(alt.xop) {
         case Xpnode::xop_postfix_inc:
           {
@@ -1101,7 +1101,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_unnamed_array:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_unnamed_array>();
+        const auto &alt = this->m_stor.as<Xpnode::S_unnamed_array>();
         // Create an array by evaluating elements recursively.
         D_array array;
         array.reserve(alt.elems.size());
@@ -1115,7 +1115,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       }
     case Xpnode::index_unnamed_object:
       {
-        const auto &alt = this->m_variant.as<Xpnode::S_unnamed_object>();
+        const auto &alt = this->m_stor.as<Xpnode::S_unnamed_object>();
         // Create an object by evaluating elements recursively.
         D_object object;
         object.reserve(alt.pairs.size());
@@ -1128,7 +1128,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_variant.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 

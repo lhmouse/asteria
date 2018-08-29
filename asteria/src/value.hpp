@@ -48,16 +48,16 @@ class Value
       };
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     Value() noexcept
-      : m_variant()  // Initialize to `null`.
+      : m_stor()  // Initialize to `null`.
       {
       }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Value(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Value();
@@ -70,32 +70,32 @@ class Value
   public:
     Type type() const noexcept
       {
-        return static_cast<Type>(m_variant.index());
+        return static_cast<Type>(m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_variant.get<AltT>();
+          return m_stor.get<AltT>();
         }
     template<typename AltT>
       AltT * opt() noexcept
         {
-          return m_variant.get<AltT>();
+          return m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_variant.as<AltT>();
+          return m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & check()
         {
-          return m_variant.as<AltT>();
+          return m_stor.as<AltT>();
         }
     template<typename AltT>
       AltT & set(AltT &&alt)
         {
-          return m_variant.set(std::forward<AltT>(alt));
+          return m_stor.set(std::forward<AltT>(alt));
         }
   };
 

@@ -40,16 +40,16 @@ class Reference_root
       )>;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     Reference_root() noexcept
-      : m_variant()  // Initialize to a constant `null`.
+      : m_stor()  // Initialize to a constant `null`.
       {
       }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Reference_root(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Reference_root();

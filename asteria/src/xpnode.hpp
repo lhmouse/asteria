@@ -130,12 +130,12 @@ class Xpnode
     static const char * get_operator_name(Xop xop) noexcept;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Xpnode(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Xpnode();

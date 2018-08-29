@@ -145,12 +145,12 @@ class Token
     Unsigned m_line;
     Unsigned m_column;
     std::size_t m_length;
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Token(Unsigned line, Unsigned column, std::size_t length, AltT &&alt)
-        : m_line(line), m_column(column), m_length(length), m_variant(std::forward<AltT>(alt))
+        : m_line(line), m_column(column), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
     ~Token();
@@ -173,17 +173,17 @@ class Token
       }
     Index index() const noexcept
       {
-        return static_cast<Index>(m_variant.index());
+        return static_cast<Index>(m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_variant.get<AltT>();
+          return m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_variant.as<AltT>();
+          return m_stor.as<AltT>();
         }
   };
 

@@ -22,56 +22,56 @@ Reference_root & Reference_root::operator=(Reference_root &&) noexcept
 
 const Value & Reference_root::dereference_readonly() const
   {
-    switch(static_cast<Index>(this->m_variant.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Reference_root::index_constant:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_constant>();
+        const auto &alt = this->m_stor.as<Reference_root::S_constant>();
         return alt.src;
       }
     case Reference_root::index_temp_value:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_temp_value>();
+        const auto &alt = this->m_stor.as<Reference_root::S_temp_value>();
         return alt.value;
       }
     case Reference_root::index_variable:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_variable>();
+        const auto &alt = this->m_stor.as<Reference_root::S_variable>();
         return alt.var->get_value();
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_variant.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
 Value & Reference_root::dereference_mutable() const
   {
-    switch(static_cast<Index>(this->m_variant.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case Reference_root::index_constant:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_constant>();
+        const auto &alt = this->m_stor.as<Reference_root::S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
       }
     case Reference_root::index_temp_value:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_temp_value>();
+        const auto &alt = this->m_stor.as<Reference_root::S_temp_value>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", alt.value, "` cannot be modified.");
       }
     case Reference_root::index_variable:
       {
-        const auto &alt = this->m_variant.as<Reference_root::S_variable>();
+        const auto &alt = this->m_stor.as<Reference_root::S_variable>();
         if(alt.var->is_immutable()) {
           ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", alt.var->get_value(), "` is immutable and cannot be modified.");
         }
         return alt.var->get_value();
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_variant.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
 bool Reference_root::is_lvalue() const noexcept
   {
-    const auto qalt = this->m_variant.get<S_variable>();
+    const auto qalt = this->m_stor.get<S_variable>();
     if(qalt) {
       return true;
     }
@@ -79,7 +79,7 @@ bool Reference_root::is_lvalue() const noexcept
   }
 bool Reference_root::is_unique() const noexcept
   {
-    const auto qalt = this->m_variant.get<S_variable>();
+    const auto qalt = this->m_stor.get<S_variable>();
     if(qalt) {
       return qalt->var.unique();
     }

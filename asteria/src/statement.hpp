@@ -159,12 +159,12 @@ class Statement
       )>;
 
   private:
-    Variant m_variant;
+    Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Statement(AltT &&alt)
-        : m_variant(std::forward<AltT>(alt))
+        : m_stor(std::forward<AltT>(alt))
         {
         }
     ~Statement();
@@ -175,17 +175,17 @@ class Statement
   public:
     Index index() const noexcept
       {
-        return static_cast<Index>(m_variant.index());
+        return static_cast<Index>(m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept
         {
-          return m_variant.get<AltT>();
+          return m_stor.get<AltT>();
         }
     template<typename AltT>
       const AltT & check() const
         {
-          return m_variant.as<AltT>();
+          return m_stor.as<AltT>();
         }
   };
 
