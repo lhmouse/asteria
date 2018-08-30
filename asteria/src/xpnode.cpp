@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "xpnode.hpp"
+#include "statement.hpp"
 #include "analytic_context.hpp"
 #include "executive_context.hpp"
 #include "abstract_function.hpp"

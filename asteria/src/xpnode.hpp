@@ -8,7 +8,6 @@
 #include "rocket/variant.hpp"
 #include "value.hpp"
 #include "reference.hpp"
-#include "statement.hpp"
 
 namespace Asteria {
 
