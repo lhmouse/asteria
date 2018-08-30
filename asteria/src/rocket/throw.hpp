@@ -8,10 +8,10 @@
 
 namespace rocket {
 
-[[noreturn]] ROCKET_FORMAT_CHECK(__printf__, 1, 2) extern void throw_invalid_argument(const char *fmt, ...);
-[[noreturn]] ROCKET_FORMAT_CHECK(__printf__, 1, 2) extern void throw_out_of_range(const char *fmt, ...);
-[[noreturn]] ROCKET_FORMAT_CHECK(__printf__, 1, 2) extern void throw_length_error(const char *fmt, ...);
-[[noreturn]] ROCKET_FORMAT_CHECK(__printf__, 1, 2) extern void throw_domain_error(const char *fmt, ...);
+[[noreturn]] ROCKET_FORMAT_PRINTF(1, 2) extern void throw_invalid_argument(const char *fmt, ...);
+[[noreturn]] ROCKET_FORMAT_PRINTF(1, 2) extern void throw_out_of_range(const char *fmt, ...);
+[[noreturn]] ROCKET_FORMAT_PRINTF(1, 2) extern void throw_length_error(const char *fmt, ...);
+[[noreturn]] ROCKET_FORMAT_PRINTF(1, 2) extern void throw_domain_error(const char *fmt, ...);
 
 }
 
