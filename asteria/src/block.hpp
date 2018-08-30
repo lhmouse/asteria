@@ -5,7 +5,6 @@
 #define ASTERIA_BLOCK_HPP_
 
 #include "fwd.hpp"
-#include "reference.hpp"
 
 namespace Asteria {
 

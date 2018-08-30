@@ -5,7 +5,6 @@
 #define ASTERIA_EXPRESSION_HPP_
 
 #include "fwd.hpp"
-#include "reference.hpp"
 
 namespace Asteria {
 
