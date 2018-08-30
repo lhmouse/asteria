@@ -18,7 +18,7 @@ class Variadic_arguer : public Abstract_function
     Vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(String file, Unsigned line, Vector<Reference> vargs)
+    Variadic_arguer(String file, Unsigned line, Vector<Reference> vargs) noexcept
       : m_file(std::move(file)), m_line(line), m_vargs(std::move(vargs))
       {
       }

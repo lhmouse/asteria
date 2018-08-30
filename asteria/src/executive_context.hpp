@@ -15,7 +15,7 @@ class Executive_context : public Abstract_context
     const Executive_context *m_parent_opt;
 
   public:
-    explicit Executive_context(const Executive_context *parent_opt = nullptr)
+    explicit Executive_context(const Executive_context *parent_opt = nullptr) noexcept
       : m_parent_opt(parent_opt)
       {
       }
