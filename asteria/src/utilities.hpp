@@ -89,7 +89,7 @@ class Formatter
 
 constexpr bool are_debug_logs_enabled() noexcept
   {
-#ifdef ENABLE_DEBUG_LOGS
+#ifdef ASTERIA_ENABLE_DEBUG_LOGS
     return true;
 #else
     return false;
