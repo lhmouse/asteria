@@ -45,15 +45,14 @@ Block Block::bind_in_place(Analytic_context &ctx_inout) const
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
-    auto status = status_next;
     for(const auto &stmt : this->m_stmts) {
-      status = stmt.execute_in_place(ref_out, ctx_inout);
+      const auto status = stmt.execute_in_place(ref_out, ctx_inout);
       if(status != status_next) {
         // Forward anything unexpected to the caller.
         return status;
       }
     }
-    return status;
+    return status_next;
   }
 
 Block Block::bind(const Analytic_context &ctx) const
