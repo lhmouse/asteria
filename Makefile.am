@@ -59,7 +59,9 @@ pkginclude_HEADERS =  \
   asteria/src/analytic_context.hpp  \
   asteria/src/executive_context.hpp  \
   asteria/src/xpnode.hpp  \
+  asteria/src/expression.hpp  \
   asteria/src/statement.hpp  \
+  asteria/src/block.hpp  \
   asteria/src/instantiated_function.hpp  \
   asteria/src/backtracer.hpp
 
@@ -90,7 +92,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/executive_context.cpp  \
   asteria/src/variadic_arguer.cpp  \
   asteria/src/xpnode.cpp  \
+  asteria/src/expression.cpp  \
   asteria/src/statement.cpp  \
+  asteria/src/block.cpp  \
   asteria/src/instantiated_function.cpp  \
   asteria/src/backtracer.cpp
 
@@ -111,7 +115,7 @@ check_PROGRAMS = \
   test/reference.test  \
   test/exception.test  \
   test/executive_context.test  \
-  test/xpnode.test  \
-  test/statement.test
+  test/expression.test  \
+  test/block.test
 
 TESTS = ${check_PROGRAMS}

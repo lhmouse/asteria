@@ -8,6 +8,8 @@
 #include "rocket/variant.hpp"
 #include "value.hpp"
 #include "reference.hpp"
+#include "expression.hpp"
+#include "block.hpp"
 
 namespace Asteria {
 
@@ -78,19 +80,19 @@ class Xpnode
       };
     struct S_subexpression
       {
-        Vector<Xpnode> expr;
+        Expression expr;
       };
     struct S_closure_function
       {
         Vector<String> params;
         String file;
         Unsigned line;
-        Vector<Statement> body;
+        Block body;
       };
     struct S_branch
       {
-        Vector<Xpnode> branch_true;
-        Vector<Xpnode> branch_false;
+        Expression branch_true;
+        Expression branch_false;
       };
     struct S_function_call
       {
@@ -105,11 +107,11 @@ class Xpnode
       };
     struct S_unnamed_array
       {
-        Vector<Vector<Xpnode>> elems;
+        Vector<Expression> elems;
       };
     struct S_unnamed_object
       {
-        Dictionary<Vector<Xpnode>> pairs;
+        Dictionary<Expression> pairs;
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -146,10 +148,6 @@ class Xpnode
     Xpnode bind(const Analytic_context &ctx) const;
     void evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const;
   };
-
-// XXX move these elsewhere
-extern Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx);
-extern Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx);
 
 }
 

@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_function.hpp"
-#include "statement.hpp"
+#include "block.hpp"
 
 namespace Asteria {
 
@@ -16,10 +16,10 @@ class Instantiated_function : public Abstract_function
     Vector<String> m_params;
     String m_file;
     Unsigned m_line;
-    Vector<Statement> m_body;
+    Block m_body;
 
   public:
-    Instantiated_function(Vector<String> params, String file, Unsigned line, Vector<Statement> body) noexcept
+    Instantiated_function(Vector<String> params, String file, Unsigned line, Block body) noexcept
       : m_params(std::move(params)), m_file(std::move(file)), m_line(line), m_body(std::move(body))
       {
       }

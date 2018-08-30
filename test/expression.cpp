@@ -2,8 +2,8 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
+#include "../src/expression.hpp"
 #include "../src/xpnode.hpp"
-#include "../src/statement.hpp"
 #include "../src/executive_context.hpp"
 
 using namespace Asteria;
@@ -37,18 +37,19 @@ int main()
         branch_false.emplace_back(Xpnode::S_named_reference { String::shallow("ival") });
         branch_false.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
       }
-    Vector<Xpnode> expr;
+    Vector<Xpnode> nodes;
       {
-        expr.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
-        expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
-        expr.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false) });
-        expr.emplace_back(Xpnode::S_literal { D_integer(1) });
-        expr.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
-        expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
-        expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_assign, false });
+        nodes.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
+        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
+        nodes.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false) });
+        nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
+        nodes.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
+        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_assign, false });
       }
+    auto expr = Expression(std::move(nodes));
 
-    auto result = evaluate_expression(expr, ctx);
+    auto result = expr.evaluate(ctx);
     auto value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
     value = ival.read();
@@ -59,7 +60,7 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_double>() == 1.75);
 
     cond.write(D_integer(42));
-    result = evaluate_expression(expr, ctx);
+    result = expr.evaluate(ctx);
     value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
     value = ival.read();

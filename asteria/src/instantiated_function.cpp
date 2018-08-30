@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "instantiated_function.hpp"
 #include "executive_context.hpp"
+#include "statement.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -24,21 +25,21 @@ Reference Instantiated_function::invoke(Reference self, Vector<Reference> args) 
     ctx_next.initialize_for_function(this->m_params, this->m_file, this->m_line, std::move(self), std::move(std::move(args)));
     // Execute the function body.
     Reference ref;
-    const auto status = execute_block_in_place(ref, ctx_next, this->m_body);
+    const auto status = this->m_body.execute_in_place(ref, ctx_next);
     switch(status) {
-    case Statement::status_next:
+    case Block::status_next:
       // Return `null` because the control flow reached the end of the function.
       return { };
-    case Statement::status_break_unspec:
-    case Statement::status_break_switch:
-    case Statement::status_break_while:
-    case Statement::status_break_for:
+    case Block::status_break_unspec:
+    case Block::status_break_switch:
+    case Block::status_break_while:
+    case Block::status_break_for:
       ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
-    case Statement::status_continue_unspec:
-    case Statement::status_continue_while:
-    case Statement::status_continue_for:
+    case Block::status_continue_unspec:
+    case Block::status_continue_while:
+    case Block::status_continue_for:
       ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
-    case Statement::status_return:
+    case Block::status_return:
       // Forward the result reference.
       return std::move(ref);
     default:
