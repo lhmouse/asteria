@@ -15,7 +15,7 @@ class Analytic_context : public Abstract_context
     const Abstract_context *m_parent_opt;
 
   public:
-    explicit Analytic_context(const Abstract_context *parent_opt)
+    explicit Analytic_context(const Abstract_context *parent_opt) noexcept
       : m_parent_opt(parent_opt)
       {
       }

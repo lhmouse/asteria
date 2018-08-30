@@ -16,7 +16,7 @@ class Variable : public Sbase<Variable>
     bool m_immutable;
 
   public:
-    explicit Variable(Value value, bool immutable = false)
+    explicit Variable(Value value, bool immutable = false) noexcept
       : m_value(std::move(value)), m_immutable(immutable)
       {
       }
