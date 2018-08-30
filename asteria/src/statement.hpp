@@ -7,6 +7,8 @@
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
 #include "reference.hpp"
+#include "expression.hpp"
+#include "block.hpp"
 
 namespace Asteria {
 
@@ -19,18 +21,6 @@ class Statement
         target_scope_switch  = 1,
         target_scope_while   = 2,
         target_scope_for     = 3,
-      };
-    enum Status : std::uint8_t
-      {
-        status_next             = 0,
-        status_break_unspec     = 1,
-        status_break_switch     = 2,
-        status_break_while      = 3,
-        status_break_for        = 4,
-        status_continue_unspec  = 5,
-        status_continue_while   = 6,
-        status_continue_for     = 7,
-        status_return           = 8,
       };
 
     enum Index : std::uint8_t
@@ -54,13 +44,13 @@ class Statement
       };
     struct S_expression
       {
-        Vector<Xpnode> expr;
+        Expression expr;
       };
     struct S_var_def
       {
         String name;
         bool immutable;
-        Vector<Xpnode> init;
+        Expression init;
       };
     struct S_func_def
       {
@@ -68,50 +58,50 @@ class Statement
         Vector<String> params;
         String file;
         Unsigned line;
-        Vector<Statement> body;
+        Block body;
       };
     struct S_if
       {
-        Vector<Xpnode> cond;
-        Vector<Statement> branch_true;
-        Vector<Statement> branch_false;
+        Expression cond;
+        Block branch_true;
+        Block branch_false;
       };
     struct S_switch
       {
-        Vector<Xpnode> ctrl;
-        Bivector<Vector<Xpnode>, Vector<Statement>> clauses;
+        Expression ctrl;
+        Bivector<Expression, Block> clauses;
       };
     struct S_do_while
       {
-        Vector<Statement> body;
-        Vector<Xpnode> cond;
+        Block body;
+        Expression cond;
       };
     struct S_while
       {
-        Vector<Xpnode> cond;
-        Vector<Statement> body;
+        Expression cond;
+        Block body;
       };
     struct S_for
       {
         String var_name;
         bool var_immutable;
-        Vector<Xpnode> var_init;
-        Vector<Xpnode> cond;
-        Vector<Xpnode> step;
-        Vector<Statement> body;
+        Expression var_init;
+        Expression cond;
+        Expression step;
+        Block body;
       };
     struct S_for_each
       {
         String key_name;
         String mapped_name;
-        Vector<Xpnode> range_init;
-        Vector<Statement> body;
+        Expression range_init;
+        Block body;
       };
     struct S_try
       {
-        Vector<Statement> body_try;
+        Block body_try;
         String except_name;
-        Vector<Statement> body_catch;
+        Block body_catch;
       };
     struct S_break
       {
@@ -123,11 +113,11 @@ class Statement
       };
     struct S_throw
       {
-        Vector<Xpnode> expr;
+        Expression expr;
       };
     struct S_return
       {
-        Vector<Xpnode> expr;
+        Expression expr;
       };
     struct S_export
       {
@@ -172,17 +162,10 @@ class Statement
     Statement & operator=(Statement &&) noexcept;
 
   public:
-    Statement bind(Analytic_context &ctx_inout) const;
-    Status execute(Reference &ref_out, Executive_context &ctx_inout) const;
+    void fly_over_in_place(Abstract_context &ctx_inout) const;
+    Statement bind_in_place(Analytic_context &ctx_inout) const;
+    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const;
   };
-
-
-// TODO move these elsewhere
-extern Vector<Statement> bind_block_in_place(Analytic_context &ctx_inout, const Vector<Statement> &block);
-extern Vector<Statement> bind_block(const Vector<Statement> &block, const Analytic_context &ctx);
-
-extern Statement::Status execute_block_in_place(Reference &ref_out, Executive_context &ctx_inout, const Vector<Statement> &block);
-extern Statement::Status execute_block(Reference &ref_out, const Vector<Statement> &block, const Executive_context &ctx);
 
 }
 

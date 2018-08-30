@@ -2,8 +2,9 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../src/statement.hpp"
+#include "../src/block.hpp"
 #include "../src/xpnode.hpp"
+#include "../src/statement.hpp"
 #include "../src/executive_context.hpp"
 
 using namespace Asteria;
@@ -16,7 +17,7 @@ int main()
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     text.emplace_back(Statement::S_var_def { String::shallow("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
-    Vector<Vector<Xpnode>> elems;
+    Vector<Expression> elems;
     for(int i = 1; i <= 3; ++i) {
       expr.clear();
       expr.emplace_back(Xpnode::S_literal { D_integer(i) });
@@ -77,11 +78,12 @@ int main()
     step.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
     step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
     text.emplace_back(Statement::S_for { String::shallow("j"), false, std::move(expr), std::move(cond), std::move(step), std::move(body) });
+    auto block = Block(std::move(text));
 
     Executive_context ctx;
     Reference ref;
-    auto status = execute_block_in_place(ref, ctx, text);
-    ASTERIA_TEST_CHECK(status == Statement::status_next);
+    auto status = block.execute_in_place(ref, ctx);
+    ASTERIA_TEST_CHECK(status == Block::status_next);
     auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 41);

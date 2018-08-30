@@ -142,7 +142,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       {
         const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Bind the subexpression recursively.
-        auto expr_bnd = bind_expression(alt.expr, ctx);
+        auto expr_bnd = alt.expr.bind(ctx);
         Xpnode::S_subexpression cand_bnd = { std::move(expr_bnd) };
         return std::move(cand_bnd);
       }
@@ -152,7 +152,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = bind_block_in_place(ctx_next, alt.body);
+        auto body_bnd = alt.body.bind_in_place(ctx_next);
         Xpnode::S_closure_function cand_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
         return std::move(cand_bnd);
       }
@@ -160,8 +160,8 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       {
         const auto &alt = this->m_stor.as<Xpnode::S_branch>();
         // Bind both branches recursively.
-        auto branch_true_bnd = bind_expression(alt.branch_true, ctx);
-        auto branch_false_bnd = bind_expression(alt.branch_false, ctx);
+        auto branch_true_bnd = alt.branch_true.bind(ctx);
+        auto branch_false_bnd = alt.branch_false.bind(ctx);
         Xpnode::S_branch cand_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(cand_bnd);
       }
@@ -183,10 +183,10 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_array>();
         // Bind everything recursively.
-        Vector<Vector<Xpnode>> elems_bnd;
+        Vector<Expression> elems_bnd;
         elems_bnd.reserve(alt.elems.size());
         for(const auto &elem : alt.elems) {
-          auto elem_bnd = bind_expression(elem, ctx);
+          auto elem_bnd = elem.bind(ctx);
           elems_bnd.emplace_back(std::move(elem_bnd));
         }
         Xpnode::S_unnamed_array cand_bnd = { std::move(elems_bnd) };
@@ -196,10 +196,10 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_object>();
         // Bind everything recursively.
-        Dictionary<Vector<Xpnode>> pairs_bnd;
+        Dictionary<Expression> pairs_bnd;
         pairs_bnd.reserve(alt.pairs.size());
         for(const auto &pair : alt.pairs) {
-          auto second_bnd = bind_expression(pair.second, ctx);
+          auto second_bnd = pair.second.bind(ctx);
           pairs_bnd.insert_or_assign(pair.first, std::move(second_bnd));
         }
         Xpnode::S_unnamed_object cand_bnd = { std::move(pairs_bnd) };
@@ -522,7 +522,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       {
         const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Evaluate the subexpression recursively.
-        auto ref = evaluate_expression(alt.expr, ctx);
+        auto ref = alt.expr.evaluate(ctx);
         stack_inout.emplace_back(std::move(ref));
         return;
       }
@@ -532,7 +532,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = bind_block_in_place(ctx_next, alt.body);
+        auto body_bnd = alt.body.bind_in_place(ctx_next);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_inout.emplace_back(std::move(ref_c));
@@ -545,9 +545,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         auto cond = do_pop_reference(stack_inout);
         // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
         // This means that if the branch taken is empty then `cond` is pushed.
-        const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        if(branch_taken.get().empty() == false) {
-          cond = evaluate_expression(branch_taken, ctx);
+        const auto branch_taken = cond.read().test() ? &(alt.branch_true) : &(alt.branch_false);
+        if(branch_taken->empty() == false) {
+          cond = branch_taken->evaluate(ctx);
         }
         stack_inout.emplace_back(std::move(cond));
         return;
@@ -1103,7 +1103,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         D_array array;
         array.reserve(alt.elems.size());
         for(const auto &elem : alt.elems) {
-          const auto result = evaluate_expression(elem, ctx);
+          const auto result = elem.evaluate(ctx);
           auto value = result.read();
           array.emplace_back(std::move(value));
         }
@@ -1118,7 +1118,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         D_object object;
         object.reserve(alt.pairs.size());
         for(const auto &pair : alt.pairs) {
-          const auto result = evaluate_expression(pair.second, ctx);
+          const auto result = pair.second.evaluate(ctx);
           auto value = result.read();
           object.insert_or_assign(pair.first, std::move(value));
         }
@@ -1129,32 +1129,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
-  }
-
-Vector<Xpnode> bind_expression(const Vector<Xpnode> &expr, const Analytic_context &ctx)
-  {
-    Vector<Xpnode> expr_bnd;
-    expr_bnd.reserve(expr.size());
-    for(const auto &node : expr) {
-      auto node_bnd = node.bind(ctx);
-      expr_bnd.emplace_back(std::move(node_bnd));
-    }
-    return expr_bnd;
-  }
-
-Reference evaluate_expression(const Vector<Xpnode> &expr, const Executive_context &ctx)
-  {
-    if(expr.empty()) {
-      return { };
-    }
-    Vector<Reference> stack;
-    for(const auto &node : expr) {
-      node.evaluate(stack, ctx);
-    }
-    if(stack.size() != 1) {
-      ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
-    }
-    return std::move(stack.mut_front());
   }
 
 }

@@ -47,7 +47,9 @@ class Backtracer;
 class Parser_result;
 class Token;
 class Xpnode;
+class Expression;
 class Statement;
+class Block;
 
 // Runtime objects
 class Value;
