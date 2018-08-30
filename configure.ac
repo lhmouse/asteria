@@ -11,11 +11,11 @@ AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
 AC_ARG_ENABLE([werror], AS_HELP_STRING([--disable-werror], [disable -Werror]))
-AM_CONDITIONAL([ENABLE_WERROR], [test "${enable_werror}" != "no"])
+AM_CONDITIONAL([enable_werror], [test "${enable_werror}" != "no"])
 
 AC_ARG_ENABLE([debug-logs], AS_HELP_STRING([--enable-debug-logs], [output debug logs to stderr]))
-AM_CONDITIONAL([ENABLE_DEBUG_LOGS], [test "${enable_debug_logs}" == "yes"])
-AM_COND_IF([ENABLE_DEBUG_LOGS], [
+AM_CONDITIONAL([enable_debug_logs], [test "${enable_debug_logs}" == "yes"])
+AM_COND_IF([enable_debug_logs], [
   AC_DEFINE([ASTERIA_ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
 ])
 

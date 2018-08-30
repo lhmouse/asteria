@@ -4,7 +4,7 @@ AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion  \
   -Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wno-error=pragmas  \
   -Wno-error=unused-{function,variable,parameter}  \
   -pipe -fPIC -DPIC -pthread
-if ENABLE_WERROR
+if enable_werror
 AM_CPPFLAGS += -Werror
 endif
 AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
