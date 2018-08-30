@@ -22,12 +22,14 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
   }
 
 namespace {
+
   template<typename ValueT>
     inline Reference do_make_constant(ValueT &&value)
       {
         Reference_root::S_constant ref_c = { std::forward<ValueT>(value) };
         return std::move(ref_c);
       }
+
 }
 
 void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
