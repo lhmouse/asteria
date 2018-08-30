@@ -1015,7 +1015,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto len = this->size();
           // Reading from the character at `size()` is permitted.
           ROCKET_ASSERT(pos <= len);
-          return this->data()[pos];
+          return this->c_str()[pos];
         }
       const_reference at(size_type pos) const
         {
