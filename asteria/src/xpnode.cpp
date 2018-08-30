@@ -229,7 +229,8 @@ namespace {
         return;
       }
       // Create an rvalue reference and assign it to `ref_inout`.
-      ref_inout = Reference::make_temporary(std::move(value));
+      Reference_root::S_temporary ref_c = { std::move(value) };
+      ref_inout = std::move(ref_c);
     }
 
   Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
@@ -493,8 +494,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
       {
         const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Push the constant.
-        auto ref = Reference::make_constant(alt.value);
-        stack_inout.emplace_back(std::move(ref));
+        Reference_root::S_constant ref_c = { alt.value };
+        stack_inout.emplace_back(std::move(ref_c));
         return;
       }
     case Xpnode::index_named_reference:
@@ -532,7 +533,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = bind_block_in_place(ctx_next, alt.body);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
-        stack_inout.emplace_back(Reference::make_temporary(D_function(std::move(func))));
+        Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
+        stack_inout.emplace_back(std::move(ref_c));
         return;
       }
     case Xpnode::index_branch:
@@ -563,12 +565,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         if(!*qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer has been made.");
         }
-        // Obtain the `this` reference.
-        Reference self;
-        if(callee.get_modifier_count() != 0) {
-          self = callee;
-          self.pop_modifier();
-        }
         // Allocate the argument vector.
         Vector<Reference> args;
         args.reserve(alt.arg_cnt);
@@ -577,7 +573,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           args.emplace_back(std::move(arg));
         }
         // Call the function and de-materialize the result.
-        auto result = do_traced_call(alt.file, alt.line, *qfunc, std::move(self), std::move(args));
+        auto result = do_traced_call(alt.file, alt.line, *qfunc, std::move(callee.zoom_out()), std::move(args));
         result.dematerialize();
         stack_inout.emplace_back(std::move(result));
         return;
@@ -640,13 +636,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             if(rhs_value.type() == Value::type_integer) {
               auto index = rhs_value.check<D_integer>();
               Reference_modifier::S_array_index mod_c = { index };
-              lhs.push_modifier(std::move(mod_c));
+              lhs.zoom_in(std::move(mod_c));
               break;
             }
             if(rhs_value.type() == Value::type_string) {
               auto key = rhs_value.check<D_string>();
               Reference_modifier::S_object_key mod_c = { std::move(key) };
-              lhs.push_modifier(std::move(mod_c));
+              lhs.zoom_in(std::move(mod_c));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
@@ -1110,7 +1106,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           auto value = result.read();
           array.emplace_back(std::move(value));
         }
-        stack_inout.emplace_back(Reference::make_temporary(std::move(array)));
+        Reference_root::S_temporary ref_c = { std::move(array) };
+        stack_inout.emplace_back(std::move(ref_c));
         return;
       }
     case Xpnode::index_unnamed_object:
@@ -1124,7 +1121,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           auto value = result.read();
           object.insert_or_assign(pair.first, std::move(value));
         }
-        stack_inout.emplace_back(Reference::make_temporary(std::move(object)));
+        Reference_root::S_temporary ref_c = { std::move(object) };
+        stack_inout.emplace_back(std::move(ref_c));
         return;
       }
     default:

@@ -21,6 +21,15 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
+namespace {
+  template<typename ValueT>
+    inline Reference do_make_constant(ValueT &&value)
+      {
+        Reference_root::S_constant ref_c = { std::forward<ValueT>(value) };
+        return std::move(ref_c);
+      }
+}
+
 void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
   {
     // Set up parameters.
@@ -38,10 +47,10 @@ void Executive_context::initialize_for_function(const Vector<String> &params, co
       }
     }
     // Set up system variables.
-    this->set_named_reference(String::shallow("__file"), Reference::make_constant(D_string(file)));
-    this->set_named_reference(String::shallow("__line"), Reference::make_constant(D_integer(line)));
+    this->set_named_reference(String::shallow("__file"), do_make_constant(D_string(file)));
+    this->set_named_reference(String::shallow("__line"), do_make_constant(D_integer(line)));
     this->set_named_reference(String::shallow("__this"), std::move(self.materialize()));
-    this->set_named_reference(String::shallow("__varg"), Reference::make_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
+    this->set_named_reference(String::shallow("__varg"), do_make_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
   }
 
 }

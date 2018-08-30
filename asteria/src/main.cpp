@@ -14,7 +14,8 @@ void test_throw(unsigned i)
   try {
     if(i < 10) {
       test_throw(i + 1);
-      throw Exception(Reference::make_constant(D_string("some exception")));
+      Reference_root::S_constant ref_c = { D_string("some exception") };
+      throw Exception(std::move(ref_c));
     }
   } catch(...) {
     throw Backtracer(String::shallow("test_file"), i);
