@@ -44,12 +44,14 @@ class Runtime_error;
 class Backtracer;
 
 // Lexical elements
-class Parser_result;
-class Token;
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
+
+// Parser objects
+class Parser_result;
+class Token;
 
 // Runtime objects
 class Value;

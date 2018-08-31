@@ -47,8 +47,6 @@ pkginclude_HEADERS =  \
   asteria/src/abstract_opaque.hpp  \
   asteria/src/abstract_function.hpp  \
   asteria/src/value.hpp  \
-  asteria/src/parser_result.hpp  \
-  asteria/src/token.hpp  \
   asteria/src/reference_root.hpp  \
   asteria/src/reference_modifier.hpp  \
   asteria/src/reference.hpp  \
@@ -63,7 +61,9 @@ pkginclude_HEADERS =  \
   asteria/src/statement.hpp  \
   asteria/src/block.hpp  \
   asteria/src/instantiated_function.hpp  \
-  asteria/src/backtracer.hpp
+  asteria/src/backtracer.hpp  \
+  asteria/src/parser_result.hpp  \
+  asteria/src/token.hpp
 
 noinst_LTLIBRARIES =  \
   lib/librocket.la
@@ -85,7 +85,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
   asteria/src/value.cpp  \
-  asteria/src/token.cpp  \
   asteria/src/reference_root.cpp  \
   asteria/src/reference_modifier.cpp  \
   asteria/src/reference.cpp  \
@@ -101,7 +100,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/statement.cpp  \
   asteria/src/block.cpp  \
   asteria/src/instantiated_function.cpp  \
-  asteria/src/backtracer.cpp
+  asteria/src/backtracer.cpp  \
+  asteria/src/token.cpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
