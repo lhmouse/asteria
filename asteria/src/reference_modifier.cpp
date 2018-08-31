@@ -82,7 +82,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           if(!creates) {
             return nullptr;
           }
-          parent.set(D_array());
+          parent = D_array();
         }
         const auto qarr = parent.opt<D_array>();
         if(!qarr) {
@@ -131,7 +131,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           if(!creates) {
             return nullptr;
           }
-          parent.set(D_object());
+          parent = D_object();
         }
         const auto qobj = parent.opt<D_object>();
         if(!qobj) {

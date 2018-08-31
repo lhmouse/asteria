@@ -181,24 +181,9 @@ class Token
           return this->m_stor.get<AltT>();
         }
     template<typename AltT>
-      AltT * opt() noexcept
-        {
-          return this->m_stor.get<AltT>();
-        }
-    template<typename AltT>
       const AltT & check() const
         {
           return this->m_stor.as<AltT>();
-        }
-    template<typename AltT>
-      AltT & check()
-        {
-          return this->m_stor.as<AltT>();
-        }
-    template<typename AltT>
-      AltT & set(AltT &&alt)
-        {
-          return this->m_stor.set(std::forward<AltT>(alt));
         }
   };
 
