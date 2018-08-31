@@ -65,17 +65,22 @@ pkginclude_HEADERS =  \
   asteria/src/instantiated_function.hpp  \
   asteria/src/backtracer.hpp
 
-lib_LTLIBRARIES =  \
-  lib/libasteria.la
+noinst_LTLIBRARIES =  \
+  lib/librocket.la
 
-lib_libasteria_la_SOURCES =  \
+lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \
   asteria/src/rocket/throw.cpp  \
   asteria/src/rocket/insertable_streambuf.cpp  \
   asteria/src/rocket/insertable_istream.cpp  \
   asteria/src/rocket/insertable_ostream.cpp  \
   asteria/src/rocket/insertable_stream.cpp  \
-  asteria/src/rocket/cow_string.cpp  \
+  asteria/src/rocket/cow_string.cpp
+
+lib_LTLIBRARIES =  \
+  lib/libasteria.la
+
+lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
@@ -97,6 +102,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/block.cpp  \
   asteria/src/instantiated_function.cpp  \
   asteria/src/backtracer.cpp
+
+lib_libasteria_la_LIBADD =  \
+  lib/librocket.la
 
 lib_libasteria_la_LDFLAGS =  \
   -Wl,--no-undefined -no-undefined -version-info 0:0:0
