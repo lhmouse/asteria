@@ -191,18 +191,23 @@ namespace {
   class Indent
     {
     private:
-      std::size_t m_num;
+      bool m_nl;
+      std::size_t m_cnt;
 
     public:
-      explicit constexpr Indent(std::size_t xnum) noexcept
-        : m_num(xnum)
+      constexpr Indent(bool nl, std::size_t cnt) noexcept
+        : m_nl(nl), m_cnt(cnt)
         {
         }
 
     public:
-      std::size_t num() const noexcept
+      bool newline() const noexcept
         {
-          return this->m_num;
+          return this->m_nl;
+        }
+      std::size_t count() const noexcept
+        {
+          return this->m_cnt;
         }
     };
 
@@ -215,27 +220,25 @@ namespace {
       using traits_type = std::ostream::traits_type;
       auto state = std::ios_base::goodbit;
       try {
-        const auto num = indent.num();
-        if(num == 0) {
+        if(indent.newline()) {
+          // Write a line feed.
+          if(traits_type::eq_int_type(os.rdbuf()->sputc('\n'), traits_type::eof())) {
+            state |= std::ios_base::failbit;
+            goto done;
+          }
+          for(auto i = indent.count(); i != 0; --i) {
+            // Write space characters.
+            if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
+              state |= std::ios_base::failbit;
+              goto done;
+            }
+          }
+        } else {
           // Write a space character.
           if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
             state |= std::ios_base::failbit;
             goto done;
           }
-        } else {
-          // Write a new line character.
-          if(traits_type::eq_int_type(os.rdbuf()->sputc('\n'), traits_type::eof())) {
-            state |= std::ios_base::failbit;
-            goto done;
-          }
-          // Write space characters up to `num` times.
-          std::size_t i = 0;
-          do {
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
-              state |= std::ios_base::failbit;
-              goto done;
-            }
-          } while(++i != num);
         }
       } catch(...) {
         // XXX: Relying on a private function is evil.
@@ -256,15 +259,19 @@ namespace {
       String m_str;
 
     public:
-      explicit Quote(String xstr) noexcept
-        : m_str(std::move(xstr))
+      explicit Quote(String str) noexcept
+        : m_str(std::move(str))
         {
         }
 
     public:
-      const String & str() const noexcept
+      const char * begin() const noexcept
         {
-          return this->m_str;
+          return this->m_str.data();
+        }
+      const char * end() const noexcept
+        {
+          return this->m_str.data() + this->m_str.size();
         }
     };
 
@@ -283,9 +290,7 @@ namespace {
           goto done;
         }
         // Output the string body.
-        const auto len = quote.str().length();
-        for(std::size_t i = 0; i != len; ++i) {
-          const int ch = quote.str()[i] & 0xFF;
+        for(const char ch : quote) {
           if((0x20 <= ch) && (ch <= 0x7E)) {
             // Output an unescaped character.
             if(traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof())) {
@@ -362,7 +367,7 @@ namespace {
 
 }
 
-void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_increment) const
+void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
     case Value::type_null:
@@ -421,11 +426,11 @@ void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_i
         // ]
         os <<"array(" <<std::dec <<alt.size() <<") [";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<Indent(indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
-          it->dump(os, indent_next + indent_increment, indent_increment);
+          os <<Indent(indent_increment != 0, indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
+          it->dump(os, indent_increment, indent_next + indent_increment);
           os <<',';
         }
-        os <<Indent(indent_next) <<']';
+        os <<Indent(indent_increment != 0, indent_next) <<']';
         return;
       }
     case Value::type_object:
@@ -438,11 +443,11 @@ void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_i
         // }
         os <<"object(" <<std::dec <<alt.size() <<") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<Indent(indent_next + indent_increment) <<Quote(it->first) <<" = ";
-          it->second.dump(os, indent_next + indent_increment, indent_increment);
+          os <<Indent(indent_increment != 0, indent_next + indent_increment) <<Quote(it->first) <<" = ";
+          it->second.dump(os, indent_increment, indent_next + indent_increment);
           os <<',';
         }
-        os <<Indent(indent_next) <<'}';
+        os <<Indent(indent_increment != 0, indent_next) <<'}';
         return;
       }
     default:
