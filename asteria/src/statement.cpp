@@ -455,14 +455,13 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           const auto &array = range_value.check<D_array>();
           for(auto it = array.begin(); it != array.end(); ++it) {
             Executive_context ctx_next(&ctx_for);
-            const auto index = static_cast<Signed>(it - array.begin());
             // Initialize the per-loop key constant.
-            Reference_root::S_constant ref_c = { D_integer(index) };
+            Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
             ref_out = std::move(ref_c);
             do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
-            Reference_modifier::S_array_index refmod_c = { index };
+            Reference_modifier::S_array_index refmod_c = { it - array.begin() };
             mapped.zoom_in(std::move(refmod_c));
             do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, mapped);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
@@ -482,14 +481,13 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           const auto &object = range_value.check<D_object>();
           for(auto it = object.begin(); it != object.end(); ++it) {
             Executive_context ctx_next(&ctx_for);
-            const auto key = std::ref(it->first);
             // Initialize the per-loop key constant.
-            Reference_root::S_constant ref_c = { D_string(key) };
+            Reference_root::S_constant ref_c = { D_string(it->first) };
             ref_out = std::move(ref_c);
             do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
-            Reference_modifier::S_object_key refmod_c = { key };
+            Reference_modifier::S_object_key refmod_c = { it->first };
             mapped.zoom_in(std::move(refmod_c));
             do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, mapped);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
