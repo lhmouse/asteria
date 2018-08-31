@@ -60,11 +60,11 @@ class Reference_root
     Reference_root & operator=(Reference_root &&) noexcept;
 
   public:
-    const Value & dereference_readonly() const;
-    Value & dereference_mutable() const;
-
     bool is_lvalue() const noexcept;
     bool is_unique() const noexcept;
+
+    const Value & dereference_readonly() const;
+    Value & dereference_mutable() const;
   };
 
 }
