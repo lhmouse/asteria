@@ -12,6 +12,9 @@ bool Abstract_context::is_name_reserved(const String &name)
     return name.empty() || name.starts_with("__");
   }
 
+Abstract_context::Abstract_context() noexcept
+  {
+  }
 Abstract_context::~Abstract_context()
   {
   }

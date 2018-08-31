@@ -67,7 +67,7 @@ int main()
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
     Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_scope_unspec });
-    body.emplace_back(Statement::S_if { std::move(expr), std::move(branch_true), { } });
+    body.emplace_back(Statement::S_if { std::move(expr), std::move(branch_true), Block({ }) });
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     Vector<Xpnode> cond;

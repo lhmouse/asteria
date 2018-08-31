@@ -14,11 +14,7 @@ class Expression
     Vector<Xpnode> m_nodes;
 
   public:
-    template<typename ...XnodesT, typename std::enable_if<std::is_constructible<Vector<Xpnode>, XnodesT &&...>::value>::type * = nullptr>
-      Expression(XnodesT &&...xnodes)
-        : m_nodes(std::forward<XnodesT>(xnodes)...)
-        {
-        }
+    Expression(Vector<Xpnode> &&nodes) noexcept;
     ~Expression();
 
     Expression(Expression &&) noexcept;
