@@ -216,18 +216,33 @@ namespace {
       auto state = std::ios_base::goodbit;
       try {
         const auto num = indent.num();
-        for(auto i = std::size_t(0); i != num; ++i) {
+        if(num == 0) {
           // Write a space character.
           if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
             state |= std::ios_base::failbit;
-            break;
+            goto done;
           }
+        } else {
+          // Write a new line character.
+          if(traits_type::eq_int_type(os.rdbuf()->sputc('\n'), traits_type::eof())) {
+            state |= std::ios_base::failbit;
+            goto done;
+          }
+          // Write space characters up to `num` times.
+          std::size_t i = 0;
+          do {
+            if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
+              state |= std::ios_base::failbit;
+              goto done;
+            }
+          } while(++i != num);
         }
       } catch(...) {
         // XXX: Relying on a private function is evil.
         rocket::details_cow_string::handle_io_exception(os);
         state &= ~std::ios_base::badbit;
       }
+    done:
       if(state != std::ios_base::goodbit) {
         os.setstate(state);
       }
@@ -262,78 +277,82 @@ namespace {
       using traits_type = std::ostream::traits_type;
       auto state = std::ios_base::goodbit;
       try {
+        // Output double quote characters at the beginning.
+        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+          state |= std::ios_base::failbit;
+          goto done;
+        }
+        // Output the string body.
         const auto len = quote.str().length();
-        for(auto i = std::size_t(-1); i != len + 1; ++i) {
-          if((i == std::size_t(-1)) || (i == len)) {
-            // Output double quote characters at both ends.
-            if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
-              state |= std::ios_base::failbit;
-              break;
-            }
-            continue;
-          }
+        for(std::size_t i = 0; i != len; ++i) {
           const int ch = quote.str()[i] & 0xFF;
           if((0x20 <= ch) && (ch <= 0x7E)) {
             // Output an unescaped character.
             if(traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof())) {
               state |= std::ios_base::failbit;
+              goto done;
+            }
+          } else {
+            // Output an escape sequence.
+            bool failed;
+            switch(ch) {
+            case '\"':
+              failed = os.rdbuf()->sputn("\\\"", 2) < 2;
+              break;
+            case '\'':
+              failed = os.rdbuf()->sputn("\\\'", 2) < 2;
+              break;
+            case '\\':
+              failed = os.rdbuf()->sputn("\\\\", 2) < 2;
+              break;
+            case '\a':
+              failed = os.rdbuf()->sputn("\\a", 2) < 2;
+              break;
+            case '\b':
+              failed = os.rdbuf()->sputn("\\b", 2) < 2;
+              break;
+            case '\f':
+              failed = os.rdbuf()->sputn("\\f", 2) < 2;
+              break;
+            case '\n':
+              failed = os.rdbuf()->sputn("\\n", 2) < 2;
+              break;
+            case '\r':
+              failed = os.rdbuf()->sputn("\\r", 2) < 2;
+              break;
+            case '\t':
+              failed = os.rdbuf()->sputn("\\t", 2) < 2;
+              break;
+            case '\v':
+              failed = os.rdbuf()->sputn("\\v", 2) < 2;
+              break;
+            default:
+              {
+                static constexpr char s_hex_table[] = "0123456789ABCDEF";
+                char temp[4] = "\\x";
+                temp[2] = s_hex_table[(ch >> 4) & 0x0F];
+                temp[3] = s_hex_table[(ch >> 0) & 0x0F];
+                failed = os.rdbuf()->sputn(temp, 4) < 4;
+              }
               break;
             }
-            continue;
-          }
-          // Output an escape sequence.
-          std::streamsize nwritten;
-          switch(ch) {
-          case '\"':
-            nwritten = os.rdbuf()->sputn("\\\"", 2);
-            break;
-          case '\'':
-            nwritten = os.rdbuf()->sputn("\\\'", 2);
-            break;
-          case '\\':
-            nwritten = os.rdbuf()->sputn("\\\\", 2);
-            break;
-          case '\a':
-            nwritten = os.rdbuf()->sputn("\\a", 2);
-            break;
-          case '\b':
-            nwritten = os.rdbuf()->sputn("\\b", 2);
-            break;
-          case '\f':
-            nwritten = os.rdbuf()->sputn("\\f", 2);
-            break;
-          case '\n':
-            nwritten = os.rdbuf()->sputn("\\n", 2);
-            break;
-          case '\r':
-            nwritten = os.rdbuf()->sputn("\\r", 2);
-            break;
-          case '\t':
-            nwritten = os.rdbuf()->sputn("\\t", 2);
-            break;
-          case '\v':
-            nwritten = os.rdbuf()->sputn("\\v", 2);
-            break;
-          default:
-            {
-              static constexpr char s_hex_table[] = "0123456789ABCDEF";
-              char temp[4] = "\\x";
-              temp[2] = s_hex_table[(ch >> 4) & 0x0F];
-              temp[3] = s_hex_table[(ch >> 0) & 0x0F];
-              nwritten = os.rdbuf()->sputn(temp, 4);
+            if(failed) {
+              state |= std::ios_base::failbit;
+              goto done;
             }
-            break;
           }
-          if(nwritten == 0) {
-            state |= std::ios_base::failbit;
-            break;
-          }
+        }
+        // Output double quote characters at the end.
+        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
+          state |= std::ios_base::failbit;
+          goto done;
         }
       } catch(...) {
         // XXX: Relying on a private function is evil.
         rocket::details_cow_string::handle_io_exception(os);
         state &= ~std::ios_base::badbit;
       }
+    done:
       if(state != std::ios_base::goodbit) {
         os.setstate(state);
       }
@@ -402,11 +421,11 @@ void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_i
         // ]
         os <<"array(" <<std::dec <<alt.size() <<") [";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<std::endl <<Indent(indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
+          os <<Indent(indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
           it->dump(os, indent_next + indent_increment, indent_increment);
           os <<',';
         }
-        os <<std::endl <<Indent(indent_next) <<']';
+        os <<Indent(indent_next) <<']';
         return;
       }
     case Value::type_object:
@@ -419,11 +438,11 @@ void Value::dump(std::ostream &os, std::size_t indent_next, std::size_t indent_i
         // }
         os <<"object(" <<std::dec <<alt.size() <<") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<std::endl <<Indent(indent_next + indent_increment) <<Quote(it->first) <<" = ";
+          os <<Indent(indent_next + indent_increment) <<Quote(it->first) <<" = ";
           it->second.dump(os, indent_next + indent_increment, indent_increment);
           os <<',';
         }
-        os <<std::endl <<Indent(indent_next) <<'}';
+        os <<Indent(indent_next) <<'}';
         return;
       }
     default:

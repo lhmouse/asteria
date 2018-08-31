@@ -2205,27 +2205,29 @@ template<typename charT, typename traitsT, typename allocatorT>
         for(;;) {
           if(traitsT::eq_int_type(ich, traitsT::eof())) {
             state |= ios_base::eofbit;
-            break;
+            goto done;
           }
           const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
                                           : (str.size() >= str.max_size());
           if(enough) {
-            break;
+            goto done;
           }
           const auto ch = traitsT::to_char_type(ich);
           if(::std::isspace<charT>(ch, loc)) {
-            break;
+            goto done;
           }
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
         if(str.empty()) {
           state |= ios_base::failbit;
+          goto done;
         }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
         state &= ~ios_base::badbit;
       }
+    done:
       if(state != ios_base::goodbit) {
         is.setstate(state);
       }
@@ -2257,13 +2259,13 @@ template<typename charT, typename traitsT, typename allocatorT>
         auto offset = left ? 0 : (len - remaining);
         for(;;) {
           if(remaining == 0) {
-            break;
+            goto done;
           }
           const auto written = ((0 <= offset) && (offset < len)) ? os.rdbuf()->sputn(str.data() + offset, len - offset)
                                                                  : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
             state |= ios_base::failbit;
-            break;
+            goto done;
           }
           remaining -= written;
           offset += written;
@@ -2272,6 +2274,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         details_cow_string::handle_io_exception(os);
         state &= ~ios_base::badbit;
       }
+    done:
       if(state != ios_base::goodbit) {
         os.setstate(state);
       }
@@ -2301,28 +2304,30 @@ template<typename charT, typename traitsT, typename allocatorT>
         for(;;) {
           if(traitsT::eq_int_type(ich, traitsT::eof())) {
             state |= ios_base::eofbit;
-            break;
+            goto done;
           }
           const auto ch = traitsT::to_char_type(ich);
           eol = traitsT::eq(ch, delim);
           if(eol) {
             is.rdbuf()->sbumpc();
-            break;
+            goto done;
           }
           if(str.size() >= str.max_size()) {
             state |= ios_base::failbit;
-            break;
+            goto done;
           }
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
         if(!eol && str.empty()) {
           state |= ios_base::failbit;
+          goto done;
         }
       } catch(...) {
         details_cow_string::handle_io_exception(is);
         state &= ~ios_base::badbit;
       }
+    done:
       if(state != ios_base::goodbit) {
         is.setstate(state);
       }
