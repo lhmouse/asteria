@@ -529,8 +529,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference().read());
             // Copy the reference into the scope.
-            ref_out = e.get_reference();
-            ref_out.dematerialize();
+            auto &except = e.get_reference();
+            ref_out = except.dematerialize();
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
