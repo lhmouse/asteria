@@ -8,37 +8,28 @@
 
 namespace rocket {
 
-#define VSNPRINTF(buf_, fmt_)    \
-    do {    \
-      ::std::va_list ap_;    \
-      va_start(ap_, fmt_);    \
-      ::std::vsnprintf((buf_), sizeof(buf_), (fmt_), ap_);    \
-      va_end(ap_);    \
-    } while(false)
+#define ROCKET_VSNPRINTF_AND_THROW(Except_, fmt_)  \
+  {  \
+    char msgbuf_[1024];  \
+    {  \
+      ::std::va_list ap_;  \
+      va_start(ap_, fmt_);  \
+      ::std::vsnprintf(msgbuf_, sizeof(msgbuf_), (fmt_), ap_);  \
+      va_end(ap_);  \
+    }  \
+    throw Except_(msgbuf_);  \
+  }
 
 void throw_invalid_argument(const char *fmt, ...)
-  {
-    char str[1024];
-    VSNPRINTF(str, fmt);
-    throw ::std::invalid_argument(str);
-  }
+  ROCKET_VSNPRINTF_AND_THROW(::std::invalid_argument, fmt)
+
 void throw_out_of_range(const char *fmt, ...)
-  {
-    char str[1024];
-    VSNPRINTF(str, fmt);
-    throw ::std::out_of_range(str);
-  }
+  ROCKET_VSNPRINTF_AND_THROW(::std::out_of_range, fmt)
+
 void throw_length_error(const char *fmt, ...)
-  {
-    char str[1024];
-    VSNPRINTF(str, fmt);
-    throw ::std::length_error(str);
-  }
+  ROCKET_VSNPRINTF_AND_THROW(::std::length_error, fmt)
+
 void throw_domain_error(const char *fmt, ...)
-  {
-    char str[1024];
-    VSNPRINTF(str, fmt);
-    throw ::std::domain_error(str);
-  }
+  ROCKET_VSNPRINTF_AND_THROW(::std::domain_error, fmt)
 
 }
