@@ -293,7 +293,7 @@ namespace {
         for(const char ch : quote) {
           if((0x20 <= ch) && (ch <= 0x7E)) {
             // Output an unescaped character.
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(static_cast<char>(ch)), traits_type::eof())) {
+            if(traits_type::eq_int_type(os.rdbuf()->sputc(ch), traits_type::eof())) {
               state |= std::ios_base::failbit;
               goto done;
             }
