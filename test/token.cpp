@@ -11,7 +11,7 @@ int main()
     const auto str = String::shallow("hh+++   if <<<->>>>>\"\\u55b5b喵\"/* - 0x1_7.8:4p+4  .false ;-42e13");
     Vector<Token> tokens;
     auto result = tokenize_line_no_comment_incremental(tokens, 42, str);
-    ASTERIA_TEST_CHECK(result);
+    ASTERIA_TEST_CHECK(result.get_error() == result.error_success);
     ASTERIA_TEST_CHECK(tokens.at(0).check<Token::S_identifier>().id == "hh");
     ASTERIA_TEST_CHECK(tokens.at(1).check<Token::S_punctuator>().punct == Token::punctuator_inc);
     ASTERIA_TEST_CHECK(tokens.at(2).check<Token::S_punctuator>().punct == Token::punctuator_add);
