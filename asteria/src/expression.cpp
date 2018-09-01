@@ -26,6 +26,10 @@ bool Expression::empty() const noexcept
   {
     return this->m_nodes.empty();
   }
+std::size_t Expression::size() const noexcept
+  {
+    return this->m_nodes.size();
+  }
 
 Expression Expression::bind(const Analytic_context &ctx) const
   {
@@ -37,7 +41,6 @@ Expression Expression::bind(const Analytic_context &ctx) const
     }
     return std::move(nodes_bnd);
   }
-
 Reference Expression::evaluate(const Executive_context &ctx) const
   {
     Vector<Reference> stack;

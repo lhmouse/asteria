@@ -22,6 +22,7 @@ class Expression
 
   public:
     bool empty() const noexcept;
+    std::size_t size() const noexcept;
 
     Expression bind(const Analytic_context &ctx) const;
     Reference evaluate(const Executive_context &ctx) const;

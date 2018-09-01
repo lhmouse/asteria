@@ -36,6 +36,7 @@ class Block
 
   public:
     bool empty() const noexcept;
+    std::size_t size() const noexcept;
 
     void fly_over_in_place(Abstract_context &ctx_inout) const;
     Block bind_in_place(Analytic_context &ctx_inout) const;
