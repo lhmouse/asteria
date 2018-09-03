@@ -93,16 +93,16 @@ namespace {
   std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Abstract_context &ctx, const String &name)
     {
       auto qctx = &ctx;
-    loop:
-      auto qref = qctx->get_named_reference_opt(name);
-      if(!qref) {
+      do {
+        const auto qref = qctx->get_named_reference_opt(name);
+        if(qref) {
+          return std::make_pair(qctx, qref);
+        }
         qctx = qctx->get_parent_opt();
         if(!qctx) {
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
         }
-        goto loop;
-      }
-      return std::make_pair(qctx, qref);
+      } while(true);
     }
 
 }
