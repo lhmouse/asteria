@@ -2233,21 +2233,21 @@ template<typename charT, typename traitsT, typename allocatorT>
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
       try {
-        // Insert characters into `os`, which are from `str` if `offset` is within `[0, len)` and are copied from `os.fill()` otherwise.
-        auto remaining = noadl::max(width, len);
-        auto offset = left ? 0 : (len - remaining);
+        // Insert characters into `os`, which are from `str` if `off` is within `[0, len)` and are copied from `os.fill()` otherwise.
+        auto rem = noadl::max(width, len);
+        auto off = left ? 0 : (len - rem);
         for(;;) {
-          if(remaining == 0) {
+          if(rem == 0) {
             goto done;
           }
-          const auto written = ((0 <= offset) && (offset < len)) ? os.rdbuf()->sputn(str.data() + offset, len - offset)
-                                                                 : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
+          const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
+                                                           : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
             state |= ios_base::failbit;
             goto done;
           }
-          remaining -= written;
-          offset += written;
+          rem -= written;
+          off += written;
         }
       } catch(...) {
         noadl::handle_ios_exception(os);
