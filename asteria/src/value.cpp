@@ -245,7 +245,7 @@ namespace {
         state &= ~std::ios_base::badbit;
       }
     done:
-      if(state != std::ios_base::goodbit) {
+      if(state) {
         os.setstate(state);
       }
       os.width(0);
@@ -356,7 +356,7 @@ namespace {
         state &= ~std::ios_base::badbit;
       }
     done:
-      if(state != std::ios_base::goodbit) {
+      if(state) {
         os.setstate(state);
       }
       os.width(0);
