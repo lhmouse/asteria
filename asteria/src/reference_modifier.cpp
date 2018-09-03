@@ -117,7 +117,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           qarr->insert(qarr->end(), static_cast<std::size_t>(size_add));
         }
         const auto rit = qarr->mut_begin() + static_cast<std::ptrdiff_t>(rindex);
-        if(erased_out_opt){
+        if(erased_out_opt) {
           *erased_out_opt = std::move(rit[0]);
           qarr->erase(rit);
           return erased_out_opt;
@@ -151,7 +151,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           }
           rit = result.first;
         }
-        if(erased_out_opt){
+        if(erased_out_opt) {
           *erased_out_opt = std::move(rit->second);
           qobj->erase(rit);
           return erased_out_opt;
