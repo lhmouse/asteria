@@ -2179,22 +2179,19 @@ template<typename charT, typename traitsT, typename allocatorT>
       const auto loc = is.getloc();
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
+      auto ich = traitsT::to_int_type(0);
       try {
         // Extract characters and append them to `str`.
-        auto ich = is.rdbuf()->sgetc();
-        for(;;) {
-          if(traitsT::eq_int_type(ich, traitsT::eof())) {
-            state |= ios_base::eofbit;
-            goto done;
-          }
+        ich = is.rdbuf()->sgetc();
+        while(!(traitsT::eq_int_type(ich, traitsT::eof()))) {
           const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
                                           : (str.size() >= str.max_size());
           if(enough) {
-            goto done;
+            break;
           }
           const auto ch = traitsT::to_char_type(ich);
           if(::std::isspace<charT>(ch, loc)) {
-            goto done;
+            break;
           }
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
@@ -2203,7 +2200,9 @@ template<typename charT, typename traitsT, typename allocatorT>
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
-    done:
+      if(traitsT::eq_int_type(ich, traitsT::eof())) {
+        state |= ios_base::eofbit;
+      }
       if(str.empty()) {
         state |= ios_base::failbit;
       }
@@ -2236,15 +2235,12 @@ template<typename charT, typename traitsT, typename allocatorT>
         // Insert characters into `os`, which are from `str` if `off` is within `[0, len)` and are copied from `os.fill()` otherwise.
         auto rem = noadl::max(width, len);
         auto off = left ? 0 : (len - rem);
-        for(;;) {
-          if(rem == 0) {
-            goto done;
-          }
+        while(rem != 0) {
           const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
                                                            : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
             state |= ios_base::failbit;
-            goto done;
+            break;
           }
           rem -= written;
           off += written;
@@ -2253,7 +2249,6 @@ template<typename charT, typename traitsT, typename allocatorT>
         noadl::handle_ios_exception(os);
         state &= ~ios_base::badbit;
       }
-    done:
       if(state) {
         os.setstate(state);
       }
@@ -2275,25 +2270,22 @@ template<typename charT, typename traitsT, typename allocatorT>
       // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
       str.erase();
       // We need to set stream state bits outside the `try` block.
-      bool eol = false;
       auto state = ios_base::goodbit;
+      auto eol = false;
+      auto ich = traitsT::to_int_type(0);
       try {
         // Extract characters and append them to `str`.
-        auto ich = is.rdbuf()->sgetc();
-        for(;;) {
-          if(traitsT::eq_int_type(ich, traitsT::eof())) {
-            state |= ios_base::eofbit;
-            goto done;
-          }
+        ich = is.rdbuf()->sgetc();
+        while(!(traitsT::eq_int_type(ich, traitsT::eof()))) {
           const auto ch = traitsT::to_char_type(ich);
           eol = traitsT::eq(ch, delim);
           if(eol) {
             is.rdbuf()->sbumpc();
-            goto done;
+            break;
           }
           if(str.size() >= str.max_size()) {
             state |= ios_base::failbit;
-            goto done;
+            break;
           }
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
@@ -2302,7 +2294,9 @@ template<typename charT, typename traitsT, typename allocatorT>
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
-    done:
+      if(traitsT::eq_int_type(ich, traitsT::eof())) {
+        state |= ios_base::eofbit;
+      }
       if(!eol && str.empty()) {
         state |= ios_base::failbit;
       }
