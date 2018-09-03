@@ -6,7 +6,7 @@
 
 #include <string> // std::char_traits<>
 #include <memory> // std::allocator<>, std::allocator_traits<>
-#include <istream> // std::streamsize, std::ios_base, std::basic_ios<>, std::basic_istream<>
+#include <istream> // std::streamsize, std::ios_base, std::basic_istream<>
 #include <locale> // std::isspace()
 #include <ostream> // std::basic_ostream<>
 #include <atomic> // std::atomic<>
@@ -40,7 +40,6 @@ using ::std::allocator;
 using ::std::allocator_traits;
 using ::std::streamsize;
 using ::std::ios_base;
-using ::std::basic_ios;
 using ::std::basic_istream;
 using ::std::basic_ostream;
 using ::std::atomic;
@@ -61,25 +60,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
   class basic_cow_string;
 
 namespace details_cow_string {
-
-  template<typename charT, typename traitsT>
-    void handle_io_exception(basic_ios<charT, traitsT> &ios)
-      {
-        // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
-        // XXX: Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
-        try {
-          ios.setstate(ios_base::badbit);
-        } catch(ios_base::failure &) {
-          // Ignore this exception.
-        }
-        // Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
-        if(ios.exceptions() & ios_base::badbit) {
-          throw;
-        }
-      }
-
-  extern template void handle_io_exception(::std::ios  &ios);
-  extern template void handle_io_exception(::std::wios &ios);
 
   template<typename allocatorT>
     struct basic_storage
@@ -2224,7 +2204,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           goto done;
         }
       } catch(...) {
-        details_cow_string::handle_io_exception(is);
+        noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
     done:
@@ -2271,7 +2251,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           offset += written;
         }
       } catch(...) {
-        details_cow_string::handle_io_exception(os);
+        noadl::handle_ios_exception(os);
         state &= ~ios_base::badbit;
       }
     done:
@@ -2324,7 +2304,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           goto done;
         }
       } catch(...) {
-        details_cow_string::handle_io_exception(is);
+        noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
     done:

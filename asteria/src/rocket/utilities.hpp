@@ -9,6 +9,7 @@
 #include <utility> // std::swap(), std::move(), std::forward()
 #include <new> // placement new
 #include <initializer_list> // std::initializer_list<>
+#include <iosfwd> // std::ios_base, std::basic_ios<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
 namespace rocket {
@@ -20,6 +21,8 @@ using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_destructible;
 using ::std::iterator_traits;
 using ::std::initializer_list;
+using ::std::ios_base;
+using ::std::basic_ios;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
@@ -47,6 +50,22 @@ template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
     {
       return (lhs < rhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
+    }
+
+template<typename charT, typename traitsT>
+  inline void handle_ios_exception(basic_ios<charT, traitsT> &ios)
+    {
+      // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
+      // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
+      try {
+        ios.setstate(ios_base::badbit);
+      } catch(...) {
+        // Ignore this exception.
+      }
+      // Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
+      if(ios.exceptions() & ios_base::badbit) {
+        throw;
+      }
     }
 
 template<typename iteratorT, typename functionT, typename ...paramsT>

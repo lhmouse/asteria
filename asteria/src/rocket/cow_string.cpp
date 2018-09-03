@@ -7,9 +7,6 @@ namespace rocket {
 
 namespace details_cow_string {
 
-  template void handle_io_exception(::std::ios  &ios);
-  template void handle_io_exception(::std::wios &ios);
-
   template class shallow_base<char>;
   template class shallow_base<wchar_t>;
   template class shallow_base<char16_t>;

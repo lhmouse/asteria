@@ -241,8 +241,7 @@ namespace {
           }
         }
       } catch(...) {
-        // XXX: Relying on a private function is evil.
-        rocket::details_cow_string::handle_io_exception(os);
+        rocket::handle_ios_exception(os);
         state &= ~std::ios_base::badbit;
       }
     done:
@@ -353,8 +352,7 @@ namespace {
           goto done;
         }
       } catch(...) {
-        // XXX: Relying on a private function is evil.
-        rocket::details_cow_string::handle_io_exception(os);
+        rocket::handle_ios_exception(os);
         state &= ~std::ios_base::badbit;
       }
     done:
