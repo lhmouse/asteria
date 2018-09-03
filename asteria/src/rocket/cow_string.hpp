@@ -2207,7 +2207,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(str.empty()) {
         state |= ios_base::failbit;
       }
-      if(state != ios_base::goodbit) {
+      if(state) {
         is.setstate(state);
       }
       is.width(0);
@@ -2254,7 +2254,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         state &= ~ios_base::badbit;
       }
     done:
-      if(state != ios_base::goodbit) {
+      if(state) {
         os.setstate(state);
       }
       os.width(0);
@@ -2306,7 +2306,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(!eol && str.empty()) {
         state |= ios_base::failbit;
       }
-      if(state != ios_base::goodbit) {
+      if(state) {
         is.setstate(state);
       }
       return is;
