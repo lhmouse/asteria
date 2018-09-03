@@ -18,7 +18,7 @@ class Parser_result
         error_istream_open_failure                 = 101,
         error_istream_fail_or_bad                  = 102,
         error_utf8_sequence_invalid                = 103,
-        error_utf_code_point_truncated             = 104,
+        error_utf8_sequence_truncated              = 104,
         error_utf_code_point_invalid               = 105,
         // Category: tokenizer
         error_token_character_unrecognized         = 201,

@@ -44,65 +44,17 @@ Token_stream & Token_stream::operator=(Token_stream &&) noexcept
   = default;
 
 namespace {
+
+  
+
+
+
+
+
+
+
+
 #if 0
-  Parser_result do_validate_code_point_utf8(Unsigned line, const String &str, Unsigned column)
-    {
-      // Get a UTF code point.
-      static constexpr unsigned char s_length_table[32] =
-        {
-          1, 1, 1, 1, 1, 1, 1, 1, // 0x00 ~ 0x38
-          1, 1, 1, 1, 1, 1, 1, 1, // 0x40 ~ 0x78
-          0, 0, 0, 0, 0, 0, 0, 0, // 0x80 ~ 0xB8
-          2, 2, 2, 2, 3, 3, 4, 0, // 0xC0 ~ 0xF8
-        };
-      char32_t code = static_cast<unsigned char>(str.at(column));
-      const unsigned length = s_length_table[code >> 3];
-      if(length == 0) {
-        // This leading character is not valid.
-        return Parser_result(line, column, 1, Parser_result::error_utf8_code_unit_invalid);
-      }
-      if(length > 1) {
-        // Unset bits that are not part of the payload.
-        code &= static_cast<char32_t>(0xFF) >> length;
-        // Accumulate trailing code units.
-        if(str.size() - column < length) {
-          // No enough characters are provided.
-          return Parser_result(line, column, str.size() - column, Parser_result::error_utf_code_point_truncated);
-        }
-        for(unsigned i = 1; i < length; ++i) {
-          const char32_t next = static_cast<unsigned char>(str.at(column + i));
-          if((next & 0xC0) != 0x80) {
-            // This trailing character is not valid.
-            return Parser_result(line, column, i + 1, Parser_result::error_utf8_code_unit_invalid);
-          }
-          code = (code << 6) | (next & 0x3F);
-        }
-        if((0xD800 <= code) && (code < 0xE000)) {
-          // Surrogates are not allowed.
-          return Parser_result(line, column, length, Parser_result::error_utf_surrogates_disallowed);
-        }
-        if(code >= 0x110000) {
-          // Code point value is too large.
-          return Parser_result(line, column, length, Parser_result::error_utf_code_point_too_large);
-        }
-        // Re-encode it and check for overlong sequences.
-        unsigned len_min;
-        if(code < 0x80) {
-          len_min = 1;
-        } else if(code < 0x800) {
-          len_min = 2;
-        } else if(code < 0x10000) {
-          len_min = 3;
-        } else {
-          len_min = 4;
-        }
-        if(length != len_min) {
-          // Overlong sequences are not allowed.
-          return Parser_result(line, column, length, Parser_result::error_utf8_encoding_overlong);
-        }
-      }
-      return Parser_result(line, column, length, Parser_result::error_success);
-    }
 
   bool do_merge_sign(Vector<Token> &tokens_inout, Unsigned line, Unsigned column)
     {
@@ -669,49 +621,15 @@ namespace {
 #endif
 }
 
-
-#if 0
-
-Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str)
-  {
-    // Ensure the source string is valid UTF-8.
-    Unsigned column = 0;
-    while(column < str.size()) {
-      const auto result = do_validate_code_point_utf8(line, str, column);
-      ROCKET_ASSERT(result.get_length() <= str.size() - column);
-      if(result.get_error() != Parser_result::error_success) {
-        ASTERIA_DEBUG_LOG("Invalid UTF-8 string: line = ", line, ", substr = `", str.substr(column, result.get_length()), "`, error = ", result.get_error());
-        return result;
-      }
-      ROCKET_ASSERT(result.get_length() > 0);
-      column += result.get_length();
-    }
-    // Get tokens one by one.
-    column = 0;
-    while(column < str.size()) {
-      const auto result = do_get_token(tokens_out, line, str, column);
-      ROCKET_ASSERT(result.get_length() <= str.size() - column);
-      if(result.get_error() != Parser_result::error_success) {
-        ASTERIA_DEBUG_LOG("Parser error: line = ", line, ", substr = `", str.substr(column, result.get_length()), "`, error = ", result.get_error());
-        return result;
-      }
-      ROCKET_ASSERT(result.get_length() > 0);
-      column += result.get_length();
-    }
-    return Parser_result(line, column, 0, Parser_result::error_success);
-  }
-
-#endif
-
-
 Parser_result Token_stream::load(std::istream &sis)
   {
-    Unsigned line = 1;
-    Unsigned column = 1;
+    // Parse source code line by line.
+    Unsigned line = 0;
+    bool in_comment = false;
     // Behave like an UnformattedInputFunction.
     const std::istream::sentry sentry(sis, true);
     if(!sentry) {
-      return Parser_result(line, column, 0, Parser_result::error_istream_open_failure);
+      return Parser_result(line, 1, 0, Parser_result::error_istream_open_failure);
     }
     // Move the vector out as its storage may be reused.
     Vector<Token> seq;
@@ -723,14 +641,16 @@ Parser_result Token_stream::load(std::istream &sis)
       // Parse source code line by line.
       using traits = std::istream::traits_type;
       String str;
-      for(;;) {
-        // Read a line.
+      // At the moment the only flag that could be set here is `eofbit`.
+      while(!state) {
+        // Clear it first so the storage may be reused.
         str.clear();
+        // Read characters and append them to `str`, until either an EOF or LF is encountered.
         for(;;) {
           const auto ich = sis.rdbuf()->sbumpc();
           if(traits::eq_int_type(ich, traits::eof())) {
             state |= std::ios_base::eofbit;
-            goto done;
+            break;
           }
           const auto ch = traits::to_char_type(ich);
           if(traits::eq(ch, '\n')) {
@@ -738,27 +658,85 @@ Parser_result Token_stream::load(std::istream &sis)
           }
           str.push_back(ch);
         }
-        // Discard the first line if it looks like a shebang.
-        if(str.starts_with("#!", 2)) {
+        // We have got a new line so far.
+        // Advance the line indicator. Ignore the first line if it looks like a shebang.
+        if((++line == 1) && str.starts_with("#!", 2)) {
           continue;
         }
-        __builtin_printf("line: %s\n", str.c_str());
+        // Ensure this line is a valid UTF-8 string.
+        std::size_t pos = 0;
+        for(;;) {
+          // How many bytes can we look ahead for?
+          const auto avail = str.size() - pos;
+          if(avail == 0) {
+            break;
+          }
+          // Read the first byte.
+          char32_t code = str.at(pos) & 0xFF;
+          if(code < 0x80) {
+            // This sequence contains only one byte.
+            pos += 1;
+            continue;
+          }
+          if(code < 0xC0) {
+            // This is not a leading character.
+            return Parser_result(line, pos + 1, 1, Parser_result::error_utf8_sequence_invalid);
+          }
+          if(code >= 0xF8) {
+            // If this leading character were valid, it would start a sequence of five bytes or more.
+            return Parser_result(line, pos + 1, 1, Parser_result::error_utf8_sequence_invalid);
+          }
+          // Calculate the number of bytes in this code point.
+          const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
+          ROCKET_ASSERT(u8len >= 2);
+          ROCKET_ASSERT(u8len <= 4);
+          if(avail < u8len) {
+            // No enough characters have been provided.
+            return Parser_result(line, pos + 1, avail, Parser_result::error_utf8_sequence_truncated);
+          }
+          // Unset bits that are not part of the payload.
+          code &= static_cast<unsigned char>(0xFF >> u8len);
+          // Accumulate trailing code units.
+          for(unsigned i = 1; i < u8len; ++i) {
+            const char32_t next = str.at(pos + i) & 0xFF;
+            if((next < 0x80) || (0xC0 <= next)) {
+              // This trailing character is not valid.
+              return Parser_result(line, pos + 1, i + 1, Parser_result::error_utf8_sequence_invalid);
+            }
+            code = (code << 6) | (next & 0x3F);
+          }
+          if((0xD800 <= code) && (code < 0xE000)) {
+            // Surrogates are not allowed.
+            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf_code_point_invalid);
+          }
+          if(code >= 0x110000) {
+            // Code point value is too large.
+            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf_code_point_invalid);
+          }
+          // Re-encode it and check for overlong sequences.
+          const auto minlen = static_cast<unsigned>(1 + (code >= 0x80) + (code >= 0x800) + (code >= 0x10000));
+          if(minlen != u8len) {
+            // Overlong sequences are not allowed.
+            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf8_sequence_invalid);
+          }
+          pos += u8len;
+        }
+__builtin_printf("line: %s\n", str.c_str());
       }
     } catch(...) {
       rocket::handle_ios_exception(sis);
       state &= ~std::ios_base::badbit;
     }
-  done:
     if(state) {
       sis.setstate(state);
     }
     // Note that `std::ios::fail()` checks for both `failbit` and `badbit`.
     if(sis.fail()) {
-      return Parser_result(line, column, 0, Parser_result::error_istream_fail_or_bad);
+      return Parser_result(line, 1, 0, Parser_result::error_istream_fail_or_bad);
     }
     // Accept the result.
     this->m_rseq.swap(do_reverse_token_sequence(seq));
-    return Parser_result(line, column, 0, Parser_result::error_success);
+    return Parser_result(line, 1, 0, Parser_result::error_success);
   }
 void Token_stream::clear() noexcept
   {
