@@ -2199,15 +2199,14 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
-        if(str.empty()) {
-          state |= ios_base::failbit;
-          goto done;
-        }
       } catch(...) {
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
     done:
+      if(str.empty()) {
+        state |= ios_base::failbit;
+      }
       if(state != ios_base::goodbit) {
         is.setstate(state);
       }
@@ -2276,11 +2275,11 @@ template<typename charT, typename traitsT, typename allocatorT>
       // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
       str.erase();
       // We need to set stream state bits outside the `try` block.
+      bool eol = false;
       auto state = ios_base::goodbit;
       try {
         // Extract characters and append them to `str`.
         auto ich = is.rdbuf()->sgetc();
-        bool eol = false;
         for(;;) {
           if(traitsT::eq_int_type(ich, traitsT::eof())) {
             state |= ios_base::eofbit;
@@ -2299,15 +2298,14 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
-        if(!eol && str.empty()) {
-          state |= ios_base::failbit;
-          goto done;
-        }
       } catch(...) {
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
       }
     done:
+      if(!eol && str.empty()) {
+        state |= ios_base::failbit;
+      }
       if(state != ios_base::goodbit) {
         is.setstate(state);
       }
