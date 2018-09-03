@@ -187,9 +187,6 @@ class Token
         }
   };
 
-// TODO move these elsewhere
-extern Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str);
-
 }
 
 #endif

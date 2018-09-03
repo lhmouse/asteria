@@ -14,27 +14,25 @@ class Parser_result
     enum Error : Uint32
       {
         error_success                              =   0,
-        // Category: encoding
-        error_utf8_code_unit_invalid               = 101,
-        error_utf_code_point_truncated             = 102,
-        error_utf_surrogates_disallowed            = 103,
-        error_utf_code_point_too_large             = 104,
-        error_utf8_encoding_overlong               = 105,
+        // Category: i/o, encoding
+        error_istream_open_failure                 = 101,
+        error_istream_fail_or_bad                  = 102,
+        error_utf8_sequence_invalid                = 103,
+        error_utf_code_point_truncated             = 104,
+        error_utf_code_point_invalid               = 105,
         // Category: tokenizer
         error_token_character_unrecognized         = 201,
         error_string_literal_unclosed              = 202,
-        error_escape_sequence_incomplete           = 203,
-        error_escape_sequence_unknown              = 204,
-        error_escape_sequence_invalid_hex          = 205,
-        error_numeric_literal_incomplete           = 206,
-        error_numeric_literal_suffixes_disallowed  = 207,
-        error_numeric_literal_exponent_overflow    = 208,
-        error_integer_literal_overflow             = 209,
-        error_integer_literal_exponent_negative    = 210,
-        error_double_literal_overflow              = 211,
-        error_double_literal_underflow             = 212,
-        error_escape_utf_surrogates_disallowed     = 213,
-        error_escape_utf_code_point_too_large      = 214,
+        error_escape_sequence_unknown              = 203,
+        error_escape_sequence_invalid_hex          = 204,
+        error_numeric_literal_incomplete           = 205,
+        error_numeric_literal_suffixes_disallowed  = 206,
+        error_numeric_literal_exponent_overflow    = 207,
+        error_integer_literal_overflow             = 208,
+        error_integer_literal_exponent_negative    = 209,
+        error_double_literal_overflow              = 210,
+        error_double_literal_underflow             = 211,
+        error_escape_utf_code_point_invalid        = 212,
       };
 
   private:
