@@ -743,7 +743,7 @@ Parser_result Token_stream::load(std::istream &sis)
             const auto head = str.at(pos);
             if(head == '\'') {
               // Escape sequences do not have special meanings inside single quotation marks.
-              auto epos = str.find('\'', pos);
+              const auto epos = str.find('\'', pos);
               if(epos == str.npos) {
                 return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
               }
@@ -802,7 +802,7 @@ Parser_result Token_stream::load(std::istream &sis)
           }
           // Search for the terminator of this block comment.
           static constexpr char s_term[2] = { '*', '/' };
-          auto epos = str.find(s_term, pos, 2);
+          const auto epos = str.find(s_term, pos, 2);
           if(epos == str.npos) {
             // The block comment will not end in this line.
             // Overwrite all characters remaining with spaces.
@@ -814,7 +814,7 @@ Parser_result Token_stream::load(std::istream &sis)
           // Finish this comment.
           bcom_line = 0;
           // Resume from the end of the comment.
-          pos = epos;
+          pos = epos + 2;
         }
         __builtin_printf("LINE: %s $\n", str.c_str());
       }
