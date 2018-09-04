@@ -164,7 +164,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
       {
         const auto &array_lhs = this->check<D_array>();
         const auto &array_rhs = other.check<D_array>();
-        const auto rlen = std::min(array_lhs.size(), array_rhs.size());
+        const auto rlen = rocket::min(array_lhs.size(), array_rhs.size());
         for(Size i = 0; i < rlen; ++i) {
           const auto res = array_lhs[i].compare(array_rhs[i]);
           if(res != Value::compare_equal) {

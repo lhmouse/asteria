@@ -125,7 +125,7 @@ namespace {
         {
           // Ignore a series of spaces.
           const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
-          const auto length = std::min(pos, str.size()) - column;
+          const auto length = rocket::min(pos, str.size()) - column;
           return Parser_result(line, column, length, Parser_result::error_success);
         }
       case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
@@ -400,7 +400,7 @@ namespace {
             }
           }
           auto pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
-          int_end = std::min(pos, str.size());
+          int_end = rocket::min(pos, str.size());
           if(int_begin == int_end) {
             return Parser_result(line, column, int_end - column, Parser_result::error_numeric_literal_incomplete);
           }
@@ -411,7 +411,7 @@ namespace {
           if(char_next == '.') {
             frac_begin += 1;
             pos = str.find_first_not_of(s_numeric_table, frac_begin, s_delim_count + radix * 2);
-            frac_end = std::min(pos, str.size());
+            frac_end = rocket::min(pos, str.size());
             if(frac_begin == frac_end) {
               return Parser_result(line, column, frac_end - column, Parser_result::error_numeric_literal_incomplete);
             }
@@ -439,7 +439,7 @@ namespace {
               exp_begin += 1;
             }
             pos = str.find_first_not_of(s_numeric_table, exp_begin, s_delim_count + 20);
-            exp_end = std::min(pos, str.size());
+            exp_end = rocket::min(pos, str.size());
             if(exp_begin == exp_end) {
               return Parser_result(line, column, exp_end - column, Parser_result::error_numeric_literal_incomplete);
             }
@@ -447,7 +447,7 @@ namespace {
           // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
           // Since we make no use of them, we just reserve them for further use for good.
           pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end);
-          pos = std::min(pos, str.size());
+          pos = rocket::min(pos, str.size());
           if(pos != exp_end) {
             return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_numeric_literal_suffixes_disallowed);
           }
@@ -620,7 +620,7 @@ namespace {
           ROCKET_ASSERT(std::is_sorted(std::begin(s_keyword_table), std::end(s_keyword_table), Keyword_comparator()));
 #endif
           const auto pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", column + 1);
-          const auto length = std::min(pos, str.size()) - column;
+          const auto length = rocket::min(pos, str.size()) - column;
           // Check whether this matches a keyword.
           const auto range = std::equal_range(std::begin(s_keyword_table), std::end(s_keyword_table), char_head, Keyword_comparator());
           for(auto it = range.first; it != range.second; ++it) {
