@@ -768,7 +768,7 @@ Parser_result Token_stream::load(std::istream &sis)
                   epos += 1;
                   continue;
                 }
-                // Because a backslash cannot occur as part of escape sequences, we just ignore any escaped character for simplicity.
+                // Because a backslash cannot occur as part of escape sequences, we just ignore any character escaped for simplicity.
                 epos += 2;
               }
               // Continue from the next character to the end of this string literal.
@@ -804,7 +804,7 @@ Parser_result Token_stream::load(std::istream &sis)
           static constexpr char s_term[2] = { '*', '/' };
           auto epos = str.find(s_term, pos, 2);
           if(epos == str.npos) {
-            // The block will not end in this line.
+            // The block comment will not end in this line.
             // Overwrite all characters remaining with spaces.
             str.replace(pos, avail, avail, ' ');
             break;
