@@ -492,34 +492,34 @@ template<typename elementT>
     }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &iptr)
+  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(iptr);
     }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&iptr)
+  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(iptr));
     }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &iptr)
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(iptr);
     }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&iptr)
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(iptr));
     }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &iptr)
+  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(iptr);
     }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&iptr)
+  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
     {
       return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(::std::move(iptr));
     }
