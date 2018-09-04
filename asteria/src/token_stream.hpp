@@ -26,8 +26,8 @@ class Token_stream
     void clear() noexcept;
 
     bool empty() const noexcept;
-    std::size_t size() const noexcept;
-    const Token * peek(std::size_t offset = 0) const noexcept;
+    Size size() const noexcept;
+    const Token * peek(Size offset = 0) const noexcept;
     Token shift();
   };
 

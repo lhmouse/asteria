@@ -45,9 +45,9 @@ Token_stream & Token_stream::operator=(Token_stream &&) noexcept
 
 namespace {
 
-  String & do_blank_comment(String &str_inout, std::size_t tpos, std::size_t tn)
+  String & do_blank_comment(String &str_inout, Size tpos, Size tn)
     {
-      for(std::size_t i = tpos; i < tpos + tn; ++i) {
+      for(Size i = tpos; i < tpos + tn; ++i) {
         const auto ch = str_inout.at(i);
         if((ch == ' ') || (ch == '\t')) {
           continue;
@@ -113,7 +113,7 @@ namespace {
         {
           // Ignore a series of spaces.
           const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
-          const auto length = std::min(pos, str.size()) - column;
+          const auto length = rocket::min(pos, str.size()) - column;
           return Parser_result(line, column, length, Parser_result::error_success);
         }
       case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
@@ -365,11 +365,11 @@ namespace {
           // 1. If `frac_begin` equals `int_end` then there is no fractional part.
           // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
           unsigned radix;
-          std::size_t int_begin, int_end;
-          std::size_t frac_begin, frac_end;
+          Size int_begin, int_end;
+          Size frac_begin, frac_end;
           unsigned exp_base;
           bool exp_sign;
-          std::size_t exp_begin, exp_end;
+          Size exp_begin, exp_end;
           // Check for radix prefixes.
           radix = 10;
           int_begin = column;
@@ -386,7 +386,7 @@ namespace {
             }
           }
           auto pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
-          int_end = std::min(pos, str.size());
+          int_end = rocket::min(pos, str.size());
           if(int_begin == int_end) {
             return Parser_result(line, column, int_end - column, Parser_result::error_numeric_literal_incomplete);
           }
@@ -397,7 +397,7 @@ namespace {
           if(char_next == '.') {
             frac_begin += 1;
             pos = str.find_first_not_of(s_numeric_table, frac_begin, s_delim_count + radix * 2);
-            frac_end = std::min(pos, str.size());
+            frac_end = rocket::min(pos, str.size());
             if(frac_begin == frac_end) {
               return Parser_result(line, column, frac_end - column, Parser_result::error_numeric_literal_incomplete);
             }
@@ -425,7 +425,7 @@ namespace {
               exp_begin += 1;
             }
             pos = str.find_first_not_of(s_numeric_table, exp_begin, s_delim_count + 20);
-            exp_end = std::min(pos, str.size());
+            exp_end = rocket::min(pos, str.size());
             if(exp_begin == exp_end) {
               return Parser_result(line, column, exp_end - column, Parser_result::error_numeric_literal_incomplete);
             }
@@ -433,7 +433,7 @@ namespace {
           // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
           // Since we make no use of them, we just reserve them for further use for good.
           pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end);
-          pos = std::min(pos, str.size());
+          pos = rocket::min(pos, str.size());
           if(pos != exp_end) {
             return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_numeric_literal_suffixes_disallowed);
           }
@@ -605,7 +605,7 @@ namespace {
           ROCKET_ASSERT(std::is_sorted(std::begin(s_keyword_table), std::end(s_keyword_table), Keyword_comparator()));
           // Get an identifier.
           const auto pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", column + 1);
-          const auto length = std::min(pos, str.size()) - column;
+          const auto length = rocket::min(pos, str.size()) - column;
           // Check whether this matches a keyword.
           const auto range = std::equal_range(std::begin(s_keyword_table), std::end(s_keyword_table), char_head, Keyword_comparator());
           for(auto it = range.first; it != range.second; ++it) {
@@ -634,10 +634,10 @@ namespace {
 Parser_result Token_stream::load(std::istream &sis)
   {
     // Save the current line number.
-    std::size_t line = 0;
+    Size line = 0;
     // Save the position of the unterminated block comment.
-    std::size_t bcom_line = 0;
-    std::size_t bcom_pos = 0;
+    Size bcom_line = 0;
+    Size bcom_pos = 0;
     // Behave like an UnformattedInputFunction.
     const std::istream::sentry sentry(sis, true);
     if(!sentry) {
@@ -679,7 +679,7 @@ Parser_result Token_stream::load(std::istream &sis)
         // Phase 1
         //   Ensure this line is a valid UTF-8 string.
         ///////////////////////////////////////////////////////////////////////
-        std::size_t pos = 0;
+        Size pos = 0;
         for(;;) {
           // How many bytes can we look ahead for?
           const auto avail = str.size() - pos;
@@ -856,11 +856,11 @@ bool Token_stream::empty() const noexcept
   {
     return this->m_rseq.empty();
   }
-std::size_t Token_stream::size() const noexcept
+Size Token_stream::size() const noexcept
   {
     return this->m_rseq.size();
   }
-const Token * Token_stream::peek(std::size_t offset) const noexcept
+const Token * Token_stream::peek(Size offset) const noexcept
   {
     const auto ntoken = this->m_rseq.size();
     if(offset >= ntoken) {
