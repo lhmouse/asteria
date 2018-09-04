@@ -13,7 +13,7 @@ namespace Asteria {
 class Token
   {
   public:
-    enum Keyword : Uint8
+    enum Keyword : std::uint8_t
       {
         keyword_var       =  0,
         keyword_const     =  1,
@@ -44,7 +44,7 @@ class Token
         keyword_export    = 26,
         keyword_import    = 27,
       };
-    enum Punctuator : Uint8
+    enum Punctuator : std::uint8_t
       {
         punctuator_add         =  0, // +
         punctuator_add_eq      =  1, // +=
@@ -98,7 +98,7 @@ class Token
         punctuator_semicolon   = 49, // ;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_keyword          = 0,
         index_punctuator       = 1,
@@ -143,14 +143,14 @@ class Token
 
   private:
     Unsigned m_line;
-    Unsigned m_column;
-    Size m_length;
+    Unsigned m_offset;
+    std::size_t m_length;
     Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(Unsigned line, Unsigned column, Size length, AltT &&alt)
-        : m_line(line), m_column(column), m_length(length), m_stor(std::forward<AltT>(alt))
+      Token(Unsigned line, Unsigned offset, std::size_t length, AltT &&alt)
+        : m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
     ~Token();
@@ -163,11 +163,11 @@ class Token
       {
         return this->m_line;
       }
-    Unsigned get_column() const noexcept
+    Unsigned get_offset() const noexcept
       {
-        return this->m_column;
+        return this->m_offset;
       }
-    Size get_length() const noexcept
+    std::size_t get_length() const noexcept
       {
         return this->m_length;
       }

@@ -11,10 +11,12 @@ using namespace Asteria;
 int main()
   {
     Token_stream ts;
-    std::istringstream iss("hh+++ \n"
+    std::istringstream iss("#!meow \n"
+                           "hh+++ \n"
                            " if <<<->>>>>\"\\u55b5b喵\"/\n"
-                           "* - 0x1_7.8:4p+4  \n"
-                           ".false ;-42e13");
+                           "* - 0x1_7.8:4p+4  // comments\n"
+                           ".false/*more\n"
+                           "comments*/;/*yet more*/-42e13");
     auto result = ts.load(iss);
     ASTERIA_TEST_CHECK(result.get_error() == result.error_success);
     ASTERIA_TEST_CHECK(iss.eof());

@@ -623,13 +623,15 @@ namespace {
 
 Parser_result Token_stream::load(std::istream &sis)
   {
-    // Parse source code line by line.
-    Unsigned line = 0;
-    bool in_comment = false;
+    // Save the current line number.
+    std::size_t line = 0;
+    // Save the position of the unterminated block comment.
+    std::size_t bcom_line = 0;
+    std::size_t bcom_pos = 0;
     // Behave like an UnformattedInputFunction.
     const std::istream::sentry sentry(sis, true);
     if(!sentry) {
-      return Parser_result(line, 1, 0, Parser_result::error_istream_open_failure);
+      return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
     }
     // Move the vector out as its storage may be reused.
     Vector<Token> seq;
@@ -663,7 +665,10 @@ Parser_result Token_stream::load(std::istream &sis)
         if((++line == 1) && str.starts_with("#!", 2)) {
           continue;
         }
-        // Ensure this line is a valid UTF-8 string.
+        ///////////////////////////////////////////////////////////////////////
+        // Phase 1
+        //   Ensure this line is a valid UTF-8 string.
+        ///////////////////////////////////////////////////////////////////////
         std::size_t pos = 0;
         for(;;) {
           // How many bytes can we look ahead for?
@@ -680,11 +685,11 @@ Parser_result Token_stream::load(std::istream &sis)
           }
           if(code < 0xC0) {
             // This is not a leading character.
-            return Parser_result(line, pos + 1, 1, Parser_result::error_utf8_sequence_invalid);
+            return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
           }
           if(code >= 0xF8) {
             // If this leading character were valid, it would start a sequence of five bytes or more.
-            return Parser_result(line, pos + 1, 1, Parser_result::error_utf8_sequence_invalid);
+            return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
           }
           // Calculate the number of bytes in this code point.
           const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
@@ -692,7 +697,7 @@ Parser_result Token_stream::load(std::istream &sis)
           ROCKET_ASSERT(u8len <= 4);
           if(avail < u8len) {
             // No enough characters have been provided.
-            return Parser_result(line, pos + 1, avail, Parser_result::error_utf8_sequence_truncated);
+            return Parser_result(line, pos, avail, Parser_result::error_utf8_sequence_truncated);
           }
           // Unset bits that are not part of the payload.
           code &= static_cast<unsigned char>(0xFF >> u8len);
@@ -701,27 +706,121 @@ Parser_result Token_stream::load(std::istream &sis)
             const char32_t next = str.at(pos + i) & 0xFF;
             if((next < 0x80) || (0xC0 <= next)) {
               // This trailing character is not valid.
-              return Parser_result(line, pos + 1, i + 1, Parser_result::error_utf8_sequence_invalid);
+              return Parser_result(line, pos, i + 1, Parser_result::error_utf8_sequence_invalid);
             }
             code = (code << 6) | (next & 0x3F);
           }
           if((0xD800 <= code) && (code < 0xE000)) {
             // Surrogates are not allowed.
-            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf_code_point_invalid);
+            return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
           }
           if(code >= 0x110000) {
             // Code point value is too large.
-            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf_code_point_invalid);
+            return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
           }
           // Re-encode it and check for overlong sequences.
           const auto minlen = static_cast<unsigned>(1 + (code >= 0x80) + (code >= 0x800) + (code >= 0x10000));
           if(minlen != u8len) {
             // Overlong sequences are not allowed.
-            return Parser_result(line, pos + 1, u8len, Parser_result::error_utf8_sequence_invalid);
+            return Parser_result(line, pos, u8len, Parser_result::error_utf8_sequence_invalid);
           }
           pos += u8len;
         }
-__builtin_printf("line: %s\n", str.c_str());
+        ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
+        ///////////////////////////////////////////////////////////////////////
+        // Phase 2
+        //   Strip comments from this line.
+        ///////////////////////////////////////////////////////////////////////
+        pos = 0;
+        for(;;) {
+          // How many bytes can we look ahead for?
+          const auto avail = str.size() - pos;
+          if(avail == 0) {
+            break;
+          }
+          // Check for the beginning of comments if we aren't inside one.
+          if(bcom_line == 0) {
+            const auto head = str.at(pos);
+            if(head == '\'') {
+              // Escape sequences do not have special meanings inside single quotation marks.
+              auto epos = str.find('\'', pos);
+              if(epos == str.npos) {
+                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              }
+              // Continue from the next character to the end of this string literal.
+              pos = epos + 1;
+              continue;
+            }
+            if(head == '\"') {
+              // Get the end of the string literal.
+              auto epos = pos + 1;
+              for(;;) {
+                if(epos >= str.size()) {
+                  return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+                }
+                const auto next = str.at(epos);
+                if(next == '\"') {
+                  // The end of this string is encountered. Finish.
+                  break;
+                }
+                if(next != '\\') {
+                  // Accumulate one character.
+                  epos += 1;
+                  continue;
+                }
+                // Because a backslash cannot occur as part of escape sequences, we just ignore any escaped character for simplicity.
+                epos += 2;
+              }
+              // Continue from the next character to the end of this string literal.
+              pos = epos + 1;
+              continue;
+            }
+            if(head == '/') {
+              // We have to use `[]` instead of `.at()` here because `pos + 1` may equal `str.size()`.
+              const auto next = str[pos + 1];
+              if(next == '/') {
+                // Start a line comment.
+                // Overwrite all characters remaining with spaces.
+                str.replace(pos, avail, avail, ' ');
+                break;
+              }
+              if(next == '*') {
+                // Start a block comment.
+                ROCKET_ASSERT(line != 0);
+                bcom_line = line;
+                bcom_pos = pos;
+                // Fallthrough.
+              }
+            }
+            // Fallthrough.
+          }
+          // Are we inside a block comment now?
+          if(bcom_line == 0) {
+            // If not, skip this character.
+            pos += 1;
+            continue;
+          }
+          // Search for the terminator of this block comment.
+          static constexpr char s_term[2] = { '*', '/' };
+          auto epos = str.find(s_term, pos, 2);
+          if(epos == str.npos) {
+            // The block will not end in this line.
+            // Overwrite all characters remaining with spaces.
+            str.replace(pos, avail, avail, ' ');
+            break;
+          }
+          // Overwrite this block comment with spaces, including the comment terminator.
+          str.replace(pos, epos + 2 - pos, epos + 2 - pos, ' ');
+          // Finish this comment.
+          bcom_line = 0;
+          // Resume from the end of the comment.
+          pos = epos;
+        }
+        __builtin_printf("LINE: %s $\n", str.c_str());
+      }
+      // Complain about block comments that haven't been closed.
+      if(bcom_line != 0) {
+        return Parser_result(bcom_line, bcom_pos, 2, Parser_result::error_block_comment_unclosed);
       }
     } catch(...) {
       rocket::handle_ios_exception(sis);
@@ -732,11 +831,11 @@ __builtin_printf("line: %s\n", str.c_str());
     }
     // Note that `std::ios::fail()` checks for both `failbit` and `badbit`.
     if(sis.fail()) {
-      return Parser_result(line, 1, 0, Parser_result::error_istream_fail_or_bad);
+      return Parser_result(line, 0, 0, Parser_result::error_istream_fail_or_bad);
     }
     // Accept the result.
     this->m_rseq.swap(do_reverse_token_sequence(seq));
-    return Parser_result(line, 1, 0, Parser_result::error_success);
+    return Parser_result(line, 0, 0, Parser_result::error_success);
   }
 void Token_stream::clear() noexcept
   {
