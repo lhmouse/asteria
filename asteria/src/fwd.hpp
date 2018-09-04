@@ -6,7 +6,6 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::pair<>
-#include <memory> // std::shared_ptr<>, std::weak_ptr<>, std::make_shared()
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include "rocket/preprocessor_utilities.h"

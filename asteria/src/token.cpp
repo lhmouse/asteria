@@ -453,14 +453,14 @@ namespace {
           }
           const auto length = pos - column;
           // Parse the exponent.
-          std::int32_t exp = 0;
+          int exp = 0;
           for(pos = exp_begin; pos != exp_end; ++pos) {
             const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, 20, str.at(pos));
             if(!ptr) {
               continue;
             }
             const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-            const auto bound = (std::numeric_limits<std::int32_t>::max() - digit_value) / 10;
+            const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
             if(exp > bound) {
               return Parser_result(line, column, length, Parser_result::error_numeric_literal_exponent_overflow);
             }
@@ -490,7 +490,7 @@ namespace {
               if(exp < 0) {
                 return Parser_result(line, column, length, Parser_result::error_integer_literal_exponent_negative);
               }
-              for(std::int32_t i = 0; i < exp; ++i) {
+              for(int i = 0; i < exp; ++i) {
                 const auto bound = std::numeric_limits<decltype(value)>::max() / exp_base;
                 if(value > bound) {
                   return Parser_result(line, column, length, Parser_result::error_integer_literal_overflow);
