@@ -45,7 +45,17 @@ Token_stream & Token_stream::operator=(Token_stream &&) noexcept
 
 namespace {
 
-  
+  String & do_blank_comment(String &str_inout, std::size_t tpos, std::size_t tn)
+    {
+      for(std::size_t i = tpos; i < tpos + tn; ++i) {
+        const auto ch = str_inout.at(i);
+        if((ch == ' ') || (ch == '\t')) {
+          continue;
+        }
+        str_inout.mut(i) = ' ';
+      }
+      return str_inout;
+    }
 
 
 
@@ -781,7 +791,7 @@ Parser_result Token_stream::load(std::istream &sis)
               if(next == '/') {
                 // Start a line comment.
                 // Overwrite all characters remaining with spaces.
-                str.replace(pos, avail, avail, ' ');
+                do_blank_comment(str, pos, avail);
                 break;
               }
               if(next == '*') {
@@ -806,11 +816,11 @@ Parser_result Token_stream::load(std::istream &sis)
           if(epos == str.npos) {
             // The block comment will not end in this line.
             // Overwrite all characters remaining with spaces.
-            str.replace(pos, avail, avail, ' ');
+            do_blank_comment(str, pos, avail);
             break;
           }
           // Overwrite this block comment with spaces, including the comment terminator.
-          str.replace(pos, epos + 2 - pos, epos + 2 - pos, ' ');
+          do_blank_comment(str, pos, epos + 2 - pos);
           // Finish this comment.
           bcom_line = 0;
           // Resume from the end of the comment.
