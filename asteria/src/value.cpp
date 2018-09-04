@@ -165,7 +165,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         const auto &array_lhs = this->check<D_array>();
         const auto &array_rhs = other.check<D_array>();
         const auto rlen = std::min(array_lhs.size(), array_rhs.size());
-        for(std::size_t i = 0; i < rlen; ++i) {
+        for(Size i = 0; i < rlen; ++i) {
           const auto res = array_lhs[i].compare(array_rhs[i]);
           if(res != Value::compare_equal) {
             return res;
@@ -192,10 +192,10 @@ namespace {
     {
     private:
       bool m_nl;
-      std::size_t m_cnt;
+      Size m_cnt;
 
     public:
-      constexpr Indent(bool nl, std::size_t cnt) noexcept
+      constexpr Indent(bool nl, Size cnt) noexcept
         : m_nl(nl), m_cnt(cnt)
         {
         }
@@ -205,7 +205,7 @@ namespace {
         {
           return this->m_nl;
         }
-      std::size_t count() const noexcept
+      Size count() const noexcept
         {
           return this->m_cnt;
         }
@@ -365,7 +365,7 @@ namespace {
 
 }
 
-void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
+void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) const
   {
     switch(this->type()) {
     case Value::type_null:

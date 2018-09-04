@@ -12,7 +12,7 @@ namespace Asteria {
 class Reference_modifier
   {
   public:
-    enum Index : std::uint8_t
+    enum Index : Uint8
       {
         index_array_index  = 0,
         index_object_key   = 1,

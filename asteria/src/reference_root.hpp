@@ -14,7 +14,7 @@ namespace Asteria {
 class Reference_root
   {
   public:
-    enum Index : std::uint8_t
+    enum Index : Uint8
       {
         index_constant   = 0,
         index_temporary  = 1,

@@ -16,7 +16,7 @@ namespace Asteria {
 class Xpnode
   {
   public:
-    enum Xop : std::uint8_t
+    enum Xop : Uint8
       {
         // Postfix operators
         xop_postfix_inc    = 10, // ++
@@ -53,7 +53,7 @@ class Xpnode
         xop_infix_assign   = 72, // =
       };
 
-    enum Index : std::uint8_t
+    enum Index : Uint8
       {
         index_literal           =  0,
         index_named_reference   =  1,
@@ -98,7 +98,7 @@ class Xpnode
       {
         String file;
         Unsigned line;
-        std::size_t arg_cnt;
+        Size arg_cnt;
       };
     struct S_operator_rpn
       {

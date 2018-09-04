@@ -11,7 +11,7 @@ namespace Asteria {
 class Parser_result
   {
   public:
-    enum Error : std::uint32_t
+    enum Error : Uint32
       {
         error_success                              =   0,
         // Category: encoding
@@ -40,11 +40,11 @@ class Parser_result
   private:
     Unsigned m_line;
     Unsigned m_column;
-    std::size_t m_length;
+    Size m_length;
     Error m_error;
 
   public:
-    constexpr Parser_result(Unsigned line, Unsigned column, std::size_t length, Error error) noexcept
+    constexpr Parser_result(Unsigned line, Unsigned column, Size length, Error error) noexcept
       : m_line(line), m_column(column), m_length(length), m_error(error)
       {
       }
@@ -58,7 +58,7 @@ class Parser_result
       {
         return this->m_column;
       }
-    std::size_t get_length() const noexcept
+    Size get_length() const noexcept
       {
         return this->m_length;
       }

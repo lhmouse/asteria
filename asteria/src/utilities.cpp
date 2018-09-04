@@ -90,7 +90,7 @@ void Formatter::do_put(const void *value)
 
 namespace {
 
-  int do_print_time(char *str, std::size_t cap)
+  int do_print_time(char *str, Size cap)
     {
       int len;
 #ifdef _WIN32
@@ -113,7 +113,7 @@ namespace {
   void do_replace_all(String &str, char ch, const char *reps)
     {
       const auto repn = std::strlen(reps);
-      auto pos = std::size_t(0);
+      auto pos = Size(0);
       do {
         pos = str.find(ch, pos);
         if(pos == str.npos) {

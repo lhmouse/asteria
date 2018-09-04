@@ -26,7 +26,7 @@ bool Expression::empty() const noexcept
   {
     return this->m_nodes.empty();
   }
-std::size_t Expression::size() const noexcept
+Size Expression::size() const noexcept
   {
     return this->m_nodes.size();
   }

@@ -28,7 +28,7 @@ bool Block::empty() const noexcept
   {
     return this->m_stmts.empty();
   }
-std::size_t Block::size() const noexcept
+Size Block::size() const noexcept
   {
     return this->m_stmts.size();
   }

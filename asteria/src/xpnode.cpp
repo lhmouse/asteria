@@ -471,8 +471,8 @@ namespace {
         if(lhs.size() > res.max_size() / count) {
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
-        res.reserve(lhs.size() * static_cast<std::size_t>(count));
-        auto mask = std::numeric_limits<std::size_t>::max() / 2 + 1;
+        res.reserve(lhs.size() * static_cast<Size>(count));
+        auto mask = std::numeric_limits<Size>::max() / 2 + 1;
         do {
           if(count & mask) {
             res.append(lhs);

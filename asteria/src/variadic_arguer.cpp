@@ -42,7 +42,7 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
           ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", *qindex, ", nvarg = ", nvarg);
           return { };
         }
-        return this->m_vargs.at(static_cast<std::size_t>(rindex));
+        return this->m_vargs.at(static_cast<Size>(rindex));
       }
     case 0:
       {

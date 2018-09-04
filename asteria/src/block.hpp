@@ -11,7 +11,7 @@ namespace Asteria {
 class Block
   {
   public:
-    enum Status : std::uint8_t
+    enum Status : Uint8
       {
         status_next             = 0,
         status_break_unspec     = 1,
@@ -36,7 +36,7 @@ class Block
 
   public:
     bool empty() const noexcept;
-    std::size_t size() const noexcept;
+    Size size() const noexcept;
 
     void fly_over_in_place(Abstract_context &ctx_inout) const;
     Block bind_in_place(Analytic_context &ctx_inout) const;

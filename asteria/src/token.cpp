@@ -379,11 +379,11 @@ namespace {
           // 1) If `frac_begin` equals `int_end` then there is no fractional part.
           // 2) If `exp_begin` equals `frac_end` then there is no exponent part.
           unsigned radix;
-          std::size_t int_begin, int_end;
-          std::size_t frac_begin, frac_end;
+          Size int_begin, int_end;
+          Size frac_begin, frac_end;
           unsigned exp_base;
           bool exp_sign;
-          std::size_t exp_begin, exp_end;
+          Size exp_begin, exp_end;
           // Check for radix prefixes.
           radix = 10;
           int_begin = column;

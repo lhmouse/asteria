@@ -13,7 +13,7 @@ namespace Asteria {
 class Token
   {
   public:
-    enum Keyword : std::uint8_t
+    enum Keyword : Uint8
       {
         keyword_var       =  0,
         keyword_const     =  1,
@@ -44,7 +44,7 @@ class Token
         keyword_export    = 26,
         keyword_import    = 27,
       };
-    enum Punctuator : std::uint8_t
+    enum Punctuator : Uint8
       {
         punctuator_add         =  0, // +
         punctuator_add_eq      =  1, // +=
@@ -98,7 +98,7 @@ class Token
         punctuator_semicolon   = 49, // ;
       };
 
-    enum Index : std::uint8_t
+    enum Index : Uint8
       {
         index_keyword          = 0,
         index_punctuator       = 1,
@@ -144,12 +144,12 @@ class Token
   private:
     Unsigned m_line;
     Unsigned m_column;
-    std::size_t m_length;
+    Size m_length;
     Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(Unsigned line, Unsigned column, std::size_t length, AltT &&alt)
+      Token(Unsigned line, Unsigned column, Size length, AltT &&alt)
         : m_line(line), m_column(column), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
@@ -167,7 +167,7 @@ class Token
       {
         return this->m_column;
       }
-    std::size_t get_length() const noexcept
+    Size get_length() const noexcept
       {
         return this->m_length;
       }

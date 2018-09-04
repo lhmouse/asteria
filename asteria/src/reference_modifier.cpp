@@ -47,7 +47,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
-        const auto rit = qarr->begin() + static_cast<std::ptrdiff_t>(rindex);
+        const auto rit = qarr->begin() + static_cast<Diff>(rindex);
         return &(rit[0]);
       }
     case Reference_modifier::index_object_key:
@@ -102,7 +102,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }
-          qarr->insert(qarr->begin(), static_cast<std::size_t>(size_add));
+          qarr->insert(qarr->begin(), static_cast<Size>(size_add));
           rindex = 0;
         }
         if(rindex >= static_cast<Signed>(qarr->size())) {
@@ -114,9 +114,9 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }
-          qarr->insert(qarr->end(), static_cast<std::size_t>(size_add));
+          qarr->insert(qarr->end(), static_cast<Size>(size_add));
         }
-        const auto rit = qarr->mut_begin() + static_cast<std::ptrdiff_t>(rindex);
+        const auto rit = qarr->mut_begin() + static_cast<Diff>(rindex);
         if(erased_out_opt) {
           *erased_out_opt = std::move(rit[0]);
           qarr->erase(rit);

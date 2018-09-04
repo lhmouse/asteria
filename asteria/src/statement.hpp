@@ -14,7 +14,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : std::uint8_t
+    enum Target : Uint8
       {
         target_scope_unspec  = 0,
         target_scope_switch  = 1,
@@ -22,7 +22,7 @@ class Statement
         target_scope_for     = 3,
       };
 
-    enum Index : std::uint8_t
+    enum Index : Uint8
       {
         index_expression  =  0,
         index_var_def     =  1,
