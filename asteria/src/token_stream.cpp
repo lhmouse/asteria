@@ -12,16 +12,16 @@ namespace Asteria {
 
 namespace {
 
-  Vector<Token> & do_reverse_token_sequence(Vector<Token> &seq)
+  Vector<Token> & do_reverse_token_sequence(Vector<Token> &seq_inout)
     {
-      if(seq.size() > 1) {
-        auto fr = seq.mut_begin();
-        auto bk = seq.mut_end() - 1;
+      if(seq_inout.size() > 1) {
+        auto fr = seq_inout.mut_begin();
+        auto bk = seq_inout.mut_end() - 1;
         do {
           std::iter_swap(fr, bk);
         } while(++fr < --bk);
       }
-      return seq;
+      return seq_inout;
     }
 
 }
@@ -47,12 +47,14 @@ namespace {
 
   String & do_blank_comment(String &str_inout, Size tpos, Size tn)
     {
-      for(Size i = tpos; i < tpos + tn; ++i) {
-        const auto ch = str_inout.at(i);
-        if((ch == ' ') || (ch == '\t')) {
-          continue;
+      auto pos = tpos;
+      for(;;) {
+        pos = str_inout.find_first_not_of(" \t\v\f\r\n", pos);
+        if(pos - tpos >= tn) {
+          break;
         }
-        str_inout.mut(i) = ' ';
+        str_inout.mut(pos) = ' ';
+        ++pos;
       }
       return str_inout;
     }
