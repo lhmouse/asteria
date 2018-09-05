@@ -59,6 +59,25 @@ namespace {
       return str_inout;
     }
 
+  struct Prefix_comparator
+    {
+      template<typename ElementT>
+        bool operator()(const ElementT &lhs, const ElementT &rhs) const noexcept
+          {
+            return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
+          }
+      template<typename ElementT>
+        bool operator()(char lhs, const ElementT &rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs, rhs.first[0]);
+          }
+      template<typename ElementT>
+        bool operator()(const ElementT &lhs, char rhs) const noexcept
+          {
+            return std::char_traits<char>::lt(lhs.first[0], rhs);
+          }
+    };
+
 
 
 
@@ -74,14 +93,14 @@ namespace {
       if(tokens_inout.empty()) {
         return false;
       }
-      auto cand_punct = tokens_inout.back().opt<Token::S_punctuator>();
-      if(cand_punct == nullptr) {
+      auto kpunct = tokens_inout.back().opt<Token::S_punctuator>();
+      if(kpunct == nullptr) {
         return false;
       }
-      if((cand_punct->punct != Token::punctuator_add) && (cand_punct->punct != Token::punctuator_sub)) {
+      if((kpunct->punct != Token::punctuator_add) && (kpunct->punct != Token::punctuator_sub)) {
         return false;
       }
-      const bool sign = cand_punct->punct == Token::punctuator_sub;
+      const bool sign = kpunct->punct == Token::punctuator_sub;
       // Don't merge them if they are not contiguous.
       if(tokens_inout.back().get_line() != line) {
         return false;
@@ -91,14 +110,14 @@ namespace {
       }
       // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
       if(tokens_inout.size() >= 2) {
-        cand_punct = tokens_inout.rbegin()[1].opt<Token::S_punctuator>();
-        if(cand_punct == nullptr) {
+        kpunct = tokens_inout.rbegin()[1].opt<Token::S_punctuator>();
+        if(kpunct == nullptr) {
           return false;
         }
-        if((cand_punct->punct == Token::punctuator_inc) || (cand_punct->punct == Token::punctuator_dec)) {
+        if((kpunct->punct == Token::punctuator_inc) || (kpunct->punct == Token::punctuator_dec)) {
           return false;
         }
-        if((cand_punct->punct == Token::punctuator_parenth_cl) || (cand_punct->punct == Token::punctuator_bracket_cl)) {
+        if((kpunct->punct == Token::punctuator_parenth_cl) || (kpunct->punct == Token::punctuator_bracket_cl)) {
           return false;
         }
       }
@@ -109,14 +128,12 @@ namespace {
 
   Parser_result do_get_token(Vector<Token> &tokens_out, Unsigned line, const String &str, Unsigned column)
     {
-      const auto char_head = str.at(column);
-      switch(char_head) {
-      case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n':
-        {
-          // Ignore a series of spaces.
-          const auto pos = str.find_first_not_of(" \t\v\f\r\n", column + 1);
-          const auto length = rocket::min(pos, str.size()) - column;
-          return Parser_result(line, column, length, Parser_result::error_success);
+
+
+
+
+
+
         }
       case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
       case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
@@ -125,7 +142,7 @@ namespace {
           // Get a punctuator.
           struct Punctuator_element
             {
-              char first[5];
+              char first[6];
               Token::Punctuator second;
             };
           struct Punctuator_comparator
@@ -560,7 +577,7 @@ namespace {
           // Get an identifier, then check whether it is a keyword.
           struct Keyword_element
             {
-              char first[15];
+              char first[14];
               Token::Keyword second;
             };
           struct Keyword_comparator
@@ -750,7 +767,7 @@ Parser_result Token_stream::load(std::istream &sis)
           if(avail == 0) {
             break;
           }
-          // Are we inside a block comment now?
+          // Are we inside a block comment?
           if(bcom_line != 0) {
             // Search for the terminator of this block comment.
             static constexpr char s_bcom_term[2] = { '*', '/' };
@@ -830,7 +847,28 @@ Parser_result Token_stream::load(std::istream &sis)
           // Skip this character.
           pos += 1;
         }
-        __builtin_printf("LINE: %s $\n", str.c_str());
+        ///////////////////////////////////////////////////////////////////////
+        // Phase 3
+        //   Break this line down into tokens.
+        ///////////////////////////////////////////////////////////////////////
+        pos = 0;
+        for(;;) {
+          // How many bytes can we look ahead for?
+          const auto avail = str.size() - pos;
+          if(avail == 0) {
+            break;
+          }
+          // Read a character.
+          const auto head = str.at(pos);
+          switch(head) {
+          case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n':
+            {
+              // Ignore a series of spaces.
+              const auto epos = str.find_first_not_of(" \t\v\f\r\n", pos + 1);
+          const auto length = rocket::min(pos, str.size()) - column;
+          return Parser_result(line, column, length, Parser_result::error_success);
+TODO
+        }
       }
       // Complain about block comments that haven't been closed.
       if(bcom_line != 0) {
