@@ -121,7 +121,7 @@ class Token
       };
     struct S_integer_literal
       {
-        Unsigned value;
+        Signed value;
       };
     struct S_double_literal
       {
@@ -143,14 +143,14 @@ class Token
 
   private:
     Unsigned m_line;
-    Unsigned m_column;
+    Size m_offset;
     Size m_length;
     Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(Unsigned line, Unsigned column, Size length, AltT &&alt)
-        : m_line(line), m_column(column), m_length(length), m_stor(std::forward<AltT>(alt))
+      Token(Unsigned line, Size offset, Size length, AltT &&alt)
+        : m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
     ~Token();
@@ -163,9 +163,9 @@ class Token
       {
         return this->m_line;
       }
-    Unsigned get_column() const noexcept
+    Size get_offset() const noexcept
       {
-        return this->m_column;
+        return this->m_offset;
       }
     Size get_length() const noexcept
       {
@@ -186,9 +186,6 @@ class Token
           return this->m_stor.as<AltT>();
         }
   };
-
-// TODO move these elsewhere
-extern Parser_result tokenize_line_no_comment_incremental(Vector<Token> &tokens_out, Unsigned line, const String &str);
 
 }
 

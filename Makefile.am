@@ -63,7 +63,8 @@ pkginclude_HEADERS =  \
   asteria/src/instantiated_function.hpp  \
   asteria/src/backtracer.hpp  \
   asteria/src/parser_result.hpp  \
-  asteria/src/token.hpp
+  asteria/src/token.hpp  \
+  asteria/src/token_stream.hpp
 
 noinst_LTLIBRARIES =  \
   lib/librocket.la
@@ -101,7 +102,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/block.cpp  \
   asteria/src/instantiated_function.cpp  \
   asteria/src/backtracer.cpp  \
-  asteria/src/token.cpp
+  asteria/src/token.cpp  \
+  asteria/src/token_stream.cpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
@@ -118,12 +120,12 @@ bin_asteria_SOURCES =  \
 check_PROGRAMS = \
   test/utilities.test  \
   test/value.test  \
-  test/token.test  \
   test/variable.test  \
   test/reference.test  \
   test/exception.test  \
   test/executive_context.test  \
   test/expression.test  \
-  test/block.test
+  test/block.test  \
+  test/token_stream.test
 
 TESTS = ${check_PROGRAMS}
