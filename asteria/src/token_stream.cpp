@@ -748,83 +748,85 @@ Parser_result Token_stream::load(std::istream &sis)
           if(avail == 0) {
             break;
           }
-          // Check for the beginning of comments if we aren't inside one.
-          if(bcom_line == 0) {
-            const auto head = str.at(pos);
-            if(head == '\'') {
-              // Escape sequences do not have special meanings inside single quotation marks.
-              const auto epos = str.find('\'', pos);
-              if(epos == str.npos) {
-                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-              }
-              // Continue from the next character to the end of this string literal.
-              pos = epos + 1;
-              continue;
-            }
-            if(head == '\"') {
-              // Get the end of the string literal.
-              auto epos = pos + 1;
-              for(;;) {
-                if(epos >= str.size()) {
-                  return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-                }
-                const auto next = str.at(epos);
-                if(next == '\"') {
-                  // The end of this string is encountered. Finish.
-                  break;
-                }
-                if(next != '\\') {
-                  // Accumulate one character.
-                  epos += 1;
-                  continue;
-                }
-                // Because a backslash cannot occur as part of escape sequences, we just ignore any character escaped for simplicity.
-                epos += 2;
-              }
-              // Continue from the next character to the end of this string literal.
-              pos = epos + 1;
-              continue;
-            }
-            if(head == '/') {
-              // We have to use `[]` instead of `.at()` here because `pos + 1` may equal `str.size()`.
-              const auto next = str[pos + 1];
-              if(next == '/') {
-                // Start a line comment.
-                // Overwrite all characters remaining with spaces.
-                do_blank_comment(str, pos, avail);
-                break;
-              }
-              if(next == '*') {
-                // Start a block comment.
-                ROCKET_ASSERT(line != 0);
-                bcom_line = line;
-                bcom_pos = pos;
-                // Fallthrough.
-              }
-            }
-            // Fallthrough.
-          }
           // Are we inside a block comment now?
-          if(bcom_line == 0) {
-            // If not, skip this character.
-            pos += 1;
+          if(bcom_line != 0) {
+            // Search for the terminator of this block comment.
+            static constexpr char s_bcom_term[2] = { '*', '/' };
+            const auto epos = str.find(s_bcom_term, pos, 2);
+            if(epos == str.npos) {
+              // The block comment will not end in this line.
+              // Overwrite all characters remaining with spaces.
+              do_blank_comment(str, pos, avail);
+              break;
+            }
+            // Overwrite this block comment with spaces, including the comment terminator.
+            do_blank_comment(str, pos, epos + 2 - pos);
+            // Finish this comment.
+            bcom_line = 0;
+            // Resume from the end of the comment.
+            pos = epos + 2;
             continue;
           }
-          // Search for the terminator of this block comment.
-          static constexpr char s_term[2] = { '*', '/' };
-          const auto epos = str.find(s_term, pos, 2);
-          if(epos == str.npos) {
-            // The block comment will not end in this line.
-            // Overwrite all characters remaining with spaces.
-            do_blank_comment(str, pos, avail);
-            break;
+          // Read a character.
+          // Skip string literals if any.
+          const auto head = str.at(pos);
+          if(head == '\'') {
+            // Escape sequences do not have special meanings inside single quotation marks.
+            const auto epos = str.find('\'', pos);
+            if(epos == str.npos) {
+              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+            }
+            // Continue from the next character to the end of this string literal.
+            pos = epos + 1;
+            continue;
           }
-          // Overwrite this block comment with spaces, including the comment terminator.
-          do_blank_comment(str, pos, epos + 2 - pos);
-          // Finish this comment.
-          bcom_line = 0;
-          // Resume from the end of the comment.
-          pos = epos + 2;
+          if(head == '\"') {
+            // Get the end of the string literal.
+            auto epos = pos + 1;
+            for(;;) {
+              if(epos >= str.size()) {
+                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              }
+              const auto next = str.at(epos);
+              if(next == '\"') {
+                // The end of this string is encountered. Finish.
+                break;
+              }
+              if(next != '\\') {
+                // Accumulate one character.
+                epos += 1;
+                continue;
+              }
+              // Because a backslash cannot occur as part of escape sequences, we just ignore any character escaped for simplicity.
+              epos += 2;
+            }
+            // Continue from the next character to the end of this string literal.
+            pos = epos + 1;
+            continue;
+          }
+          if(head == '/') {
+            // We have to use `[]` instead of `.at()` here because `pos + 1` may equal `str.size()`.
+            const auto next = str[pos + 1];
+            if(next == '/') {
+              // Start a line comment.
+              // Overwrite all characters remaining with spaces.
+              do_blank_comment(str, pos, avail);
+              break;
+            }
+            if(next == '*') {
+              // Start a block comment.
+              do_blank_comment(str, pos, 2);
+              // Record the beginning of this block.
+              ROCKET_ASSERT(line != 0);
+              bcom_line = line;
+              bcom_pos = pos;
+              // Resume from the next character to the initiator.
+              pos += 2;
+              continue;
+            }
+          }
+          // Skip this character.
+          pos += 1;
         }
         __builtin_printf("LINE: %s $\n", str.c_str());
       }
