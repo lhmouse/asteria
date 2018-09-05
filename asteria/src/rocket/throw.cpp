@@ -8,7 +8,7 @@
 
 namespace rocket {
 
-#define ROCKET_VSNPRINTF_AND_THROW(Except_, fmt_)  \
+#define ROCKET_DEFINE_VSNPRINTF_AND_THROW(Except_, fmt_)  \
   {  \
     char msgbuf_[1024];  \
     {  \
@@ -21,15 +21,15 @@ namespace rocket {
   }
 
 void throw_invalid_argument(const char *fmt, ...)
-  ROCKET_VSNPRINTF_AND_THROW(::std::invalid_argument, fmt)
+  ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::invalid_argument, fmt)
 
 void throw_out_of_range(const char *fmt, ...)
-  ROCKET_VSNPRINTF_AND_THROW(::std::out_of_range, fmt)
+  ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::out_of_range, fmt)
 
 void throw_length_error(const char *fmt, ...)
-  ROCKET_VSNPRINTF_AND_THROW(::std::length_error, fmt)
+  ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::length_error, fmt)
 
 void throw_domain_error(const char *fmt, ...)
-  ROCKET_VSNPRINTF_AND_THROW(::std::domain_error, fmt)
+  ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::domain_error, fmt)
 
 }
