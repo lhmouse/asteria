@@ -78,7 +78,11 @@ namespace {
           }
     };
 
-
+  template<typename IteratorT>
+    constexpr std::pair<std::reverse_iterator<IteratorT>, std::reverse_iterator<IteratorT>> do_reverse_range(std::pair<IteratorT, IteratorT> range)
+      {
+        return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
+      }
 
 
 
@@ -134,96 +138,6 @@ namespace {
 
 
 
-        }
-      case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
-      case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
-      case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
-        {
-          // Get a punctuator.
-          struct Punctuator_element
-            {
-              char first[6];
-              Token::Punctuator second;
-            };
-          struct Punctuator_comparator
-            {
-              bool operator()(const Punctuator_element &lhs, const Punctuator_element &rhs) const noexcept
-                { return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0; }
-              bool operator()(char lhs, const Punctuator_element &rhs) const noexcept
-                { return std::char_traits<char>::lt(lhs, rhs.first[0]); }
-              bool operator()(const Punctuator_element &lhs, char rhs) const noexcept
-                { return std::char_traits<char>::lt(lhs.first[0], rhs); }
-            };
-          // Remember to keep this table sorted!
-          static constexpr Punctuator_element s_punctuator_table[] =
-            {
-              { "!",     Token::punctuator_notl        },
-              { "!=",    Token::punctuator_cmp_ne      },
-              { "%",     Token::punctuator_mod         },
-              { "%=",    Token::punctuator_mod_eq      },
-              { "&",     Token::punctuator_andb        },
-              { "&&",    Token::punctuator_andl        },
-              { "&&=",   Token::punctuator_andl_eq     },
-              { "&=",    Token::punctuator_andb_eq     },
-              { "(",     Token::punctuator_parenth_op  },
-              { ")",     Token::punctuator_parenth_cl  },
-              { "*",     Token::punctuator_mul         },
-              { "*=",    Token::punctuator_mul_eq      },
-              { "+",     Token::punctuator_add         },
-              { "++",    Token::punctuator_inc         },
-              { "+=",    Token::punctuator_add_eq      },
-              { ",",     Token::punctuator_comma       },
-              { "-",     Token::punctuator_sub         },
-              { "--",    Token::punctuator_dec         },
-              { "-=",    Token::punctuator_sub_eq      },
-              { ".",     Token::punctuator_dot         },
-              { "/",     Token::punctuator_div         },
-              { "/=",    Token::punctuator_div_eq      },
-              { ":",     Token::punctuator_colon       },
-              { ";",     Token::punctuator_semicolon   },
-              { "<",     Token::punctuator_cmp_lt      },
-              { "<<",    Token::punctuator_sla         },
-              { "<<<",   Token::punctuator_sll         },
-              { "<<<=",  Token::punctuator_sll_eq      },
-              { "<<=",   Token::punctuator_sla_eq      },
-              { "<=",    Token::punctuator_cmp_lte     },
-              { "=",     Token::punctuator_assign      },
-              { "==",    Token::punctuator_cmp_eq      },
-              { ">",     Token::punctuator_cmp_gt      },
-              { ">=",    Token::punctuator_cmp_gte     },
-              { ">>",    Token::punctuator_sra         },
-              { ">>=",   Token::punctuator_sra_eq      },
-              { ">>>",   Token::punctuator_srl         },
-              { ">>>=",  Token::punctuator_srl_eq      },
-              { "?",     Token::punctuator_condition   },
-              { "[",     Token::punctuator_bracket_op  },
-              { "]",     Token::punctuator_bracket_cl  },
-              { "^",     Token::punctuator_xorb        },
-              { "^=",    Token::punctuator_xorb_eq     },
-              { "{",     Token::punctuator_brace_op    },
-              { "|",     Token::punctuator_orb         },
-              { "|=",    Token::punctuator_orb_eq      },
-              { "||",    Token::punctuator_orl         },
-              { "||=",   Token::punctuator_orl_eq      },
-              { "}",     Token::punctuator_brace_cl    },
-              { "~",     Token::punctuator_notb        },
-            };
-          ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuator_table), std::end(s_punctuator_table), Punctuator_comparator()));
-          // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
-          // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-          const auto range = std::equal_range(std::begin(s_punctuator_table), std::end(s_punctuator_table), char_head, Punctuator_comparator());
-          for(auto it = range.second; it != range.first; --it) {
-            const auto &pair = it[-1];
-            const auto length = std::char_traits<char>::length(pair.first);
-            if((str.size() - column >= length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)) {
-              // Push a punctuator.
-              Token::S_punctuator token_p = { pair.second };
-              tokens_out.emplace_back(line, column, length, std::move(token_p));
-              return Parser_result(line, column, length, Parser_result::error_success);
-            }
-          }
-          // There must be a bug in the punctuator table.
-          ASTERIA_TERMINATE("The punctuator `", char_head, "` is not handled.");
         }
       case '\"':  case '\'':
         {
@@ -564,88 +478,6 @@ namespace {
           tokens_out.emplace_back(line, column, length, std::move(token_d));
           return Parser_result(line, column, length, Parser_result::error_success);
         }
-      case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
-      case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
-      case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
-      case 'U':  case 'V':  case 'W':  case 'X':  case 'Y':  case 'Z':
-      case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':  case 'g':
-      case 'h':  case 'i':  case 'j':  case 'k':  case 'l':  case 'm':  case 'n':
-      case 'o':  case 'p':  case 'q':  case 'r':  case 's':  case 't':
-      case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
-      case '_':
-        {
-          // Get an identifier, then check whether it is a keyword.
-          struct Keyword_element
-            {
-              char first[14];
-              Token::Keyword second;
-            };
-          struct Keyword_comparator
-            {
-              bool operator()(const Keyword_element &lhs, const Keyword_element &rhs) const noexcept
-                { return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0; }
-              bool operator()(char lhs, const Keyword_element &rhs) const noexcept
-                { return std::char_traits<char>::lt(lhs, rhs.first[0]); }
-              bool operator()(const Keyword_element &lhs, char rhs) const noexcept
-                { return std::char_traits<char>::lt(lhs.first[0], rhs); }
-            };
-          // Remember to keep this table sorted!
-          static constexpr Keyword_element s_keyword_table[] =
-            {
-              { "break",     Token::keyword_break     },
-              { "case",      Token::keyword_case      },
-              { "catch",     Token::keyword_catch     },
-              { "const",     Token::keyword_const     },
-              { "continue",  Token::keyword_continue  },
-              { "default",   Token::keyword_default   },
-              { "defer",     Token::keyword_defer     },
-              { "do",        Token::keyword_do        },
-              { "each",      Token::keyword_each      },
-              { "else",      Token::keyword_else      },
-              { "export",    Token::keyword_export    },
-              { "false",     Token::keyword_false     },
-              { "for",       Token::keyword_for       },
-              { "function",  Token::keyword_function  },
-              { "if",        Token::keyword_if        },
-              { "import",    Token::keyword_import    },
-              { "infinity",  Token::keyword_infinity  },
-              { "nan",       Token::keyword_nan       },
-              { "null",      Token::keyword_null      },
-              { "return",    Token::keyword_return    },
-              { "switch",    Token::keyword_switch    },
-              { "this",      Token::keyword_this      },
-              { "throw",     Token::keyword_throw     },
-              { "true",      Token::keyword_true      },
-              { "try",       Token::keyword_try       },
-              { "unset",     Token::keyword_unset     },
-              { "var",       Token::keyword_var       },
-              { "while",     Token::keyword_while     },
-            };
-          ROCKET_ASSERT(std::is_sorted(std::begin(s_keyword_table), std::end(s_keyword_table), Keyword_comparator()));
-          // Get an identifier.
-          const auto pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", column + 1);
-          const auto length = rocket::min(pos, str.size()) - column;
-          // Check whether this matches a keyword.
-          const auto range = std::equal_range(std::begin(s_keyword_table), std::end(s_keyword_table), char_head, Keyword_comparator());
-          for(auto it = range.first; it != range.second; ++it) {
-            const auto &pair = it[0];
-            if((std::char_traits<char>::length(pair.first) == length) && (std::char_traits<char>::compare(pair.first, str.data() + column, length) == 0)) {
-              // Push a keyword.
-              Token::S_keyword token_kw = { pair.second };
-              tokens_out.emplace_back(line, column, length, std::move(token_kw));
-              return Parser_result(line, column, length, Parser_result::error_success);
-            }
-          }
-          // Push a trivial identifier.
-          Token::S_identifier token_id = { str.substr(column, length) };
-          tokens_out.emplace_back(line, column, length, std::move(token_id));
-          return Parser_result(line, column, length, Parser_result::error_success);
-        }
-      default:
-        // Fail to find a valid token.
-        ASTERIA_DEBUG_LOG("Character not handled: ", str.substr(column, 25));
-        return Parser_result(line, column, 1, Parser_result::error_token_character_unrecognized);
-      }
     }
 #endif
 }
@@ -670,14 +502,15 @@ Parser_result Token_stream::load(std::istream &sis)
     auto state = std::ios_base::goodbit;
     try {
       // Parse source code line by line.
-      using traits = std::istream::traits_type;
       String str;
+      Size epos;
       // At the moment the only flag that could be set here is `eofbit`.
       while(!state) {
         // Clear it first so the storage may be reused.
         str.clear();
         // Read characters and append them to `str`, until either an EOF or LF is encountered.
         for(;;) {
+          using traits = std::istream::traits_type;
           const auto ich = sis.rdbuf()->sbumpc();
           if(traits::eq_int_type(ich, traits::eof())) {
             state |= std::ios_base::eofbit;
@@ -699,12 +532,7 @@ Parser_result Token_stream::load(std::istream &sis)
         //   Ensure this line is a valid UTF-8 string.
         ///////////////////////////////////////////////////////////////////////
         Size pos = 0;
-        for(;;) {
-          // How many bytes can we look ahead for?
-          const auto avail = str.size() - pos;
-          if(avail == 0) {
-            break;
-          }
+        while(pos < str.size()) {
           // Read the first byte.
           char32_t code = str.at(pos) & 0xFF;
           if(code < 0x80) {
@@ -724,9 +552,9 @@ Parser_result Token_stream::load(std::istream &sis)
           const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
           ROCKET_ASSERT(u8len >= 2);
           ROCKET_ASSERT(u8len <= 4);
-          if(avail < u8len) {
+          if(str.size() - pos < u8len) {
             // No enough characters have been provided.
-            return Parser_result(line, pos, avail, Parser_result::error_utf8_sequence_truncated);
+            return Parser_result(line, pos, str.size() - pos, Parser_result::error_utf8_sequence_truncated);
           }
           // Unset bits that are not part of the payload.
           code &= static_cast<unsigned char>(0xFF >> u8len);
@@ -761,21 +589,16 @@ Parser_result Token_stream::load(std::istream &sis)
         //   Strip comments from this line.
         ///////////////////////////////////////////////////////////////////////
         pos = 0;
-        for(;;) {
-          // How many bytes can we look ahead for?
-          const auto avail = str.size() - pos;
-          if(avail == 0) {
-            break;
-          }
+        while(pos < str.size()) {
           // Are we inside a block comment?
           if(bcom_line != 0) {
             // Search for the terminator of this block comment.
             static constexpr char s_bcom_term[2] = { '*', '/' };
-            const auto epos = str.find(s_bcom_term, pos, 2);
+            epos = str.find(s_bcom_term, pos, 2);
             if(epos == str.npos) {
               // The block comment will not end in this line.
               // Overwrite all characters remaining with spaces.
-              do_blank_comment(str, pos, avail);
+              do_blank_comment(str, pos, str.size() - pos);
               break;
             }
             // Overwrite this block comment with spaces, including the comment terminator.
@@ -791,7 +614,7 @@ Parser_result Token_stream::load(std::istream &sis)
           const auto head = str.at(pos);
           if(head == '\'') {
             // Escape sequences do not have special meanings inside single quotation marks.
-            const auto epos = str.find('\'', pos);
+            epos = str.find('\'', pos);
             if(epos == str.npos) {
               return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
             }
@@ -801,7 +624,7 @@ Parser_result Token_stream::load(std::istream &sis)
           }
           if(head == '\"') {
             // Get the end of the string literal.
-            auto epos = pos + 1;
+            epos = pos + 1;
             for(;;) {
               if(epos >= str.size()) {
                 return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
@@ -829,7 +652,7 @@ Parser_result Token_stream::load(std::istream &sis)
             if(next == '/') {
               // Start a line comment.
               // Overwrite all characters remaining with spaces.
-              do_blank_comment(str, pos, avail);
+              do_blank_comment(str, pos, str.size() - pos);
               break;
             }
             if(next == '*') {
@@ -852,22 +675,179 @@ Parser_result Token_stream::load(std::istream &sis)
         //   Break this line down into tokens.
         ///////////////////////////////////////////////////////////////////////
         pos = 0;
-        for(;;) {
-          // How many bytes can we look ahead for?
-          const auto avail = str.size() - pos;
-          if(avail == 0) {
+        while(pos < str.size()) {
+          // Skip leading spaces.
+          epos = str.find_first_not_of(" \t\v\f\r\n", pos);
+          if(epos == str.npos) {
+            // This line consists of only spaces. Bail out.
             break;
           }
+          pos = epos;
           // Read a character.
           const auto head = str.at(pos);
           switch(head) {
-          case ' ':  case '\t':  case '\v':  case '\f':  case '\r':  case '\n':
+          case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
+          case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
+          case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
+          case 'U':  case 'V':  case 'W':  case 'X':  case 'Y':  case 'Z':
+          case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':  case 'g':
+          case 'h':  case 'i':  case 'j':  case 'k':  case 'l':  case 'm':  case 'n':
+          case 'o':  case 'p':  case 'q':  case 'r':  case 's':  case 't':
+          case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
+          case '_':
             {
-              // Ignore a series of spaces.
-              const auto epos = str.find_first_not_of(" \t\v\f\r\n", pos + 1);
-          const auto length = rocket::min(pos, str.size()) - column;
-          return Parser_result(line, column, length, Parser_result::error_success);
-TODO
+              // Get an identifier or keyword.
+              struct Keyword_element
+                {
+                  char first[14];
+                  Token::Keyword second;
+                }
+              static constexpr s_keywords[] =
+                {
+                  { "break",     Token::keyword_break     },
+                  { "case",      Token::keyword_case      },
+                  { "catch",     Token::keyword_catch     },
+                  { "const",     Token::keyword_const     },
+                  { "continue",  Token::keyword_continue  },
+                  { "default",   Token::keyword_default   },
+                  { "defer",     Token::keyword_defer     },
+                  { "do",        Token::keyword_do        },
+                  { "each",      Token::keyword_each      },
+                  { "else",      Token::keyword_else      },
+                  { "export",    Token::keyword_export    },
+                  { "false",     Token::keyword_false     },
+                  { "for",       Token::keyword_for       },
+                  { "function",  Token::keyword_function  },
+                  { "if",        Token::keyword_if        },
+                  { "import",    Token::keyword_import    },
+                  { "infinity",  Token::keyword_infinity  },
+                  { "nan",       Token::keyword_nan       },
+                  { "null",      Token::keyword_null      },
+                  { "return",    Token::keyword_return    },
+                  { "switch",    Token::keyword_switch    },
+                  { "this",      Token::keyword_this      },
+                  { "throw",     Token::keyword_throw     },
+                  { "true",      Token::keyword_true      },
+                  { "try",       Token::keyword_try       },
+                  { "unset",     Token::keyword_unset     },
+                  { "var",       Token::keyword_var       },
+                  { "while",     Token::keyword_while     },
+                };
+              ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
+              // Get an identifier.
+              epos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", pos + 1);
+              epos = rocket::min(epos, str.size());
+              // Check whether this identifier matches a keyword.
+              auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), head, Prefix_comparator());
+              for(;;) {
+                if(range.first == range.second) {
+                  // No matching keyword has been found so far.
+                  Token::S_identifier token_c = { str.substr(pos, epos - pos) };
+                  seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                  break;
+                }
+                const auto len = std::char_traits<char>::length(range.first->first);
+                if((len == epos - pos) && (std::char_traits<char>::compare(range.first->first, str.data() + pos, len) == 0)) {
+                  // A keyword has been found.
+                  Token::S_keyword token_c = { range.first->second };
+                  seq.emplace_back(line, pos, len, std::move(token_c));
+                  break;
+                }
+                ++(range.first);
+              }
+              break;
+            }
+          case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
+          case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
+          case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
+            {
+              // Get a punctuator.
+              struct Punctuator_element
+                {
+                  char first[6];
+                  Token::Punctuator second;
+                }
+              static constexpr s_punctuators[] =
+                {
+                  { "!",     Token::punctuator_notl        },
+                  { "!=",    Token::punctuator_cmp_ne      },
+                  { "%",     Token::punctuator_mod         },
+                  { "%=",    Token::punctuator_mod_eq      },
+                  { "&",     Token::punctuator_andb        },
+                  { "&&",    Token::punctuator_andl        },
+                  { "&&=",   Token::punctuator_andl_eq     },
+                  { "&=",    Token::punctuator_andb_eq     },
+                  { "(",     Token::punctuator_parenth_op  },
+                  { ")",     Token::punctuator_parenth_cl  },
+                  { "*",     Token::punctuator_mul         },
+                  { "*=",    Token::punctuator_mul_eq      },
+                  { "+",     Token::punctuator_add         },
+                  { "++",    Token::punctuator_inc         },
+                  { "+=",    Token::punctuator_add_eq      },
+                  { ",",     Token::punctuator_comma       },
+                  { "-",     Token::punctuator_sub         },
+                  { "--",    Token::punctuator_dec         },
+                  { "-=",    Token::punctuator_sub_eq      },
+                  { ".",     Token::punctuator_dot         },
+                  { "/",     Token::punctuator_div         },
+                  { "/=",    Token::punctuator_div_eq      },
+                  { ":",     Token::punctuator_colon       },
+                  { ";",     Token::punctuator_semicolon   },
+                  { "<",     Token::punctuator_cmp_lt      },
+                  { "<<",    Token::punctuator_sla         },
+                  { "<<<",   Token::punctuator_sll         },
+                  { "<<<=",  Token::punctuator_sll_eq      },
+                  { "<<=",   Token::punctuator_sla_eq      },
+                  { "<=",    Token::punctuator_cmp_lte     },
+                  { "=",     Token::punctuator_assign      },
+                  { "==",    Token::punctuator_cmp_eq      },
+                  { ">",     Token::punctuator_cmp_gt      },
+                  { ">=",    Token::punctuator_cmp_gte     },
+                  { ">>",    Token::punctuator_sra         },
+                  { ">>=",   Token::punctuator_sra_eq      },
+                  { ">>>",   Token::punctuator_srl         },
+                  { ">>>=",  Token::punctuator_srl_eq      },
+                  { "?",     Token::punctuator_condition   },
+                  { "[",     Token::punctuator_bracket_op  },
+                  { "]",     Token::punctuator_bracket_cl  },
+                  { "^",     Token::punctuator_xorb        },
+                  { "^=",    Token::punctuator_xorb_eq     },
+                  { "{",     Token::punctuator_brace_op    },
+                  { "|",     Token::punctuator_orb         },
+                  { "|=",    Token::punctuator_orb_eq      },
+                  { "||",    Token::punctuator_orl         },
+                  { "||=",   Token::punctuator_orl_eq      },
+                  { "}",     Token::punctuator_brace_cl    },
+                  { "~",     Token::punctuator_notb        },
+                };
+              ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
+              // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
+              // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
+              auto range = do_reverse_range(std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), head, Prefix_comparator()));
+              for(;;) {
+                if(range.first == range.second) {
+                  // No matching punctuator has been found so far.
+                  // This is caused by a `case` value which does not exist in the table above.
+                  ASTERIA_TERMINATE("The punctuator `", head, "` is unhandled.");
+                }
+                const auto len = std::char_traits<char>::length(range.first->first);
+                epos = pos + len;
+                if((epos <= str.size()) && (std::char_traits<char>::compare(range.first->first, str.data() + pos, len) == 0)) {
+                  // A punctuator has been found.
+                  Token::S_punctuator token_c = { range.first->second };
+                  seq.emplace_back(line, pos, len, std::move(token_c));
+                  break;
+                }
+                ++(range.first);
+              }
+              break;
+            }
+          default:
+            // Fail to find a valid token.
+            ASTERIA_DEBUG_LOG("Invalid stray character in source code: ", str.substr(pos, 25));
+            return Parser_result(line, pos, 1, Parser_result::error_token_character_unrecognized);
+          }
+          pos = epos;
         }
       }
       // Complain about block comments that haven't been closed.
