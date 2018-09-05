@@ -2271,15 +2271,13 @@ template<typename charT, typename traitsT, typename allocatorT>
       str.erase();
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
-      auto eol = false;
       auto ich = traitsT::to_int_type(0);
       try {
         // Extract characters and append them to `str`.
         ich = is.rdbuf()->sgetc();
         while(!(traitsT::eq_int_type(ich, traitsT::eof()))) {
           const auto ch = traitsT::to_char_type(ich);
-          eol = traitsT::eq(ch, delim);
-          if(eol) {
+          if(traitsT::eq(ch, delim)) {
             is.rdbuf()->sbumpc();
             break;
           }
@@ -2297,7 +2295,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       if(traitsT::eq_int_type(ich, traitsT::eof())) {
         state |= ios_base::eofbit;
       }
-      if(!eol && str.empty()) {
+      if(str.empty() && !(traitsT::eq_int_type(ich, traitsT::to_int_type(delim)))) {
         state |= ios_base::failbit;
       }
       if(state) {
