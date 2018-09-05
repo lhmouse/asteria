@@ -2179,11 +2179,14 @@ template<typename charT, typename traitsT, typename allocatorT>
       const auto loc = is.getloc();
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
-      auto ich = traitsT::to_int_type(0);
       try {
         // Extract characters and append them to `str`.
-        ich = is.rdbuf()->sgetc();
-        while(!(traitsT::eq_int_type(ich, traitsT::eof()))) {
+        auto ich = is.rdbuf()->sgetc();
+        for(;;) {
+          if(traitsT::eq_int_type(ich, traitsT::eof())) {
+            state |= ios_base::eofbit;
+            break;
+          }
           const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
                                           : (str.size() >= str.max_size());
           if(enough) {
@@ -2196,15 +2199,12 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
+        if(str.empty()) {
+          state |= ios_base::failbit;
+        }
       } catch(...) {
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
-      }
-      if(traitsT::eq_int_type(ich, traitsT::eof())) {
-        state |= ios_base::eofbit;
-      }
-      if(str.empty()) {
-        state |= ios_base::failbit;
       }
       if(state) {
         is.setstate(state);
@@ -2235,7 +2235,10 @@ template<typename charT, typename traitsT, typename allocatorT>
         // Insert characters into `os`, which are from `str` if `off` is within `[0, len)` and are copied from `os.fill()` otherwise.
         auto rem = noadl::max(width, len);
         auto off = left ? 0 : (len - rem);
-        while(rem != 0) {
+        for(;;) {
+          if(rem == 0) {
+            break;
+          }
           const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
                                                            : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
@@ -2271,11 +2274,14 @@ template<typename charT, typename traitsT, typename allocatorT>
       str.erase();
       // We need to set stream state bits outside the `try` block.
       auto state = ios_base::goodbit;
-      auto ich = traitsT::to_int_type(0);
       try {
         // Extract characters and append them to `str`.
-        ich = is.rdbuf()->sgetc();
-        while(!(traitsT::eq_int_type(ich, traitsT::eof()))) {
+        auto ich = is.rdbuf()->sgetc();
+        for(;;) {
+          if(traitsT::eq_int_type(ich, traitsT::eof())) {
+            state |= ios_base::eofbit;
+            break;
+          }
           const auto ch = traitsT::to_char_type(ich);
           if(traitsT::eq(ch, delim)) {
             is.rdbuf()->sbumpc();
@@ -2288,15 +2294,12 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
+        if(str.empty() && !(traitsT::eq_int_type(ich, traitsT::to_int_type(delim)))) {
+          state |= ios_base::failbit;
+        }
       } catch(...) {
         noadl::handle_ios_exception(is);
         state &= ~ios_base::badbit;
-      }
-      if(traitsT::eq_int_type(ich, traitsT::eof())) {
-        state |= ios_base::eofbit;
-      }
-      if(str.empty() && !(traitsT::eq_int_type(ich, traitsT::to_int_type(delim)))) {
-        state |= ios_base::failbit;
       }
       if(state) {
         is.setstate(state);
