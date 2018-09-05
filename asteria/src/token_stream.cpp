@@ -467,27 +467,26 @@ Parser_result Token_stream::load(std::istream &sis)
             }
             break;
           }
-        case '\"':  case '\'':
+        case '\'':
           {
             // Get a string literal.
-            epos = str.find(head, pos + 1);
+            epos = str.find('\'', pos + 1);
             if(epos == str.npos) {
               return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
             }
-            if(head == '\'') {
-              // Escape sequences do not have special meanings inside single quotation marks.
-              // Adjust `epos` to point to the character next to the closing single quotation mark.
-              epos += 1;
-              // Push the string as-is.
-              Token::S_string_literal token_c = { str.substr(pos + 1, epos - pos - 2) };
-              seq.emplace_back(line, pos, epos - pos, std::move(token_c));
-              break;
-            }
-            // Escape characters have to be treated specifically inside double quotation marks.
+            // Escape sequences do not have special meanings inside single quotation marks.
+            // Adjust `epos` to point to the character next to the closing single quotation mark.
+            epos += 1;
+            // Push the string as-is.
+            Token::S_string_literal token_c = { str.substr(pos + 1, epos - pos - 2) };
+            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            break;
+          }
+        case '\"':
+          {
+            // Get a string literal.
             String value;
-            // This is only an estimated length. The actual string may be shorter or longer.
-            value.reserve(epos - pos);
-            // Find the end of the string literal.
+            // Escape characters have to be treated specifically inside double quotation marks.
             epos = pos + 1;
             for(;;) {
               if(epos >= str.size()) {
@@ -808,8 +807,7 @@ Parser_result Token_stream::load(std::istream &sis)
             // Finalize it.
             const bool negative = do_merge_sign(seq, line, pos);
             if(negative) {
-              // Negate the unsigned value.
-              // We ignore one's complement systems, as POSIX does.
+              // Negate the floating-point value.
               value = -value;
             }
             Token::S_double_literal token_c = { value };
