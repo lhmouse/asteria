@@ -78,26 +78,24 @@ namespace {
           }
     };
 
+  constexpr Size do_normalize_index(const String &str, Size pos) noexcept
+    {
+      return (pos == str.npos) ? str.size() : pos;
+    }
+
   template<typename IteratorT>
     constexpr std::pair<std::reverse_iterator<IteratorT>, std::reverse_iterator<IteratorT>> do_reverse_range(std::pair<IteratorT, IteratorT> range)
       {
         return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
       }
 
-
-
-
-
-
-#if 0
-
-  bool do_merge_sign(Vector<Token> &tokens_inout, Unsigned line, Unsigned column)
+  bool do_merge_sign(Vector<Token> &seq_inout, Unsigned line, Size pos)
     {
       // The last token must be a positive or negative sign.
-      if(tokens_inout.empty()) {
+      if(seq_inout.empty()) {
         return false;
       }
-      auto kpunct = tokens_inout.back().opt<Token::S_punctuator>();
+      auto kpunct = seq_inout.back().opt<Token::S_punctuator>();
       if(kpunct == nullptr) {
         return false;
       }
@@ -106,15 +104,15 @@ namespace {
       }
       const bool sign = kpunct->punct == Token::punctuator_sub;
       // Don't merge them if they are not contiguous.
-      if(tokens_inout.back().get_line() != line) {
+      if(seq_inout.back().get_line() != line) {
         return false;
       }
-      if(tokens_inout.back().get_column() + tokens_inout.back().get_length() != column) {
+      if(seq_inout.back().get_offset() + seq_inout.back().get_length() != pos) {
         return false;
       }
       // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
-      if(tokens_inout.size() >= 2) {
-        kpunct = tokens_inout.rbegin()[1].opt<Token::S_punctuator>();
+      if(seq_inout.size() >= 2) {
+        kpunct = seq_inout.rbegin()[1].opt<Token::S_punctuator>();
         if(kpunct == nullptr) {
           return false;
         }
@@ -126,60 +124,393 @@ namespace {
         }
       }
       // Drop the sign token.
-      tokens_inout.pop_back();
+      seq_inout.pop_back();
       return sign;
     }
 
-  Parser_result do_get_token(Vector<Token> &tokens_out, Unsigned line, const String &str, Unsigned column)
-    {
+}
 
-
-
-
-
-
+Parser_result Token_stream::load(std::istream &sis)
+  {
+    // Move the vector out as its storage may be reused.
+    Vector<Token> seq;
+    seq.swap(this->m_rseq);
+    seq.clear();
+    // Read source code line by line.
+    Size line = 0;
+    if(!sis) {
+      return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
+    }
+    String str;
+    // Save the position of an unterminated block comment.
+    Size bcom_line = 0;
+    Size bcom_off = 0;
+    Size bcom_len = 0;
+    while(++line, getline(sis, str)) {
+      ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
+      // Discard the first line if it looks like a shebang.
+      if((line == 1) && str.starts_with("#!", 2)) {
+        continue;
+      }
+      Size pos, epos;
+      ///////////////////////////////////////////////////////////////////////
+      // Phase 1
+      //   Ensure this line is a valid UTF-8 string.
+      ///////////////////////////////////////////////////////////////////////
+      pos = 0;
+      while(pos < str.size()) {
+        // Read the first byte.
+        char32_t code = str.at(pos) & 0xFF;
+        if(code < 0x80) {
+          // This sequence contains only one byte.
+          pos += 1;
+          continue;
         }
-      case '\"':  case '\'':
-        {
-          // Get a string literal.
-          const auto body_begin = column + 1;
-          auto body_end = str.find(char_head, body_begin);
-          String value;
-          if(char_head == '\'') {
-            // Escape sequences do not have special meanings inside single quotation marks.
-            if(body_end == str.npos) {
-              return Parser_result(line, column, str.size() - column, Parser_result::error_string_literal_unclosed);
+        if(code < 0xC0) {
+          // This is not a leading character.
+          return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
+        }
+        if(code >= 0xF8) {
+          // If this leading character were valid, it would start a sequence of five bytes or more.
+          return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
+        }
+        // Calculate the number of bytes in this code point.
+        const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
+        ROCKET_ASSERT(u8len >= 2);
+        ROCKET_ASSERT(u8len <= 4);
+        if(str.size() - pos < u8len) {
+          // No enough characters have been provided.
+          return Parser_result(line, pos, str.size() - pos, Parser_result::error_utf8_sequence_incomplete);
+        }
+        // Unset bits that are not part of the payload.
+        code &= static_cast<unsigned char>(0xFF >> u8len);
+        // Accumulate trailing code units.
+        for(unsigned i = 1; i < u8len; ++i) {
+          const char32_t next = str.at(pos + i) & 0xFF;
+          if((next < 0x80) || (0xC0 <= next)) {
+            // This trailing character is not valid.
+            return Parser_result(line, pos, i + 1, Parser_result::error_utf8_sequence_invalid);
+          }
+          code = (code << 6) | (next & 0x3F);
+        }
+        if((0xD800 <= code) && (code < 0xE000)) {
+          // Surrogates are not allowed.
+          return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
+        }
+        if(code >= 0x110000) {
+          // Code point value is too large.
+          return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
+        }
+        // Re-encode it and check for overlong sequences.
+        const auto minlen = static_cast<unsigned>(1 + (code >= 0x80) + (code >= 0x800) + (code >= 0x10000));
+        if(minlen != u8len) {
+          // Overlong sequences are not allowed.
+          return Parser_result(line, pos, u8len, Parser_result::error_utf8_sequence_invalid);
+        }
+        pos += u8len;
+      }
+      ///////////////////////////////////////////////////////////////////////
+      // Phase 2
+      //   Strip comments from this line.
+      ///////////////////////////////////////////////////////////////////////
+      pos = 0;
+      while(pos < str.size()) {
+        // Are we inside a block comment?
+        if(bcom_line != 0) {
+          // Search for the terminator of this block comment.
+          static constexpr char s_bcom_term[2] = { '*', '/' };
+          epos = str.find(s_bcom_term, pos, 2);
+          if(epos == str.npos) {
+            // The block comment will not end in this line.
+            // Overwrite all characters remaining with spaces.
+            do_blank_comment(str, pos, str.size() - pos);
+            break;
+          }
+          // Overwrite this block comment with spaces, including the comment terminator.
+          do_blank_comment(str, pos, epos + 2 - pos);
+          // Finish this comment.
+          bcom_line = 0;
+          // Resume from the end of the comment.
+          pos = epos + 2;
+          continue;
+        }
+        // Read a character.
+        // Skip string literals if any.
+        const auto head = str.at(pos);
+        if(head == '\'') {
+          // Escape sequences do not have special meanings inside single quotation marks.
+          epos = str.find('\'', pos);
+          if(epos == str.npos) {
+            return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+          }
+          // Continue from the next character to the end of this string literal.
+          pos = epos + 1;
+          continue;
+        }
+        if(head == '\"') {
+          // Find the end of the string literal.
+          epos = pos + 1;
+          for(;;) {
+            if(epos >= str.size()) {
+              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
             }
-            // Copy the substring as is.
-            value.assign(str, body_begin, body_end - body_begin);
-          } else {
-            // Escape characters have to be treated specifically, inside double quotation marks.
-            // Consequently, this is only an estimated length.
-            value.reserve(body_end - body_begin);
-            // Translate escape sequences as needed.
-            body_end = body_begin;
-            for(;;) {
-              if(body_end >= str.size()) {
-                return Parser_result(line, column, str.size() - column, Parser_result::error_string_literal_unclosed);
+            const auto next = str.at(epos);
+            if(next == '\"') {
+              // The end of this string is encountered. Finish.
+              break;
+            }
+            if(next != '\\') {
+              // Accumulate one character.
+              epos += 1;
+              continue;
+            }
+            // Because a backslash cannot occur as part of escape sequences, we just ignore any character escaped for simplicity.
+            epos += 2;
+          }
+          // Continue from the next character to the end of this string literal.
+          pos = epos + 1;
+          continue;
+        }
+        if(head == '/') {
+          // We have to use `[]` instead of `.at()` here because `pos + 1` may equal `str.size()`.
+          const auto next = str[pos + 1];
+          if(next == '/') {
+            // Start a line comment.
+            // Overwrite all characters remaining with spaces.
+            do_blank_comment(str, pos, str.size() - pos);
+            break;
+          }
+          if(next == '*') {
+            // Start a block comment.
+            do_blank_comment(str, pos, 2);
+            // Record the beginning of this block.
+            ROCKET_ASSERT(line != 0);
+            bcom_line = line;
+            bcom_off = pos;
+            bcom_len = str.size() - pos;
+            // Resume from the next character to the initiator.
+            pos += 2;
+            continue;
+          }
+        }
+        // Skip this character.
+        pos += 1;
+      }
+      ///////////////////////////////////////////////////////////////////////
+      // Phase 3
+      //   Break this line down into tokens.
+      ///////////////////////////////////////////////////////////////////////
+      pos = 0;
+      while(pos < str.size()) {
+        // Skip leading spaces.
+        epos = str.find_first_not_of(" \t\v\f\r\n", pos);
+        if(epos == str.npos) {
+          // This line consists of only spaces. Bail out.
+          break;
+        }
+        pos = epos;
+        const auto delims_and_digits = "_:00112233445566778899AaBbCcDdEeFf";
+        const auto digits = delims_and_digits + 2;
+        // Read a character.
+        const auto head = str.at(pos);
+        switch(head) {
+        case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
+        case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
+        case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
+        case 'U':  case 'V':  case 'W':  case 'X':  case 'Y':  case 'Z':
+        case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':  case 'g':
+        case 'h':  case 'i':  case 'j':  case 'k':  case 'l':  case 'm':  case 'n':
+        case 'o':  case 'p':  case 'q':  case 'r':  case 's':  case 't':
+        case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
+        case '_':
+          {
+            // Get an identifier or keyword.
+            struct Keyword_element
+              {
+                char first[14];
+                Token::Keyword second;
               }
-              auto char_next = str.at(body_end);
-              if(char_next == char_head) {
-                // Got end of string literal. Finish.
+            static constexpr s_keywords[] =
+              {
+                { "break",     Token::keyword_break     },
+                { "case",      Token::keyword_case      },
+                { "catch",     Token::keyword_catch     },
+                { "const",     Token::keyword_const     },
+                { "continue",  Token::keyword_continue  },
+                { "default",   Token::keyword_default   },
+                { "defer",     Token::keyword_defer     },
+                { "do",        Token::keyword_do        },
+                { "each",      Token::keyword_each      },
+                { "else",      Token::keyword_else      },
+                { "export",    Token::keyword_export    },
+                { "false",     Token::keyword_false     },
+                { "for",       Token::keyword_for       },
+                { "function",  Token::keyword_function  },
+                { "if",        Token::keyword_if        },
+                { "import",    Token::keyword_import    },
+                { "infinity",  Token::keyword_infinity  },
+                { "nan",       Token::keyword_nan       },
+                { "null",      Token::keyword_null      },
+                { "return",    Token::keyword_return    },
+                { "switch",    Token::keyword_switch    },
+                { "this",      Token::keyword_this      },
+                { "throw",     Token::keyword_throw     },
+                { "true",      Token::keyword_true      },
+                { "try",       Token::keyword_try       },
+                { "unset",     Token::keyword_unset     },
+                { "var",       Token::keyword_var       },
+                { "while",     Token::keyword_while     },
+              };
+            ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
+            // Get an identifier.
+            epos = do_normalize_index(str, str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", pos + 1));
+            // Check whether this identifier matches a keyword.
+            auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), head, Prefix_comparator());
+            for(;;) {
+              if(range.first == range.second) {
+                // No matching keyword has been found so far.
+                Token::S_identifier token_c = { str.substr(pos, epos - pos) };
+                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
                 break;
               }
-              if(char_next != '\\') {
+              if((epos - pos == std::strlen(range.first->first)) && (std::memcmp(range.first->first, str.data() + pos, epos - pos) == 0)) {
+                // A keyword has been found.
+                Token::S_keyword token_c = { range.first->second };
+                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                break;
+              }
+              ++(range.first);
+            }
+            break;
+          }
+        case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
+        case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
+        case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
+          {
+            // Get a punctuator.
+            struct Punctuator_element
+              {
+                char first[6];
+                Token::Punctuator second;
+              }
+            static constexpr s_punctuators[] =
+              {
+                { "!",     Token::punctuator_notl        },
+                { "!=",    Token::punctuator_cmp_ne      },
+                { "%",     Token::punctuator_mod         },
+                { "%=",    Token::punctuator_mod_eq      },
+                { "&",     Token::punctuator_andb        },
+                { "&&",    Token::punctuator_andl        },
+                { "&&=",   Token::punctuator_andl_eq     },
+                { "&=",    Token::punctuator_andb_eq     },
+                { "(",     Token::punctuator_parenth_op  },
+                { ")",     Token::punctuator_parenth_cl  },
+                { "*",     Token::punctuator_mul         },
+                { "*=",    Token::punctuator_mul_eq      },
+                { "+",     Token::punctuator_add         },
+                { "++",    Token::punctuator_inc         },
+                { "+=",    Token::punctuator_add_eq      },
+                { ",",     Token::punctuator_comma       },
+                { "-",     Token::punctuator_sub         },
+                { "--",    Token::punctuator_dec         },
+                { "-=",    Token::punctuator_sub_eq      },
+                { ".",     Token::punctuator_dot         },
+                { "/",     Token::punctuator_div         },
+                { "/=",    Token::punctuator_div_eq      },
+                { ":",     Token::punctuator_colon       },
+                { ";",     Token::punctuator_semicolon   },
+                { "<",     Token::punctuator_cmp_lt      },
+                { "<<",    Token::punctuator_sla         },
+                { "<<<",   Token::punctuator_sll         },
+                { "<<<=",  Token::punctuator_sll_eq      },
+                { "<<=",   Token::punctuator_sla_eq      },
+                { "<=",    Token::punctuator_cmp_lte     },
+                { "=",     Token::punctuator_assign      },
+                { "==",    Token::punctuator_cmp_eq      },
+                { ">",     Token::punctuator_cmp_gt      },
+                { ">=",    Token::punctuator_cmp_gte     },
+                { ">>",    Token::punctuator_sra         },
+                { ">>=",   Token::punctuator_sra_eq      },
+                { ">>>",   Token::punctuator_srl         },
+                { ">>>=",  Token::punctuator_srl_eq      },
+                { "?",     Token::punctuator_condition   },
+                { "[",     Token::punctuator_bracket_op  },
+                { "]",     Token::punctuator_bracket_cl  },
+                { "^",     Token::punctuator_xorb        },
+                { "^=",    Token::punctuator_xorb_eq     },
+                { "{",     Token::punctuator_brace_op    },
+                { "|",     Token::punctuator_orb         },
+                { "|=",    Token::punctuator_orb_eq      },
+                { "||",    Token::punctuator_orl         },
+                { "||=",   Token::punctuator_orl_eq      },
+                { "}",     Token::punctuator_brace_cl    },
+                { "~",     Token::punctuator_notb        },
+              };
+            ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
+            // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
+            // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
+            auto range = do_reverse_range(std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), head, Prefix_comparator()));
+            for(;;) {
+              if(range.first == range.second) {
+                // No matching punctuator has been found so far.
+                // This is caused by a `case` value which does not exist in the table above.
+                ASTERIA_TERMINATE("The punctuator `", head, "` is unhandled.");
+              }
+              epos = pos + std::strlen(range.first->first);
+              if((epos <= str.size()) && (std::memcmp(range.first->first, str.data() + pos, epos - pos) == 0)) {
+                // A punctuator has been found.
+                Token::S_punctuator token_c = { range.first->second };
+                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                break;
+              }
+              ++(range.first);
+            }
+            break;
+          }
+        case '\"':  case '\'':
+          {
+            // Get a string literal.
+            epos = str.find(head, pos + 1);
+            if(epos == str.npos) {
+              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+            }
+            if(head == '\'') {
+              // Escape sequences do not have special meanings inside single quotation marks.
+              // Adjust `epos` to point to the character next to the closing single quotation mark.
+              epos += 1;
+              // Push the string as-is.
+              Token::S_string_literal token_c = { str.substr(pos + 1, epos - pos - 2) };
+              seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+              break;
+            }
+            // Escape characters have to be treated specifically inside double quotation marks.
+            String value;
+            // This is only an estimated length. The actual string may be shorter or longer.
+            value.reserve(epos - pos);
+            // Find the end of the string literal.
+            epos = pos + 1;
+            for(;;) {
+              if(epos >= str.size()) {
+                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              }
+              auto next = str.at(epos);
+              if(next == '\"') {
+                // The end of this string is encountered. Finish.
+                break;
+              }
+              if(next != '\\') {
                 // This character does not start an escape sequence. Copy it as is.
-                value.push_back(char_next);
-                body_end += 1;
+                value.push_back(next);
+                epos += 1;
                 continue;
               }
-              // This character starts an escape sequence.
-              unsigned seq_len = 2;
-              if(str.size() - body_end < seq_len) {
-                return Parser_result(line, body_end, str.size() - body_end, Parser_result::error_escape_sequence_incomplete);
+              // Translate an escape sequence.
+              unsigned seqlen = 2;
+              if(str.size() - epos < seqlen) {
+                return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
               }
-              char_next = str.at(body_end + 1);
-              switch(char_next) {
+              next = str.at(epos + 1);
+              switch(next) {
               case '\'':
                 value.push_back('\'');
                 break;
@@ -214,49 +545,49 @@ namespace {
                 value.push_back('\v');
                 break;
               case '0':
-                value.push_back(0);
+                value.push_back('\x00');
                 break;
               case 'Z':
-                value.push_back(0x1A);
+                value.push_back('\x1A');
                 break;
               case 'e':
-                value.push_back(0x1B);
+                value.push_back('\x1B');
                 break;
               case 'U':
                 {
-                  seq_len += 2;
+                  seqlen += 2;
                   // Fallthrough.
               case 'u':
-                  seq_len += 2;
+                  seqlen += 2;
                   // Fallthrough.
               case 'x':
-                  seq_len += 2;
+                  seqlen += 2;
                   // Read hex digits.
-                  if(str.size() - body_end < seq_len) {
-                    return Parser_result(line, body_end, str.size() - body_end, Parser_result::error_escape_sequence_incomplete);
+                  if(str.size() - epos < seqlen) {
+                    return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
                   }
                   char32_t code = 0;
-                  for(unsigned i = 2; i < seq_len; ++i) {
-                    const auto digit = str.at(body_end + i);
-                    static constexpr char s_hex_table[] = "00112233445566778899AaBbCcDdEeFf";
-                    const auto ptr = std::char_traits<char>::find(s_hex_table, 32, digit);
+                  for(Size i = epos + 2; i < epos + seqlen; ++i) {
+                    const auto ptr = std::char_traits<char>::find(digits, 32, str.at(i));
                     if(!ptr) {
-                      return Parser_result(line, body_end, i, Parser_result::error_escape_sequence_invalid_hex);
+                      return Parser_result(line, epos, i, Parser_result::error_escape_sequence_invalid_hex);
                     }
-                    const auto digit_value = static_cast<unsigned char>((ptr - s_hex_table) / 2);
-                    code = (code << 4) | digit_value;
+                    const auto digit_value = static_cast<unsigned>((ptr - digits) / 2);
+                    code = code * 16 + digit_value;
                   }
                   if((0xD800 <= code) && (code < 0xE000)) {
                     // Surrogates are not allowed.
-                    return Parser_result(line, body_end, seq_len, Parser_result::error_escape_utf_surrogates_disallowed);
+                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
                   }
                   if(code >= 0x110000) {
                     // Code point value is too large.
-                    return Parser_result(line, body_end, seq_len, Parser_result::error_escape_utf_code_point_too_large);
+                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
                   }
                   // Encode it.
                   const auto encode_one = [&](unsigned shift, unsigned mask)
-                    { value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask))); };
+                    {
+                      value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask)));
+                    };
                   if(code < 0x80) {
                     encode_one( 0, 0xFF);
                   } else if(code < 0x800) {
@@ -275,597 +606,234 @@ namespace {
                   break;
                 }
               default:
-                // Fail if this escape sequence cannot be identified.
-                return Parser_result(line, body_end, seq_len, Parser_result::error_escape_sequence_unknown);
+                // Fail if this escape sequence cannot be recognized.
+                return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
               }
-              body_end += seq_len;
+              epos += seqlen;
             }
+            // Adjust `epos` to point to the character next to the closing double quotation mark.
+            epos += 1;
+            // Push the string.
+            Token::S_string_literal token_c = { std::move(value) };
+            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            break;
           }
-          const auto length = body_end + 1 - column;
-          // Push the string unescaped.
-          Token::S_string_literal token_s = { std::move(value) };
-          tokens_out.emplace_back(line, column, length, std::move(token_s));
-          return Parser_result(line, column, length, Parser_result::error_success);
-        }
-      case '0':  case '1':  case '2':  case '3':  case '4':
-      case '5':  case '6':  case '7':  case '8':  case '9':
-        {
-          // Get a numeric literal.
-          static constexpr char s_numeric_table[] = "_:00112233445566778899AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz";
-          static constexpr unsigned s_delim_count = 2;
-          // Declare everything that will be calculated later.
-          // 0. The integral part is required. The fractional and exponent parts are optional.
-          // 1. If `frac_begin` equals `int_end` then there is no fractional part.
-          // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
-          unsigned radix;
-          Size int_begin, int_end;
-          Size frac_begin, frac_end;
-          unsigned exp_base;
-          bool exp_sign;
-          Size exp_begin, exp_end;
-          // Check for radix prefixes.
-          radix = 10;
-          int_begin = column;
-          char char_next;
-          if(char_head == '0') {
-            // Do not use `str.at()` here as `int_begin + 1` may exceed `str.size()`.
-            char_next = str[int_begin + 1];
-            if((char_next == 'B') || (char_next == 'b')) {
-              radix = 2;
-              int_begin += 2;
-            } else if((char_next == 'X') || (char_next == 'x')) {
-              radix = 16;
-              int_begin += 2;
+        case '0':  case '1':  case '2':  case '3':  case '4':
+        case '5':  case '6':  case '7':  case '8':  case '9':
+          {
+            // Get a numeric literal.
+            // Declare everything that will be calculated later.
+            // 0. The integral part is required. The fractional and exponent parts are optional.
+            // 1. If `frac_begin` equals `int_end` then there is no fractional part.
+            // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
+            unsigned radix;
+            Size int_begin, int_end;
+            Size frac_begin, frac_end;
+            unsigned exp_base;
+            bool exp_sign;
+            Size exp_begin, exp_end;
+            char next;
+            // Check for radix prefixes.
+            radix = 10;
+            int_begin = pos;
+            if(head == '0') {
+              // Do not use `str.at()` here as `int_begin + 1` may exceed `str.size()`.
+              next = str[int_begin + 1];
+              switch(next) {
+              case 'B':
+              case 'b':
+                radix = 2;
+                int_begin += 2;
+                break;
+              case 'X':
+              case 'x':
+                radix = 16;
+                int_begin += 2;
+                break;
+              }
             }
-          }
-          auto pos = str.find_first_not_of(s_numeric_table, int_begin, s_delim_count + radix * 2);
-          int_end = rocket::min(pos, str.size());
-          if(int_begin == int_end) {
-            return Parser_result(line, column, int_end - column, Parser_result::error_numeric_literal_incomplete);
-          }
-          // Look for the fractional part.
-          frac_begin = int_end;
-          frac_end = frac_begin;
-          char_next = str[int_end];
-          if(char_next == '.') {
-            frac_begin += 1;
-            pos = str.find_first_not_of(s_numeric_table, frac_begin, s_delim_count + radix * 2);
-            frac_end = rocket::min(pos, str.size());
-            if(frac_begin == frac_end) {
-              return Parser_result(line, column, frac_end - column, Parser_result::error_numeric_literal_incomplete);
+            int_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, int_begin, 2 + radix * 2));
+            if(int_begin == int_end) {
+              return Parser_result(line, pos, int_end - pos, Parser_result::error_numeric_literal_incomplete);
             }
-          }
-          // Look for the exponent.
-          exp_base = 0;
-          exp_sign = false;
-          exp_begin = frac_end;
-          exp_end = exp_begin;
-          char_next = str[frac_end];
-          if((char_next == 'E') || (char_next == 'e')) {
-            exp_base = 10;
-            exp_begin += 1;
-          } else if((char_next == 'P') || (char_next == 'p')) {
-            exp_base = 2;
-            exp_begin += 1;
-          }
-          if(exp_base != 0) {
-            char_next = str[exp_begin];
-            if(char_next == '+') {
-              exp_sign = false;
+            // Look for the fractional part.
+            frac_begin = int_end;
+            frac_end = frac_begin;
+            next = str[int_end];
+            if(next == '.') {
+              frac_begin += 1;
+              frac_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, frac_begin, 2 + radix * 2));
+              if(frac_begin == frac_end) {
+                return Parser_result(line, pos, frac_end - pos, Parser_result::error_numeric_literal_incomplete);
+              }
+            }
+            // Look for the exponent.
+            exp_base = 0;
+            exp_sign = false;
+            exp_begin = frac_end;
+            exp_end = exp_begin;
+            next = str[frac_end];
+            switch(next) {
+            case 'E':
+            case 'e':
+              exp_base = 10;
               exp_begin += 1;
-            } else if(char_next == '-') {
-              exp_sign = true;
+              break;
+            case 'P':
+            case 'p':
+              exp_base = 2;
               exp_begin += 1;
+              break;
             }
-            pos = str.find_first_not_of(s_numeric_table, exp_begin, s_delim_count + 20);
-            exp_end = rocket::min(pos, str.size());
+            if(exp_base != 0) {
+              next = str[exp_begin];
+              switch(next) {
+              case '+':
+                exp_sign = false;
+                exp_begin += 1;
+                break;
+              case '-':
+                exp_sign = true;
+                exp_begin += 1;
+                break;
+              }
+            }
+            exp_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, exp_begin, 22));
             if(exp_begin == exp_end) {
-              return Parser_result(line, column, exp_end - column, Parser_result::error_numeric_literal_incomplete);
+              return Parser_result(line, pos, exp_end - pos, Parser_result::error_numeric_literal_incomplete);
             }
-          }
-          // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
-          // Since we make no use of them, we just reserve them for further use for good.
-          pos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end);
-          pos = rocket::min(pos, str.size());
-          if(pos != exp_end) {
-            return Parser_result(line, exp_end, pos - exp_end, Parser_result::error_numeric_literal_suffixes_disallowed);
-          }
-          const auto length = pos - column;
-          // Parse the exponent.
-          int exp = 0;
-          for(pos = exp_begin; pos != exp_end; ++pos) {
-            const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, 20, str.at(pos));
-            if(!ptr) {
-              continue;
+            // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
+            // Since we make no use of them, we just reserve them for further use for good.
+            epos = do_normalize_index(str, str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end));
+            if(epos != exp_end) {
+              return Parser_result(line, pos, epos - pos, Parser_result::error_numeric_literal_suffix_disallowed);
             }
-            const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-            const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
-            if(exp > bound) {
-              return Parser_result(line, column, length, Parser_result::error_numeric_literal_exponent_overflow);
-            }
-            exp *= 10;
-            exp += digit_value;
-          }
-          if(exp_sign) {
-            exp = -exp;
-          }
-          if(frac_begin == int_end) {
-            // Parse the literal as an integer.
-            Unsigned value = 0;
-            for(pos = int_begin; pos != int_end; ++pos) {
-              const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
+            // Parse the exponent.
+            int exp = 0;
+            for(Size i = exp_begin; i != exp_end; ++i) {
+              const auto ptr = std::char_traits<char>::find(digits, 20, str.at(i));
               if(!ptr) {
                 continue;
               }
-              const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-              const auto bound = (std::numeric_limits<Unsigned>::max() - digit_value) / radix;
-              if(value > bound) {
-                return Parser_result(line, column, length, Parser_result::error_integer_literal_overflow);
-              }
-              value *= radix;
-              value += digit_value;
+              const auto digit_value = static_cast<int>((ptr - digits) / 2);
+              exp = exp * 10 + digit_value;
             }
-            if(value != 0) {
+            if(exp_sign) {
+              exp = -exp;
+            }
+            // Is this literal an integral or floating-point number?
+            if(frac_begin == int_end) {
+              // Parse the literal as an integer.
+              // Negative exponents are not allowed, even when the significant part is zero.
               if(exp < 0) {
-                return Parser_result(line, column, length, Parser_result::error_integer_literal_exponent_negative);
+                return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_exponent_negative);
               }
-              for(int i = 0; i < exp; ++i) {
-                const auto bound = std::numeric_limits<Unsigned>::max() / exp_base;
-                if(value > bound) {
-                  return Parser_result(line, column, length, Parser_result::error_integer_literal_overflow);
+              // Parse the significant part.
+              Unsigned value = 0;
+              for(Size i = int_begin; i != int_end; ++i) {
+                const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
+                if(!ptr) {
+                  continue;
                 }
-                value *= exp_base;
+                const auto digit_value = static_cast<Unsigned>((ptr - digits) / 2);
+                const auto bound = (std::numeric_limits<Unsigned>::max() - digit_value) / radix;
+                if(value > bound) {
+                  return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
+                }
+                value = value * radix + digit_value;
               }
+              // Raise the significant part to the power of `exp`.
+              if(value != 0) {
+                for(int i = 0; i < exp; ++i) {
+                  const auto bound = std::numeric_limits<Unsigned>::max() / exp_base;
+                  if(value > bound) {
+                    return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
+                  }
+                  value *= exp_base;
+                }
+              }
+              // Finalize it.
+              const bool negative = do_merge_sign(seq, line, pos);
+              if(negative) {
+                // Negate the unsigned value.
+                // We ignore one's complement systems, as POSIX does.
+                value = -value;
+              }
+              Token::S_integer_literal token_c = { static_cast<Signed>(value) };
+              seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+              break;
             }
-            if(do_merge_sign(tokens_out, line, column)) {
+            // Parse the literal as a floating-point number.
+            // Parse the integral part.
+            Double value = 0;
+            bool zero = true;
+            for(Size i = int_begin; i != int_end; ++i) {
+              const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
+              if(!ptr) {
+                continue;
+              }
+              const auto digit_value = static_cast<int>((ptr - digits) / 2);
+              value = value * static_cast<int>(radix) + digit_value;
+              zero |= digit_value;
+            }
+            int vclass = std::fpclassify(value);
+            if(vclass == FP_INFINITE) {
+              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_overflow);
+            }
+            // Parse the fractional part.
+            Double frac = 0;
+            for(Size i = frac_end - 1; i + 1 != frac_begin; --i) {
+              const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
+              if(!ptr) {
+                continue;
+              }
+              const auto digit_value = static_cast<int>((ptr - digits) / 2);
+              frac = (frac + digit_value) / static_cast<int>(radix);
+              zero |= digit_value;
+            }
+            value += frac;
+            // Raise the significant part to the power of `exp`.
+            if(exp_base == FLT_RADIX) {
+              value = std::scalbn(value, exp);
+            } else {
+              value = value * std::pow(static_cast<int>(exp_base), exp);
+            }
+            vclass = std::fpclassify(value);
+            if(vclass == FP_INFINITE) {
+              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_overflow);
+            }
+            if((vclass == FP_ZERO) && !zero) {
+              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_underflow);
+            }
+            // Finalize it.
+            const bool negative = do_merge_sign(seq, line, pos);
+            if(negative) {
               // Negate the unsigned value.
               // We ignore one's complement systems, as POSIX does.
               value = -value;
             }
-            Token::S_integer_literal token_i = { value };
-            tokens_out.emplace_back(line, column, length, std::move(token_i));
-            return Parser_result(line, column, length, Parser_result::error_success);
-          }
-          // Parse the literal as a floating-point number.
-          Double value = 0;
-          bool zero = true;
-          for(pos = int_begin; pos != int_end; ++pos) {
-            const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-            if(!ptr) {
-              continue;
-            }
-            const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-            if(digit_value != 0) {
-              zero = false;
-            }
-            value *= radix;
-            value += digit_value;
-          }
-          int value_class = std::fpclassify(value);
-          if(value_class == FP_INFINITE) {
-            return Parser_result(line, column, length, Parser_result::error_integer_literal_overflow);
-          }
-          Double mantissa = 0;
-          for(pos = frac_end - 1; pos != frac_begin - 1; --pos) {
-            const auto ptr = std::char_traits<char>::find(s_numeric_table + s_delim_count, radix * 2, str.at(pos));
-            if(!ptr) {
-              continue;
-            }
-            const auto digit_value = static_cast<unsigned char>((ptr - s_numeric_table - s_delim_count) / 2);
-            if(digit_value != 0) {
-              zero = false;
-            }
-            mantissa += digit_value;
-            mantissa /= radix;
-          }
-          value += mantissa;
-          if(exp_base == FLT_RADIX) {
-            value = std::scalbn(value, exp);
-          } else {
-            value = value * std::pow(static_cast<int>(exp_base), exp);
-          }
-          value_class = std::fpclassify(value);
-          if(value_class == FP_INFINITE) {
-            return Parser_result(line, column, length, Parser_result::error_double_literal_overflow);
-          }
-          if((value_class == FP_ZERO) && (zero == false)) {
-            return Parser_result(line, column, length, Parser_result::error_double_literal_underflow);
-          }
-          if(do_merge_sign(tokens_out, line, column)) {
-            value = -value;
-          }
-          Token::S_double_literal token_d = { value };
-          tokens_out.emplace_back(line, column, length, std::move(token_d));
-          return Parser_result(line, column, length, Parser_result::error_success);
-        }
-    }
-#endif
-}
-
-Parser_result Token_stream::load(std::istream &sis)
-  {
-    // Save the current line number.
-    Size line = 0;
-    // Save the position of the unterminated block comment.
-    Size bcom_line = 0;
-    Size bcom_pos = 0;
-    // Behave like an UnformattedInputFunction.
-    const std::istream::sentry sentry(sis, true);
-    if(!sentry) {
-      return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
-    }
-    // Move the vector out as its storage may be reused.
-    Vector<Token> seq;
-    seq.swap(this->m_rseq);
-    seq.clear();
-    // We need to set stream state bits outside the `try` block.
-    auto state = std::ios_base::goodbit;
-    try {
-      // Parse source code line by line.
-      String str;
-      Size epos;
-      // At the moment the only flag that could be set here is `eofbit`.
-      while(!state) {
-        // Clear it first so the storage may be reused.
-        str.clear();
-        // Read characters and append them to `str`, until either an EOF or LF is encountered.
-        for(;;) {
-          using traits = std::istream::traits_type;
-          const auto ich = sis.rdbuf()->sbumpc();
-          if(traits::eq_int_type(ich, traits::eof())) {
-            state |= std::ios_base::eofbit;
+            Token::S_double_literal token_c = { value };
+            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;
           }
-          const auto ch = traits::to_char_type(ich);
-          if(traits::eq(ch, '\n')) {
-            break;
-          }
-          str.push_back(ch);
+        default:
+          // Fail to find a valid token.
+          ASTERIA_DEBUG_LOG("Invalid stray character in source code: ", str.substr(pos, 25));
+          return Parser_result(line, pos, 1, Parser_result::error_token_character_unrecognized);
         }
-        // We have got a new line so far.
-        // Advance the line indicator. Ignore the first line if it looks like a shebang.
-        if((++line == 1) && str.starts_with("#!", 2)) {
-          continue;
-        }
-        ///////////////////////////////////////////////////////////////////////
-        // Phase 1
-        //   Ensure this line is a valid UTF-8 string.
-        ///////////////////////////////////////////////////////////////////////
-        Size pos = 0;
-        while(pos < str.size()) {
-          // Read the first byte.
-          char32_t code = str.at(pos) & 0xFF;
-          if(code < 0x80) {
-            // This sequence contains only one byte.
-            pos += 1;
-            continue;
-          }
-          if(code < 0xC0) {
-            // This is not a leading character.
-            return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
-          }
-          if(code >= 0xF8) {
-            // If this leading character were valid, it would start a sequence of five bytes or more.
-            return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
-          }
-          // Calculate the number of bytes in this code point.
-          const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
-          ROCKET_ASSERT(u8len >= 2);
-          ROCKET_ASSERT(u8len <= 4);
-          if(str.size() - pos < u8len) {
-            // No enough characters have been provided.
-            return Parser_result(line, pos, str.size() - pos, Parser_result::error_utf8_sequence_truncated);
-          }
-          // Unset bits that are not part of the payload.
-          code &= static_cast<unsigned char>(0xFF >> u8len);
-          // Accumulate trailing code units.
-          for(unsigned i = 1; i < u8len; ++i) {
-            const char32_t next = str.at(pos + i) & 0xFF;
-            if((next < 0x80) || (0xC0 <= next)) {
-              // This trailing character is not valid.
-              return Parser_result(line, pos, i + 1, Parser_result::error_utf8_sequence_invalid);
-            }
-            code = (code << 6) | (next & 0x3F);
-          }
-          if((0xD800 <= code) && (code < 0xE000)) {
-            // Surrogates are not allowed.
-            return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
-          }
-          if(code >= 0x110000) {
-            // Code point value is too large.
-            return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
-          }
-          // Re-encode it and check for overlong sequences.
-          const auto minlen = static_cast<unsigned>(1 + (code >= 0x80) + (code >= 0x800) + (code >= 0x10000));
-          if(minlen != u8len) {
-            // Overlong sequences are not allowed.
-            return Parser_result(line, pos, u8len, Parser_result::error_utf8_sequence_invalid);
-          }
-          pos += u8len;
-        }
-        ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
-        ///////////////////////////////////////////////////////////////////////
-        // Phase 2
-        //   Strip comments from this line.
-        ///////////////////////////////////////////////////////////////////////
-        pos = 0;
-        while(pos < str.size()) {
-          // Are we inside a block comment?
-          if(bcom_line != 0) {
-            // Search for the terminator of this block comment.
-            static constexpr char s_bcom_term[2] = { '*', '/' };
-            epos = str.find(s_bcom_term, pos, 2);
-            if(epos == str.npos) {
-              // The block comment will not end in this line.
-              // Overwrite all characters remaining with spaces.
-              do_blank_comment(str, pos, str.size() - pos);
-              break;
-            }
-            // Overwrite this block comment with spaces, including the comment terminator.
-            do_blank_comment(str, pos, epos + 2 - pos);
-            // Finish this comment.
-            bcom_line = 0;
-            // Resume from the end of the comment.
-            pos = epos + 2;
-            continue;
-          }
-          // Read a character.
-          // Skip string literals if any.
-          const auto head = str.at(pos);
-          if(head == '\'') {
-            // Escape sequences do not have special meanings inside single quotation marks.
-            epos = str.find('\'', pos);
-            if(epos == str.npos) {
-              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-            }
-            // Continue from the next character to the end of this string literal.
-            pos = epos + 1;
-            continue;
-          }
-          if(head == '\"') {
-            // Get the end of the string literal.
-            epos = pos + 1;
-            for(;;) {
-              if(epos >= str.size()) {
-                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-              }
-              const auto next = str.at(epos);
-              if(next == '\"') {
-                // The end of this string is encountered. Finish.
-                break;
-              }
-              if(next != '\\') {
-                // Accumulate one character.
-                epos += 1;
-                continue;
-              }
-              // Because a backslash cannot occur as part of escape sequences, we just ignore any character escaped for simplicity.
-              epos += 2;
-            }
-            // Continue from the next character to the end of this string literal.
-            pos = epos + 1;
-            continue;
-          }
-          if(head == '/') {
-            // We have to use `[]` instead of `.at()` here because `pos + 1` may equal `str.size()`.
-            const auto next = str[pos + 1];
-            if(next == '/') {
-              // Start a line comment.
-              // Overwrite all characters remaining with spaces.
-              do_blank_comment(str, pos, str.size() - pos);
-              break;
-            }
-            if(next == '*') {
-              // Start a block comment.
-              do_blank_comment(str, pos, 2);
-              // Record the beginning of this block.
-              ROCKET_ASSERT(line != 0);
-              bcom_line = line;
-              bcom_pos = pos;
-              // Resume from the next character to the initiator.
-              pos += 2;
-              continue;
-            }
-          }
-          // Skip this character.
-          pos += 1;
-        }
-        ///////////////////////////////////////////////////////////////////////
-        // Phase 3
-        //   Break this line down into tokens.
-        ///////////////////////////////////////////////////////////////////////
-        pos = 0;
-        while(pos < str.size()) {
-          // Skip leading spaces.
-          epos = str.find_first_not_of(" \t\v\f\r\n", pos);
-          if(epos == str.npos) {
-            // This line consists of only spaces. Bail out.
-            break;
-          }
-          pos = epos;
-          // Read a character.
-          const auto head = str.at(pos);
-          switch(head) {
-          case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
-          case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
-          case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
-          case 'U':  case 'V':  case 'W':  case 'X':  case 'Y':  case 'Z':
-          case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':  case 'g':
-          case 'h':  case 'i':  case 'j':  case 'k':  case 'l':  case 'm':  case 'n':
-          case 'o':  case 'p':  case 'q':  case 'r':  case 's':  case 't':
-          case 'u':  case 'v':  case 'w':  case 'x':  case 'y':  case 'z':
-          case '_':
-            {
-              // Get an identifier or keyword.
-              struct Keyword_element
-                {
-                  char first[14];
-                  Token::Keyword second;
-                }
-              static constexpr s_keywords[] =
-                {
-                  { "break",     Token::keyword_break     },
-                  { "case",      Token::keyword_case      },
-                  { "catch",     Token::keyword_catch     },
-                  { "const",     Token::keyword_const     },
-                  { "continue",  Token::keyword_continue  },
-                  { "default",   Token::keyword_default   },
-                  { "defer",     Token::keyword_defer     },
-                  { "do",        Token::keyword_do        },
-                  { "each",      Token::keyword_each      },
-                  { "else",      Token::keyword_else      },
-                  { "export",    Token::keyword_export    },
-                  { "false",     Token::keyword_false     },
-                  { "for",       Token::keyword_for       },
-                  { "function",  Token::keyword_function  },
-                  { "if",        Token::keyword_if        },
-                  { "import",    Token::keyword_import    },
-                  { "infinity",  Token::keyword_infinity  },
-                  { "nan",       Token::keyword_nan       },
-                  { "null",      Token::keyword_null      },
-                  { "return",    Token::keyword_return    },
-                  { "switch",    Token::keyword_switch    },
-                  { "this",      Token::keyword_this      },
-                  { "throw",     Token::keyword_throw     },
-                  { "true",      Token::keyword_true      },
-                  { "try",       Token::keyword_try       },
-                  { "unset",     Token::keyword_unset     },
-                  { "var",       Token::keyword_var       },
-                  { "while",     Token::keyword_while     },
-                };
-              ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
-              // Get an identifier.
-              epos = str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", pos + 1);
-              epos = rocket::min(epos, str.size());
-              // Check whether this identifier matches a keyword.
-              auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), head, Prefix_comparator());
-              for(;;) {
-                if(range.first == range.second) {
-                  // No matching keyword has been found so far.
-                  Token::S_identifier token_c = { str.substr(pos, epos - pos) };
-                  seq.emplace_back(line, pos, epos - pos, std::move(token_c));
-                  break;
-                }
-                const auto len = std::char_traits<char>::length(range.first->first);
-                if((len == epos - pos) && (std::char_traits<char>::compare(range.first->first, str.data() + pos, len) == 0)) {
-                  // A keyword has been found.
-                  Token::S_keyword token_c = { range.first->second };
-                  seq.emplace_back(line, pos, len, std::move(token_c));
-                  break;
-                }
-                ++(range.first);
-              }
-              break;
-            }
-          case '!':  case '%':  case '&':  case '(':  case ')':  case '*':  case '+':  case ',':
-          case '-':  case '.':  case '/':  case ':':  case ';':  case '<':  case '=':  case '>':
-          case '?':  case '[':  case ']':  case '^':  case '{':  case '|':  case '}':  case '~':
-            {
-              // Get a punctuator.
-              struct Punctuator_element
-                {
-                  char first[6];
-                  Token::Punctuator second;
-                }
-              static constexpr s_punctuators[] =
-                {
-                  { "!",     Token::punctuator_notl        },
-                  { "!=",    Token::punctuator_cmp_ne      },
-                  { "%",     Token::punctuator_mod         },
-                  { "%=",    Token::punctuator_mod_eq      },
-                  { "&",     Token::punctuator_andb        },
-                  { "&&",    Token::punctuator_andl        },
-                  { "&&=",   Token::punctuator_andl_eq     },
-                  { "&=",    Token::punctuator_andb_eq     },
-                  { "(",     Token::punctuator_parenth_op  },
-                  { ")",     Token::punctuator_parenth_cl  },
-                  { "*",     Token::punctuator_mul         },
-                  { "*=",    Token::punctuator_mul_eq      },
-                  { "+",     Token::punctuator_add         },
-                  { "++",    Token::punctuator_inc         },
-                  { "+=",    Token::punctuator_add_eq      },
-                  { ",",     Token::punctuator_comma       },
-                  { "-",     Token::punctuator_sub         },
-                  { "--",    Token::punctuator_dec         },
-                  { "-=",    Token::punctuator_sub_eq      },
-                  { ".",     Token::punctuator_dot         },
-                  { "/",     Token::punctuator_div         },
-                  { "/=",    Token::punctuator_div_eq      },
-                  { ":",     Token::punctuator_colon       },
-                  { ";",     Token::punctuator_semicolon   },
-                  { "<",     Token::punctuator_cmp_lt      },
-                  { "<<",    Token::punctuator_sla         },
-                  { "<<<",   Token::punctuator_sll         },
-                  { "<<<=",  Token::punctuator_sll_eq      },
-                  { "<<=",   Token::punctuator_sla_eq      },
-                  { "<=",    Token::punctuator_cmp_lte     },
-                  { "=",     Token::punctuator_assign      },
-                  { "==",    Token::punctuator_cmp_eq      },
-                  { ">",     Token::punctuator_cmp_gt      },
-                  { ">=",    Token::punctuator_cmp_gte     },
-                  { ">>",    Token::punctuator_sra         },
-                  { ">>=",   Token::punctuator_sra_eq      },
-                  { ">>>",   Token::punctuator_srl         },
-                  { ">>>=",  Token::punctuator_srl_eq      },
-                  { "?",     Token::punctuator_condition   },
-                  { "[",     Token::punctuator_bracket_op  },
-                  { "]",     Token::punctuator_bracket_cl  },
-                  { "^",     Token::punctuator_xorb        },
-                  { "^=",    Token::punctuator_xorb_eq     },
-                  { "{",     Token::punctuator_brace_op    },
-                  { "|",     Token::punctuator_orb         },
-                  { "|=",    Token::punctuator_orb_eq      },
-                  { "||",    Token::punctuator_orl         },
-                  { "||=",   Token::punctuator_orl_eq      },
-                  { "}",     Token::punctuator_brace_cl    },
-                  { "~",     Token::punctuator_notb        },
-                };
-              ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
-              // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
-              // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-              auto range = do_reverse_range(std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), head, Prefix_comparator()));
-              for(;;) {
-                if(range.first == range.second) {
-                  // No matching punctuator has been found so far.
-                  // This is caused by a `case` value which does not exist in the table above.
-                  ASTERIA_TERMINATE("The punctuator `", head, "` is unhandled.");
-                }
-                const auto len = std::char_traits<char>::length(range.first->first);
-                epos = pos + len;
-                if((epos <= str.size()) && (std::char_traits<char>::compare(range.first->first, str.data() + pos, len) == 0)) {
-                  // A punctuator has been found.
-                  Token::S_punctuator token_c = { range.first->second };
-                  seq.emplace_back(line, pos, len, std::move(token_c));
-                  break;
-                }
-                ++(range.first);
-              }
-              break;
-            }
-          default:
-            // Fail to find a valid token.
-            ASTERIA_DEBUG_LOG("Invalid stray character in source code: ", str.substr(pos, 25));
-            return Parser_result(line, pos, 1, Parser_result::error_token_character_unrecognized);
-          }
-          pos = epos;
-        }
+        // Continue from the end of this token.
+        pos = epos;
       }
-      // Complain about block comments that haven't been closed.
-      if(bcom_line != 0) {
-        return Parser_result(bcom_line, bcom_pos, 2, Parser_result::error_block_comment_unclosed);
-      }
-    } catch(...) {
-      rocket::handle_ios_exception(sis);
-      state &= ~std::ios_base::badbit;
     }
-    if(state) {
-      sis.setstate(state);
+    if(sis.bad()) {
+      // If there was an irrecovable I/O failure then any other status code is meaningless.
+      return Parser_result(line, 0, 0, Parser_result::error_istream_badbit_set);
     }
-    // Note that `std::ios::fail()` checks for both `failbit` and `badbit`.
-    if(sis.fail()) {
-      return Parser_result(line, 0, 0, Parser_result::error_istream_fail_or_bad);
+    if(bcom_line != 0) {
+      // A block comment may straddle multiple lines. We just mark the first line here.
+      return Parser_result(bcom_line, bcom_off, bcom_len, Parser_result::error_block_comment_unclosed);
     }
-    // Accept the result.
+    // Accept the sequence.
     this->m_rseq.swap(do_reverse_token_sequence(seq));
     return Parser_result(line, 0, 0, Parser_result::error_success);
   }

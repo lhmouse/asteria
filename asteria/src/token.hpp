@@ -121,7 +121,7 @@ class Token
       };
     struct S_integer_literal
       {
-        Unsigned value;
+        Signed value;
       };
     struct S_double_literal
       {
