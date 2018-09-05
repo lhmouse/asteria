@@ -2294,7 +2294,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           str.push_back(ch);
           ich = is.rdbuf()->snextc();
         }
-        if(str.empty() && !(traitsT::eq_int_type(ich, traitsT::to_int_type(delim)))) {
+        if(str.empty() && traitsT::eq_int_type(ich, traitsT::eof())) {
           state |= ios_base::failbit;
         }
       } catch(...) {
