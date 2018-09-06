@@ -33,7 +33,7 @@ int main()
     ASTERIA_TEST_CHECK(ts.peek(9)->check<Token::S_punctuator>().punct == Token::punctuator_div);
     ASTERIA_TEST_CHECK(ts.peek(10)->check<Token::S_punctuator>().punct == Token::punctuator_mul);
     ASTERIA_TEST_CHECK(ts.peek(11)->check<Token::S_punctuator>().punct == Token::punctuator_sub);
-    ASTERIA_TEST_CHECK(ts.peek(12)->check<Token::S_double_literal>().value == 376.25);
+    ASTERIA_TEST_CHECK(ts.peek(12)->check<Token::S_real_literal>().value == 376.25);
     ASTERIA_TEST_CHECK(ts.peek(13)->check<Token::S_punctuator>().punct == Token::punctuator_dot);
     ASTERIA_TEST_CHECK(ts.peek(14)->check<Token::S_keyword>().keyword == Token::keyword_false);
     ASTERIA_TEST_CHECK(ts.peek(15)->check<Token::S_punctuator>().punct == Token::punctuator_semicolon);

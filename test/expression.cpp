@@ -13,7 +13,7 @@ int main()
     Executive_context ctx;
     auto &cond = ctx.set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
     cond.materialize();
-    auto &dval = ctx.set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_double(1.5) }));
+    auto &dval = ctx.set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_real(1.5) }));
     dval.materialize();
     auto &ival = ctx.set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
     ival.materialize();
@@ -26,7 +26,7 @@ int main()
     //               \--- "hello," ival *    ::= branch_false
     Vector<Xpnode> branch_true;
       {
-        branch_true.emplace_back(Xpnode::S_literal { D_double(0.25) });
+        branch_true.emplace_back(Xpnode::S_literal { D_real(0.25) });
         branch_true.emplace_back(Xpnode::S_named_reference { String::shallow("dval") });
         branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_inc, false });
         branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, false });
@@ -51,18 +51,18 @@ int main()
 
     auto result = expr.evaluate(ctx);
     auto value = dval.read();
-    ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
+    ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = aval.read();
-    ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_double>() == 1.75);
+    ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_real>() == 1.75);
     value = result.read();
-    ASTERIA_TEST_CHECK(value.check<D_double>() == 1.75);
+    ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond.write(D_integer(42));
     result = expr.evaluate(ctx);
     value = dval.read();
-    ASTERIA_TEST_CHECK(value.check<D_double>() == 2.5);
+    ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = aval.read();

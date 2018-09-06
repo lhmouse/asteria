@@ -12,15 +12,15 @@ int main()
     ASTERIA_TEST_CHECK(value.type() == Value::type_boolean);
     ASTERIA_TEST_CHECK(value.check<D_boolean>() == true);
     ASTERIA_TEST_CHECK_CATCH(value.check<D_string>());
-    ASTERIA_TEST_CHECK(value.opt<D_double>() == nullptr);
+    ASTERIA_TEST_CHECK(value.opt<D_real>() == nullptr);
 
     value = D_integer(42);
     ASTERIA_TEST_CHECK(value.type() == Value::type_integer);
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 42);
 
-    value = D_double(1.5);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_double);
-    ASTERIA_TEST_CHECK(value.check<D_double>() == 1.5);
+    value = D_real(1.5);
+    ASTERIA_TEST_CHECK(value.type() == Value::type_real);
+    ASTERIA_TEST_CHECK(value.check<D_real>() == 1.5);
 
     value = D_string(String::shallow("hello"));
     ASTERIA_TEST_CHECK(value.type() == Value::type_string);
@@ -83,14 +83,14 @@ int main()
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_equal);
 
-    value = D_double(-2.5);
-    cmp = D_double(11.0);
+    value = D_real(-2.5);
+    cmp = D_real(11.0);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_greater);
 
-    value = D_double(1.0);
-    cmp = D_double(NAN);
+    value = D_real(1.0);
+    cmp = D_real(NAN);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
