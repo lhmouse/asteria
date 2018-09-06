@@ -104,7 +104,7 @@ class Token
         index_punctuator       = 1,
         index_identifier       = 2,
         index_integer_literal  = 3,
-        index_double_literal   = 4,
+        index_real_literal     = 4,
         index_string_literal   = 5,
       };
     struct S_keyword
@@ -123,9 +123,9 @@ class Token
       {
         Sint64 value;
       };
-    struct S_double_literal
+    struct S_real_literal
       {
-        Double value;
+        Xfloat value;
       };
     struct S_string_literal
       {
@@ -137,7 +137,7 @@ class Token
         , S_punctuator       // 1
         , S_identifier       // 2
         , S_integer_literal  // 3
-        , S_double_literal   // 4
+        , S_real_literal     // 4
         , S_string_literal   // 5
       )>;
 

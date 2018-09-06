@@ -475,7 +475,8 @@ Parser_result Token_stream::load(std::istream &sis)
             // Adjust `epos` to point to the character next to the closing single quotation mark.
             epos += 1;
             // Push the string as-is.
-            Token::S_string_literal token_c = { str.substr(pos + 1, epos - pos - 2) };
+            String value(str, pos + 1, epos - pos - 2);
+            Token::S_string_literal token_c = { std::move(value) };
             seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;
           }
@@ -761,7 +762,7 @@ Parser_result Token_stream::load(std::istream &sis)
             }
             // Parse the literal as a floating-point number.
             // Parse the integral part.
-            Double value = 0;
+            Xfloat value = 0;
             bool zero = true;
             for(Size i = int_begin; i != int_end; ++i) {
               const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
@@ -774,10 +775,10 @@ Parser_result Token_stream::load(std::istream &sis)
             }
             int vclass = std::fpclassify(value);
             if(vclass == FP_INFINITE) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_overflow);
+              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_overflow);
             }
             // Parse the fractional part.
-            Double frac = 0;
+            Xfloat frac = 0;
             for(Size i = frac_end - 1; i + 1 != frac_begin; --i) {
               const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
               if(!ptr) {
@@ -796,10 +797,10 @@ Parser_result Token_stream::load(std::istream &sis)
             }
             vclass = std::fpclassify(value);
             if(vclass == FP_INFINITE) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_overflow);
+              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_overflow);
             }
             if((vclass == FP_ZERO) && !zero) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_double_literal_underflow);
+              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_underflow);
             }
             // Finalize it.
             const bool negative = do_merge_sign(seq, line, pos);
@@ -807,7 +808,7 @@ Parser_result Token_stream::load(std::istream &sis)
               // Negate the floating-point value.
               value = -value;
             }
-            Token::S_double_literal token_c = { value };
+            Token::S_real_literal token_c = { value };
             seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;
           }

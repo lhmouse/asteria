@@ -421,32 +421,32 @@ namespace {
       return lhs ^ rhs;
     }
 
-  D_double do_negate(D_double rhs)
+  D_real do_negate(D_real rhs)
     {
       return -rhs;
     }
 
-  D_double do_add(D_double lhs, D_double rhs)
+  D_real do_add(D_real lhs, D_real rhs)
     {
       return lhs + rhs;
     }
 
-  D_double do_subtract(D_double lhs, D_double rhs)
+  D_real do_subtract(D_real lhs, D_real rhs)
     {
       return lhs - rhs;
     }
 
-  D_double do_multiply(D_double lhs, D_double rhs)
+  D_real do_multiply(D_real lhs, D_real rhs)
     {
       return lhs * rhs;
     }
 
-  D_double do_divide(D_double lhs, D_double rhs)
+  D_real do_divide(D_real lhs, D_real rhs)
     {
       return lhs / rhs;
     }
 
-  D_double do_modulo(D_double lhs, D_double rhs)
+  D_real do_modulo(D_real lhs, D_real rhs)
     {
       return std::fmod(lhs, rhs);
     }
@@ -599,9 +599,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, false, std::move(result));
               break;
             }
-            if(lhs_value.type() == Value::type_double) {
-              auto result = lhs_value.check<D_double>();
-              do_set_result(lhs, true, do_add(result, D_double(1)));
+            if(lhs_value.type() == Value::type_real) {
+              auto result = lhs_value.check<D_real>();
+              do_set_result(lhs, true, do_add(result, D_real(1)));
               do_set_result(lhs, false, std::move(result));
               break;
             }
@@ -618,9 +618,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, false, std::move(result));
               break;
             }
-            if(lhs_value.type() == Value::type_double) {
-              auto result = lhs_value.check<D_double>();
-              do_set_result(lhs, true, do_subtract(result, D_double(1)));
+            if(lhs_value.type() == Value::type_real) {
+              auto result = lhs_value.check<D_real>();
+              do_set_result(lhs, true, do_subtract(result, D_real(1)));
               do_set_result(lhs, false, std::move(result));
               break;
             }
@@ -666,7 +666,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               break;
             }
             if(lhs_value.type() == Value::type_string) {
-              auto result = do_negate(lhs_value.check<D_double>());
+              auto result = do_negate(lhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
@@ -707,8 +707,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, true, std::move(result));
               break;
             }
-            if(lhs_value.type() == Value::type_double) {
-              auto result = do_add(lhs_value.check<D_double>(), D_double(1));
+            if(lhs_value.type() == Value::type_real) {
+              auto result = do_add(lhs_value.check<D_real>(), D_real(1));
               do_set_result(lhs, true, std::move(result));
               break;
             }
@@ -724,8 +724,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, true, std::move(result));
               break;
             }
-            if(lhs_value.type() == Value::type_double) {
-              auto result = do_subtract(lhs_value.check<D_double>(), D_double(1));
+            if(lhs_value.type() == Value::type_real) {
+              auto result = do_subtract(lhs_value.check<D_real>(), D_real(1));
               do_set_result(lhs, true, std::move(result));
               break;
             }
@@ -829,7 +829,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical OR'd result of both operands.
-            // For the `integer` and `double` types, return the sum of both operands.
+            // For the `integer` and `real` types, return the sum of both operands.
             // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -843,8 +843,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
-            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
-              auto result = do_add(lhs_value.check<D_double>(), rhs_value.check<D_double>());
+            if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
+              auto result = do_add(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
@@ -860,7 +860,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the `boolean` type, return the logical XOR'd result of both operands.
-            // For the `integer` and `double` types, return the difference of both operands.
+            // For the `integer` and `real` types, return the difference of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
@@ -873,8 +873,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
-            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
-              auto result = do_subtract(lhs_value.check<D_double>(), rhs_value.check<D_double>());
+            if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
+              auto result = do_subtract(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
@@ -885,7 +885,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
             // For the boolean type, return the logical AND'd result of both operands.
-            // For the integer and double types, return the product of both operands.
+            // For the integer and real types, return the product of both operands.
             // If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -899,8 +899,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
-            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
-              auto result = do_multiply(lhs_value.check<D_double>(), rhs_value.check<D_double>());
+            if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
+              auto result = do_multiply(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
@@ -920,7 +920,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
-            // For the integer and double types, return the quotient of both operands.
+            // For the integer and real types, return the quotient of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
@@ -928,8 +928,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
-            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
-              auto result = do_divide(lhs_value.check<D_double>(), rhs_value.check<D_double>());
+            if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
+              auto result = do_divide(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
@@ -939,7 +939,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
-            // For the integer and double types, return the reminder of both operands.
+            // For the integer and real types, return the reminder of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
@@ -947,8 +947,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }
-            if((lhs_value.type() == Value::type_double) && (rhs_value.type() == Value::type_double)) {
-              auto result = do_modulo(lhs_value.check<D_double>(), rhs_value.check<D_double>());
+            if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
+              auto result = do_modulo(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }

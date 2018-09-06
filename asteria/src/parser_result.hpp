@@ -32,8 +32,8 @@ class Parser_result
         error_numeric_literal_exponent_overflow  = 209,
         error_integer_literal_overflow           = 210,
         error_integer_literal_exponent_negative  = 211,
-        error_double_literal_overflow            = 212,
-        error_double_literal_underflow           = 213,
+        error_real_literal_overflow              = 212,
+        error_real_literal_underflow             = 213,
         error_block_comment_unclosed             = 214,
       };
 

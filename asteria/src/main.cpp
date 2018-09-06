@@ -30,7 +30,7 @@ int main()
 
     arr.clear();
     arr.emplace_back(D_integer(42));
-    arr.emplace_back(D_double(123.456));
+    arr.emplace_back(D_real(123.456));
     Value second(std::move(arr));
 
     arr.clear();

@@ -16,8 +16,8 @@ const char * Value::get_type_name(Value::Type type) noexcept
       return "boolean";
     case Value::type_integer:
       return "integer";
-    case Value::type_double:
-      return "double";
+    case Value::type_real:
+      return "real";
     case Value::type_string:
       return "string";
     case Value::type_opaque:
@@ -61,9 +61,9 @@ bool Value::test() const noexcept
         const auto &alt = this->m_stor.as<D_integer>();
         return alt != 0;
       }
-    case Value::type_double:
+    case Value::type_real:
       {
-        const auto &alt = this->m_stor.as<D_double>();
+        const auto &alt = this->m_stor.as<D_real>();
         return std::fpclassify(alt) != FP_ZERO;
       }
     case Value::type_string:
@@ -129,10 +129,10 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_double:
+    case Value::type_real:
       {
-        const auto &cand_lhs = this->check<D_double>();
-        const auto &cand_rhs = other.check<D_double>();
+        const auto &cand_lhs = this->check<D_real>();
+        const auto &cand_rhs = other.check<D_real>();
         if(std::isunordered(cand_lhs, cand_rhs)) {
           return Value::compare_unordered;
         }
@@ -386,11 +386,11 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
         os <<"integer " <<std::dec <<alt;
         return;
       }
-    case Value::type_double:
+    case Value::type_real:
       {
-        const auto &alt = this->m_stor.as<D_double>();
-        // double 123.456
-        os <<"double " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_double>::max_digits10) <<alt;
+        const auto &alt = this->m_stor.as<D_real>();
+        // real 123.456
+        os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_real>::max_digits10) <<alt;
         return;
       }
     case Value::type_string:
