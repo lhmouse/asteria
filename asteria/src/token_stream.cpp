@@ -96,7 +96,7 @@ namespace {
         return false;
       }
       auto kpunct = seq_inout.back().opt<Token::S_punctuator>();
-      if(kpunct == nullptr) {
+      if(!kpunct) {
         return false;
       }
       if(rocket::is_none_of(kpunct->punct, { Token::punctuator_add, Token::punctuator_sub })) {
@@ -113,7 +113,7 @@ namespace {
       // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
       if(seq_inout.size() >= 2) {
         kpunct = seq_inout.rbegin()[1].opt<Token::S_punctuator>();
-        if(kpunct == nullptr) {
+        if(!kpunct) {
           return false;
         }
         if(rocket::is_any_of(kpunct->punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl, Token::punctuator_bracket_cl })) {
