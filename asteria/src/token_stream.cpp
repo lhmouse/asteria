@@ -133,22 +133,25 @@ Parser_result Token_stream::load(std::istream &sis)
     Vector<Token> seq;
     seq.swap(this->m_rseq);
     seq.clear();
-    // Read source code line by line.
+    // Check whether the stream can be read from.
+    // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
     Size line = 0;
     if(!sis) {
       return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
     }
-    String str;
     // Save the position of an unterminated block comment.
     Size bcom_line = 0;
     Size bcom_off = 0;
     Size bcom_len = 0;
-    while(++line, getline(sis, str)) {
-      ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
+    // Read source code line by line.
+    String str;
+    while(getline(sis, str)) {
+      ++line;
       // Discard the first line if it looks like a shebang.
       if((line == 1) && str.starts_with("#!", 2)) {
         continue;
       }
+      ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
       Size pos, epos;
       ///////////////////////////////////////////////////////////////////////
       // Phase 1
