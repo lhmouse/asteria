@@ -59,7 +59,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           return const_cast<streambuf_type *>(&(this->m_sb));
         }
 
-      const string_type & get_string() const noexcept
+      const string_type & get_string() const
         {
           return this->rdbuf()->get_string();
         }
@@ -67,7 +67,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->rdbuf()->get_caret();
         }
-      void set_string(string_type str, size_type caret = npos) noexcept
+      void set_string(string_type str, size_type caret = npos)
         {
           return this->rdbuf()->set_string(::std::move(str), caret);
         }
@@ -75,7 +75,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->rdbuf()->set_caret(caret);
         }
-      string_type extract_string() noexcept
+      string_type extract_string()
         {
           return this->rdbuf()->extract_string();
         }

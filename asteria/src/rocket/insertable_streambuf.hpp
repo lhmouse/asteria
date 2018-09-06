@@ -78,7 +78,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->m_caret;
         }
-      void set_string(string_type str, size_type caret = npos) noexcept(noexcept(m_str = ::std::move(m_str)))
+      void set_string(string_type str, size_type caret = npos)
         {
           this->basic_insertable_streambuf::sync();
           this->m_str = ::std::move(str);
@@ -88,7 +88,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           this->m_caret = caret;
         }
-      string_type extract_string() noexcept(noexcept(m_str.swap(m_str)))
+      string_type extract_string()
         {
           string_type str;
           this->basic_insertable_streambuf::sync();
