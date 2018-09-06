@@ -14,13 +14,18 @@ class Parser_result
     enum Error : Uint32
       {
         error_success                            =   0,
-        // Category: i/o, encoding
+        // Phase 1
+        //   I/O stream
+        //   UTF-8 decoder
         error_istream_open_failure               = 101,
         error_istream_badbit_set                 = 102,
         error_utf8_sequence_invalid              = 103,
         error_utf8_sequence_incomplete           = 104,
         error_utf_code_point_invalid             = 105,
-        // Category: tokenizer
+        // Phase 2
+        //   Comment stripper
+        // Phase 3
+        //   Tokenizer
         error_token_character_unrecognized       = 201,
         error_string_literal_unclosed            = 202,
         error_escape_sequence_unknown            = 203,
@@ -35,6 +40,8 @@ class Parser_result
         error_real_literal_overflow              = 212,
         error_real_literal_underflow             = 213,
         error_block_comment_unclosed             = 214,
+        // Phase 4
+        //  Parser
       };
 
   private:
