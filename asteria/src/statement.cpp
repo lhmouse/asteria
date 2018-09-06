@@ -564,13 +564,13 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
     case Statement::index_break:
       {
         const auto &alt = this->m_stor.as<Statement::S_break>();
-        if(alt.target == Statement::target_scope_switch) {
+        if(alt.target == Statement::target_switch) {
           return Block::status_break_switch;
         }
-        if(alt.target == Statement::target_scope_while) {
+        if(alt.target == Statement::target_while) {
           return Block::status_break_while;
         }
-        if(alt.target == Statement::target_scope_for) {
+        if(alt.target == Statement::target_for) {
           return Block::status_break_for;
         }
         return Block::status_break_unspec;
@@ -578,10 +578,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
     case Statement::index_continue:
       {
         const auto &alt = this->m_stor.as<Statement::S_continue>();
-        if(alt.target == Statement::target_scope_while) {
+        if(alt.target == Statement::target_while) {
           return Block::status_continue_while;
         }
-        if(alt.target == Statement::target_scope_for) {
+        if(alt.target == Statement::target_for) {
           return Block::status_continue_for;
         }
         return Block::status_continue_unspec;

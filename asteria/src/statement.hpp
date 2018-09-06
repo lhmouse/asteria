@@ -16,10 +16,10 @@ class Statement
   public:
     enum Target : Uint8
       {
-        target_scope_unspec  = 0,
-        target_scope_switch  = 1,
-        target_scope_while   = 2,
-        target_scope_for     = 3,
+        target_unspec  = 0,
+        target_switch  = 1,
+        target_while   = 2,
+        target_for     = 3,
       };
 
     enum Index : Uint8
