@@ -28,10 +28,6 @@ bool Block::empty() const noexcept
   {
     return this->m_stmts.empty();
   }
-Size Block::size() const noexcept
-  {
-    return this->m_stmts.size();
-  }
 
 void Block::fly_over_in_place(Abstract_context &ctx_inout) const
   {

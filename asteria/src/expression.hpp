@@ -22,7 +22,6 @@ class Expression
 
   public:
     bool empty() const noexcept;
-    Size size() const noexcept;
 
     Expression bind(const Analytic_context &ctx) const;
     Reference evaluate(const Executive_context &ctx) const;

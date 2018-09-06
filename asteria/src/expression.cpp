@@ -26,10 +26,6 @@ bool Expression::empty() const noexcept
   {
     return this->m_nodes.empty();
   }
-Size Expression::size() const noexcept
-  {
-    return this->m_nodes.size();
-  }
 
 Expression Expression::bind(const Analytic_context &ctx) const
   {
