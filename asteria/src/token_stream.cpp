@@ -713,6 +713,10 @@ Parser_result Token_stream::load(std::istream &sis)
                 continue;
               }
               const auto digit_value = static_cast<int>((ptr - digits) / 2);
+              const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
+              if(exp > bound) {
+                return Parser_result(line, pos, epos - pos, Parser_result::error_numeric_literal_exponent_overflow);
+              }
               exp = exp * 10 + digit_value;
             }
             if(exp_sign) {
