@@ -120,15 +120,18 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
     case Xpnode::index_named_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
-        // Look for the reference in the current context.
-        const auto pair = do_name_lookup(ctx, alt.name);
-        if(pair.first->is_analytic()) {
-          // Don't bind it onto something in a analytic context.
-          Xpnode::S_named_reference cand_bnd = { alt.name };
-          return std::move(cand_bnd);
+        // Only references with non-reserved names can be bound.
+        if(ctx.is_name_reserved(alt.name) == false) {
+          // Look for the reference in the current context.
+          // Don't bind it onto something in a analytic context which will soon get destroyed.
+          const auto pair = do_name_lookup(ctx, alt.name);
+          if(pair.first->is_analytic() == false) {
+            Xpnode::S_bound_reference cand_bnd = { *(pair.second) };
+            return std::move(cand_bnd);
+          }
         }
-        // Bind it.
-        Xpnode::S_bound_reference cand_bnd = { *(pair.second) };
+        // Copy it as-is.
+        Xpnode::S_named_reference cand_bnd = { alt.name };
         return std::move(cand_bnd);
       }
     case Xpnode::index_bound_reference:
@@ -504,9 +507,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, alt.name);
-        if(pair.first->is_analytic()) {
-          ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
-        }
         // Push the reference found.
         stack_inout.emplace_back(*(pair.second));
         return;
