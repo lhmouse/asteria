@@ -76,7 +76,6 @@ class Formatter
         return this->m_stream;
       }
 
-  public:
     template<typename ValueT>
       Formatter & operator,(const ValueT &value) noexcept
         try {
