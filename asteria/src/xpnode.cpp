@@ -234,7 +234,7 @@ namespace {
       ref_inout = std::move(ref_c);
     }
 
-  Reference do_traced_call(const String &file, Unsigned line, const D_function &func, Reference &&self, Vector<Reference> &&args)
+  Reference do_traced_call(const String &file, Uint64 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
     try {
       return func->invoke(std::move(self), std::move(args));
     } catch(...) {
@@ -345,7 +345,7 @@ namespace {
       if(rhs > limits::digits) {
         return 0;
       }
-      auto reg = static_cast<Unsigned>(lhs);
+      auto reg = static_cast<Uint64>(lhs);
       reg <<= rhs;
       return static_cast<D_integer>(reg);
     }
@@ -359,7 +359,7 @@ namespace {
       if(rhs > limits::digits) {
         return 0;
       }
-      auto reg = static_cast<Unsigned>(lhs);
+      auto reg = static_cast<Uint64>(lhs);
       reg >>= rhs;
       return static_cast<D_integer>(reg);
     }
@@ -374,7 +374,7 @@ namespace {
         ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
       }
       const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
-      auto reg = static_cast<Unsigned>(lhs);
+      auto reg = static_cast<Uint64>(lhs);
       const auto mask_out = (reg >> bits_rem) << bits_rem;
       const auto mask_sign = -(reg >> limits::digits) << bits_rem;
       if(mask_out != mask_sign) {
@@ -394,7 +394,7 @@ namespace {
         ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
       }
       const auto bits_rem = static_cast<unsigned char>(limits::digits - rhs);
-      auto reg = static_cast<Unsigned>(lhs);
+      auto reg = static_cast<Uint64>(lhs);
       const auto mask_in = -(reg >> limits::digits) << bits_rem;
       reg >>= rhs;
       reg |= mask_in;
@@ -466,7 +466,7 @@ namespace {
         ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
       }
       D_string res;
-      const auto count = static_cast<Unsigned>(rhs);
+      const auto count = static_cast<Uint64>(rhs);
       if(count != 0) {
         if(lhs.size() > res.max_size() / count) {
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");

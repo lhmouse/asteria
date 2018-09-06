@@ -59,7 +59,7 @@ int main()
     try {
       test_throw(0);
     } catch(...) {
-      Bivector<String, Unsigned> bt;
+      Bivector<String, Uint64> bt;
       try {
         Backtracer::unpack_and_rethrow(bt, std::current_exception());
       } catch(Exception &e) {

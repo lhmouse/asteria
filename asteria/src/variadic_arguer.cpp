@@ -18,7 +18,7 @@ String Variadic_arguer::describe() const
 
 Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) const
   {
-    const auto nvarg = static_cast<Signed>(this->m_vargs.size());
+    const auto nvarg = static_cast<Sint64>(this->m_vargs.size());
     switch(args.size()) {
     case 1:
       {

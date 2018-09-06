@@ -121,7 +121,7 @@ class Token
       };
     struct S_integer_literal
       {
-        Signed value;
+        Sint64 value;
       };
     struct S_double_literal
       {
@@ -142,14 +142,14 @@ class Token
       )>;
 
   private:
-    Unsigned m_line;
+    Uint64 m_line;
     Size m_offset;
     Size m_length;
     Variant m_stor;
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(Unsigned line, Size offset, Size length, AltT &&alt)
+      Token(Uint64 line, Size offset, Size length, AltT &&alt)
         : m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
@@ -159,7 +159,7 @@ class Token
     Token & operator=(Token &&) noexcept;
 
   public:
-    Unsigned get_line() const noexcept
+    Uint64 get_line() const noexcept
       {
         return this->m_line;
       }

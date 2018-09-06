@@ -19,7 +19,7 @@ class Reference_modifier
       };
     struct S_array_index
       {
-        Signed index;
+        Sint64 index;
       };
     struct S_object_key
       {

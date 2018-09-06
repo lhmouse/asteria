@@ -37,13 +37,13 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
         auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
-          rindex += static_cast<Signed>(qarr->size());
+          rindex += static_cast<Sint64>(qarr->size());
         }
         if(rindex < 0) {
           ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
-        if(rindex >= static_cast<Signed>(qarr->size())) {
+        if(rindex >= static_cast<Sint64>(qarr->size())) {
           ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
@@ -91,26 +91,26 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
         auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
-          rindex += static_cast<Signed>(qarr->size());
+          rindex += static_cast<Sint64>(qarr->size());
         }
         if(rindex < 0) {
           ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
           if(!creates) {
             return nullptr;
           }
-          const auto size_add = static_cast<Unsigned>(0) - static_cast<Unsigned>(rindex);
+          const auto size_add = static_cast<Uint64>(0) - static_cast<Uint64>(rindex);
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }
           qarr->insert(qarr->begin(), static_cast<Size>(size_add));
           rindex = 0;
         }
-        if(rindex >= static_cast<Signed>(qarr->size())) {
+        if(rindex >= static_cast<Sint64>(qarr->size())) {
           ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           if(!creates) {
             return nullptr;
           }
-          const auto size_add = static_cast<Unsigned>(rindex) + 1 - qarr->size();
+          const auto size_add = static_cast<Uint64>(rindex) + 1 - qarr->size();
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }

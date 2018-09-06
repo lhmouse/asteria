@@ -19,11 +19,6 @@ namespace Asteria {
 // Aliases
 using Null      = std::nullptr_t;
 using Boolean   = bool;
-using Signed    = std::int64_t;
-using Unsigned  = std::uint64_t;
-using Double    = double;
-using String    = rocket::cow_string;
-
 using Sint8     = std::int8_t;
 using Uint8     = std::uint8_t;
 using Sint16    = std::int16_t;
@@ -36,9 +31,10 @@ using Sintmax   = std::intmax_t;
 using Uintmax   = std::uintmax_t;
 using Sintptr   = std::intptr_t;
 using Uintptr   = std::uintptr_t;
-
 using Size      = std::size_t;
 using Diff      = std::ptrdiff_t;
+using Double    = double;
+using String    = rocket::cow_string;
 
 template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
@@ -86,7 +82,7 @@ class Instantiated_function;
 // Runtime data types exposed to users
 using D_null      = Null;
 using D_boolean   = Boolean;
-using D_integer   = Signed;
+using D_integer   = Sint64;
 using D_double    = Double;
 using D_string    = String;
 using D_opaque    = Sptr<Abstract_opaque>;

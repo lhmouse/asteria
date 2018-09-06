@@ -38,19 +38,19 @@ class Parser_result
       };
 
   private:
-    Unsigned m_line;
+    Uint64 m_line;
     Size m_offset;
     Size m_length;
     Error m_error;
 
   public:
-    constexpr Parser_result(Unsigned line, Size offset, Size length, Error error) noexcept
+    constexpr Parser_result(Uint64 line, Size offset, Size length, Error error) noexcept
       : m_line(line), m_offset(offset), m_length(length), m_error(error)
       {
       }
 
   public:
-    Unsigned get_line() const noexcept
+    Uint64 get_line() const noexcept
       {
         return this->m_line;
       }

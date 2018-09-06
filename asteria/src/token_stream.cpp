@@ -89,7 +89,7 @@ namespace {
         return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
       }
 
-  bool do_merge_sign(Vector<Token> &seq_inout, Unsigned line, Size pos)
+  bool do_merge_sign(Vector<Token> &seq_inout, Uint64 line, Size pos)
     {
       // The last token must be a positive or negative sign.
       if(seq_inout.empty()) {
@@ -725,14 +725,14 @@ Parser_result Token_stream::load(std::istream &sis)
                 return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_exponent_negative);
               }
               // Parse the significant part.
-              Unsigned value = 0;
+              Uint64 value = 0;
               for(Size i = int_begin; i != int_end; ++i) {
                 const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
                 if(!ptr) {
                   continue;
                 }
-                const auto digit_value = static_cast<Unsigned>((ptr - digits) / 2);
-                const auto bound = (std::numeric_limits<Unsigned>::max() - digit_value) / radix;
+                const auto digit_value = static_cast<Uint64>((ptr - digits) / 2);
+                const auto bound = (std::numeric_limits<Uint64>::max() - digit_value) / radix;
                 if(value > bound) {
                   return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
                 }
@@ -741,7 +741,7 @@ Parser_result Token_stream::load(std::istream &sis)
               // Raise the significant part to the power of `exp`.
               if(value != 0) {
                 for(int i = 0; i < exp; ++i) {
-                  const auto bound = std::numeric_limits<Unsigned>::max() / exp_base;
+                  const auto bound = std::numeric_limits<Uint64>::max() / exp_base;
                   if(value > bound) {
                     return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
                   }
@@ -755,7 +755,7 @@ Parser_result Token_stream::load(std::istream &sis)
                 // We ignore one's complement systems, as POSIX does.
                 value = -value;
               }
-              Token::S_integer_literal token_c = { static_cast<Signed>(value) };
+              Token::S_integer_literal token_c = { static_cast<Sint64>(value) };
               seq.emplace_back(line, pos, epos - pos, std::move(token_c));
               break;
             }

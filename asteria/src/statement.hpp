@@ -56,7 +56,7 @@ class Statement
         String name;
         Vector<String> params;
         String file;
-        Unsigned line;
+        Uint64 line;
         Block body;
       };
     struct S_if

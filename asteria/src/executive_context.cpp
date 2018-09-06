@@ -33,7 +33,7 @@ namespace {
 
 }
 
-void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Unsigned line, Reference self, Vector<Reference> args)
+void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Uint64 line, Reference self, Vector<Reference> args)
   {
     // Set up parameters.
     for(const auto &name : params) {

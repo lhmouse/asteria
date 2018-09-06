@@ -86,7 +86,7 @@ class Xpnode
       {
         Vector<String> params;
         String file;
-        Unsigned line;
+        Uint64 line;
         Block body;
       };
     struct S_branch
@@ -97,7 +97,7 @@ class Xpnode
     struct S_function_call
       {
         String file;
-        Unsigned line;
+        Uint64 line;
         Size arg_cnt;
       };
     struct S_operator_rpn

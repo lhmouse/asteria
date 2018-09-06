@@ -523,7 +523,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // The exception variable shall not outlast the loop body.
           Executive_context ctx_next(&ctx_inout);
           // Identify the dynamic type of the exception.
-          Bivector<String, Unsigned> btv;
+          Bivector<String, Uint64> btv;
           try {
             Backtracer::unpack_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {

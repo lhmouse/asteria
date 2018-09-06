@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-void Backtracer::unpack_and_rethrow(Bivector<String, Unsigned> &btv_out, const std::exception_ptr &etop)
+void Backtracer::unpack_and_rethrow(Bivector<String, Uint64> &btv_out, const std::exception_ptr &etop)
   {
     // Rethrow the exception. If `Backtracer` is caught, a new element is appended to `btv_out` and the nested
     // exception is rethrown. This procedure is repeated until something other than `Backtracer` is thrown.
