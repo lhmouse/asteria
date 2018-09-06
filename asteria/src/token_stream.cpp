@@ -99,7 +99,7 @@ namespace {
       if(kpunct == nullptr) {
         return false;
       }
-      if((kpunct->punct != Token::punctuator_add) && (kpunct->punct != Token::punctuator_sub)) {
+      if(rocket::is_none_of(kpunct->punct, { Token::punctuator_add, Token::punctuator_sub })) {
         return false;
       }
       const bool sign = kpunct->punct == Token::punctuator_sub;
@@ -116,10 +116,7 @@ namespace {
         if(kpunct == nullptr) {
           return false;
         }
-        if((kpunct->punct == Token::punctuator_inc) || (kpunct->punct == Token::punctuator_dec)) {
-          return false;
-        }
-        if((kpunct->punct == Token::punctuator_parenth_cl) || (kpunct->punct == Token::punctuator_bracket_cl)) {
+        if(rocket::is_any_of(kpunct->punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl, Token::punctuator_bracket_cl })) {
           return false;
         }
       }
