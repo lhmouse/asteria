@@ -507,6 +507,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(ctx, alt.name);
+        if(pair.first->is_analytic()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
+        }
         // Push the reference found.
         stack_inout.emplace_back(*(pair.second));
         return;
