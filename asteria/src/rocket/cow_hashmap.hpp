@@ -1374,6 +1374,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         {
           return this->m_sth.as_allocator();
         }
+      // N.B. The return type differs from `std::unordered_map`.
       const hasher & hash_function() const noexcept
         {
           return this->m_sth.as_hasher();
@@ -1382,6 +1383,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         {
           return this->m_sth.as_hasher();
         }
+      // N.B. The return type differs from `std::unordered_map`.
       const key_equal & key_eq() const noexcept
         {
           return this->m_sth.as_key_equal();
