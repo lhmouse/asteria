@@ -15,7 +15,6 @@ class Token_stream
 
   public:
     Token_stream() noexcept;
-    Token_stream(Vector<Token> &&seq);
     ~Token_stream();
 
     Token_stream(Token_stream &&) noexcept;

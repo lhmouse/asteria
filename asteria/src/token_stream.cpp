@@ -10,28 +10,8 @@
 
 namespace Asteria {
 
-namespace {
-
-  Vector<Token> & do_reverse_token_sequence(Vector<Token> &seq_inout)
-    {
-      if(seq_inout.size() > 1) {
-        auto fr = seq_inout.mut_begin();
-        auto bk = seq_inout.mut_end() - 1;
-        do {
-          std::iter_swap(fr, bk);
-        } while(++fr < --bk);
-      }
-      return seq_inout;
-    }
-
-}
-
 Token_stream::Token_stream() noexcept
   : m_rseq()
-  {
-  }
-Token_stream::Token_stream(Vector<Token> &&seq)
-  : m_rseq(std::move(do_reverse_token_sequence(seq)))
   {
   }
 Token_stream::~Token_stream()
@@ -93,10 +73,6 @@ namespace {
 
 Parser_result Token_stream::load(std::istream &sis)
   {
-    // Move the vector out as its storage may be reused.
-    Vector<Token> seq;
-    seq.swap(this->m_rseq);
-    seq.clear();
     // Check whether the stream can be read from.
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
     Size line = 0;
@@ -108,6 +84,7 @@ Parser_result Token_stream::load(std::istream &sis)
     Size bcom_off = 0;
     Size bcom_len = 0;
     // Read source code line by line.
+    Vector<Token> seq;
     String str;
     while(getline(sis, str)) {
       ++line;
@@ -789,8 +766,8 @@ Parser_result Token_stream::load(std::istream &sis)
       // A block comment may straddle multiple lines. We just mark the first line here.
       return Parser_result(bcom_line, bcom_off, bcom_len, Parser_result::error_block_comment_unclosed);
     }
-    // Accept the sequence.
-    this->m_rseq.swap(do_reverse_token_sequence(seq));
+    // Accept the sequence in reverse order.
+    this->m_rseq.assign(std::make_move_iterator(seq.mut_rbegin()), std::make_move_iterator(seq.mut_rend()));
     return Parser_result(line, 0, 0, Parser_result::error_success);
   }
 void Token_stream::clear() noexcept
