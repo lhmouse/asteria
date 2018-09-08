@@ -14,10 +14,10 @@
 
 namespace Asteria {
 
-Formatter::Formatter(const char *file, unsigned long line, const char *func) noexcept
-  : m_file(file), m_line(line), m_func(func)
+Formatter::Formatter()
+  : m_stream()
   {
-    this->m_stream <<std::boolalpha;
+    this->m_stream.setf(std::ios::boolalpha);
   }
 Formatter::~Formatter()
   {
@@ -131,7 +131,7 @@ namespace {
 
 }
 
-bool write_log_to_stderr(Formatter &&fmt) noexcept
+bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept
   try {
     auto &oss = fmt.get_stream();
     oss.set_caret(0);
@@ -139,7 +139,7 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
     do_print_time(time_str, sizeof(time_str));
     oss <<time_str <<" $$ ";
     oss.set_caret(oss.npos);
-    oss <<" @@ " <<fmt.get_file() <<':' <<fmt.get_line();
+    oss <<" @@ " <<file <<':' <<line;
     auto str = oss.extract_string();
     do_replace_all(str, '\n', "\n\t");
     do_replace_all(str, '\0', "[NUL]");
@@ -150,11 +150,11 @@ bool write_log_to_stderr(Formatter &&fmt) noexcept
     return false;
   }
 
-void throw_runtime_error(Formatter &&fmt)
+void throw_runtime_error(const char *funcsig, Formatter &&fmt)
   {
     auto &oss = fmt.get_stream();
     oss.set_caret(0);
-    oss <<fmt.get_func() <<": ";
+    oss <<funcsig <<": ";
     auto str = oss.extract_string();
     throw Runtime_error(std::move(str));
   }
