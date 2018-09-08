@@ -13,7 +13,7 @@
 4. Lightweight.
 5. Procedural.
 6. Dynamically typed.
-7. Easy to intergrate in a C++ project. (C++11 is required.)
+7. Easy to integrate in a C++ project. (C++11 is required.)
 8. Native to C++ exceptions, particularly `std::bad_alloc`.
 
 # Characteristics
