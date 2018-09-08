@@ -721,7 +721,7 @@ Parser_result Token_stream::load(std::istream &sis)
                 }
               }
               // Push an integer literal.
-              Token::S_integer_literal token_c = { static_cast<Sint64>(value) };
+              Token::S_integer_literal token_c = { value };
               seq.emplace_back(line, pos, epos - pos, std::move(token_c));
               break;
             }

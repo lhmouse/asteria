@@ -121,7 +121,7 @@ class Token
       };
     struct S_integer_literal
       {
-        Sint64 value;
+        Uint64 value;
       };
     struct S_real_literal
       {
