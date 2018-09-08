@@ -1205,14 +1205,14 @@ template<typename valueT, typename allocatorT>
         cow_vector & assign(size_type n, const paramsT &...params)
           {
             this->clear();
-            this->insert(this->begin(), n, params...);
+            this->append(n, params...);
             return *this;
           }
       // N.B. The return type is a non-standard extension.
       cow_vector & assign(initializer_list<value_type> init)
         {
           this->clear();
-          this->insert(this->begin(), init);
+          this->append(init);
           return *this;
         }
       // N.B. The return type is a non-standard extension.
@@ -1220,7 +1220,7 @@ template<typename valueT, typename allocatorT>
         cow_vector & assign(inputT first, inputT last)
           {
             this->clear();
-            this->insert(this->begin(), ::std::move(first), ::std::move(last));
+            this->append(::std::move(first), ::std::move(last));
             return *this;
           }
 
