@@ -265,11 +265,14 @@ namespace {
       return lhs ^ rhs;
     }
 
-  D_integer do_negate(D_integer rhs)
+  D_integer do_negate(D_integer rhs, bool wrap)
     {
       using limits = std::numeric_limits<D_integer>;
       if(rhs == limits::min()) {
-        ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
+        if(!wrap) {
+          ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
+        }
+        return rhs;
       }
       return -rhs;
     }
@@ -664,7 +667,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             // Negate the operand to create an rvalue, then return it.
             auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
-              auto result = do_negate(lhs_value.check<D_integer>());
+              auto result = do_negate(lhs_value.check<D_integer>(), lhs.is_constant());
               do_set_result(lhs, alt.compound_assign, std::move(result));
               break;
             }

@@ -42,6 +42,7 @@ class Reference
     Reference & zoom_in(Reference_modifier modifier);
     Reference & zoom_out();
 
+    bool is_constant() const noexcept;
     Reference & materialize();
     Reference & dematerialize();
   };

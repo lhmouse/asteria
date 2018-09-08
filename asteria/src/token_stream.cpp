@@ -89,42 +89,6 @@ namespace {
         return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
       }
 
-  bool do_merge_sign(Vector<Token> &seq_inout, Uint64 line, Size pos)
-    {
-      // The last token must be a positive or negative sign.
-      if(seq_inout.empty()) {
-        return false;
-      }
-      auto kpunct = seq_inout.back().opt<Token::S_punctuator>();
-      if(!kpunct) {
-        return false;
-      }
-      if(rocket::is_none_of(kpunct->punct, { Token::punctuator_add, Token::punctuator_sub })) {
-        return false;
-      }
-      const bool sign = kpunct->punct == Token::punctuator_sub;
-      // Don't merge them if they are not contiguous.
-      if(seq_inout.back().get_line() != line) {
-        return false;
-      }
-      if(seq_inout.back().get_offset() + seq_inout.back().get_length() != pos) {
-        return false;
-      }
-      // Don't merge them if the sign token follows a non-punctuator or a punctuator that terminates a postfix expression.
-      if(seq_inout.size() >= 2) {
-        kpunct = seq_inout.rbegin()[1].opt<Token::S_punctuator>();
-        if(!kpunct) {
-          return false;
-        }
-        if(rocket::is_any_of(kpunct->punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl, Token::punctuator_bracket_cl })) {
-          return false;
-        }
-      }
-      // Drop the sign token.
-      seq_inout.pop_back();
-      return sign;
-    }
-
 }
 
 Parser_result Token_stream::load(std::istream &sis)
@@ -756,13 +720,7 @@ Parser_result Token_stream::load(std::istream &sis)
                   value *= exp_base;
                 }
               }
-              // Finalize it.
-              const bool negative = do_merge_sign(seq, line, pos);
-              if(negative) {
-                // Negate the unsigned value.
-                // We ignore one's complement systems, as POSIX does.
-                value = -value;
-              }
+              // Push an integer literal.
               Token::S_integer_literal token_c = { static_cast<Sint64>(value) };
               seq.emplace_back(line, pos, epos - pos, std::move(token_c));
               break;
@@ -809,12 +767,7 @@ Parser_result Token_stream::load(std::istream &sis)
             if((vclass == FP_ZERO) && !zero) {
               return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_underflow);
             }
-            // Finalize it.
-            const bool negative = do_merge_sign(seq, line, pos);
-            if(negative) {
-              // Negate the floating-point value.
-              value = -value;
-            }
+            // Push a floating-point literal.
             Token::S_real_literal token_c = { value };
             seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;

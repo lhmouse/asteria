@@ -95,6 +95,10 @@ Reference & Reference::zoom_out()
     return *this;
   }
 
+bool Reference::is_constant() const noexcept
+  {
+    return this->m_root.is_constant();
+  }
 Reference & Reference::materialize()
   {
     if(this->m_root.is_lvalue() != false) {

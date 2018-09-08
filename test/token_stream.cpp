@@ -20,7 +20,7 @@ int main()
     auto result = ts.load(iss);
     ASTERIA_TEST_CHECK(result.get_error() == result.error_success);
     ASTERIA_TEST_CHECK(iss.eof());
-    ASTERIA_TEST_CHECK(ts.size() == 17);
+    ASTERIA_TEST_CHECK(ts.size() == 18);
     ASTERIA_TEST_CHECK(ts.peek(0)->check<Token::S_identifier>().id == "hh");
     ASTERIA_TEST_CHECK(ts.peek(1)->check<Token::S_punctuator>().punct == Token::punctuator_inc);
     ASTERIA_TEST_CHECK(ts.peek(2)->check<Token::S_punctuator>().punct == Token::punctuator_add);
@@ -37,5 +37,6 @@ int main()
     ASTERIA_TEST_CHECK(ts.peek(13)->check<Token::S_punctuator>().punct == Token::punctuator_dot);
     ASTERIA_TEST_CHECK(ts.peek(14)->check<Token::S_keyword>().keyword == Token::keyword_false);
     ASTERIA_TEST_CHECK(ts.peek(15)->check<Token::S_punctuator>().punct == Token::punctuator_semicolon);
-    ASTERIA_TEST_CHECK(ts.peek(16)->check<Token::S_integer_literal>().value == -420000000000000);
+    ASTERIA_TEST_CHECK(ts.peek(16)->check<Token::S_punctuator>().punct == Token::punctuator_sub);
+    ASTERIA_TEST_CHECK(ts.peek(17)->check<Token::S_integer_literal>().value == 420000000000000);
   }

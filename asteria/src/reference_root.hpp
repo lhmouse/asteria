@@ -60,6 +60,7 @@ class Reference_root
     Reference_root & operator=(Reference_root &&) noexcept;
 
   public:
+    bool is_constant() const noexcept;
     bool is_lvalue() const noexcept;
     bool is_unique() const noexcept;
 
