@@ -28,7 +28,7 @@ class Block
     Vector<Statement> m_stmts;
 
   public:
-    Block(Vector<Statement> &&stmts) noexcept;
+    Block(Vector<Statement> &&stmts);
     ~Block();
 
     Block(Block &&) noexcept;

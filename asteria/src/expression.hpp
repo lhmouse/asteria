@@ -14,7 +14,7 @@ class Expression
     Vector<Xpnode> m_nodes;
 
   public:
-    Expression(Vector<Xpnode> &&nodes) noexcept;
+    Expression(Vector<Xpnode> &&nodes);
     ~Expression();
 
     Expression(Expression &&) noexcept;
