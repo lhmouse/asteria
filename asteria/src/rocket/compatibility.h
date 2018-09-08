@@ -23,7 +23,7 @@
 #  define ROCKET_DEBUG                1
 #endif
 
-#define ROCKET_FORMAT_PRINTF(...)     // not implemented
+#define ROCKET_ATTRIBUTE_PRINTF(...)  // not implemented
 #define ROCKET_FUNCSIG                __FUNCSIG__
 #define ROCKET_UNREACHABLE()          __assume(0)
 #define ROCKET_SELECTANY              __declspec(selectany)
@@ -39,7 +39,7 @@
 #  define ROCKET_DEBUG                1
 #endif
 
-#define ROCKET_FORMAT_PRINTF(...)     __attribute__((__format__(__printf__, __VA_ARGS__)))
+#define ROCKET_ATTRIBUTE_PRINTF(...)  __attribute__((__format__(__printf__, __VA_ARGS__)))
 #define ROCKET_FUNCSIG                __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()          __builtin_unreachable()
 #define ROCKET_SELECTANY              __attribute__((__weak__))
@@ -55,7 +55,7 @@
 #  define ROCKET_DEBUG                1
 #endif
 
-#define ROCKET_FORMAT_PRINTF(...)     __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
+#define ROCKET_ATTRIBUTE_PRINTF(...)  __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
 #define ROCKET_FUNCSIG                __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()          __builtin_unreachable()
 #define ROCKET_SELECTANY              __attribute__((__weak__))
