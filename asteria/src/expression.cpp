@@ -43,14 +43,13 @@ Reference Expression::evaluate(const Executive_context &ctx) const
     for(const auto &node : this->m_nodes) {
       node.evaluate(stack, ctx);
     }
-    switch(stack.size()) {
-    case 0:
+    if(stack.empty()) {
       return { };
-    case 1:
-      return std::move(stack.mut_front());
-    default:
+    }
+    if(stack.size() != 1) {
       ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
     }
+    return std::move(stack.mut_front());
   }
 
 }
