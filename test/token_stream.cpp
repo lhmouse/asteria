@@ -39,4 +39,5 @@ int main()
     ASTERIA_TEST_CHECK(ts.peek(15)->check<Token::S_punctuator>().punct == Token::punctuator_semicolon);
     ASTERIA_TEST_CHECK(ts.peek(16)->check<Token::S_punctuator>().punct == Token::punctuator_sub);
     ASTERIA_TEST_CHECK(ts.peek(17)->check<Token::S_integer_literal>().value == 420000000000000);
+    ASTERIA_TEST_CHECK(ts.peek(18) == nullptr);
   }
