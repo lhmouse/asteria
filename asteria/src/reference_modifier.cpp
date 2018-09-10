@@ -26,7 +26,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        const auto &alt = this->m_stor.as<Reference_modifier::S_array_index>();
+        const auto &alt = this->m_stor.as<S_array_index>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -53,7 +53,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
       }
     case index_object_key:
       {
-        const auto &alt = this->m_stor.as<Reference_modifier::S_object_key>();
+        const auto &alt = this->m_stor.as<S_object_key>();
         if(parent.type() == Value::type_null) {
           return nullptr;
         }
@@ -78,7 +78,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        const auto &alt = this->m_stor.as<Reference_modifier::S_array_index>();
+        const auto &alt = this->m_stor.as<S_array_index>();
         if(parent.type() == Value::type_null) {
           if(!create_new) {
             return nullptr;
@@ -131,7 +131,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
       }
     case index_object_key:
       {
-        const auto &alt = this->m_stor.as<Reference_modifier::S_object_key>();
+        const auto &alt = this->m_stor.as<S_object_key>();
         if(parent.type() == Value::type_null) {
           if(!create_new) {
             return nullptr;

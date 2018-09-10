@@ -25,17 +25,17 @@ const Value & Reference_root::dereference_readonly() const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_constant:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_constant>();
+        const auto &alt = this->m_stor.as<S_constant>();
         return alt.src;
       }
     case index_temporary:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_temporary>();
+        const auto &alt = this->m_stor.as<S_temporary>();
         return alt.value;
       }
     case index_variable:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         return alt.var->get_value();
       }
     default:
@@ -48,17 +48,17 @@ Value & Reference_root::dereference_mutable() const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_constant:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_constant>();
+        const auto &alt = this->m_stor.as<S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
       }
     case index_temporary:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_temporary>();
+        const auto &alt = this->m_stor.as<S_temporary>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", alt.value, "` cannot be modified.");
       }
     case index_variable:
       {
-        const auto &alt = this->m_stor.as<Reference_root::S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         if(alt.var->is_immutable()) {
           ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", alt.var->get_value(), "` is immutable and cannot be modified.");
         }
