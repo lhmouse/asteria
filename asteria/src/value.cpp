@@ -107,48 +107,48 @@ Value::Compare Value::compare(const Value &other) const noexcept
       return Value::compare_equal;
     case Value::type_boolean:
       {
-        const auto &cand_lhs = this->check<D_boolean>();
-        const auto &cand_rhs = other.check<D_boolean>();
-        if(cand_lhs < cand_rhs) {
+        const auto &alt_lhs = this->check<D_boolean>();
+        const auto &alt_rhs = other.check<D_boolean>();
+        if(alt_lhs < alt_rhs) {
           return Value::compare_less;
         }
-        if(cand_lhs > cand_rhs) {
+        if(alt_lhs > alt_rhs) {
           return Value::compare_greater;
         }
         return Value::compare_equal;
       }
     case Value::type_integer:
       {
-        const auto &cand_lhs = this->check<D_integer>();
-        const auto &cand_rhs = other.check<D_integer>();
-        if(cand_lhs < cand_rhs) {
+        const auto &alt_lhs = this->check<D_integer>();
+        const auto &alt_rhs = other.check<D_integer>();
+        if(alt_lhs < alt_rhs) {
           return Value::compare_less;
         }
-        if(cand_lhs > cand_rhs) {
+        if(alt_lhs > alt_rhs) {
           return Value::compare_greater;
         }
         return Value::compare_equal;
       }
     case Value::type_real:
       {
-        const auto &cand_lhs = this->check<D_real>();
-        const auto &cand_rhs = other.check<D_real>();
-        if(std::isunordered(cand_lhs, cand_rhs)) {
+        const auto &alt_lhs = this->check<D_real>();
+        const auto &alt_rhs = other.check<D_real>();
+        if(std::isunordered(alt_lhs, alt_rhs)) {
           return Value::compare_unordered;
         }
-        if(std::isless(cand_lhs, cand_rhs)) {
+        if(std::isless(alt_lhs, alt_rhs)) {
           return Value::compare_less;
         }
-        if(std::isgreater(cand_lhs, cand_rhs)) {
+        if(std::isgreater(alt_lhs, alt_rhs)) {
           return Value::compare_greater;
         }
         return Value::compare_equal;
       }
     case Value::type_string:
       {
-        const auto &cand_lhs = this->check<D_string>();
-        const auto &cand_rhs = other.check<D_string>();
-        const int cmp = cand_lhs.compare(cand_rhs);
+        const auto &alt_lhs = this->check<D_string>();
+        const auto &alt_rhs = other.check<D_string>();
+        const int cmp = alt_lhs.compare(alt_rhs);
         if(cmp < 0) {
           return Value::compare_less;
         }

@@ -114,8 +114,8 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       {
         const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Copy it as-is.
-        Xpnode::S_literal cand_bnd = { alt.value };
-        return std::move(cand_bnd);
+        Xpnode::S_literal alt_bnd = { alt.value };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_named_reference:
       {
@@ -126,28 +126,28 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
           // Don't bind it onto something in a analytic context which will soon get destroyed.
           const auto pair = do_name_lookup(ctx, alt.name);
           if(pair.first->is_analytic() == false) {
-            Xpnode::S_bound_reference cand_bnd = { *(pair.second) };
-            return std::move(cand_bnd);
+            Xpnode::S_bound_reference alt_bnd = { *(pair.second) };
+            return std::move(alt_bnd);
           }
         }
         // Copy it as-is.
-        Xpnode::S_named_reference cand_bnd = { alt.name };
-        return std::move(cand_bnd);
+        Xpnode::S_named_reference alt_bnd = { alt.name };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_bound_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_bound_reference>();
         // Copy it as-is.
-        Xpnode::S_bound_reference cand_bnd = { alt.ref };
-        return std::move(cand_bnd);
+        Xpnode::S_bound_reference alt_bnd = { alt.ref };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_subexpression:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Bind the subexpression recursively.
         auto expr_bnd = alt.expr.bind(ctx);
-        Xpnode::S_subexpression cand_bnd = { std::move(expr_bnd) };
-        return std::move(cand_bnd);
+        Xpnode::S_subexpression alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_closure_function:
       {
@@ -156,8 +156,8 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next);
-        Xpnode::S_closure_function cand_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
-        return std::move(cand_bnd);
+        Xpnode::S_closure_function alt_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_branch:
       {
@@ -165,22 +165,22 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(ctx);
         auto branch_false_bnd = alt.branch_false.bind(ctx);
-        Xpnode::S_branch cand_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd) };
-        return std::move(cand_bnd);
+        Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd) };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_function_call:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Copy it as-is.
-        Xpnode::S_function_call cand_bnd = { alt.file, alt.line, alt.arg_cnt };
-        return std::move(cand_bnd);
+        Xpnode::S_function_call alt_bnd = { alt.file, alt.line, alt.arg_cnt };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_operator_rpn:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_operator_rpn>();
         // Copy it as-is.
-        Xpnode::S_operator_rpn cand_bnd = { alt.xop, alt.compound_assign };
-        return std::move(cand_bnd);
+        Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.compound_assign };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_unnamed_array:
       {
@@ -192,8 +192,8 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
           auto elem_bnd = elem.bind(ctx);
           elems_bnd.emplace_back(std::move(elem_bnd));
         }
-        Xpnode::S_unnamed_array cand_bnd = { std::move(elems_bnd) };
-        return std::move(cand_bnd);
+        Xpnode::S_unnamed_array alt_bnd = { std::move(elems_bnd) };
+        return std::move(alt_bnd);
       }
     case Xpnode::index_unnamed_object:
       {
@@ -205,8 +205,8 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
           auto second_bnd = pair.second.bind(ctx);
           pairs_bnd.insert_or_assign(pair.first, std::move(second_bnd));
         }
-        Xpnode::S_unnamed_object cand_bnd = { std::move(pairs_bnd) };
-        return std::move(cand_bnd);
+        Xpnode::S_unnamed_object alt_bnd = { std::move(pairs_bnd) };
+        return std::move(alt_bnd);
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");

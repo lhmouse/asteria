@@ -40,8 +40,8 @@ Block Block::bind_in_place(Analytic_context &ctx_inout) const
     Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      auto cand_bnd = stmt.bind_in_place(ctx_inout);
-      stmts_bnd.emplace_back(std::move(cand_bnd));
+      auto alt_bnd = stmt.bind_in_place(ctx_inout);
+      stmts_bnd.emplace_back(std::move(alt_bnd));
     }
     return std::move(stmts_bnd);
   }

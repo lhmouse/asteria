@@ -84,8 +84,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         const auto &alt = this->m_stor.as<Statement::S_expression>();
         // Bind the expression recursively.
         auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_expression cand_bnd = { std::move(expr_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_expression alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_var_def:
       {
@@ -94,8 +94,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         do_safe_set_named_reference(ctx_inout, "variable", alt.name, { });
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(ctx_inout);
-        Statement::S_var_def cand_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_func_def:
       {
@@ -106,8 +106,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Analytic_context ctx_next(&ctx_inout);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next);
-        Statement::S_func_def cand_bnd = { alt.name, alt.params, alt.file, alt.line, std::move(body_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_func_def alt_bnd = { alt.name, alt.params, alt.file, alt.line, std::move(body_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_if:
       {
@@ -116,8 +116,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         auto cond_bnd = alt.cond.bind(ctx_inout);
         auto branch_true_bnd = alt.branch_true.bind(ctx_inout);
         auto branch_false_bnd = alt.branch_false.bind(ctx_inout);
-        Statement::S_if cand_bnd = { std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_if alt_bnd = { std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_switch:
       {
@@ -133,8 +133,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
           auto second_bnd = pair.second.bind_in_place(ctx_next);
           clauses_bnd.emplace_back(std::move(first_bnd), std::move(second_bnd));
         }
-        Statement::S_switch cand_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_do_while:
       {
@@ -142,8 +142,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         // Bind the loop body and condition recursively.
         auto body_bnd = alt.body.bind(ctx_inout);
         auto cond_bnd = alt.cond.bind(ctx_inout);
-        Statement::S_do_while cand_bnd = { std::move(body_bnd), std::move(cond_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_while:
       {
@@ -151,8 +151,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         // Bind the condition and loop body recursively.
         auto cond_bnd = alt.cond.bind(ctx_inout);
         auto body_bnd = alt.body.bind(ctx_inout);
-        Statement::S_while cand_bnd = { std::move(cond_bnd), std::move(body_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_for:
       {
@@ -165,8 +165,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         auto cond_bnd = alt.cond.bind(ctx_next);
         auto step_bnd = alt.step.bind(ctx_next);
         auto body_bnd = alt.body.bind(ctx_next);
-        Statement::S_for cand_bnd = { alt.var_name, alt.var_immutable, std::move(var_init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_for alt_bnd = { alt.var_name, alt.var_immutable, std::move(var_init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_for_each:
       {
@@ -178,8 +178,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         // Bind the range initializer and loop body recursively.
         auto range_init_bnd = alt.range_init.bind(ctx_next);
         auto body_bnd = alt.body.bind(ctx_next);
-        Statement::S_for_each cand_bnd = { alt.key_name, alt.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_try:
       {
@@ -191,52 +191,52 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         do_safe_set_named_reference(ctx_next, "exception", alt.except_name, { });
         // Bind the `catch` branch recursively.
         auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next);
-        Statement::S_try cand_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_break:
       {
         const auto &alt = this->m_stor.as<Statement::S_break>();
         // Copy it as-is.
-        Statement::S_break cand_bnd = { alt.target };
-        return std::move(cand_bnd);
+        Statement::S_break alt_bnd = { alt.target };
+        return std::move(alt_bnd);
       }
     case Statement::index_continue:
       {
         const auto &alt = this->m_stor.as<Statement::S_continue>();
         // Copy it as-is.
-        Statement::S_continue cand_bnd = { alt.target };
-        return std::move(cand_bnd);
+        Statement::S_continue alt_bnd = { alt.target };
+        return std::move(alt_bnd);
       }
     case Statement::index_throw:
       {
         const auto &alt = this->m_stor.as<Statement::S_throw>();
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_throw cand_bnd = { std::move(expr_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_throw alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_return:
       {
         const auto &alt = this->m_stor.as<Statement::S_return>();
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_return cand_bnd = { std::move(expr_bnd) };
-        return std::move(cand_bnd);
+        Statement::S_return alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
       }
     case Statement::index_export:
       {
         const auto &alt = this->m_stor.as<Statement::S_export>();
         // Copy it as-is.
-        Statement::S_export cand_bnd = { alt.name };
-        return std::move(cand_bnd);
+        Statement::S_export alt_bnd = { alt.name };
+        return std::move(alt_bnd);
       }
     case Statement::index_import:
       {
         const auto &alt = this->m_stor.as<Statement::S_import>();
         // Copy it as-is.
-        Statement::S_import cand_bnd = { alt.path };
-        return std::move(cand_bnd);
+        Statement::S_import alt_bnd = { alt.path };
+        return std::move(alt_bnd);
       }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
