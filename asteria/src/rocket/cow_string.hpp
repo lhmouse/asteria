@@ -1063,7 +1063,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string & operator+=(initializer_list<value_type> init)
         {
-         return this->append(init);
+          return this->append(init);
         }
 
       basic_cow_string & append(shallow sh)

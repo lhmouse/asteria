@@ -373,7 +373,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // Check the loop condition.
           ref_out = alt.cond.evaluate(ctx_inout);
           if(ref_out.read().test() == false) {
-             break;
+            break;
           }
         }
         return Block::status_next;
