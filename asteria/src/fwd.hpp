@@ -17,7 +17,7 @@
 namespace Asteria {
 
 // Aliases
-using Null      = std::nullptr_t;
+using Nullptr   = std::nullptr_t;
 using Boolean   = bool;
 using Sint8     = std::int8_t;
 using Uint8     = std::uint8_t;
@@ -80,7 +80,7 @@ class Variadic_arguer;
 class Instantiated_function;
 
 // Runtime data types exposed to users
-using D_null      = Null;
+using D_null      = Nullptr;
 using D_boolean   = Boolean;
 using D_integer   = Sint64;
 using D_real      = Xfloat;
