@@ -56,6 +56,30 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     }
     return status_next;
   }
+Reference Block::execute_as_function_in_place(Executive_context &ctx_inout) const
+  {
+    Reference ref;
+    const auto status = this->execute_in_place(ref, ctx_inout);
+    switch(status) {
+    case status_next:
+      // Return `null` because the control flow reached the end of the function.
+      return { };
+    case status_break_unspec:
+    case status_break_switch:
+    case status_break_while:
+    case status_break_for:
+      ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
+    case status_continue_unspec:
+    case status_continue_while:
+    case status_continue_for:
+      ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
+    case status_return:
+      // Forward the result reference.
+      return std::move(ref);
+    default:
+      ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");
+    }
+  }
 
 Block Block::bind(const Analytic_context &ctx) const
   {
