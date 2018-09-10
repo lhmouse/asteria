@@ -7,6 +7,9 @@
 #include "reference.hpp"
 #include "backtracer.hpp"
 #include "exception.hpp"
+#include "token_stream.hpp"
+#include "parser.hpp"
+#include "rocket/insertable_istream.hpp"
 
 using namespace Asteria;
 
@@ -69,4 +72,50 @@ int main()
         }
       }
     }
+
+    Token_stream ts;
+#define NL "\n"
+    rocket::insertable_istream iss(String::shallow("import \"stdio\";  " NL
+                                                   "  { }  " NL
+                                                   "  { var i; }  " NL
+                                                   "//  { const i; }  " NL
+                                                   "  { const i = 1; }  " NL
+                                                   "func meow(param1, param2)  " NL
+                                                   "  {  " NL
+                                                   "    var i;  " NL
+                                                   "    const j = 1;  " NL
+                                                   "  }  " NL
+                                                   "if(true) " NL
+                                                   "  var k = 1; " NL
+                                                   "else if(true) {" NL
+                                                   "  const r = 2; " NL
+                                                   "  const z = 2; " NL
+                                                   "} " NL
+                                                   "  switch (42)  {   " NL
+                                                   "    case \"meow\": " NL
+                                                   "      continue while;  " NL
+                                                   "      continue for;  " NL
+                                                   "      continue  ;  " NL
+                                                   "      break switch;  " NL
+                                                   "      break while;  " NL
+                                                   "      break for;  " NL
+                                                   "      break  ;  " NL
+                                                   "    case \"woof\": " NL
+                                                   "    default  : " NL
+                                                   "      const meow = 1; " NL
+                                                   "    case 42 : " NL
+                                                   "  } " NL
+                                                   "var sum = 0;  " NL
+                                                   "for(var i = 0; i < 100; ++i) {  " NL
+                                                   "  sum  += i;  " NL
+                                                   "}  " NL
+                                                   "null  ;" NL
+                                                   ";" NL
+                                                   "print(sum);  " NL
+                                                   "export sum;  " NL));
+    auto r = ts.load(iss, String::shallow("dummy_file"));
+    ASTERIA_DEBUG_LOG("tokenizer error = ", r.get_error());
+    Parser p;
+    r = p.load(ts);
+    ASTERIA_DEBUG_LOG("parser error = ", r.get_error());
   }
