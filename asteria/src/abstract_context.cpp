@@ -35,10 +35,13 @@ Reference * Abstract_context::get_named_reference_opt(const String &name) noexce
     }
     return &(it->second);
   }
-Reference & Abstract_context::set_named_reference(const String &name, Reference ref)
+Reference & Abstract_context::open_named_reference(const String &name)
   {
-    const auto pair = this->m_named_refs.insert_or_assign(name, std::move(ref));
-    return pair.first->second;
+    return this->m_named_refs.try_emplace(name).first->second;
+  }
+void Abstract_context::set_named_reference(const String &name, Reference ref)
+  {
+    this->m_named_refs.insert_or_assign(name, std::move(ref));
   }
 
 }

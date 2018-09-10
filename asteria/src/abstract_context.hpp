@@ -31,7 +31,8 @@ class Abstract_context
 
     const Reference * get_named_reference_opt(const String &name) const noexcept;
     Reference * get_named_reference_opt(const String &name) noexcept;
-    Reference & set_named_reference(const String &name, Reference ref);
+    Reference & open_named_reference(const String &name);
+    void set_named_reference(const String &name, Reference ref);
   };
 
 }

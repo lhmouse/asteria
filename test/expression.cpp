@@ -11,13 +11,18 @@ using namespace Asteria;
 int main()
   {
     Executive_context ctx;
-    auto &cond = ctx.set_named_reference(String::shallow("cond"), Reference(Reference_root::S_constant { D_null()      }));
+    auto &cond = ctx.open_named_reference(String::shallow("cond"));
+    auto &dval = ctx.open_named_reference(String::shallow("dval"));
+    auto &ival = ctx.open_named_reference(String::shallow("ival"));
+    auto &aval = ctx.open_named_reference(String::shallow("aval"));
+
+    dval = Reference_root::S_constant { D_real(1.5) };
+    ival = Reference_root::S_constant { D_integer(3) };
+    aval = Reference_root::S_constant { D_array() };
+
     cond.materialize();
-    auto &dval = ctx.set_named_reference(String::shallow("dval"), Reference(Reference_root::S_constant { D_real(1.5) }));
     dval.materialize();
-    auto &ival = ctx.set_named_reference(String::shallow("ival"), Reference(Reference_root::S_constant { D_integer(3)  }));
     ival.materialize();
-    auto &aval = ctx.set_named_reference(String::shallow("aval"), Reference(Reference_root::S_constant { D_array()     }));
     aval.materialize();
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
