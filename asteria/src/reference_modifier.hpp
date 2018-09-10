@@ -49,7 +49,7 @@ class Reference_modifier
 
   public:
     const Value * apply_readonly_opt(const Value &parent) const;
-    Value * apply_mutable_opt(Value &parent, bool creates, Value *erased_out_opt) const;
+    Value * apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const;
   };
 
 }

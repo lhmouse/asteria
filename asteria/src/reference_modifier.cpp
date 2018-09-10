@@ -34,20 +34,21 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
         if(!qarr) {
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
         }
+        const auto ssize = static_cast<Sint64>(qarr->size());
         auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
-          rindex += static_cast<Sint64>(qarr->size());
+          rindex += ssize;
         }
         if(rindex < 0) {
           ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
-        if(rindex >= static_cast<Sint64>(qarr->size())) {
+        if(rindex >= ssize) {
           ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
           return nullptr;
         }
-        const auto rit = qarr->begin() + static_cast<Diff>(rindex);
+        auto rit = qarr->begin() + static_cast<Diff>(rindex);
         return &(rit[0]);
       }
     case Reference_modifier::index_object_key:
@@ -60,7 +61,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
         if(!qobj) {
           ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
         }
-        const auto rit = qobj->find(alt.key);
+        auto rit = qobj->find(alt.key);
         if(rit == qobj->end()) {
           ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
           return nullptr;
@@ -72,14 +73,14 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
     }
   }
 
-Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value *erased_out_opt) const
+Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case Reference_modifier::index_array_index:
       {
         const auto &alt = this->m_stor.as<Reference_modifier::S_array_index>();
         if(parent.type() == Value::type_null) {
-          if(!creates) {
+          if(!create_new) {
             return nullptr;
           }
           parent = D_array();
@@ -88,35 +89,39 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
         if(!qarr) {
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
         }
+        const auto ssize = static_cast<Sint64>(qarr->size());
         auto rindex = alt.index;
         if(rindex < 0) {
           // Wrap negative indices.
-          rindex += static_cast<Sint64>(qarr->size());
+          rindex += ssize;
         }
+        D_array::iterator rit;
         if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
-          if(!creates) {
+          if(!create_new) {
+            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
             return nullptr;
           }
-          const auto size_add = static_cast<Uint64>(0) - static_cast<Uint64>(rindex);
+          const auto size_add = 0 - static_cast<Uint64>(rindex);
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }
-          qarr->insert(qarr->begin(), static_cast<Size>(size_add));
-          rindex = 0;
+          rit = qarr->insert(qarr->begin(), static_cast<Size>(size_add));
+          goto ma;
         }
-        if(rindex >= static_cast<Sint64>(qarr->size())) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
-          if(!creates) {
+        if(rindex >= ssize) {
+          if(!create_new) {
+            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
             return nullptr;
           }
           const auto size_add = static_cast<Uint64>(rindex) + 1 - qarr->size();
           if(size_add >= qarr->max_size() - qarr->size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
           }
-          qarr->insert(qarr->end(), static_cast<Size>(size_add));
+          rit = qarr->insert(qarr->end(), static_cast<Size>(size_add)) + static_cast<Diff>(size_add - 1);
+          goto ma;
         }
-        const auto rit = qarr->mut_begin() + static_cast<Diff>(rindex);
+        rit = qarr->mut_begin() + static_cast<Diff>(rindex);
+  ma:
         if(erased_out_opt) {
           *erased_out_opt = std::move(rit[0]);
           qarr->erase(rit);
@@ -128,7 +133,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
       {
         const auto &alt = this->m_stor.as<Reference_modifier::S_object_key>();
         if(parent.type() == Value::type_null) {
-          if(!creates) {
+          if(!create_new) {
             return nullptr;
           }
           parent = D_object();
@@ -137,20 +142,17 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool creates, Value
         if(!qobj) {
           ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
         }
-        auto rit = D_object::iterator();
-        if(!creates) {
+        D_object::iterator rit;
+        if(!create_new) {
           rit = qobj->find_mut(alt.key);
           if(rit == qobj->end()) {
             ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
             return nullptr;
           }
-        } else {
-          const auto result = qobj->try_emplace(alt.key);
-          if(result.second) {
-            ASTERIA_DEBUG_LOG("New object key has been created: key = ", alt.key, ", parent = ", parent);
-          }
-          rit = result.first;
+          goto mo;
         }
+        rit = qobj->try_emplace(alt.key).first;
+  mo:
         if(erased_out_opt) {
           *erased_out_opt = std::move(rit->second);
           qobj->erase(rit);
