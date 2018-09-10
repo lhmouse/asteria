@@ -75,7 +75,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
     case xop_infix_assign:
       return "assginment";
     default:
-      ASTERIA_TERMINATE("An unknown operator type enumeration `", xop, "` has been encountered.");
+      return "<unknown>";
     }
   }
 

@@ -286,7 +286,7 @@ Parser_result Token_stream::load(std::istream &sis)
                 { "export",    Token::keyword_export    },
                 { "false",     Token::keyword_false     },
                 { "for",       Token::keyword_for       },
-                { "function",  Token::keyword_function  },
+                { "func",      Token::keyword_func      },
                 { "if",        Token::keyword_if        },
                 { "import",    Token::keyword_import    },
                 { "infinity",  Token::keyword_infinity  },

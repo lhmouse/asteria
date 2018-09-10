@@ -29,7 +29,7 @@ const char * Value::get_type_name(Value::Type type) noexcept
     case type_object:
       return "object";
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
+      return "<unknown>";
     }
   }
 

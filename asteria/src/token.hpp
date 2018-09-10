@@ -17,7 +17,7 @@ class Token
       {
         keyword_var       =  0,
         keyword_const     =  1,
-        keyword_function  =  2,
+        keyword_func      =  2,
         keyword_if        =  3,
         keyword_else      =  4,
         keyword_switch    =  5,
@@ -140,6 +140,10 @@ class Token
         , S_real_literal     // 4
         , S_string_literal   // 5
       )>;
+
+  public:
+    static const char * get_keyword(Keyword keyword) noexcept;
+    static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
     Uint64 m_line;
