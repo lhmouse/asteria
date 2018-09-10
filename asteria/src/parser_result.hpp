@@ -73,7 +73,7 @@ class Parser_result
       {
         return this->m_error;
       }
-    explicit operator bool() const noexcept
+    explicit operator bool () const noexcept
       {
         return this->m_error == error_success;
       }
