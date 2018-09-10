@@ -60,9 +60,18 @@ class Reference_root
     Reference_root & operator=(Reference_root &&) noexcept;
 
   public:
-    bool is_constant() const noexcept;
-    bool is_lvalue() const noexcept;
-    bool is_unique() const noexcept;
+    Index index() const noexcept
+      {
+        return static_cast<Index>(this->m_stor.index());
+      }
+    bool unique() const noexcept
+      {
+        const auto qvar = this->m_stor.get<S_variable>();
+        if(!qvar) {
+          return false;
+        }
+        return qvar->var.unique();
+      }
 
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;

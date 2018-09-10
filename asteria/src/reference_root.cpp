@@ -20,33 +20,6 @@ Reference_root::Reference_root(Reference_root &&) noexcept
 Reference_root & Reference_root::operator=(Reference_root &&) noexcept
   = default;
 
-bool Reference_root::is_constant() const noexcept
-  {
-    const auto qalt = this->m_stor.get<S_constant>();
-    if(!qalt) {
-      return false;
-    }
-    return true;
-  }
-
-bool Reference_root::is_lvalue() const noexcept
-  {
-    const auto qalt = this->m_stor.get<S_variable>();
-    if(!qalt) {
-      return false;
-    }
-    return true;
-  }
-
-bool Reference_root::is_unique() const noexcept
-  {
-    const auto qalt = this->m_stor.get<S_variable>();
-    if(!qalt) {
-      return false;
-    }
-    return qalt->var.unique();
-  }
-
 const Value & Reference_root::dereference_readonly() const
   {
     switch(static_cast<Index>(this->m_stor.index())) {

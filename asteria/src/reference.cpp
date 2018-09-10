@@ -97,12 +97,11 @@ Reference & Reference::zoom_out()
 
 bool Reference::is_constant() const noexcept
   {
-    return this->m_root.is_constant();
+    return this->m_root.index() == Reference_root::index_constant;
   }
 Reference & Reference::materialize()
   {
-    if(this->m_root.is_lvalue() != false) {
-      // Lvalues need no materialization.
+    if(this->m_root.index() == Reference_root::index_variable) {
       return *this;
     }
     // Create an lvalue by allocating a variable and assign it to `*this`.
@@ -115,8 +114,7 @@ Reference & Reference::materialize()
   }
 Reference & Reference::dematerialize()
   {
-    if(this->m_root.is_unique() == false) {
-      // The reference is shared and should be left as-is.
+    if(this->m_root.unique() == false) {
       return *this;
     }
     // Create a temporary value and assign it to `*this`.
