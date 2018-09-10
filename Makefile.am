@@ -20,6 +20,12 @@ BUILT_SOURCES =  \
 CLEANFILES =  \
   asteria/src/precompiled.hpp.gch
 
+noinst_LTLIBRARIES =  \
+  lib/librocket.la
+
+lib_LTLIBRARIES =  \
+  lib/libasteria.la
+
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS = \
   asteria/src/rocket/compatibility.h  \
@@ -40,6 +46,15 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \
   asteria/src/rocket/refcounted_ptr.hpp
+
+lib_librocket_la_SOURCES =  \
+  asteria/src/rocket/assert.cpp  \
+  asteria/src/rocket/throw.cpp  \
+  asteria/src/rocket/insertable_streambuf.cpp  \
+  asteria/src/rocket/insertable_istream.cpp  \
+  asteria/src/rocket/insertable_ostream.cpp  \
+  asteria/src/rocket/insertable_stream.cpp  \
+  asteria/src/rocket/cow_string.cpp
 
 pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
@@ -65,21 +80,6 @@ pkginclude_HEADERS =  \
   asteria/src/parser_result.hpp  \
   asteria/src/token.hpp  \
   asteria/src/token_stream.hpp
-
-noinst_LTLIBRARIES =  \
-  lib/librocket.la
-
-lib_librocket_la_SOURCES =  \
-  asteria/src/rocket/assert.cpp  \
-  asteria/src/rocket/throw.cpp  \
-  asteria/src/rocket/insertable_streambuf.cpp  \
-  asteria/src/rocket/insertable_istream.cpp  \
-  asteria/src/rocket/insertable_ostream.cpp  \
-  asteria/src/rocket/insertable_stream.cpp  \
-  asteria/src/rocket/cow_string.cpp
-
-lib_LTLIBRARIES =  \
-  lib/libasteria.la
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
