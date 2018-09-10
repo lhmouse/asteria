@@ -94,10 +94,10 @@ Parser_result Token_stream::load(std::istream &sis)
       }
       ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
       Size pos, epos;
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       // Phase 1
       //   Ensure this line is a valid UTF-8 string.
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       pos = 0;
       while(pos < str.size()) {
         // Read the first byte.
@@ -150,10 +150,10 @@ Parser_result Token_stream::load(std::istream &sis)
         }
         pos += u8len;
       }
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       // Phase 2
       //   Strip comments from this line.
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       pos = 0;
       while(pos < str.size()) {
         // Are we inside a block comment?
@@ -237,10 +237,10 @@ Parser_result Token_stream::load(std::istream &sis)
         // Skip this character.
         pos += 1;
       }
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       // Phase 3
       //   Break this line down into tokens.
-      ///////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////
       pos = 0;
       while(pos < str.size()) {
         // Skip leading spaces.
@@ -638,10 +638,10 @@ Parser_result Token_stream::load(std::istream &sis)
                 exp_begin += 1;
                 break;
               }
-            }
-            exp_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, exp_begin, 22));
-            if(exp_begin == exp_end) {
-              return Parser_result(line, pos, exp_end - pos, Parser_result::error_numeric_literal_incomplete);
+              exp_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, exp_begin, 22));
+              if(exp_begin == exp_end) {
+                return Parser_result(line, pos, exp_end - pos, Parser_result::error_numeric_literal_incomplete);
+              }
             }
             // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
             // Since we make no use of them, we just reserve them for further use for good.
@@ -775,10 +775,6 @@ void Token_stream::clear() noexcept
     this->m_rseq.clear();
   }
 
-bool Token_stream::empty() const noexcept
-  {
-    return this->m_rseq.empty();
-  }
 Size Token_stream::size() const noexcept
   {
     return this->m_rseq.size();
