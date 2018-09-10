@@ -41,8 +41,8 @@ class Variable : public Sbase<Variable>
         return this->m_immutable;
       }
 
-    Value & set_value(Value value, bool immutable = false);
-    bool & set_immutable(bool immutable = true) noexcept;
+    void set_value(Value value, bool immutable = false);
+    void set_immutable(bool immutable = true) noexcept;
   };
 
 }
