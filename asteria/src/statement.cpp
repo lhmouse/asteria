@@ -41,35 +41,35 @@ namespace {
 void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case Statement::index_expression:
+    case index_expression:
       return;
-    case Statement::index_var_def:
+    case index_var_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_inout, "skipped variable", alt.name, { });
         return;
       }
-    case Statement::index_func_def:
+    case index_func_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_inout, "skipped function", alt.name, { });
         return;
       }
-    case Statement::index_if:
-    case Statement::index_switch:
-    case Statement::index_do_while:
-    case Statement::index_while:
-    case Statement::index_for:
-    case Statement::index_for_each:
-    case Statement::index_try:
-    case Statement::index_break:
-    case Statement::index_continue:
-    case Statement::index_throw:
-    case Statement::index_return:
-    case Statement::index_export:
-    case Statement::index_import:
+    case index_if:
+    case index_switch:
+    case index_do_while:
+    case index_while:
+    case index_for:
+    case index_for_each:
+    case index_try:
+    case index_break:
+    case index_continue:
+    case index_throw:
+    case index_return:
+    case index_export:
+    case index_import:
       break;
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -79,7 +79,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
 Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case Statement::index_expression:
+    case index_expression:
       {
         const auto &alt = this->m_stor.as<Statement::S_expression>();
         // Bind the expression recursively.
@@ -87,7 +87,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_expression alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_var_def:
+    case index_var_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
@@ -97,7 +97,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_func_def:
+    case index_func_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
@@ -109,7 +109,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_func_def alt_bnd = { alt.name, alt.params, alt.file, alt.line, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_if:
+    case index_if:
       {
         const auto &alt = this->m_stor.as<Statement::S_if>();
         // Bind the condition and both branches recursively.
@@ -119,7 +119,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_if alt_bnd = { std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_switch:
+    case index_switch:
       {
         const auto &alt = this->m_stor.as<Statement::S_switch>();
         // Bind the control expression and all clauses recursively.
@@ -136,7 +136,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_do_while:
+    case index_do_while:
       {
         const auto &alt = this->m_stor.as<Statement::S_do_while>();
         // Bind the loop body and condition recursively.
@@ -145,7 +145,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_while:
+    case index_while:
       {
         const auto &alt = this->m_stor.as<Statement::S_while>();
         // Bind the condition and loop body recursively.
@@ -154,7 +154,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_for:
+    case index_for:
       {
         const auto &alt = this->m_stor.as<Statement::S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
@@ -168,7 +168,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_for alt_bnd = { alt.var_name, alt.var_immutable, std::move(var_init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_for_each:
+    case index_for_each:
       {
         const auto &alt = this->m_stor.as<Statement::S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
@@ -181,7 +181,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_try:
+    case index_try:
       {
         const auto &alt = this->m_stor.as<Statement::S_try>();
         // The `try` branch needs no special treatement.
@@ -194,21 +194,21 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_break:
+    case index_break:
       {
         const auto &alt = this->m_stor.as<Statement::S_break>();
         // Copy it as-is.
         Statement::S_break alt_bnd = { alt.target };
         return std::move(alt_bnd);
       }
-    case Statement::index_continue:
+    case index_continue:
       {
         const auto &alt = this->m_stor.as<Statement::S_continue>();
         // Copy it as-is.
         Statement::S_continue alt_bnd = { alt.target };
         return std::move(alt_bnd);
       }
-    case Statement::index_throw:
+    case index_throw:
       {
         const auto &alt = this->m_stor.as<Statement::S_throw>();
         // Bind the exception initializer recursively.
@@ -216,7 +216,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_throw alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_return:
+    case index_return:
       {
         const auto &alt = this->m_stor.as<Statement::S_return>();
         // Bind the result initializer recursively.
@@ -224,14 +224,14 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_return alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
-    case Statement::index_export:
+    case index_export:
       {
         const auto &alt = this->m_stor.as<Statement::S_export>();
         // Copy it as-is.
         Statement::S_export alt_bnd = { alt.name };
         return std::move(alt_bnd);
       }
-    case Statement::index_import:
+    case index_import:
       {
         const auto &alt = this->m_stor.as<Statement::S_import>();
         // Copy it as-is.
@@ -246,14 +246,14 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case Statement::index_expression:
+    case index_expression:
       {
         const auto &alt = this->m_stor.as<Statement::S_expression>();
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(ctx_inout);
         return Block::status_next;
       }
-    case Statement::index_var_def:
+    case index_var_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_var_def>();
         // Create a dummy reference for further name lookups.
@@ -270,7 +270,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ASTERIA_DEBUG_LOG("Created named variable: name = ", alt.name, ", immutable = ", alt.immutable);
         return Block::status_next;
       }
-    case Statement::index_func_def:
+    case index_func_def:
       {
         const auto &alt = this->m_stor.as<Statement::S_func_def>();
         // Create a dummy reference for further name lookups.
@@ -289,7 +289,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ASTERIA_DEBUG_LOG("Created named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
         return Block::status_next;
       }
-    case Statement::index_if:
+    case index_if:
       {
         const auto &alt = this->m_stor.as<Statement::S_if>();
         // Evaluate the condition and pick a branch.
@@ -301,7 +301,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_switch:
+    case index_switch:
       {
         const auto &alt = this->m_stor.as<Statement::S_switch>();
         // Evaluate the control expression.
@@ -356,7 +356,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_do_while:
+    case index_do_while:
       {
         const auto &alt = this->m_stor.as<Statement::S_do_while>();
         for(;;) {
@@ -378,7 +378,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_while:
+    case index_while:
       {
         const auto &alt = this->m_stor.as<Statement::S_while>();
         for(;;) {
@@ -400,7 +400,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_for:
+    case index_for:
       {
         const auto &alt = this->m_stor.as<Statement::S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
@@ -440,7 +440,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_for_each:
+    case index_for_each:
       {
         const auto &alt = this->m_stor.as<Statement::S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
@@ -508,7 +508,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_try:
+    case index_try:
       {
         const auto &alt = this->m_stor.as<Statement::S_try>();
         try {
@@ -561,7 +561,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-    case Statement::index_break:
+    case index_break:
       {
         const auto &alt = this->m_stor.as<Statement::S_break>();
         if(alt.target == Statement::target_switch) {
@@ -575,7 +575,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_break_unspec;
       }
-    case Statement::index_continue:
+    case index_continue:
       {
         const auto &alt = this->m_stor.as<Statement::S_continue>();
         if(alt.target == Statement::target_while) {
@@ -586,7 +586,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_continue_unspec;
       }
-    case Statement::index_throw:
+    case index_throw:
       {
         const auto &alt = this->m_stor.as<Statement::S_throw>();
         // Evaluate the expression.
@@ -594,21 +594,21 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ASTERIA_DEBUG_LOG("Throwing exception: ", ref_out.read());
         throw Exception(ref_out);
       }
-    case Statement::index_return:
+    case index_return:
       {
         const auto &alt = this->m_stor.as<Statement::S_return>();
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(ctx_inout);
         return Block::status_return;
       }
-    case Statement::index_export:
+    case index_export:
       {
         const auto &alt = this->m_stor.as<Statement::S_export>();
         // TODO
         ASTERIA_TERMINATE("TODO : `export` has not been implemented yet.");
         (void)alt;
       }
-    case Statement::index_import:
+    case index_import:
       {
         const auto &alt = this->m_stor.as<Statement::S_import>();
         // TODO

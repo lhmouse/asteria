@@ -10,23 +10,23 @@ namespace Asteria {
 const char * Value::get_type_name(Value::Type type) noexcept
   {
     switch(type) {
-    case Value::type_null:
+    case type_null:
       return "null";
-    case Value::type_boolean:
+    case type_boolean:
       return "boolean";
-    case Value::type_integer:
+    case type_integer:
       return "integer";
-    case Value::type_real:
+    case type_real:
       return "real";
-    case Value::type_string:
+    case type_string:
       return "string";
-    case Value::type_opaque:
+    case type_opaque:
       return "opaque";
-    case Value::type_function:
+    case type_function:
       return "function";
-    case Value::type_array:
+    case type_array:
       return "array";
-    case Value::type_object:
+    case type_object:
       return "object";
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", type, "` has been encountered.");
@@ -49,37 +49,37 @@ Value & Value::operator=(Value &&) noexcept
 bool Value::test() const noexcept
   {
     switch(this->type()) {
-    case Value::type_null:
+    case type_null:
       return false;
-    case Value::type_boolean:
+    case type_boolean:
       {
         const auto &alt = this->m_stor.as<D_boolean>();
         return alt;
       }
-    case Value::type_integer:
+    case type_integer:
       {
         const auto &alt = this->m_stor.as<D_integer>();
         return alt != 0;
       }
-    case Value::type_real:
+    case type_real:
       {
         const auto &alt = this->m_stor.as<D_real>();
         return std::fpclassify(alt) != FP_ZERO;
       }
-    case Value::type_string:
+    case type_string:
       {
         const auto &alt = this->m_stor.as<D_string>();
         return alt.empty() == false;
       }
-    case Value::type_opaque:
-    case Value::type_function:
+    case type_opaque:
+    case type_function:
       return true;
-    case Value::type_array:
+    case type_array:
       {
         const auto &alt = this->m_stor.as<D_array>();
         return alt.empty() == false;
       }
-    case Value::type_object:
+    case type_object:
       {
         const auto &alt = this->m_stor.as<D_object>();
         return alt.empty() == false;
@@ -93,19 +93,19 @@ Value::Compare Value::compare(const Value &other) const noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
     if(this->type() != other.type()) {
-      if(this->type() == Value::type_null) {
+      if(this->type() == type_null) {
         return Value::compare_less;
       }
-      if(other.type() == Value::type_null) {
+      if(other.type() == type_null) {
         return Value::compare_greater;
       }
       return Value::compare_unordered;
     }
     // If both operands have the same type, perform normal comparison.
     switch(this->type()) {
-    case Value::type_null:
+    case type_null:
       return Value::compare_equal;
-    case Value::type_boolean:
+    case type_boolean:
       {
         const auto &alt_lhs = this->check<D_boolean>();
         const auto &alt_rhs = other.check<D_boolean>();
@@ -117,7 +117,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_integer:
+    case type_integer:
       {
         const auto &alt_lhs = this->check<D_integer>();
         const auto &alt_rhs = other.check<D_integer>();
@@ -129,7 +129,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_real:
+    case type_real:
       {
         const auto &alt_lhs = this->check<D_real>();
         const auto &alt_rhs = other.check<D_real>();
@@ -144,7 +144,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_string:
+    case type_string:
       {
         const auto &alt_lhs = this->check<D_string>();
         const auto &alt_rhs = other.check<D_string>();
@@ -157,10 +157,10 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_opaque:
-    case Value::type_function:
+    case type_opaque:
+    case type_function:
       return Value::compare_unordered;
-    case Value::type_array:
+    case type_array:
       {
         const auto &array_lhs = this->check<D_array>();
         const auto &array_rhs = other.check<D_array>();
@@ -179,7 +179,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return Value::compare_equal;
       }
-    case Value::type_object:
+    case type_object:
       return Value::compare_unordered;
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
@@ -368,53 +368,53 @@ namespace {
 void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) const
   {
     switch(this->type()) {
-    case Value::type_null:
+    case type_null:
       // null
       os <<"null";
       return;
-    case Value::type_boolean:
+    case type_boolean:
       {
         const auto &alt = this->m_stor.as<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
-    case Value::type_integer:
+    case type_integer:
       {
         const auto &alt = this->m_stor.as<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
-    case Value::type_real:
+    case type_real:
       {
         const auto &alt = this->m_stor.as<D_real>();
         // real 123.456
         os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_real>::max_digits10) <<alt;
         return;
       }
-    case Value::type_string:
+    case type_string:
       {
         const auto &alt = this->m_stor.as<D_string>();
         // string(5) "hello"
         os <<"string(" <<std::dec <<alt.size() <<") " <<Quote(alt);
         return;
       }
-    case Value::type_opaque:
+    case type_opaque:
       {
         const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
         os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
-    case Value::type_function:
+    case type_function:
       {
         const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
         os <<"function(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
         return;
       }
-    case Value::type_array:
+    case type_array:
       {
         const auto &alt = this->m_stor.as<D_array>();
         // array(3) = [
@@ -431,7 +431,7 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
         os <<Indent(indent_increment != 0, indent_next) <<']';
         return;
       }
-    case Value::type_object:
+    case type_object:
       {
         const auto &alt = this->m_stor.as<D_object>();
         // object(3) = {

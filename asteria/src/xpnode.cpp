@@ -16,63 +16,63 @@ namespace Asteria {
 const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
   {
     switch(xop) {
-    case Xpnode::xop_postfix_inc:
+    case xop_postfix_inc:
       return "postfix increment";
-    case Xpnode::xop_postfix_dec:
+    case xop_postfix_dec:
       return "postfix decrement";
-    case Xpnode::xop_postfix_at:
+    case xop_postfix_at:
       return "subscripting";
-    case Xpnode::xop_prefix_pos:
+    case xop_prefix_pos:
       return "unary plus";
-    case Xpnode::xop_prefix_neg:
+    case xop_prefix_neg:
       return "unary negation";
-    case Xpnode::xop_prefix_notb:
+    case xop_prefix_notb:
       return "bitwise not";
-    case Xpnode::xop_prefix_notl:
+    case xop_prefix_notl:
       return "logical not";
-    case Xpnode::xop_prefix_inc:
+    case xop_prefix_inc:
       return "prefix increment";
-    case Xpnode::xop_prefix_dec:
+    case xop_prefix_dec:
       return "prefix decrement";
-    case Xpnode::xop_prefix_unset:
+    case xop_prefix_unset:
       return "prefix `unset`";
-    case Xpnode::xop_infix_cmp_eq:
+    case xop_infix_cmp_eq:
       return "equality comparison";
-    case Xpnode::xop_infix_cmp_ne:
+    case xop_infix_cmp_ne:
       return "inequality comparison";
-    case Xpnode::xop_infix_cmp_lt:
+    case xop_infix_cmp_lt:
       return "less-than comparison";
-    case Xpnode::xop_infix_cmp_gt:
+    case xop_infix_cmp_gt:
       return "greater-than comparison";
-    case Xpnode::xop_infix_cmp_lte:
+    case xop_infix_cmp_lte:
       return "less-than-or-equal comparison";
-    case Xpnode::xop_infix_cmp_gte:
+    case xop_infix_cmp_gte:
       return "greater-than-or-equal comparison";
-    case Xpnode::xop_infix_add:
+    case xop_infix_add:
       return "addition";
-    case Xpnode::xop_infix_sub:
+    case xop_infix_sub:
       return "subtraction";
-    case Xpnode::xop_infix_mul:
+    case xop_infix_mul:
       return "multiplication";
-    case Xpnode::xop_infix_div:
+    case xop_infix_div:
       return "division";
-    case Xpnode::xop_infix_mod:
+    case xop_infix_mod:
       return "modulo";
-    case Xpnode::xop_infix_sll:
+    case xop_infix_sll:
       return "logical left shift";
-    case Xpnode::xop_infix_srl:
+    case xop_infix_srl:
       return "arithmetic left shift";
-    case Xpnode::xop_infix_sla:
+    case xop_infix_sla:
       return "logical right shift";
-    case Xpnode::xop_infix_sra:
+    case xop_infix_sra:
       return "arithmetic right shift";
-    case Xpnode::xop_infix_andb:
+    case xop_infix_andb:
       return "bitwise and";
-    case Xpnode::xop_infix_orb:
+    case xop_infix_orb:
       return "bitwise or";
-    case Xpnode::xop_infix_xorb:
+    case xop_infix_xorb:
       return "bitwise xor";
-    case Xpnode::xop_infix_assign:
+    case xop_infix_assign:
       return "assginment";
     default:
       ASTERIA_TERMINATE("An unknown operator type enumeration `", xop, "` has been encountered.");
@@ -110,14 +110,14 @@ namespace {
 Xpnode Xpnode::bind(const Analytic_context &ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case Xpnode::index_literal:
+    case index_literal:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Copy it as-is.
         Xpnode::S_literal alt_bnd = { alt.value };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_named_reference:
+    case index_named_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Only references with non-reserved names can be bound.
@@ -134,14 +134,14 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_named_reference alt_bnd = { alt.name };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_bound_reference:
+    case index_bound_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_subexpression:
+    case index_subexpression:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Bind the subexpression recursively.
@@ -149,7 +149,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_subexpression alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_closure_function:
+    case index_closure_function:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_closure_function>();
         // Bind the body recursively.
@@ -159,7 +159,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_closure_function alt_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_branch:
+    case index_branch:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_branch>();
         // Bind both branches recursively.
@@ -168,21 +168,21 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_function_call:
+    case index_function_call:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.file, alt.line, alt.arg_cnt };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_operator_rpn:
+    case index_operator_rpn:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.compound_assign };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_unnamed_array:
+    case index_unnamed_array:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_array>();
         // Bind everything recursively.
@@ -195,7 +195,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_unnamed_array alt_bnd = { std::move(elems_bnd) };
         return std::move(alt_bnd);
       }
-    case Xpnode::index_unnamed_object:
+    case index_unnamed_object:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_object>();
         // Bind everything recursively.
@@ -497,7 +497,7 @@ namespace {
 void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case Xpnode::index_literal:
+    case index_literal:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_literal>();
         // Push the constant.
@@ -505,7 +505,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }
-    case Xpnode::index_named_reference:
+    case index_named_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_named_reference>();
         // Look for the reference in the current context.
@@ -517,14 +517,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(*(pair.second));
         return;
       }
-    case Xpnode::index_bound_reference:
+    case index_bound_reference:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_bound_reference>();
         // Push the reference stored.
         stack_inout.emplace_back(alt.ref);
         return;
       }
-    case Xpnode::index_subexpression:
+    case index_subexpression:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_subexpression>();
         // Evaluate the subexpression recursively.
@@ -532,7 +532,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(ref));
         return;
       }
-    case Xpnode::index_closure_function:
+    case index_closure_function:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_closure_function>();
         // Bind the function body recursively.
@@ -544,7 +544,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }
-    case Xpnode::index_branch:
+    case index_branch:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_branch>();
         // Pop the condition off the stack.
@@ -558,7 +558,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(cond));
         return;
       }
-    case Xpnode::index_function_call:
+    case index_function_call:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_function_call>();
         // Pop the callee off the stack.
@@ -585,7 +585,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(result));
         return;
       }
-    case Xpnode::index_operator_rpn:
+    case index_operator_rpn:
       {
         // Pop the first operand off the stack.
         // For prefix operators, this is actually the RHS operand anyway.
@@ -594,7 +594,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         // Deal with individual operators.
         const auto &alt = this->m_stor.as<Xpnode::S_operator_rpn>();
         switch(alt.xop) {
-        case Xpnode::xop_postfix_inc:
+        case xop_postfix_inc:
           {
             // Increment the operand and return the old value.
             // `compound_assign` is ignored.
@@ -613,7 +613,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_postfix_dec:
+        case xop_postfix_dec:
           {
             // Decrement the operand and return the old value.
             // `compound_assign` is ignored.
@@ -632,7 +632,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_postfix_at:
+        case xop_postfix_at:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -654,7 +654,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
           }
-        case Xpnode::xop_prefix_pos:
+        case xop_prefix_pos:
           {
             // Copy the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
@@ -662,7 +662,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
-        case Xpnode::xop_prefix_neg:
+        case xop_prefix_neg:
           {
             // Negate the operand to create an rvalue, then return it.
             auto lhs_value = lhs.read();
@@ -678,7 +678,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_prefix_notb:
+        case xop_prefix_notb:
           {
             // Perform bitwise not operation on the operand to create an rvalue, then return it.
             auto lhs_value = lhs.read();
@@ -694,7 +694,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_prefix_notl:
+        case xop_prefix_notl:
           {
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
@@ -703,7 +703,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
-        case Xpnode::xop_prefix_inc:
+        case xop_prefix_inc:
           {
             // Increment the operand and return it.
             // `compound_assign` is ignored.
@@ -720,7 +720,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_prefix_dec:
+        case xop_prefix_dec:
           {
             // Decrement the operand and return it.
             // `compound_assign` is ignored.
@@ -737,14 +737,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
-        case Xpnode::xop_prefix_unset:
+        case xop_prefix_unset:
           {
             // Unset the reference and return the value unset.
             auto result = lhs.unset();
             do_set_result(lhs, alt.compound_assign, std::move(result));
             break;
           }
-        case Xpnode::xop_infix_cmp_eq:
+        case xop_infix_cmp_eq:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -757,7 +757,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_cmp_ne:
+        case xop_infix_cmp_ne:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -770,7 +770,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_cmp_lt:
+        case xop_infix_cmp_lt:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -785,7 +785,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_cmp_gt:
+        case xop_infix_cmp_gt:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -800,7 +800,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_cmp_lte:
+        case xop_infix_cmp_lte:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -815,7 +815,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_cmp_gte:
+        case xop_infix_cmp_gte:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -830,7 +830,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             do_set_result(lhs, false, result);
             break;
           }
-        case Xpnode::xop_infix_add:
+        case xop_infix_add:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -861,7 +861,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_sub:
+        case xop_infix_sub:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -886,7 +886,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_mul:
+        case xop_infix_mul:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -922,7 +922,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_div:
+        case xop_infix_div:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -941,7 +941,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_mod:
+        case xop_infix_mod:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -960,7 +960,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_sll:
+        case xop_infix_sll:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -976,7 +976,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_srl:
+        case xop_infix_srl:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -992,7 +992,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_sla:
+        case xop_infix_sla:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1009,7 +1009,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_sra:
+        case xop_infix_sra:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1025,7 +1025,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_andb:
+        case xop_infix_andb:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1045,7 +1045,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_orb:
+        case xop_infix_orb:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1065,7 +1065,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_xorb:
+        case xop_infix_xorb:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1085,7 +1085,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
-        case Xpnode::xop_infix_assign:
+        case xop_infix_assign:
           {
             // Pop the second operand off the stack.
             auto rhs = do_pop_reference(stack_inout);
@@ -1102,7 +1102,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(lhs));
         return;
       }
-    case Xpnode::index_unnamed_array:
+    case index_unnamed_array:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_array>();
         // Create an array by evaluating elements recursively.
@@ -1117,7 +1117,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         stack_inout.emplace_back(std::move(ref_c));
         return;
       }
-    case Xpnode::index_unnamed_object:
+    case index_unnamed_object:
       {
         const auto &alt = this->m_stor.as<Xpnode::S_unnamed_object>();
         // Create an object by evaluating elements recursively.
