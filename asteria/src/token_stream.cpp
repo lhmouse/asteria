@@ -255,6 +255,157 @@ Parser_result Token_stream::load(std::istream &sis)
         // Read a character.
         const auto head = str.at(pos);
         switch(head) {
+        case '\'':
+          {
+            // Get a string literal.
+            epos = str.find('\'', pos + 1);
+            if(epos == str.npos) {
+              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+            }
+            // Escape sequences do not have special meanings inside single quotation marks.
+            // Adjust `epos` to point to the character next to the closing single quotation mark.
+            epos += 1;
+            // Push the string as-is.
+            String value(str, pos + 1, epos - pos - 2);
+            Token::S_string_literal token_c = { std::move(value) };
+            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            break;
+          }
+        case '\"':
+          {
+            // Get a string literal.
+            String value;
+            // Escape characters have to be treated specifically inside double quotation marks.
+            epos = pos + 1;
+            for(;;) {
+              if(epos >= str.size()) {
+                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              }
+              auto next = str.at(epos);
+              if(next == '\"') {
+                // The end of this string is encountered. Finish.
+                break;
+              }
+              if(next != '\\') {
+                // This character does not start an escape sequence. Copy it as is.
+                value.push_back(next);
+                epos += 1;
+                continue;
+              }
+              // Translate an escape sequence.
+              unsigned seqlen = 2;
+              if(str.size() - epos < seqlen) {
+                return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
+              }
+              next = str.at(epos + 1);
+              switch(next) {
+              case '\'':
+                value.push_back('\'');
+                break;
+              case '\"':
+                value.push_back('\"');
+                break;
+              case '\\':
+                value.push_back('\\');
+                break;
+              case '?':
+                value.push_back('?');
+                break;
+              case 'a':
+                value.push_back('\a');
+                break;
+              case 'b':
+                value.push_back('\b');
+                break;
+              case 'f':
+                value.push_back('\f');
+                break;
+              case 'n':
+                value.push_back('\n');
+                break;
+              case 'r':
+                value.push_back('\r');
+                break;
+              case 't':
+                value.push_back('\t');
+                break;
+              case 'v':
+                value.push_back('\v');
+                break;
+              case '0':
+                value.push_back('\0');
+                break;
+              case 'Z':
+                value.push_back('\x1A');
+                break;
+              case 'e':
+                value.push_back('\x1B');
+                break;
+              case 'U':
+                {
+                  seqlen += 2;
+                  // Fallthrough.
+              case 'u':
+                  seqlen += 2;
+                  // Fallthrough.
+              case 'x':
+                  seqlen += 2;
+                  // Read hex digits.
+                  if(str.size() - epos < seqlen) {
+                    return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
+                  }
+                  char32_t code = 0;
+                  for(Size i = epos + 2; i < epos + seqlen; ++i) {
+                    const auto ptr = std::char_traits<char>::find(digits, 32, str.at(i));
+                    if(!ptr) {
+                      return Parser_result(line, epos, i, Parser_result::error_escape_sequence_invalid_hex);
+                    }
+                    const auto digit_value = static_cast<unsigned>((ptr - digits) / 2);
+                    code = code * 16 + digit_value;
+                  }
+                  if((0xD800 <= code) && (code < 0xE000)) {
+                    // Surrogates are not allowed.
+                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
+                  }
+                  if(code >= 0x110000) {
+                    // Code point value is too large.
+                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
+                  }
+                  // Encode it.
+                  const auto encode_one = [&](unsigned shift, unsigned mask)
+                    {
+                      value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask)));
+                    };
+                  if(code < 0x80) {
+                    encode_one( 0, 0xFF);
+                  } else if(code < 0x800) {
+                    encode_one( 6, 0x1F);
+                    encode_one( 0, 0x3F);
+                  } else if(code < 0x10000) {
+                    encode_one(12, 0x0F);
+                    encode_one( 6, 0x3F);
+                    encode_one( 0, 0x3F);
+                  } else {
+                    encode_one(18, 0x07);
+                    encode_one(12, 0x3F);
+                    encode_one( 6, 0x3F);
+                    encode_one( 0, 0x3F);
+                  }
+                  break;
+                }
+              default:
+                // Fail if this escape sequence cannot be recognized.
+                return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
+              }
+              epos += seqlen;
+            }
+            // Adjust `epos` to point to the character next to the closing double quotation mark.
+            epos += 1;
+            // Push the string.
+            Token::S_string_literal token_c = { std::move(value) };
+            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            break;
+          }
         case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
         case 'H':  case 'I':  case 'J':  case 'K':  case 'L':  case 'M':  case 'N':
         case 'O':  case 'P':  case 'Q':  case 'R':  case 'S':  case 'T':
@@ -406,157 +557,6 @@ Parser_result Token_stream::load(std::istream &sis)
               }
               ++(range.first);
             }
-            break;
-          }
-        case '\'':
-          {
-            // Get a string literal.
-            epos = str.find('\'', pos + 1);
-            if(epos == str.npos) {
-              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-            }
-            // Escape sequences do not have special meanings inside single quotation marks.
-            // Adjust `epos` to point to the character next to the closing single quotation mark.
-            epos += 1;
-            // Push the string as-is.
-            String value(str, pos + 1, epos - pos - 2);
-            Token::S_string_literal token_c = { std::move(value) };
-            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
-            break;
-          }
-        case '\"':
-          {
-            // Get a string literal.
-            String value;
-            // Escape characters have to be treated specifically inside double quotation marks.
-            epos = pos + 1;
-            for(;;) {
-              if(epos >= str.size()) {
-                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
-              }
-              auto next = str.at(epos);
-              if(next == '\"') {
-                // The end of this string is encountered. Finish.
-                break;
-              }
-              if(next != '\\') {
-                // This character does not start an escape sequence. Copy it as is.
-                value.push_back(next);
-                epos += 1;
-                continue;
-              }
-              // Translate an escape sequence.
-              unsigned seqlen = 2;
-              if(str.size() - epos < seqlen) {
-                return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
-              }
-              next = str.at(epos + 1);
-              switch(next) {
-              case '\'':
-                value.push_back('\'');
-                break;
-              case '\"':
-                value.push_back('\"');
-                break;
-              case '\\':
-                value.push_back('\\');
-                break;
-              case '?':
-                value.push_back('?');
-                break;
-              case 'a':
-                value.push_back('\a');
-                break;
-              case 'b':
-                value.push_back('\b');
-                break;
-              case 'f':
-                value.push_back('\f');
-                break;
-              case 'n':
-                value.push_back('\n');
-                break;
-              case 'r':
-                value.push_back('\r');
-                break;
-              case 't':
-                value.push_back('\t');
-                break;
-              case 'v':
-                value.push_back('\v');
-                break;
-              case '0':
-                value.push_back('\0');
-                break;
-              case 'Z':
-                value.push_back('\x1A');
-                break;
-              case 'e':
-                value.push_back('\x1B');
-                break;
-              case 'U':
-                {
-                  seqlen += 2;
-                  // Fallthrough.
-              case 'u':
-                  seqlen += 2;
-                  // Fallthrough.
-              case 'x':
-                  seqlen += 2;
-                  // Read hex digits.
-                  if(str.size() - epos < seqlen) {
-                    return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
-                  }
-                  char32_t code = 0;
-                  for(Size i = epos + 2; i < epos + seqlen; ++i) {
-                    const auto ptr = std::char_traits<char>::find(digits, 32, str.at(i));
-                    if(!ptr) {
-                      return Parser_result(line, epos, i, Parser_result::error_escape_sequence_invalid_hex);
-                    }
-                    const auto digit_value = static_cast<unsigned>((ptr - digits) / 2);
-                    code = code * 16 + digit_value;
-                  }
-                  if((0xD800 <= code) && (code < 0xE000)) {
-                    // Surrogates are not allowed.
-                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
-                  }
-                  if(code >= 0x110000) {
-                    // Code point value is too large.
-                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
-                  }
-                  // Encode it.
-                  const auto encode_one = [&](unsigned shift, unsigned mask)
-                    {
-                      value.push_back(static_cast<char>((~mask << 1) | ((code >> shift) & mask)));
-                    };
-                  if(code < 0x80) {
-                    encode_one( 0, 0xFF);
-                  } else if(code < 0x800) {
-                    encode_one( 6, 0x1F);
-                    encode_one( 0, 0x3F);
-                  } else if(code < 0x10000) {
-                    encode_one(12, 0x0F);
-                    encode_one( 6, 0x3F);
-                    encode_one( 0, 0x3F);
-                  } else {
-                    encode_one(18, 0x07);
-                    encode_one(12, 0x3F);
-                    encode_one( 6, 0x3F);
-                    encode_one( 0, 0x3F);
-                  }
-                  break;
-                }
-              default:
-                // Fail if this escape sequence cannot be recognized.
-                return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
-              }
-              epos += seqlen;
-            }
-            // Adjust `epos` to point to the character next to the closing double quotation mark.
-            epos += 1;
-            // Push the string.
-            Token::S_string_literal token_c = { std::move(value) };
-            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;
           }
         case '0':  case '1':  case '2':  case '3':  case '4':
