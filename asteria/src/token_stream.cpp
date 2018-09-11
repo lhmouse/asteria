@@ -779,7 +779,7 @@ Size Token_stream::size() const noexcept
   {
     return this->m_rseq.size();
   }
-const Token * Token_stream::peek(Size offset) const noexcept
+const Token * Token_stream::peek_opt(Size offset) const noexcept
   {
     const auto ntoken = this->m_rseq.size();
     if(offset >= ntoken) {
