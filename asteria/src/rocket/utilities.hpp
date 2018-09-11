@@ -53,7 +53,7 @@ template<typename lhsT, typename rhsT>
     }
 
 template<typename charT, typename traitsT>
-  inline void handle_ios_exception(basic_ios<charT, traitsT> &ios)
+  inline void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
     {
       // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
       // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
@@ -66,6 +66,8 @@ template<typename charT, typename traitsT>
       if(ios.exceptions() & ios_base::badbit) {
         throw;
       }
+      // Clear the badbit as it need not be set a second time.
+      state &= ~ios_base::badbit;
     }
 
 template<typename iteratorT, typename functionT, typename ...paramsT>

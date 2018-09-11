@@ -50,8 +50,8 @@ template<typename ElementT>
 
 // General utilities
 class Formatter;
-class Exception;
 class Runtime_error;
+class Exception;
 class Backtracer;
 
 // Lexical elements

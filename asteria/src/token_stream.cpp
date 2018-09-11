@@ -486,7 +486,7 @@ Parser_result Token_stream::load(std::istream &sis)
                 value.push_back('\v');
                 break;
               case '0':
-                value.push_back('\x00');
+                value.push_back('\0');
                 break;
               case 'Z':
                 value.push_back('\x1A');

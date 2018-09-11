@@ -53,22 +53,22 @@ bool Value::test() const noexcept
       return false;
     case type_boolean:
       {
-        const auto &alt = this->m_stor.as<D_boolean>();
+        const auto &alt = this->check<D_boolean>();
         return alt;
       }
     case type_integer:
       {
-        const auto &alt = this->m_stor.as<D_integer>();
+        const auto &alt = this->check<D_integer>();
         return alt != 0;
       }
     case type_real:
       {
-        const auto &alt = this->m_stor.as<D_real>();
+        const auto &alt = this->check<D_real>();
         return std::fpclassify(alt) != FP_ZERO;
       }
     case type_string:
       {
-        const auto &alt = this->m_stor.as<D_string>();
+        const auto &alt = this->check<D_string>();
         return alt.empty() == false;
       }
     case type_opaque:
@@ -76,12 +76,12 @@ bool Value::test() const noexcept
       return true;
     case type_array:
       {
-        const auto &alt = this->m_stor.as<D_array>();
+        const auto &alt = this->check<D_array>();
         return alt.empty() == false;
       }
     case type_object:
       {
-        const auto &alt = this->m_stor.as<D_object>();
+        const auto &alt = this->check<D_object>();
         return alt.empty() == false;
       }
     default:
@@ -188,179 +188,9 @@ Value::Compare Value::compare(const Value &other) const noexcept
 
 namespace {
 
-  class Indent
+  inline Indent do_indent_or_space(Size indent_increment, Size indent_next)
     {
-    private:
-      bool m_nl;
-      Size m_cnt;
-
-    public:
-      constexpr Indent(bool nl, Size cnt) noexcept
-        : m_nl(nl), m_cnt(cnt)
-        {
-        }
-
-    public:
-      bool newline() const noexcept
-        {
-          return this->m_nl;
-        }
-      Size count() const noexcept
-        {
-          return this->m_cnt;
-        }
-    };
-
-  inline std::ostream & operator<<(std::ostream &os, const Indent &indent)
-    {
-      const std::ostream::sentry sentry(os);
-      if(!sentry) {
-        return os;
-      }
-      using traits_type = std::ostream::traits_type;
-      auto state = std::ios_base::goodbit;
-      try {
-        if(indent.newline()) {
-          // Write a line feed.
-          if(traits_type::eq_int_type(os.rdbuf()->sputc('\n'), traits_type::eof())) {
-            state |= std::ios_base::failbit;
-            goto done;
-          }
-          for(auto i = indent.count(); i != 0; --i) {
-            // Write space characters.
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
-              state |= std::ios_base::failbit;
-              goto done;
-            }
-          }
-        } else {
-          // Write a space character.
-          if(traits_type::eq_int_type(os.rdbuf()->sputc(' '), traits_type::eof())) {
-            state |= std::ios_base::failbit;
-            goto done;
-          }
-        }
-      } catch(...) {
-        rocket::handle_ios_exception(os);
-        state &= ~std::ios_base::badbit;
-      }
-    done:
-      if(state) {
-        os.setstate(state);
-      }
-      os.width(0);
-      return os;
-    }
-
-  class Quote
-    {
-    private:
-      String m_str;
-
-    public:
-      explicit Quote(String str) noexcept
-        : m_str(std::move(str))
-        {
-        }
-
-    public:
-      const char * begin() const noexcept
-        {
-          return this->m_str.data();
-        }
-      const char * end() const noexcept
-        {
-          return this->m_str.data() + this->m_str.size();
-        }
-    };
-
-  inline std::ostream & operator<<(std::ostream &os, const Quote &quote)
-    {
-      const std::ostream::sentry sentry(os);
-      if(!sentry) {
-        return os;
-      }
-      using traits_type = std::ostream::traits_type;
-      auto state = std::ios_base::goodbit;
-      try {
-        // Output double quote characters at the beginning.
-        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
-          state |= std::ios_base::failbit;
-          goto done;
-        }
-        // Output the string body.
-        for(const char ch : quote) {
-          if((0x20 <= ch) && (ch <= 0x7E)) {
-            // Output an unescaped character.
-            if(traits_type::eq_int_type(os.rdbuf()->sputc(ch), traits_type::eof())) {
-              state |= std::ios_base::failbit;
-              goto done;
-            }
-          } else {
-            // Output an escape sequence.
-            bool failed;
-            switch(ch) {
-            case '\"':
-              failed = os.rdbuf()->sputn("\\\"", 2) < 2;
-              break;
-            case '\'':
-              failed = os.rdbuf()->sputn("\\\'", 2) < 2;
-              break;
-            case '\\':
-              failed = os.rdbuf()->sputn("\\\\", 2) < 2;
-              break;
-            case '\a':
-              failed = os.rdbuf()->sputn("\\a", 2) < 2;
-              break;
-            case '\b':
-              failed = os.rdbuf()->sputn("\\b", 2) < 2;
-              break;
-            case '\f':
-              failed = os.rdbuf()->sputn("\\f", 2) < 2;
-              break;
-            case '\n':
-              failed = os.rdbuf()->sputn("\\n", 2) < 2;
-              break;
-            case '\r':
-              failed = os.rdbuf()->sputn("\\r", 2) < 2;
-              break;
-            case '\t':
-              failed = os.rdbuf()->sputn("\\t", 2) < 2;
-              break;
-            case '\v':
-              failed = os.rdbuf()->sputn("\\v", 2) < 2;
-              break;
-            default:
-              {
-                static constexpr char s_hex_table[] = "0123456789ABCDEF";
-                char temp[4] = "\\x";
-                temp[2] = s_hex_table[(ch >> 4) & 0x0F];
-                temp[3] = s_hex_table[(ch >> 0) & 0x0F];
-                failed = os.rdbuf()->sputn(temp, 4) < 4;
-              }
-              break;
-            }
-            if(failed) {
-              state |= std::ios_base::failbit;
-              goto done;
-            }
-          }
-        }
-        // Output double quote characters at the end.
-        if(traits_type::eq_int_type(os.rdbuf()->sputc('\"'), traits_type::eof())) {
-          state |= std::ios_base::failbit;
-          goto done;
-        }
-      } catch(...) {
-        rocket::handle_ios_exception(os);
-        state &= ~std::ios_base::badbit;
-      }
-    done:
-      if(state) {
-        os.setstate(state);
-      }
-      os.width(0);
-      return os;
+      return (indent_increment != 0) ? Indent('\n', indent_next) : Indent(' ', 0);
     }
 
 }
@@ -374,49 +204,49 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
       return;
     case type_boolean:
       {
-        const auto &alt = this->m_stor.as<D_boolean>();
+        const auto &alt = this->check<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
     case type_integer:
       {
-        const auto &alt = this->m_stor.as<D_integer>();
+        const auto &alt = this->check<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
     case type_real:
       {
-        const auto &alt = this->m_stor.as<D_real>();
+        const auto &alt = this->check<D_real>();
         // real 123.456
         os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_real>::max_digits10) <<alt;
         return;
       }
     case type_string:
       {
-        const auto &alt = this->m_stor.as<D_string>();
+        const auto &alt = this->check<D_string>();
         // string(5) "hello"
-        os <<"string(" <<std::dec <<alt.size() <<") " <<Quote(alt);
+        os <<"string(" <<std::dec <<alt.size() <<") \"" <<escape(alt) <<"\"";
         return;
       }
     case type_opaque:
       {
-        const auto &alt = this->m_stor.as<D_opaque>();
+        const auto &alt = this->check<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
+        os <<"opaque(\"" <<typeid(*alt).name() <<"\") \"" <<escape(alt->describe()) <<"\"";
         return;
       }
     case type_function:
       {
-        const auto &alt = this->m_stor.as<D_function>();
+        const auto &alt = this->check<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*alt).name() <<"\") " <<Quote(alt->describe());
+        os <<"function(\"" <<typeid(*alt).name() <<"\") \"" <<escape(alt->describe()) <<"\"";
         return;
       }
     case type_array:
       {
-        const auto &alt = this->m_stor.as<D_array>();
+        const auto &alt = this->check<D_array>();
         // array(3) = [
         //   0 = integer 1,
         //   1 = integer 2,
@@ -424,16 +254,16 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
         // ]
         os <<"array(" <<std::dec <<alt.size() <<") [";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<Indent(indent_increment != 0, indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
+          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
           it->dump(os, indent_increment, indent_next + indent_increment);
           os <<',';
         }
-        os <<Indent(indent_increment != 0, indent_next) <<']';
+        os <<do_indent_or_space(indent_increment, indent_next) <<']';
         return;
       }
     case type_object:
       {
-        const auto &alt = this->m_stor.as<D_object>();
+        const auto &alt = this->check<D_object>();
         // object(3) = {
         //   "one" = integer 1,
         //   "two" = integer 2,
@@ -441,11 +271,11 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
         // }
         os <<"object(" <<std::dec <<alt.size() <<") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<Indent(indent_increment != 0, indent_next + indent_increment) <<Quote(it->first) <<" = ";
+          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<"\"" <<escape(it->first) <<"\" = ";
           it->second.dump(os, indent_increment, indent_next + indent_increment);
           os <<',';
         }
-        os <<Indent(indent_increment != 0, indent_next) <<'}';
+        os <<do_indent_or_space(indent_increment, indent_next) <<'}';
         return;
       }
     default:

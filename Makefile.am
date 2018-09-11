@@ -67,7 +67,6 @@ pkginclude_HEADERS =  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp  \
   asteria/src/exception.hpp  \
-  asteria/src/runtime_error.hpp  \
   asteria/src/abstract_context.hpp  \
   asteria/src/analytic_context.hpp  \
   asteria/src/executive_context.hpp  \
@@ -91,7 +90,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp  \
   asteria/src/exception.cpp  \
-  asteria/src/runtime_error.cpp  \
   asteria/src/abstract_context.cpp  \
   asteria/src/analytic_context.cpp  \
   asteria/src/executive_context.cpp  \
