@@ -255,8 +255,7 @@ Parser_result Token_stream::load(std::istream &sis)
         // Read a character.
         const auto head = str.at(pos);
         switch(head) {
-        case '\'':
-          {
+          case '\'': {
             // Get a string literal.
             epos = str.find('\'', pos + 1);
             if(epos == str.npos) {
@@ -271,8 +270,7 @@ Parser_result Token_stream::load(std::istream &sis)
             seq.emplace_back(line, pos, epos - pos, std::move(token_c));
             break;
           }
-        case '\"':
-          {
+          case '\"': {
             // Get a string literal.
             String value;
             // Escape characters have to be treated specifically inside double quotation marks.
@@ -299,56 +297,69 @@ Parser_result Token_stream::load(std::istream &sis)
               }
               next = str.at(epos + 1);
               switch(next) {
-              case '\'':
-                value.push_back('\'');
-                break;
-              case '\"':
-                value.push_back('\"');
-                break;
-              case '\\':
-                value.push_back('\\');
-                break;
-              case '?':
-                value.push_back('?');
-                break;
-              case 'a':
-                value.push_back('\a');
-                break;
-              case 'b':
-                value.push_back('\b');
-                break;
-              case 'f':
-                value.push_back('\f');
-                break;
-              case 'n':
-                value.push_back('\n');
-                break;
-              case 'r':
-                value.push_back('\r');
-                break;
-              case 't':
-                value.push_back('\t');
-                break;
-              case 'v':
-                value.push_back('\v');
-                break;
-              case '0':
-                value.push_back('\0');
-                break;
-              case 'Z':
-                value.push_back('\x1A');
-                break;
-              case 'e':
-                value.push_back('\x1B');
-                break;
-              case 'U':
-                {
+                case '\'': {
+                  value.push_back('\'');
+                  break;
+                }
+                case '\"': {
+                  value.push_back('\"');
+                  break;
+                }
+                case '\\': {
+                  value.push_back('\\');
+                  break;
+                }
+                case '?': {
+                  value.push_back('?');
+                  break;
+                }
+                case 'a': {
+                  value.push_back('\a');
+                  break;
+                }
+                case 'b': {
+                  value.push_back('\b');
+                  break;
+                }
+                case 'f': {
+                  value.push_back('\f');
+                  break;
+                }
+                case 'n': {
+                  value.push_back('\n');
+                  break;
+                }
+                case 'r': {
+                  value.push_back('\r');
+                  break;
+                }
+                case 't': {
+                  value.push_back('\t');
+                  break;
+                }
+                case 'v': {
+                  value.push_back('\v');
+                  break;
+                }
+                case '0': {
+                  value.push_back('\0');
+                  break;
+                }
+                case 'Z': {
+                  value.push_back('\x1A');
+                  break;
+                }
+                case 'e': {
+                  value.push_back('\x1B');
+                  break;
+                }
+                case 'U': {
                   seqlen += 2;
                   // Fallthrough.
-              case 'u':
+                case 'u':
                   seqlen += 2;
                   // Fallthrough.
-              case 'x':
+                case 'x':
                   seqlen += 2;
                   // Read hex digits.
                   if(str.size() - epos < seqlen) {
@@ -393,9 +404,10 @@ Parser_result Token_stream::load(std::istream &sis)
                   }
                   break;
                 }
-              default:
-                // Fail if this escape sequence cannot be recognized.
-                return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
+                default: {
+                  // Fail if this escape sequence cannot be recognized.
+                  return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
+                }
               }
               epos += seqlen;
             }
@@ -581,16 +593,18 @@ Parser_result Token_stream::load(std::istream &sis)
               // Do not use `str.at()` here as `int_begin + 1` may exceed `str.size()`.
               next = str[int_begin + 1];
               switch(next) {
-              case 'B':
-              case 'b':
-                radix = 2;
-                int_begin += 2;
-                break;
-              case 'X':
-              case 'x':
-                radix = 16;
-                int_begin += 2;
-                break;
+                case 'B':
+                case 'b': {
+                  radix = 2;
+                  int_begin += 2;
+                  break;
+                }
+                case 'X':
+                case 'x': {
+                  radix = 16;
+                  int_begin += 2;
+                  break;
+                }
               }
             }
             int_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, int_begin, 2 + radix * 2));
@@ -615,28 +629,32 @@ Parser_result Token_stream::load(std::istream &sis)
             exp_end = exp_begin;
             next = str[frac_end];
             switch(next) {
-            case 'E':
-            case 'e':
-              exp_base = 10;
-              exp_begin += 1;
-              break;
-            case 'P':
-            case 'p':
-              exp_base = 2;
-              exp_begin += 1;
-              break;
+              case 'E':
+              case 'e': {
+                exp_base = 10;
+                exp_begin += 1;
+                break;
+              }
+              case 'P':
+              case 'p': {
+                exp_base = 2;
+                exp_begin += 1;
+                break;
+              }
             }
             if(exp_base != 0) {
               next = str[exp_begin];
               switch(next) {
-              case '+':
-                exp_sign = false;
-                exp_begin += 1;
-                break;
-              case '-':
-                exp_sign = true;
-                exp_begin += 1;
-                break;
+                case '+': {
+                  exp_sign = false;
+                  exp_begin += 1;
+                  break;
+                }
+                case '-': {
+                  exp_sign = true;
+                  exp_begin += 1;
+                  break;
+                }
               }
               exp_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, exp_begin, 22));
               if(exp_begin == exp_end) {

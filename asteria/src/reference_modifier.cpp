@@ -24,8 +24,7 @@ Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexce
 const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case index_array_index:
-      {
+      case index_array_index: {
         const auto &alt = this->m_stor.as<S_array_index>();
         if(parent.type() == Value::type_null) {
           return nullptr;
@@ -51,8 +50,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
         auto rit = qarr->begin() + static_cast<Diff>(rindex);
         return &(rit[0]);
       }
-    case index_object_key:
-      {
+      case index_object_key: {
         const auto &alt = this->m_stor.as<S_object_key>();
         if(parent.type() == Value::type_null) {
           return nullptr;
@@ -68,16 +66,16 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
         }
         return &(rit->second);
       }
-    default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      default: {
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      }
     }
   }
 
 Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case index_array_index:
-      {
+      case index_array_index: {
         const auto &alt = this->m_stor.as<S_array_index>();
         if(parent.type() == Value::type_null) {
           if(!create_new) {
@@ -129,8 +127,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
         }
         return &(rit[0]);
       }
-    case index_object_key:
-      {
+      case index_object_key: {
         const auto &alt = this->m_stor.as<S_object_key>();
         if(parent.type() == Value::type_null) {
           if(!create_new) {
@@ -160,8 +157,9 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
         }
         return &(rit->second);
       }
-    default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      default: {
+        ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      }
     }
   }
 

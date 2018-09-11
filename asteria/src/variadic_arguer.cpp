@@ -20,8 +20,7 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
   {
     const auto nvarg = static_cast<Sint64>(this->m_vargs.size());
     switch(args.size()) {
-    case 1:
-      {
+      case 1: {
         // Return the argument at the index specified.
         const auto ivalue = args.at(0).read();
         const auto qindex = ivalue.opt<D_integer>();
@@ -44,14 +43,14 @@ Reference Variadic_arguer::invoke(Reference /*self*/, Vector<Reference> args) co
         }
         return this->m_vargs.at(static_cast<Size>(rindex));
       }
-    case 0:
-      {
+      case 0: {
         // Return the number of variadic arguments.
         Reference_root::S_constant ref_c = { D_integer(nvarg) };
         return std::move(ref_c);
       }
-    default:
-      ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
+      default: {
+        ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
+      }
     }
   }
 
