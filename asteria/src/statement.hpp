@@ -22,25 +22,6 @@ class Statement
         target_for     = 3,
       };
 
-    enum Index : Uint8
-      {
-        index_expression  =  0,
-        index_var_def     =  1,
-        index_func_def    =  2,
-        index_if          =  3,
-        index_switch      =  4,
-        index_do_while    =  5,
-        index_while       =  6,
-        index_for         =  7,
-        index_for_each    =  8,
-        index_try         =  9,
-        index_break       = 10,
-        index_continue    = 11,
-        index_throw       = 12,
-        index_return      = 13,
-        index_export      = 14,
-        index_import      = 15,
-      };
     struct S_expression
       {
         Expression expr;
@@ -125,6 +106,26 @@ class Statement
     struct S_import
       {
         String path;
+      };
+
+    enum Index : Uint8
+      {
+        index_expression  =  0,
+        index_var_def     =  1,
+        index_func_def    =  2,
+        index_if          =  3,
+        index_switch      =  4,
+        index_do_while    =  5,
+        index_while       =  6,
+        index_for         =  7,
+        index_for_each    =  8,
+        index_try         =  9,
+        index_break       = 10,
+        index_continue    = 11,
+        index_throw       = 12,
+        index_return      = 13,
+        index_export      = 14,
+        index_import      = 15,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(

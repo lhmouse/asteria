@@ -12,11 +12,6 @@ namespace Asteria {
 class Reference_modifier
   {
   public:
-    enum Index : Uint8
-      {
-        index_array_index  = 0,
-        index_object_key   = 1,
-      };
     struct S_array_index
       {
         Sint64 index;
@@ -24,6 +19,12 @@ class Reference_modifier
     struct S_object_key
       {
         String key;
+      };
+
+    enum Index : Uint8
+      {
+        index_array_index  = 0,
+        index_object_key   = 1,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(

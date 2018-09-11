@@ -14,6 +14,14 @@ namespace Asteria {
 class Value
   {
   public:
+    enum Compare : Uint8
+      {
+        compare_unordered  = 0,
+        compare_less       = 1,
+        compare_equal      = 2,
+        compare_greater    = 3,
+      };
+
     enum Type : Uint8
       {
         type_null      = 0,
@@ -38,14 +46,6 @@ class Value
         , D_array     // 7,
         , D_object    // 8,
       )>;
-
-    enum Compare : Uint8
-      {
-        compare_unordered  = 0,
-        compare_less       = 1,
-        compare_equal      = 2,
-        compare_greater    = 3,
-      };
 
   public:
     static const char * get_type_name(Type type) noexcept;

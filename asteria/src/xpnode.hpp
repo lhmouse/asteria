@@ -19,53 +19,40 @@ class Xpnode
     enum Xop : Uint8
       {
         // Postfix operators
-        xop_postfix_inc    = 10, // ++
-        xop_postfix_dec    = 11, // --
-        xop_postfix_at     = 12, // []
+        xop_postfix_inc    = 10,  // ++
+        xop_postfix_dec    = 11,  // --
+        xop_postfix_at     = 12,  // []
         // Prefix operators
-        xop_prefix_pos     = 30, // +
-        xop_prefix_neg     = 31, // -
-        xop_prefix_notb    = 32, // ~
-        xop_prefix_notl    = 33, // !
-        xop_prefix_inc     = 34, // ++
-        xop_prefix_dec     = 35, // --
-        xop_prefix_unset   = 36, // unset
+        xop_prefix_pos     = 30,  // +
+        xop_prefix_neg     = 31,  // -
+        xop_prefix_notb    = 32,  // ~
+        xop_prefix_notl    = 33,  // !
+        xop_prefix_inc     = 34,  // ++
+        xop_prefix_dec     = 35,  // --
+        xop_prefix_unset   = 36,  // unset
         // Infix relational operators
-        xop_infix_cmp_eq   = 50, // ==
-        xop_infix_cmp_ne   = 51, // !=
-        xop_infix_cmp_lt   = 52, // <
-        xop_infix_cmp_gt   = 53, // >
-        xop_infix_cmp_lte  = 54, // <=
-        xop_infix_cmp_gte  = 55, // >=
+        xop_infix_cmp_eq   = 50,  // ==
+        xop_infix_cmp_ne   = 51,  // !=
+        xop_infix_cmp_lt   = 52,  // <
+        xop_infix_cmp_gt   = 53,  // >
+        xop_infix_cmp_lte  = 54,  // <=
+        xop_infix_cmp_gte  = 55,  // >=
         // Infix general operators
-        xop_infix_add      = 60, // +
-        xop_infix_sub      = 61, // -
-        xop_infix_mul      = 62, // *
-        xop_infix_div      = 63, // /
-        xop_infix_mod      = 64, // %
-        xop_infix_sll      = 65, // <<<
-        xop_infix_srl      = 66, // >>>
-        xop_infix_sla      = 67, // <<
-        xop_infix_sra      = 68, // >>
-        xop_infix_andb     = 69, // &
-        xop_infix_orb      = 70, // |
-        xop_infix_xorb     = 71, // ^
-        xop_infix_assign   = 72, // =
+        xop_infix_add      = 60,  // +
+        xop_infix_sub      = 61,  // -
+        xop_infix_mul      = 62,  // *
+        xop_infix_div      = 63,  // /
+        xop_infix_mod      = 64,  // %
+        xop_infix_sll      = 65,  // <<<
+        xop_infix_srl      = 66,  // >>>
+        xop_infix_sla      = 67,  // <<
+        xop_infix_sra      = 68,  // >>
+        xop_infix_andb     = 69,  // &
+        xop_infix_orb      = 70,  // |
+        xop_infix_xorb     = 71,  // ^
+        xop_infix_assign   = 72,  // =
       };
 
-    enum Index : Uint8
-      {
-        index_literal           =  0,
-        index_named_reference   =  1,
-        index_bound_reference   =  2,
-        index_subexpression     =  3,
-        index_closure_function  =  4,
-        index_branch            =  5,
-        index_function_call     =  6,
-        index_operator_rpn      =  7,
-        index_unnamed_array     =  8,
-        index_unnamed_object    =  9,
-      };
     struct S_literal
       {
         Value value;
@@ -112,6 +99,20 @@ class Xpnode
     struct S_unnamed_object
       {
         Dictionary<Expression> pairs;
+      };
+
+    enum Index : Uint8
+      {
+        index_literal           =  0,
+        index_named_reference   =  1,
+        index_bound_reference   =  2,
+        index_subexpression     =  3,
+        index_closure_function  =  4,
+        index_branch            =  5,
+        index_function_call     =  6,
+        index_operator_rpn      =  7,
+        index_unnamed_array     =  8,
+        index_unnamed_object    =  9,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
