@@ -33,7 +33,7 @@ infinity-literal ::=
 statement ::=
 	block | variable-definition | function-definition |
 	if-statement | switch-statement |
-	do-while-statement | while-statement | for-statement | for-each-statement |
+	do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
 	try-statement |
 	expression-statement
@@ -77,9 +77,11 @@ do-while-statement ::=
 while-statement ::=
 	"while" "(" expression ")" block
 for-statement ::=
-	"for" "(" ( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt ")" block
-for-each-statement ::=
-	"for" "(" "each" identifier "," identifier ":" expression ")" block
+	"for" "(" ( for-statement-triplet | for-statement-range ) ")" block
+for-statement-triplet ::=
+	( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt
+for-statement-range ::=
+	"each" identifier "," identifier ":" expression
 
 break-statement ::=
 	"break" ( "switch" | "while" | "for" ) ";"
@@ -154,8 +156,10 @@ directive-or-statement-list-opt ::=
 directive-or-statement-list ::=
 	directive-or-statement directive-or-statement-list-opt
 directive-or-statement ::=
-	export-directive | import-directive |
-	statement
+	directive | statement
+
+directive ::=
+	export-directive | import-directive
 
 export-directive ::=
 	"export" identifier ";"
