@@ -230,19 +230,19 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
       case type_string: {
         const auto &alt = this->check<D_string>();
         // string(5) "hello"
-        os <<"string(" <<std::dec <<alt.size() <<") \"" <<escape(alt) <<"\"";
+        os <<"string(" <<std::dec <<alt.size() <<") " <<quote(alt);
         return;
       }
       case type_opaque: {
         const auto &alt = this->check<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*alt).name() <<"\") \"" <<escape(alt->describe()) <<"\"";
+        os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_function: {
         const auto &alt = this->check<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*alt).name() <<"\") \"" <<escape(alt->describe()) <<"\"";
+        os <<"function(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_array: {
@@ -270,7 +270,7 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
         // }
         os <<"object(" <<std::dec <<alt.size() <<") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<"\"" <<escape(it->first) <<"\" = ";
+          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<quote(it->first) <<" = ";
           it->second.dump(os, indent_increment, indent_next + indent_increment);
           os <<',';
         }

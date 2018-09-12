@@ -143,17 +143,17 @@ constexpr Indent indent(char head, std::size_t count) noexcept
 extern std::ostream & operator<<(std::ostream &os, const Indent &n);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Escape
+// Quote
 ///////////////////////////////////////////////////////////////////////////////
 
-class Escape
+class Quote
   {
   private:
     const char *m_data;
     std::size_t m_size;
 
   public:
-    constexpr Escape(const char *xdata, std::size_t xsize) noexcept
+    constexpr Quote(const char *xdata, std::size_t xsize) noexcept
       : m_data(xdata), m_size(xsize)
       {
       }
@@ -169,20 +169,20 @@ class Escape
       }
   };
 
-constexpr Escape escape(const char *data, std::size_t size) noexcept
+constexpr Quote quote(const char *data, std::size_t size) noexcept
   {
-    return Escape(data, size);
+    return Quote(data, size);
   }
-inline Escape escape(const char *str) noexcept
+inline Quote quote(const char *str) noexcept
   {
-    return Escape(str, std::char_traits<char>::length(str));
+    return Quote(str, std::char_traits<char>::length(str));
   }
-inline Escape escape(const rocket::cow_string &str) noexcept
+inline Quote quote(const rocket::cow_string &str) noexcept
   {
-    return Escape(str.data(), str.size());
+    return Quote(str.data(), str.size());
   }
 
-extern std::ostream & operator<<(std::ostream &os, const Escape &q);
+extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 
 }
 
