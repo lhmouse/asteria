@@ -71,12 +71,12 @@ namespace {
 
 }
 
-Parser_result Token_stream::load(std::istream &sis)
+Parser_result Token_stream::load(std::istream &sis_inout)
   {
     // Check whether the stream can be read from.
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
     Size line = 0;
-    if(!sis) {
+    if(!sis_inout) {
       return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
     }
     // Save the position of an unterminated block comment.
@@ -86,7 +86,7 @@ Parser_result Token_stream::load(std::istream &sis)
     // Read source code line by line.
     Vector<Token> seq;
     String str;
-    while(getline(sis, str)) {
+    while(getline(sis_inout, str)) {
       ++line;
       // Discard the first line if it looks like a shebang.
       if((line == 1) && str.starts_with("#!", 2)) {
@@ -776,7 +776,7 @@ Parser_result Token_stream::load(std::istream &sis)
         pos = epos;
       }
     }
-    if(sis.bad()) {
+    if(sis_inout.bad()) {
       // If there was an irrecovable I/O failure then any other status code is meaningless.
       return Parser_result(line, 0, 0, Parser_result::error_istream_badbit_set);
     }
