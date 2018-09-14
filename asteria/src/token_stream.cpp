@@ -71,7 +71,7 @@ namespace {
 
 }
 
-Parser_result Token_stream::load(std::istream &sis_inout)
+Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
   {
     // Check whether the stream can be read from.
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
@@ -267,7 +267,7 @@ Parser_result Token_stream::load(std::istream &sis_inout)
             // Push the string as-is.
             String value(str, pos + 1, epos - pos - 2);
             Token::S_string_literal token_c = { std::move(value) };
-            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
             break;
           }
           case '\"': {
@@ -415,7 +415,7 @@ Parser_result Token_stream::load(std::istream &sis_inout)
             epos += 1;
             // Push the string.
             Token::S_string_literal token_c = { std::move(value) };
-            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
             break;
           }
         case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':  case 'G':
@@ -474,13 +474,13 @@ Parser_result Token_stream::load(std::istream &sis_inout)
               if(range.first == range.second) {
                 // No matching keyword has been found so far.
                 Token::S_identifier token_c = { str.substr(pos, epos - pos) };
-                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
                 break;
               }
               if((epos - pos == std::strlen(range.first->first)) && (std::memcmp(range.first->first, str.data() + pos, epos - pos) == 0)) {
                 // A keyword has been found.
                 Token::S_keyword token_c = { range.first->second };
-                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
                 break;
               }
               ++(range.first);
@@ -564,7 +564,7 @@ Parser_result Token_stream::load(std::istream &sis_inout)
               if((epos <= str.size()) && (std::memcmp(range.first->first, str.data() + pos, epos - pos) == 0)) {
                 // A punctuator has been found.
                 Token::S_punctuator token_c = { range.first->second };
-                seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+                seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
                 break;
               }
               ++(range.first);
@@ -717,7 +717,7 @@ Parser_result Token_stream::load(std::istream &sis_inout)
               }
               // Push an integer literal.
               Token::S_integer_literal token_c = { value };
-              seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+              seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
               break;
             }
             // Parse the literal as a floating-point number.
@@ -764,7 +764,7 @@ Parser_result Token_stream::load(std::istream &sis_inout)
             }
             // Push a floating-point literal.
             Token::S_real_literal token_c = { value };
-            seq.emplace_back(line, pos, epos - pos, std::move(token_c));
+            seq.emplace_back(file, line, pos, epos - pos, std::move(token_c));
             break;
           }
         default:

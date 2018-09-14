@@ -21,7 +21,7 @@ class Token_stream
     Token_stream & operator=(Token_stream &&) noexcept;
 
   public:
-    Parser_result load(std::istream &sis_inout);
+    Parser_result load(std::istream &sis_inout, const String &file);
     void clear() noexcept;
 
     Size size() const noexcept;

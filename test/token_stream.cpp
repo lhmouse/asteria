@@ -17,7 +17,7 @@ int main()
                            "* - 0x1_7.8:4p+4  // comments\n"
                            ".false/*more\n"
                            "comments*/;/*yet more*/-42e13");
-    auto result = ts.load(iss);
+    auto result = ts.load(iss, String("dummy_file"));
     ASTERIA_TEST_CHECK(result.get_error() == result.error_success);
     ASTERIA_TEST_CHECK(iss.eof());
     ASTERIA_TEST_CHECK(ts.size() == 18);

@@ -147,6 +147,7 @@ class Token
     static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
+    String m_file;
     Uint64 m_line;
     Size m_offset;
     Size m_length;
@@ -154,8 +155,8 @@ class Token
 
   public:
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
-      Token(Uint64 line, Size offset, Size length, AltT &&alt)
-        : m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
+      Token(const String &file, Uint64 line, Size offset, Size length, AltT &&alt)
+        : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
     ~Token();
@@ -164,6 +165,10 @@ class Token
     Token & operator=(Token &&) noexcept;
 
   public:
+    const String & get_file() const noexcept
+      {
+        return this->m_file;
+      }
     Uint64 get_line() const noexcept
       {
         return this->m_line;
