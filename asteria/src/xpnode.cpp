@@ -248,6 +248,7 @@ namespace {
 
   void do_set_result(Reference &ref_inout, bool compound_assign, Value value)
     {
+      ASTERIA_DEBUG_LOG("Setting result: ", value);
       if(compound_assign) {
         // Write the value through `ref_inout`, which is unchanged.
         ref_inout.write(std::move(value));
@@ -260,9 +261,12 @@ namespace {
 
   Reference do_traced_call(const String &file, Uint64 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
     try {
-      return func->invoke(std::move(self), std::move(args));
+      ASTERIA_DEBUG_LOG("Entering function \'", file, ':', line, "\'...");
+      auto res = func->invoke(std::move(self), std::move(args));
+      ASTERIA_DEBUG_LOG("Leaving function \'", file, ':', line, "\'...");
+      return res;
     } catch(...) {
-      ASTERIA_DEBUG_LOG("  Forwarding exception thrown insode \'", file, ':', line, "\'...");
+      ASTERIA_DEBUG_LOG("Tracing exception thrown from \'", file, ':', line, "\'...");
       throw Backtracer(file, line);
     }
 

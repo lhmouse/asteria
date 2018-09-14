@@ -41,7 +41,7 @@ namespace {
 void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expression: {
+      case index_expr: {
         return;
       }
       case index_var_def: {
@@ -80,11 +80,11 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
 Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expression: {
-        const auto &alt = this->m_stor.as<S_expression>();
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
         // Bind the expression recursively.
         auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_expression alt_bnd = { std::move(expr_bnd) };
+        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_var_def: {
@@ -232,8 +232,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expression: {
-        const auto &alt = this->m_stor.as<S_expression>();
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(ctx_inout);
         return Block::status_next;

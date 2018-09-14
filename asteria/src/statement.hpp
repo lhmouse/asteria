@@ -22,7 +22,7 @@ class Statement
         target_for     = 3,
       };
 
-    struct S_expression
+    struct S_expr
       {
         Expression expr;
       };
@@ -110,41 +110,41 @@ class Statement
 
     enum Index : Uint8
       {
-        index_expression  =  0,
-        index_var_def     =  1,
-        index_func_def    =  2,
-        index_if          =  3,
-        index_switch      =  4,
-        index_do_while    =  5,
-        index_while       =  6,
-        index_for         =  7,
-        index_for_each    =  8,
-        index_try         =  9,
-        index_break       = 10,
-        index_continue    = 11,
-        index_throw       = 12,
-        index_return      = 13,
-        index_export      = 14,
-        index_import      = 15,
+        index_expr      =  0,
+        index_var_def   =  1,
+        index_func_def  =  2,
+        index_if        =  3,
+        index_switch    =  4,
+        index_do_while  =  5,
+        index_while     =  6,
+        index_for       =  7,
+        index_for_each  =  8,
+        index_try       =  9,
+        index_break     = 10,
+        index_continue  = 11,
+        index_throw     = 12,
+        index_return    = 13,
+        index_export    = 14,
+        index_import    = 15,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_expression  //  0,
-        , S_var_def     //  1,
-        , S_func_def    //  2,
-        , S_if          //  3,
-        , S_switch      //  4,
-        , S_do_while    //  5,
-        , S_while       //  6,
-        , S_for         //  7,
-        , S_for_each    //  8,
-        , S_try         //  9,
-        , S_break       // 10,
-        , S_continue    // 11,
-        , S_throw       // 12,
-        , S_return      // 13,
-        , S_export      // 14,
-        , S_import      // 15,
+        , S_expr      //  0,
+        , S_var_def   //  1,
+        , S_func_def  //  2,
+        , S_if        //  3,
+        , S_switch    //  4,
+        , S_do_while  //  5,
+        , S_while     //  6,
+        , S_for       //  7,
+        , S_for_each  //  8,
+        , S_try       //  9,
+        , S_break     // 10,
+        , S_continue  // 11,
+        , S_throw     // 12,
+        , S_return    // 13,
+        , S_export    // 14,
+        , S_import    // 15,
       )>;
 
   private:
