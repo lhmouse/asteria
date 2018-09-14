@@ -53,16 +53,14 @@ equal-initializer ::=
 constant-definition ::=
 	"const" identifier equal-initailizer ";"
 function-definition ::=
-	"func" identifier "(" parameter-list-opt ")" block
+	"func" identifier "(" parameter-list-opt ")" statement
 parameter-list-opt ::=
 	parameter-list | ""
 parameter-list ::=
 	identifier ( "," parameter-list | "" )
 
 if-statement ::=
-	"if" "(" expression ")" block ( "else" else-branch | "" )
-else-branch ::=
-	if-statement | block
+	"if" "(" expression ")" statement ( "else" statement | "" )
 switch-statement ::=
 	"switch" "(" expression ")" switch-block
 switch-block ::=
@@ -77,11 +75,11 @@ switch-clause-default ::=
 	"default" ":" statement-list-opt
 
 do-while-statement ::=
-	"do" block "while" "(" expression ")" ";"
+	"do" statement "while" "(" expression ")" ";"
 while-statement ::=
-	"while" "(" expression ")" block
+	"while" "(" expression ")" statement
 for-statement ::=
-	"for" "(" ( for-statement-triplet | for-statement-range ) ")" block
+	"for" "(" ( for-statement-triplet | for-statement-range ) ")" statement
 for-statement-triplet ::=
 	( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt
 for-statement-range ::=
@@ -97,7 +95,7 @@ return-statement ::=
 	"return" expression-opt ";"
 
 try-statement ::=
-	"try" block "catch" "(" identifier ")" block
+	"try" statement "catch" "(" identifier ")" statement
 
 expression-statement ::=
 	expression-opt ";"
@@ -112,7 +110,7 @@ prefix-operator-expression ::=
 expression-initiator ::=
 	identifier | literal | "this" | closure-function | nested-expression | unnamed-array | unnamed-object
 closure-function ::=
-	"func" "(" parameter-list-opt ")" block
+	"func" "(" parameter-list-opt ")" statement
 nested-expression ::=
 	"(" expression ")"
 unnamed-array ::=
