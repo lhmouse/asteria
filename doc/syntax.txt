@@ -31,7 +31,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	block | variable-definition | function-definition |
+	block | variable-definition | constant-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
@@ -45,9 +45,13 @@ statement-list-opt ::=
 statement-list ::=
 	statement statement-list-opt
 variable-definition ::=
-	( "var" | "const" ) identifier equal-initailizer-opt ";"
+	"var" identifier equal-initailizer-opt ";"
 equal-initializer-opt ::=
-	"=" expression | ""
+	equal-initializer | ""
+equal-initializer ::=
+	"=" expression
+constant-definition ::=
+	"const" identifier equal-initailizer ";"
 function-definition ::=
 	"func" identifier "(" parameter-list-opt ")" block
 parameter-list-opt ::=
