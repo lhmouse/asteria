@@ -40,7 +40,7 @@ class Parser_result
         error_real_literal_underflow             = 213,
         error_block_comment_unclosed             = 214,
         // Phase 3
-        //  Parser
+        //   Parser
         error_directive_or_statement_expected    = 301,
         error_identifier_expected                = 302,
         error_semicolon_expected                 = 303,

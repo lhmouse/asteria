@@ -77,7 +77,7 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
         return "A block comment was not properly terminated.";
       }
       // Phase 3
-      //  Parser
+      //   Parser
       case error_directive_or_statement_expected: {
         return "An unexpected token was encountered while a directive or statement is expected.";
       }
