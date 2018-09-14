@@ -99,6 +99,7 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       }
     }
   }
+
 const char * Token::get_punctuator(Punctuator punct) noexcept
   {
     switch(punct) {
@@ -266,5 +267,50 @@ Token::Token(Token &&) noexcept
   = default;
 Token & Token::operator=(Token &&) noexcept
   = default;
+
+void Token::dump(std::ostream &os) const
+  {
+    switch(this->index()) {
+      case index_keyword: {
+        const auto &alt = this->check<S_keyword>();
+        // keyword `if`
+        os <<"keyword `" <<get_keyword(alt.keyword) <<"`";
+        return;
+      }
+      case index_punctuator: {
+        const auto &alt = this->check<S_punctuator>();
+        // punctuator `;`
+        os <<"punctuator `" <<get_punctuator(alt.punct) <<"`";
+        return;
+      }
+      case index_identifier: {
+        const auto &alt = this->check<S_identifier>();
+        // identifier `meow`
+        os <<"identifier `" <<alt.name <<"`";
+        return;
+      }
+      case index_integer_literal: {
+        const auto &alt = this->check<S_integer_literal>();
+        // integer-literal `42`
+        os <<"integer-literal `" <<std::dec <<alt.value <<"`";
+        return;
+      }
+      case index_real_literal: {
+        const auto &alt = this->check<S_real_literal>();
+        // real-number-literal `123.456`
+        os <<"real-number-literal `" <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<Xfloat>::max_digits10) <<alt.value <<"`";
+        return;
+      }
+      case index_string_literal: {
+        const auto &alt = this->check<S_string_literal>();
+        // string-literal "hello world"
+        os <<"string-literal `" <<quote(alt.value) <<"`";
+        return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered.");
+      }
+    }
+  }
 
 }

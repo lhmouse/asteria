@@ -21,7 +21,7 @@ int main()
     ASTERIA_TEST_CHECK(result.get_error() == result.error_success);
     ASTERIA_TEST_CHECK(iss.eof());
     ASTERIA_TEST_CHECK(ts.size() == 18);
-    ASTERIA_TEST_CHECK(ts.peek_opt(0)->check<Token::S_identifier>().id == "hh");
+    ASTERIA_TEST_CHECK(ts.peek_opt(0)->check<Token::S_identifier>().name == "hh");
     ASTERIA_TEST_CHECK(ts.peek_opt(1)->check<Token::S_punctuator>().punct == Token::punctuator_inc);
     ASTERIA_TEST_CHECK(ts.peek_opt(2)->check<Token::S_punctuator>().punct == Token::punctuator_add);
     ASTERIA_TEST_CHECK(ts.peek_opt(3)->check<Token::S_keyword>().keyword == Token::keyword_if);

@@ -108,7 +108,7 @@ class Token
       };
     struct S_identifier
       {
-        String id;
+        String name;
       };
     struct S_integer_literal
       {
@@ -176,6 +176,7 @@ class Token
       {
         return this->m_length;
       }
+
     Index index() const noexcept
       {
         return static_cast<Index>(this->m_stor.index());
@@ -190,7 +191,15 @@ class Token
         {
           return this->m_stor.as<AltT>();
         }
+
+    void dump(std::ostream &os) const;
   };
+
+inline std::ostream & operator<<(std::ostream &os, const Token &token)
+  {
+    token.dump(os);
+    return os;
+  }
 
 }
 
