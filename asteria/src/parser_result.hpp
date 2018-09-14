@@ -24,7 +24,6 @@ class Parser_result
         error_utf_code_point_invalid             = 105,
         // Phase 2
         //   Comment stripper
-        // Phase 3
         //   Tokenizer
         error_token_character_unrecognized       = 201,
         error_string_literal_unclosed            = 202,
@@ -40,9 +39,19 @@ class Parser_result
         error_real_literal_overflow              = 212,
         error_real_literal_underflow             = 213,
         error_block_comment_unclosed             = 214,
-        // Phase 4
+        // Phase 3
         //  Parser
+        error_directive_or_statement_expected    = 301,
+        error_identifier_expected                = 302,
+        error_semicolon_expected                 = 303,
+        error_string_literal_expected            = 304,
+        error_statement_expected                 = 305,
+        error_equals_sign_expected               = 306,
+        error_expression_expected                = 307,
       };
+
+  public:
+    static const char * describe_error(Error error) noexcept;
 
   private:
     Uint64 m_line;
