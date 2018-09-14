@@ -86,13 +86,12 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
     // Read source code line by line.
     Vector<Token> seq;
     String str;
-    while(getline(sis_inout, str)) {
-      ++line;
+    while(++line, getline(sis_inout, str)) {
       // Discard the first line if it looks like a shebang.
       if((line == 1) && str.starts_with("#!", 2)) {
         continue;
       }
-      ASTERIA_DEBUG_LOG("Parsing line ", std::setw(4), line , ": ", str);
+      ASTERIA_DEBUG_LOG("Read line ", std::setw(4), line , ": ", str);
       Size pos, epos;
       /////////////////////////////////////////////////////////////////////////
       // Phase 1
@@ -797,13 +796,12 @@ Size Token_stream::size() const noexcept
   {
     return this->m_rseq.size();
   }
-const Token * Token_stream::peek_opt(Size offset) const noexcept
+const Token * Token_stream::peek_opt() const noexcept
   {
-    const auto ntoken = this->m_rseq.size();
-    if(offset >= ntoken) {
+    if(this->m_rseq.empty()) {
       return nullptr;
     }
-    return this->m_rseq.data() + ntoken - 1 - offset;
+    return &(this->m_rseq.back());
   }
 Token Token_stream::shift()
   {

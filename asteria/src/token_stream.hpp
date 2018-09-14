@@ -25,7 +25,7 @@ class Token_stream
     void clear() noexcept;
 
     Size size() const noexcept;
-    const Token * peek_opt(Size offset = 0) const noexcept;
+    const Token * peek_opt() const noexcept;
     Token shift();
   };
 
