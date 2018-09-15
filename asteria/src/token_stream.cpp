@@ -785,7 +785,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
     }
     // Accept the sequence in reverse order.
     this->m_rseq.assign(std::make_move_iterator(seq.mut_rbegin()), std::make_move_iterator(seq.mut_rend()));
-    return Parser_result(line, 0, 0, Parser_result::error_success);
+    return Parser_result(line, 0, 0, Parser_result::success);
   }
 void Token_stream::clear() noexcept
   {
