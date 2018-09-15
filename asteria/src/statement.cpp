@@ -58,7 +58,6 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
       }
       case index_if:
       case index_switch:
-      case index_do_while:
       case index_while:
       case index_for:
       case index_for_each:
@@ -132,20 +131,13 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
         return std::move(alt_bnd);
       }
-      case index_do_while: {
-        const auto &alt = this->m_stor.as<S_do_while>();
-        // Bind the loop body and condition recursively.
-        auto body_bnd = alt.body.bind(ctx_inout);
-        auto cond_bnd = alt.cond.bind(ctx_inout);
-        Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
-        return std::move(alt_bnd);
-      }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
         // Bind the condition and loop body recursively.
+        auto first_bnd = alt.first.bind(ctx_inout);
         auto cond_bnd = alt.cond.bind(ctx_inout);
         auto body_bnd = alt.body.bind(ctx_inout);
-        Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
+        Statement::S_while alt_bnd = { std::move(first_bnd), std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_for: {
@@ -333,37 +325,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
-      case index_do_while: {
-        const auto &alt = this->m_stor.as<S_do_while>();
-        for(;;) {
-          // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_inout);
-          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
-            // Break out of the body as requested.
-            break;
-          }
-          if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-          // Check the loop condition.
-          ref_out = alt.cond.evaluate(ctx_inout);
-          if(ref_out.read().test() == false) {
-            break;
-          }
-        }
-        return Block::status_next;
-      }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
+        auto body = std::ref(alt.first);
         for(;;) {
-          // Check the loop condition.
-          ref_out = alt.cond.evaluate(ctx_inout);
-          if(ref_out.read().test() == false) {
-            break;
-          }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_inout);
+          const auto status = body.get().execute(ref_out, ctx_inout);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -372,6 +339,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             // Forward anything unexpected to the caller.
             return status;
           }
+          // Check the loop condition.
+          ref_out = alt.cond.evaluate(ctx_inout);
+          if(ref_out.read().test() == false) {
+            break;
+          }
+          body = std::ref(alt.body);
         }
         return Block::status_next;
       }

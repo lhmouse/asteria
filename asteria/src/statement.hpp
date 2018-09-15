@@ -51,13 +51,9 @@ class Statement
         Expression ctrl;
         Bivector<Expression, Block> clauses;
       };
-    struct S_do_while
-      {
-        Block body;
-        Expression cond;
-      };
     struct S_while
       {
+        Block first;
         Expression cond;
         Block body;
       };
@@ -115,17 +111,16 @@ class Statement
         index_func_def  =  2,
         index_if        =  3,
         index_switch    =  4,
-        index_do_while  =  5,
-        index_while     =  6,
-        index_for       =  7,
-        index_for_each  =  8,
-        index_try       =  9,
-        index_break     = 10,
-        index_continue  = 11,
-        index_throw     = 12,
-        index_return    = 13,
-        index_export    = 14,
-        index_import    = 15,
+        index_while     =  5,
+        index_for       =  6,
+        index_for_each  =  7,
+        index_try       =  8,
+        index_break     =  9,
+        index_continue  = 10,
+        index_throw     = 11,
+        index_return    = 12,
+        index_export    = 13,
+        index_import    = 14,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -134,17 +129,16 @@ class Statement
         , S_func_def  //  2,
         , S_if        //  3,
         , S_switch    //  4,
-        , S_do_while  //  5,
-        , S_while     //  6,
-        , S_for       //  7,
-        , S_for_each  //  8,
-        , S_try       //  9,
-        , S_break     // 10,
-        , S_continue  // 11,
-        , S_throw     // 12,
-        , S_return    // 13,
-        , S_export    // 14,
-        , S_import    // 15,
+        , S_while     //  5,
+        , S_for       //  6,
+        , S_for_each  //  7,
+        , S_try       //  8,
+        , S_break     //  9,
+        , S_continue  // 10,
+        , S_throw     // 11,
+        , S_return    // 12,
+        , S_export    // 13,
+        , S_import    // 14,
       )>;
 
   private:
