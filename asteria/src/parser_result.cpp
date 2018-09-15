@@ -10,8 +10,11 @@ namespace Asteria {
 const char * Parser_result::describe_error(Parser_result::Error error) noexcept
   {
     switch(error) {
-      case success: {
+      case error_success: {
         return "The operation succeeded.";
+      }
+      case error_no_operation_performed: {
+        return "No operation was performed.";
       }
       // Phase 1
       //   I/O stream
