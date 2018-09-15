@@ -57,28 +57,33 @@ class Parser_result
     Uint64 m_line;
     Size m_offset;
     Size m_length;
+    bool m_noop;
     Error m_error;
 
   public:
-    constexpr Parser_result(Uint64 line, Size offset, Size length, Error error) noexcept
-      : m_line(line), m_offset(offset), m_length(length), m_error(error)
+    constexpr Parser_result(Uint64 line, Size offset, Size length, bool noop, Error error) noexcept
+      : m_line(line), m_offset(offset), m_length(length), m_noop(noop), m_error(error)
       {
       }
 
   public:
-    Uint64 get_line() const noexcept
+    constexpr Uint64 get_line() const noexcept
       {
         return this->m_line;
       }
-    Size get_offset() const noexcept
+    constexpr Size get_offset() const noexcept
       {
         return this->m_offset;
       }
-    Size get_length() const noexcept
+    constexpr Size get_length() const noexcept
       {
         return this->m_length;
       }
-    Error get_error() const noexcept
+    constexpr bool was_noop() const noexcept
+      {
+        return this->m_noop;
+      }
+    constexpr Error get_error() const noexcept
       {
         return this->m_error;
       }

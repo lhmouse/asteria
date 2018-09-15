@@ -77,7 +77,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
     Size line = 0;
     if(!sis_inout) {
-      return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
+      return Parser_result(line, 0, 0, true, Parser_result::error_istream_open_failure);
     }
     // Save the position of an unterminated block comment.
     Size bcom_line = 0;
@@ -108,11 +108,11 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
         }
         if(code < 0xC0) {
           // This is not a leading character.
-          return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
+          return Parser_result(line, pos, 1, false, Parser_result::error_utf8_sequence_invalid);
         }
         if(code >= 0xF8) {
           // If this leading character were valid, it would start a sequence of five bytes or more.
-          return Parser_result(line, pos, 1, Parser_result::error_utf8_sequence_invalid);
+          return Parser_result(line, pos, 1, false, Parser_result::error_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
         const auto u8len = static_cast<unsigned>(2 + (code >= 0xE0) + (code >= 0xF0));
@@ -120,7 +120,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
         ROCKET_ASSERT(u8len <= 4);
         if(str.size() - pos < u8len) {
           // No enough characters have been provided.
-          return Parser_result(line, pos, str.size() - pos, Parser_result::error_utf8_sequence_incomplete);
+          return Parser_result(line, pos, str.size() - pos, false, Parser_result::error_utf8_sequence_incomplete);
         }
         // Unset bits that are not part of the payload.
         code &= static_cast<unsigned char>(0xFF >> u8len);
@@ -129,23 +129,23 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
           const char32_t next = str.at(pos + i) & 0xFF;
           if((next < 0x80) || (0xC0 <= next)) {
             // This trailing character is not valid.
-            return Parser_result(line, pos, i + 1, Parser_result::error_utf8_sequence_invalid);
+            return Parser_result(line, pos, i + 1, false, Parser_result::error_utf8_sequence_invalid);
           }
           code = (code << 6) | (next & 0x3F);
         }
         if((0xD800 <= code) && (code < 0xE000)) {
           // Surrogates are not allowed.
-          return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
+          return Parser_result(line, pos, u8len, false, Parser_result::error_utf_code_point_invalid);
         }
         if(code >= 0x110000) {
           // Code point value is too large.
-          return Parser_result(line, pos, u8len, Parser_result::error_utf_code_point_invalid);
+          return Parser_result(line, pos, u8len, false, Parser_result::error_utf_code_point_invalid);
         }
         // Re-encode it and check for overlong sequences.
         const auto minlen = static_cast<unsigned>(1 + (code >= 0x80) + (code >= 0x800) + (code >= 0x10000));
         if(minlen != u8len) {
           // Overlong sequences are not allowed.
-          return Parser_result(line, pos, u8len, Parser_result::error_utf8_sequence_invalid);
+          return Parser_result(line, pos, u8len, false, Parser_result::error_utf8_sequence_invalid);
         }
         pos += u8len;
       }
@@ -181,7 +181,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
           // Escape sequences do not have special meanings inside single quotation marks.
           epos = str.find('\'', pos);
           if(epos == str.npos) {
-            return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+            return Parser_result(line, pos, str.size() - pos, false, Parser_result::error_string_literal_unclosed);
           }
           // Continue from the next character to the end of this string literal.
           pos = epos + 1;
@@ -192,7 +192,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
           epos = pos + 1;
           for(;;) {
             if(epos >= str.size()) {
-              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              return Parser_result(line, pos, str.size() - pos, false, Parser_result::error_string_literal_unclosed);
             }
             const auto next = str.at(epos);
             if(next == '\"') {
@@ -258,7 +258,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             // Get a string literal.
             epos = str.find('\'', pos + 1);
             if(epos == str.npos) {
-              return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+              return Parser_result(line, pos, str.size() - pos, false, Parser_result::error_string_literal_unclosed);
             }
             // Escape sequences do not have special meanings inside single quotation marks.
             // Adjust `epos` to point to the character next to the closing single quotation mark.
@@ -276,7 +276,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             epos = pos + 1;
             for(;;) {
               if(epos >= str.size()) {
-                return Parser_result(line, pos, str.size() - pos, Parser_result::error_string_literal_unclosed);
+                return Parser_result(line, pos, str.size() - pos, false, Parser_result::error_string_literal_unclosed);
               }
               auto next = str.at(epos);
               if(next == '\"') {
@@ -292,7 +292,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               // Translate an escape sequence.
               unsigned seqlen = 2;
               if(str.size() - epos < seqlen) {
-                return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
+                return Parser_result(line, epos, str.size() - epos, false, Parser_result::error_escape_sequence_incomplete);
               }
               next = str.at(epos + 1);
               switch(next) {
@@ -362,24 +362,24 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
                   seqlen += 2;
                   // Read hex digits.
                   if(str.size() - epos < seqlen) {
-                    return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
+                    return Parser_result(line, epos, str.size() - epos, false, Parser_result::error_escape_sequence_incomplete);
                   }
                   char32_t code = 0;
                   for(Size i = epos + 2; i < epos + seqlen; ++i) {
                     const auto ptr = std::char_traits<char>::find(digits, 32, str.at(i));
                     if(!ptr) {
-                      return Parser_result(line, epos, i, Parser_result::error_escape_sequence_invalid_hex);
+                      return Parser_result(line, epos, i, false, Parser_result::error_escape_sequence_invalid_hex);
                     }
                     const auto digit_value = static_cast<unsigned>((ptr - digits) / 2);
                     code = code * 16 + digit_value;
                   }
                   if((0xD800 <= code) && (code < 0xE000)) {
                     // Surrogates are not allowed.
-                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
+                    return Parser_result(line, epos, seqlen, false, Parser_result::error_escape_utf_code_point_invalid);
                   }
                   if(code >= 0x110000) {
                     // Code point value is too large.
-                    return Parser_result(line, epos, seqlen, Parser_result::error_escape_utf_code_point_invalid);
+                    return Parser_result(line, epos, seqlen, false, Parser_result::error_escape_utf_code_point_invalid);
                   }
                   // Encode it.
                   const auto encode_one = [&](unsigned shift, unsigned mask)
@@ -405,7 +405,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
                 }
                 default: {
                   // Fail if this escape sequence cannot be recognized.
-                  return Parser_result(line, epos, seqlen, Parser_result::error_escape_sequence_unknown);
+                  return Parser_result(line, epos, seqlen, false, Parser_result::error_escape_sequence_unknown);
                 }
               }
               epos += seqlen;
@@ -608,7 +608,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             }
             int_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, int_begin, 2 + radix * 2));
             if(int_begin == int_end) {
-              return Parser_result(line, pos, int_end - pos, Parser_result::error_numeric_literal_incomplete);
+              return Parser_result(line, pos, int_end - pos, false, Parser_result::error_numeric_literal_incomplete);
             }
             // Look for the fractional part.
             frac_begin = int_end;
@@ -618,7 +618,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               frac_begin += 1;
               frac_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, frac_begin, 2 + radix * 2));
               if(frac_begin == frac_end) {
-                return Parser_result(line, pos, frac_end - pos, Parser_result::error_numeric_literal_incomplete);
+                return Parser_result(line, pos, frac_end - pos, false, Parser_result::error_numeric_literal_incomplete);
               }
             }
             // Look for the exponent.
@@ -657,14 +657,14 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               }
               exp_end = do_normalize_index(str, str.find_first_not_of(delims_and_digits, exp_begin, 22));
               if(exp_begin == exp_end) {
-                return Parser_result(line, pos, exp_end - pos, Parser_result::error_numeric_literal_incomplete);
+                return Parser_result(line, pos, exp_end - pos, false, Parser_result::error_numeric_literal_incomplete);
               }
             }
             // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
             // Since we make no use of them, we just reserve them for further use for good.
             epos = do_normalize_index(str, str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end));
             if(epos != exp_end) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_numeric_literal_suffix_disallowed);
+              return Parser_result(line, pos, epos - pos, false, Parser_result::error_numeric_literal_suffix_disallowed);
             }
             // Parse the exponent.
             int exp = 0;
@@ -676,7 +676,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               const auto digit_value = static_cast<int>((ptr - digits) / 2);
               const auto bound = (std::numeric_limits<int>::max() - digit_value) / 10;
               if(exp > bound) {
-                return Parser_result(line, pos, epos - pos, Parser_result::error_numeric_literal_exponent_overflow);
+                return Parser_result(line, pos, epos - pos, false, Parser_result::error_numeric_literal_exponent_overflow);
               }
               exp = exp * 10 + digit_value;
             }
@@ -688,7 +688,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               // Parse the literal as an integer.
               // Negative exponents are not allowed, even when the significant part is zero.
               if(exp < 0) {
-                return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_exponent_negative);
+                return Parser_result(line, pos, epos - pos, false, Parser_result::error_integer_literal_exponent_negative);
               }
               // Parse the significant part.
               Uint64 value = 0;
@@ -700,7 +700,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
                 const auto digit_value = static_cast<Uint64>((ptr - digits) / 2);
                 const auto bound = (std::numeric_limits<Uint64>::max() - digit_value) / radix;
                 if(value > bound) {
-                  return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
+                  return Parser_result(line, pos, epos - pos, false, Parser_result::error_integer_literal_overflow);
                 }
                 value = value * radix + digit_value;
               }
@@ -709,7 +709,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
                 for(int i = 0; i < exp; ++i) {
                   const auto bound = std::numeric_limits<Uint64>::max() / exp_base;
                   if(value > bound) {
-                    return Parser_result(line, pos, epos - pos, Parser_result::error_integer_literal_overflow);
+                    return Parser_result(line, pos, epos - pos, false, Parser_result::error_integer_literal_overflow);
                   }
                   value *= exp_base;
                 }
@@ -734,7 +734,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             }
             int vclass = std::fpclassify(value);
             if(vclass == FP_INFINITE) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_overflow);
+              return Parser_result(line, pos, epos - pos, false, Parser_result::error_real_literal_overflow);
             }
             // Parse the fractional part.
             Xfloat frac = 0;
@@ -756,10 +756,10 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             }
             vclass = std::fpclassify(value);
             if(vclass == FP_INFINITE) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_overflow);
+              return Parser_result(line, pos, epos - pos, false, Parser_result::error_real_literal_overflow);
             }
             if((vclass == FP_ZERO) && !zero) {
-              return Parser_result(line, pos, epos - pos, Parser_result::error_real_literal_underflow);
+              return Parser_result(line, pos, epos - pos, false, Parser_result::error_real_literal_underflow);
             }
             // Push a floating-point literal.
             Token::S_real_literal token_c = { value };
@@ -769,7 +769,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
         default:
           // Fail to find a valid token.
           ASTERIA_DEBUG_LOG("Invalid stray character in source code: ", str.substr(pos, 25));
-          return Parser_result(line, pos, 1, Parser_result::error_token_character_unrecognized);
+          return Parser_result(line, pos, 1, false, Parser_result::error_token_character_unrecognized);
         }
         // Continue from the end of this token.
         pos = epos;
@@ -777,15 +777,15 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
     }
     if(sis_inout.bad()) {
       // If there was an irrecovable I/O failure then any other status code is meaningless.
-      return Parser_result(line, 0, 0, Parser_result::error_istream_badbit_set);
+      return Parser_result(line, 0, 0, false, Parser_result::error_istream_badbit_set);
     }
     if(bcom_line != 0) {
       // A block comment may straddle multiple lines. We just mark the first line here.
-      return Parser_result(bcom_line, bcom_off, bcom_len, Parser_result::error_block_comment_unclosed);
+      return Parser_result(bcom_line, bcom_off, bcom_len, false, Parser_result::error_block_comment_unclosed);
     }
     // Accept the sequence in reverse order.
     this->m_rseq.assign(std::make_move_iterator(seq.mut_rbegin()), std::make_move_iterator(seq.mut_rend()));
-    return Parser_result(line, 0, 0, Parser_result::success);
+    return Parser_result(line, 0, 0, false, Parser_result::success);
   }
 void Token_stream::clear() noexcept
   {

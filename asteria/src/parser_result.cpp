@@ -79,25 +79,25 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       // Phase 3
       //   Parser
       case error_directive_or_statement_expected: {
-        return "An unexpected token was encountered while a directive or statement is expected.";
+        return "An unexpected token or the end of file was encountered while looking for a directive or statement.";
       }
       case error_identifier_expected: {
-        return "An unexpected token was encountered while an identifier is expected.";
+        return "An unexpected token or the end of file was encountered while looking for an identifier.";
       }
       case error_semicolon_expected: {
-        return "An unexpected token was encountered while a semicolon is expected.";
+        return "An unexpected token or the end of file was encountered while looking for a semicolon.";
       }
       case error_string_literal_expected: {
-        return "An unexpected token was encountered while a string literal is expected.";
+        return "An unexpected token or the end of file was encountered while looking for a string literal.";
       }
       case error_statement_expected: {
-        return "An unexpected token was encountered while a statement is expected.";
+        return "An unexpected token or the end of file was encountered while looking for a statement.";
       }
       case error_equals_sign_expected: {
-        return "An unexpected token was encountered while an equals sign is expected.";
+        return "An unexpected token or the end of file was encountered while looking for an equals sign.";
       }
       case error_expression_expected: {
-        return "An unexpected token was encountered while an expression is expected.";
+        return "An unexpected token or the end of file was encountered while looking for an expression.";
       }
       default: {
         return "No description is available for this error code.";
