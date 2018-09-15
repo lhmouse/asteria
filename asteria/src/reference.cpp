@@ -27,11 +27,11 @@ Value Reference::read() const
     // Apply modifiers.
     const auto mend = this->m_modifiers.end();
     for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto ptr = mit->apply_readonly_opt(cur);
-      if(!ptr) {
+      const auto qnext = mit->apply_readonly_opt(cur);
+      if(!qnext) {
         return { };
       }
-      cur = std::ref(*ptr);
+      cur = std::ref(*qnext);
     }
     // Return the value found.
     return cur;
@@ -43,11 +43,11 @@ Value & Reference::write(Value value) const
     // Apply modifiers.
     const auto mend = this->m_modifiers.end();
     for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto ptr = mit->apply_mutable_opt(cur, true, nullptr);
-      if(!ptr) {
+      const auto qnext = mit->apply_mutable_opt(cur, true, nullptr);
+      if(!qnext) {
         ROCKET_ASSERT(false);
       }
-      cur = std::ref(*ptr);
+      cur = std::ref(*qnext);
     }
     // Set the new value.
     cur.get() = std::move(value);
@@ -63,11 +63,11 @@ Value Reference::unset() const
     // Apply modifiers.
     const auto mend = this->m_modifiers.end() - 1;
     for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto ptr = mit->apply_mutable_opt(cur, false, nullptr);
-      if(!ptr) {
+      const auto qnext = mit->apply_mutable_opt(cur, false, nullptr);
+      if(!qnext) {
         return { };
       }
-      cur = std::ref(*ptr);
+      cur = std::ref(*qnext);
     }
     // Erase the element referenced by the last modifier.
     Value erased;

@@ -568,13 +568,17 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         const auto &alt = this->m_stor.as<S_branch>();
         // Pop the condition off the stack.
         auto cond = do_pop_reference(stack_inout);
-        // Pick a branch. If it is not empty, evaluate it and write the result to `cond`.
-        // This means that if the branch taken is empty then `cond` is pushed.
-        const auto branch_taken = cond.read().test() ? &(alt.branch_true) : &(alt.branch_false);
-        if(branch_taken->empty() == false) {
-          cond = branch_taken->evaluate(ctx);
+        // Pick a branch.
+        const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        if(branch_taken.get().empty()) {
+          // If it is empty, push the condition instead.
+          // This approach implements the `&&` and `||` operators.
+          stack_inout.emplace_back(std::move(cond));
+          return;
         }
-        stack_inout.emplace_back(std::move(cond));
+        // Evaluate the branch.
+        auto result = branch_taken.get().evaluate(ctx);
+        stack_inout.emplace_back(std::move(result));
         return;
       }
       case index_function_call: {

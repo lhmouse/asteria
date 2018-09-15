@@ -276,12 +276,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
         ref_out = alt.cond.evaluate(ctx_inout);
-        const auto branch_taken = ref_out.read().test() ? &(alt.branch_true) : &(alt.branch_false);
-        const auto status = branch_taken->execute(ref_out, ctx_inout);
-        if(status != Block::status_next) {
-          return status;
-        }
-        return Block::status_next;
+        const auto branch_taken = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        return branch_taken.get().execute(ref_out, ctx_inout);
       }
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
