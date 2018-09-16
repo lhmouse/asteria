@@ -31,12 +31,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	block | variable-definition | constant-definition | function-definition |
-	if-statement | switch-statement |
-	do-while-statement | while-statement | for-statement |
-	break-statement | continue-statement | throw-statement | return-statement |
-	try-statement |
-	expression-statement
+	block | non-block-statement
 
 block ::=
 	"{" statement-list-opt "}"
@@ -44,20 +39,29 @@ statement-list-opt ::=
 	statement-list | ""
 statement-list ::=
 	statement statement-list-opt
+
+non-block-statement ::=
+	variable-definition | immutable-variable-definition | function-definition |
+	if-statement | switch-statement |
+	do-while-statement | while-statement | for-statement |
+	break-statement | continue-statement | throw-statement | return-statement |
+	try-statement |
+	expression-statement
+
 variable-definition ::=
 	"var" identifier equal-initailizer-opt ";"
 equal-initializer-opt ::=
 	equal-initializer | ""
 equal-initializer ::=
 	"=" expression
-constant-definition ::=
+immutable-variable-definition ::=
 	"const" identifier equal-initailizer ";"
 function-definition ::=
-	"func" identifier "(" parameter-list-opt ")" statement
-parameter-list-opt ::=
-	parameter-list | ""
-parameter-list ::=
-	identifier ( "," parameter-list | "" )
+	"func" identifier "(" identifier-list-opt ")" statement
+identifier-list-opt ::=
+	identifier-list | ""
+identifier-list ::=
+	identifier ( "," identifier-list | "" )
 
 if-statement ::=
 	"if" "(" expression ")" statement ( "else" statement | "" )
@@ -110,7 +114,7 @@ prefix-operator-expression ::=
 expression-initiator ::=
 	identifier | literal | "this" | closure-function | nested-expression | unnamed-array | unnamed-object
 closure-function ::=
-	"func" "(" parameter-list-opt ")" statement
+	"func" "(" identifier-list-opt ")" statement
 nested-expression ::=
 	"(" expression ")"
 unnamed-array ::=
