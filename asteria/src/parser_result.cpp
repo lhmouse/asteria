@@ -88,7 +88,7 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
         return "An unexpected token or the end of file was encountered while looking for an identifier.";
       }
       case error_semicolon_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a semicolon.";
+        return "An unexpected token or the end of file was encountered while looking for a `;`.";
       }
       case error_string_literal_expected: {
         return "An unexpected token or the end of file was encountered while looking for a string literal.";
@@ -97,10 +97,25 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
         return "An unexpected token or the end of file was encountered while looking for a statement.";
       }
       case error_equals_sign_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an equals sign.";
+        return "An unexpected token or the end of file was encountered while looking for an `=`.";
       }
       case error_expression_expected: {
         return "An unexpected token or the end of file was encountered while looking for an expression.";
+      }
+      case error_open_brace_expected: {
+        return "An unexpected token or the end of file was encountered while looking for an `{`.";
+      }
+      case error_close_brace_or_statement_expected: {
+        return "An unexpected token or the end of file was encountered while looking for a `}` or statement.";
+      }
+      case error_open_parenthesis_expected: {
+        return "An unexpected token or the end of file was encountered while looking for an `(`.";
+      }
+      case error_close_parenthesis_or_identifier_expected: {
+        return "An unexpected token or the end of file was encountered while looking for a `)` or identifier.";
+      }
+      case error_close_parenthesis_expected: {
+        return "An unexpected token or the end of file was encountered while looking for a `)`.";
       }
       default: {
         return "No description is available for this error code.";
