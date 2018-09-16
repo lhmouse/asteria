@@ -147,10 +147,9 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
         // Bind the condition and loop body recursively.
-        auto first_bnd = alt.first.bind(ctx_inout);
         auto cond_bnd = alt.cond.bind(ctx_inout);
         auto body_bnd = alt.body.bind(ctx_inout);
-        Statement::S_while alt_bnd = { std::move(first_bnd), std::move(cond_bnd), std::move(body_bnd) };
+        Statement::S_while alt_bnd = { alt.has_do, std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_for: {
@@ -346,10 +345,18 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
-        auto body = std::ref(alt.first);
+        if(alt.has_do) {
+          goto zs;
+        }
         for(;;) {
+          // Check the loop condition.
+          ref_out = alt.cond.evaluate(ctx_inout);
+          if(ref_out.read().test() == false) {
+            break;
+          }
+  zs:
           // Execute the loop body.
-          const auto status = body.get().execute(ref_out, ctx_inout);
+          const auto status = alt.body.execute(ref_out, ctx_inout);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -358,12 +365,6 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             // Forward anything unexpected to the caller.
             return status;
           }
-          // Check the loop condition.
-          ref_out = alt.cond.evaluate(ctx_inout);
-          if(ref_out.read().test() == false) {
-            break;
-          }
-          body = std::ref(alt.body);
         }
         return Block::status_next;
       }

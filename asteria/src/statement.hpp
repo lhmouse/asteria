@@ -61,7 +61,7 @@ class Statement
       };
     struct S_while
       {
-        Block first;
+        bool has_do;
         Expression cond;
         Block body;
       };
