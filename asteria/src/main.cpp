@@ -93,7 +93,8 @@ int main()
       }
       do
         const i = 4;
-      while(1);
+      while(0);
+      while(0) var k = 2;
         switch (42)  {
           case "meow":
             continue while;

@@ -515,6 +515,37 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_while_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // while-statement ::=
+      //   "while" "(" expression ")" statement
+      auto res = do_match_keyword(toks_inout, Token::keyword_while, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Expression cond;
+      res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Block body;
+      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_while stmt_c = { false, std::move(cond), std::move(body) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
@@ -545,6 +576,10 @@ namespace {
         return res;
       }
       res = do_accept_do_while_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_while_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }
