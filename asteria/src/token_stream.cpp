@@ -249,8 +249,8 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
           break;
         }
         pos = epos;
-        const auto delims_and_digits = "_:00112233445566778899AaBbCcDdEeFf";
-        const auto digits = delims_and_digits + 2;
+        const auto delims_and_digits = "_00112233445566778899AaBbCcDdEeFf";
+        const auto digits = delims_and_digits + 1;
         // Read a character.
         const auto head = str.at(pos);
         switch(head) {
