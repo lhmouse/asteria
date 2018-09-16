@@ -441,17 +441,17 @@ namespace {
           if(res != Parser_result::error_success) {
             return res;
           }
-          goto zcol;
+          goto zc;
         }
         res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
         if(res != Parser_result::error_no_operation_performed) {
           if(res != Parser_result::error_success) {
             return res;
           }
-          goto zcol;
+          goto zc;
         }
         break;
-  zcol:
+    zc:
         res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
         if(res != Parser_result::error_success) {
           return res;
