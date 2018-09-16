@@ -22,6 +22,14 @@ class Statement
         target_for     = 3,
       };
 
+    struct S_export
+      {
+        String name;
+      };
+    struct S_import
+      {
+        String path;
+      };
     struct S_block
       {
         Block body;
@@ -99,58 +107,54 @@ class Statement
       {
         Expression expr;
       };
-    struct S_export
-      {
-        String name;
-      };
-    struct S_import
-      {
-        String path;
-      };
 
     enum Index : Uint8
       {
-        index_block     =  0,
-        index_var_def   =  1,
-        index_func_def  =  2,
-        index_if        =  3,
-        index_switch    =  4,
-        index_while     =  5,
-        index_for       =  6,
-        index_for_each  =  7,
-        index_try       =  8,
-        index_break     =  9,
-        index_continue  = 10,
-        index_throw     = 11,
-        index_return    = 12,
-        index_expr      = 13,
-        index_export    = 14,
-        index_import    = 15,
+        index_export    =  0,
+        index_import    =  1,
+        index_block     =  2,
+        index_var_def   =  3,
+        index_func_def  =  4,
+        index_if        =  5,
+        index_switch    =  6,
+        index_while     =  7,
+        index_for       =  8,
+        index_for_each  =  9,
+        index_try       = 10,
+        index_break     = 11,
+        index_continue  = 12,
+        index_throw     = 13,
+        index_return    = 14,
+        index_expr      = 15,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_block     //  0,
-        , S_var_def   //  1,
-        , S_func_def  //  2,
-        , S_if        //  3,
-        , S_switch    //  4,
-        , S_while     //  5,
-        , S_for       //  6,
-        , S_for_each  //  7,
-        , S_try       //  8,
-        , S_break     //  9,
-        , S_continue  // 10,
-        , S_throw     // 11,
-        , S_return    // 12,
-        , S_expr      // 13,
-        , S_export    // 14,
-        , S_import    // 15,
+        , S_export    //  0,
+        , S_import    //  1,
+        , S_block     //  2,
+        , S_var_def   //  3,
+        , S_func_def  //  4,
+        , S_if        //  5,
+        , S_switch    //  6,
+        , S_while     //  7,
+        , S_for       //  8,
+        , S_for_each  //  9,
+        , S_try       // 10,
+        , S_break     // 11,
+        , S_continue  // 12,
+        , S_throw     // 13,
+        , S_return    // 14,
+        , S_expr      // 15,
       )>;
 
   private:
     Variant m_stor;
 
   public:
+    Statement() noexcept
+      : m_stor()
+      {
+      }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Statement(AltT &&alt)
         : m_stor(std::forward<AltT>(alt))
