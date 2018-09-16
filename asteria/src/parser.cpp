@@ -199,6 +199,16 @@ namespace {
   Parser_result do_accept_expression(Expression &expr_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // TODO
+      auto qk = toks_inout.peek_opt();
+      if(!qk) {
+        return do_make_result(nullptr, noop_error);
+      }
+      if(qk->index() == Token::index_keyword) {
+        return do_make_result(qk, noop_error);
+      }
+      if(qk->index() == Token::index_punctuator) {
+        return do_make_result(qk, noop_error);
+      }
       toks_inout.shift();
       return do_make_result(nullptr, Parser_result::error_success);
     }
@@ -708,6 +718,37 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_null_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // null-statement ::=
+      //   ";"
+      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_null stmt_c = { };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
+  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // expression-statement ::=
+      //   expression ";"
+      Expression expr;
+      auto res = do_accept_expression(expr, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_expr stmt_c = { std::move(expr) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
@@ -716,7 +757,7 @@ namespace {
       //   do-while-statement | while-statement | for-statement |
       //   break-statement | continue-statement | throw-statement | return-statement |
       //   try-statement |
-      //   expression-statement
+      //   null-statement | expression-statement
       auto res = do_accept_variable_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
@@ -766,6 +807,14 @@ namespace {
         return res;
       }
       res = do_accept_try_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_null_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }

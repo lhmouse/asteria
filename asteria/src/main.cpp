@@ -85,12 +85,13 @@ int main()
           var i;
           const j = 1;
         }
-      if(true)
+      if(1.5e4)
         var k = 1;
-      else if(true) {
+      else if(x) {
         const r = 2;
         const z = 2;
       }
+      ;
       try var i = 1; catch(e) { throw 2; }
       do
         const i = 4;
@@ -112,7 +113,7 @@ int main()
             break while;
             break for;
             break  ;
-          case null:
+          case 2:
         }
       var sum = 0;
       for(var i = 0; i < 100; ++i) {
