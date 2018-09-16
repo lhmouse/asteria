@@ -52,7 +52,7 @@ class Parser_result
         error_open_brace_expected                        = 308,
         error_close_brace_or_statement_expected          = 309,
         error_open_parenthesis_expected                  = 310,
-        error_close_parenthesis_or_identifier_expected   = 311,
+        error_close_parenthesis_or_parameter_expected    = 311,
         error_close_parenthesis_expected                 = 312,
       };
 

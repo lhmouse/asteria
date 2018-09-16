@@ -111,7 +111,7 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       case error_open_parenthesis_expected: {
         return "An unexpected token or the end of file was encountered while looking for an `(`.";
       }
-      case error_close_parenthesis_or_identifier_expected: {
+      case error_close_parenthesis_or_parameter_expected: {
         return "An unexpected token or the end of file was encountered while looking for a `)` or identifier.";
       }
       case error_close_parenthesis_expected: {
