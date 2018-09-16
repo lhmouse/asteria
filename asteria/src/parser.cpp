@@ -622,6 +622,52 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_throw_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // throw-statement ::=
+      //   "throw" expression ";"
+      auto res = do_match_keyword(toks_inout, Token::keyword_throw, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Expression expr;
+      res = do_accept_expression(expr, toks_inout, Parser_result::error_expression_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_throw stmt_c = { std::move(expr) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
+  Parser_result do_accept_return_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // return-statement ::=
+      //   "return" expression-opt ";"
+      auto res = do_match_keyword(toks_inout, Token::keyword_return, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Expression expr;
+      res = do_accept_expression(expr, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_return stmt_c = { std::move(expr) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
@@ -668,6 +714,14 @@ namespace {
         return res;
       }
       res = do_accept_continue_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_throw_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_return_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }

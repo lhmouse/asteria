@@ -92,7 +92,7 @@ break-statement ::=
 continue-statement ::=
 	"continue" ( "while" | "for" ) ";"
 throw-statement ::=
-	"throw" expression-opt ";"
+	"throw" expression ";"
 return-statement ::=
 	"return" expression-opt ";"
 

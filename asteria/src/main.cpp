@@ -100,6 +100,9 @@ int main()
             continue while;
             continue for;
             continue  ;
+            throw 42;
+            return 42;
+            return;
           case "woof":
           default  :
             const meow = 1;
