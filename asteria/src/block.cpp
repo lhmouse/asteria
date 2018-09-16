@@ -11,10 +11,6 @@
 
 namespace Asteria {
 
-Block::Block(Vector<Statement> &&stmts)
-  : m_stmts(std::move(stmts))
-  {
-  }
 Block::~Block()
   {
   }

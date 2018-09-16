@@ -9,10 +9,6 @@
 
 namespace Asteria {
 
-Expression::Expression(Vector<Xpnode> &&nodes)
-  : m_nodes(std::move(nodes))
-  {
-  }
 Expression::~Expression()
   {
   }
