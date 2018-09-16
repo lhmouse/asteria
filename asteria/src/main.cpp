@@ -74,45 +74,50 @@ int main()
     }
 
     Token_stream ts;
-#define NL "\n"
-    rocket::insertable_istream iss(String::shallow("import \"stdio\";  " NL
-                                                   "  { }  " NL
-                                                   "  { var i; }  " NL
-                                                   "//  { const i; }  " NL
-                                                   "  { const i = 1; }  " NL
-                                                   "func meow(param1, param2)  " NL
-                                                   "  {  " NL
-                                                   "    var i;  " NL
-                                                   "    const j = 1;  " NL
-                                                   "  }  " NL
-                                                   "if(true) " NL
-                                                   "  var k = 1; " NL
-                                                   "else if(true) {" NL
-                                                   "  const r = 2; " NL
-                                                   "  const z = 2; " NL
-                                                   "} " NL
-                                                   "  switch (42)  {   " NL
-                                                   "    case \"meow\": " NL
-                                                   "      continue while;  " NL
-                                                   "      continue for;  " NL
-                                                   "      continue  ;  " NL
-                                                   "      break switch;  " NL
-                                                   "      break while;  " NL
-                                                   "      break for;  " NL
-                                                   "      break  ;  " NL
-                                                   "    case \"woof\": " NL
-                                                   "    default  : " NL
-                                                   "      const meow = 1; " NL
-                                                   "    case 42 : " NL
-                                                   "  } " NL
-                                                   "var sum = 0;  " NL
-                                                   "for(var i = 0; i < 100; ++i) {  " NL
-                                                   "  sum  += i;  " NL
-                                                   "}  " NL
-                                                   "null  ;" NL
-                                                   ";" NL
-                                                   "print(sum);  " NL
-                                                   "export sum;  " NL));
+    rocket::insertable_istream iss(String::shallow(R"___(
+      import "stdio";
+        { }
+        { var i; }
+        //  { const i; }
+        { const i = 1; }
+      func meow(param1, param2)
+        {
+          var i;
+          const j = 1;
+        }
+      if(true)
+        var k = 1;
+      else if(true) {
+        const r = 2;
+        const z = 2;
+      }
+      do
+        const i = 4;
+      while(1);
+        switch (42)  {
+          case "meow":
+            continue while;
+            continue for;
+            continue  ;
+          case "woof":
+          default  :
+            const meow = 1;
+          case 42 :
+            break switch;
+            break while;
+            break for;
+            break  ;
+          case null:
+        }
+      var sum = 0;
+      for(var i = 0; i < 100; ++i) {
+        sum  += i;
+      }
+      null  ;
+      ;
+      print(sum);
+      export sum;
+    )___"));
     auto r = ts.load(iss, String::shallow("dummy_file"));
     ASTERIA_DEBUG_LOG("tokenizer error = ", r.get_error());
     Parser p;

@@ -121,7 +121,10 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
         return "An unexpected token or the end of file was encountered while looking for a `:`.";
       }
       case error_close_brace_or_switch_clause_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `}`, a `case` or `default` clause.";
+        return "An unexpected token or the end of file was encountered while looking for a `}`, `case` clause or `default` clause.";
+      }
+      case error_keyword_while_expected: {
+        return "An unexpected token or the end of file was encountered while looking for a `while`.";
       }
       default: {
         return "No description is available for this error code.";
