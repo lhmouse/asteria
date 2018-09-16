@@ -532,6 +532,7 @@ namespace {
       res = do_make_result(toks_inout.peek_opt(), noop_error);
       return res;
     }
+
   Parser_result do_accept_statement(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       ASTERIA_DEBUG_LOG("Looking for a statement as `Block`: ", *(toks_inout.peek_opt()));
