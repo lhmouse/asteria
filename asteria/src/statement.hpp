@@ -22,9 +22,9 @@ class Statement
         target_for     = 3,
       };
 
-    struct S_expr
+    struct S_block
       {
-        Expression expr;
+        Block body;
       };
     struct S_var_def
       {
@@ -95,6 +95,10 @@ class Statement
       {
         Expression expr;
       };
+    struct S_expr
+      {
+        Expression expr;
+      };
     struct S_export
       {
         String name;
@@ -106,7 +110,7 @@ class Statement
 
     enum Index : Uint8
       {
-        index_expr      =  0,
+        index_block     =  0,
         index_var_def   =  1,
         index_func_def  =  2,
         index_if        =  3,
@@ -119,12 +123,13 @@ class Statement
         index_continue  = 10,
         index_throw     = 11,
         index_return    = 12,
-        index_export    = 13,
-        index_import    = 14,
+        index_expr      = 13,
+        index_export    = 14,
+        index_import    = 15,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_expr      //  0,
+        , S_block     //  0,
         , S_var_def   //  1,
         , S_func_def  //  2,
         , S_if        //  3,
@@ -137,8 +142,9 @@ class Statement
         , S_continue  // 10,
         , S_throw     // 11,
         , S_return    // 12,
-        , S_export    // 13,
-        , S_import    // 14,
+        , S_expr      // 13,
+        , S_export    // 14,
+        , S_import    // 15,
       )>;
 
   private:

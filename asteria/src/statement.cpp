@@ -41,7 +41,7 @@ namespace {
 void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expr: {
+      case index_block: {
         return;
       }
       case index_var_def: {
@@ -66,6 +66,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
       case index_continue:
       case index_throw:
       case index_return:
+      case index_expr:
       case index_export:
       case index_import: {
         break;
@@ -79,11 +80,11 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
 Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
-        // Bind the expression recursively.
-        auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
+      case index_block: {
+        const auto &alt = this->m_stor.as<S_block>();
+        // Bind the body recursively.
+        auto body_bnd = alt.body.bind(ctx_inout);
+        Statement::S_block alt_bnd = { std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_var_def: {
@@ -203,6 +204,13 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_return alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
+        // Bind the expression recursively.
+        auto expr_bnd = alt.expr.bind(ctx_inout);
+        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
+      }
       case index_export: {
         const auto &alt = this->m_stor.as<S_export>();
         // Copy it as-is.
@@ -224,11 +232,10 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
-        // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_inout);
-        return Block::status_next;
+      case index_block: {
+        const auto &alt = this->m_stor.as<S_block>();
+        // Execute the body.
+        return alt.body.execute(ref_out, ctx_inout);
       }
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
@@ -541,6 +548,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(ctx_inout);
         return Block::status_return;
+      }
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
+        // Evaluate the expression.
+        ref_out = alt.expr.evaluate(ctx_inout);
+        return Block::status_next;
       }
       case index_export: {
         const auto &alt = this->m_stor.as<S_export>();
