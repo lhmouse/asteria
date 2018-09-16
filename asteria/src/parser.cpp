@@ -398,35 +398,6 @@ namespace {
       return res;
     }
 
-  Parser_result do_accept_case_or_default_condition(Expression &cond_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // case-or-default-condition ::=
-      //   "case" expression | "default"
-      auto res = do_match_keyword(toks_inout, Token::keyword_case, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        res = do_accept_expression(cond_out, toks_inout, Parser_result::error_expression_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        return res;
-      }
-      res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        return res;
-      }
-      // Be advised that a `return do_make_result(...);` would prevent NRVO.
-      res = do_make_result(toks_inout.peek_opt(), noop_error);
-      return res;
-    }
-
   Parser_result do_accept_switch_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // switch-statement ::=
@@ -436,7 +407,7 @@ namespace {
       // switch-clause-list-opt ::=
       //   switch-clause-list | ""
       // switch-clause-list ::=
-      //   case-or-default-condition ":" statement-list-opt switch-clause-list-opt
+      //   ( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
       auto res = do_match_keyword(toks_inout, Token::keyword_switch, noop_error);
       if(res != Parser_result::error_success) {
         return res;
@@ -461,10 +432,27 @@ namespace {
       Bivector<Expression, Block> clauses;
       for(;;) {
         Expression cond;
-        res = do_accept_case_or_default_condition(cond, toks_inout, Parser_result::error_no_operation_performed);
-        if(res == Parser_result::error_no_operation_performed) {
-          break;
+        res = do_match_keyword(toks_inout, Token::keyword_case, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+          res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+          goto zcol;
         }
+        res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+          goto zcol;
+        }
+        break;
+  zcol:
+        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
         if(res != Parser_result::error_success) {
           return res;
         }

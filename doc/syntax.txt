@@ -72,9 +72,7 @@ switch-block ::=
 switch-clause-list-opt ::=
 	switch-clause-list | ""
 switch-clause-list ::=
-	case-or-default-condition ":" statement-list-opt switch-clause-list-opt
-case-or-default-condition ::=
-	"case" expression | "default"
+	( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
 
 do-while-statement ::=
 	"do" statement "while" "(" expression ")" ";"
