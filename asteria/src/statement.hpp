@@ -67,9 +67,7 @@ class Statement
       };
     struct S_for
       {
-        String var_name;
-        bool var_immutable;
-        Expression var_init;
+        Block init;
         Expression cond;
         Expression step;
         Block body;

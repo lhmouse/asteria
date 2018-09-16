@@ -156,13 +156,12 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         const auto &alt = this->m_stor.as<S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Analytic_context ctx_next(&ctx_inout);
-        do_safe_set_named_reference(ctx_next, "`for` variable", alt.var_name, { });
-        // Bind the loop variable initializer, condition, step expression and loop body recursively.
-        auto var_init_bnd = alt.var_init.bind(ctx_next);
+        // Bind the loop initializer, condition, step expression and loop body recursively.
+        auto init_bnd = alt.init.bind(ctx_next);
         auto cond_bnd = alt.cond.bind(ctx_next);
         auto step_bnd = alt.step.bind(ctx_next);
         auto body_bnd = alt.body.bind(ctx_next);
-        Statement::S_for alt_bnd = { alt.var_name, alt.var_immutable, std::move(var_init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
+        Statement::S_for alt_bnd = { std::move(init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_for_each: {
@@ -372,18 +371,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Executive_context ctx_next(&ctx_inout);
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_next, "`for` variable", alt.var_name, { });
-        // Create a variable using the initializer.
-        ref_out = alt.var_init.evaluate(ctx_next);
-        if(alt.var_name.empty() == false) {
-          auto value = ref_out.read();
-          auto var = rocket::make_refcounted<Variable>(std::move(value), alt.var_immutable);
-          // Reset the reference.
-          Reference_root::S_variable ref_c = { std::move(var) };
-          do_safe_set_named_reference(ctx_next, "`for` variable", alt.var_name, std::move(ref_c));
-          ASTERIA_DEBUG_LOG("Created named variable with `for` scope: name = ", alt.var_name, ", immutable = ", alt.var_immutable);
-        }
+        // Execute the initializer. The status is ignored.
+        ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
+        alt.init.execute_in_place(ref_out, ctx_next);
+        ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
         for(;;) {
           // Check the loop condition.
           if(alt.cond.empty() == false) {

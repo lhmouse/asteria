@@ -70,6 +70,8 @@ int main()
     body.emplace_back(Statement::S_if { std::move(expr), std::move(branch_true), Block({ }) });
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
+    Vector<Statement> init;
+    init.emplace_back(Statement::S_var_def { String::shallow("j"), false, std::move(expr) });
     Vector<Xpnode> cond;
     cond.emplace_back(Xpnode::S_literal { D_integer(3) });
     cond.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
@@ -77,7 +79,7 @@ int main()
     Vector<Xpnode> step;
     step.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
     step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
-    text.emplace_back(Statement::S_for { String::shallow("j"), false, std::move(expr), std::move(cond), std::move(step), std::move(body) });
+    text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     auto block = Block(std::move(text));
 
     Executive_context ctx;
