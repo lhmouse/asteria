@@ -668,6 +668,46 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_try_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // try-statement ::=
+      //   "try" statement "catch" "(" identifier ")" statement
+      auto res = do_match_keyword(toks_inout, Token::keyword_try, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Block body_try;
+      res = do_accept_statement(body_try, toks_inout, Parser_result::error_statement_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_keyword(toks_inout, Token::keyword_catch, Parser_result::error_keyword_catch_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      String except_name;
+      res = do_match_identifier(except_name, toks_inout, Parser_result::error_identifier_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Block body_catch;
+      res = do_accept_statement(body_catch, toks_inout, Parser_result::error_statement_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_try stmt_c = { std::move(body_try), std::move(except_name), std::move(body_catch) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
@@ -722,6 +762,10 @@ namespace {
         return res;
       }
       res = do_accept_return_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_try_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }

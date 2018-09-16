@@ -57,6 +57,7 @@ class Parser_result
         error_colon_expected                             = 313,
         error_close_brace_or_switch_clause_expected      = 314,
         error_keyword_while_expected                     = 315,
+        error_keyword_catch_expected                     = 316,
       };
 
   public:

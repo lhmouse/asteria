@@ -91,6 +91,7 @@ int main()
         const r = 2;
         const z = 2;
       }
+      try var i = 1; catch(e) { throw 2; }
       do
         const i = 4;
       while(0);
