@@ -544,34 +544,6 @@ namespace {
       return res;
     }
 
-  Parser_result do_accept_statement_target(Statement::Target &target_out, Token_stream &toks_inout, bool allow_switch, Parser_result::Error noop_error)
-    {
-      const auto qtok = toks_inout.peek_opt();
-      if(!qtok) {
-        return do_make_result(nullptr, noop_error);
-      }
-      const auto qalt = qtok->opt<Token::S_keyword>();
-      if(!qalt) {
-        return do_make_result(qtok, noop_error);
-      }
-      if(allow_switch && (qalt->keyword == Token::keyword_switch)) {
-        target_out = Statement::target_switch;
-        goto z;
-      }
-      if(qalt->keyword == Token::keyword_while) {
-        target_out = Statement::target_while;
-        goto z;
-      }
-      if(qalt->keyword == Token::keyword_for) {
-        target_out = Statement::target_for;
-        goto z;
-      }
-      return do_make_result(qtok, noop_error);
-    z:
-      toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
-    }
-
   Parser_result do_accept_break_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // break-statement ::=
@@ -581,12 +553,31 @@ namespace {
         return res;
       }
       Statement::Target target = Statement::target_unspec;
-      res = do_accept_statement_target(target, toks_inout, true, Parser_result::error_no_operation_performed);
+      res = do_match_keyword(toks_inout, Token::keyword_switch, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         if(res != Parser_result::error_success) {
           return res;
         }
+        target = Statement::target_switch;
+        goto z;
       }
+      res = do_match_keyword(toks_inout, Token::keyword_while, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        target = Statement::target_while;
+        goto z;
+      }
+      res = do_match_keyword(toks_inout, Token::keyword_for, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        target = Statement::target_for;
+        goto z;
+      }
+    z:
       res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
@@ -605,12 +596,23 @@ namespace {
         return res;
       }
       Statement::Target target = Statement::target_unspec;
-      res = do_accept_statement_target(target, toks_inout, false, Parser_result::error_no_operation_performed);
+      res = do_match_keyword(toks_inout, Token::keyword_while, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         if(res != Parser_result::error_success) {
           return res;
         }
+        target = Statement::target_while;
+        goto z;
       }
+      res = do_match_keyword(toks_inout, Token::keyword_for, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        target = Statement::target_for;
+        goto z;
+      }
+    z:
       res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
