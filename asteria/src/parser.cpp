@@ -626,20 +626,20 @@ namespace {
           if(res != Parser_result::error_success) {
             return res;
           }
-          goto z;
+          goto zin;
         }
         res = do_accept_null_statement(init_stmt, toks_inout, Parser_result::error_no_operation_performed);
         if(res != Parser_result::error_no_operation_performed) {
           if(res != Parser_result::error_success) {
             return res;
           }
-          goto z;
+          goto zin;
         }
         res = do_accept_expression_statement(init_stmt, toks_inout, Parser_result::error_for_statement_initializer_expected);
         if(res != Parser_result::error_success) {
           return res;
         }
-    z:
+    zin:
         res = do_accept_expression(cond, toks_inout, Parser_result::error_no_operation_performed);
         if(res != Parser_result::error_no_operation_performed) {
           if(res != Parser_result::error_success) {
