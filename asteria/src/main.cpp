@@ -92,6 +92,8 @@ int main()
         const z = 2;
       }
       ;
+      for(each k, v : f)
+        throw 1;
       try var i = 1; catch(e) { throw 2; }
       do
         const i = 4;

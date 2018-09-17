@@ -612,7 +612,7 @@ namespace {
         if(res != Parser_result::error_success) {
           return res;
         }
-        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_colon_expected);
+        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
         if(res != Parser_result::error_success) {
           return res;
         }
