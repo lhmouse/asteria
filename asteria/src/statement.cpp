@@ -41,8 +41,8 @@ namespace {
 void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_export:
-      case index_import:
+      case index_null:
+      case index_expr:
       case index_block: {
         return;
       }
@@ -68,7 +68,8 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
       case index_continue:
       case index_throw:
       case index_return:
-      case index_expr: {
+      case index_export:
+      case index_import: {
         break;
       }
       default: {
@@ -80,16 +81,18 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
 Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_export: {
-        const auto &alt = this->m_stor.as<S_export>();
+      case index_null: {
+        const auto &alt = this->m_stor.as<S_null>();
         // Copy it as-is.
-        Statement::S_export alt_bnd = { alt.name };
+        static_cast<void>(alt);
+        Statement::S_null alt_bnd = { };
         return std::move(alt_bnd);
       }
-      case index_import: {
-        const auto &alt = this->m_stor.as<S_import>();
-        // Copy it as-is.
-        Statement::S_import alt_bnd = { alt.path };
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
+        // Bind the expression recursively.
+        auto expr_bnd = alt.expr.bind(ctx_inout);
+        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_block: {
@@ -214,11 +217,16 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Statement::S_return alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
-        // Bind the expression recursively.
-        auto expr_bnd = alt.expr.bind(ctx_inout);
-        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
+      case index_export: {
+        const auto &alt = this->m_stor.as<S_export>();
+        // Copy it as-is.
+        Statement::S_export alt_bnd = { alt.name };
+        return std::move(alt_bnd);
+      }
+      case index_import: {
+        const auto &alt = this->m_stor.as<S_import>();
+        // Copy it as-is.
+        Statement::S_import alt_bnd = { alt.path };
         return std::move(alt_bnd);
       }
       default: {
@@ -230,17 +238,17 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-      case index_export: {
-        const auto &alt = this->m_stor.as<S_export>();
-        // TODO
-        ASTERIA_TERMINATE("TODO : `export` has not been implemented yet.");
-        (void)alt;
+      case index_null: {
+        const auto &alt = this->m_stor.as<S_null>();
+        // There is nothing to do.
+        static_cast<void>(alt);
+        return Block::status_next;
       }
-      case index_import: {
-        const auto &alt = this->m_stor.as<S_import>();
-        // TODO
-        ASTERIA_TERMINATE("TODO : `import` has not been implemented yet.");
-        (void)alt;
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
+        // Evaluate the expression.
+        ref_out = alt.expr.evaluate(ctx_inout);
+        return Block::status_next;
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
@@ -553,11 +561,17 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ref_out = alt.expr.evaluate(ctx_inout);
         return Block::status_return;
       }
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
-        // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_inout);
-        return Block::status_next;
+      case index_export: {
+        const auto &alt = this->m_stor.as<S_export>();
+        // TODO
+        ASTERIA_TERMINATE("TODO : `export` has not been implemented yet.");
+        (void)alt;
+      }
+      case index_import: {
+        const auto &alt = this->m_stor.as<S_import>();
+        // TODO
+        ASTERIA_TERMINATE("TODO : `import` has not been implemented yet.");
+        (void)alt;
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
