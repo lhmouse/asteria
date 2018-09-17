@@ -126,7 +126,7 @@ namespace details_cow_vector {
               return;
             }
             auto stp = brk;
-          loop:
+          r:
             if(isl < isr) {
               // Before:  bot   brk           end
               //        > 0 1 2 3 4 5 6 7 8 9 -
@@ -139,7 +139,7 @@ namespace details_cow_vector {
               isr = end - brk;
               // `isl` is unchanged.
               stp = brk;
-              goto loop;
+              goto r;
             }
             if(isl > isr) {
               // Before:  bot           brk   end
@@ -153,12 +153,12 @@ namespace details_cow_vector {
               isl = stp - bot;
               // `isr` is unchanged.
               brk = stp;
-              goto loop;
+              goto r;
             }
             // Before:  bot       brk       end
             //        > 0 1 2 3 4 5 6 7 8 9 -
             // After:             bot       brk
-            //        > 3 4 5 0 1 2 6 7 8 9 -
+            //        > 5 6 7 8 9 0 1 2 3 4 -
             do {
               noadl::adl_swap(ptr[bot++], ptr[brk++]);
             } while(bot != stp);
