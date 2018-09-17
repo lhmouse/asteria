@@ -249,7 +249,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
           break;
         }
         pos = epos;
-        const auto delims_and_digits = "_00112233445566778899AaBbCcDdEeFf";
+        const auto delims_and_digits = "`00112233445566778899AaBbCcDdEeFf";
         const auto digits = delims_and_digits + 1;
         // Read a character.
         const auto head = str.at(pos);
@@ -466,7 +466,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
               };
             ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
             // Get an identifier.
-            epos = do_normalize_index(str, str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_", pos + 1));
+            epos = do_normalize_index(str, str.find_first_not_of("_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", pos + 1));
             // Check whether this identifier matches a keyword.
             auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), head, Prefix_comparator());
             for(;;) {
@@ -662,7 +662,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
             }
             // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
             // Since we make no use of them, we just reserve them for further use for good.
-            epos = do_normalize_index(str, str.find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.", exp_end));
+            epos = do_normalize_index(str, str.find_first_not_of("._ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", exp_end));
             if(epos != exp_end) {
               return Parser_result(line, pos, epos - pos, Parser_result::error_numeric_literal_suffix_disallowed);
             }

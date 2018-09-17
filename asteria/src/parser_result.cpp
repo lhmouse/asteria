@@ -59,7 +59,7 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
         return "This numeric literal was incomplete.";
       }
       case error_numeric_literal_suffix_disallowed: {
-        return "This numeric literal was malformed.";
+        return "This numeric literal was not terminated properly.";
       }
       case error_numeric_literal_exponent_overflow: {
         return "The exponent of this numeric literal was too large.";

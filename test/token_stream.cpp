@@ -14,7 +14,7 @@ int main()
     std::istringstream iss("#!meow \n"
                            "hh+++ \n"
                            " if <<<->>>>>\"\\u55b5b喵\"/\n"
-                           "* - 0x1_7.8_4p+4  // comments\n"
+                           "* - 0x`01`7.8`4p+4  // comments\n"
                            ".false/*more\n"
                            "comments*/;/*yet more*/-42e13");
     auto result = ts.load(iss, String("dummy_file"));
