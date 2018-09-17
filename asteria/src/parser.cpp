@@ -226,24 +226,6 @@ namespace {
       return do_make_result(nullptr, Parser_result::error_success);
     }
 
-  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // expression-statement ::=
-      //   expression ";"
-      Expression expr;
-      auto res = do_accept_expression(expr, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      Statement::S_expr stmt_c = { std::move(expr) };
-      stmt_out = std::move(stmt_c);
-      return res;
-    }
-
   Parser_result do_accept_variable_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // variable-definition ::=
@@ -381,6 +363,24 @@ namespace {
         return res;
       }
       Statement::S_func_def stmt_c = { std::move(name), std::move(params), std::move(file), line, std::move(body) };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
+  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // expression-statement ::=
+      //   expression ";"
+      Expression expr;
+      auto res = do_accept_expression(expr, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_expr stmt_c = { std::move(expr) };
       stmt_out = std::move(stmt_c);
       return res;
     }
@@ -845,17 +845,14 @@ namespace {
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
-      //   null-statement | expression-statement |
+      //   null-statement |
       //   variable-definition | immutable-variable-definition | function-definition |
+      //   expression-statement |
       //   if-statement | switch-statement |
       //   do-while-statement | while-statement | for-statement |
       //   break-statement | continue-statement | throw-statement | return-statement |
       //   try-statement
       auto res = do_accept_null_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }
@@ -868,6 +865,10 @@ namespace {
         return res;
       }
       res = do_accept_function_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }

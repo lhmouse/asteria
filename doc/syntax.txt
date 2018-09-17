@@ -41,8 +41,9 @@ statement-list ::=
 	statement statement-list-opt
 
 non-block-statement ::=
-	null-statement | expression-statement |
+	null-statement |
 	variable-definition | immutable-variable-definition | function-definition |
+	expression-statement |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
@@ -50,8 +51,6 @@ non-block-statement ::=
 
 null-statement ::=
 	";"
-expression-statement ::=
-	expression ";"
 
 variable-definition ::=
 	"var" identifier equal-initailizer-opt ";"
@@ -67,6 +66,9 @@ identifier-list-opt ::=
 	identifier-list | ""
 identifier-list ::=
 	identifier ( "," identifier-list | "" )
+
+expression-statement ::=
+	expression ";"
 
 if-statement ::=
 	"if" "(" expression ")" statement ( "else" statement | "" )
