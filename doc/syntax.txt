@@ -41,12 +41,17 @@ statement-list ::=
 	statement statement-list-opt
 
 non-block-statement ::=
+	null-statement | expression-statement |
 	variable-definition | immutable-variable-definition | function-definition |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
-	try-statement |
-	null-statement | expression-statement
+	try-statement
+
+null-statement ::=
+	";"
+expression-statement ::=
+	expression ";"
 
 variable-definition ::=
 	"var" identifier equal-initailizer-opt ";"
@@ -79,11 +84,11 @@ do-while-statement ::=
 while-statement ::=
 	"while" "(" expression ")" statement
 for-statement ::=
-	"for" "(" ( for-statement-triplet | for-statement-range ) ")" statement
-for-statement-triplet ::=
-	( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt
+	"for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
 for-statement-range ::=
 	"each" identifier "," identifier ":" expression
+for-statement-triplet ::=
+	( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
 
 break-statement ::=
 	"break" ( "switch" | "while" | "for" ) ";"
@@ -96,11 +101,6 @@ return-statement ::=
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement
-
-null-statement ::=
-	";"
-expression-statement ::=
-	expression ";"
 
 expression-opt ::=
 	expression | ""

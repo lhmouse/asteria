@@ -196,6 +196,19 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_null_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // null-statement ::=
+      //   ";"
+      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_null stmt_c = { };
+      stmt_out = std::move(stmt_c);
+      return res;
+    }
+
   Parser_result do_accept_expression(Expression &expr_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // TODO
@@ -211,6 +224,24 @@ namespace {
       }
       toks_inout.shift();
       return do_make_result(nullptr, Parser_result::error_success);
+    }
+
+  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // expression-statement ::=
+      //   expression ";"
+      Expression expr;
+      auto res = do_accept_expression(expr, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_expr stmt_c = { std::move(expr) };
+      stmt_out = std::move(stmt_c);
+      return res;
     }
 
   Parser_result do_accept_variable_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
@@ -542,6 +573,111 @@ namespace {
       return res;
     }
 
+  Parser_result do_accept_for_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // for-statement ::=
+      //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
+      // for-statement-range ::=
+      //   "each" identifier "," identifier ":" expression
+      // for-statement-triplet ::=
+      //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
+      auto res = do_match_keyword(toks_inout, Token::keyword_for, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
+      String key_name;
+      String mapped_name;
+      Statement init_stmt;
+      Expression cond;
+      Expression step;
+      res = do_match_keyword(toks_inout, Token::keyword_each, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_match_identifier(key_name, toks_inout, Parser_result::error_identifier_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_comma_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_match_identifier(mapped_name, toks_inout, Parser_result::error_identifier_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_colon_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_accept_expression(step, toks_inout, Parser_result::error_expression_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+      } else {
+        res = do_accept_variable_definition(init_stmt, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+          goto z;
+        }
+        res = do_accept_null_statement(init_stmt, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+          goto z;
+        }
+        res = do_accept_expression_statement(init_stmt, toks_inout, Parser_result::error_for_statement_initializer_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+    z:
+        res = do_accept_expression(cond, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+        }
+        res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_accept_expression(step, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          if(res != Parser_result::error_success) {
+            return res;
+          }
+        }
+      }
+      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Block body;
+      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      if(key_name.empty()) {
+        Vector<Statement> init;
+        init.emplace_back(std::move(init_stmt));
+        Statement::S_for stmt_c = { std::move(init), std::move(cond), std::move(step), std::move(body) };
+        stmt_out = std::move(stmt_c);
+      } else {
+        Statement::S_for_each stmt_c = { std::move(key_name), std::move(mapped_name), std::move(step), std::move(body) };
+        stmt_out = std::move(stmt_c);
+      }
+      return res;
+    }
+
   Parser_result do_accept_break_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // break-statement ::=
@@ -706,47 +842,24 @@ namespace {
       return res;
     }
 
-  Parser_result do_accept_null_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // null-statement ::=
-      //   ";"
-      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      Statement::S_null stmt_c = { };
-      stmt_out = std::move(stmt_c);
-      return res;
-    }
-
-  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // expression-statement ::=
-      //   expression ";"
-      Expression expr;
-      auto res = do_accept_expression(expr, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      Statement::S_expr stmt_c = { std::move(expr) };
-      stmt_out = std::move(stmt_c);
-      return res;
-    }
-
   Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // non-block-statement ::=
+      //   null-statement | expression-statement |
       //   variable-definition | immutable-variable-definition | function-definition |
       //   if-statement | switch-statement |
       //   do-while-statement | while-statement | for-statement |
       //   break-statement | continue-statement | throw-statement | return-statement |
-      //   try-statement |
-      //   null-statement | expression-statement
-      auto res = do_accept_variable_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      //   try-statement
+      auto res = do_accept_null_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
+      res = do_accept_variable_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }
@@ -774,10 +887,10 @@ namespace {
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }
-//      res = do_accept_for_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-//      if(res != Parser_result::error_no_operation_performed) {
-//        return res;
-//      }
+      res = do_accept_for_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
+      if(res != Parser_result::error_no_operation_performed) {
+        return res;
+      }
       res = do_accept_break_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
@@ -795,14 +908,6 @@ namespace {
         return res;
       }
       res = do_accept_try_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_null_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
       if(res != Parser_result::error_no_operation_performed) {
         return res;
       }

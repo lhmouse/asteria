@@ -119,7 +119,9 @@ int main()
       for(var i = 0; i < 100; ++i) {
         sum  += i;
       }
-      null  ;
+      for(;;)
+        break;
+      54  ;
       ;
       print(sum);
       export sum;
