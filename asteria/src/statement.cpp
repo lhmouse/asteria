@@ -423,12 +423,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             // Initialize the per-loop key constant.
             Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
             ref_out = std::move(ref_c);
-            do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
+            do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_array_index refmod_c = { it - array.begin() };
             mapped.zoom_in(std::move(refmod_c));
-            do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, mapped);
+            do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
             // Execute the loop body.
             const auto status = alt.body.execute_in_place(ref_out, ctx_next);
@@ -449,12 +449,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             // Initialize the per-loop key constant.
             Reference_root::S_constant ref_c = { D_string(it->first) };
             ref_out = std::move(ref_c);
-            do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, ref_out);
+            do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
             ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
             // Initialize the per-loop value reference.
             Reference_modifier::S_object_key refmod_c = { it->first };
             mapped.zoom_in(std::move(refmod_c));
-            do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, mapped);
+            do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
             ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
             // Execute the loop body.
             const auto status = alt.body.execute_in_place(ref_out, ctx_next);
