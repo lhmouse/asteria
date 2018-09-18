@@ -166,19 +166,19 @@ Value::Compare Value::compare(const Value &other) const noexcept
         return Value::compare_unordered;
       }
       case type_array: {
-        const auto &array_lhs = this->check<D_array>();
-        const auto &array_rhs = other.check<D_array>();
-        const auto rlen = rocket::min(array_lhs.size(), array_rhs.size());
+        const auto &alt_lhs = this->check<D_array>();
+        const auto &alt_rhs = other.check<D_array>();
+        const auto rlen = rocket::min(alt_lhs.size(), alt_rhs.size());
         for(Size i = 0; i < rlen; ++i) {
-          const auto res = array_lhs[i].compare(array_rhs[i]);
+          const auto res = alt_lhs[i].compare(alt_rhs[i]);
           if(res != Value::compare_equal) {
             return res;
           }
         }
-        if(array_lhs.size() < array_rhs.size()) {
+        if(alt_lhs.size() < alt_rhs.size()) {
           return Value::compare_less;
         }
-        if(array_lhs.size() > array_rhs.size()) {
+        if(alt_lhs.size() > alt_rhs.size()) {
           return Value::compare_greater;
         }
         return Value::compare_equal;

@@ -19,6 +19,7 @@ namespace noadl = ::rocket;
 using ::std::common_type;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_destructible;
+using ::std::underlying_type;
 using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::ios_base;
@@ -145,6 +146,12 @@ template<typename elementT>
   inline bool is_none_of(const elementT &elem, initializer_list<elementT> init)
     {
       return is_any_of(elem, init) == false;
+    }
+
+template<typename enumT>
+  constexpr inline typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
+    {
+      return static_cast<typename underlying_type<enumT>::type>(value);
     }
 
 }

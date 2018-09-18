@@ -416,60 +416,66 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Calculate the range using the initializer.
         auto mapped = alt.range_init.evaluate(ctx_for);
         const auto range_value = ref_out.read();
-        if(range_value.type() == Value::type_array) {
-          const auto &array = range_value.check<D_array>();
-          for(auto it = array.begin(); it != array.end(); ++it) {
-            Executive_context ctx_next(&ctx_for);
-            // Initialize the per-loop key constant.
-            Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
-            ref_out = std::move(ref_c);
-            do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-            ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
-            // Initialize the per-loop value reference.
-            Reference_modifier::S_array_index refmod_c = { it - array.begin() };
-            mapped.zoom_in(std::move(refmod_c));
-            do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-            ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
-            // Execute the loop body.
-            const auto status = alt.body.execute_in_place(ref_out, ctx_next);
-            if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
-              // Break out of the body as requested.
-              break;
+        switch(rocket::weaken_enum(range_value.type())) {
+          case Value::type_array: {
+            const auto &array = range_value.check<D_array>();
+            for(auto it = array.begin(); it != array.end(); ++it) {
+              Executive_context ctx_next(&ctx_for);
+              // Initialize the per-loop key constant.
+              Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
+              ref_out = std::move(ref_c);
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
+              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
+              // Initialize the per-loop value reference.
+              Reference_modifier::S_array_index refmod_c = { it - array.begin() };
+              mapped.zoom_in(std::move(refmod_c));
+              do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
+              // Execute the loop body.
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
+                // Break out of the body as requested.
+                break;
+              }
+              if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
+                // Forward anything unexpected to the caller.
+                return status;
+              }
+              mapped.zoom_out();
             }
-            if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
-              // Forward anything unexpected to the caller.
-              return status;
-            }
-            mapped.zoom_out();
+            break;
           }
-        } else if(range_value.type() == Value::type_object) {
-          const auto &object = range_value.check<D_object>();
-          for(auto it = object.begin(); it != object.end(); ++it) {
-            Executive_context ctx_next(&ctx_for);
-            // Initialize the per-loop key constant.
-            Reference_root::S_constant ref_c = { D_string(it->first) };
-            ref_out = std::move(ref_c);
-            do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-            ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
-            // Initialize the per-loop value reference.
-            Reference_modifier::S_object_key refmod_c = { it->first };
-            mapped.zoom_in(std::move(refmod_c));
-            do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-            ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
-            // Execute the loop body.
-            const auto status = alt.body.execute_in_place(ref_out, ctx_next);
-            if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
-              // Break out of the body as requested.
-              break;
+          case Value::type_object: {
+            const auto &object = range_value.check<D_object>();
+            for(auto it = object.begin(); it != object.end(); ++it) {
+              Executive_context ctx_next(&ctx_for);
+              // Initialize the per-loop key constant.
+              Reference_root::S_constant ref_c = { D_string(it->first) };
+              ref_out = std::move(ref_c);
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
+              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
+              // Initialize the per-loop value reference.
+              Reference_modifier::S_object_key refmod_c = { it->first };
+              mapped.zoom_in(std::move(refmod_c));
+              do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
+              // Execute the loop body.
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
+                // Break out of the body as requested.
+                break;
+              }
+              if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
+                // Forward anything unexpected to the caller.
+                return status;
+              }
+              mapped.zoom_out();
             }
-            if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
-              // Forward anything unexpected to the caller.
-              return status;
-            }
-            mapped.zoom_out();
+            break;
           }
-        } else {
-          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
+          }
         }
         return Block::status_next;
       }
@@ -527,24 +533,31 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       }
       case index_break: {
         const auto &alt = this->m_stor.as<S_break>();
-        if(alt.target == Statement::target_switch) {
-          return Block::status_break_switch;
-        }
-        if(alt.target == Statement::target_while) {
-          return Block::status_break_while;
-        }
-        if(alt.target == Statement::target_for) {
-          return Block::status_break_for;
+        switch(rocket::weaken_enum(alt.target)) {
+          case Statement::target_switch: {
+            return Block::status_break_switch;
+          }
+          case Statement::target_while: {
+            return Block::status_break_while;
+          }
+          case Statement::target_for: {
+            return Block::status_break_for;
+          }
         }
         return Block::status_break_unspec;
       }
       case index_continue: {
         const auto &alt = this->m_stor.as<S_continue>();
-        if(alt.target == Statement::target_while) {
-          return Block::status_continue_while;
-        }
-        if(alt.target == Statement::target_for) {
-          return Block::status_continue_for;
+        switch(rocket::weaken_enum(alt.target)) {
+          case Statement::target_switch: {
+            ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
+          }
+          case Statement::target_while: {
+            return Block::status_continue_while;
+          }
+          case Statement::target_for: {
+            return Block::status_continue_for;
+          }
         }
         return Block::status_continue_unspec;
       }
