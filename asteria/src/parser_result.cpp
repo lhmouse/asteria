@@ -82,58 +82,58 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       // Phase 3
       //   Parser
       case error_directive_or_statement_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a directive or statement.";
+        return "Expectation failed while looking for a directive or statement.";
       }
       case error_identifier_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an identifier.";
+        return "Expectation failed while looking for an identifier.";
       }
       case error_semicolon_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `;`.";
+        return "Expectation failed while looking for a `;`.";
       }
       case error_string_literal_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a string literal.";
+        return "Expectation failed while looking for a string literal.";
       }
       case error_statement_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a statement.";
+        return "Expectation failed while looking for a statement.";
       }
       case error_equals_sign_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an `=`.";
+        return "Expectation failed while looking for an `=`.";
       }
       case error_expression_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an expression.";
+        return "Expectation failed while looking for an expression.";
       }
       case error_open_brace_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an `{`.";
+        return "Expectation failed while looking for an `{`.";
       }
       case error_close_brace_or_statement_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `}` or statement.";
+        return "Expectation failed while looking for a `}` or statement.";
       }
       case error_open_parenthesis_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an `(`.";
+        return "Expectation failed while looking for an `(`.";
       }
       case error_close_parenthesis_or_parameter_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `)` or identifier.";
+        return "Expectation failed while looking for a `)` or identifier.";
       }
       case error_close_parenthesis_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `)`.";
+        return "Expectation failed while looking for a `)`.";
       }
       case error_colon_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `:`.";
+        return "Expectation failed while looking for a `:`.";
       }
       case error_close_brace_or_switch_clause_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `}`, `case` clause or `default` clause.";
+        return "Expectation failed while looking for a `}`, `case` clause or `default` clause.";
       }
       case error_keyword_while_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `while`.";
+        return "Expectation failed while looking for a `while`.";
       }
       case error_keyword_catch_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `catch`.";
+        return "Expectation failed while looking for a `catch`.";
       }
       case error_comma_expected: {
-        return "An unexpected token or the end of file was encountered while looking for a `,`.";
+        return "Expectation failed while looking for a `,`.";
       }
       case error_for_statement_initializer_expected: {
-        return "An unexpected token or the end of file was encountered while looking for an `each`, variable definition or expression statement.";
+        return "Expectation failed while looking for an `each`, variable definition or expression statement.";
       }
       default: {
         return "No description is available for this error code.";
