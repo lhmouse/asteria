@@ -145,8 +145,8 @@ namespace {
       return res;
     }
 
-  extern Parser_result do_accept_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error);
-  extern Parser_result do_accept_statement(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error);
+  template<typename SinkT>
+    extern Parser_result do_accept_statement(SinkT &sink_out, Token_stream &toks_inout, Parser_result::Error noop_error);
 
   Parser_result do_accept_statement_list(Vector<Statement> &stmts_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
@@ -193,6 +193,17 @@ namespace {
         return res;
       }
       block_out = std::move(stmts);
+      return res;
+    }
+  Parser_result do_accept_block(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      Block block;
+      auto res = do_accept_block(block, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      Statement::S_block stmt_c = { std::move(block) };
+      stmt_out = std::move(stmt_c);
       return res;
     }
 
@@ -916,53 +927,37 @@ namespace {
       res = do_make_result(toks_inout.peek_opt(), noop_error);
       return res;
     }
-
-  Parser_result do_accept_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  Parser_result do_accept_nonblock_statement(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
-      ASTERIA_DEBUG_LOG("Looking for a statement as `Statement`: ", *(toks_inout.peek_opt()));
-      // statement ::=
-      //   block | non-block-statement
-      Block block;
-      auto res = do_accept_block(block, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res == Parser_result::error_success) {
-          Statement::S_block stmt_c = { std::move(block) };
-          stmt_out = std::move(stmt_c);
-        }
-        return res;
-      }
-      res = do_accept_nonblock_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      // Be advised that a `return do_make_result(...);` would prevent NRVO.
-      res = do_make_result(toks_inout.peek_opt(), noop_error);
-      return res;
-    }
-
-  Parser_result do_accept_statement(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      ASTERIA_DEBUG_LOG("Looking for a statement as `Block`: ", *(toks_inout.peek_opt()));
-      // statement ::=
-      //   block | non-block-statement
-      auto res = do_accept_block(block_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
       Statement stmt;
-      res = do_accept_nonblock_statement(stmt, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res == Parser_result::error_success) {
-          Vector<Statement> stmts;
-          stmts.emplace_back(std::move(stmt));
-          block_out = std::move(stmts);
-        }
+      auto res = do_accept_nonblock_statement(stmt, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
         return res;
       }
-      // Be advised that a `return do_make_result(...);` would prevent NRVO.
-      res = do_make_result(toks_inout.peek_opt(), noop_error);
+      Vector<Statement> stmts;
+      stmts.emplace_back(std::move(stmt));
+      block_out = std::move(stmts);
       return res;
     }
+
+  template<typename SinkT>
+    Parser_result do_accept_statement(SinkT &sink_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+      {
+        ASTERIA_DEBUG_LOG("Looking for a statement: ", *(toks_inout.peek_opt()));
+        // statement ::=
+        //   block | non-block-statement
+        auto res = do_accept_block(sink_out, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          return res;
+        }
+        res = do_accept_nonblock_statement(sink_out, toks_inout, Parser_result::error_no_operation_performed);
+        if(res != Parser_result::error_no_operation_performed) {
+          return res;
+        }
+        // Be advised that a `return do_make_result(...);` would prevent NRVO.
+        res = do_make_result(toks_inout.peek_opt(), noop_error);
+        return res;
+      }
 
   Parser_result do_accept_directive_or_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {

@@ -118,14 +118,14 @@ int main()
           case 2:
         }
       var sum = 0;
-      for(var i = 0; i < 100; ++i) {
-        sum  += i;
-      }
-      for(;;)
-        break;
+//      for(var i = 0; i < 100; ++i) {
+//        sum  += i;
+//      }
+//      for(;;)
+//        break;
       54  ;
       ;
-      print(sum);
+//      print(sum);
       export sum;
     )___"));
     auto r = ts.load(iss, String::shallow("dummy_file"));
