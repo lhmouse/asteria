@@ -4,7 +4,8 @@ document ::=
 identifier ::=
 	PCRE([A-Za-z_][0-9A-Za-z_]*)
 literal ::=
-	null-literal | boolean-literal | string-literal | noescape-string-literal | numeric-literal | nan-literal | infinity-literal
+	null-literal | boolean-literal | string-literal | noescape-string-literal |
+	numeric-literal | nan-literal | infinity-literal
 null-literal ::=
 	"null"
 boolean-litearl ::=
@@ -14,7 +15,9 @@ string-literal ::=
 noescape-string-literal ::=
 	PCRE('[^']*?')
 numeric-literal ::=
-	( binary-literal | decimal-literal | hexadecimal-literal ) ( decimal-exponent-suffix | binary-exponent-suffix | "" )
+	( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+exponent-suffix-opt ::=
+	decimal-exponent-suffix | binary-exponent-suffix | ""
 binary-literal ::=
 	PCRE(0[bB][01`]+(\.[01`]+)
 decimal-literal ::=
