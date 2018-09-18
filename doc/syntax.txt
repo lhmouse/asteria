@@ -113,11 +113,9 @@ prefix-operator-expression ::=
 	( "+" | "-" | "~" | "!" | "++" | "--" | "unset" ) expression
 
 expression-initiator ::=
-	identifier | literal | "this" | closure-function | nested-expression | unnamed-array | unnamed-object
+	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
 closure-function ::=
 	"func" "(" identifier-list-opt ")" statement
-nested-expression ::=
-	"(" expression ")"
 unnamed-array ::=
 	"[" array-element-list-opt "]"
 array-element-list-opt ::=
@@ -130,6 +128,8 @@ key-mapped-list-opt ::=
 	key-mapped-list | ""
 key-mapped-list ::=
 	( string-literal | identifier ) "=" expression ( "," key-mapped-list-opt | "" )
+nested-expression ::=
+	"(" expression ")"
 
 expression-trailer-opt ::=
 	expression-trailer | ""

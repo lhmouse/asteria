@@ -65,15 +65,11 @@ class Xpnode
       {
         Reference ref;
       };
-    struct S_subexpression
-      {
-        Expression expr;
-      };
     struct S_closure_function
       {
-        Vector<String> params;
         String file;
         Uint64 line;
+        Vector<String> params;
         Block body;
       };
     struct S_branch
@@ -103,29 +99,27 @@ class Xpnode
 
     enum Index : Uint8
       {
-        index_literal           =  0,
-        index_named_reference   =  1,
-        index_bound_reference   =  2,
-        index_subexpression     =  3,
-        index_closure_function  =  4,
-        index_branch            =  5,
-        index_function_call     =  6,
-        index_operator_rpn      =  7,
-        index_unnamed_array     =  8,
-        index_unnamed_object    =  9,
+        index_literal           = 0,
+        index_named_reference   = 1,
+        index_bound_reference   = 2,
+        index_closure_function  = 3,
+        index_branch            = 4,
+        index_function_call     = 5,
+        index_operator_rpn      = 6,
+        index_unnamed_array     = 7,
+        index_unnamed_object    = 8,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_literal           //  0,
-        , S_named_reference   //  1,
-        , S_bound_reference   //  2,
-        , S_subexpression     //  3,
-        , S_closure_function  //  4,
-        , S_branch            //  5,
-        , S_function_call     //  6,
-        , S_operator_rpn      //  7,
-        , S_unnamed_array     //  8,
-        , S_unnamed_object    //  9,
+        , S_literal           // 0,
+        , S_named_reference   // 1,
+        , S_bound_reference   // 2,
+        , S_closure_function  // 3,
+        , S_branch            // 4,
+        , S_function_call     // 5,
+        , S_operator_rpn      // 6,
+        , S_unnamed_array     // 7,
+        , S_unnamed_object    // 8,
       )>;
 
   public:

@@ -41,10 +41,10 @@ class Statement
       };
     struct S_func_def
       {
-        String name;
-        Vector<String> params;
         String file;
         Uint64 line;
+        String name;
+        Vector<String> params;
         Block body;
       };
     struct S_if

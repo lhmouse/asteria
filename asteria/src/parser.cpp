@@ -27,16 +27,6 @@ namespace {
       return Parser_result(qtok_opt->get_line(), qtok_opt->get_offset(), qtok_opt->get_length(), error);
     }
 
-  void do_tell_source_location(String &file_out, Uint64 &line_out, const Token_stream &toks)
-    {
-      const auto qtok = toks.peek_opt();
-      if(!qtok) {
-        return;
-      }
-      file_out = qtok->get_file();
-      line_out = qtok->get_line();
-    }
-
   Parser_result do_match_keyword(Token_stream &toks_inout, Token::Keyword keyword, Parser_result::Error noop_error)
     {
       const auto qtok = toks_inout.peek_opt();
@@ -220,6 +210,45 @@ namespace {
       return res;
     }
 
+  void do_tell_source_location(String &file_out, Uint64 &line_out, const Token_stream &toks)
+    {
+      const auto qtok = toks.peek_opt();
+      if(!qtok) {
+        return;
+      }
+      file_out = qtok->get_file();
+      line_out = qtok->get_line();
+    }
+
+  Parser_result do_accept_identifier_list(Vector<String> &names_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    {
+      // identifier-list-opt ::=
+      //   identifier-list | ""
+      // identifier-list ::=
+      //   identifier ( "," identifier-list | "" )
+      String name;
+      auto res = do_match_identifier(name, toks_inout, noop_error);
+      if(res != Parser_result::error_success) {
+        return res;
+      }
+      names_out.emplace_back(std::move(name));
+      for(;;) {
+        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_no_operation_performed);
+        if(res == Parser_result::error_no_operation_performed) {
+          break;
+        }
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
+        if(res != Parser_result::error_success) {
+          return res;
+        }
+        names_out.emplace_back(std::move(name));
+      }
+      return res;
+    }
+
   Parser_result do_accept_expression(Expression &expr_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // TODO
@@ -307,35 +336,6 @@ namespace {
       return res;
     }
 
-  Parser_result do_accept_identifier_list(Vector<String> &names_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // identifier-list-opt ::=
-      //   identifier-list | ""
-      // identifier-list ::=
-      //   identifier ( "," identifier-list | "" )
-      String name;
-      auto res = do_match_identifier(name, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      names_out.emplace_back(std::move(name));
-      for(;;) {
-        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_no_operation_performed);
-        if(res == Parser_result::error_no_operation_performed) {
-          break;
-        }
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        names_out.emplace_back(std::move(name));
-      }
-      return res;
-    }
-
   Parser_result do_accept_function_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
     {
       // Copy these parameters before reading from the stream which is destructive.
@@ -373,7 +373,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      Statement::S_func_def stmt_c = { std::move(name), std::move(params), std::move(file), line, std::move(body) };
+      Statement::S_func_def stmt_c = { std::move(file), line, std::move(name), std::move(params), std::move(body) };
       stmt_out = std::move(stmt_c);
       return res;
     }
@@ -474,23 +474,19 @@ namespace {
       Bivector<Expression, Block> clauses;
       for(;;) {
         Expression cond;
-        res = do_match_keyword(toks_inout, Token::keyword_case, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-          res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-        } else {
-          res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
+        res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
+        if(res == Parser_result::error_no_operation_performed) {
+          res = do_match_keyword(toks_inout, Token::keyword_case, Parser_result::error_no_operation_performed);
           if(res == Parser_result::error_no_operation_performed) {
             break;
           }
           if(res != Parser_result::error_success) {
             return res;
           }
+          res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
+        }
+        if(res != Parser_result::error_success) {
+          return res;
         }
         res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
         if(res != Parser_result::error_success) {

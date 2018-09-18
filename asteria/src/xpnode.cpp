@@ -168,20 +168,13 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
         return std::move(alt_bnd);
       }
-      case index_subexpression: {
-        const auto &alt = this->m_stor.as<S_subexpression>();
-        // Bind the subexpression recursively.
-        auto expr_bnd = alt.expr.bind(ctx);
-        Xpnode::S_subexpression alt_bnd = { std::move(expr_bnd) };
-        return std::move(alt_bnd);
-      }
       case index_closure_function: {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next);
-        Xpnode::S_closure_function alt_bnd = { alt.params, alt.file, alt.line, std::move(body_bnd) };
+        Xpnode::S_closure_function alt_bnd = { alt.file, alt.line, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_branch: {
@@ -544,13 +537,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         const auto &alt = this->m_stor.as<S_bound_reference>();
         // Push the reference stored.
         stack_inout.emplace_back(alt.ref);
-        return;
-      }
-      case index_subexpression: {
-        const auto &alt = this->m_stor.as<S_subexpression>();
-        // Evaluate the subexpression recursively.
-        auto ref = alt.expr.evaluate(ctx);
-        stack_inout.emplace_back(std::move(ref));
         return;
       }
       case index_closure_function: {

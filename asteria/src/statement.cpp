@@ -119,7 +119,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
         Analytic_context ctx_next(&ctx_inout);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next);
-        Statement::S_func_def alt_bnd = { alt.name, alt.params, alt.file, alt.line, std::move(body_bnd) };
+        Statement::S_func_def alt_bnd = { alt.file, alt.line, alt.name, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_if: {
