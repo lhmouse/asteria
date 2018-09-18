@@ -41,12 +41,16 @@ statement-list ::=
 	statement statement-list-opt
 
 non-block-statement ::=
+	null-statement |
 	variable-definition | immutable-variable-definition | function-definition |
+	expression-statement |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement |
-	try-statement |
-	expression-statement
+	try-statement
+
+null-statement ::=
+	";"
 
 variable-definition ::=
 	"var" identifier equal-initailizer-opt ";"
@@ -63,6 +67,9 @@ identifier-list-opt ::=
 identifier-list ::=
 	identifier ( "," identifier-list | "" )
 
+expression-statement ::=
+	expression ";"
+
 if-statement ::=
 	"if" "(" expression ")" statement ( "else" statement | "" )
 switch-statement ::=
@@ -72,37 +79,31 @@ switch-block ::=
 switch-clause-list-opt ::=
 	switch-clause-list | ""
 switch-clause-list ::=
-	( switch-clause-case | switch-clause-default ) switch-clause-list-opt
-switch-clause-case ::=
-	"case" expression ":" statement-list-opt
-switch-clause-default ::=
-	"default" ":" statement-list-opt
+	( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
 
 do-while-statement ::=
 	"do" statement "while" "(" expression ")" ";"
 while-statement ::=
 	"while" "(" expression ")" statement
 for-statement ::=
-	"for" "(" ( for-statement-triplet | for-statement-range ) ")" statement
-for-statement-triplet ::=
-	( variable-definition | expression-opt ";" ) expression-opt ";" expression-opt
+	"for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
 for-statement-range ::=
 	"each" identifier "," identifier ":" expression
+for-statement-triplet ::=
+	( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
 
 break-statement ::=
 	"break" ( "switch" | "while" | "for" ) ";"
 continue-statement ::=
 	"continue" ( "while" | "for" ) ";"
 throw-statement ::=
-	"throw" expression-opt ";"
+	"throw" expression ";"
 return-statement ::=
 	"return" expression-opt ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement
 
-expression-statement ::=
-	expression-opt ";"
 expression-opt ::=
 	expression | ""
 expression ::=

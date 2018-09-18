@@ -7,6 +7,9 @@
 #include "reference.hpp"
 #include "backtracer.hpp"
 #include "exception.hpp"
+#include "token_stream.hpp"
+#include "parser.hpp"
+#include "rocket/insertable_istream.hpp"
 
 using namespace Asteria;
 
@@ -69,4 +72,65 @@ int main()
         }
       }
     }
+
+    Token_stream ts;
+    rocket::insertable_istream iss(String::shallow(R"___(
+      import "stdio";
+        { }
+        { var i; }
+        //  { const i; }
+        { const i = 1; }
+      func meow(param1, param2)
+        {
+          var i;
+          const j = 1;
+        }
+      if(1.5e4)
+        var k = 1;
+      else if(x) {
+        const r = 2;
+        const z = 2;
+      }
+      ;
+      for(each k, v : f)
+        throw 1;
+      try var i = 1; catch(e) { throw 2; }
+      do
+        const i = 4;
+      while(0);
+      while(0) var k = 2;
+        switch (42)  {
+          case "meow":
+            continue while;
+            continue for;
+            continue  ;
+            throw 42;
+            return 42;
+            return;
+          case "woof":
+          default  :
+            const meow = 1;
+          case 42 :
+            break switch;
+            break while;
+            break for;
+            break  ;
+          case 2:
+        }
+      var sum = 0;
+//      for(var i = 0; i < 100; ++i) {
+//        sum  += i;
+//      }
+//      for(;;)
+//        break;
+      54  ;
+      ;
+//      print(sum);
+      export sum;
+    )___"));
+    auto r = ts.load(iss, String::shallow("dummy_file"));
+    ASTERIA_DEBUG_LOG("tokenizer error = ", r.get_error());
+    Parser p;
+    r = p.load(ts);
+    ASTERIA_DEBUG_LOG("parser error = ", r.get_error());
   }

@@ -78,7 +78,8 @@ pkginclude_HEADERS =  \
   asteria/src/backtracer.hpp  \
   asteria/src/parser_result.hpp  \
   asteria/src/token.hpp  \
-  asteria/src/token_stream.hpp
+  asteria/src/token_stream.hpp  \
+  asteria/src/parser.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
@@ -102,7 +103,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/backtracer.cpp  \
   asteria/src/parser_result.cpp  \
   asteria/src/token.cpp  \
-  asteria/src/token_stream.cpp
+  asteria/src/token_stream.cpp  \
+  asteria/src/parser.cpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la

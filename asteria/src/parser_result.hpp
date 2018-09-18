@@ -54,6 +54,12 @@ class Parser_result
         error_open_parenthesis_expected                  = 310,
         error_close_parenthesis_or_parameter_expected    = 311,
         error_close_parenthesis_expected                 = 312,
+        error_colon_expected                             = 313,
+        error_close_brace_or_switch_clause_expected      = 314,
+        error_keyword_while_expected                     = 315,
+        error_keyword_catch_expected                     = 316,
+        error_comma_expected                             = 317,
+        error_for_statement_initializer_expected         = 318,
       };
 
   public:
