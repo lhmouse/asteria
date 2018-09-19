@@ -155,7 +155,7 @@ function-call-trailer ::=
 argument-list-opt ::=
 	argument-list | ""
 argument-list ::=
-	expression-opt ( "," argument-list-opt | "" )
+	expression ( "," argument-list | "" )
 subscripting-trailer ::=
 	"[" expression "]" expression-trailer-opt
 member-access-trailer ::=

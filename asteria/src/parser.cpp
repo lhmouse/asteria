@@ -19,12 +19,10 @@ Parser::~Parser()
 
 namespace {
 
-  Parser_result do_make_result(const Token *qtok_opt, Parser_result::Error error)
+  constexpr Parser_result do_make_result(const Token *qtok_opt, Parser_result::Error error)
     {
-      if(!qtok_opt) {
-        return Parser_result(0, 0, 0, error);
-      }
-      return Parser_result(qtok_opt->get_line(), qtok_opt->get_offset(), qtok_opt->get_length(), error);
+      return qtok_opt ? Parser_result(qtok_opt->get_line(), qtok_opt->get_offset(), qtok_opt->get_length(), error)
+                      : Parser_result(0, 0, 0, error);
     }
 
   Parser_result do_match_keyword(Token_stream &toks_inout, Token::Keyword keyword, Parser_result::Error noop_error)
