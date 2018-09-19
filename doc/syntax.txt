@@ -110,12 +110,16 @@ try-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	prefix-operator-expression | expression-initiator expression-trailer-opt
+	prefix-operator-list-opt primary-expression postfix-trailer-list-opt infix-trailer-list-opt
 
-prefix-operator-expression ::=
-	( "+" | "-" | "~" | "!" | "++" | "--" | "unset" ) expression
+prefix-operator-list-opt ::=
+	prefix-operator-list | ""
+prefix-operator-list ::=
+	prefix-operator prefix-operator-list-opt
+prefix-operator ::=
+	"+" | "-" | "~" | "!" | "++" | "--" | "unset"
 
-expression-initiator ::=
+primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
 closure-function ::=
 	"func" "(" identifier-list-opt ")" statement
@@ -134,32 +138,34 @@ key-mapped-list ::=
 nested-expression ::=
 	"(" expression ")"
 
-expression-trailer-opt ::=
-	expression-trailer | ""
-expression-trailer ::=
-	postfix-operator-trailer | infix-operator-trailer | ternary-trailer | assignment-trailer |
-	function-call-trailer | subscripting-trailer | member-access-trailer
-postifix-operator-trailer ::=
-	( "++" | "--" ) expression-trailer-opt
-infix-operator-trailer ::=
-	( "+" | "-" | "*" | "/"  | "%"  | "<<" | ">>" | "<<<" | ">>>" |
-	  "&" | "|" | "^" | "&&" | "||" | "==" | "!=" | "<"   | ">"   | "<=" | ">=" ) expression
-ternary-trailer ::=
-	"?" expression-opt ":" expression
-assignment-trailer ::=
-	( "+=" | "-=" | "*=" | "/="  | "%="  | "<<=" | ">>=" | "<<<=" | ">>>=" |
-	  "&=" | "|=" | "^=" | "&&=" | "||=" | "="   ) expression
-
-function-call-trailer ::=
-	"(" argument-list-opt ")" expression-trailer-opt
+postfix-trailer-list-opt ::=
+	postfix-trailer-list | ""
+postfix-trailer-list ::=
+	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
+postfix-operator ::=
+	"++" | "--"
+postfix-function-call ::=
+	"(" argument-list-opt ")"
 argument-list-opt ::=
 	argument-list | ""
 argument-list ::=
 	expression ( "," argument-list | "" )
-subscripting-trailer ::=
-	"[" expression "]" expression-trailer-opt
-member-access-trailer ::=
-	"." identifier expression-trailer-opt
+postfix-subscript ::=
+	"[" expression "]"
+postfix-member-access ::=
+	"." identifier
+
+infix-trailer-list-opt ::=
+	infix-trailer-list | ""
+infix-trailer-list ::=
+	( infix-selection | infix-operator ) expression
+infix-selection ::=
+	"?"  expression ":" | "&&"  | "||"  |
+	"?=" expression ":" | "&&=" | "||="
+infix-operator ::=
+	"+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
+	"+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
+	"="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="
 
 directive-or-statement-list-opt ::=
 	directive-or-statement-list | ""

@@ -102,7 +102,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -124,7 +124,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -199,7 +199,7 @@ namespace {
     {
       // null-statement ::=
       //   ";"
-      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, noop_error);
+      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicol, noop_error);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -292,7 +292,7 @@ namespace {
           return res;
         }
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -325,7 +325,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -385,7 +385,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -538,7 +538,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -651,7 +651,7 @@ namespace {
             return res;
           }
         }
-        res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+        res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
         if(res != Parser_result::error_success) {
           return res;
         }
@@ -717,7 +717,7 @@ namespace {
         goto z;
       }
     z:
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -752,7 +752,7 @@ namespace {
         goto z;
       }
     z:
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -774,7 +774,7 @@ namespace {
       if(res != Parser_result::error_success) {
         return res;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }
@@ -798,7 +798,7 @@ namespace {
           return res;
         }
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicolon, Parser_result::error_semicolon_expected);
+      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
       if(res != Parser_result::error_success) {
         return res;
       }

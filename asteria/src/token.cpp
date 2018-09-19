@@ -220,8 +220,11 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
       case punctuator_dot: {
         return ".";
       }
-      case punctuator_condition: {
+      case punctuator_quest: {
         return "?";
+      }
+      case punctuator_quest_eq: {
+        return "?=";
       }
       case punctuator_assign: {
         return "=";
@@ -250,7 +253,7 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
       case punctuator_colon: {
         return ":";
       }
-      case punctuator_semicolon: {
+      case punctuator_semicol: {
         return ";";
       }
       default: {

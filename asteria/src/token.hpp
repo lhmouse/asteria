@@ -85,17 +85,18 @@ class Token
         punctuator_cmp_lte     = 36,  // <=
         punctuator_cmp_gte     = 37,  // >=
         punctuator_dot         = 38,  // .
-        punctuator_condition   = 39,  // ?
-        punctuator_assign      = 40,  // =
-        punctuator_parenth_op  = 41,  // (
-        punctuator_parenth_cl  = 42,  // )
-        punctuator_bracket_op  = 43,  // [
-        punctuator_bracket_cl  = 44,  // ]
-        punctuator_brace_op    = 45,  // {
-        punctuator_brace_cl    = 46,  // }
-        punctuator_comma       = 47,  // ,
-        punctuator_colon       = 48,  // :
-        punctuator_semicolon   = 49,  // ;
+        punctuator_quest       = 39,  // ?
+        punctuator_quest_eq    = 40,  // ?=
+        punctuator_assign      = 41,  // =
+        punctuator_parenth_op  = 42,  // (
+        punctuator_parenth_cl  = 43,  // )
+        punctuator_bracket_op  = 44,  // [
+        punctuator_bracket_cl  = 45,  // ]
+        punctuator_brace_op    = 46,  // {
+        punctuator_brace_cl    = 47,  // }
+        punctuator_comma       = 48,  // ,
+        punctuator_colon       = 49,  // :
+        punctuator_semicol     = 50,  // ;
       };
 
     struct S_keyword
