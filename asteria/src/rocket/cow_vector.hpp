@@ -108,11 +108,11 @@ namespace details_cow_vector {
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-        static void rotate(value_type *ptr, size_type after, size_type seek, size_type end)
+        static void rotate(value_type *ptr, size_type begin, size_type seek, size_type end)
           {
-            ROCKET_ASSERT(after <= seek);
+            ROCKET_ASSERT(begin <= seek);
             ROCKET_ASSERT(seek <= end);
-            auto bot = after;
+            auto bot = begin;
             auto brk = seek;
             //   |<- isl ->|<- isr ->|
             //   bot       brk       end
