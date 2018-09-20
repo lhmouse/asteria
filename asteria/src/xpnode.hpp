@@ -76,6 +76,7 @@ class Xpnode
       {
         Expression branch_true;
         Expression branch_false;
+        bool compound_assign;
       };
     struct S_function_call
       {
