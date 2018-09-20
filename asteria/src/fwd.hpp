@@ -64,6 +64,7 @@ class Block;
 class Parser_result;
 class Token;
 class Token_stream;
+class Parser;
 
 // Runtime objects
 class Value;
