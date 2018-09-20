@@ -40,7 +40,7 @@ namespace {
 
 void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_null:
       case index_expr:
       case index_block: {
@@ -80,7 +80,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_inout) const
 
 Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_null: {
         const auto &alt = this->m_stor.as<S_null>();
         // Copy it as-is.
@@ -237,7 +237,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_inout) const
 
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_inout) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_null: {
         const auto &alt = this->m_stor.as<S_null>();
         // There is nothing to do.

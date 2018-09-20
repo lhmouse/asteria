@@ -22,7 +22,7 @@ Reference_root & Reference_root::operator=(Reference_root &&) noexcept
 
 const Value & Reference_root::dereference_readonly() const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_constant: {
         const auto &alt = this->m_stor.as<S_constant>();
         return alt.src;
@@ -43,7 +43,7 @@ const Value & Reference_root::dereference_readonly() const
 
 Value & Reference_root::dereference_mutable() const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_constant: {
         const auto &alt = this->m_stor.as<S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");

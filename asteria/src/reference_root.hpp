@@ -63,7 +63,7 @@ class Reference_root
   public:
     Index index() const noexcept
       {
-        return static_cast<Index>(this->m_stor.index());
+        return Index(this->m_stor.index());
       }
     bool unique() const noexcept
       {

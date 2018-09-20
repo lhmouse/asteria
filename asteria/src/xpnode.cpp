@@ -139,7 +139,7 @@ namespace {
 
 Xpnode Xpnode::bind(const Analytic_context &ctx) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_literal: {
         const auto &alt = this->m_stor.as<S_literal>();
         // Copy it as-is.
@@ -508,7 +508,7 @@ namespace {
 
 void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(Index(this->m_stor.index())) {
       case index_literal: {
         const auto &alt = this->m_stor.as<S_literal>();
         // Push the constant.
