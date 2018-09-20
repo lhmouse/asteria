@@ -25,9 +25,9 @@ Value Reference::read() const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_readonly());
     // Apply modifiers.
-    const auto mend = this->m_modifiers.end();
-    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto qnext = mit->apply_readonly_opt(cur);
+    const auto end = this->m_modifiers.end();
+    for(auto it = this->m_modifiers.begin(); it != end; ++it) {
+      const auto qnext = it->apply_readonly_opt(cur);
       if(!qnext) {
         return { };
       }
@@ -41,9 +41,9 @@ Value & Reference::write(Value value) const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());
     // Apply modifiers.
-    const auto mend = this->m_modifiers.end();
-    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto qnext = mit->apply_mutable_opt(cur, true, nullptr);
+    const auto end = this->m_modifiers.end();
+    for(auto it = this->m_modifiers.begin(); it != end; ++it) {
+      const auto qnext = it->apply_mutable_opt(cur, true, nullptr);
       if(!qnext) {
         ROCKET_ASSERT(false);
       }
@@ -61,9 +61,9 @@ Value Reference::unset() const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());
     // Apply modifiers.
-    const auto mend = this->m_modifiers.end() - 1;
-    for(auto mit = this->m_modifiers.begin(); mit != mend; ++mit) {
-      const auto qnext = mit->apply_mutable_opt(cur, false, nullptr);
+    const auto end = this->m_modifiers.end() - 1;
+    for(auto it = this->m_modifiers.begin(); it != end; ++it) {
+      const auto qnext = it->apply_mutable_opt(cur, false, nullptr);
       if(!qnext) {
         return { };
       }
@@ -71,7 +71,7 @@ Value Reference::unset() const
     }
     // Erase the element referenced by the last modifier.
     Value erased;
-    mend->apply_mutable_opt(cur, false, &erased);
+    end->apply_mutable_opt(cur, false, &erased);
     return std::move(erased);
   }
 
