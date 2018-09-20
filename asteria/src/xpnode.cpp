@@ -221,6 +221,13 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_unnamed_object alt_bnd = { std::move(pairs_bnd) };
         return std::move(alt_bnd);
       }
+      case index_subexpression: {
+        const auto &alt = this->m_stor.as<S_subexpression>();
+        // Bind the subexpression recursively.
+        auto expr_bnd = alt.expr.bind(ctx);
+        Xpnode::S_subexpression alt_bnd = { std::move(expr_bnd) };
+        return std::move(alt_bnd);
+      }
       default: {
         ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
       }
@@ -1108,6 +1115,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
         stack_inout.emplace_back(std::move(ref_c));
+        return;
+      }
+      case index_subexpression: {
+        const auto &alt = this->m_stor.as<S_subexpression>();
+        // Evaluate the subexpression recursively.
+        auto ref = alt.expr.evaluate(ctx);
+        stack_inout.emplace_back(std::move(ref));
         return;
       }
       default: {

@@ -97,6 +97,10 @@ class Xpnode
       {
         Dictionary<Expression> pairs;
       };
+    struct S_subexpression
+      {
+        Expression expr;
+      };
 
     enum Index : Uint8
       {
@@ -109,6 +113,7 @@ class Xpnode
         index_operator_rpn      = 6,
         index_unnamed_array     = 7,
         index_unnamed_object    = 8,
+        index_subexpression     = 9,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -121,6 +126,7 @@ class Xpnode
         , S_operator_rpn      // 6,
         , S_unnamed_array     // 7,
         , S_unnamed_object    // 8,
+        , S_subexpression     // 9,
       )>;
 
   public:
