@@ -19,198 +19,171 @@ Parser::~Parser()
 
 namespace {
 
-  constexpr Parser_result do_make_result(const Token *qtok_opt, Parser_result::Error error)
-    {
-      return qtok_opt ? Parser_result(qtok_opt->get_line(), qtok_opt->get_offset(), qtok_opt->get_length(), error)
-                      : Parser_result(0, 0, 0, error);
-    }
-
-  Parser_result do_match_keyword(Token_stream &toks_inout, Token::Keyword keyword, Parser_result::Error noop_error)
+  inline Parser_result do_make_parser_result(const Token_stream &toks_inout, Parser_result::Error error)
     {
       const auto qtok = toks_inout.peek_opt();
       if(!qtok) {
-        return do_make_result(nullptr, noop_error);
+        return Parser_result(0, 0, 0, error);
+      }
+      return Parser_result(qtok->get_line(), qtok->get_offset(), qtok->get_length(), error);
+    }
+
+  bool do_match_keyword(Token_stream &toks_inout, Token::Keyword keyword)
+    {
+      const auto qtok = toks_inout.peek_opt();
+      if(!qtok) {
+        return false;
       }
       const auto qalt = qtok->opt<Token::S_keyword>();
       if(!qalt) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       if(qalt->keyword != keyword) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
+      return true;
     }
 
-  Parser_result do_match_punctuator(Token_stream &toks_inout, Token::Punctuator punct, Parser_result::Error noop_error)
+  bool do_match_punctuator(Token_stream &toks_inout, Token::Punctuator punct)
     {
       const auto qtok = toks_inout.peek_opt();
       if(!qtok) {
-        return do_make_result(nullptr, noop_error);
+        return false;
       }
       const auto qalt = qtok->opt<Token::S_punctuator>();
       if(!qalt) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       if(qalt->punct != punct) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
+      return true;
     }
 
-  Parser_result do_match_identifier(String &name_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_identifier(String &name_out, Token_stream &toks_inout)
     {
       const auto qtok = toks_inout.peek_opt();
       if(!qtok) {
-        return do_make_result(nullptr, noop_error);
+        return false;
       }
       const auto qalt = qtok->opt<Token::S_identifier>();
       if(!qalt) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       name_out = qalt->name;
       toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
+      return true;
     }
 
-  Parser_result do_match_string_literal(String &value_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_match_string_literal(String &value_out, Token_stream &toks_inout)
     {
       const auto qtok = toks_inout.peek_opt();
       if(!qtok) {
-        return do_make_result(nullptr, noop_error);
+        return false;
       }
       const auto qalt = qtok->opt<Token::S_string_literal>();
       if(!qalt) {
-        return do_make_result(qtok, noop_error);
+        return false;
       }
       value_out = qalt->value;
       toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
+      return true;
     }
 
-  Parser_result do_accept_export_directive(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_export_directive(Statement &stmt_out, Token_stream &toks_inout)
     {
       // export-directive ::=
       //   "export" identifier ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_export, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_export) == false) {
+        return false;
       }
       String name;
-      res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(name, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_export stmt_c = { std::move(name) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_import_directive(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_import_directive(Statement &stmt_out, Token_stream &toks_inout)
     {
       // import-directive ::=
       //   "import" string-literal ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_import, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_import) == false) {
+        return false;
       }
       String path;
-      res = do_match_string_literal(path, toks_inout, Parser_result::error_string_literal_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_string_literal(path, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_string_literal_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_import stmt_c = { std::move(path) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
   template<typename SinkT>
-    extern Parser_result do_accept_statement(SinkT &sink_out, Token_stream &toks_inout, Parser_result::Error noop_error);
+    extern bool do_accept_statement(SinkT &sink_out, Token_stream &toks_inout);
 
-  Parser_result do_accept_statement_list(Vector<Statement> &stmts_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_block(Block &block_out, Token_stream &toks_inout)
     {
+      // block ::=
+      //   "{" statement-list-opt "}"
       // statement-list-opt ::=
       //   statement-list | ""
       // statement-list ::=
       //   statement statement-list-opt
-      Statement stmt;
-      auto res = do_accept_statement(stmt, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      stmts_out.emplace_back(std::move(stmt));
-      for(;;) {
-        res = do_accept_statement(stmt, toks_inout, Parser_result::error_no_operation_performed);
-        if(res == Parser_result::error_no_operation_performed) {
-          break;
-        }
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        stmts_out.emplace_back(std::move(stmt));
-      }
-      return res;
-    }
-
-  Parser_result do_accept_block(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error)
-    {
-      // block ::=
-      //   "{" statement-list-opt "}"
-      auto res = do_match_punctuator(toks_inout, Token::punctuator_brace_op, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_brace_op) == false) {
+        return false;
       }
       Vector<Statement> stmts;
-      res = do_accept_statement_list(stmts, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
+      for(;;) {
+        Statement stmt;
+        if(do_accept_statement(stmt, toks_inout) == false) {
+          break;
         }
+        stmts.emplace_back(std::move(stmt));
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_brace_cl, Parser_result::error_close_brace_or_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_brace_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_brace_or_statement_expected);
       }
       block_out = std::move(stmts);
-      return res;
+      return true;
     }
-  Parser_result do_accept_block(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_block(Statement &stmt_out, Token_stream &toks_inout)
     {
       Block block;
-      auto res = do_accept_block(block, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_block(block, toks_inout) == false) {
+        return false;
       }
       Statement::S_block stmt_c = { std::move(block) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_null_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_null_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // null-statement ::=
       //   ";"
-      auto res = do_match_punctuator(toks_inout, Token::punctuator_semicol, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        return false;
       }
       Statement::S_null stmt_c = { };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  void do_tell_source_location(String &file_out, Uint64 &line_out, const Token_stream &toks)
+  void do_tell_source_location(String &file_out, Uint64 &line_out, const Token_stream &toks_inout)
     {
-      const auto qtok = toks.peek_opt();
+      const auto qtok = toks_inout.peek_opt();
       if(!qtok) {
         return;
       }
@@ -218,53 +191,44 @@ namespace {
       line_out = qtok->get_line();
     }
 
-  Parser_result do_accept_identifier_list(Vector<String> &names_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_identifier_list(Vector<String> &names_out, Token_stream &toks_inout)
     {
       // identifier-list-opt ::=
       //   identifier-list | ""
       // identifier-list ::=
       //   identifier ( "," identifier-list | "" )
       String name;
-      auto res = do_match_identifier(name, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(name, toks_inout) == false) {
+        return false;
       }
       names_out.emplace_back(std::move(name));
-      for(;;) {
-        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_no_operation_performed);
-        if(res == Parser_result::error_no_operation_performed) {
-          break;
-        }
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-        if(res != Parser_result::error_success) {
-          return res;
+      while(do_match_punctuator(toks_inout, Token::punctuator_comma)) {
+        if(do_accept_identifier(name, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
         }
         names_out.emplace_back(std::move(name));
       }
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_expression(Expression &expr_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_expression(Expression &expr_out, Token_stream &toks_inout)
     {
       // TODO
       auto qk = toks_inout.peek_opt();
       if(!qk) {
-        return do_make_result(nullptr, noop_error);
+        return false;
       }
       if(qk->index() == Token::index_keyword) {
-        return do_make_result(qk, noop_error);
+        return false;
       }
       if(qk->index() == Token::index_punctuator) {
-        return do_make_result(qk, noop_error);
+        return false;
       }
       toks_inout.shift();
-      return do_make_result(nullptr, Parser_result::error_success);
+      return true;
     }
 
-  Parser_result do_accept_variable_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_variable_definition(Statement &stmt_out, Token_stream &toks_inout)
     {
       // variable-definition ::=
       //   "var" identifier equal-initailizer-opt ";"
@@ -272,69 +236,56 @@ namespace {
       //   equal-initializer | ""
       // equal-initializer ::=
       //   "=" expression
-      auto res = do_match_keyword(toks_inout, Token::keyword_var, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_var) == false) {
+        return false;
       }
       String name;
-      res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(name, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
       }
       Expression init;
-      res = do_match_punctuator(toks_inout, Token::punctuator_assign, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_accept_expression(init, toks_inout, Parser_result::error_expression_expected);
-        if(res != Parser_result::error_success) {
-          return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_assign)) {
+        if(do_accept_expression(init, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
         }
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_var_def stmt_c = { std::move(name), false, std::move(init) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_immutable_variable_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_immutable_variable_definition(Statement &stmt_out, Token_stream &toks_inout)
     {
       // immutable-variable-definition ::=
       //   "const" identifier equal-initailizer ";"
       // equal-initializer ::=
       //   "=" expression
-      auto res = do_match_keyword(toks_inout, Token::keyword_const, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_const) == false) {
+        return false;
       }
       String name;
-      res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(name, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_assign, Parser_result::error_equals_sign_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_assign) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_equals_sign_expected);
       }
       Expression init;
-      res = do_accept_expression(init, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(init, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_var_def stmt_c = { std::move(name), true, std::move(init) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_function_definition(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_function_definition(Statement &stmt_out, Token_stream &toks_inout)
     {
       // Copy these parameters before reading from the stream which is destructive.
       String file;
@@ -342,103 +293,79 @@ namespace {
       do_tell_source_location(file, line, toks_inout);
       // function-definition ::=
       //   "func" identifier "(" identifier-list-opt ")" statement
-      auto res = do_match_keyword(toks_inout, Token::keyword_func, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_func) == false) {
+        return false;
       }
       String name;
-      res = do_match_identifier(name, toks_inout, Parser_result::error_identifier_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(name, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
       Vector<String> params;
-      res = do_accept_identifier_list(params, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_or_parameter_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      do_accept_identifier_list(params, toks_inout);
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Block body;
-      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
       Statement::S_func_def stmt_c = { std::move(file), line, std::move(name), std::move(params), std::move(body) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_expression_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // expression-statement ::=
       //   expression ";"
       Expression expr;
-      auto res = do_accept_expression(expr, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(expr, toks_inout) == false) {
+        return false;
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_expr stmt_c = { std::move(expr) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_if_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_if_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // if-statement ::=
       //   "if" "(" expression ")" statement ( "else" statement | "" )
-      auto res = do_match_keyword(toks_inout, Token::keyword_if, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_if) == false) {
+        return false;
       }
       Expression cond;
-      res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(cond, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
+      }
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Block branch_true;
-      res = do_accept_statement(branch_true, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(branch_true, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
       Block branch_false;
-      res = do_match_keyword(toks_inout, Token::keyword_else, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
+      if(do_match_keyword(toks_inout, Token::keyword_else)) {
+        if(do_accept_statement(branch_false, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
         }
-        res = do_accept_statement(branch_false, toks_inout, Parser_result::error_statement_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-      } else {
-        res = do_make_result(nullptr, Parser_result::error_success);
       }
       Statement::S_if stmt_c = { std::move(cond), std::move(branch_true), std::move(branch_false) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_switch_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_switch_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // switch-statement ::=
       //   "switch" "(" expression ")" switch-block
@@ -448,137 +375,113 @@ namespace {
       //   switch-clause-list | ""
       // switch-clause-list ::=
       //   ( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
-      auto res = do_match_keyword(toks_inout, Token::keyword_switch, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_switch) == false) {
+        return false;
       }
       Expression ctrl;
-      res = do_accept_expression(ctrl, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(ctrl, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_brace_op, Parser_result::error_open_brace_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Bivector<Expression, Block> clauses;
+      if(do_match_punctuator(toks_inout, Token::punctuator_brace_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_brace_expected);
+      }
       for(;;) {
         Expression cond;
-        res = do_match_keyword(toks_inout, Token::keyword_default, Parser_result::error_no_operation_performed);
-        if(res == Parser_result::error_no_operation_performed) {
-          res = do_match_keyword(toks_inout, Token::keyword_case, Parser_result::error_no_operation_performed);
-          if(res == Parser_result::error_no_operation_performed) {
+        if(do_match_keyword(toks_inout, Token::keyword_default) == false) {
+          if(do_match_keyword(toks_inout, Token::keyword_case) == false) {
             break;
           }
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-          res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
-        }
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        Vector<Statement> body;
-        res = do_accept_statement_list(body, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
+          if(do_accept_expression(cond, toks_inout) == false) {
+            throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
           }
         }
-        clauses.emplace_back(std::move(cond), std::move(body));
+        if(do_match_punctuator(toks_inout, Token::punctuator_colon) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_colon_expected);
+        }
+        Vector<Statement> stmts;
+        for(;;) {
+          Statement stmt;
+          if(do_accept_statement(stmt, toks_inout) == false) {
+            break;
+          }
+          stmts.emplace_back(std::move(stmt));
+        }
+        clauses.emplace_back(std::move(cond), std::move(stmts));
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_brace_cl, Parser_result::error_close_brace_or_switch_clause_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_brace_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_brace_or_switch_clause_expected);
       }
       Statement::S_switch stmt_c = { std::move(ctrl), std::move(clauses) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_do_while_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_do_while_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // do-while-statement ::=
       //   "do" statement "while" "(" expression ")" ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_do, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_do) == false) {
+        return false;
       }
       Block body;
-      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
-      res = do_match_keyword(toks_inout, Token::keyword_while, Parser_result::error_keyword_while_expected);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_while) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_keyword_while_expected);
       }
       Expression cond;
-      res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(cond, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
+      }
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_while stmt_c = { true, std::move(cond), std::move(body) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_while_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_while_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // while-statement ::=
       //   "while" "(" expression ")" statement
-      auto res = do_match_keyword(toks_inout, Token::keyword_while, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_while) == false) {
+        return false;
       }
       Expression cond;
-      res = do_accept_expression(cond, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(cond, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
+      }
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Block body;
-      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
       Statement::S_while stmt_c = { false, std::move(cond), std::move(body) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_for_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_for_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // for-statement ::=
       //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
@@ -586,13 +489,8 @@ namespace {
       //   "each" identifier "," identifier ":" expression
       // for-statement-triplet ::=
       //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
-      auto res = do_match_keyword(toks_inout, Token::keyword_for, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_for) == false) {
+        return false;
       }
       // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
       String key_name;
@@ -600,76 +498,41 @@ namespace {
       Statement init_stmt;
       Expression cond;
       Expression step;
-      res = do_match_keyword(toks_inout, Token::keyword_each, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
+      }
+      if(do_match_keyword(toks_inout, Token::keyword_each)) {
+        if(do_accept_identifier(key_name, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
         }
-        res = do_match_identifier(key_name, toks_inout, Parser_result::error_identifier_expected);
-        if(res != Parser_result::error_success) {
-          return res;
+        if(do_match_punctuator(toks_inout, Token::punctuator_comma) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_comma_expected);
         }
-        res = do_match_punctuator(toks_inout, Token::punctuator_comma, Parser_result::error_comma_expected);
-        if(res != Parser_result::error_success) {
-          return res;
+        if(do_accept_identifier(mapped_name, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
         }
-        res = do_match_identifier(mapped_name, toks_inout, Parser_result::error_identifier_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_match_punctuator(toks_inout, Token::punctuator_colon, Parser_result::error_colon_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_accept_expression(step, toks_inout, Parser_result::error_expression_expected);
-        if(res != Parser_result::error_success) {
-          return res;
+        if(do_match_punctuator(toks_inout, Token::punctuator_colon) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_colon_expected);
         }
       } else {
-        res = do_accept_variable_definition(init_stmt, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-          goto zin;
+        const bool init_got = do_accept_variable_definition(init_stmt, toks_inout) ||
+                              do_accept_null_statement(init_stmt, toks_inout) ||
+                              do_accept_expression_statement(init_stmt, toks_inout);
+        if(!init_got) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_for_statement_initializer_expected);
         }
-        res = do_accept_null_statement(init_stmt, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-          goto zin;
-        }
-        res = do_accept_expression_statement(init_stmt, toks_inout, Parser_result::error_for_statement_initializer_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-    zin:
-        res = do_accept_expression(cond, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
-          }
-        }
-        res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-        res = do_accept_expression(step, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          if(res != Parser_result::error_success) {
-            return res;
-          }
+        do_accept_expression(cond, toks_inout);
+        if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
         }
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      do_accept_expression(step, toks_inout);
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Block body;
-      res = do_accept_statement(body, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
       if(key_name.empty()) {
         Vector<Statement> init;
@@ -680,174 +543,133 @@ namespace {
         Statement::S_for_each stmt_c = { std::move(key_name), std::move(mapped_name), std::move(step), std::move(body) };
         stmt_out = std::move(stmt_c);
       }
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_break_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_break_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // break-statement ::=
       //   "break" ( "switch" | "while" | "for" ) ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_break, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_break) == false) {
+        return false;
       }
       Statement::Target target = Statement::target_unspec;
-      res = do_match_keyword(toks_inout, Token::keyword_switch, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
+      if(do_match_keyword(toks_inout, Token::keyword_switch)) {
         target = Statement::target_switch;
         goto z;
       }
-      res = do_match_keyword(toks_inout, Token::keyword_while, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
+      if(do_match_keyword(toks_inout, Token::keyword_while)) {
         target = Statement::target_while;
         goto z;
       }
-      res = do_match_keyword(toks_inout, Token::keyword_for, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
+      if(do_match_keyword(toks_inout, Token::keyword_for)) {
         target = Statement::target_for;
         goto z;
       }
     z:
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_break stmt_c = { target };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_continue_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_continue_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // continue-statement ::=
       //   "continue" ( "while" | "for" ) ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_continue, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_continue) == false) {
+        return false;
       }
       Statement::Target target = Statement::target_unspec;
-      res = do_match_keyword(toks_inout, Token::keyword_while, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
+      if(do_match_keyword(toks_inout, Token::keyword_while)) {
         target = Statement::target_while;
         goto z;
       }
-      res = do_match_keyword(toks_inout, Token::keyword_for, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
+      if(do_match_keyword(toks_inout, Token::keyword_for)) {
         target = Statement::target_for;
         goto z;
       }
     z:
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_continue stmt_c = { target };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_throw_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_throw_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // throw-statement ::=
       //   "throw" expression ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_throw, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_throw) == false) {
+        return false;
       }
       Expression expr;
-      res = do_accept_expression(expr, toks_inout, Parser_result::error_expression_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_expression(expr, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_expression_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_throw stmt_c = { std::move(expr) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_return_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_return_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // return-statement ::=
       //   "return" expression-opt ";"
-      auto res = do_match_keyword(toks_inout, Token::keyword_return, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_return) == false) {
+        return false;
       }
       Expression expr;
-      res = do_accept_expression(expr, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        if(res != Parser_result::error_success) {
-          return res;
-        }
-      }
-      res = do_match_punctuator(toks_inout, Token::punctuator_semicol, Parser_result::error_semicolon_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      do_accept_expression(expr, toks_inout);
+      if(do_match_punctuator(toks_inout, Token::punctuator_semicol) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_semicolon_expected);
       }
       Statement::S_return stmt_c = { std::move(expr) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_try_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_try_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // try-statement ::=
       //   "try" statement "catch" "(" identifier ")" statement
-      auto res = do_match_keyword(toks_inout, Token::keyword_try, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_try) == false) {
+        return false;
       }
       Block body_try;
-      res = do_accept_statement(body_try, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body_try, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
-      res = do_match_keyword(toks_inout, Token::keyword_catch, Parser_result::error_keyword_catch_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_keyword(toks_inout, Token::keyword_catch) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_keyword_catch_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_op, Parser_result::error_open_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_op) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_open_parenthesis_expected);
       }
       String except_name;
-      res = do_match_identifier(except_name, toks_inout, Parser_result::error_identifier_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_identifier(except_name, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
       }
-      res = do_match_punctuator(toks_inout, Token::punctuator_parenth_cl, Parser_result::error_close_parenthesis_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_match_punctuator(toks_inout, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_close_parenthesis_expected);
       }
       Block body_catch;
-      res = do_accept_statement(body_catch, toks_inout, Parser_result::error_statement_expected);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_statement(body_catch, toks_inout) == false) {
+        throw do_make_parser_result(toks_inout, Parser_result::error_statement_expected);
       }
       Statement::S_try stmt_c = { std::move(body_try), std::move(except_name), std::move(body_catch) };
       stmt_out = std::move(stmt_c);
-      return res;
+      return true;
     }
 
-  Parser_result do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_nonblock_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
       // non-block-statement ::=
       //   null-statement |
@@ -857,124 +679,53 @@ namespace {
       //   do-while-statement | while-statement | for-statement |
       //   break-statement | continue-statement | throw-statement | return-statement |
       //   try-statement
-      auto res = do_accept_null_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_variable_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_immutable_variable_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_function_definition(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_expression_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_if_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_switch_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_do_while_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_while_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_for_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_break_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_continue_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_throw_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_return_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_try_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      // Be advised that a `return do_make_result(...);` would prevent NRVO.
-      res = do_make_result(toks_inout.peek_opt(), noop_error);
-      return res;
+      return do_accept_null_statement(stmt_out, toks_inout) ||
+             do_accept_variable_definition(stmt_out, toks_inout) ||
+             do_accept_immutable_variable_definition(stmt_out, toks_inout) ||
+             do_accept_function_definition(stmt_out, toks_inout) ||
+             do_accept_expression_statement(stmt_out, toks_inout) ||
+             do_accept_if_statement(stmt_out, toks_inout) ||
+             do_accept_switch_statement(stmt_out, toks_inout) ||
+             do_accept_do_while_statement(stmt_out, toks_inout) ||
+             do_accept_while_statement(stmt_out, toks_inout) ||
+             do_accept_for_statement(stmt_out, toks_inout) ||
+             do_accept_break_statement(stmt_out, toks_inout) ||
+             do_accept_continue_statement(stmt_out, toks_inout) ||
+             do_accept_throw_statement(stmt_out, toks_inout) ||
+             do_accept_return_statement(stmt_out, toks_inout) ||
+             do_accept_try_statement(stmt_out, toks_inout);
     }
-  Parser_result do_accept_nonblock_statement(Block &block_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_nonblock_statement(Block &block_out, Token_stream &toks_inout)
     {
       Statement stmt;
-      auto res = do_accept_nonblock_statement(stmt, toks_inout, noop_error);
-      if(res != Parser_result::error_success) {
-        return res;
+      if(do_accept_nonblock_statement(stmt, toks_inout) == false) {
+        return false;
       }
       Vector<Statement> stmts;
       stmts.emplace_back(std::move(stmt));
       block_out = std::move(stmts);
-      return res;
+      return true;
     }
 
   template<typename SinkT>
-    Parser_result do_accept_statement(SinkT &sink_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+    bool do_accept_statement(SinkT &sink_out, Token_stream &toks_inout)
       {
-        ASTERIA_DEBUG_LOG("Looking for a statement: ", *(toks_inout.peek_opt()));
+        ASTERIA_DEBUG_LOG("Looking for a statement: ", toks_inout.empty() ? String::shallow("<no token>") : ASTERIA_FORMAT_STRING(*(toks_inout.peek_opt())));
         // statement ::=
         //   block | non-block-statement
-        auto res = do_accept_block(sink_out, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          return res;
-        }
-        res = do_accept_nonblock_statement(sink_out, toks_inout, Parser_result::error_no_operation_performed);
-        if(res != Parser_result::error_no_operation_performed) {
-          return res;
-        }
-        // Be advised that a `return do_make_result(...);` would prevent NRVO.
-        res = do_make_result(toks_inout.peek_opt(), noop_error);
-        return res;
+        return do_accept_block(sink_out, toks_inout) ||
+               do_accept_nonblock_statement(sink_out, toks_inout);
       }
 
-  Parser_result do_accept_directive_or_statement(Statement &stmt_out, Token_stream &toks_inout, Parser_result::Error noop_error)
+  bool do_accept_directive_or_statement(Statement &stmt_out, Token_stream &toks_inout)
     {
-      ASTERIA_DEBUG_LOG("Looking for a directive or statement: ", *(toks_inout.peek_opt()));
       // directive-or-statement ::=
       //   directive | statement
       // directive ::=
       //   export-directive | import-directive
-      auto res = do_accept_export_directive(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_import_directive(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      res = do_accept_statement(stmt_out, toks_inout, Parser_result::error_no_operation_performed);
-      if(res != Parser_result::error_no_operation_performed) {
-        return res;
-      }
-      // Be advised that a `return do_make_result(...);` would prevent NRVO.
-      res = do_make_result(toks_inout.peek_opt(), noop_error);
-      return res;
+      return do_accept_export_directive(stmt_out, toks_inout) ||
+             do_accept_import_directive(stmt_out, toks_inout) ||
+             do_accept_statement(stmt_out, toks_inout);
     }
 
 }
@@ -988,21 +739,24 @@ Parser_result Parser::load(Token_stream &toks_inout)
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
     Vector<Statement> stmts;
-    while(toks_inout.size() != 0) {
-      // document ::=
-      //   directive-or-statement-list-opt
-      // directive-or-statement-list-opt ::=
-      //   directive-or-statement-list | ""
-      // directive-or-statement-list ::=
-      //   directive-or-statement directive-or-statement-list-opt
-      Statement stmt;
-      auto res = do_accept_directive_or_statement(stmt, toks_inout, Parser_result::error_directive_or_statement_expected);
-      if(res != Parser_result::error_success) {
-        ASTERIA_DEBUG_LOG("Parser error: ", res.get_error(), " (", Parser_result::describe_error(res.get_error()), ")");
-        this->m_stor.set(res);
-        return res;
+    try {
+      while(toks_inout.empty() == false) {
+        // document ::=
+        //   directive-or-statement-list-opt
+        // directive-or-statement-list-opt ::=
+        //   directive-or-statement-list | ""
+        // directive-or-statement-list ::=
+        //   directive-or-statement directive-or-statement-list-opt
+        Statement stmt;
+        if(do_accept_directive_or_statement(stmt, toks_inout) == false) {
+          throw do_make_parser_result(toks_inout, Parser_result::error_identifier_expected);
+        }
+        stmts.emplace_back(std::move(stmt));
       }
-      stmts.emplace_back(std::move(stmt));
+    } catch(Parser_result &e) {  // Don't play this at home.
+      ASTERIA_DEBUG_LOG("Parser error: ", e.get_error(), " (", Parser_result::describe_error(e.get_error()), ")");
+      this->m_stor.set(e);
+      return e;
     }
     // Accept the result.
     this->m_stor.emplace<Block>(std::move(stmts));

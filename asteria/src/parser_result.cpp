@@ -13,9 +13,6 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       case error_success: {
         return "The operation succeeded.";
       }
-      case error_no_operation_performed: {
-        return "No operation was performed.";
-      }
       // Phase 1
       //   I/O stream
       //   UTF-8 decoder

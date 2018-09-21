@@ -24,7 +24,7 @@ class Token_stream
     Parser_result load(std::istream &sis_inout, const String &file);
     void clear() noexcept;
 
-    Size size() const noexcept;
+    bool empty() const noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();
   };

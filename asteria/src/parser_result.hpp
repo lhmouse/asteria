@@ -14,7 +14,6 @@ class Parser_result
     enum Error : Uint32
       {
         error_success                                    =   0,
-        error_no_operation_performed                     =   1,
         // Phase 1
         //   I/O stream
         //   UTF-8 decoder

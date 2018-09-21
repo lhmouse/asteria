@@ -793,9 +793,9 @@ void Token_stream::clear() noexcept
     this->m_rseq.clear();
   }
 
-Size Token_stream::size() const noexcept
+bool Token_stream::empty() const noexcept
   {
-    return this->m_rseq.size();
+    return this->m_rseq.empty();
   }
 const Token * Token_stream::peek_opt() const noexcept
   {
