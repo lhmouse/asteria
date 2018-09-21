@@ -44,7 +44,7 @@ class Parser
         return this->state() == state_success;
       }
 
-    Parser_result load(Token_stream &toks_inout);
+    Parser_result load(Token_stream &toks_io);
     void clear() noexcept;
 
     Parser_result get_result() const;

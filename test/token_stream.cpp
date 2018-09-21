@@ -20,7 +20,6 @@ int main()
     auto result = ts.load(iss, String("dummy_file"));
     ASTERIA_TEST_CHECK(result.get_error() == Parser_result::error_success);
     ASTERIA_TEST_CHECK(iss.eof());
-    ASTERIA_TEST_CHECK(ts.size() == 18);
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_identifier>().name == "hh");
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_inc);
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_add);

@@ -25,18 +25,18 @@ Token_stream & Token_stream::operator=(Token_stream &&) noexcept
 
 namespace {
 
-  String & do_blank_comment(String &str_inout, Size tpos, Size tn)
+  String & do_blank_comment(String &str_io, Size tpos, Size tn)
     {
       auto pos = tpos;
       for(;;) {
-        pos = str_inout.find_first_not_of(" \t\v\f\r\n", pos);
+        pos = str_io.find_first_not_of(" \t\v\f\r\n", pos);
         if(pos - tpos >= tn) {
           break;
         }
-        str_inout.mut(pos) = ' ';
+        str_io.mut(pos) = ' ';
         ++pos;
       }
-      return str_inout;
+      return str_io;
     }
 
   struct Prefix_comparator
@@ -71,12 +71,12 @@ namespace {
 
 }
 
-Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
+Parser_result Token_stream::load(std::istream &sis_io, const String &file)
   {
     // Check whether the stream can be read from.
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
     Size line = 0;
-    if(!sis_inout) {
+    if(!sis_io) {
       return Parser_result(line, 0, 0, Parser_result::error_istream_open_failure);
     }
     // Save the position of an unterminated block comment.
@@ -86,7 +86,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
     // Read source code line by line.
     Vector<Token> seq;
     String str;
-    while(++line, getline(sis_inout, str)) {
+    while(++line, getline(sis_io, str)) {
       // Discard the first line if it looks like a shebang.
       if((line == 1) && str.starts_with("#!", 2)) {
         continue;
@@ -776,7 +776,7 @@ Parser_result Token_stream::load(std::istream &sis_inout, const String &file)
         pos = epos;
       }
     }
-    if(sis_inout.bad()) {
+    if(sis_io.bad()) {
       // If there was an irrecovable I/O failure then any other status code is meaningless.
       return Parser_result(line, 0, 0, Parser_result::error_istream_badbit_set);
     }

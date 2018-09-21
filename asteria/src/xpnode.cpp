@@ -236,13 +236,13 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
 
 namespace {
 
-  Reference do_pop_reference(Vector<Reference> &stack_inout)
+  Reference do_pop_reference(Vector<Reference> &stack_io)
     {
-      if(stack_inout.empty()) {
+      if(stack_io.empty()) {
         ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack is empty, which means the expression is probably invalid.");
       }
-      auto ref = std::move(stack_inout.mut_back());
-      stack_inout.pop_back();
+      auto ref = std::move(stack_io.mut_back());
+      stack_io.pop_back();
       return ref;
     }
 
@@ -506,14 +506,14 @@ namespace {
 
 }
 
-void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const
+void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {
         const auto &alt = this->m_stor.as<S_literal>();
         // Push the constant.
         Reference_root::S_constant ref_c = { alt.value };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_io.emplace_back(std::move(ref_c));
         return;
       }
       case index_named_reference: {
@@ -524,13 +524,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
         }
         // Push the reference found.
-        stack_inout.emplace_back(*(pair.second));
+        stack_io.emplace_back(*(pair.second));
         return;
       }
       case index_bound_reference: {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         // Push the reference stored.
-        stack_inout.emplace_back(alt.ref);
+        stack_io.emplace_back(alt.ref);
         return;
       }
       case index_closure_function: {
@@ -541,13 +541,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         auto body_bnd = alt.body.bind_in_place(ctx_next);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_io.emplace_back(std::move(ref_c));
         return;
       }
       case index_branch: {
         const auto &alt = this->m_stor.as<S_branch>();
         // Pop the condition off the stack.
-        auto cond = do_pop_reference(stack_inout);
+        auto cond = do_pop_reference(stack_io);
         // Pick a branch.
         const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         if(branch_taken.get().empty()) {
@@ -563,13 +563,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             cond = std::move(result);
           }
         }
-        stack_inout.emplace_back(std::move(cond));
+        stack_io.emplace_back(std::move(cond));
         return;
       }
       case index_function_call: {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Pop the callee off the stack.
-        auto callee = do_pop_reference(stack_inout);
+        auto callee = do_pop_reference(stack_io);
         auto callee_value = callee.read();
         // Make sure it is really a function.
         const auto qfunc = callee_value.opt<D_function>();
@@ -583,13 +583,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         Vector<Reference> args;
         args.reserve(alt.arg_cnt);
         for(auto i = alt.arg_cnt; i != 0; --i) {
-          auto arg = do_pop_reference(stack_inout);
+          auto arg = do_pop_reference(stack_io);
           args.emplace_back(std::move(arg));
         }
         // Call the function and de-materialize the result.
         auto result = do_traced_call(alt.file, alt.line, *qfunc, std::move(callee.zoom_out()), std::move(args));
         result.dematerialize();
-        stack_inout.emplace_back(std::move(result));
+        stack_io.emplace_back(std::move(result));
         return;
       }
       case index_operator_rpn: {
@@ -597,7 +597,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
         // Pop the first operand off the stack.
         // For prefix operators, this is actually the rhs operand anyway.
         // This is also the `Reference` where the result will be stored.
-        auto lhs = do_pop_reference(stack_inout);
+        auto lhs = do_pop_reference(stack_io);
         const auto set_result = [&](bool compound_assign, Value value)
           {
             ASTERIA_DEBUG_LOG("Setting result: ", value);
@@ -647,7 +647,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_postfix_at: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // The subscript operand shall have type `integer` or `string`.
             // `compound_assign` is ignored.
             auto lhs_value = lhs.read();
@@ -751,7 +751,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_eq: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = lhs.read();
@@ -763,7 +763,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_ne: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = lhs.read();
@@ -775,7 +775,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_lt: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -789,7 +789,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_gt: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -803,7 +803,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_lte: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -817,7 +817,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_cmp_gte: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -831,7 +831,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_add: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` and `real` types, return the sum of both operands.
             // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
@@ -861,7 +861,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_sub: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` and `real` types, return the difference of both operands.
             auto lhs_value = lhs.read();
@@ -885,7 +885,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_mul: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the boolean type, return the logical AND'd result of both operands.
             // For the integer and real types, return the product of both operands.
             // If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
@@ -920,7 +920,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_div: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the integer and real types, return the quotient of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -938,7 +938,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_mod: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the integer and real types, return the reminder of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -956,7 +956,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_sll: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
@@ -971,7 +971,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_srl: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
@@ -986,7 +986,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_sla: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
             // If a bit unequal to the sign bit would be shifted into or across the sign bit, an exception is thrown.
@@ -1002,7 +1002,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_sra: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
             // Both operands have to be integers.
@@ -1017,7 +1017,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_andb: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the `boolean` type, return the logical AND'd result of both operands.
             // For the `integer` type, return the bitwise AND'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1036,7 +1036,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_orb: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` type, return the bitwise OR'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1055,7 +1055,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_xorb: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` type, return the bitwise XOR'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1074,7 +1074,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           }
           case xop_infix_assign: {
             // Pop the second operand off the stack.
-            auto rhs = do_pop_reference(stack_inout);
+            auto rhs = do_pop_reference(stack_io);
             // Copy the operand referenced by `rhs` to `lhs`.
             // `compound_assign` is ignored.
             // N.B. This is one of the few operators that work on all types.
@@ -1086,7 +1086,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
             ASTERIA_TERMINATE("An unknown operator type enumeration `", alt.xop, "` has been encountered.");
           }
         }
-        stack_inout.emplace_back(std::move(lhs));
+        stack_io.emplace_back(std::move(lhs));
         return;
       }
       case index_unnamed_array: {
@@ -1100,7 +1100,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           array.emplace_back(std::move(value));
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_io.emplace_back(std::move(ref_c));
         return;
       }
       case index_unnamed_object: {
@@ -1114,14 +1114,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_inout, const Executive_context &c
           object.insert_or_assign(pair.first, std::move(value));
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
-        stack_inout.emplace_back(std::move(ref_c));
+        stack_io.emplace_back(std::move(ref_c));
         return;
       }
       case index_subexpression: {
         const auto &alt = this->m_stor.as<S_subexpression>();
         // Evaluate the subexpression recursively.
         auto ref = alt.expr.evaluate(ctx);
-        stack_inout.emplace_back(std::move(ref));
+        stack_io.emplace_back(std::move(ref));
         return;
       }
       default: {

@@ -148,7 +148,7 @@ class Xpnode
 
   public:
     Xpnode bind(const Analytic_context &ctx) const;
-    void evaluate(Vector<Reference> &stack_inout, const Executive_context &ctx) const;
+    void evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const;
   };
 
 }
