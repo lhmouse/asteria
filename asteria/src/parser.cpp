@@ -731,7 +731,7 @@ namespace {
 }
 
 Parser_result Parser::load(Token_stream &toks_io)
-  {
+  try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor.set(nullptr);
     ///////////////////////////////////////////////////////////////////////////
@@ -739,28 +739,26 @@ Parser_result Parser::load(Token_stream &toks_io)
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
     Vector<Statement> stmts;
-    try {
-      while(toks_io.empty() == false) {
-        // document ::=
-        //   directive-or-statement-list-opt
-        // directive-or-statement-list-opt ::=
-        //   directive-or-statement-list | ""
-        // directive-or-statement-list ::=
-        //   directive-or-statement directive-or-statement-list-opt
-        Statement stmt;
-        if(do_accept_directive_or_statement(stmt, toks_io) == false) {
-          throw do_make_parser_result(toks_io, Parser_result::error_identifier_expected);
-        }
-        stmts.emplace_back(std::move(stmt));
+    while(toks_io.empty() == false) {
+      // document ::=
+      //   directive-or-statement-list-opt
+      // directive-or-statement-list-opt ::=
+      //   directive-or-statement-list | ""
+      // directive-or-statement-list ::=
+      //   directive-or-statement directive-or-statement-list-opt
+      Statement stmt;
+      if(do_accept_directive_or_statement(stmt, toks_io) == false) {
+        throw do_make_parser_result(toks_io, Parser_result::error_identifier_expected);
       }
-    } catch(Parser_result &e) {  // Don't play this at home.
-      ASTERIA_DEBUG_LOG("Parser error: ", e.get_error(), " (", Parser_result::describe_error(e.get_error()), ")");
-      this->m_stor.set(e);
-      return e;
+      stmts.emplace_back(std::move(stmt));
     }
     // Accept the result.
     this->m_stor.emplace<Block>(std::move(stmts));
     return Parser_result(0, 0, 0, Parser_result::error_success);
+  } catch(Parser_result &e) {  // Don't play this at home.
+    ASTERIA_DEBUG_LOG("Parser error: ", e.get_error(), " (", Parser_result::describe_error(e.get_error()), ")");
+    this->m_stor.set(e);
+    return e;
   }
 void Parser::clear() noexcept
   {
