@@ -687,23 +687,27 @@ namespace details_cow_vector {
   constexpr struct append_tag
     {
     } append;
-  constexpr struct emplace_back_tag
-    {
-    } emplace_back;
-  constexpr struct push_back_tag
-    {
-    } push_back;
 
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
       {
         vec->append(::std::forward<paramsT>(params)...);
       }
+
+  constexpr struct emplace_back_tag
+    {
+    } emplace_back;
+
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
       {
         vec->emplace_back(::std::forward<paramsT>(params)...);
       }
+
+  constexpr struct push_back_tag
+    {
+    } push_back;
+
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
       {

@@ -573,15 +573,17 @@ namespace details_cow_string {
   constexpr struct append_tag
     {
     } append;
-  constexpr struct push_back_tag
-    {
-    } push_back;
 
   template<typename stringT, typename ...paramsT>
     inline void tagged_append(stringT *str, append_tag, paramsT &&...params)
       {
         str->append(::std::forward<paramsT>(params)...);
       }
+
+  constexpr struct push_back_tag
+    {
+    } push_back;
+
   template<typename stringT, typename ...paramsT>
     inline void tagged_append(stringT *str, push_back_tag, paramsT &&...params)
       {
