@@ -92,6 +92,76 @@ namespace {
       return true;
     }
 
+  bool do_match_literal(Value &value_out, Token_stream &toks_io)
+    {
+      // literal ::=
+      //   null-literal | boolean-literal | string-literal | noescape-string-literal |
+      //   numeric-literal | nan-literal | infinity-literal
+      // null-literal ::=
+      //   "null"
+      // boolean-litearl ::=
+      //   "false" | "true"
+      // nan-literal ::=
+      //   "nan"
+      // infinity-literal ::=
+      //   "infinity"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword: {
+          const auto &alt = qtok->check<Token::S_keyword>();
+          switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_null: {
+              value_out = D_null();
+              break;
+            }
+            case Token::keyword_false: {
+              value_out = D_boolean(false);
+              break;
+            }
+            case Token::keyword_true: {
+              value_out = D_boolean(true);
+              break;
+            }
+            case Token::keyword_nan: {
+              value_out = std::numeric_limits<D_real>::quiet_NaN();
+              break;
+            }
+            case Token::keyword_infinity: {
+              value_out = std::numeric_limits<D_real>::infinity();
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        case Token::index_integer_literal: {
+          const auto &alt = qtok->check<Token::S_integer_literal>();
+          value_out = D_integer(alt.value);
+          break;
+        }
+        case Token::index_real_literal: {
+          const auto &alt = qtok->check<Token::S_real_literal>();
+          value_out = D_real(alt.value);
+          break;
+        }
+        case Token::index_string_literal: {
+          const auto &alt = qtok->check<Token::S_string_literal>();
+          value_out = D_string(alt.value);
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      toks_io.shift();
+      return true;
+    }
+
   bool do_accept_export_directive(Statement &stmt_out, Token_stream &toks_io)
     {
       // export-directive ::=
