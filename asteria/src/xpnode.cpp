@@ -280,13 +280,12 @@ namespace {
   D_integer do_negate(D_integer rhs, bool wrap)
     {
       using limits = std::numeric_limits<D_integer>;
-      if(rhs == limits::min()) {
-        if(!wrap) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
-        }
-        return rhs;
+      if(!wrap && (rhs == limits::min())) {
+        ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
       }
-      return -rhs;
+      auto reg = static_cast<Uint64>(rhs);
+      reg = -reg;
+      return static_cast<D_integer>(reg);
     }
 
   D_integer do_add(D_integer lhs, D_integer rhs)
