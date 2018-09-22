@@ -33,19 +33,25 @@ Expression Expression::bind(const Analytic_context &ctx) const
     }
     return std::move(nodes_bnd);
   }
-Reference Expression::evaluate(const Executive_context &ctx) const
+Reference Expression::evaluate(Vector<Reference> &stack, const Executive_context &ctx) const
   {
-    Vector<Reference> stack;
+    const auto size_old = stack.size();
     for(const auto &node : this->m_nodes) {
       node.evaluate(stack, ctx);
     }
-    if(stack.empty()) {
-      return { };
+    switch(stack.size() - size_old) {
+      case 0: {
+        return { };
+      }
+      case 1: {
+        auto ref = std::move(stack.mut_back());
+        stack.pop_back();
+        return std::move(ref);
+      }
+      default: {
+        ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
+      }
     }
-    if(stack.size() != 1) {
-      ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
-    }
-    return std::move(stack.mut_front());
   }
 
 }

@@ -28,7 +28,7 @@ class Expression
     bool empty() const noexcept;
 
     Expression bind(const Analytic_context &ctx) const;
-    Reference evaluate(const Executive_context &ctx) const;
+    Reference evaluate(Vector<Reference> &stack, const Executive_context &ctx) const;
   };
 
 }

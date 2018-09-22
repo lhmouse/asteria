@@ -235,7 +235,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
     }
   }
 
-Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
+Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Vector<Reference> &stack) const
   {
     switch(Index(this->m_stor.index())) {
       case index_null: {
@@ -247,13 +247,13 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(stack, ctx_io);
         return Block::status_next;
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
         // Execute the body.
-        return alt.body.execute(ref_out, ctx_io);
+        return alt.body.execute(ref_out, stack, ctx_io);
       }
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
@@ -261,7 +261,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // A variable becomes visible before its initializer, where it is initialized to `null`.
         do_safe_set_named_reference(ctx_io, "variable", alt.name, { });
         // Create a variable using the initializer.
-        ref_out = alt.init.evaluate(ctx_io);
+        ref_out = alt.init.evaluate(stack, ctx_io);
         auto value = ref_out.read();
         auto var = rocket::make_refcounted<Variable>(std::move(value), alt.immutable);
         // Reset the reference.
@@ -292,14 +292,14 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
-        ref_out = alt.cond.evaluate(ctx_io);
+        ref_out = alt.cond.evaluate(stack, ctx_io);
         const auto branch_taken = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        return branch_taken.get().execute(ref_out, ctx_io);
+        return branch_taken.get().execute(ref_out, stack, ctx_io);
       }
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
         // Evaluate the control expression.
-        ref_out = alt.ctrl.evaluate(ctx_io);
+        ref_out = alt.ctrl.evaluate(stack, ctx_io);
         const auto value_ctrl = ref_out.read();
         // Note that all `switch` clauses share the same context.
         // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
@@ -324,7 +324,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             ctx_test = std::ref(ctx_second);
           } else {
             // This is a `case` clause.
-            ref_out = it->first.evaluate(ctx_next);
+            ref_out = it->first.evaluate(stack, ctx_next);
             const auto value_comp = ref_out.read();
             if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
@@ -338,7 +338,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         // Iterate from the match clause to the end of the body, falling through clause boundaries if any.
         for(auto it = match; it != alt.clauses.end(); ++it) {
-          const auto status = it->second.execute_in_place(ref_out, ctx_next);
+          const auto status = it->second.execute_in_place(ref_out, ctx_next, stack);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_switch })) {
             // Break out of the body as requested.
             break;
@@ -353,17 +353,17 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
         if(alt.has_do) {
-          goto zs;
+          goto zentry;
         }
         for(;;) {
           // Check the loop condition.
-          ref_out = alt.cond.evaluate(ctx_io);
+          ref_out = alt.cond.evaluate(stack, ctx_io);
           if(ref_out.read().test() == false) {
             break;
           }
-  zs:
+  zentry:
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_io);
+          const auto status = alt.body.execute(ref_out, stack, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -381,18 +381,18 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Executive_context ctx_next(&ctx_io);
         // Execute the initializer. The status is ignored.
         ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
-        alt.init.execute_in_place(ref_out, ctx_next);
+        alt.init.execute_in_place(ref_out, ctx_next, stack);
         ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
         for(;;) {
           // Check the loop condition.
           if(alt.cond.empty() == false) {
-            ref_out = alt.cond.evaluate(ctx_next);
+            ref_out = alt.cond.evaluate(stack, ctx_next);
             if(ref_out.read().test() == false) {
               break;
             }
           }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_next);
+          const auto status = alt.body.execute(ref_out, stack, ctx_next);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
             // Break out of the body as requested.
             break;
@@ -402,7 +402,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             return status;
           }
           // Evaluate the loop step expression.
-          alt.step.evaluate(ctx_next);
+          alt.step.evaluate(stack, ctx_next);
         }
         return Block::status_next;
       }
@@ -414,7 +414,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
-        auto mapped = alt.range_init.evaluate(ctx_for);
+        auto mapped = alt.range_init.evaluate(stack, ctx_for);
         const auto range_value = ref_out.read();
         switch(rocket::weaken_enum(range_value.type())) {
           case Value::type_array: {
@@ -432,7 +432,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, stack);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -460,7 +460,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, stack);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -484,7 +484,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         try {
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
-          const auto status = alt.body_try.execute(ref_out, ctx_io);
+          const auto status = alt.body_try.execute(ref_out, stack, ctx_io);
           if(status != Block::status_next) {
             // Forward anything unexpected to the caller.
             return status;
@@ -523,7 +523,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           ref_out = std::move(ref_c);
           do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
-          const auto status = alt.body_catch.execute(ref_out, ctx_next);
+          const auto status = alt.body_catch.execute(ref_out, stack, ctx_next);
           if(status != Block::status_next) {
             // Forward anything unexpected to the caller.
             return status;
@@ -564,14 +564,14 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(stack, ctx_io);
         ASTERIA_DEBUG_LOG("Throwing exception: ", ref_out.read());
         throw Exception(ref_out);
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(stack, ctx_io);
         return Block::status_return;
       }
       case index_export: {

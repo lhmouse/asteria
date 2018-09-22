@@ -554,7 +554,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
           ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
         } else {
           // Evaluate the branch and store the result into `cond`.
-          auto result = branch_taken.get().evaluate(ctx);
+          auto result = branch_taken.get().evaluate(stack_io, ctx);
           ASTERIA_DEBUG_LOG("Setting branch result: ", result.read());
           if(alt.compound_assign) {
             cond.write(result.read());
@@ -1094,7 +1094,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         D_array array;
         array.reserve(alt.elems.size());
         for(const auto &elem : alt.elems) {
-          const auto result = elem.evaluate(ctx);
+          const auto result = elem.evaluate(stack_io, ctx);
           auto value = result.read();
           array.emplace_back(std::move(value));
         }
@@ -1108,7 +1108,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         D_object object;
         object.reserve(alt.pairs.size());
         for(const auto &pair : alt.pairs) {
-          const auto result = pair.second.evaluate(ctx);
+          const auto result = pair.second.evaluate(stack_io, ctx);
           auto value = result.read();
           object.insert_or_assign(pair.first, std::move(value));
         }
@@ -1119,7 +1119,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
       case index_subexpression: {
         const auto &alt = this->m_stor.as<S_subexpression>();
         // Evaluate the subexpression recursively.
-        auto ref = alt.expr.evaluate(ctx);
+        auto ref = alt.expr.evaluate(stack_io, ctx);
         stack_io.emplace_back(std::move(ref));
         return;
       }

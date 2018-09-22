@@ -82,10 +82,12 @@ int main()
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     auto block = Block(std::move(text));
 
-    Executive_context ctx;
     Reference ref;
-    auto status = block.execute_in_place(ref, ctx);
+    Executive_context ctx;
+    Vector<Reference> stack;
+    auto status = block.execute_in_place(ref, ctx, stack);
     ASTERIA_TEST_CHECK(status == Block::status_next);
+    ASTERIA_TEST_CHECK(stack.empty());
     auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 41);

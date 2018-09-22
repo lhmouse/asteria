@@ -171,7 +171,7 @@ class Statement
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io) const;
-    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io) const;
+    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Vector<Reference> &stack) const;
   };
 
 }

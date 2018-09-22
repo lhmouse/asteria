@@ -11,6 +11,8 @@ using namespace Asteria;
 int main()
   {
     Executive_context ctx;
+    Vector<Reference> stack;
+
     auto &cond = ctx.open_named_reference(String::shallow("cond"));
     auto &dval = ctx.open_named_reference(String::shallow("dval"));
     auto &ival = ctx.open_named_reference(String::shallow("ival"));
@@ -54,7 +56,8 @@ int main()
       }
     auto expr = Expression(std::move(nodes));
 
-    auto result = expr.evaluate(ctx);
+    auto result = expr.evaluate(stack, ctx);
+    ASTERIA_TEST_CHECK(stack.empty());
     auto value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
@@ -65,7 +68,8 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond.write(D_integer(42));
-    result = expr.evaluate(ctx);
+    result = expr.evaluate(stack, ctx);
+    ASTERIA_TEST_CHECK(stack.empty());
     value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
