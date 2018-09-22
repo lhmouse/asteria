@@ -17,19 +17,14 @@ int main()
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     text.emplace_back(Statement::S_var_def { String::shallow("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
-    Vector<Expression> elems;
-    for(int i = 1; i <= 3; ++i) {
-      expr.clear();
-      expr.emplace_back(Xpnode::S_literal { D_integer(i) });
-      elems.emplace_back(std::move(expr));
-    }
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_literal { D_integer(5) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    elems.emplace_back(std::move(expr));
-    expr.clear();
-    expr.emplace_back(Xpnode::S_unnamed_array { std::move(elems) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(3) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(1) });
+    expr.emplace_back(Xpnode::S_unnamed_array { 4 });
     text.emplace_back(Statement::S_var_def { String::shallow("data"), true, std::move(expr) });
     // for(each k, v in data) {
     //   res += k * v;
