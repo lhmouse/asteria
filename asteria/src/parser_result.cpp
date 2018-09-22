@@ -132,6 +132,15 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       case error_for_statement_initializer_expected: {
         return "Expectation failed while looking for an `each`, variable definition or expression statement.";
       }
+      case error_close_bracket_or_expression_expected: {
+        return "Expectation failed while looking for a `]` or expression.";
+      }
+      case error_close_brace_or_object_key_expected: {
+        return "Expectation failed while looking for a `}`, identifier or string literal.";
+      }
+      case error_duplicate_object_key: {
+        return "A duplicate key was to be created in the same object.";
+      }
       default: {
         return "No description is available for this error code.";
       }

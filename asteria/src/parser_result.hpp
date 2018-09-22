@@ -59,6 +59,9 @@ class Parser_result
         error_keyword_catch_expected                     = 316,
         error_comma_expected                             = 317,
         error_for_statement_initializer_expected         = 318,
+        error_close_bracket_or_expression_expected       = 319,
+        error_close_brace_or_object_key_expected         = 320,
+        error_duplicate_object_key                       = 321,
       };
 
   public:
