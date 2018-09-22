@@ -304,7 +304,9 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_open_parenthesis_expected);
       }
       Vector<String> params;
-      do_accept_identifier_list(params, toks_io);
+      if(do_accept_identifier_list(params, toks_io) == false) {
+        // This is optional.
+      }
       if(do_match_punctuator(toks_io, Token::punctuator_parenth_cl) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_close_parenthesis_expected);
       }
@@ -524,11 +526,15 @@ namespace {
         if(!init_got) {
           throw do_make_parser_result(toks_io, Parser_result::error_for_statement_initializer_expected);
         }
-        do_accept_expression(cond, toks_io);
+        if(do_accept_expression(cond, toks_io) == false) {
+          // This is optional.
+        }
         if(do_match_punctuator(toks_io, Token::punctuator_semicol) == false) {
           throw do_make_parser_result(toks_io, Parser_result::error_semicolon_expected);
         }
-        do_accept_expression(step, toks_io);
+        if(do_accept_expression(step, toks_io) == false) {
+          // This is optional.
+        }
       }
       if(do_match_punctuator(toks_io, Token::punctuator_parenth_cl) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_close_parenthesis_expected);
@@ -630,7 +636,9 @@ namespace {
         return false;
       }
       Expression expr;
-      do_accept_expression(expr, toks_io);
+      if(do_accept_expression(expr, toks_io) == false) {
+        // This is optional.
+      }
       if(do_match_punctuator(toks_io, Token::punctuator_semicol) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_semicolon_expected);
       }
