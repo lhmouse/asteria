@@ -21,12 +21,9 @@ String Instantiated_function::describe() const
 
 Reference Instantiated_function::invoke(Reference self, Vector<Reference> args) const
   {
-    // Create an orphan context.
     Executive_context ctx_next;
     ctx_next.initialize_for_function(this->m_params, this->m_file, this->m_line, std::move(self), std::move(std::move(args)));
-    // And an orphan stack.
-    Vector<Reference> stack;
-    return this->m_body.execute_as_function_in_place(ctx_next, stack);
+    return this->m_body.execute_as_function_in_place(ctx_next);
   }
 
 }

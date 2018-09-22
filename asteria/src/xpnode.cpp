@@ -530,7 +530,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
           ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
         } else {
           // Evaluate the branch and store the result into `cond`.
-          auto result = branch_taken.get().evaluate(stack_io, ctx);
+          auto result = branch_taken.get().evaluate(ctx);
           ASTERIA_DEBUG_LOG("Setting branch result: ", result.read());
           if(alt.compound_assign) {
             cond.write(result.read());
