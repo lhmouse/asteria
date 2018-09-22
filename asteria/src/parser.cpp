@@ -514,10 +514,13 @@ namespace {
         if(do_match_punctuator(toks_io, Token::punctuator_colon) == false) {
           throw do_make_parser_result(toks_io, Parser_result::error_colon_expected);
         }
+        if(do_accept_expression(step, toks_io) == false) {
+          throw do_make_parser_result(toks_io, Parser_result::error_expression_expected);
+        }
       } else {
-        const bool init_got = do_accept_variable_definition(init_stmt, toks_io) ||
-                              do_accept_null_statement(init_stmt, toks_io) ||
-                              do_accept_expression_statement(init_stmt, toks_io);
+        bool init_got = do_accept_variable_definition(init_stmt, toks_io) ||
+                        do_accept_null_statement(init_stmt, toks_io) ||
+                        do_accept_expression_statement(init_stmt, toks_io);
         if(!init_got) {
           throw do_make_parser_result(toks_io, Parser_result::error_for_statement_initializer_expected);
         }
@@ -525,8 +528,8 @@ namespace {
         if(do_match_punctuator(toks_io, Token::punctuator_semicol) == false) {
           throw do_make_parser_result(toks_io, Parser_result::error_semicolon_expected);
         }
+        do_accept_expression(step, toks_io);
       }
-      do_accept_expression(step, toks_io);
       if(do_match_punctuator(toks_io, Token::punctuator_parenth_cl) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_close_parenthesis_expected);
       }
