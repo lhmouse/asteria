@@ -92,76 +92,6 @@ namespace {
       return true;
     }
 
-  bool do_accept_literal(Value &value_out, Token_stream &toks_io)
-    {
-      // literal ::=
-      //   null-literal | boolean-literal | string-literal | noescape-string-literal |
-      //   numeric-literal | nan-literal | infinity-literal
-      // null-literal ::=
-      //   "null"
-      // boolean-litearl ::=
-      //   "false" | "true"
-      // nan-literal ::=
-      //   "nan"
-      // infinity-literal ::=
-      //   "infinity"
-      const auto qtok = toks_io.peek_opt();
-      if(!qtok) {
-        return false;
-      }
-      switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword: {
-          const auto &alt = qtok->check<Token::S_keyword>();
-          switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_null: {
-              value_out = D_null();
-              break;
-            }
-            case Token::keyword_false: {
-              value_out = D_boolean(false);
-              break;
-            }
-            case Token::keyword_true: {
-              value_out = D_boolean(true);
-              break;
-            }
-            case Token::keyword_nan: {
-              value_out = std::numeric_limits<D_real>::quiet_NaN();
-              break;
-            }
-            case Token::keyword_infinity: {
-              value_out = std::numeric_limits<D_real>::infinity();
-              break;
-            }
-            default: {
-              return false;
-            }
-          }
-          break;
-        }
-        case Token::index_integer_literal: {
-          const auto &alt = qtok->check<Token::S_integer_literal>();
-          value_out = D_integer(alt.value);
-          break;
-        }
-        case Token::index_real_literal: {
-          const auto &alt = qtok->check<Token::S_real_literal>();
-          value_out = D_real(alt.value);
-          break;
-        }
-        case Token::index_string_literal: {
-          const auto &alt = qtok->check<Token::S_string_literal>();
-          value_out = D_string(alt.value);
-          break;
-        }
-        default: {
-          return false;
-        }
-      }
-      toks_io.shift();
-      return true;
-    }
-
   bool do_accept_export_directive(Statement &stmt_out, Token_stream &toks_io)
     {
       // export-directive ::=
@@ -269,53 +199,125 @@ namespace {
       //   identifier-list | ""
       // identifier-list ::=
       //   identifier ( "," identifier-list | "" )
-      String name;
-      if(do_accept_identifier(name, toks_io) == false) {
-        return false;
-      }
-      names_out.emplace_back(std::move(name));
-      while(do_match_punctuator(toks_io, Token::punctuator_comma)) {
+      const auto size_init = names_out.size();
+      for(;;) {
+        String name;
         if(do_accept_identifier(name, toks_io) == false) {
+          if(names_out.size() == size_init) {
+            return false;
+          }
           throw do_make_parser_result(toks_io, Parser_result::error_identifier_expected);
         }
         names_out.emplace_back(std::move(name));
+        if(do_match_punctuator(toks_io, Token::punctuator_comma) == false) {
+          break;
+        }
       }
       return true;
     }
 
-  bool do_accept_named_reference(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_named_reference(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       String name;
       if(do_accept_identifier(name, toks_io) == false) {
         return false;
       }
       Xpnode::S_named_reference node_c = { std::move(name) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_literal(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_literal(Value &value_out, Token_stream &toks_io)
+    {
+      // literal ::=
+      //   null-literal | boolean-literal | string-literal | noescape-string-literal |
+      //   numeric-literal | nan-literal | infinity-literal
+      // null-literal ::=
+      //   "null"
+      // boolean-litearl ::=
+      //   "false" | "true"
+      // nan-literal ::=
+      //   "nan"
+      // infinity-literal ::=
+      //   "infinity"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword: {
+          const auto &alt = qtok->check<Token::S_keyword>();
+          switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_null: {
+              value_out = D_null();
+              break;
+            }
+            case Token::keyword_false: {
+              value_out = D_boolean(false);
+              break;
+            }
+            case Token::keyword_true: {
+              value_out = D_boolean(true);
+              break;
+            }
+            case Token::keyword_nan: {
+              value_out = std::numeric_limits<D_real>::quiet_NaN();
+              break;
+            }
+            case Token::keyword_infinity: {
+              value_out = std::numeric_limits<D_real>::infinity();
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        case Token::index_integer_literal: {
+          const auto &alt = qtok->check<Token::S_integer_literal>();
+          value_out = D_integer(alt.value);
+          break;
+        }
+        case Token::index_real_literal: {
+          const auto &alt = qtok->check<Token::S_real_literal>();
+          value_out = D_real(alt.value);
+          break;
+        }
+        case Token::index_string_literal: {
+          const auto &alt = qtok->check<Token::S_string_literal>();
+          value_out = D_string(alt.value);
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      toks_io.shift();
+      return true;
+    }
+  bool do_accept_literal(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       Value value;
       if(do_accept_literal(value, toks_io) == false) {
         return false;
       }
       Xpnode::S_literal node_c = { std::move(value) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_this(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_this(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       if(do_match_keyword(toks_io, Token::keyword_this) == false) {
         return false;
       }
       Xpnode::S_named_reference node_c = { String::shallow("__this") };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_closure_function(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_closure_function(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
       String file;
@@ -341,11 +343,11 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_statement_expected);
       }
       Xpnode::S_closure_function node_c = { std::move(file), line, std::move(params), std::move(body) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_unnamed_array(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_unnamed_array(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // unnamed-array ::=
       //   "[" array-element-list-opt "]"
@@ -373,11 +375,11 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_close_bracket_or_expression_expected);
       }
       Xpnode::S_unnamed_array node_c = { std::move(elems) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_unnamed_object(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_unnamed_object(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // unnamed-object ::=
       //   "{" key-mapped-list-opt "}"
@@ -415,11 +417,11 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_close_brace_or_object_key_expected);
       }
       Xpnode::S_unnamed_object node_c = { std::move(pairs) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_nested_expression(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_nested_expression(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // nested-expression ::=
       //   "(" expression ")"
@@ -434,37 +436,261 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_close_parenthesis_expected);
       }
       Xpnode::S_subexpression node_c = { std::move(expr) };
-      node_out = std::move(node_c);
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_primary_expression(Xpnode &node_out, Token_stream &toks_io)
+  bool do_accept_primary_expression(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // primary-expression ::=
       //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
-      return do_accept_named_reference(node_out, toks_io) ||
-             do_accept_literal(node_out, toks_io) ||
-             do_accept_this(node_out, toks_io) ||
-             do_accept_closure_function(node_out, toks_io) ||
-             do_accept_unnamed_object(node_out, toks_io) ||
-             do_accept_unnamed_array(node_out, toks_io) ||
-             do_accept_nested_expression(node_out, toks_io);
+      return do_accept_named_reference(nodes_out, toks_io) ||
+             do_accept_literal(nodes_out, toks_io) ||
+             do_accept_this(nodes_out, toks_io) ||
+             do_accept_closure_function(nodes_out, toks_io) ||
+             do_accept_unnamed_object(nodes_out, toks_io) ||
+             do_accept_unnamed_array(nodes_out, toks_io) ||
+             do_accept_nested_expression(nodes_out, toks_io);
+    }
+
+  bool do_accept_prefix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+    {
+      // prefix-operator ::=
+      //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword: {
+          const auto &alt = qtok->check<Token::S_keyword>();
+          switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_unset: {
+              xop_out = Xpnode::xop_prefix_unset;
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        case Token::index_punctuator: {
+          const auto &alt = qtok->check<Token::S_punctuator>();
+          switch(rocket::weaken_enum(alt.punct)) {
+            case Token::punctuator_add: {
+              xop_out = Xpnode::xop_prefix_pos;
+              break;
+            }
+            case Token::punctuator_sub: {
+              xop_out = Xpnode::xop_prefix_neg;
+              break;
+            }
+            case Token::punctuator_notb: {
+              xop_out = Xpnode::xop_prefix_notb;
+              break;
+            }
+            case Token::punctuator_notl: {
+              xop_out = Xpnode::xop_prefix_notl;
+              break;
+            }
+            case Token::punctuator_inc: {
+              xop_out = Xpnode::xop_prefix_inc;
+              break;
+            }
+            case Token::punctuator_dec: {
+              xop_out = Xpnode::xop_prefix_dec;
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      toks_io.shift();
+      return true;
+    }
+  bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      Xpnode::Xop xop;
+      if(do_accept_prefix_operator(xop, toks_io) == false) {
+        return false;
+      }
+      Xpnode::S_operator_rpn node_c = { xop, false };
+      nodes_out.emplace_back(std::move(node_c));
+      return true;
+    }
+
+  bool do_accept_postfix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+    {
+      // postfix-operator ::=
+      //   "++" | "--"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      const auto qalt = qtok->opt<Token::S_punctuator>();
+      if(!qalt) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qalt->punct)) {
+        case Token::punctuator_inc: {
+          xop_out = Xpnode::xop_postfix_inc;
+          break;
+        }
+        case Token::punctuator_dec: {
+          xop_out = Xpnode::xop_postfix_dec;
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      toks_io.shift();
+      return true;
+    }
+  bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      Xpnode::Xop xop;
+      if(do_accept_postfix_operator(xop, toks_io) == false) {
+        return false;
+      }
+      Xpnode::S_operator_rpn node_c = { xop, false };
+      nodes_out.emplace_back(std::move(node_c));
+      return true;
+    }
+
+  bool do_accept_postfix_function_call(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      // Copy these parameters before reading from the stream which is destructive.
+      String file;
+      Uint64 line = 0;
+      do_tell_source_location(file, line, toks_io);
+      // postfix-function-call ::=
+      //   "(" argument-list-opt ")"
+      // argument-list-opt ::=
+      //   argument-list | ""
+      // argument-list ::=
+      //   expression ( "," argument-list | "" )
+      if(do_match_punctuator(toks_io, Token::punctuator_parenth_op) == false) {
+        return false;
+      }
+      Vector<Expression> args;
+      for(;;) {
+        Expression arg;
+        if(do_accept_expression(arg, toks_io) == false) {
+          if(args.empty()) {
+            break;
+          }
+          throw do_make_parser_result(toks_io, Parser_result::error_expression_expected);
+        }
+        args.emplace_back(std::move(arg));
+        if(do_match_punctuator(toks_io, Token::punctuator_comma) == false) {
+          break;
+        }
+      }
+      if(do_match_punctuator(toks_io, Token::punctuator_parenth_cl) == false) {
+        throw do_make_parser_result(toks_io, Parser_result::error_close_parenthesis_or_argument_expected);
+      }
+      for(Size i = 0; i < args.size(); ++i) {
+        Xpnode::S_subexpression node_c = { std::move(args.mut(i)) };
+        nodes_out.emplace_back(std::move(node_c));
+      }
+      Xpnode::S_function_call node_c = { std::move(file), line, args.size() };
+      nodes_out.emplace_back(std::move(node_c));
+      return true;
+    }
+
+  bool do_accept_postfix_subscript(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      // postfix-subscript ::=
+      //   "[" expression "]"
+      if(do_match_punctuator(toks_io, Token::punctuator_bracket_op) == false) {
+        return false;
+      }
+      Expression expr;
+      if(do_accept_expression(expr, toks_io) == false) {
+        throw do_make_parser_result(toks_io, Parser_result::error_expression_expected);
+      }
+      if(do_match_punctuator(toks_io, Token::punctuator_bracket_cl) == false) {
+        throw do_make_parser_result(toks_io, Parser_result::error_close_bracket_expected);
+      }
+      Xpnode::S_subexpression node_i = { std::move(expr) };
+      nodes_out.emplace_back(std::move(node_i));
+      Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
+      nodes_out.emplace_back(std::move(node_c));
+      return true;
+    }
+
+  bool do_accept_postfix_member_access(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      // postfix-member-access ::=
+      //   "." identifier
+      if(do_match_punctuator(toks_io, Token::punctuator_dot) == false) {
+        return false;
+      }
+      String name;
+      if(do_accept_identifier(name, toks_io) == false) {
+        throw do_make_parser_result(toks_io, Parser_result::error_identifier_expected);
+      }
+      Xpnode::S_literal node_i = { D_string(std::move(name)) };
+      nodes_out.emplace_back(std::move(node_i));
+      Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
+      nodes_out.emplace_back(std::move(node_c));
+      return true;
+    }
+
+  bool do_accept_infix_element(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+    {
+      // infix-element ::=
+      //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
+      // prefix-operator-list-opt ::=
+      //   prefix-operator-list | ""
+      // prefix-operator-list ::=
+      //   prefix-operator prefix-operator-list-opt
+      // postfix-operator-list-opt ::=
+      //   postfix-operator-list | ""
+      // postfix-operator-list ::=
+      //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
+      Vector<Xpnode> prefixes;
+      for(;;) {
+        bool prefix_got = do_accept_prefix_operator(prefixes, toks_io);
+        if(prefix_got == false) {
+          break;
+        }
+      }
+      if(do_accept_primary_expression(nodes_out, toks_io) == false) {
+        if(prefixes.empty()) {
+          return false;
+        }
+        throw do_make_parser_result(toks_io, Parser_result::error_expression_expected);
+      }
+      for(;;) {
+        bool postfix_got = do_accept_postfix_operator(nodes_out, toks_io) ||
+                           do_accept_postfix_function_call(nodes_out, toks_io) ||
+                           do_accept_postfix_subscript(nodes_out, toks_io) ||
+                           do_accept_postfix_member_access(nodes_out, toks_io);
+        if(postfix_got == false) {
+          break;
+        }
+      }
+      nodes_out.append(std::make_move_iterator(prefixes.mut_rbegin()), std::make_move_iterator(prefixes.mut_rend()));
+      return true;
     }
 
   bool do_accept_expression(Expression &expr_out, Token_stream &toks_io)
     {
       // TODO
-      auto qk = toks_io.peek_opt();
-      if(!qk) {
+      Vector<Xpnode> nodes;
+      if(do_accept_infix_element(nodes, toks_io) == false) {
         return false;
       }
-      if(qk->index() == Token::index_keyword) {
-        return false;
-      }
-      if(qk->index() == Token::index_punctuator) {
-        return false;
-      }
-      toks_io.shift();
+      expr_out = std::move(nodes);
       return true;
     }
 
@@ -763,7 +989,7 @@ namespace {
         bool init_got = do_accept_variable_definition(init_stmt, toks_io) ||
                         do_accept_null_statement(init_stmt, toks_io) ||
                         do_accept_expression_statement(init_stmt, toks_io);
-        if(!init_got) {
+        if(init_got == false) {
           throw do_make_parser_result(toks_io, Parser_result::error_for_statement_initializer_expected);
         }
         if(do_accept_expression(cond, toks_io) == false) {

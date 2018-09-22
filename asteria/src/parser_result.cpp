@@ -141,6 +141,12 @@ const char * Parser_result::describe_error(Parser_result::Error error) noexcept
       case error_duplicate_object_key: {
         return "A duplicate key was to be created in the same object.";
       }
+      case error_close_parenthesis_or_argument_expected: {
+        return "Expectation failed while looking for a `)` or expression.";
+      }
+      case error_close_bracket_expected: {
+        return "Expectation failed while looking for a `]`.";
+      }
       default: {
         return "No description is available for this error code.";
       }

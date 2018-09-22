@@ -110,7 +110,9 @@ try-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	( prefix-operator-list primary-expression | primary_expression ) postfix-trailer-list-opt infix-trailer-list-opt
+	infix-element infix-operator-list-opt
+infix-element ::=
+	( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
 
 prefix-operator-list-opt ::=
 	prefix-operator-list | ""
@@ -140,9 +142,9 @@ key-mapped-list ::=
 nested-expression ::=
 	"(" expression ")"
 
-postfix-trailer-list-opt ::=
-	postfix-trailer-list | ""
-postfix-trailer-list ::=
+postfix-operator-list-opt ::=
+	postfix-operator-list | ""
+postfix-operator-list ::=
 	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
 postfix-operator ::=
 	"++" | "--"
@@ -157,10 +159,10 @@ postfix-subscript ::=
 postfix-member-access ::=
 	"." identifier
 
-infix-trailer-list-opt ::=
-	infix-trailer-list | ""
-infix-trailer-list ::=
-	( infix-selection | infix-operator ) expression
+infix-operator-list-opt ::=
+	infix-operator-list | ""
+infix-operator-list ::=
+	( infix-selection | infix-operator ) infix-element infix-operator-list-opt
 infix-selection ::=
 	"?"  expression ":" | "&&"  | "||"  |
 	"?=" expression ":" | "&&=" | "||="

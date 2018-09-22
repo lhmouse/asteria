@@ -62,6 +62,8 @@ class Parser_result
         error_close_bracket_or_expression_expected       = 319,
         error_close_brace_or_object_key_expected         = 320,
         error_duplicate_object_key                       = 321,
+        error_close_parenthesis_or_argument_expected     = 322,
+        error_close_bracket_expected                     = 323,
       };
 
   public:
