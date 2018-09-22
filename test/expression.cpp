@@ -47,7 +47,7 @@ int main()
       {
         nodes.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
         nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
-        nodes.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false), false });
+        nodes.emplace_back(Xpnode::S_branch { false, std::move(branch_true), std::move(branch_false) });
         nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
         nodes.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
         nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });

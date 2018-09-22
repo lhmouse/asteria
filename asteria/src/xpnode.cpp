@@ -177,7 +177,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(ctx);
         auto branch_false_bnd = alt.branch_false.bind(ctx);
-        Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd), alt.compound_assign };
+        Xpnode::S_branch alt_bnd = { alt.compound_assign, std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
       case index_function_call: {
