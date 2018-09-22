@@ -419,13 +419,12 @@ namespace {
       if(do_match_punctuator(toks_io, Token::punctuator_brace_cl) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_close_brace_or_object_key_expected);
       }
-      Vector<String> keys;
-      keys.reserve(inits.size());
       for(auto it = inits.mut_begin(); it != inits.mut_end(); ++it) {
-        keys.insert(keys.begin(), it->first);
         expr_out.append(std::make_move_iterator(it->second.mut_begin()), std::make_move_iterator(it->second.mut_end()));
+        Xpnode::S_literal node_i = { D_string(it->first) };
+        expr_out.emplace_back(std::move(node_i));
       }
-      Xpnode::S_unnamed_object node_c = { std::move(keys) };
+      Xpnode::S_unnamed_object node_c = { inits.size() };
       expr_out.emplace_back(std::move(node_c));
       return true;
     }
