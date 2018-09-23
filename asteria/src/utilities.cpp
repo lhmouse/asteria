@@ -293,9 +293,7 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
             buf[nb++] = 'e';
             break;
           }
-          case '\"':
-          case '\'':
-          case '\\': {
+          case '\"':  case '\'':  case '\\': {
             buf[nb++] = '\\';
           }
           // Fallthrough
