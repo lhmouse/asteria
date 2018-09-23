@@ -34,7 +34,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	block | non-block-statement
+	block | nonblock-statement
 
 block ::=
 	"{" statement-list-opt "}"
@@ -43,7 +43,7 @@ statement-list-opt ::=
 statement-list ::=
 	statement statement-list-opt
 
-non-block-statement ::=
+nonblock-statement ::=
 	null-statement |
 	variable-definition | immutable-variable-definition | function-definition |
 	expression-statement |

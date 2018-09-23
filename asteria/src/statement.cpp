@@ -36,7 +36,6 @@ namespace {
 void Statement::fly_over_in_place(Abstract_context &ctx_io) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_null:
       case index_expr:
       case index_block: {
         return;
@@ -77,13 +76,6 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
 Statement Statement::bind_in_place(Analytic_context &ctx_io) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_null: {
-        const auto &alt = this->m_stor.as<S_null>();
-        // Copy it as-is.
-        static_cast<void>(alt);
-        Statement::S_null alt_bnd = { };
-        return std::move(alt_bnd);
-      }
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Bind the expression recursively.
@@ -242,12 +234,6 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_null: {
-        const auto &alt = this->m_stor.as<S_null>();
-        // There is nothing to do.
-        static_cast<void>(alt);
-        return Block::status_next;
-      }
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Evaluate the expression.
