@@ -360,7 +360,7 @@ Parser_result Token_stream::load(std::istream &sis_io, const String &file)
                     return Parser_result(line, epos, str.size() - epos, Parser_result::error_escape_sequence_incomplete);
                   }
                   char32_t code = 0;
-                  for(Size i = epos + 2; i < epos + seqlen; ++i) {
+                  for(auto i = epos + 2; i < epos + seqlen; ++i) {
                     const auto ptr = std::char_traits<char>::find(digits, 32, str.at(i));
                     if(!ptr) {
                       return Parser_result(line, epos, i, Parser_result::error_escape_sequence_invalid_hex);
@@ -664,7 +664,7 @@ Parser_result Token_stream::load(std::istream &sis_io, const String &file)
             }
             // Parse the exponent.
             int exp = 0;
-            for(Size i = exp_begin; i != exp_end; ++i) {
+            for(auto i = exp_begin; i != exp_end; ++i) {
               const auto ptr = std::char_traits<char>::find(digits, 20, str.at(i));
               if(!ptr) {
                 continue;
@@ -688,7 +688,7 @@ Parser_result Token_stream::load(std::istream &sis_io, const String &file)
               }
               // Parse the significant part.
               Uint64 value = 0;
-              for(Size i = int_begin; i != int_end; ++i) {
+              for(auto i = int_begin; i != int_end; ++i) {
                 const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
                 if(!ptr) {
                   continue;
@@ -719,7 +719,7 @@ Parser_result Token_stream::load(std::istream &sis_io, const String &file)
             // Parse the integral part.
             Xfloat value = 0;
             bool zero = true;
-            for(Size i = int_begin; i != int_end; ++i) {
+            for(auto i = int_begin; i != int_end; ++i) {
               const auto ptr = std::char_traits<char>::find(digits, radix * 2, str.at(i));
               if(!ptr) {
                 continue;

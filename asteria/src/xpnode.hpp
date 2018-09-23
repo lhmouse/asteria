@@ -95,7 +95,7 @@ class Xpnode
       };
     struct S_unnamed_object
       {
-        Size pair_cnt;
+        Vector<String> keys;
       };
 
     enum Index : Uint8

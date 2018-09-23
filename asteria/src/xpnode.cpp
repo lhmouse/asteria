@@ -201,7 +201,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       case index_unnamed_object: {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Copy it as-is.
-        Xpnode::S_unnamed_object alt_bnd = { alt.pair_cnt };
+        Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         return std::move(alt_bnd);
       }
       default: {
@@ -557,7 +557,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         // Allocate the argument vector.
         Vector<Reference> args;
         args.reserve(alt.arg_cnt);
-        for(Size i = 0; i != alt.arg_cnt; ++i) {
+        for(auto i = alt.arg_cnt; i != 0; --i) {
           auto arg = do_pop_reference(stack_io);
           args.emplace_back(std::move(arg));
         }
@@ -1069,9 +1069,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         // Pop references to create an array.
         D_array array;
         array.reserve(alt.elem_cnt);
-        for(Size i = 0; i != alt.elem_cnt; ++i) {
-          auto elem = do_pop_reference(stack_io).read();
-          array.emplace_back(std::move(elem));
+        for(auto i = alt.elem_cnt; i != 0; --i) {
+          auto ref = do_pop_reference(stack_io);
+          array.emplace_back(ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
         stack_io.emplace_back(std::move(ref_c));
@@ -1081,11 +1081,10 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Pop references to create an object.
         D_object object;
-        object.reserve(alt.pair_cnt);
-        for(Size i = 0; i != alt.pair_cnt; ++i) {
-          auto key = do_pop_reference(stack_io).read().check<D_string>();
-          auto mapped = do_pop_reference(stack_io).read();
-          object.insert_or_assign(std::move(key), std::move(mapped));
+        object.reserve(alt.keys.size());
+        for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
+          auto ref = do_pop_reference(stack_io);
+          object.insert_or_assign(*it, ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
         stack_io.emplace_back(std::move(ref_c));
