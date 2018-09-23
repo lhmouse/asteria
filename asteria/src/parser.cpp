@@ -915,7 +915,7 @@ namespace {
       if(do_match_punctuator(toks_io, Token::punctuator_semicol) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_semicolon_expected);
       }
-      Statement::S_while stmt_c = { true, std::move(cond), std::move(body) };
+      Statement::S_do_while stmt_c = { std::move(body), std::move(cond) };
       stmt_out = std::move(stmt_c);
       return true;
     }
@@ -941,7 +941,7 @@ namespace {
       if(do_accept_statement(body, toks_io) == false) {
         throw do_make_parser_result(toks_io, Parser_result::error_statement_expected);
       }
-      Statement::S_while stmt_c = { false, std::move(cond), std::move(body) };
+      Statement::S_while stmt_c = { std::move(cond), std::move(body) };
       stmt_out = std::move(stmt_c);
       return true;
     }

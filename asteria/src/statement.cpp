@@ -55,6 +55,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       }
       case index_if:
       case index_switch:
+      case index_do_while:
       case index_while:
       case index_for:
       case index_for_each:
@@ -142,12 +143,20 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
         return std::move(alt_bnd);
       }
+      case index_do_while: {
+        const auto &alt = this->m_stor.as<S_while>();
+        // Bind the loop body and condition recursively.
+        auto body_bnd = alt.body.bind(ctx_io);
+        auto cond_bnd = alt.cond.bind(ctx_io);
+        Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
+        return std::move(alt_bnd);
+      }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
         // Bind the condition and loop body recursively.
         auto cond_bnd = alt.cond.bind(ctx_io);
         auto body_bnd = alt.body.bind(ctx_io);
-        Statement::S_while alt_bnd = { alt.has_do, std::move(cond_bnd), std::move(body_bnd) };
+        Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_for: {
@@ -345,18 +354,37 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         return Block::status_next;
       }
+      case index_do_while: {
+        const auto &alt = this->m_stor.as<S_while>();
+        for(;;) {
+          // Execute the loop body.
+          Executive_context ctx_next(&ctx_io);
+          const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
+            // Break out of the body as requested.
+            break;
+          }
+          if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
+            // Forward anything unexpected to the caller.
+            return status;
+          }
+          // Check the loop condition.
+          // This differs from a `while` loop where the context for the loop body is destroyed before this check.
+          ref_out = alt.cond.evaluate(ctx_next);
+          if(ref_out.read().test() == false) {
+            break;
+          }
+        }
+        return Block::status_next;
+      }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
-        if(alt.has_do) {
-          goto zs;
-        }
         for(;;) {
           // Check the loop condition.
           ref_out = alt.cond.evaluate(ctx_io);
           if(ref_out.read().test() == false) {
             break;
           }
-  zs:
           // Execute the loop body.
           const auto status = alt.body.execute(ref_out, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
