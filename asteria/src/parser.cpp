@@ -456,7 +456,7 @@ namespace {
              do_accept_nested_expression(nodes_out, toks_io);
     }
 
-  bool do_accept_prefix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+  bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // prefix-operator ::=
       //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
@@ -464,12 +464,14 @@ namespace {
       if(!qtok) {
         return false;
       }
+      Xpnode::Xop xop;
       switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword: {
           const auto &alt = qtok->check<Token::S_keyword>();
           switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset: {
-              xop_out = Xpnode::xop_prefix_unset;
+              xop = Xpnode::xop_prefix_unset;
+              toks_io.shift();
               break;
             }
             default: {
@@ -482,27 +484,33 @@ namespace {
           const auto &alt = qtok->check<Token::S_punctuator>();
           switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_add: {
-              xop_out = Xpnode::xop_prefix_pos;
+              xop = Xpnode::xop_prefix_pos;
+              toks_io.shift();
               break;
             }
             case Token::punctuator_sub: {
-              xop_out = Xpnode::xop_prefix_neg;
+              xop = Xpnode::xop_prefix_neg;
+              toks_io.shift();
               break;
             }
             case Token::punctuator_notb: {
-              xop_out = Xpnode::xop_prefix_notb;
+              xop = Xpnode::xop_prefix_notb;
+              toks_io.shift();
               break;
             }
             case Token::punctuator_notl: {
-              xop_out = Xpnode::xop_prefix_notl;
+              xop = Xpnode::xop_prefix_notl;
+              toks_io.shift();
               break;
             }
             case Token::punctuator_inc: {
-              xop_out = Xpnode::xop_prefix_inc;
+              xop = Xpnode::xop_prefix_inc;
+              toks_io.shift();
               break;
             }
             case Token::punctuator_dec: {
-              xop_out = Xpnode::xop_prefix_dec;
+              xop = Xpnode::xop_prefix_dec;
+              toks_io.shift();
               break;
             }
             default: {
@@ -515,21 +523,12 @@ namespace {
           return false;
         }
       }
-      toks_io.shift();
-      return true;
-    }
-  bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
-    {
-      Xpnode::Xop xop;
-      if(do_accept_prefix_operator(xop, toks_io) == false) {
-        return false;
-      }
       Xpnode::S_operator_rpn node_c = { xop, false };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_postfix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+  bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
       // postfix-operator ::=
       //   "++" | "--"
@@ -541,27 +540,21 @@ namespace {
       if(!qalt) {
         return false;
       }
+      Xpnode::Xop xop;
       switch(rocket::weaken_enum(qalt->punct)) {
         case Token::punctuator_inc: {
-          xop_out = Xpnode::xop_postfix_inc;
+          xop = Xpnode::xop_postfix_inc;
+          toks_io.shift();
           break;
         }
         case Token::punctuator_dec: {
-          xop_out = Xpnode::xop_postfix_dec;
+          xop = Xpnode::xop_postfix_dec;
+          toks_io.shift();
           break;
         }
         default: {
           return false;
         }
-      }
-      toks_io.shift();
-      return true;
-    }
-  bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
-    {
-      Xpnode::Xop xop;
-      if(do_accept_postfix_operator(xop, toks_io) == false) {
-        return false;
       }
       Xpnode::S_operator_rpn node_c = { xop, false };
       nodes_out.emplace_back(std::move(node_c));
