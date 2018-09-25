@@ -61,7 +61,7 @@ class Statement;
 class Block;
 
 // Parser Objects
-class Parser_result;
+class Parser_error;
 class Token;
 class Token_stream;
 class Parser;
