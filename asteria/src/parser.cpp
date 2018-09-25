@@ -102,6 +102,182 @@ namespace {
       return true;
     }
 
+  bool do_accept_prefix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+    {
+      // prefix-operator ::=
+      //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword: {
+          const auto &alt = qtok->check<Token::S_keyword>();
+          switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_unset: {
+              xop_out = Xpnode::xop_prefix_unset;
+              toks_io.shift();
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        case Token::index_punctuator: {
+          const auto &alt = qtok->check<Token::S_punctuator>();
+          switch(rocket::weaken_enum(alt.punct)) {
+            case Token::punctuator_add: {
+              xop_out = Xpnode::xop_prefix_pos;
+              toks_io.shift();
+              break;
+            }
+            case Token::punctuator_sub: {
+              xop_out = Xpnode::xop_prefix_neg;
+              toks_io.shift();
+              break;
+            }
+            case Token::punctuator_notb: {
+              xop_out = Xpnode::xop_prefix_notb;
+              toks_io.shift();
+              break;
+            }
+            case Token::punctuator_notl: {
+              xop_out = Xpnode::xop_prefix_notl;
+              toks_io.shift();
+              break;
+            }
+            case Token::punctuator_inc: {
+              xop_out = Xpnode::xop_prefix_inc;
+              toks_io.shift();
+              break;
+            }
+            case Token::punctuator_dec: {
+              xop_out = Xpnode::xop_prefix_dec;
+              toks_io.shift();
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      return true;
+    }
+
+  bool do_accept_postfix_operator(Xpnode::Xop &xop_out, Token_stream &toks_io)
+    {
+      // postfix-operator ::=
+      //   "++" | "--"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      const auto qalt = qtok->opt<Token::S_punctuator>();
+      if(!qalt) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qalt->punct)) {
+        case Token::punctuator_inc: {
+          xop_out = Xpnode::xop_postfix_inc;
+          toks_io.shift();
+          break;
+        }
+        case Token::punctuator_dec: {
+          xop_out = Xpnode::xop_postfix_dec;
+          toks_io.shift();
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      return true;
+    }
+
+  bool do_accept_literal(Value &value_out, Token_stream &toks_io)
+    {
+      // literal ::=
+      //   null-literal | boolean-literal | string-literal | noescape-string-literal |
+      //   numeric-literal | nan-literal | infinity-literal
+      // null-literal ::=
+      //   "null"
+      // boolean-litearl ::=
+      //   "false" | "true"
+      // nan-literal ::=
+      //   "nan"
+      // infinity-literal ::=
+      //   "infinity"
+      const auto qtok = toks_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword: {
+          const auto &alt = qtok->check<Token::S_keyword>();
+          switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_null: {
+              value_out = D_null();
+              toks_io.shift();
+              break;
+            }
+            case Token::keyword_false: {
+              value_out = D_boolean(false);
+              toks_io.shift();
+              break;
+            }
+            case Token::keyword_true: {
+              value_out = D_boolean(true);
+              toks_io.shift();
+              break;
+            }
+            case Token::keyword_nan: {
+              value_out = std::numeric_limits<D_real>::quiet_NaN();
+              toks_io.shift();
+              break;
+            }
+            case Token::keyword_infinity: {
+              value_out = std::numeric_limits<D_real>::infinity();
+              toks_io.shift();
+              break;
+            }
+            default: {
+              return false;
+            }
+          }
+          break;
+        }
+        case Token::index_integer_literal: {
+          const auto &alt = qtok->check<Token::S_integer_literal>();
+          value_out = D_integer(alt.value);
+          toks_io.shift();
+          break;
+        }
+        case Token::index_real_literal: {
+          const auto &alt = qtok->check<Token::S_real_literal>();
+          value_out = D_real(alt.value);
+          toks_io.shift();
+          break;
+        }
+        case Token::index_string_literal: {
+          const auto &alt = qtok->check<Token::S_string_literal>();
+          value_out = D_string(alt.value);
+          toks_io.shift();
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      return true;
+    }
+
   bool do_accept_export_directive(Vector<Statement> &stmts_out, Token_stream &toks_io)
     {
       // export-directive ::=
@@ -226,78 +402,9 @@ namespace {
 
   bool do_accept_literal(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
-      // literal ::=
-      //   null-literal | boolean-literal | string-literal | noescape-string-literal |
-      //   numeric-literal | nan-literal | infinity-literal
-      // null-literal ::=
-      //   "null"
-      // boolean-litearl ::=
-      //   "false" | "true"
-      // nan-literal ::=
-      //   "nan"
-      // infinity-literal ::=
-      //   "infinity"
-      const auto qtok = toks_io.peek_opt();
-      if(!qtok) {
-        return false;
-      }
       Value value;
-      switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword: {
-          const auto &alt = qtok->check<Token::S_keyword>();
-          switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_null: {
-              value = D_null();
-              toks_io.shift();
-              break;
-            }
-            case Token::keyword_false: {
-              value = D_boolean(false);
-              toks_io.shift();
-              break;
-            }
-            case Token::keyword_true: {
-              value = D_boolean(true);
-              toks_io.shift();
-              break;
-            }
-            case Token::keyword_nan: {
-              value = std::numeric_limits<D_real>::quiet_NaN();
-              toks_io.shift();
-              break;
-            }
-            case Token::keyword_infinity: {
-              value = std::numeric_limits<D_real>::infinity();
-              toks_io.shift();
-              break;
-            }
-            default: {
-              return false;
-            }
-          }
-          break;
-        }
-        case Token::index_integer_literal: {
-          const auto &alt = qtok->check<Token::S_integer_literal>();
-          value = D_integer(alt.value);
-          toks_io.shift();
-          break;
-        }
-        case Token::index_real_literal: {
-          const auto &alt = qtok->check<Token::S_real_literal>();
-          value = D_real(alt.value);
-          toks_io.shift();
-          break;
-        }
-        case Token::index_string_literal: {
-          const auto &alt = qtok->check<Token::S_string_literal>();
-          value = D_string(alt.value);
-          toks_io.shift();
-          break;
-        }
-        default: {
-          return false;
-        }
+      if(do_accept_literal(value, toks_io) == false) {
+        return false;
       }
       Xpnode::S_literal node_c = { std::move(value) };
       nodes_out.emplace_back(std::move(node_c));
@@ -456,105 +563,22 @@ namespace {
              do_accept_nested_expression(nodes_out, toks_io);
     }
 
-  bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+  bool do_accept_prefix_operator_as_xpnode(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
-      // prefix-operator ::=
-      //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
-      const auto qtok = toks_io.peek_opt();
-      if(!qtok) {
-        return false;
-      }
       Xpnode::Xop xop;
-      switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword: {
-          const auto &alt = qtok->check<Token::S_keyword>();
-          switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_unset: {
-              xop = Xpnode::xop_prefix_unset;
-              toks_io.shift();
-              break;
-            }
-            default: {
-              return false;
-            }
-          }
-          break;
-        }
-        case Token::index_punctuator: {
-          const auto &alt = qtok->check<Token::S_punctuator>();
-          switch(rocket::weaken_enum(alt.punct)) {
-            case Token::punctuator_add: {
-              xop = Xpnode::xop_prefix_pos;
-              toks_io.shift();
-              break;
-            }
-            case Token::punctuator_sub: {
-              xop = Xpnode::xop_prefix_neg;
-              toks_io.shift();
-              break;
-            }
-            case Token::punctuator_notb: {
-              xop = Xpnode::xop_prefix_notb;
-              toks_io.shift();
-              break;
-            }
-            case Token::punctuator_notl: {
-              xop = Xpnode::xop_prefix_notl;
-              toks_io.shift();
-              break;
-            }
-            case Token::punctuator_inc: {
-              xop = Xpnode::xop_prefix_inc;
-              toks_io.shift();
-              break;
-            }
-            case Token::punctuator_dec: {
-              xop = Xpnode::xop_prefix_dec;
-              toks_io.shift();
-              break;
-            }
-            default: {
-              return false;
-            }
-          }
-          break;
-        }
-        default: {
-          return false;
-        }
+      if(do_accept_prefix_operator(xop, toks_io) == false) {
+        return false;
       }
       Xpnode::S_operator_rpn node_c = { xop, false };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
+  bool do_accept_postfix_operator_as_xpnode(Vector<Xpnode> &nodes_out, Token_stream &toks_io)
     {
-      // postfix-operator ::=
-      //   "++" | "--"
-      const auto qtok = toks_io.peek_opt();
-      if(!qtok) {
-        return false;
-      }
-      const auto qalt = qtok->opt<Token::S_punctuator>();
-      if(!qalt) {
-        return false;
-      }
       Xpnode::Xop xop;
-      switch(rocket::weaken_enum(qalt->punct)) {
-        case Token::punctuator_inc: {
-          xop = Xpnode::xop_postfix_inc;
-          toks_io.shift();
-          break;
-        }
-        case Token::punctuator_dec: {
-          xop = Xpnode::xop_postfix_dec;
-          toks_io.shift();
-          break;
-        }
-        default: {
-          return false;
-        }
+      if(do_accept_postfix_operator(xop, toks_io) == false) {
+        return false;
       }
       Xpnode::S_operator_rpn node_c = { xop, false };
       nodes_out.emplace_back(std::move(node_c));
@@ -651,7 +675,7 @@ namespace {
       //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
       Vector<Xpnode> prefixes;
       for(;;) {
-        bool prefix_got = do_accept_prefix_operator(prefixes, toks_io);
+        bool prefix_got = do_accept_prefix_operator_as_xpnode(prefixes, toks_io);
         if(prefix_got == false) {
           break;
         }
@@ -663,7 +687,7 @@ namespace {
         throw do_make_parser_result(toks_io, Parser_result::error_expression_expected);
       }
       for(;;) {
-        bool postfix_got = do_accept_postfix_operator(nodes_out, toks_io) ||
+        bool postfix_got = do_accept_postfix_operator_as_xpnode(nodes_out, toks_io) ||
                            do_accept_postfix_function_call(nodes_out, toks_io) ||
                            do_accept_postfix_subscript(nodes_out, toks_io) ||
                            do_accept_postfix_member_access(nodes_out, toks_io);
