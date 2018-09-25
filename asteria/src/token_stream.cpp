@@ -86,7 +86,7 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
     this->m_stor.set(nullptr);
     // Check whether the stream can be read from.
     // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
-    if(!cstrm_io) {
+    if(cstrm_io.fail()) {
       throw Parser_error(0, 0, 0, Parser_error::code_istream_open_failure);
     }
     // Save the position of an unterminated block comment.
@@ -108,11 +108,11 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
       if(cstrm_io.fail()) {
         break;
       }
+      ASTERIA_DEBUG_LOG("Read line ", std::setw(4), line , ": ", str);
       // Discard the first line if it looks like a shebang.
       if((line == 1) && str.starts_with("#!", 2)) {
         continue;
       }
-      ASTERIA_DEBUG_LOG("Read line ", std::setw(4), line , ": ", str);
       /////////////////////////////////////////////////////////////////////////
       // Phase 1
       //   Ensure this line is a valid UTF-8 string.
@@ -818,7 +818,8 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
     this->m_stor.emplace<Vector<Token>>(std::move(seq));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
-    ASTERIA_DEBUG_LOG("Parser error: ", err.get_code(), " (", Parser_error::get_code_description(err.get_code()), ")");
+    ASTERIA_DEBUG_LOG("Parser error: line = ", err.get_line(), ", offset = ", err.get_offset(),
+                      ", code = ", err.get_code(), " (", Parser_error::get_code_description(err.get_code()), ")");
     this->m_stor.set(std::move(err));
     return false;
   }
