@@ -46,10 +46,11 @@ class Parser
         return this->state() == state_success;
       }
 
+    Parser_error get_parser_error() const noexcept;
+
     bool load(Token_stream &tstrm_io);
     void clear() noexcept;
 
-    Parser_error get_parser_error() const;
     const Block & get_document() const;
     Block extract_document();
   };

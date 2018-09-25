@@ -501,7 +501,7 @@ namespace {
       }
       Dictionary<Vector<Xpnode>> inits;
       for(;;) {
-        const auto duplicate_key_result = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
+        const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
         String name;
         if((do_accept_string_literal(name, tstrm_io) == false) && (do_accept_identifier(name, tstrm_io) == false)) {
           break;
@@ -514,7 +514,7 @@ namespace {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
         if(inits.try_emplace(std::move(name), std::move(init)).second == false) {
-          throw duplicate_key_result;
+          throw duplicate_key_error;
         }
         if((do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) && (do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false)) {
           break;
@@ -1200,6 +1200,24 @@ namespace {
 
 }
 
+Parser_error Parser::get_parser_error() const noexcept
+  {
+    switch(this->state()) {
+      case state_empty: {
+        return Parser_error(0, 0, 0, Parser_error::code_no_data_loaded);
+      }
+      case state_error: {
+        return this->m_stor.as<Parser_error>();
+      }
+      case state_success: {
+        return Parser_error(0, 0, 0, Parser_error::code_success);
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      }
+    }
+  }
+
 bool Parser::load(Token_stream &tstrm_io)
   try {
     // This has to be done before anything else because of possibility of exceptions.
@@ -1239,24 +1257,6 @@ bool Parser::load(Token_stream &tstrm_io)
 void Parser::clear() noexcept
   {
     this->m_stor.set(nullptr);
-  }
-
-Parser_error Parser::get_parser_error() const
-  {
-    switch(this->state()) {
-      case state_empty: {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-      case state_error: {
-        return this->m_stor.as<Parser_error>();
-      }
-      case state_success: {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has succeeded.");
-      }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
-    }
   }
 
 const Block & Parser::get_document() const

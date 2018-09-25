@@ -10,6 +10,13 @@ namespace Asteria {
 const char * Parser_error::get_code_description(Parser_error::Code code) noexcept
   {
     switch(code) {
+      // Special
+      case code_success: {
+        return "The operation succeeded.";
+      }
+      case code_no_data_loaded : {
+        return "No data were loaded.";
+      }
       // Phase 1
       //   I/O stream
       //   UTF-8 decoder

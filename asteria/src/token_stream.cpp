@@ -62,6 +62,24 @@ namespace {
 
 }
 
+Parser_error Token_stream::get_parser_error() const noexcept
+  {
+    switch(this->state()) {
+      case state_empty: {
+        return Parser_error(0, 0, 0, Parser_error::code_no_data_loaded);
+      }
+      case state_error: {
+        return this->m_stor.as<Parser_error>();
+      }
+      case state_success: {
+        return Parser_error(0, 0, 0, Parser_error::code_success);
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      }
+    }
+  }
+
 bool Token_stream::load(std::istream &cstrm_io, const String &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.

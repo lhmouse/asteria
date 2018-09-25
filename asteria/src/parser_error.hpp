@@ -13,6 +13,9 @@ class Parser_error
   public:
     enum Code : Uint32
       {
+        // Special
+        code_success                                    =   0,
+        code_no_data_loaded                             =   1,
         // Phase 1
         //   I/O stream
         //   UTF-8 decoder

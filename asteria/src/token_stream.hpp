@@ -46,10 +46,11 @@ class Token_stream
         return this->state() == state_success;
       }
 
+    Parser_error get_parser_error() const noexcept;
+
     bool load(std::istream &cstrm_io, const String &file);
     void clear() noexcept;
 
-    Parser_error get_parser_error() const;
     bool empty() const noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();
