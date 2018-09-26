@@ -998,10 +998,10 @@ namespace {
       if(key_name.empty()) {
         Statement::S_for stmt_c = { std::move(init), std::move(cond), std::move(step), std::move(body) };
         stmts_out.emplace_back(std::move(stmt_c));
-      } else {
-        Statement::S_for_each stmt_c = { std::move(key_name), std::move(mapped_name), std::move(step), std::move(body) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        return true;
       }
+      Statement::S_for_each stmt_c = { std::move(key_name), std::move(mapped_name), std::move(step), std::move(body) };
+      stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }
 
