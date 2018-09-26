@@ -164,10 +164,20 @@ class Statement
     ~Statement();
 
   public:
+    void swap(Statement &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io) const;
     Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io) const;
   };
+
+inline void swap(Statement &lhs, Statement &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

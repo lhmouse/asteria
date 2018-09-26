@@ -70,9 +70,19 @@ class Reference_root
         return qvar->var.unique();
       }
 
+    void swap(Reference_root &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;
   };
+
+inline void swap(Reference_root &lhs, Reference_root &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

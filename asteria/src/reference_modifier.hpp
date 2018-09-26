@@ -45,9 +45,19 @@ class Reference_modifier
     ~Reference_modifier();
 
   public:
+    void swap(Reference_modifier &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     const Value * apply_readonly_opt(const Value &parent) const;
     Value * apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const;
   };
+
+inline void swap(Reference_modifier &lhs, Reference_modifier &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

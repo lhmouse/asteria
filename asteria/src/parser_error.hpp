@@ -25,7 +25,6 @@ class Parser_error
         code_utf8_sequence_incomplete                   = 104,
         code_utf_code_point_invalid                     = 105,
         // Phase 2
-        //   Comment stripper
         //   Tokenizer
         code_token_character_unrecognized               = 201,
         code_string_literal_unclosed                    = 202,

@@ -139,9 +139,19 @@ class Xpnode
     ~Xpnode();
 
   public:
+    void swap(Xpnode &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     Xpnode bind(const Analytic_context &ctx) const;
     void evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const;
   };
+
+inline void swap(Xpnode &lhs, Xpnode &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

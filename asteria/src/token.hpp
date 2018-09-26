@@ -196,8 +196,18 @@ class Token
           return this->m_stor.as<AltT>();
         }
 
+    void swap(Token &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     void dump(std::ostream &os) const;
   };
+
+inline void swap(Token &lhs, Token &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 inline std::ostream & operator<<(std::ostream &os, const Token &token)
   {

@@ -2,7 +2,7 @@ document ::=
 	directive-or-statement-list-opt
 
 identifier ::=
-	PCRE([A-Za-z_][0-9A-Za-z_]*)
+	PCRE([A-Za-z_][A-Za-z_0-9]*)
 literal ::=
 	null-literal | boolean-literal | string-literal | noescape-string-literal |
 	numeric-literal | nan-literal | infinity-literal

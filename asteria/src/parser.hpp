@@ -48,12 +48,22 @@ class Parser
 
     Parser_error get_parser_error() const noexcept;
 
+    void swap(Parser &other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     bool load(Token_stream &tstrm_io);
     void clear() noexcept;
 
     const Block & get_document() const;
     Block extract_document();
   };
+
+inline void swap(Parser &lhs, Parser &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

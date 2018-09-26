@@ -35,6 +35,12 @@ class Reference
     Reference & operator=(Reference &&) noexcept;
 
   public:
+    void swap(Reference &other) noexcept
+      {
+        this->m_root.swap(other.m_root);
+        this->m_modifiers.swap(other.m_modifiers);
+      }
+
     Value read() const;
     Value & write(Value value) const;
     Value unset() const;
@@ -46,6 +52,11 @@ class Reference
     Reference & materialize();
     Reference & dematerialize();
   };
+
+inline void swap(Reference &lhs, Reference &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 

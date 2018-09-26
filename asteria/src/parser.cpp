@@ -1249,7 +1249,7 @@ bool Parser::load(Token_stream &tstrm_io)
     this->m_stor.emplace<Block>(std::move(stmts));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
-    ASTERIA_DEBUG_LOG("Parser error: line = ", err.get_line(), ", offset = ", err.get_offset(),
+    ASTERIA_DEBUG_LOG("Parser error: line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(),
                       ", code = ", err.get_code(), " (", Parser_error::get_code_description(err.get_code()), ")");
     this->m_stor.set(std::move(err));
     return false;
