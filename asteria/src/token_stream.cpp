@@ -491,10 +491,9 @@ namespace {
               throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_incomplete);
             }
             char32_t code_point = 0;
-            for(unsigned i = 0; i < xcnt; ++i) {
+            for(auto i = tlen; i < tlen + xcnt; ++i) {
               static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-              const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[tlen]);
-              ++tlen;
+              const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
               if(!dptr) {
                 throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_invalid_hex);
               }
@@ -540,6 +539,7 @@ namespace {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_unknown);
           }
         }
+        tlen += xcnt;
       }
     __builtin_printf("dquote: %s\n", value.c_str());
       Token::S_string_literal token_c = { std::move(value) };
