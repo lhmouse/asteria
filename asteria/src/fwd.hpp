@@ -48,25 +48,25 @@ template<typename ElementT>
 template<typename ElementT>
   using Sptr = rocket::refcounted_ptr<ElementT>;
 
-// General utilities
+// General Utilities
 class Formatter;
 class Runtime_error;
 class Exception;
 class Backtracer;
 
-// Lexical elements
+// Lexical Elements
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
 
-// Parser objects
+// Parser Objects
 class Parser_result;
 class Token;
 class Token_stream;
 class Parser;
 
-// Runtime objects
+// Runtime Objects
 class Value;
 class Abstract_opaque;
 class Abstract_function;
@@ -80,7 +80,7 @@ class Executive_context;
 class Variadic_arguer;
 class Instantiated_function;
 
-// Runtime data types exposed to users
+// Runtime Data Types
 using D_null      = Nullptr;
 using D_boolean   = Boolean;
 using D_integer   = Sint64;
