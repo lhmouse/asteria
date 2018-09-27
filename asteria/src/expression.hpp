@@ -19,20 +19,10 @@ class Expression
     ~Expression();
 
   public:
-    void swap(Expression &other) noexcept
-      {
-        rocket::adl_swap(this->m_nodes, other.m_nodes);
-      }
-
     bool empty() const noexcept;
     Expression bind(const Analytic_context &ctx) const;
     Reference evaluate(const Executive_context &ctx) const;
   };
-
-inline void swap(Expression &lhs, Expression &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 }
 

@@ -110,7 +110,8 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
           goto ma;
         }
         rit = qarr->mut_begin() + static_cast<Diff>(rindex);
-  ma:   if(erased_out_opt) {
+  ma:
+        if(erased_out_opt) {
           *erased_out_opt = std::move(rit[0]);
           qarr->erase(rit);
           return erased_out_opt;
@@ -139,7 +140,8 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
           goto mo;
         }
         rit = qobj->try_emplace(alt.key).first;
-  mo:   if(erased_out_opt) {
+  mo:
+        if(erased_out_opt) {
           *erased_out_opt = std::move(rit->second);
           qobj->erase(rit);
           return erased_out_opt;

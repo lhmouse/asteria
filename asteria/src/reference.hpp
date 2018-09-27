@@ -35,12 +35,6 @@ class Reference
     Reference & operator=(Reference &&) noexcept;
 
   public:
-    void swap(Reference &other) noexcept
-      {
-        rocket::adl_swap(this->m_root, other.m_root);
-        rocket::adl_swap(this->m_modifiers, other.m_modifiers);
-      }
-
     Value read() const;
     Value & write(Value value) const;
     Value unset() const;
@@ -52,11 +46,6 @@ class Reference
     Reference & materialize();
     Reference & dematerialize();
   };
-
-inline void swap(Reference &lhs, Reference &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 }
 

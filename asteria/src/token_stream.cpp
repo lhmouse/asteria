@@ -237,6 +237,28 @@ namespace {
         return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
       }
 
+  template<typename ElementT>
+    inline Vector<ElementT> & do_reverse_vector(Vector<ElementT> &vec_io)
+      {
+        auto bp = vec_io.mut_begin();
+        auto ep = vec_io.mut_end();
+        if(ep - bp < 2) {
+          return vec_io;
+        }
+        auto tmp = std::move(*bp);
+        for(;;) {
+          --ep;
+          *bp = std::move(*ep);
+          *ep = std::move(tmp);
+          ++bp;
+          if(ep - bp < 2) {
+            break;
+          }
+          tmp = std::move(*bp);
+        }
+        return vec_io;
+      }
+
   bool do_accept_identifier_or_keyword(Vector<Token> &seq_out, Source_reader &reader_io)
     {
       // identifier ::=
@@ -788,17 +810,6 @@ namespace {
       return true;
     }
 
-  void do_reverse_sequence(Vector<Token> &seq_io)
-    {
-      auto ei = seq_io.mut_end();
-      auto bi = seq_io.mut_begin();
-      while(ei - bi >= 2) {
-        --ei;
-        std::iter_swap(bi, ei);
-        ++bi;
-      }
-    }
-
 }
 
 Parser_error Token_stream::get_parser_error() const noexcept
@@ -904,7 +915,7 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
       throw Parser_error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_error::code_block_comment_unclosed);
     }
     // Accept the result.
-    do_reverse_sequence(seq);
+    do_reverse_vector(seq);
     this->m_stor.emplace<Vector<Token>>(std::move(seq));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.

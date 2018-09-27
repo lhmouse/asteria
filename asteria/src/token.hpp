@@ -196,22 +196,8 @@ class Token
           return this->m_stor.as<AltT>();
         }
 
-    void swap(Token &other) noexcept
-      {
-        rocket::adl_swap(this->m_file, other.m_file);
-        rocket::adl_swap(this->m_line, other.m_line);
-        rocket::adl_swap(this->m_offset, other.m_offset);
-        rocket::adl_swap(this->m_length, other.m_length);
-        rocket::adl_swap(this->m_stor, other.m_stor);
-      }
-
     void dump(std::ostream &os) const;
   };
-
-inline void swap(Token &lhs, Token &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 inline std::ostream & operator<<(std::ostream &os, const Token &token)
   {

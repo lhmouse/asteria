@@ -48,11 +48,6 @@ class Token_stream
 
     Parser_error get_parser_error() const noexcept;
 
-    void swap(Token_stream &other) noexcept
-      {
-        rocket::adl_swap(this->m_stor, other.m_stor);
-      }
-
     bool load(std::istream &cstrm_io, const String &file);
     void clear() noexcept;
 
@@ -60,11 +55,6 @@ class Token_stream
     const Token * peek_opt() const noexcept;
     Token shift();
   };
-
-inline void swap(Token_stream &lhs, Token_stream &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 }
 

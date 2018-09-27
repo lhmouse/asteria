@@ -97,20 +97,10 @@ class Value
           return this->m_stor.as<AltT>();
         }
 
-    void swap(Value &other) noexcept
-      {
-        rocket::adl_swap(this->m_stor, other.m_stor);
-      }
-
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, Size indent_increment = 2, Size indent_next = 0) const;
   };
-
-inline void swap(Value &lhs, Value &rhs) noexcept
-  {
-    lhs.swap(rhs);
-  }
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)
   {
