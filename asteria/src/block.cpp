@@ -15,16 +15,6 @@ Block::~Block()
   {
   }
 
-Block::Block(Block &&) noexcept
-  = default;
-Block & Block::operator=(Block &&) noexcept
-  = default;
-
-bool Block::empty() const noexcept
-  {
-    return this->m_stmts.empty();
-  }
-
 void Block::fly_over_in_place(Abstract_context &ctx_io) const
   {
     for(const auto &stmt : this->m_stmts) {

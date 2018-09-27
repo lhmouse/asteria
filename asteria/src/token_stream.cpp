@@ -18,11 +18,6 @@ Token_stream::~Token_stream()
   {
   }
 
-Token_stream::Token_stream(Token_stream &&) noexcept
-  = default;
-Token_stream & Token_stream::operator=(Token_stream &&) noexcept
-  = default;
-
 namespace {
 
   String & do_blank_comment(String &str_io, Size tpos, Size tn)

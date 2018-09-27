@@ -31,8 +31,10 @@ class Parser
       }
     ~Parser();
 
-    Parser(Parser &&) noexcept;
-    Parser & operator=(Parser &&) noexcept;
+    Parser(const Parser &)
+      = delete;
+    Parser & operator=(const Parser &)
+      = delete;
 
   public:
     State state() const noexcept

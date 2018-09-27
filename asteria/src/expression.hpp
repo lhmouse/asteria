@@ -21,9 +21,6 @@ class Expression
         }
     ~Expression();
 
-    Expression(Expression &&) noexcept;
-    Expression & operator=(Expression &&) noexcept;
-
   public:
     bool empty() const noexcept;
 

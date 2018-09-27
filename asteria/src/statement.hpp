@@ -165,9 +165,6 @@ class Statement
         }
     ~Statement();
 
-    Statement(Statement &&) noexcept;
-    Statement & operator=(Statement &&) noexcept;
-
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io) const;

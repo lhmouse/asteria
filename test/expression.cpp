@@ -4,6 +4,7 @@
 #include "_test_init.hpp"
 #include "../src/expression.hpp"
 #include "../src/xpnode.hpp"
+#include "../src/statement.hpp"
 #include "../src/executive_context.hpp"
 
 using namespace Asteria;

@@ -36,6 +36,7 @@ Value Reference::read() const
     // Return the value found.
     return cur;
   }
+
 Value & Reference::write(Value value) const
   {
     // Dereference the root.
@@ -53,6 +54,7 @@ Value & Reference::write(Value value) const
     cur.get() = std::move(value);
     return cur;
   }
+
 Value Reference::unset() const
   {
     if(this->m_modifiers.empty()) {
@@ -81,6 +83,7 @@ Reference & Reference::zoom_in(Reference_modifier modifier)
     this->m_modifiers.emplace_back(std::move(modifier));
     return *this;
   }
+
 Reference & Reference::zoom_out()
   {
     if(this->m_modifiers.empty() == false) {
@@ -99,6 +102,7 @@ bool Reference::is_constant() const noexcept
   {
     return this->m_root.index() == Reference_root::index_constant;
   }
+
 Reference & Reference::materialize()
   {
     if(this->m_root.index() == Reference_root::index_variable) {
@@ -112,6 +116,7 @@ Reference & Reference::materialize()
     this->m_modifiers.clear();
     return *this;
   }
+
 Reference & Reference::dematerialize()
   {
     if(this->m_root.unique() == false) {

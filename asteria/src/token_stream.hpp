@@ -17,8 +17,10 @@ class Token_stream
     Token_stream() noexcept;
     ~Token_stream();
 
-    Token_stream(Token_stream &&) noexcept;
-    Token_stream & operator=(Token_stream &&) noexcept;
+   Token_stream(const Token_stream &)
+     = delete;
+   Token_stream & operator=(const Token_stream &)
+     = delete;
 
   public:
     Parser_result load(std::istream &sis_io, const String &file);

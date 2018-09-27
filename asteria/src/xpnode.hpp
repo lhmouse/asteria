@@ -143,9 +143,6 @@ class Xpnode
         }
     ~Xpnode();
 
-    Xpnode(Xpnode &&) noexcept;
-    Xpnode & operator=(Xpnode &&) noexcept;
-
   public:
     Xpnode bind(const Analytic_context &ctx) const;
     void evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const;

@@ -113,11 +113,6 @@ Xpnode::~Xpnode()
   {
   }
 
-Xpnode::Xpnode(Xpnode &&) noexcept
-  = default;
-Xpnode & Xpnode::operator=(Xpnode &&) noexcept
-  = default;
-
 namespace {
 
   std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Abstract_context &ctx, const String &name)

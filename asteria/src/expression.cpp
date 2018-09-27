@@ -13,11 +13,6 @@ Expression::~Expression()
   {
   }
 
-Expression::Expression(Expression &&) noexcept
-  = default;
-Expression & Expression::operator=(Expression &&) noexcept
-  = default;
-
 bool Expression::empty() const noexcept
   {
     return this->m_nodes.empty();

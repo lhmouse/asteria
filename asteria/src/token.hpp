@@ -162,9 +162,6 @@ class Token
         }
     ~Token();
 
-    Token(Token &&) noexcept;
-    Token & operator=(Token &&) noexcept;
-
   public:
     const String & get_file() const noexcept
       {

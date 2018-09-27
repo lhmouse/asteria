@@ -11,15 +11,6 @@ Reference_root::~Reference_root()
   {
   }
 
-Reference_root::Reference_root(const Reference_root &) noexcept
-  = default;
-Reference_root & Reference_root::operator=(const Reference_root &) noexcept
-  = default;
-Reference_root::Reference_root(Reference_root &&) noexcept
-  = default;
-Reference_root & Reference_root::operator=(Reference_root &&) noexcept
-  = default;
-
 const Value & Reference_root::dereference_readonly() const
   {
     switch(Index(this->m_stor.index())) {

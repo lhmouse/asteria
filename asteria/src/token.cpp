@@ -266,11 +266,6 @@ Token::~Token()
   {
   }
 
-Token::Token(Token &&) noexcept
-  = default;
-Token & Token::operator=(Token &&) noexcept
-  = default;
-
 void Token::dump(std::ostream &os) const
   {
     switch(this->index()) {

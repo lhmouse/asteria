@@ -35,12 +35,7 @@ class Block
         }
     ~Block();
 
-    Block(Block &&) noexcept;
-    Block & operator=(Block &&) noexcept;
-
   public:
-    bool empty() const noexcept;
-
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Block bind_in_place(Analytic_context &ctx_io) const;
     Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Vector<Reference> &stack) const;

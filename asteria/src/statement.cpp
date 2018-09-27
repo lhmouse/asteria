@@ -18,11 +18,6 @@ Statement::~Statement()
   {
   }
 
-Statement::Statement(Statement &&) noexcept
-  = default;
-Statement & Statement::operator=(Statement &&) noexcept
-  = default;
-
 namespace {
 
   void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const String &name, Reference ref)

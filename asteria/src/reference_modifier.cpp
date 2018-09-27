@@ -12,15 +12,6 @@ Reference_modifier::~Reference_modifier()
   {
   }
 
-Reference_modifier::Reference_modifier(const Reference_modifier &) noexcept
-  = default;
-Reference_modifier & Reference_modifier::operator=(const Reference_modifier &) noexcept
-  = default;
-Reference_modifier::Reference_modifier(Reference_modifier &&) noexcept
-  = default;
-Reference_modifier & Reference_modifier::operator=(Reference_modifier &&) noexcept
-  = default;
-
 const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
   {
     switch(Index(this->m_stor.index())) {

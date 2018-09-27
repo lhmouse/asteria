@@ -43,11 +43,6 @@ class Reference_modifier
         }
     ~Reference_modifier();
 
-    Reference_modifier(const Reference_modifier &) noexcept;
-    Reference_modifier & operator=(const Reference_modifier &) noexcept;
-    Reference_modifier(Reference_modifier &&) noexcept;
-    Reference_modifier & operator=(Reference_modifier &&) noexcept;
-
   public:
     const Value * apply_readonly_opt(const Value &parent) const;
     Value * apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const;
