@@ -523,21 +523,23 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         const auto &alt = this->m_stor.as<S_branch>();
         // Pop the condition off the stack.
         auto cond = do_pop_reference(stack_io);
-        // Pick a branch.
-        const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        if(branch_taken.get().empty()) {
-          // Push the condition if the branch is empty.
-          ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
-        } else {
-          // Evaluate the branch and store the result into `cond`.
-          auto result = branch_taken.get().evaluate(ctx);
-          ASTERIA_DEBUG_LOG("Setting branch result: ", result.read());
+        // Read the condition and pick a branch.
+        const auto stack_size_old = stack_io.size();
+        const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, ctx);
+        if(has_result) {
+          // The result will have been pushed onto `stack_io`.
+          ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
+          ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
           if(alt.compound_assign) {
+            auto &result = stack_io.mut_back();
             cond.write(result.read());
-          } else {
-            cond = std::move(result);
+            result = std::move(cond);
           }
+          return;
         }
+        // Push the condition if the branch is empty.
+        ROCKET_ASSERT(stack_io.size() == stack_size_old);
+        ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
         stack_io.emplace_back(std::move(cond));
         return;
       }
