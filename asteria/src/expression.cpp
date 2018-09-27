@@ -33,6 +33,7 @@ Expression Expression::bind(const Analytic_context &ctx) const
     }
     return std::move(nodes_bnd);
   }
+
 Reference Expression::evaluate(Vector<Reference> &stack, const Executive_context &ctx) const
   {
     const auto size_old = stack.size();
