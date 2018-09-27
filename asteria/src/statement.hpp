@@ -22,9 +22,6 @@ class Statement
         target_for     = 3,
       };
 
-    struct S_null
-      {
-      };
     struct S_expr
       {
         Expression expr;
@@ -58,9 +55,13 @@ class Statement
         Expression ctrl;
         Bivector<Expression, Block> clauses;
       };
+    struct S_do_while
+      {
+        Block body;
+        Expression cond;
+      };
     struct S_while
       {
-        bool has_do;
         Expression cond;
         Block body;
       };
@@ -111,13 +112,13 @@ class Statement
 
     enum Index : Uint8
       {
-        index_null      =  0,
-        index_expr      =  1,
-        index_block     =  2,
-        index_var_def   =  3,
-        index_func_def  =  4,
-        index_if        =  5,
-        index_switch    =  6,
+        index_expr      =  0,
+        index_block     =  1,
+        index_var_def   =  2,
+        index_func_def  =  3,
+        index_if        =  4,
+        index_switch    =  5,
+        index_do_while  =  6,
         index_while     =  7,
         index_for       =  8,
         index_for_each  =  9,
@@ -131,13 +132,13 @@ class Statement
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_null      //  0,
-        , S_expr      //  1,
-        , S_block     //  2,
-        , S_var_def   //  3,
-        , S_func_def  //  4,
-        , S_if        //  5,
-        , S_switch    //  6,
+        , S_expr      //  0,
+        , S_block     //  1,
+        , S_var_def   //  2,
+        , S_func_def  //  3,
+        , S_if        //  4,
+        , S_switch    //  5,
+        , S_do_while  //  6,
         , S_while     //  7,
         , S_for       //  8,
         , S_for_each  //  9,
@@ -154,10 +155,6 @@ class Statement
     Variant m_stor;
 
   public:
-    Statement() noexcept
-      : m_stor()
-      {
-      }
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Statement(AltT &&alt)
@@ -169,7 +166,7 @@ class Statement
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io) const;
-    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Vector<Reference> &stack) const;
+    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io) const;
   };
 
 }

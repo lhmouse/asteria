@@ -41,10 +41,10 @@ Block Block::bind_in_place(Analytic_context &ctx_io) const
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Vector<Reference> &stack) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
   {
     for(const auto &stmt : this->m_stmts) {
-      const auto status = stmt.execute_in_place(ref_out, ctx_io, stack);
+      const auto status = stmt.execute_in_place(ref_out, ctx_io);
       if(status != status_next) {
         // Forward anything unexpected to the caller.
         return status;
@@ -53,10 +53,10 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     return status_next;
   }
 
-Reference Block::execute_as_function_in_place(Executive_context &ctx_io, Vector<Reference> &stack) const
+Reference Block::execute_as_function_in_place(Executive_context &ctx_io) const
   {
     Reference ref;
-    const auto status = this->execute_in_place(ref, ctx_io, stack);
+    const auto status = this->execute_in_place(ref, ctx_io);
     switch(status) {
       case status_next: {
         // Return `null` because the control flow reached the end of the function.
@@ -89,10 +89,10 @@ Block Block::bind(const Analytic_context &ctx) const
     return this->bind_in_place(ctx_next);
   }
 
-Block::Status Block::execute(Reference &ref_out, Vector<Reference> &stack, const Executive_context &ctx) const
+Block::Status Block::execute(Reference &ref_out, const Executive_context &ctx) const
   {
     Executive_context ctx_next(&ctx);
-    return this->execute_in_place(ref_out, ctx_next, stack);
+    return this->execute_in_place(ref_out, ctx_next);
   }
 
 }

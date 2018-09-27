@@ -74,9 +74,9 @@ class Xpnode
       };
     struct S_branch
       {
+        bool compound_assign;
         Expression branch_true;
         Expression branch_false;
-        bool compound_assign;
       };
     struct S_function_call
       {
@@ -91,15 +91,11 @@ class Xpnode
       };
     struct S_unnamed_array
       {
-        Vector<Expression> elems;
+        Size elem_cnt;
       };
     struct S_unnamed_object
       {
-        Dictionary<Expression> pairs;
-      };
-    struct S_subexpression
-      {
-        Expression expr;
+        Vector<String> keys;
       };
 
     enum Index : Uint8
@@ -113,7 +109,6 @@ class Xpnode
         index_operator_rpn      = 6,
         index_unnamed_array     = 7,
         index_unnamed_object    = 8,
-        index_subexpression     = 9,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -126,7 +121,6 @@ class Xpnode
         , S_operator_rpn      // 6,
         , S_unnamed_array     // 7,
         , S_unnamed_object    // 8,
-        , S_subexpression     // 9,
       )>;
 
   public:

@@ -17,19 +17,14 @@ int main()
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     text.emplace_back(Statement::S_var_def { String::shallow("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
-    Vector<Expression> elems;
-    for(int i = 1; i <= 3; ++i) {
-      expr.clear();
-      expr.emplace_back(Xpnode::S_literal { D_integer(i) });
-      elems.emplace_back(std::move(expr));
-    }
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_literal { D_integer(5) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    elems.emplace_back(std::move(expr));
-    expr.clear();
-    expr.emplace_back(Xpnode::S_unnamed_array { std::move(elems) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(3) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(1) });
+    expr.emplace_back(Xpnode::S_unnamed_array { 4 });
     text.emplace_back(Statement::S_var_def { String::shallow("data"), true, std::move(expr) });
     // for(each k, v in data) {
     //   res += k * v;
@@ -82,12 +77,10 @@ int main()
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     auto block = Block(std::move(text));
 
-    Reference ref;
     Executive_context ctx;
-    Vector<Reference> stack;
-    auto status = block.execute_in_place(ref, ctx, stack);
+    Reference ref;
+    auto status = block.execute_in_place(ref, ctx);
     ASTERIA_TEST_CHECK(status == Block::status_next);
-    ASTERIA_TEST_CHECK(stack.empty());
     auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 41);

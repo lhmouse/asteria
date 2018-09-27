@@ -177,7 +177,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(ctx);
         auto branch_false_bnd = alt.branch_false.bind(ctx);
-        Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd), alt.compound_assign };
+        Xpnode::S_branch alt_bnd = { alt.compound_assign, std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
       case index_function_call: {
@@ -194,33 +194,14 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       }
       case index_unnamed_array: {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
-        // Bind everything recursively.
-        Vector<Expression> elems_bnd;
-        elems_bnd.reserve(alt.elems.size());
-        for(const auto &elem : alt.elems) {
-          auto elem_bnd = elem.bind(ctx);
-          elems_bnd.emplace_back(std::move(elem_bnd));
-        }
-        Xpnode::S_unnamed_array alt_bnd = { std::move(elems_bnd) };
+        // Copy it as-is.
+        Xpnode::S_unnamed_array alt_bnd = { alt.elem_cnt };
         return std::move(alt_bnd);
       }
       case index_unnamed_object: {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
-        // Bind everything recursively.
-        Dictionary<Expression> pairs_bnd;
-        pairs_bnd.reserve(alt.pairs.size());
-        for(const auto &pair : alt.pairs) {
-          auto second_bnd = pair.second.bind(ctx);
-          pairs_bnd.insert_or_assign(pair.first, std::move(second_bnd));
-        }
-        Xpnode::S_unnamed_object alt_bnd = { std::move(pairs_bnd) };
-        return std::move(alt_bnd);
-      }
-      case index_subexpression: {
-        const auto &alt = this->m_stor.as<S_subexpression>();
-        // Bind the subexpression recursively.
-        auto expr_bnd = alt.expr.bind(ctx);
-        Xpnode::S_subexpression alt_bnd = { std::move(expr_bnd) };
+        // Copy it as-is.
+        Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         return std::move(alt_bnd);
       }
       default: {
@@ -542,21 +523,23 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         const auto &alt = this->m_stor.as<S_branch>();
         // Pop the condition off the stack.
         auto cond = do_pop_reference(stack_io);
-        // Pick a branch.
-        const auto branch_taken = cond.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        if(branch_taken.get().empty()) {
-          // Push the condition if the branch is empty.
-          ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
-        } else {
-          // Evaluate the branch and store the result into `cond`.
-          auto result = branch_taken.get().evaluate(stack_io, ctx);
-          ASTERIA_DEBUG_LOG("Setting branch result: ", result.read());
+        // Read the condition and pick a branch.
+        const auto stack_size_old = stack_io.size();
+        const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, ctx);
+        if(has_result) {
+          // The result will have been pushed onto `stack_io`.
+          ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
+          ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
           if(alt.compound_assign) {
+            auto &result = stack_io.mut_back();
             cond.write(result.read());
-          } else {
-            cond = std::move(result);
+            result = std::move(cond);
           }
+          return;
         }
+        // Push the condition if the branch is empty.
+        ROCKET_ASSERT(stack_io.size() == stack_size_old);
+        ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
         stack_io.emplace_back(std::move(cond));
         return;
       }
@@ -1085,13 +1068,12 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
       }
       case index_unnamed_array: {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
-        // Create an array by evaluating elements recursively.
+        // Pop references to create an array.
         D_array array;
-        array.reserve(alt.elems.size());
-        for(const auto &elem : alt.elems) {
-          const auto result = elem.evaluate(stack_io, ctx);
-          auto value = result.read();
-          array.emplace_back(std::move(value));
+        array.reserve(alt.elem_cnt);
+        for(auto i = alt.elem_cnt; i != 0; --i) {
+          auto ref = do_pop_reference(stack_io);
+          array.emplace_back(ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
         stack_io.emplace_back(std::move(ref_c));
@@ -1099,23 +1081,15 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
       }
       case index_unnamed_object: {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
-        // Create an object by evaluating elements recursively.
+        // Pop references to create an object.
         D_object object;
-        object.reserve(alt.pairs.size());
-        for(const auto &pair : alt.pairs) {
-          const auto result = pair.second.evaluate(stack_io, ctx);
-          auto value = result.read();
-          object.insert_or_assign(pair.first, std::move(value));
+        object.reserve(alt.keys.size());
+        for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
+          auto ref = do_pop_reference(stack_io);
+          object.insert_or_assign(*it, ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
         stack_io.emplace_back(std::move(ref_c));
-        return;
-      }
-      case index_subexpression: {
-        const auto &alt = this->m_stor.as<S_subexpression>();
-        // Evaluate the subexpression recursively.
-        auto ref = alt.expr.evaluate(stack_io, ctx);
-        stack_io.emplace_back(std::move(ref));
         return;
       }
       default: {

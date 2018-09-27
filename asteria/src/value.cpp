@@ -96,6 +96,22 @@ bool Value::test() const noexcept
     }
   }
 
+namespace {
+
+  template<typename ElementT>
+    inline Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
+      {
+        if(lhs < rhs) {
+          return Value::compare_less;
+        }
+        if(rhs < lhs) {
+          return Value::compare_greater;
+        }
+        return Value::compare_equal;
+      }
+
+}
+
 Value::Compare Value::compare(const Value &other) const noexcept
   {
     // `null` is considered to be equal to `null` and less than anything else.
@@ -116,24 +132,12 @@ Value::Compare Value::compare(const Value &other) const noexcept
       case type_boolean: {
         const auto &alt_lhs = this->check<D_boolean>();
         const auto &alt_rhs = other.check<D_boolean>();
-        if(alt_lhs < alt_rhs) {
-          return Value::compare_less;
-        }
-        if(alt_lhs > alt_rhs) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+        return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_integer: {
         const auto &alt_lhs = this->check<D_integer>();
         const auto &alt_rhs = other.check<D_integer>();
-        if(alt_lhs < alt_rhs) {
-          return Value::compare_less;
-        }
-        if(alt_lhs > alt_rhs) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+        return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_real: {
         const auto &alt_lhs = this->check<D_real>();
@@ -141,25 +145,12 @@ Value::Compare Value::compare(const Value &other) const noexcept
         if(std::isunordered(alt_lhs, alt_rhs)) {
           return Value::compare_unordered;
         }
-        if(std::isless(alt_lhs, alt_rhs)) {
-          return Value::compare_less;
-        }
-        if(std::isgreater(alt_lhs, alt_rhs)) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+        return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_string: {
         const auto &alt_lhs = this->check<D_string>();
         const auto &alt_rhs = other.check<D_string>();
-        const int cmp = alt_lhs.compare(alt_rhs);
-        if(cmp < 0) {
-          return Value::compare_less;
-        }
-        if(cmp > 0) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+        return do_three_way_compare(alt_lhs.compare(alt_rhs), 0);
       }
       case type_opaque:
       case type_function: {
@@ -168,20 +159,17 @@ Value::Compare Value::compare(const Value &other) const noexcept
       case type_array: {
         const auto &alt_lhs = this->check<D_array>();
         const auto &alt_rhs = other.check<D_array>();
-        const auto rlen = rocket::min(alt_lhs.size(), alt_rhs.size());
-        for(Size i = 0; i < rlen; ++i) {
-          const auto res = alt_lhs[i].compare(alt_rhs[i]);
-          if(res != Value::compare_equal) {
-            return res;
+        auto pl = alt_lhs.begin(), el = alt_lhs.end();
+        auto pr = alt_rhs.begin(), er = alt_rhs.end();
+        while((pl != el) && (pr != er)) {
+          const auto r = pl->compare(*pr);
+          if(r != Value::compare_equal) {
+            return r;
           }
+          ++pl;
+          ++pr;
         }
-        if(alt_lhs.size() < alt_rhs.size()) {
-          return Value::compare_less;
-        }
-        if(alt_lhs.size() > alt_rhs.size()) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+        return do_three_way_compare(el - pl, er - pr);
       }
       case type_object: {
         return Value::compare_unordered;

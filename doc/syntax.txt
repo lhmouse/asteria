@@ -2,7 +2,7 @@ document ::=
 	directive-or-statement-list-opt
 
 identifier ::=
-	PCRE([A-Za-z_][0-9A-Za-z_]*)
+	PCRE([A-Za-z_][A-Za-z_0-9]*)
 literal ::=
 	null-literal | boolean-literal | string-literal | noescape-string-literal |
 	numeric-literal | nan-literal | infinity-literal
@@ -34,7 +34,7 @@ infinity-literal ::=
 	"infinity"
 
 statement ::=
-	block | non-block-statement
+	block | nonblock-statement
 
 block ::=
 	"{" statement-list-opt "}"
@@ -43,7 +43,7 @@ statement-list-opt ::=
 statement-list ::=
 	statement statement-list-opt
 
-non-block-statement ::=
+nonblock-statement ::=
 	null-statement |
 	variable-definition | immutable-variable-definition | function-definition |
 	expression-statement |
@@ -110,7 +110,9 @@ try-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	prefix-operator-list-opt primary-expression postfix-trailer-list-opt infix-trailer-list-opt
+	infix-element infix-operator-list-opt
+infix-element ::=
+	( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
 
 prefix-operator-list-opt ::=
 	prefix-operator-list | ""
@@ -128,19 +130,21 @@ unnamed-array ::=
 array-element-list-opt ::=
 	array-element-list | ""
 array-element-list ::=
-	expression ( "," array-element-list-opt | "" )
+	expression ( comma-or-semicolon array-element-list-opt | "" )
+comma-or-semicolon ::=
+	"," | ";"
 unnamed-object ::=
 	"{" key-mapped-list-opt "}"
 key-mapped-list-opt ::=
 	key-mapped-list | ""
 key-mapped-list ::=
-	( string-literal | identifier ) "=" expression ( "," key-mapped-list-opt | "" )
+	( string-literal | identifier ) "=" expression ( comma-or-semicolon key-mapped-list-opt | "" )
 nested-expression ::=
 	"(" expression ")"
 
-postfix-trailer-list-opt ::=
-	postfix-trailer-list | ""
-postfix-trailer-list ::=
+postfix-operator-list-opt ::=
+	postfix-operator-list | ""
+postfix-operator-list ::=
 	postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
 postfix-operator ::=
 	"++" | "--"
@@ -155,10 +159,10 @@ postfix-subscript ::=
 postfix-member-access ::=
 	"." identifier
 
-infix-trailer-list-opt ::=
-	infix-trailer-list | ""
-infix-trailer-list ::=
-	( infix-selection | infix-operator ) expression
+infix-operator-list-opt ::=
+	infix-operator-list | ""
+infix-operator-list ::=
+	( infix-selection | infix-operator ) infix-element infix-operator-list-opt
 infix-selection ::=
 	"?"  expression ":" | "&&"  | "||"  |
 	"?=" expression ":" | "&&=" | "||="

@@ -12,8 +12,6 @@ using namespace Asteria;
 int main()
   {
     Executive_context ctx;
-    Vector<Reference> stack;
-
     auto &cond = ctx.open_named_reference(String::shallow("cond"));
     auto &dval = ctx.open_named_reference(String::shallow("dval"));
     auto &ival = ctx.open_named_reference(String::shallow("ival"));
@@ -49,7 +47,7 @@ int main()
       {
         nodes.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
         nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
-        nodes.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false), false });
+        nodes.emplace_back(Xpnode::S_branch { false, std::move(branch_true), std::move(branch_false) });
         nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
         nodes.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
         nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
@@ -57,8 +55,7 @@ int main()
       }
     auto expr = Expression(std::move(nodes));
 
-    auto result = expr.evaluate(stack, ctx);
-    ASTERIA_TEST_CHECK(stack.empty());
+    auto result = expr.evaluate(ctx);
     auto value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
@@ -69,8 +66,7 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond.write(D_integer(42));
-    result = expr.evaluate(stack, ctx);
-    ASTERIA_TEST_CHECK(stack.empty());
+    result = expr.evaluate(ctx);
     value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();

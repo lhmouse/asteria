@@ -17,8 +17,8 @@ int main()
                            "* - 0x`01`7.8`4p+4  // comments\n"
                            ".false/*more\n"
                            "comments*/;/*yet more*/-42e13");
-    auto result = ts.load(iss, String("dummy_file"));
-    ASTERIA_TEST_CHECK(result.get_error() == Parser_result::error_success);
+    auto r = ts.load(iss, String("dummy_file"));
+    ASTERIA_TEST_CHECK(r);
     ASTERIA_TEST_CHECK(iss.eof());
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_identifier>().name == "hh");
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_inc);
