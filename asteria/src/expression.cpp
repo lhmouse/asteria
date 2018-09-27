@@ -48,7 +48,7 @@ Reference Expression::evaluate(const Executive_context &ctx) const
         return { };
       }
       case 1: {
-        return std::move(stack.mut_front());
+        return std::move(stack.mut_back());
       }
       default: {
         ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
