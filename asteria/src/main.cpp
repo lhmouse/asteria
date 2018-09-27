@@ -118,7 +118,7 @@ int main()
           case 2:
         }
       var sum = 0;
-      ++--sum++--("a","b",false)++[1].at;
+      1 + 2 * 3 * (4 + 5) + ++--sum++--("a","b",false)++[1].at;
 //      for(var i = 0; i < 100; ++i) {
 //        sum  += i;
 //      }
