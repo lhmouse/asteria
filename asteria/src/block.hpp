@@ -41,10 +41,9 @@ class Block
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Block bind_in_place(Analytic_context &ctx_io) const;
+    Block bind(const Analytic_context &ctx) const;
     Status execute_in_place(Reference &ref_out, Executive_context &ctx_io) const;
     Reference execute_as_function_in_place(Executive_context &ctx_io) const;
-
-    Block bind(const Analytic_context &ctx) const;
     Status execute(Reference &ref_out, const Executive_context &ctx) const;
   };
 

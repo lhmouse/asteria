@@ -13,11 +13,6 @@ Expression::~Expression()
   {
   }
 
-bool Expression::empty() const noexcept
-  {
-    return this->m_nodes.empty();
-  }
-
 Expression Expression::bind(const Analytic_context &ctx) const
   {
     Vector<Xpnode> nodes_bnd;
@@ -27,6 +22,11 @@ Expression Expression::bind(const Analytic_context &ctx) const
       nodes_bnd.emplace_back(std::move(node_bnd));
     }
     return std::move(nodes_bnd);
+  }
+
+bool Expression::empty() const noexcept
+  {
+    return this->m_nodes.empty();
   }
 
 bool Expression::evaluate_partial(Vector<Reference> &stack_io, const Executive_context &ctx) const

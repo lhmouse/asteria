@@ -33,6 +33,12 @@ Block Block::bind_in_place(Analytic_context &ctx_io) const
     return std::move(stmts_bnd);
   }
 
+Block Block::bind(const Analytic_context &ctx) const
+  {
+    Analytic_context ctx_next(&ctx);
+    return this->bind_in_place(ctx_next);
+  }
+
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
   {
     for(const auto &stmt : this->m_stmts) {
@@ -73,12 +79,6 @@ Reference Block::execute_as_function_in_place(Executive_context &ctx_io) const
         ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");
       }
     }
-  }
-
-Block Block::bind(const Analytic_context &ctx) const
-  {
-    Analytic_context ctx_next(&ctx);
-    return this->bind_in_place(ctx_next);
   }
 
 Block::Status Block::execute(Reference &ref_out, const Executive_context &ctx) const

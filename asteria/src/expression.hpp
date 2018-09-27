@@ -25,8 +25,8 @@ class Expression
     ~Expression();
 
   public:
-    bool empty() const noexcept;
     Expression bind(const Analytic_context &ctx) const;
+    bool empty() const noexcept;
     bool evaluate_partial(Vector<Reference> &stack_io, const Executive_context &ctx) const;
     Reference evaluate(const Executive_context &ctx) const;
   };
