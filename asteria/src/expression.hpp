@@ -21,7 +21,7 @@ class Expression
   public:
     void swap(Expression &other) noexcept
       {
-        this->m_nodes.swap(other.m_nodes);
+        rocket::adl_swap(this->m_nodes, other.m_nodes);
       }
 
     bool empty() const noexcept;

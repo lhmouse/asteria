@@ -50,7 +50,7 @@ class Token_stream
 
     void swap(Token_stream &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     bool load(std::istream &cstrm_io, const String &file);

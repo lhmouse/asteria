@@ -99,7 +99,7 @@ class Value
 
     void swap(Value &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     bool test() const noexcept;

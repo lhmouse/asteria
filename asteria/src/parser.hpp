@@ -50,7 +50,7 @@ class Parser
 
     void swap(Parser &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     bool load(Token_stream &tstrm_io);

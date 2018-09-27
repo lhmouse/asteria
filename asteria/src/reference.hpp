@@ -37,8 +37,8 @@ class Reference
   public:
     void swap(Reference &other) noexcept
       {
-        this->m_root.swap(other.m_root);
-        this->m_modifiers.swap(other.m_modifiers);
+        rocket::adl_swap(this->m_root, other.m_root);
+        rocket::adl_swap(this->m_modifiers, other.m_modifiers);
       }
 
     Value read() const;

@@ -141,7 +141,7 @@ class Xpnode
   public:
     void swap(Xpnode &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     Xpnode bind(const Analytic_context &ctx) const;

@@ -166,7 +166,7 @@ class Statement
   public:
     void swap(Statement &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     void fly_over_in_place(Abstract_context &ctx_io) const;

@@ -198,7 +198,11 @@ class Token
 
     void swap(Token &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_file, other.m_file);
+        rocket::adl_swap(this->m_line, other.m_line);
+        rocket::adl_swap(this->m_offset, other.m_offset);
+        rocket::adl_swap(this->m_length, other.m_length);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     void dump(std::ostream &os) const;

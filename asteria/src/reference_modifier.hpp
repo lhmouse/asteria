@@ -47,7 +47,7 @@ class Reference_modifier
   public:
     void swap(Reference_modifier &other) noexcept
       {
-        this->m_stor.swap(other.m_stor);
+        rocket::adl_swap(this->m_stor, other.m_stor);
       }
 
     const Value * apply_readonly_opt(const Value &parent) const;
