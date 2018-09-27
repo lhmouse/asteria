@@ -277,12 +277,9 @@ template<typename ...altsT>
           };
 
     private:
-      using storage = details_variant::basic_storage<altsT...>;
-
-    private:
       unsigned m_turnout : 1;
       unsigned m_index : 15;
-      storage m_buffers[2];
+      details_variant::basic_storage<altsT...> m_buffers[2];
 
     private:
       const void * do_get_front_buffer() const noexcept
@@ -316,7 +313,7 @@ template<typename ...altsT>
           details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
                                                     details_variant::visitor_destroy());
 #ifdef ROCKET_DEBUG
-          ::std::memset(this->m_buffers + turnout_old, '@', sizeof(storage));
+          ::std::memset(this->m_buffers + turnout_old, '@', sizeof(this->m_buffers[0]));
 #endif
         }
 
