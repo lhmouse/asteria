@@ -361,7 +361,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
         return false;
       }
-      Statement::S_expr stmt_c = { };
+      Statement::S_expr stmt_c = { Vector<Xpnode>() };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }
