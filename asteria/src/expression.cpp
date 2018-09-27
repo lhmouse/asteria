@@ -9,6 +9,14 @@
 
 namespace Asteria {
 
+Expression::Expression() noexcept
+  : m_nodes()
+  {
+  }
+Expression::Expression(Vector<Xpnode> &&nodes) noexcept
+  : m_nodes(std::move(nodes))
+  {
+  }
 Expression::~Expression()
   {
   }

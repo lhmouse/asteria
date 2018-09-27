@@ -28,11 +28,8 @@ class Block
     Vector<Statement> m_stmts;
 
   public:
-    template<typename ...XnodesT, typename std::enable_if<std::is_constructible<Vector<Statement>, XnodesT &&...>::value>::type * = nullptr>
-      Block(XnodesT &&...xnodes)
-        : m_stmts(std::forward<XnodesT>(xnodes)...)
-        {
-        }
+    Block() noexcept;
+    Block(Vector<Statement> &&stmts) noexcept;
     ~Block();
 
   public:

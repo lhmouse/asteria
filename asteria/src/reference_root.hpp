@@ -48,7 +48,8 @@ class Reference_root
       : m_stor()  // Initialize to a constant `null`.
       {
       }
-    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+    // This constructor does not accept lvalues.
+    template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Reference_root(AltT &&alt)
         : m_stor(std::forward<AltT>(alt))
         {

@@ -21,10 +21,10 @@ class Reference
       : m_root(), m_modifiers()
       {
       }
-    template<typename XrootT, typename ...XmodifiersT, typename std::enable_if<std::is_constructible<Reference_root, XrootT &&>::value &&
-                                                                               std::is_constructible<Vector<Reference_modifier>, XmodifiersT &&...>::value>::type * = nullptr>
-      Reference(XrootT &&xroot, XmodifiersT &&...xmodifiers)
-        : m_root(std::forward<XrootT>(xroot)), m_modifiers(std::forward<XmodifiersT>(xmodifiers)...)
+    // This constructor does not accept lvalues.
+    template<typename XrootT, typename std::enable_if<(Reference_root::Variant::index_of<XrootT>::value || true)>::type * = nullptr>
+      Reference(XrootT &&xroot)
+        : m_root(std::forward<XrootT>(xroot)), m_modifiers()
         {
         }
     ~Reference();

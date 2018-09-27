@@ -155,7 +155,8 @@ class Token
     Variant m_stor;
 
   public:
-    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+    // This constructor does not accept lvalues.
+    template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Token(const String &file, Uint64 line, Size offset, Size length, AltT &&alt)
         : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
