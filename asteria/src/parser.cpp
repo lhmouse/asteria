@@ -355,18 +355,6 @@ namespace {
       return true;
     }
 
-  bool do_accept_null_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
-    {
-      // null-statement ::=
-      //   ";"
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
-        return false;
-      }
-      Statement::S_expr stmt_c = { Vector<Xpnode>() };
-      stmts_out.emplace_back(std::move(stmt_c));
-      return true;
-    }
-
   bool do_accept_identifier_list(Vector<String> &names_out, Token_stream &tstrm_io)
     {
       // identifier-list-opt ::=
@@ -986,7 +974,7 @@ namespace {
         }
       } else {
         bool init_got = do_accept_variable_definition(init, tstrm_io) ||
-                        do_accept_null_statement(init, tstrm_io) ||
+                        do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
                         do_accept_expression_statement(init, tstrm_io);
         if(init_got == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_for_statement_initializer_expected);
@@ -1154,7 +1142,7 @@ namespace {
       //   do-while-statement | while-statement | for-statement |
       //   break-statement | continue-statement | throw-statement | return-statement |
       //   try-statement
-      return do_accept_null_statement(stmts_out, tstrm_io) ||
+      return do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
              do_accept_variable_definition(stmts_out, tstrm_io) ||
              do_accept_immutable_variable_definition(stmts_out, tstrm_io) ||
              do_accept_function_definition(stmts_out, tstrm_io) ||
