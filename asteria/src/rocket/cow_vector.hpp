@@ -40,6 +40,7 @@ using ::std::is_trivial;
 using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::is_copy_constructible;
+using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_move_constructible;
 using ::std::conditional;
@@ -275,21 +276,22 @@ namespace details_cow_vector {
 
       private:
         storage_pointer m_ptr;
+        void (*m_sdf)(storage_pointer);
 
       public:
         explicit constexpr storage_handle(const allocator_type &alloc) noexcept
           : allocator_base(alloc),
-            m_ptr()
+            m_ptr(), m_sdf()
           {
           }
         explicit constexpr storage_handle(allocator_type &&alloc) noexcept
           : allocator_base(::std::move(alloc)),
-            m_ptr()
+            m_ptr(), m_sdf()
           {
           }
         ~storage_handle()
           {
-            this->do_reset(storage_pointer());
+            this->deallocate();
           }
 
         storage_handle(const storage_handle &)
@@ -298,12 +300,21 @@ namespace details_cow_vector {
           = delete;
 
       private:
-        void do_reset(storage_pointer ptr_new) noexcept
+        void do_reset(storage_pointer ptr_new, void (*sdf_new)(storage_pointer)) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
             if(!ptr) {
               return;
             }
+            const auto sdf = noadl::exchange(this->m_sdf, sdf_new);
+            if(!sdf) {
+              return;
+            }
+            (*sdf)(ptr);
+          }
+
+        static void do_destroy_storage(storage_pointer ptr)
+          {
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
             const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
             if(nref_old > 1) {
@@ -388,7 +399,7 @@ namespace details_cow_vector {
           {
             if(res_arg == 0) {
               // Deallocate the block.
-              this->do_reset(storage_pointer());
+              this->deallocate();
               return nullptr;
             }
             const auto cap = this->check_size_add(0, res_arg);
@@ -420,12 +431,12 @@ namespace details_cow_vector {
               }
             }
             // Replace the current block.
-            this->do_reset(ptr);
+            this->do_reset(ptr, &do_destroy_storage);
             return ptr->data;
           }
         void deallocate() noexcept
           {
-            this->do_reset(storage_pointer());
+            this->do_reset(storage_pointer(), nullptr);
           }
 
         void share_with(const storage_handle &other) noexcept
@@ -436,7 +447,7 @@ namespace details_cow_vector {
               const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
               ROCKET_ASSERT(nref_old >= 1);
             }
-            this->do_reset(ptr);
+            this->do_reset(ptr, other.m_sdf);
           }
         void share_with(storage_handle &&other) noexcept
           {
@@ -445,11 +456,12 @@ namespace details_cow_vector {
               // Detach the block.
               other.m_ptr = storage_pointer();
             }
-            this->do_reset(ptr);
+            this->do_reset(ptr, other.m_sdf);
           }
         void exchange_with(storage_handle &other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
+            ::std::swap(this->m_sdf, other.m_sdf);
           }
 
         constexpr operator const storage_handle * () const noexcept
@@ -746,7 +758,7 @@ template<typename valueT, typename allocatorT>
         : m_sth(alloc)
         {
         }
-      cow_vector() noexcept(noexcept(allocator_type()))
+      cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
         : cow_vector(allocator_type())
         {
         }
@@ -826,7 +838,7 @@ template<typename valueT, typename allocatorT>
           return ptr;
         }
       // Deallocate any dynamic storage.
-      void do_deallocate() noexcept
+      void deallocate() noexcept
         {
           this->m_sth.deallocate();
         }
@@ -991,7 +1003,7 @@ template<typename valueT, typename allocatorT>
       void clear() noexcept
         {
           if(this->unique() == false) {
-            this->do_deallocate();
+            this->deallocate();
             return;
           }
           this->m_sth.pop_back_n_unchecked(this->size());

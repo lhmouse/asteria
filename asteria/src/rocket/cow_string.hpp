@@ -49,6 +49,7 @@ using ::std::is_array;
 using ::std::is_trivial;
 using ::std::enable_if;
 using ::std::is_convertible;
+using ::std::is_nothrow_constructible;
 using ::std::conditional;
 using ::std::iterator_traits;
 using ::std::initializer_list;
@@ -128,7 +129,7 @@ namespace details_cow_string {
           }
         ~storage_handle()
           {
-            this->do_reset(storage_pointer());
+            this->deallocate();
           }
 
         storage_handle(const storage_handle &)
@@ -219,7 +220,7 @@ namespace details_cow_string {
           {
             if(res_arg == 0) {
               // Deallocate the block.
-              this->do_reset(storage_pointer());
+              this->deallocate();
               return nullptr;
             }
             const auto cap = this->check_size_add(0, res_arg);
@@ -641,7 +642,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         : basic_cow_string(shallow(), alloc)
         {
         }
-      basic_cow_string(shallow sh = shallow()) noexcept(noexcept(allocator_type()))
+      basic_cow_string(shallow sh = shallow()) noexcept(is_nothrow_constructible<allocator_type>::value)
         : basic_cow_string(sh, allocator_type())
         {
         }
@@ -749,7 +750,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           this->m_len = len;
         }
       // Deallocate any dynamic storage.
-      void do_deallocate() noexcept
+      void deallocate() noexcept
         {
           this->m_sth.deallocate();
           this->m_ptr = shallow().data();
@@ -980,7 +981,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       void clear() noexcept
         {
           if(this->unique() == false) {
-            this->do_deallocate();
+            this->deallocate();
             return;
           }
           this->do_set_length(0);

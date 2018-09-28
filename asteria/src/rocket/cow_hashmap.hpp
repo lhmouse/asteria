@@ -45,6 +45,7 @@ using ::std::is_const;
 using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::is_copy_constructible;
+using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_move_constructible;
 using ::std::remove_const;
@@ -330,6 +331,7 @@ namespace details_cow_hashmap {
 
       private:
         storage_pointer m_ptr;
+        void (*m_sdf)(storage_pointer);
 
       public:
         constexpr storage_handle(const allocator_type &alloc, const hasher &hf, const key_equal &eq)
@@ -338,7 +340,7 @@ namespace details_cow_hashmap {
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr()
+            m_ptr(), m_sdf()
           {
           }
         constexpr storage_handle(allocator_type &&alloc, const hasher &hf, const key_equal &eq)
@@ -347,12 +349,12 @@ namespace details_cow_hashmap {
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr()
+            m_ptr(), m_sdf()
           {
           }
         ~storage_handle()
           {
-            this->do_reset(storage_pointer());
+            this->deallocate();
           }
 
         storage_handle(const storage_handle &)
@@ -361,12 +363,21 @@ namespace details_cow_hashmap {
           = delete;
 
       private:
-        void do_reset(storage_pointer ptr_new) noexcept
+        void do_reset(storage_pointer ptr_new, void (*sdf_new)(storage_pointer)) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
             if(!ptr) {
               return;
             }
+            const auto sdf = noadl::exchange(this->m_sdf, sdf_new);
+            if(!sdf) {
+              return;
+            }
+            (*sdf)(ptr);
+          }
+
+        static void do_destroy_storage(storage_pointer ptr)
+          {
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
             const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
             if(nref_old > 1) {
@@ -477,7 +488,7 @@ namespace details_cow_hashmap {
           {
             if(res_arg == 0) {
               // Deallocate the block.
-              this->do_reset(storage_pointer());
+              this->deallocate();
               return nullptr;
             }
             const auto cap = this->check_size_add(0, res_arg);
@@ -509,21 +520,12 @@ namespace details_cow_hashmap {
               }
             }
             // Replace the current block.
-            this->do_reset(ptr);
+            this->do_reset(ptr, &do_destroy_storage);
             return ptr->data;
           }
         void deallocate() noexcept
           {
-            this->do_reset(storage_pointer());
-          }
-
-        constexpr operator const storage_handle * () const noexcept
-          {
-            return this;
-          }
-        operator storage_handle * () noexcept
-          {
-            return this;
+            this->do_reset(storage_pointer(), nullptr);
           }
 
         void share_with(const storage_handle &other) noexcept
@@ -534,7 +536,7 @@ namespace details_cow_hashmap {
               const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
               ROCKET_ASSERT(nref_old >= 1);
             }
-            this->do_reset(ptr);
+            this->do_reset(ptr, other.m_sdf);
           }
         void share_with(storage_handle &&other) noexcept
           {
@@ -543,11 +545,21 @@ namespace details_cow_hashmap {
               // Detach the block.
               other.m_ptr = storage_pointer();
             }
-            this->do_reset(ptr);
+            this->do_reset(ptr, other.m_sdf);
           }
         void exchange_with(storage_handle &other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
+            ::std::swap(this->m_sdf, other.m_sdf);
+          }
+
+        constexpr operator const storage_handle * () const noexcept
+          {
+            return this;
+          }
+        operator storage_handle * () noexcept
+          {
+            return this;
           }
 
         template<typename ykeyT>
@@ -814,20 +826,21 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     public:
       // 26.5.4.2, construct/copy/destroy
+      explicit cow_hashmap(const allocator_type &alloc) noexcept(is_nothrow_constructible<hasher>::value && is_nothrow_copy_constructible<hasher>::value &&
+                                                                 is_nothrow_constructible<key_equal>::value && is_nothrow_copy_constructible<key_equal>::value)
+        : m_sth(alloc, hasher(), key_equal())
+        {
+        }
+      cow_hashmap() noexcept(is_nothrow_constructible<hasher>::value && is_nothrow_copy_constructible<hasher>::value &&
+                             is_nothrow_constructible<key_equal>::value && is_nothrow_copy_constructible<key_equal>::value &&
+                             is_nothrow_constructible<allocator_type>::value)
+        : cow_hashmap(allocator_type())
+        {
+        }
       explicit cow_hashmap(size_type res_arg, const hasher &hf = hasher(), const key_equal &eq = key_equal(), const allocator_type &alloc = allocator_type())
         : m_sth(alloc, hf, eq)
         {
           this->m_sth.reallocate(0, 0, 0, res_arg);
-        }
-      cow_hashmap() noexcept(noexcept(hasher()) && is_nothrow_copy_constructible<hasher>::value &&
-                             noexcept(key_equal()) && is_nothrow_copy_constructible<key_equal>::value &&
-                             noexcept(allocator_type()))
-        : cow_hashmap(0, hasher(), key_equal(), allocator_type())
-        {
-        }
-      explicit cow_hashmap(const allocator_type &alloc) noexcept
-        : cow_hashmap(0, hasher(), key_equal(), alloc)
-        {
         }
       cow_hashmap(size_type res_arg, const allocator_type &alloc)
         : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
@@ -925,7 +938,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           return ptr;
         }
       // Deallocate any dynamic storage.
-      void do_deallocate() noexcept
+      void deallocate() noexcept
         {
           this->m_sth.deallocate();
         }
@@ -1047,7 +1060,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       void clear() noexcept
         {
           if(this->unique() == false) {
-            this->do_deallocate();
+            this->deallocate();
             return;
           }
           this->m_sth.erase_range_unchecked(0, this->bucket_count());
