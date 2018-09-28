@@ -75,7 +75,7 @@ class Xpnode
       };
     struct S_branch
       {
-        bool compound_assign;
+        bool assign;
         Expression branch_true;
         Expression branch_false;
       };
@@ -88,7 +88,7 @@ class Xpnode
     struct S_operator_rpn
       {
         Xop xop;
-        bool compound_assign;  // This parameter is ignored for `++`, `--`, `[]`, `=` and all relational operators.
+        bool assign;  // This parameter is ignored for `++`, `--`, `[]`, `=` and all relational operators.
       };
     struct S_unnamed_array
       {
@@ -100,7 +100,7 @@ class Xpnode
       };
     struct S_coalescence
       {
-        bool compound_assign;
+        bool assign;
         Expression branch_null;
       };
 
