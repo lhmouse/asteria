@@ -98,6 +98,11 @@ class Xpnode
       {
         Vector<String> keys;
       };
+    struct S_coalescence
+      {
+        bool compound_assign;
+        Expression branch_null;
+      };
 
     enum Index : Uint8
       {
@@ -110,6 +115,7 @@ class Xpnode
         index_operator_rpn      = 6,
         index_unnamed_array     = 7,
         index_unnamed_object    = 8,
+        index_coalescence       = 9,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -122,6 +128,7 @@ class Xpnode
         , S_operator_rpn      // 6,
         , S_unnamed_array     // 7,
         , S_unnamed_object    // 8,
+        , S_coalescence       // 9,
       )>;
 
   public:

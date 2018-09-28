@@ -98,6 +98,8 @@ class Token
         punctuator_colon       = 49,  // :
         punctuator_semicol     = 50,  // ;
         punctuator_spaceship   = 51,  // <=>
+        punctuator_coales      = 52,  // ??
+        punctuator_coales_eq   = 53,  // ??=
       };
 
     struct S_keyword

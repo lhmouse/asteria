@@ -164,8 +164,8 @@ infix-operator-list-opt ::=
 infix-operator-list ::=
 	( infix-selection | infix-operator ) infix-element infix-operator-list-opt
 infix-selection ::=
-	"?"  expression ":" | "&&"  | "||"  |
-	"?=" expression ":" | "&&=" | "||="
+	"?"  expression ":" | "&&"  | "||"  | "??"  |
+	"?=" expression ":" | "&&=" | "||=" | "??="
 infix-operator ::=
 	"+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
 	"+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |

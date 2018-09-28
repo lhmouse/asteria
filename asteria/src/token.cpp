@@ -259,6 +259,12 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
       case punctuator_spaceship: {
         return "<=>";
       }
+      case punctuator_coales: {
+        return "?\?";
+      }
+      case punctuator_coales_eq: {
+        return "?\?=";
+      }
       default: {
         return "<unknown>";
       }

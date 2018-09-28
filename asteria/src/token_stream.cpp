@@ -386,6 +386,8 @@ namespace {
           { ">>>=",  Token::punctuator_srl_eq      },
           { "?",     Token::punctuator_quest       },
           { "?=",    Token::punctuator_quest_eq    },
+          { "?\?",   Token::punctuator_coales      },
+          { "?\?=",  Token::punctuator_coales_eq   },
           { "[",     Token::punctuator_bracket_op  },
           { "]",     Token::punctuator_bracket_cl  },
           { "^",     Token::punctuator_xorb        },

@@ -207,6 +207,13 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         return std::move(alt_bnd);
       }
+      case index_coalescence: {
+        const auto &alt = this->m_stor.as<S_coalescence>();
+        // Bind the null branch recursively.
+        auto branch_null_bnd = alt.branch_null.bind(ctx);
+        Xpnode::S_coalescence alt_bnd = { alt.compound_assign, std::move(branch_null_bnd) };
+        return std::move(alt_bnd);
+      }
       default: {
         ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
       }
@@ -530,8 +537,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         const auto stack_size_old = stack_io.size();
         const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, ctx);
         if(has_result) {
-          // The result will have been pushed onto `stack_io`.
           ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
+          // The result will have been pushed onto `stack_io`.
           ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
           if(alt.compound_assign) {
             auto &result = stack_io.mut_back();
@@ -540,8 +547,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
           }
           return;
         }
-        // Push the condition if the branch is empty.
         ROCKET_ASSERT(stack_io.size() == stack_size_old);
+        // Push the condition if the branch is empty.
         ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
         stack_io.emplace_back(std::move(cond));
         return;
@@ -1123,6 +1130,32 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
         stack_io.emplace_back(std::move(ref_c));
+        return;
+      }
+      case index_coalescence: {
+        const auto &alt = this->m_stor.as<S_coalescence>();
+        // Pop the condition off the stack.
+        auto cond = do_pop_reference(stack_io);
+        // Read the condition. If it is null, evaluate the branch.
+        if(cond.read().type() == Value::type_null) {
+          const auto stack_size_old = stack_io.size();
+          const auto has_result = alt.branch_null.evaluate_partial(stack_io, ctx);
+          if(has_result) {
+            ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
+            // The result will have been pushed onto `stack_io`.
+            ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
+            if(alt.compound_assign) {
+              auto &result = stack_io.mut_back();
+              cond.write(result.read());
+              result = std::move(cond);
+            }
+            return;
+          }
+          ROCKET_ASSERT(stack_io.size() == stack_size_old);
+        }
+        // Push the condition back.
+        ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
+        stack_io.emplace_back(std::move(cond));
         return;
       }
       default: {
