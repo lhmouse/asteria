@@ -17,7 +17,10 @@ class Abstract_context
     Dictionary<Reference> m_named_refs;
 
   public:
-    Abstract_context() noexcept;
+    Abstract_context() noexcept
+      : m_named_refs()
+      {
+      }
     virtual ~Abstract_context();
 
     Abstract_context(const Abstract_context &)

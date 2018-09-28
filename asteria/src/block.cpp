@@ -11,14 +11,6 @@
 
 namespace Asteria {
 
-Block::Block() noexcept
-  : m_stmts()
-  {
-  }
-Block::Block(Vector<Statement> &&stmts) noexcept
-  : m_stmts(std::move(stmts))
-  {
-  }
 Block::~Block()
   {
   }

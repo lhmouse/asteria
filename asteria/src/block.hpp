@@ -28,8 +28,14 @@ class Block
     Vector<Statement> m_stmts;
 
   public:
-    Block() noexcept;
-    Block(Vector<Statement> &&stmts) noexcept;
+    Block() noexcept
+      : m_stmts()
+      {
+      }
+    Block(Vector<Statement> &&stmts) noexcept
+      : m_stmts(std::move(stmts))
+      {
+      }
     ~Block();
 
   public:

@@ -14,8 +14,14 @@ class Expression
     Vector<Xpnode> m_nodes;
 
   public:
-    Expression() noexcept;
-    Expression(Vector<Xpnode> &&nodes) noexcept;
+    Expression() noexcept
+      : m_nodes()
+      {
+      }
+    Expression(Vector<Xpnode> &&nodes) noexcept
+      : m_nodes(std::move(nodes))
+      {
+      }
     ~Expression();
 
   public:
