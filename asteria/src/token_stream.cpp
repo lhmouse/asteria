@@ -375,6 +375,7 @@ namespace {
           { "<<<=",  Token::punctuator_sll_eq      },
           { "<<=",   Token::punctuator_sla_eq      },
           { "<=",    Token::punctuator_cmp_lte     },
+          { "<=>",   Token::punctuator_spaceship   },
           { "=",     Token::punctuator_assign      },
           { "==",    Token::punctuator_cmp_eq      },
           { ">",     Token::punctuator_cmp_gt      },

@@ -64,6 +64,9 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       case xop_infix_cmp_gte: {
         return "greater-than-or-equal comparison";
       }
+      case xop_infix_cmp_3way: {
+        return "three-way comparison";
+      }
       case xop_infix_add: {
         return "addition";
       }
@@ -804,6 +807,36 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
             }
             auto result = comp != Value::compare_less;
             set_result(false, result);
+            break;
+          }
+          case xop_infix_cmp_3way: {
+            // Pop the second operand off the stack.
+            auto rhs = do_pop_reference(stack_io);
+            // N.B. This is one of the few operators that work on all types.
+            auto lhs_value = lhs.read();
+            auto rhs_value = rhs.read();
+            auto comp = lhs_value.compare(rhs_value);
+            switch(comp) {
+              case Value::compare_less: {
+                set_result(false, D_integer(-1));
+                break;
+              }
+              case Value::compare_equal: {
+                set_result(false, D_integer(0));
+                break;
+              }
+              case Value::compare_greater: {
+                set_result(false, D_integer(+1));
+                break;
+              }
+              case Value::compare_unordered: {
+                set_result(false, D_null());
+                break;
+              }
+              default: {
+                ASTERIA_TERMINATE("An unknown comparison result `", comp, "` has been encountered.");
+              }
+            }
             break;
           }
           case xop_infix_add: {

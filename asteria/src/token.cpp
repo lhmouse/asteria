@@ -256,6 +256,9 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
       case punctuator_semicol: {
         return ";";
       }
+      case punctuator_spaceship: {
+        return "<=>";
+      }
       default: {
         return "<unknown>";
       }
