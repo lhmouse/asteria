@@ -296,7 +296,7 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
           case '\"':  case '\'':  case '\\': {
             buf[nb++] = '\\';
           }
-          // Fallthrough
+          // Fallthrough.
           case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
           case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
           case 0x30:  case 0x31:  case 0x32:  case 0x33:  case 0x34:  case 0x35:  case 0x36:  case 0x37:

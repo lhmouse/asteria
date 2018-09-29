@@ -103,7 +103,7 @@ namespace {
       return true;
     }
 
-  bool do_accept_prefix_operator(Xpnode::Xop &xop_out, Token_stream &tstrm_io)
+  bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // prefix-operator ::=
       //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
@@ -111,12 +111,13 @@ namespace {
       if(!qtok) {
         return false;
       }
+      Xpnode::Xop xop;
       switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword: {
           const auto &alt = qtok->check<Token::S_keyword>();
           switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset: {
-              xop_out = Xpnode::xop_prefix_unset;
+              xop = Xpnode::xop_prefix_unset;
               tstrm_io.shift();
               break;
             }
@@ -130,32 +131,32 @@ namespace {
           const auto &alt = qtok->check<Token::S_punctuator>();
           switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_add: {
-              xop_out = Xpnode::xop_prefix_pos;
+              xop = Xpnode::xop_prefix_pos;
               tstrm_io.shift();
               break;
             }
             case Token::punctuator_sub: {
-              xop_out = Xpnode::xop_prefix_neg;
+              xop = Xpnode::xop_prefix_neg;
               tstrm_io.shift();
               break;
             }
             case Token::punctuator_notb: {
-              xop_out = Xpnode::xop_prefix_notb;
+              xop = Xpnode::xop_prefix_notb;
               tstrm_io.shift();
               break;
             }
             case Token::punctuator_notl: {
-              xop_out = Xpnode::xop_prefix_notl;
+              xop = Xpnode::xop_prefix_notl;
               tstrm_io.shift();
               break;
             }
             case Token::punctuator_inc: {
-              xop_out = Xpnode::xop_prefix_inc;
+              xop = Xpnode::xop_prefix_inc;
               tstrm_io.shift();
               break;
             }
             case Token::punctuator_dec: {
-              xop_out = Xpnode::xop_prefix_dec;
+              xop = Xpnode::xop_prefix_dec;
               tstrm_io.shift();
               break;
             }
@@ -169,10 +170,12 @@ namespace {
           return false;
         }
       }
+      Xpnode::S_operator_rpn node_c = { xop, false };
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
-  bool do_accept_postfix_operator(Xpnode::Xop &xop_out, Token_stream &tstrm_io)
+  bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // postfix-operator ::=
       //   "++" | "--"
@@ -184,14 +187,15 @@ namespace {
       if(!qalt) {
         return false;
       }
+      Xpnode::Xop xop;
       switch(rocket::weaken_enum(qalt->punct)) {
         case Token::punctuator_inc: {
-          xop_out = Xpnode::xop_postfix_inc;
+          xop = Xpnode::xop_postfix_inc;
           tstrm_io.shift();
           break;
         }
         case Token::punctuator_dec: {
-          xop_out = Xpnode::xop_postfix_dec;
+          xop = Xpnode::xop_postfix_dec;
           tstrm_io.shift();
           break;
         }
@@ -199,6 +203,8 @@ namespace {
           return false;
         }
       }
+      Xpnode::S_operator_rpn node_c = { xop, false };
+      nodes_out.emplace_back(std::move(node_c));
       return true;
     }
 
@@ -542,28 +548,6 @@ namespace {
              do_accept_nested_expression(nodes_out, tstrm_io);
     }
 
-  bool do_accept_prefix_operator_as_xpnode(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
-    {
-      Xpnode::Xop xop;
-      if(do_accept_prefix_operator(xop, tstrm_io) == false) {
-        return false;
-      }
-      Xpnode::S_operator_rpn node_c = { xop, false };
-      nodes_out.emplace_back(std::move(node_c));
-      return true;
-    }
-
-  bool do_accept_postfix_operator_as_xpnode(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
-    {
-      Xpnode::Xop xop;
-      if(do_accept_postfix_operator(xop, tstrm_io) == false) {
-        return false;
-      }
-      Xpnode::S_operator_rpn node_c = { xop, false };
-      nodes_out.emplace_back(std::move(node_c));
-      return true;
-    }
-
   bool do_accept_postfix_function_call(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
@@ -649,7 +633,7 @@ namespace {
       //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
       Vector<Xpnode> prefixes;
       for(;;) {
-        bool prefix_got = do_accept_prefix_operator_as_xpnode(prefixes, tstrm_io);
+        bool prefix_got = do_accept_prefix_operator(prefixes, tstrm_io);
         if(prefix_got == false) {
           break;
         }
@@ -661,7 +645,7 @@ namespace {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       for(;;) {
-        bool postfix_got = do_accept_postfix_operator_as_xpnode(nodes_out, tstrm_io) ||
+        bool postfix_got = do_accept_postfix_operator(nodes_out, tstrm_io) ||
                            do_accept_postfix_function_call(nodes_out, tstrm_io) ||
                            do_accept_postfix_subscript(nodes_out, tstrm_io) ||
                            do_accept_postfix_member_access(nodes_out, tstrm_io);
@@ -676,10 +660,493 @@ namespace {
       return true;
     }
 
+  class Infix_element_base
+    {
+    public:
+      enum Precedence
+        {
+          precedence_multiplicative  =  1,
+          precedence_additive        =  2,
+          precedence_shift           =  3,
+          precedence_relational      =  4,
+          precedence_equality        =  5,
+          precedence_bitwise_and     =  6,
+          precedence_bitwise_xor     =  7,
+          precedence_bitwise_or      =  8,
+          precedence_logical_and     =  9,
+          precedence_logical_or      = 10,
+          precedence_coalescence     = 11,
+          precedence_assignment      = 12,
+        };
+
+    public:
+      virtual ~Infix_element_base()
+        {
+        }
+
+    public:
+      virtual Precedence precedence() const noexcept = 0;
+      virtual void extract(Vector<Xpnode> &nodes_out) = 0;
+      virtual void append(Infix_element_base &&elem) = 0;
+    };
+
+  class Infix_head : public Infix_element_base
+    {
+    private:
+      Vector<Xpnode> m_nodes;
+
+    public:
+      explicit Infix_head(Vector<Xpnode> &&nodes)
+        : m_nodes(std::move(nodes))
+        {
+        }
+
+    public:
+      Precedence precedence() const noexcept override
+        {
+          return precedence_assignment;
+        }
+      void extract(Vector<Xpnode> &nodes_out) override
+        {
+          nodes_out.append(std::make_move_iterator(this->m_nodes.mut_begin()), std::make_move_iterator(this->m_nodes.mut_end()));
+        }
+      void append(Infix_element_base &&elem) override
+        {
+          elem.extract(this->m_nodes);
+        }
+    };
+
+  bool do_accept_infix_head(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      Vector<Xpnode> nodes;
+      if(do_accept_infix_element(nodes, tstrm_io) == false) {
+        return false;
+      }
+      elem_out.reset(new Infix_head(std::move(nodes)));
+      return true;
+    }
+
+  class Infix_selection : public Infix_element_base
+    {
+    public:
+      enum Sop
+        {
+          sop_quest   = 0,  // ? :
+          sop_and     = 1,  // &&
+          sop_or      = 2,  // ||
+          sop_coales  = 3,  // ??
+        };
+
+    private:
+      Sop m_sop;
+      bool m_assign;
+      Vector<Xpnode> m_branch_true;
+      Vector<Xpnode> m_branch_false;
+
+    public:
+      Infix_selection(Sop sop, bool assign, Vector<Xpnode> &&branch_true, Vector<Xpnode> &&branch_false)
+        : m_sop(sop), m_assign(assign), m_branch_true(std::move(branch_true)), m_branch_false(std::move(branch_false))
+        {
+        }
+
+    public:
+      Precedence precedence() const noexcept override
+        {
+          if(this->m_assign) {
+            return precedence_assignment;
+          }
+          switch(this->m_sop) {
+            case sop_quest: {
+              return precedence_assignment;
+            }
+            case sop_and: {
+              return precedence_logical_and;
+            }
+            case sop_or: {
+              return precedence_logical_or;
+            }
+            case sop_coales: {
+              return precedence_coalescence;
+            }
+            default: {
+              ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
+            }
+          }
+        }
+      void extract(Vector<Xpnode> &nodes_out) override
+        {
+          if(this->m_sop == sop_coales) {
+            Xpnode::S_coalescence node_c = { this->m_assign, std::move(this->m_branch_false) };
+            nodes_out.emplace_back(std::move(node_c));
+            return;
+          }
+          Xpnode::S_branch node_c = { this->m_assign, std::move(this->m_branch_true), std::move(this->m_branch_false) };
+          nodes_out.emplace_back(std::move(node_c));
+        }
+      void append(Infix_element_base &&elem) override
+        {
+          elem.extract(this->m_branch_false);
+        }
+    };
+
+  bool do_accept_infix_selection_quest(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      bool assign = false;
+      if(do_match_punctuator(tstrm_io, Token::punctuator_quest) == false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_quest_eq) == false) {
+          return false;
+        }
+        assign = true;
+      }
+      Vector<Xpnode> branch_true;
+      if(do_accept_expression(branch_true, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
+      }
+      Vector<Xpnode> branch_false;
+      if(do_accept_infix_element(branch_false, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      elem_out.reset(new Infix_selection(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false)));
+      return true;
+    }
+
+  bool do_accept_infix_selection_and(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      bool assign = false;
+      if(do_match_punctuator(tstrm_io, Token::punctuator_andl) == false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_andl_eq) == false) {
+          return false;
+        }
+        assign = true;
+      }
+      Vector<Xpnode> branch_true;
+      if(do_accept_infix_element(branch_true, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      elem_out.reset(new Infix_selection(Infix_selection::sop_and, assign, std::move(branch_true), Vector<Xpnode>()));
+      return true;
+    }
+
+  bool do_accept_infix_selection_or(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      bool assign = false;
+      if(do_match_punctuator(tstrm_io, Token::punctuator_orl) == false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_orl_eq) == false) {
+          return false;
+        }
+        assign = true;
+      }
+      Vector<Xpnode> branch_false;
+      if(do_accept_infix_element(branch_false, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_false)));
+      return true;
+    }
+
+  bool do_accept_infix_selection_coales(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      bool assign = false;
+      if(do_match_punctuator(tstrm_io, Token::punctuator_coales) == false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_coales_eq) == false) {
+          return false;
+        }
+        assign = true;
+      }
+      Vector<Xpnode> branch_null;
+      if(do_accept_infix_element(branch_null, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_null)));
+      return true;
+    }
+
+  class Infix_operator : public Infix_element_base
+    {
+    private:
+      Xpnode::Xop m_xop;
+      bool m_assign;
+      Vector<Xpnode> m_rhs;
+
+    public:
+      Infix_operator(Xpnode::Xop xop, bool assign, Vector<Xpnode> &&rhs)
+        : m_xop(xop), m_assign(assign), m_rhs(std::move(rhs))
+        {
+        }
+
+    public:
+      Precedence precedence() const noexcept override
+        {
+          if(this->m_assign) {
+            return precedence_assignment;
+          }
+          switch(rocket::weaken_enum(this->m_xop)) {
+            case Xpnode::xop_infix_mul:
+            case Xpnode::xop_infix_div:
+            case Xpnode::xop_infix_mod: {
+              return precedence_multiplicative;
+            }
+            case Xpnode::xop_infix_add:
+            case Xpnode::xop_infix_sub: {
+              return precedence_additive;
+            }
+            case Xpnode::xop_infix_sla:
+            case Xpnode::xop_infix_sra:
+            case Xpnode::xop_infix_sll:
+            case Xpnode::xop_infix_srl: {
+              return precedence_shift;
+            }
+            case Xpnode::xop_infix_cmp_lt:
+            case Xpnode::xop_infix_cmp_lte:
+            case Xpnode::xop_infix_cmp_gt:
+            case Xpnode::xop_infix_cmp_gte: {
+              return precedence_relational;
+            }
+            case Xpnode::xop_infix_cmp_eq:
+            case Xpnode::xop_infix_cmp_ne:
+            case Xpnode::xop_infix_cmp_3way: {
+              return precedence_equality;
+            }
+            case Xpnode::xop_infix_andb: {
+              return precedence_bitwise_and;
+            }
+            case Xpnode::xop_infix_xorb: {
+              return precedence_bitwise_xor;
+            }
+            case Xpnode::xop_infix_orb: {
+              return precedence_bitwise_or;
+            }
+            case Xpnode::xop_infix_assign: {
+              return precedence_assignment;
+            }
+            default: {
+              ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
+            }
+          }
+        }
+      void extract(Vector<Xpnode> &nodes_out) override
+        {
+          nodes_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
+          // Don't forget the operator!
+          Xpnode::S_operator_rpn node_c = { this->m_xop, this->m_assign };
+          nodes_out.emplace_back(std::move(node_c));
+        }
+      void append(Infix_element_base &&elem) override
+        {
+          elem.extract(this->m_rhs);
+        }
+    };
+
+  bool do_accept_infix_operator(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    {
+      // infix-operator ::=
+      //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
+      //     "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
+      //     "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
+      const auto qtok = tstrm_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      const auto qalt = qtok->opt<Token::S_punctuator>();
+      if(!qalt) {
+        return false;
+      }
+      bool assign = false;
+      Xpnode::Xop xop;
+      switch(rocket::weaken_enum(qalt->punct)) {
+        case Token::punctuator_add_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_add:
+          xop = Xpnode::xop_infix_add;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_sub_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_sub:
+          xop = Xpnode::xop_infix_sub;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_mul_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_mul:
+          xop = Xpnode::xop_infix_mul;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_div_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_div:
+          xop = Xpnode::xop_infix_div;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_mod_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_mod:
+          xop = Xpnode::xop_infix_mod;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_sla_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_sla:
+          xop = Xpnode::xop_infix_sla;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_sra_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_sra:
+          xop = Xpnode::xop_infix_sra;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_sll_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_sll:
+          xop = Xpnode::xop_infix_sll;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_srl_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_srl:
+          xop = Xpnode::xop_infix_srl;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_andb_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_andb:
+          xop = Xpnode::xop_infix_andb;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_orb_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_orb:
+          xop = Xpnode::xop_infix_orb;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_xorb_eq: {
+          assign = true;
+          // Fallthrough.
+        case Token::punctuator_xorb:
+          xop = Xpnode::xop_infix_xorb;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_assign: {
+          xop = Xpnode::xop_infix_assign;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_eq: {
+          xop = Xpnode::xop_infix_cmp_eq;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_ne: {
+          xop = Xpnode::xop_infix_cmp_ne;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_lt: {
+          xop = Xpnode::xop_infix_cmp_lt;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_gt: {
+          xop = Xpnode::xop_infix_cmp_gt;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_lte: {
+          xop = Xpnode::xop_infix_cmp_lte;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_cmp_gte: {
+          xop = Xpnode::xop_infix_cmp_gte;
+          tstrm_io.shift();
+          break;
+        }
+        case Token::punctuator_spaceship: {
+          xop = Xpnode::xop_infix_cmp_3way;
+          tstrm_io.shift();
+          break;
+        }
+        default: {
+          return false;
+        }
+      }
+      Vector<Xpnode> rhs;
+      if(do_accept_infix_element(rhs, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      }
+      elem_out.reset(new Infix_operator(xop, assign, std::move(rhs)));
+      return true;
+    }
+
   bool do_accept_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
-      // TODO
-      return do_accept_infix_element(nodes_out, tstrm_io);
+      // expression ::=
+      //   infix-element infix-operator-list-opt
+      // infix-operator-list-opt ::=
+      //   infix-operator-list | ""
+      // infix-operator-list ::=
+      //   ( infix-selection | infix-operator ) infix-operator-list-opt
+      // infix-selection ::=
+      //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
+      //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
+      std::unique_ptr<Infix_element_base> elem;
+      if(do_accept_infix_head(elem, tstrm_io) == false) {
+        return false;
+      }
+      Vector<std::unique_ptr<Infix_element_base>> stack;
+      stack.emplace_back(std::move(elem));
+      for(;;) {
+        bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
+                        do_accept_infix_selection_and(elem, tstrm_io) ||
+                        do_accept_infix_selection_or(elem, tstrm_io) ||
+                        do_accept_infix_selection_coales(elem, tstrm_io) ||
+                        do_accept_infix_operator(elem, tstrm_io);
+        if(elem_got == false) {
+          break;
+        }
+        const auto prec = elem->precedence();
+        // Assignment operations have the lowest precedence and group from right to left.
+        if(prec != elem->precedence_assignment) {
+          while((stack.size() >= 2) && (stack.back()->precedence() <= prec)) {
+            stack.at(stack.size() - 2)->append(std::move(*(stack.back())));
+            stack.pop_back();
+          }
+        }
+        stack.emplace_back(std::move(elem));
+      }
+      while(stack.size() >= 2) {
+        stack.at(stack.size() - 2)->append(std::move(*(stack.back())));
+        stack.pop_back();
+      }
+      stack.front()->extract(nodes_out);
+      return true;
     }
 
   bool do_accept_variable_definition(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
