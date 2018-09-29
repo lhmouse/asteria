@@ -17,45 +17,69 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
     switch(Index(this->m_stor.index())) {
       case index_array_index: {
         const auto &alt = this->m_stor.as<S_array_index>();
-        if(parent.type() == Value::type_null) {
-          return nullptr;
+        switch(rocket::weaken_enum(parent.type())) {
+          case Value::type_null: {
+            return nullptr;
+          }
+          case Value::type_array: {
+            const auto &arr = parent.check<D_array>();
+            const auto ssize = static_cast<Sint64>(arr.size());
+            auto rindex = alt.index;
+            if(rindex < 0) {
+              // Wrap negative indices.
+              rindex += ssize;
+            }
+            if(rindex < 0) {
+              ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
+              return nullptr;
+            }
+            if(rindex >= ssize) {
+              ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
+              return nullptr;
+            }
+            auto rit = arr.begin() + static_cast<Diff>(rindex);
+            return &(rit[0]);
+          }
+//          case Value::type_opaque: {
+//            const auto &opq = parent.check<D_opaque>();
+//            if(!opq) {
+//              ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
+//              return nullptr;
+//            }
+//            return opq->open_member(alt.index, false);
+//          }
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
+          }
         }
-        const auto qarr = parent.opt<D_array>();
-        if(!qarr) {
-          ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
-        }
-        const auto ssize = static_cast<Sint64>(qarr->size());
-        auto rindex = alt.index;
-        if(rindex < 0) {
-          // Wrap negative indices.
-          rindex += ssize;
-        }
-        if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
-          return nullptr;
-        }
-        if(rindex >= ssize) {
-          ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
-          return nullptr;
-        }
-        auto rit = qarr->begin() + static_cast<Diff>(rindex);
-        return &(rit[0]);
       }
       case index_object_key: {
         const auto &alt = this->m_stor.as<S_object_key>();
-        if(parent.type() == Value::type_null) {
-          return nullptr;
+        switch(rocket::weaken_enum(parent.type())) {
+          case Value::type_null: {
+            return nullptr;
+          }
+          case Value::type_object: {
+            const auto &obj = parent.check<D_object>();
+            auto rit = obj.find(alt.key);
+            if(rit == obj.end()) {
+              ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
+              return nullptr;
+            }
+            return &(rit->second);
+          }
+          case Value::type_opaque: {
+            const auto &opq = parent.check<D_opaque>();
+            if(!opq) {
+              ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
+              return nullptr;
+            }
+            return opq->open_member(alt.key, false);
+          }
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
+          }
         }
-        const auto qobj = parent.opt<D_object>();
-        if(!qobj) {
-          ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
-        }
-        auto rit = qobj->find(alt.key);
-        if(rit == qobj->end()) {
-          ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
-          return nullptr;
-        }
-        return &(rit->second);
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -68,85 +92,123 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
     switch(Index(this->m_stor.index())) {
       case index_array_index: {
         const auto &alt = this->m_stor.as<S_array_index>();
-        if(parent.type() == Value::type_null) {
-          if(!create_new) {
-            return nullptr;
-          }
-          parent = D_array();
-        }
-        const auto qarr = parent.opt<D_array>();
-        if(!qarr) {
-          ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "` because it is not an array.");
-        }
-        const auto ssize = static_cast<Sint64>(qarr->size());
-        auto rindex = alt.index;
-        if(rindex < 0) {
-          // Wrap negative indices.
-          rindex += ssize;
-        }
-        D_array::iterator rit;
-        if(rindex < 0) {
-          if(!create_new) {
-            ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
-            return nullptr;
-          }
-          const auto size_add = 0 - static_cast<Uint64>(rindex);
-          if(size_add >= qarr->max_size() - qarr->size()) {
-            ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
-          }
-          rit = qarr->insert(qarr->begin(), static_cast<Size>(size_add));
-          goto ma;
-        }
-        if(rindex >= ssize) {
-          if(!create_new) {
-            ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
-            return nullptr;
-          }
-          const auto size_add = static_cast<Uint64>(rindex) + 1 - qarr->size();
-          if(size_add >= qarr->max_size() - qarr->size()) {
-            ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", qarr->size(), "` by `", size_add, "` would exceed system resource limits.");
-          }
-          rit = qarr->insert(qarr->end(), static_cast<Size>(size_add)) + static_cast<Diff>(size_add - 1);
-          goto ma;
-        }
-        rit = qarr->mut_begin() + static_cast<Diff>(rindex);
+        switch(rocket::weaken_enum(parent.type())) {
+          case Value::type_null: {
+            if(!create_new) {
+              return nullptr;
+            }
+            parent = D_array();
+            // Fallthrough.
+          case Value::type_array:
+            auto &arr = parent.check<D_array>();
+            const auto ssize = static_cast<Sint64>(arr.size());
+            auto rindex = alt.index;
+            if(rindex < 0) {
+              // Wrap negative indices.
+              rindex += ssize;
+            }
+            D_array::iterator rit;
+            if(rindex < 0) {
+              if(!create_new) {
+                ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
+                return nullptr;
+              }
+              const auto size_add = 0 - static_cast<Uint64>(rindex);
+              if(size_add >= arr.max_size() - arr.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
+              }
+              rit = arr.insert(arr.begin(), static_cast<Size>(size_add));
+              goto ma;
+            }
+            if(rindex >= ssize) {
+              if(!create_new) {
+                ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
+                return nullptr;
+              }
+              const auto size_add = static_cast<Uint64>(rindex) + 1 - arr.size();
+              if(size_add >= arr.max_size() - arr.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
+              }
+              rit = arr.insert(arr.end(), static_cast<Size>(size_add)) + static_cast<Diff>(size_add - 1);
+              goto ma;
+            }
+            rit = arr.mut_begin() + static_cast<Diff>(rindex);
   ma:
-        if(erased_out_opt) {
-          *erased_out_opt = std::move(rit[0]);
-          qarr->erase(rit);
-          return erased_out_opt;
+            if(erased_out_opt) {
+              *erased_out_opt = std::move(rit[0]);
+              arr.erase(rit);
+              return erased_out_opt;
+            }
+            return &(rit[0]);
+          }
+//          case Value::type_opaque: {
+//            const auto &opq = parent.check<D_opaque>();
+//            if(!opq) {
+//              if(!create_new) {
+//                ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
+//                return nullptr;
+//              }
+//              ASTERIA_THROW_RUNTIME_ERROR("An attempt to create a member through a null opaque pointer was made.");
+//            }
+//            if(erased_out_opt) {
+//              *erased_out_opt = opq->unset_member(alt.index);
+//              return erased_out_opt;
+//            }
+//            return opq->open_member(alt.index, create_new);
+//          }
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
+          }
         }
-        return &(rit[0]);
       }
       case index_object_key: {
         const auto &alt = this->m_stor.as<S_object_key>();
-        if(parent.type() == Value::type_null) {
-          if(!create_new) {
-            return nullptr;
-          }
-          parent = D_object();
-        }
-        const auto qobj = parent.opt<D_object>();
-        if(!qobj) {
-          ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "` because it is not an object.");
-        }
-        D_object::iterator rit;
-        if(!create_new) {
-          rit = qobj->find_mut(alt.key);
-          if(rit == qobj->end()) {
-            ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
-            return nullptr;
-          }
-          goto mo;
-        }
-        rit = qobj->try_emplace(alt.key).first;
+        switch(rocket::weaken_enum(parent.type())) {
+          case Value::type_null: {
+            if(!create_new) {
+              return nullptr;
+            }
+            parent = D_object();
+            // Fallthrough.
+          case Value::type_object:
+            auto &obj = parent.check<D_object>();
+            D_object::iterator rit;
+            if(!create_new) {
+              rit = obj.find_mut(alt.key);
+              if(rit == obj.end()) {
+                ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
+                return nullptr;
+              }
+              goto mo;
+            }
+            rit = obj.try_emplace(alt.key).first;
   mo:
-        if(erased_out_opt) {
-          *erased_out_opt = std::move(rit->second);
-          qobj->erase(rit);
-          return erased_out_opt;
+            if(erased_out_opt) {
+              *erased_out_opt = std::move(rit->second);
+              obj.erase(rit);
+              return erased_out_opt;
+            }
+            return &(rit->second);
+          }
+          case Value::type_opaque: {
+            const auto &opq = parent.check<D_opaque>();
+            if(!opq) {
+              if(!create_new) {
+                ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
+                return nullptr;
+              }
+              ASTERIA_THROW_RUNTIME_ERROR("An attempt to create a member through a null opaque pointer was made.");
+            }
+            if(erased_out_opt) {
+              *erased_out_opt = opq->unset_member(alt.key);
+              return erased_out_opt;
+            }
+            return opq->open_member(alt.key, create_new);
+          }
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
+          }
         }
-        return &(rit->second);
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");

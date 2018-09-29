@@ -5,17 +5,16 @@
 #define ASTERIA_ABSTRACT_FUNCTION_HPP_
 
 #include "fwd.hpp"
-#include "abstract_opaque.hpp"
 
 namespace Asteria {
 
-class Abstract_function : public Abstract_opaque
+class Abstract_function : public Sbase<Abstract_function>
   {
   public:
     Abstract_function() noexcept
       {
       }
-    ~Abstract_function();
+    virtual ~Abstract_function();
 
   public:
     virtual String describe() const = 0;
