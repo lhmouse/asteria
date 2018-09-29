@@ -75,7 +75,7 @@ int main()
 
     Token_stream ts;
     rocket::insertable_istream iss(String::shallow(R"___(
-      import "stdio";
+      // var stdio = require "stdio";
         { }
         { var i; }
         //  { const i; }
@@ -127,7 +127,6 @@ int main()
       54  ;
       ;
       print(sum);
-      export sum;
     )___"));
     bool r = ts.load(iss, String::shallow("dummy_file"));
     ROCKET_ASSERT(r);

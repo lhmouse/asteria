@@ -82,9 +82,6 @@ const char * Parser_error::get_code_description(Parser_error::Code code) noexcep
       }
       // Phase 3
       //   Parser
-      case code_directive_or_statement_expected: {
-        return "Expectation failed while looking for a directive or statement.";
-      }
       case code_identifier_expected: {
         return "Expectation failed while looking for an identifier.";
       }

@@ -1,5 +1,5 @@
 document ::=
-	directive-or-statement-list-opt
+	statement-list-opt
 
 identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -170,18 +170,3 @@ infix-operator ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
 	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
-
-directive-or-statement-list-opt ::=
-	directive-or-statement-list | ""
-directive-or-statement-list ::=
-	directive-or-statement directive-or-statement-list-opt
-directive-or-statement ::=
-	directive | statement
-
-directive ::=
-	export-directive | import-directive
-
-export-directive ::=
-	"export" identifier ";"
-import-directive ::=
-	"import" string-literal ";"

@@ -101,14 +101,6 @@ class Statement
       {
         Expression expr;
       };
-    struct S_export
-      {
-        String name;
-      };
-    struct S_import
-      {
-        String path;
-      };
 
     enum Index : Uint8
       {
@@ -127,8 +119,6 @@ class Statement
         index_continue  = 12,
         index_throw     = 13,
         index_return    = 14,
-        index_export    = 15,
-        index_import    = 16,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -147,8 +137,6 @@ class Statement
         , S_continue  // 12,
         , S_throw     // 13,
         , S_return    // 14,
-        , S_export    // 15,
-        , S_import    // 16,
       )>;
 
   private:

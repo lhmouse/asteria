@@ -62,9 +62,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       case index_break:
       case index_continue:
       case index_throw:
-      case index_return:
-      case index_export:
-      case index_import: {
+      case index_return: {
         break;
       }
       default: {
@@ -211,18 +209,6 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(ctx_io);
         Statement::S_return alt_bnd = { std::move(expr_bnd) };
-        return std::move(alt_bnd);
-      }
-      case index_export: {
-        const auto &alt = this->m_stor.as<S_export>();
-        // Copy it as-is.
-        Statement::S_export alt_bnd = { alt.name };
-        return std::move(alt_bnd);
-      }
-      case index_import: {
-        const auto &alt = this->m_stor.as<S_import>();
-        // Copy it as-is.
-        Statement::S_import alt_bnd = { alt.path };
         return std::move(alt_bnd);
       }
       default: {
@@ -587,18 +573,6 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(ctx_io);
         return Block::status_return;
-      }
-      case index_export: {
-        const auto &alt = this->m_stor.as<S_export>();
-        // TODO
-        ASTERIA_TERMINATE("TODO : `export` has not been implemented yet.");
-        (void)alt;
-      }
-      case index_import: {
-        const auto &alt = this->m_stor.as<S_import>();
-        // TODO
-        ASTERIA_TERMINATE("TODO : `import` has not been implemented yet.");
-        (void)alt;
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");

@@ -300,44 +300,6 @@ namespace {
       return true;
     }
 
-  bool do_accept_export_directive(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
-    {
-      // export-directive ::=
-      //   "export" identifier ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_export) == false) {
-        return false;
-      }
-      String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
-      }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
-      }
-      Statement::S_export stmt_c = { std::move(name) };
-      stmts_out.emplace_back(std::move(stmt_c));
-      return true;
-    }
-
-  bool do_accept_import_directive(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
-    {
-      // import-directive ::=
-      //   "import" string-literal ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_import) == false) {
-        return false;
-      }
-      String path;
-      if(do_accept_string_literal(path, tstrm_io) == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_string_literal_expected);
-      }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
-      }
-      Statement::S_import stmt_c = { std::move(path) };
-      stmts_out.emplace_back(std::move(stmt_c));
-      return true;
-    }
-
   extern bool do_accept_statement_as_block(Vector<Statement> &stmts_out, Token_stream &tstrm_io);
   extern bool do_accept_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io);
   extern bool do_accept_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io);
@@ -1696,20 +1658,9 @@ bool Parser::load(Token_stream &tstrm_io)
     Vector<Statement> stmts;
     while(tstrm_io.empty() == false) {
       // document ::=
-      //   directive-or-statement-list-opt
-      // directive-or-statement-list-opt ::=
-      //   directive-or-statement-list | ""
-      // directive-or-statement-list ::=
-      //   directive-or-statement directive-or-statement-list-opt
-      // directive-or-statement ::=
-      //   directive | statement
-      // directive ::=
-      //   export-directive | import-directive
-      bool stmt_got = do_accept_export_directive(stmts, tstrm_io) ||
-                      do_accept_import_directive(stmts, tstrm_io) ||
-                      do_accept_statement(stmts, tstrm_io);
-      if(stmt_got == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
+      //   statement-list-opt
+      if(do_accept_statement(stmts, tstrm_io) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
     }
     // Accept the result.

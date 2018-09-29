@@ -42,7 +42,6 @@ class Parser_error
         code_block_comment_unclosed                     = 214,
         // Phase 3
         //   Parser
-        code_directive_or_statement_expected            = 301,
         code_identifier_expected                        = 302,
         code_semicolon_expected                         = 303,
         code_string_literal_expected                    = 304,

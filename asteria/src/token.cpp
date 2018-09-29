@@ -88,12 +88,6 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       case keyword_unset: {
         return "unset";
       }
-      case keyword_export: {
-        return "export";
-      }
-      case keyword_import: {
-        return "import";
-      }
       default: {
         return "<unknown>";
       }
