@@ -23,6 +23,7 @@ int main()
       for(each k, v : b) {
         s += (k % 2 == 0) ? +v : -v;
       }
+      // assert(s == -3);
       return s;
     )__");
     Token_stream tis;
