@@ -331,7 +331,7 @@ namespace details_cow_hashmap {
 
       private:
         storage_pointer m_ptr;
-        void (*m_sdf)(storage_pointer);
+        void (*m_smf)(storage_pointer, bool);
 
       public:
         constexpr storage_handle(const allocator_type &alloc, const hasher &hf, const key_equal &eq)
@@ -340,7 +340,7 @@ namespace details_cow_hashmap {
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr(), m_sdf()
+            m_ptr(), m_smf()
           {
           }
         constexpr storage_handle(allocator_type &&alloc, const hasher &hf, const key_equal &eq)
@@ -349,7 +349,7 @@ namespace details_cow_hashmap {
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr(), m_sdf()
+            m_ptr(), m_smf()
           {
           }
         ~storage_handle()
@@ -363,35 +363,38 @@ namespace details_cow_hashmap {
           = delete;
 
       private:
-        void do_reset(storage_pointer ptr_new, void (*sdf_new)(storage_pointer)) noexcept
+        void do_reset(storage_pointer ptr_new, void (*smf_new)(storage_pointer, bool)) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            const auto smf = noadl::exchange(this->m_smf, smf_new);
             if(!ptr) {
               return;
             }
-            const auto sdf = noadl::exchange(this->m_sdf, sdf_new);
-            if(!sdf) {
-              return;
-            }
-            (*sdf)(ptr);
+            (*smf)(ptr, false);
           }
 
-        static void do_destroy_storage(storage_pointer ptr)
+        static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref)
           {
-            // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
-            if(nref_old > 1) {
-              return;
-            }
-            ROCKET_ASSERT(nref_old == 1);
-            // If it has been decremented to zero, deallocate the block.
-            auto st_alloc = storage_allocator(ptr->alloc);
-            const auto nblk = ptr->nblk;
-            noadl::destroy_at(noadl::unfancy(ptr));
+            if(to_add_ref) {
+              // Increment the reference count.
+              const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
+              ROCKET_ASSERT(nref_old >= 1);
+            } else {
+              // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
+              const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
+              if(nref_old > 1) {
+                return;
+              }
+              ROCKET_ASSERT(nref_old == 1);
+              // If it has been decremented to zero, deallocate the block.
+              auto st_alloc = storage_allocator(ptr->alloc);
+              const auto nblk = ptr->nblk;
+              noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
+              ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
-            allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+              allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+            }
           }
 
       public:
@@ -520,7 +523,7 @@ namespace details_cow_hashmap {
               }
             }
             // Replace the current block.
-            this->do_reset(ptr, &do_destroy_storage);
+            this->do_reset(ptr, &do_manipulate_storage);
             return ptr->data;
           }
         void deallocate() noexcept
@@ -533,10 +536,9 @@ namespace details_cow_hashmap {
             const auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
-              const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-              ROCKET_ASSERT(nref_old >= 1);
+              (*(other.m_smf))(ptr, true);
             }
-            this->do_reset(ptr, other.m_sdf);
+            this->do_reset(ptr, other.m_smf);
           }
         void share_with(storage_handle &&other) noexcept
           {
@@ -545,12 +547,12 @@ namespace details_cow_hashmap {
               // Detach the block.
               other.m_ptr = storage_pointer();
             }
-            this->do_reset(ptr, other.m_sdf);
+            this->do_reset(ptr, other.m_smf);
           }
         void exchange_with(storage_handle &other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
-            ::std::swap(this->m_sdf, other.m_sdf);
+            ::std::swap(this->m_smf, other.m_smf);
           }
 
         constexpr operator const storage_handle * () const noexcept
