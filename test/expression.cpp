@@ -27,32 +27,32 @@ int main()
     aval.materialize();
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
-    // RPN:   cond ! ?: 1 aval [] =          ::= expr
-    //               |\-- 0.25 dval ++ +     ::= branch_true
-    //               \--- "hello," ival *    ::= branch_false
+    // RPN:   aval 1 [] cond ! ?: =                    ::= expr
+    //                         |\-- dval ++ 0.25 +     ::= branch_true
+    //                         \--- ival "hello," *    ::= branch_false
     Vector<Xpnode> branch_true;
-      {
-        branch_true.emplace_back(Xpnode::S_literal { D_real(0.25) });
-        branch_true.emplace_back(Xpnode::S_named_reference { String::shallow("dval") });
-        branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_inc, false });
-        branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, false });
-      }
+    {
+      branch_true.emplace_back(Xpnode::S_named_reference { String::shallow("dval") });
+      branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_inc, false });
+      branch_true.emplace_back(Xpnode::S_literal { D_real(0.25) });
+      branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, false });
+    }
     Vector<Xpnode> branch_false;
-      {
-        branch_false.emplace_back(Xpnode::S_literal { D_string("hello,") });
-        branch_false.emplace_back(Xpnode::S_named_reference { String::shallow("ival") });
-        branch_false.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-      }
+    {
+      branch_false.emplace_back(Xpnode::S_named_reference { String::shallow("ival") });
+      branch_false.emplace_back(Xpnode::S_literal { D_string("hello,") });
+      branch_false.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
+    }
     Vector<Xpnode> nodes;
-      {
-        nodes.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
-        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
-        nodes.emplace_back(Xpnode::S_branch { false, std::move(branch_true), std::move(branch_false) });
-        nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
-        nodes.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
-        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
-        nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_assign, false });
-      }
+    {
+      nodes.emplace_back(Xpnode::S_named_reference { String::shallow("aval") });
+      nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
+      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+      nodes.emplace_back(Xpnode::S_named_reference { String::shallow("cond") });
+      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
+      nodes.emplace_back(Xpnode::S_branch { false, std::move(branch_true), std::move(branch_false) });
+      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_assign, false });
+    }
     auto expr = Expression(std::move(nodes));
 
     auto result = expr.evaluate(ctx);

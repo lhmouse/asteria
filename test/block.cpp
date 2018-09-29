@@ -18,12 +18,12 @@ int main()
     text.emplace_back(Statement::S_var_def { String::shallow("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
+    expr.emplace_back(Xpnode::S_literal { D_integer(1) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
+    expr.emplace_back(Xpnode::S_literal { D_integer(3) });
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_literal { D_integer(5) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    expr.emplace_back(Xpnode::S_literal { D_integer(3) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(1) });
     expr.emplace_back(Xpnode::S_unnamed_array { 4 });
     text.emplace_back(Statement::S_var_def { String::shallow("data"), true, std::move(expr) });
     // for(each k, v in data) {
@@ -32,10 +32,10 @@ int main()
     Vector<Xpnode> range;
     range.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
     expr.clear();
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("k") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("v") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     Vector<Statement> body;
     body.emplace_back(Statement::S_expr { std::move(expr) });
@@ -48,17 +48,17 @@ int main()
     // }
     body.clear();
     expr.clear();
-    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
-    expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     body.emplace_back(Statement::S_expr { std::move(expr) });
     expr.clear();
-    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
-    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
+    expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
     Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_unspec });
@@ -68,8 +68,8 @@ int main()
     Vector<Statement> init;
     init.emplace_back(Statement::S_var_def { String::shallow("j"), false, std::move(expr) });
     Vector<Xpnode> cond;
-    cond.emplace_back(Xpnode::S_literal { D_integer(3) });
     cond.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
+    cond.emplace_back(Xpnode::S_literal { D_integer(3) });
     cond.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_lte, false });
     Vector<Xpnode> step;
     step.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
