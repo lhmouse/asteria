@@ -464,8 +464,6 @@ namespace {
       //   key-mapped-list | ""
       // key-mapped-list ::=
       //   ( string-literal | identifier ) "=" expression ( comma-or-semicolon key-mapped-list-opt | "" )
-      // nested-expression ::=
-      //   "(" expression ")"
       if(do_match_punctuator(tstrm_io, Token::punctuator_brace_op) == false) {
         return false;
       }
