@@ -21,7 +21,6 @@ class Xpnode
         // Postfix operators
         xop_postfix_inc     = 10,  // ++
         xop_postfix_dec     = 11,  // --
-        xop_postfix_at      = 12,  // []
         // Prefix operators
         xop_prefix_pos      = 30,  // +
         xop_prefix_neg      = 31,  // -
@@ -85,10 +84,14 @@ class Xpnode
         Uint64 line;
         Size arg_cnt;
       };
+    struct S_subscript
+      {
+        String name;
+      };
     struct S_operator_rpn
       {
         Xop xop;
-        bool assign;  // This parameter is ignored for `++`, `--`, `[]`, `=` and all relational operators.
+        bool assign;  // This parameter is ignored for `++`, `--`, `=` and all relational operators.
       };
     struct S_unnamed_array
       {
@@ -106,29 +109,31 @@ class Xpnode
 
     enum Index : Uint8
       {
-        index_literal           = 0,
-        index_named_reference   = 1,
-        index_bound_reference   = 2,
-        index_closure_function  = 3,
-        index_branch            = 4,
-        index_function_call     = 5,
-        index_operator_rpn      = 6,
-        index_unnamed_array     = 7,
-        index_unnamed_object    = 8,
-        index_coalescence       = 9,
+        index_literal           =  0,
+        index_named_reference   =  1,
+        index_bound_reference   =  2,
+        index_closure_function  =  3,
+        index_branch            =  4,
+        index_function_call     =  5,
+        index_subscript         =  6,
+        index_operator_rpn      =  7,
+        index_unnamed_array     =  8,
+        index_unnamed_object    =  9,
+        index_coalescence       = 10,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_literal           // 0,
-        , S_named_reference   // 1,
-        , S_bound_reference   // 2,
-        , S_closure_function  // 3,
-        , S_branch            // 4,
-        , S_function_call     // 5,
-        , S_operator_rpn      // 6,
-        , S_unnamed_array     // 7,
-        , S_unnamed_object    // 8,
-        , S_coalescence       // 9,
+        , S_literal           //  0,
+        , S_named_reference   //  1,
+        , S_bound_reference   //  2,
+        , S_closure_function  //  3,
+        , S_branch            //  4,
+        , S_function_call     //  5,
+        , S_subscript         //  6,
+        , S_operator_rpn      //  7,
+        , S_unnamed_array     //  8,
+        , S_unnamed_object    //  9,
+        , S_coalescence       // 10,
       )>;
 
   public:

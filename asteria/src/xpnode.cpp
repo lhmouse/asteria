@@ -22,9 +22,6 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       case xop_postfix_dec: {
         return "postfix decrement";
       }
-      case xop_postfix_at: {
-        return "subscripting";
-      }
       case xop_prefix_pos: {
         return "unary plus";
       }
@@ -187,6 +184,12 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.file, alt.line, alt.arg_cnt };
+        return std::move(alt_bnd);
+      }
+      case index_subscript: {
+        const auto &alt = this->m_stor.as<S_subscript>();
+        // Copy it as-is.
+        Xpnode::S_subscript alt_bnd = { alt.name };
         return std::move(alt_bnd);
       }
       case index_operator_rpn: {
@@ -590,6 +593,36 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         stack_io.emplace_back(std::move(result));
         return;
       }
+      case index_subscript: {
+        const auto &alt = this->m_stor.as<S_subscript>();
+        // Get the subscript.
+        Value sub_value;
+        if(alt.name.empty() == false) {
+          sub_value = D_string(alt.name);
+        } else {
+          auto sub = do_pop_reference(stack_io);
+          sub_value = sub.read();
+        }
+        auto cursor = do_pop_reference(stack_io);
+        // The subscript operand shall have type `integer` or `string`.
+        switch(rocket::weaken_enum(sub_value.type())) {
+          case Value::type_integer: {
+            Reference_modifier::S_array_index mod_c = { sub_value.check<D_integer>() };
+            cursor.zoom_in(std::move(mod_c));
+            break;
+          }
+          case Value::type_string: {
+            Reference_modifier::S_object_key mod_c = { sub_value.check<D_string>() };
+            cursor.zoom_in(std::move(mod_c));
+            break;
+          }
+          default: {
+            ASTERIA_THROW_RUNTIME_ERROR("The value `", sub_value, "` cannot be used as a subscript.");
+          }
+        }
+        stack_io.emplace_back(std::move(cursor));
+        return;
+      }
       case index_operator_rpn: {
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         switch(alt.xop) {
@@ -634,27 +667,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
-          }
-          case xop_postfix_at: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
-            // The subscript operand shall have type `integer` or `string`.
-            // `assign` is ignored.
-            auto lhs_value = lhs.read();
-            auto rhs_value = rhs.read();
-            if(rhs_value.type() == Value::type_integer) {
-              Reference_modifier::S_array_index mod_c = { rhs_value.check<D_integer>() };
-              lhs.zoom_in(std::move(mod_c));
-              stack_io.emplace_back(std::move(lhs));
-              break;
-            }
-            if(rhs_value.type() == Value::type_string) {
-              Reference_modifier::S_object_key mod_c = { rhs_value.check<D_string>() };
-              lhs.zoom_in(std::move(mod_c));
-              stack_io.emplace_back(std::move(lhs));
-              break;
-            }
-            ASTERIA_THROW_RUNTIME_ERROR("`", rhs_value, "` is not a valid member designator.");
           }
           case xop_prefix_pos: {
             auto rhs = do_pop_reference(stack_io);

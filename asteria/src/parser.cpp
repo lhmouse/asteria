@@ -581,7 +581,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_expected);
       }
-      Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
+      Xpnode::S_subscript node_c = { String() };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -597,9 +597,7 @@ namespace {
       if(do_accept_identifier(name, tstrm_io) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
-      Xpnode::S_literal node_i = { D_string(std::move(name)) };
-      nodes_out.emplace_back(std::move(node_i));
-      Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
+      Xpnode::S_subscript node_c = { std::move(name) };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }

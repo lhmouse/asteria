@@ -51,13 +51,13 @@ int main()
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("res") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+    expr.emplace_back(Xpnode::S_subscript { String::shallow("") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     body.emplace_back(Statement::S_expr { std::move(expr) });
     expr.clear();
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("data") });
     expr.emplace_back(Xpnode::S_named_reference { String::shallow("j") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
+    expr.emplace_back(Xpnode::S_subscript { String::shallow("") });
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
     Vector<Statement> branch_true;
