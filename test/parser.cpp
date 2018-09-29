@@ -18,7 +18,12 @@ int main()
         a += i + a * i;
       }
       // assert(a == 719);
-      return 42;
+      var b = [1,2,3,5];
+      var s = 0;
+      for(each k, v : b) {
+        s += (k % 2 == 0) ? +v : -v;
+      }
+      return s;
     )__");
     Token_stream tis;
     ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
@@ -28,7 +33,7 @@ int main()
 
     Executive_context ctx(nullptr);
     auto res = code.execute_as_function_in_place(ctx);
-    ASTERIA_TEST_CHECK(res.read().check<D_integer>() == 42);
+    ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -3);
     auto qr = ctx.get_named_reference_opt(String::shallow("a"));
     ASTERIA_TEST_CHECK(qr);
     ASTERIA_TEST_CHECK(qr->read().check<D_integer>() == 719);
