@@ -802,8 +802,8 @@ namespace {
       if(do_accept_expression(branch_true, tstrm_io) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
-        throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
+      if(do_match_punctuator(tstrm_io, Token::punctuator_colon) == false) {
+        throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
       }
       Vector<Xpnode> branch_false;
       if(do_accept_infix_element(branch_false, tstrm_io) == false) {

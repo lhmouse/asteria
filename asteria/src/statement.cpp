@@ -258,7 +258,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Reference_root::S_variable ref_c = { std::move(var) };
         ref_out = std::move(ref_c);
         do_safe_set_named_reference(ctx_io, "variable", alt.name, ref_out);
-        ASTERIA_DEBUG_LOG("Created named variable: name = ", alt.name, ", immutable = ", alt.immutable);
+        ASTERIA_DEBUG_LOG("Created named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", ref_out.read());
         return Block::status_next;
       }
       case index_func_def: {
@@ -428,7 +428,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
         auto mapped = alt.range_init.evaluate(ctx_for);
-        const auto range_value = ref_out.read();
+        ref_out = mapped;
+        const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
           case Value::type_array: {
             const auto &array = range_value.check<D_array>();
@@ -438,12 +439,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
               ref_out = std::move(ref_c);
               do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
+              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name, ": ", ref_out.read());
               // Initialize the per-loop value reference.
               Reference_modifier::S_array_index refmod_c = { it - array.begin() };
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
@@ -466,12 +467,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               Reference_root::S_constant ref_c = { D_string(it->first) };
               ref_out = std::move(ref_c);
               do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name);
+              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name, ": ", ref_out.read());
               // Initialize the per-loop value reference.
               Reference_modifier::S_object_key refmod_c = { it->first };
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name);
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
@@ -521,7 +522,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             ref_out = std::move(ref_c);
           }
           do_safe_set_named_reference(ctx_next, "exception", alt.except_name, ref_out);
-          ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", alt.except_name);
+          ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", alt.except_name, ": ", ref_out.read());
           // Initialize the backtrace array.
           D_array backtrace;
           backtrace.reserve(btv.size());
