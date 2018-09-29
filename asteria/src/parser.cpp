@@ -103,6 +103,21 @@ namespace {
       return true;
     }
 
+  bool do_accept_keyword_as_identifier(String &name_out, Token_stream &tstrm_io)
+    {
+      const auto qtok = tstrm_io.peek_opt();
+      if(!qtok) {
+        return false;
+      }
+      const auto qalt = qtok->opt<Token::S_keyword>();
+      if(!qalt) {
+        return false;
+      }
+      name_out = String::shallow(Token::get_keyword(qalt->keyword));
+      tstrm_io.shift();
+      return true;
+    }
+
   bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // prefix-operator ::=
@@ -465,7 +480,9 @@ namespace {
           break;
         }
         ++elem_cnt;
-        if((do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) && (do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false)) {
+        bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
+                        do_match_punctuator(tstrm_io, Token::punctuator_semicol);
+        if(has_next == false) {
           break;
         }
       }
@@ -494,7 +511,10 @@ namespace {
       for(;;) {
         const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
         String key;
-        if((do_accept_string_literal(key, tstrm_io) == false) && (do_accept_identifier(key, tstrm_io) == false)) {
+        bool key_got = do_accept_string_literal(key, tstrm_io) ||
+                       do_accept_identifier(key, tstrm_io) ||
+                       do_accept_keyword_as_identifier(key, tstrm_io);
+        if(key_got == false) {
           break;
         }
         if(do_match_punctuator(tstrm_io, Token::punctuator_assign) == false) {
@@ -507,7 +527,9 @@ namespace {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
         keys.emplace_back(std::move(key));
-        if((do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) && (do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false)) {
+        bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
+                        do_match_punctuator(tstrm_io, Token::punctuator_semicol);
+        if(has_next == false) {
           break;
         }
       }
