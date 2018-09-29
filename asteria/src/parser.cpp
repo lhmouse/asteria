@@ -10,6 +10,7 @@
 #include "xpnode.hpp"
 #include "expression.hpp"
 #include "utilities.hpp"
+#include <algorithm>
 
 namespace Asteria {
 
@@ -464,13 +465,12 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_op) == false) {
         return false;
       }
-      Vector<Vector<Xpnode>> inits;
+      Size elem_cnt = 0;
       for(;;) {
-        Vector<Xpnode> init;
-        if(do_accept_expression(init, tstrm_io) == false) {
+        if(do_accept_expression(nodes_out, tstrm_io) == false) {
           break;
         }
-        inits.emplace_back(std::move(init));
+        ++elem_cnt;
         if((do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) && (do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false)) {
           break;
         }
@@ -478,10 +478,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_or_expression_expected);
       }
-      for(auto it = inits.mut_rbegin(); it != inits.mut_rend(); ++it) {
-        nodes_out.append(std::make_move_iterator(it->mut_begin()), std::make_move_iterator(it->mut_end()));
-      }
-      Xpnode::S_unnamed_array node_c = { inits.size() };
+      Xpnode::S_unnamed_array node_c = { elem_cnt };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -499,35 +496,29 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_brace_op) == false) {
         return false;
       }
-      Dictionary<Vector<Xpnode>> inits;
+      Vector<String> keys;
       for(;;) {
         const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
-        String name;
-        if((do_accept_string_literal(name, tstrm_io) == false) && (do_accept_identifier(name, tstrm_io) == false)) {
+        String key;
+        if((do_accept_string_literal(key, tstrm_io) == false) && (do_accept_identifier(key, tstrm_io) == false)) {
           break;
         }
         if(do_match_punctuator(tstrm_io, Token::punctuator_assign) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_equals_sign_expected);
         }
-        Vector<Xpnode> init;
-        if(do_accept_expression(init, tstrm_io) == false) {
-          throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
-        }
-        if(inits.try_emplace(std::move(name), std::move(init)).second == false) {
+        if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
           throw duplicate_key_error;
         }
+        if(do_accept_expression(nodes_out, tstrm_io) == false) {
+          throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+        }
+        keys.emplace_back(std::move(key));
         if((do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) && (do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false)) {
           break;
         }
       }
       if(do_match_punctuator(tstrm_io, Token::punctuator_brace_cl) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_brace_or_object_key_expected);
-      }
-      Vector<String> keys;
-      keys.reserve(inits.size());
-      for(auto it = inits.mut_begin(); it != inits.mut_end(); ++it) {
-        keys.emplace_back(it->first);
-        nodes_out.append(std::make_move_iterator(it->second.mut_begin()), std::make_move_iterator(it->second.mut_end()));
       }
       Xpnode::S_unnamed_object node_c = { std::move(keys) };
       nodes_out.emplace_back(std::move(node_c));
@@ -600,16 +591,14 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
         return false;
       }
-      Vector<Vector<Xpnode>> args;
+      Size arg_cnt = 0;
       for(;;) {
-        Vector<Xpnode> arg;
-        if(do_accept_expression(arg, tstrm_io) == false) {
-          if(args.empty()) {
+        if(do_accept_expression(nodes_out, tstrm_io) == false) {
+          if(arg_cnt == 0) {
             break;
           }
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        args.emplace_back(std::move(arg));
         if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
           break;
         }
@@ -617,10 +606,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_or_argument_expected);
       }
-      for(auto it = args.mut_rbegin(); it != args.mut_rend(); ++it) {
-        nodes_out.append(std::make_move_iterator(it->mut_begin()), std::make_move_iterator(it->mut_end()));
-      }
-      Xpnode::S_function_call node_c = { std::move(file), line, args.size() };
+      Xpnode::S_function_call node_c = { std::move(file), line, arg_cnt };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -695,7 +681,10 @@ namespace {
           break;
         }
       }
-      nodes_out.append(std::make_move_iterator(prefixes.mut_rbegin()), std::make_move_iterator(prefixes.mut_rend()));
+      while(prefixes.empty() == false) {
+        nodes_out.emplace_back(std::move(prefixes.mut_back()));
+        prefixes.pop_back();
+      }
       return true;
     }
 
