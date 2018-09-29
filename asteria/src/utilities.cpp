@@ -3,7 +3,8 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#include <cstdio> // std::snprintf(), std::fputs(), stderr
+#include <iostream> // std::cerr
+#include <cstdio> // std::snprintf()
 
 #ifdef _WIN32
 #  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
@@ -142,7 +143,7 @@ bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) 
     do_replace_all(str, '\n', "\n\t");
     do_replace_all(str, '\0', "[NUL]");
     str.push_back('\n');
-    std::fputs(str.c_str(), stderr);
+    std::cerr <<str <<std::flush;
     return true;
   } catch(...) {
     return false;
