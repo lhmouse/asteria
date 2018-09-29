@@ -127,6 +127,7 @@ check_PROGRAMS = \
   test/executive_context.test  \
   test/expression.test  \
   test/block.test  \
-  test/token_stream.test
+  test/token_stream.test  \
+  test/parser.test
 
 TESTS = ${check_PROGRAMS}

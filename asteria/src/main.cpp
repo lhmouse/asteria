@@ -119,9 +119,9 @@ int main()
         }
       var sum = 0;
       1 + 2 * 3 * (4 + 5) + ++--sum++--("a","b",false)++[1].at;
-//      for(var i = 0; i < 100; ++i) {
-//        sum  += i;
-//      }
+      for(var i = 0; i < 100; ++i) {
+        sum  += i;
+      }
       for(;;)
         break;
       54  ;
