@@ -571,6 +571,7 @@ namespace {
           }
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
+        ++arg_cnt;
         if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
           break;
         }

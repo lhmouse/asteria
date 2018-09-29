@@ -24,6 +24,10 @@ int main()
         s += (k % 2 == 0) ? +v : -v;
       }
       // assert(s == -3);
+      func sub(a, b) {
+        return a - b;
+      }
+      s = sub(s, -1);
       return s;
     )__");
     Token_stream tis;
@@ -34,7 +38,7 @@ int main()
 
     Executive_context ctx(nullptr);
     auto res = code.execute_as_function_in_place(ctx);
-    ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -3);
+    ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
     auto qr = ctx.get_named_reference_opt(String::shallow("a"));
     ASTERIA_TEST_CHECK(qr);
     ASTERIA_TEST_CHECK(qr->read().check<D_integer>() == 719);
