@@ -564,7 +564,6 @@ namespace {
         }
         tlen += xcnt;
       }
-    __builtin_printf("dquote: %s\n", value.c_str());
       Token::S_string_literal token_c = { std::move(value) };
       do_push_token(seq_out, reader_io, tlen, std::move(token_c));
       return true;
