@@ -13,17 +13,6 @@
 
 using namespace Asteria;
 
-void test_throw(unsigned i)
-  try {
-    if(i < 10) {
-      test_throw(i + 1);
-      Reference_root::S_constant ref_c = { D_string("some exception") };
-      throw Exception(std::move(ref_c));
-    }
-  } catch(...) {
-    throw Backtracer(String::shallow("test_file"), i);
-  }
-
 int main()
   {
     D_array arr;
@@ -58,20 +47,6 @@ int main()
 
     ASTERIA_DEBUG_LOG("---> ", root);
     ASTERIA_DEBUG_LOG("<--- ", copy);
-
-    try {
-      test_throw(0);
-    } catch(...) {
-      Bivector<String, Uint64> bt;
-      try {
-        Backtracer::unpack_and_rethrow(bt, std::current_exception());
-      } catch(Exception &e) {
-        ASTERIA_DEBUG_LOG("Caught: ", e.get_reference().read());
-        for(auto it = bt.rbegin(); it != bt.rend(); ++it) {
-          ASTERIA_DEBUG_LOG("  inside ", it->first, ':', it->second);
-        }
-      }
-    }
 
     Token_stream ts;
     rocket::insertable_istream iss(String::shallow(R"___(

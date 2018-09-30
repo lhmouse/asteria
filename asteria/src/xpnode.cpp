@@ -230,6 +230,25 @@ Xpnode Xpnode::bind(const Global_context *global_opt, const Analytic_context &ct
 
 namespace {
 
+  String do_get_enclosing_func(const Executive_context &ctx)
+    {
+      auto qctx = &ctx;
+      do {
+        const auto qref = qctx->get_named_reference_opt(String::shallow("__func"));
+        if(qref) {
+          auto value = qref->read();
+          const auto qstr = value.opt<D_string>();
+          if(qstr) {
+            return std::move(*qstr);
+          }
+        }
+        qctx = qctx->get_parent_opt();
+        if(!qctx) {
+          return String::shallow("<unknown function>");
+        }
+      } while(true);
+    }
+
   template<typename ValueT>
     void do_set_result(Reference &ref_io, bool assign, ValueT &&value)
       {
@@ -582,15 +601,16 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         if(!*qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer is made.");
         }
-        ASTERIA_DEBUG_LOG("Entering function \'", alt.file, ':', alt.line, "\'...");
+        const auto encl_func = do_get_enclosing_func(ctx);
+        ASTERIA_DEBUG_LOG("Entering function `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
         try {
           tgt = qfunc->get()->invoke(global_opt, std::move(tgt.zoom_out()), std::move(args));
           tgt.dematerialize();
         } catch(...) {
-          ASTERIA_DEBUG_LOG("Tracing exception thrown from \'", alt.file, ':', alt.line, "\'...");
-          throw Backtracer(alt.file, alt.line);
+          ASTERIA_DEBUG_LOG("Tracing exception thrown from `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
+          throw Backtracer(alt.file, alt.line, encl_func);
         }
-        ASTERIA_DEBUG_LOG("Leaving function \'", alt.file, ':', alt.line, "\'...");
+        ASTERIA_DEBUG_LOG("Leaving function `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
         stack_io.emplace_back(std::move(tgt));
         return;
       }

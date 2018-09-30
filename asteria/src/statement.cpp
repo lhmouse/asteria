@@ -493,7 +493,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // The exception variable shall not outlast the loop body.
           Executive_context ctx_next(&ctx_io);
           // Identify the dynamic type of the exception.
-          Bivector<String, Uint64> btv;
+          Vector<Backtracer> btv;
           try {
             Backtracer::unpack_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {
@@ -514,8 +514,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           backtrace.reserve(btv.size());
           for(auto it = btv.rbegin(); it != btv.rend(); ++it) {
             D_object elem;
-            elem.insert_or_assign(String::shallow("file"), D_string(std::move(it->first)));
-            elem.insert_or_assign(String::shallow("line"), D_integer(it->second));
+            elem.insert_or_assign(String::shallow("file"), D_string(it->file()));
+            elem.insert_or_assign(String::shallow("line"), D_integer(it->line()));
+            elem.insert_or_assign(String::shallow("func"), D_string(it->func()));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
