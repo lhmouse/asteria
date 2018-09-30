@@ -231,34 +231,6 @@ namespace {
           }
     };
 
-  template<typename IteratorT>
-    inline std::pair<std::reverse_iterator<IteratorT>, std::reverse_iterator<IteratorT>> do_reverse_range(std::pair<IteratorT, IteratorT> range)
-      {
-        return std::make_pair(std::reverse_iterator<IteratorT>(std::move(range.second)), std::reverse_iterator<IteratorT>(std::move(range.first)));
-      }
-
-  template<typename ElementT>
-    inline Vector<ElementT> & do_reverse_vector(Vector<ElementT> &vec_io)
-      {
-        auto bp = vec_io.mut_begin();
-        auto ep = vec_io.mut_end();
-        if(ep - bp < 2) {
-          return vec_io;
-        }
-        auto tmp = std::move(*bp);
-        for(;;) {
-          --ep;
-          *bp = std::move(*ep);
-          *ep = std::move(tmp);
-          ++bp;
-          if(ep - bp < 2) {
-            break;
-          }
-          tmp = std::move(*bp);
-        }
-        return vec_io;
-      }
-
   bool do_accept_identifier_or_keyword(Vector<Token> &seq_out, Source_reader &reader_io)
     {
       // identifier ::=
@@ -317,9 +289,10 @@ namespace {
           do_push_token(seq_out, reader_io, tlen, std::move(token_c));
           return true;
         }
-        if((std::char_traits<char>::length(range.first->first) == tlen) && (std::char_traits<char>::compare(bptr, range.first->first, tlen) == 0)) {
+        const auto &cur = range.first[0];
+        if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
           // A keyword has been found.
-          Token::S_keyword token_c = { range.first->second };
+          Token::S_keyword token_c = { cur.second };
           do_push_token(seq_out, reader_io, tlen, std::move(token_c));
           return true;
         }
@@ -401,21 +374,22 @@ namespace {
       ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
       // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
       // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-      auto range = do_reverse_range(std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_comparator()));
+      auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_comparator());
       for(;;) {
         if(range.first == range.second) {
           // No matching punctuator has been found so far.
           // This is caused by a character in `punct_chars` that does not exist in the table above.
           ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
         }
-        const auto tlen = std::char_traits<char>::length(range.first->first);
-        if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, range.first->first, tlen) == 0)) {
+        const auto &cur = range.second[-1];
+        const auto tlen = std::char_traits<char>::length(cur.first);
+        if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
           // A punctuator has been found.
-          Token::S_punctuator token_c = { range.first->second };
+          Token::S_punctuator token_c = { cur.second };
           do_push_token(seq_out, reader_io, tlen, std::move(token_c));
           return true;
         }
-        ++(range.first);
+        --(range.second);
       }
     }
 
@@ -915,7 +889,7 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
       throw Parser_error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_error::code_block_comment_unclosed);
     }
     // Accept the result.
-    do_reverse_vector(seq);
+    std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor.emplace<Vector<Token>>(std::move(seq));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.

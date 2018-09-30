@@ -512,10 +512,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // Initialize the backtrace array.
           D_array backtrace;
           backtrace.reserve(btv.size());
-          for(auto &pair : btv) {
+          for(auto it = btv.rbegin(); it != btv.rend(); ++it) {
             D_object elem;
-            elem.insert_or_assign(String::shallow("file"), D_string(std::move(pair.first)));
-            elem.insert_or_assign(String::shallow("line"), D_integer(pair.second));
+            elem.insert_or_assign(String::shallow("file"), D_string(std::move(it->first)));
+            elem.insert_or_assign(String::shallow("line"), D_integer(it->second));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
