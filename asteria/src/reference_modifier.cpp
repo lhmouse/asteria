@@ -46,7 +46,8 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
 //              ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
 //              return nullptr;
 //            }
-//            return opq->open_member(alt.index, false);
+//            const auto qmem = opq->open_member(alt.index, false);
+//            return qmem;
 //          }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -74,7 +75,8 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
               ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
               return nullptr;
             }
-            return opq->open_member(alt.key, false);
+            const auto qmem = opq->open_member(alt.key, false);
+            return qmem;
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
@@ -154,7 +156,11 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
 //              *erased_out_opt = opq->unset_member(alt.index);
 //              return erased_out_opt;
 //            }
-//            return opq->open_member(alt.index, create_new);
+//            const auto qmem = opq->open_member(alt.index, create_new);
+//            if(create_new && !qmem) {
+//              ASTERIA_THROW_RUNTIME_ERROR("`open_member()` (of `", typeid(*opq).name(), "`) returned a null pointer when `create_new` was `true`.");
+//            }
+//            return qmem;
 //          }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -203,7 +209,11 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
               *erased_out_opt = opq->unset_member(alt.key);
               return erased_out_opt;
             }
-            return opq->open_member(alt.key, create_new);
+            const auto qmem = opq->open_member(alt.key, create_new);
+            if(create_new && !qmem) {
+              ASTERIA_THROW_RUNTIME_ERROR("`open_member()` (of `", typeid(*opq).name(), "`) returned a null pointer when `create_new` was `true`.");
+            }
+            return qmem;
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
