@@ -252,17 +252,6 @@ namespace {
       return ref;
     }
 
-  Reference do_traced_call(Global_context *global_opt, const String &file, Uint32 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
-    try {
-      ASTERIA_DEBUG_LOG("Entering function \'", file, ':', line, "\'...");
-      auto res = func->invoke(global_opt, std::move(self), std::move(args));
-      ASTERIA_DEBUG_LOG("Leaving function \'", file, ':', line, "\'...");
-      return res;
-    } catch(...) {
-      ASTERIA_DEBUG_LOG("Tracing exception thrown from \'", file, ':', line, "\'...");
-      throw Backtracer(file, line);
-    }
-
   D_boolean do_logical_not(D_boolean rhs)
     {
       return !rhs;
@@ -582,20 +571,27 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
           auto arg = do_pop_reference(stack_io);
           args.mut(i) = std::move(arg);
         }
-        // Pop the callee off the stack.
-        auto callee = do_pop_reference(stack_io);
-        auto callee_value = callee.read();
+        // Pop the target off the stack.
+        auto tgt = do_pop_reference(stack_io);
+        const auto tgt_value = tgt.read();
         // Make sure it is really a function.
-        const auto qfunc = callee_value.opt<D_function>();
+        const auto qfunc = tgt_value.opt<D_function>();
         if(!qfunc) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", callee_value, "` is not a function and cannot be called.");
+          ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
         if(!*qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer is made.");
         }
-        auto result = do_traced_call(global_opt, alt.file, alt.line, *qfunc, std::move(callee.zoom_out()), std::move(args));
-        result.dematerialize();
-        stack_io.emplace_back(std::move(result));
+        ASTERIA_DEBUG_LOG("Entering function \'", alt.file, ':', alt.line, "\'...");
+        try {
+          tgt = qfunc->get()->invoke(global_opt, std::move(tgt.zoom_out()), std::move(args));
+          tgt.dematerialize();
+        } catch(...) {
+          ASTERIA_DEBUG_LOG("Tracing exception thrown from \'", alt.file, ':', alt.line, "\'...");
+          throw Backtracer(alt.file, alt.line);
+        }
+        ASTERIA_DEBUG_LOG("Leaving function \'", alt.file, ':', alt.line, "\'...");
+        stack_io.emplace_back(std::move(tgt));
         return;
       }
       case index_subscript: {
