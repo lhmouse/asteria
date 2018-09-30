@@ -89,7 +89,7 @@ const char * Token::get_keyword(Keyword keyword) noexcept
         return "unset";
       }
       default: {
-        return "<unknown>";
+        return "<unknown keyword>";
       }
     }
   }
@@ -260,7 +260,7 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
         return "?\?=";
       }
       default: {
-        return "<unknown>";
+        return "<unknown punctuator>";
       }
     }
   }

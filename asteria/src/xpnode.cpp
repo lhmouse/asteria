@@ -105,7 +105,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return "assginment";
       }
       default: {
-        return "<unknown>";
+        return "<unknown operator>";
       }
     }
   }
@@ -552,7 +552,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        auto func = rocket::make_refcounted<Instantiated_function>(alt.file, alt.line, String::shallow("<closure>"), alt.params, std::move(body_bnd));
+        auto func = rocket::make_refcounted<Instantiated_function>(alt.file, alt.line, String::shallow("<closure function>"), alt.params, std::move(body_bnd));
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.emplace_back(std::move(ref_c));
         return;

@@ -38,7 +38,7 @@ const char * Value::get_type_name(Value::Type type) noexcept
         return "object";
       }
       default: {
-        return "<unknown>";
+        return "<unknown type>";
       }
     }
   }
