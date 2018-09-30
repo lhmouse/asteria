@@ -134,7 +134,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         return std::move(alt_bnd);
       }
       case index_do_while: {
-        const auto &alt = this->m_stor.as<S_while>();
+        const auto &alt = this->m_stor.as<S_do_while>();
         // Bind the loop body and condition recursively.
         auto body_bnd = alt.body.bind(ctx_io);
         auto cond_bnd = alt.cond.bind(ctx_io);
@@ -331,7 +331,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         return Block::status_next;
       }
       case index_do_while: {
-        const auto &alt = this->m_stor.as<S_while>();
+        const auto &alt = this->m_stor.as<S_do_while>();
         for(;;) {
           // Execute the loop body.
           Executive_context ctx_next(&ctx_io);
