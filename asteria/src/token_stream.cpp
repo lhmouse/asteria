@@ -22,7 +22,7 @@ namespace {
       std::istream &m_stream;
       const String &m_file;
       String m_str;
-      Uint64 m_line;
+      Uint32 m_line;
       Size m_offset;
 
     public:
@@ -49,7 +49,7 @@ namespace {
           return this->m_file;
         }
 
-      Uint64 line() const noexcept
+      Uint32 line() const noexcept
         {
           return this->m_line;
         }
@@ -110,7 +110,7 @@ namespace {
   class Tack
     {
     private:
-      Uint64 m_line;
+      Uint32 m_line;
       Size m_offset;
       Size m_length;
 
@@ -121,7 +121,7 @@ namespace {
         }
 
     public:
-      constexpr Uint64 line() const noexcept
+      constexpr Uint32 line() const noexcept
         {
           return this->m_line;
         }

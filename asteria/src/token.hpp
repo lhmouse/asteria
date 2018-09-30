@@ -150,7 +150,7 @@ class Token
 
   private:
     String m_file;
-    Uint64 m_line;
+    Uint32 m_line;
     Size m_offset;
     Size m_length;
     Variant m_stor;
@@ -158,7 +158,7 @@ class Token
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
-      Token(const String &file, Uint64 line, Size offset, Size length, AltT &&alt)
+      Token(const String &file, Uint32 line, Size offset, Size length, AltT &&alt)
         : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
         {
         }
@@ -169,7 +169,7 @@ class Token
       {
         return this->m_file;
       }
-    Uint64 get_line() const noexcept
+    Uint32 get_line() const noexcept
       {
         return this->m_line;
       }

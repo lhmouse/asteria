@@ -39,7 +39,7 @@ class Statement
     struct S_func_def
       {
         String file;
-        Uint64 line;
+        Uint32 line;
         String name;
         Vector<String> params;
         Block body;

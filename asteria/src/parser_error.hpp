@@ -70,19 +70,19 @@ class Parser_error
     static const char * get_code_description(Code code) noexcept;
 
   private:
-    Uint64 m_line;
+    Uint32 m_line;
     Size m_offset;
     Size m_length;
     Code m_code;
 
   public:
-    constexpr Parser_error(Uint64 line, Size offset, Size length, Code code) noexcept
+    constexpr Parser_error(Uint32 line, Size offset, Size length, Code code) noexcept
       : m_line(line), m_offset(offset), m_length(length), m_code(code)
       {
       }
 
   public:
-    constexpr Uint64 get_line() const noexcept
+    constexpr Uint32 get_line() const noexcept
       {
         return this->m_line;
       }

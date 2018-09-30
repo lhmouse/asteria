@@ -68,7 +68,7 @@ class Xpnode
     struct S_closure_function
       {
         String file;
-        Uint64 line;
+        Uint32 line;
         Vector<String> params;
         Block body;
       };
@@ -81,7 +81,7 @@ class Xpnode
     struct S_function_call
       {
         String file;
-        Uint64 line;
+        Uint32 line;
         Size arg_cnt;
       };
     struct S_subscript

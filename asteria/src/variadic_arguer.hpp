@@ -14,11 +14,11 @@ class Variadic_arguer : public Abstract_function
   {
   private:
     String m_file;
-    Uint64 m_line;
+    Uint32 m_line;
     Vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(String file, Uint64 line, Vector<Reference> vargs) noexcept
+    Variadic_arguer(String file, Uint32 line, Vector<Reference> vargs) noexcept
       : m_file(std::move(file)), m_line(line), m_vargs(std::move(vargs))
       {
       }

@@ -29,7 +29,7 @@ namespace {
       return Parser_error(qtok->get_line(), qtok->get_offset(), qtok->get_length(), code);
     }
 
-  inline void do_tell_source_location(String &file_out, Uint64 &line_out, const Token_stream &tstrm_io)
+  inline void do_tell_source_location(String &file_out, Uint32 &line_out, const Token_stream &tstrm_io)
     {
       const auto qtok = tstrm_io.peek_opt();
       if(!qtok) {
@@ -396,7 +396,7 @@ namespace {
     {
       // Copy these parameters before reading from the stream which is destructive.
       String file;
-      Uint64 line = 0;
+      Uint32 line = 0;
       do_tell_source_location(file, line, tstrm_io);
       // closure-function ::=
       //   "func" "(" identifier-list-opt ")" statement
@@ -533,7 +533,7 @@ namespace {
     {
       // Copy these parameters before reading from the stream which is destructive.
       String file;
-      Uint64 line = 0;
+      Uint32 line = 0;
       do_tell_source_location(file, line, tstrm_io);
       // postfix-function-call ::=
       //   "(" argument-list-opt ")"
@@ -1192,7 +1192,7 @@ namespace {
     {
       // Copy these parameters before reading from the stream which is destructive.
       String file;
-      Uint64 line = 0;
+      Uint32 line = 0;
       do_tell_source_location(file, line, tstrm_io);
       // function-definition ::=
       //   "func" identifier "(" identifier-list-opt ")" statement

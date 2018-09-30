@@ -16,10 +16,10 @@ class Backtracer : public virtual std::nested_exception
 
   private:
     String m_file;
-    Uint64 m_line;
+    Uint32 m_line;
 
   public:
-    Backtracer(String file, Uint64 line) noexcept
+    Backtracer(String file, Uint32 line) noexcept
       : m_file(std::move(file)), m_line(line)
       {
       }
@@ -30,7 +30,7 @@ class Backtracer : public virtual std::nested_exception
       {
         return this->m_file;
       }
-    Uint64 get_line() const noexcept
+    Uint32 get_line() const noexcept
       {
         return this->m_line;
       }

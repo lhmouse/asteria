@@ -247,7 +247,7 @@ namespace {
       return ref;
     }
 
-  Reference do_traced_call(const String &file, Uint64 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
+  Reference do_traced_call(const String &file, Uint32 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
     try {
       ASTERIA_DEBUG_LOG("Entering function \'", file, ':', line, "\'...");
       auto res = func->invoke(std::move(self), std::move(args));

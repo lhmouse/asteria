@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-Instantiated_function::Instantiated_function(Vector<String> params, String file, Uint64 line, Block body) noexcept
+Instantiated_function::Instantiated_function(Vector<String> params, String file, Uint32 line, Block body) noexcept
   : m_params(std::move(params)), m_file(std::move(file)), m_line(line), m_body(std::move(body))
   {
   }
