@@ -521,7 +521,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary ref_c = { std::move(backtrace) };
           ref_out = std::move(ref_c);
-          do_safe_set_named_reference(ctx_next, "backtrace array", String::shallow("__backtrace"), ref_out);
+          ctx_next.set_named_reference(String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, ctx_next);
           if(status != Block::status_next) {
