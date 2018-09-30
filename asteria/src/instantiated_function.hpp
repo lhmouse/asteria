@@ -19,7 +19,10 @@ class Instantiated_function : public Abstract_function
     Block m_body;
 
   public:
-    Instantiated_function(Vector<String> params, String file, Uint32 line, Block body) noexcept;
+    Instantiated_function(Vector<String> params, String file, Uint32 line, Block body) noexcept
+      : m_params(std::move(params)), m_file(std::move(file)), m_line(line), m_body(std::move(body))
+      {
+      }
     ~Instantiated_function();
 
   public:

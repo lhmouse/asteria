@@ -11,10 +11,6 @@
 
 namespace Asteria {
 
-Instantiated_function::Instantiated_function(Vector<String> params, String file, Uint32 line, Block body) noexcept
-  : m_params(std::move(params)), m_file(std::move(file)), m_line(line), m_body(std::move(body))
-  {
-  }
 Instantiated_function::~Instantiated_function()
   {
   }
