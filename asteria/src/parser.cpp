@@ -344,18 +344,17 @@ namespace {
       //   identifier-list | ""
       // identifier-list ::=
       //   identifier ( "," identifier-list | "" )
-      const auto size_init = names_out.size();
+      String name;
+      if(do_accept_identifier(name, tstrm_io) == false) {
+        return false;
+      }
       for(;;) {
-        String name;
-        if(do_accept_identifier(name, tstrm_io) == false) {
-          if(names_out.size() == size_init) {
-            return false;
-          }
-          throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
-        }
         names_out.emplace_back(std::move(name));
         if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
           break;
+        }
+        if(do_accept_identifier(name, tstrm_io) == false) {
+          throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
       }
       return true;
@@ -546,16 +545,15 @@ namespace {
         return false;
       }
       Size arg_cnt = 0;
-      for(;;) {
-        if(do_accept_expression(nodes_out, tstrm_io) == false) {
-          if(arg_cnt == 0) {
+      if(do_accept_expression(nodes_out, tstrm_io) != false) {
+        for(;;) {
+          ++arg_cnt;
+          if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
             break;
           }
-          throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
-        }
-        ++arg_cnt;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
-          break;
+          if(do_accept_expression(nodes_out, tstrm_io) == false) {
+            throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+          }
         }
       }
       if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
@@ -613,17 +611,20 @@ namespace {
       // postfix-operator-list ::=
       //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
       Vector<Xpnode> prefixes;
-      for(;;) {
-        bool prefix_got = do_accept_prefix_operator(prefixes, tstrm_io);
-        if(prefix_got == false) {
-          break;
-        }
-      }
-      if(do_accept_primary_expression(nodes_out, tstrm_io) == false) {
-        if(prefixes.empty()) {
+      if(do_accept_prefix_operator(prefixes, tstrm_io) == false) {
+        if(do_accept_primary_expression(nodes_out, tstrm_io) == false) {
           return false;
         }
-        throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+      } else {
+        for(;;) {
+          bool prefix_got = do_accept_prefix_operator(prefixes, tstrm_io);
+          if(prefix_got == false) {
+            break;
+          }
+        }
+        if(do_accept_primary_expression(nodes_out, tstrm_io) == false) {
+          throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
+        }
       }
       for(;;) {
         bool postfix_got = do_accept_postfix_operator(nodes_out, tstrm_io) ||
@@ -1146,7 +1147,7 @@ namespace {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
       Vector<Xpnode> init;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
+      if(do_match_punctuator(tstrm_io, Token::punctuator_assign) != false) {
         if(do_accept_expression(init, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
@@ -1259,7 +1260,7 @@ namespace {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Vector<Statement> branch_false;
-      if(do_match_keyword(tstrm_io, Token::keyword_else)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_else) != false) {
         if(do_accept_statement_as_block(branch_false, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1404,7 +1405,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_each)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_each) != false) {
         if(do_accept_identifier(key_name, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
@@ -1462,15 +1463,15 @@ namespace {
         return false;
       }
       Statement::Target target = Statement::target_unspec;
-      if(do_match_keyword(tstrm_io, Token::keyword_switch)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_switch) != false) {
         target = Statement::target_switch;
         goto z;
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_while)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_while) != false) {
         target = Statement::target_while;
         goto z;
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_for)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_for) != false) {
         target = Statement::target_for;
         goto z;
       }
@@ -1491,11 +1492,11 @@ namespace {
         return false;
       }
       Statement::Target target = Statement::target_unspec;
-      if(do_match_keyword(tstrm_io, Token::keyword_while)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_while) != false) {
         target = Statement::target_while;
         goto z;
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_for)) {
+      if(do_match_keyword(tstrm_io, Token::keyword_for) != false) {
         target = Statement::target_for;
         goto z;
       }

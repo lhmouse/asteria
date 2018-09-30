@@ -27,7 +27,11 @@ int main()
       func sub(a, b) {
         return a - b;
       }
-      s = sub(s, -1);
+      s = sub(s, 2);
+      func add() {
+        s += 3;
+      }
+      add();
       return s;
     )__");
     Token_stream tis;
