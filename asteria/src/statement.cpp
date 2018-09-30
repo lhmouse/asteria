@@ -71,20 +71,20 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
     }
   }
 
-Statement Statement::bind_in_place(Analytic_context &ctx_io) const
+Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_context *global_opt) const
   {
     switch(Index(this->m_stor.index())) {
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Bind the expression recursively.
-        auto expr_bnd = alt.expr.bind(ctx_io);
+        auto expr_bnd = alt.expr.bind(global_opt, ctx_io);
         Statement::S_expr alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
         // Bind the body recursively.
-        auto body_bnd = alt.body.bind(ctx_io);
+        auto body_bnd = alt.body.bind(global_opt, ctx_io);
         Statement::S_block alt_bnd = { std::move(body_bnd) };
         return std::move(alt_bnd);
       }
@@ -93,7 +93,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "variable", alt.name, { });
         // Bind the initializer recursively.
-        auto init_bnd = alt.init.bind(ctx_io);
+        auto init_bnd = alt.init.bind(global_opt, ctx_io);
         Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
         return std::move(alt_bnd);
       }
@@ -104,30 +104,30 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next);
+        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
         Statement::S_func_def alt_bnd = { alt.file, alt.line, alt.name, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
         // Bind the condition and both branches recursively.
-        auto cond_bnd = alt.cond.bind(ctx_io);
-        auto branch_true_bnd = alt.branch_true.bind(ctx_io);
-        auto branch_false_bnd = alt.branch_false.bind(ctx_io);
+        auto cond_bnd = alt.cond.bind(global_opt, ctx_io);
+        auto branch_true_bnd = alt.branch_true.bind(global_opt, ctx_io);
+        auto branch_false_bnd = alt.branch_false.bind(global_opt, ctx_io);
         Statement::S_if alt_bnd = { std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
         // Bind the control expression and all clauses recursively.
-        auto ctrl_bnd = alt.ctrl.bind(ctx_io);
+        auto ctrl_bnd = alt.ctrl.bind(global_opt, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_context ctx_next(&ctx_io);
         Bivector<Expression, Block> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
         for(const auto &pair : alt.clauses) {
-          auto first_bnd = pair.first.bind(ctx_next);
-          auto second_bnd = pair.second.bind_in_place(ctx_next);
+          auto first_bnd = pair.first.bind(global_opt, ctx_next);
+          auto second_bnd = pair.second.bind_in_place(ctx_next, global_opt);
           clauses_bnd.emplace_back(std::move(first_bnd), std::move(second_bnd));
         }
         Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
@@ -136,16 +136,16 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
       case index_do_while: {
         const auto &alt = this->m_stor.as<S_do_while>();
         // Bind the loop body and condition recursively.
-        auto body_bnd = alt.body.bind(ctx_io);
-        auto cond_bnd = alt.cond.bind(ctx_io);
+        auto body_bnd = alt.body.bind(global_opt, ctx_io);
+        auto cond_bnd = alt.cond.bind(global_opt, ctx_io);
         Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
         return std::move(alt_bnd);
       }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
         // Bind the condition and loop body recursively.
-        auto cond_bnd = alt.cond.bind(ctx_io);
-        auto body_bnd = alt.body.bind(ctx_io);
+        auto cond_bnd = alt.cond.bind(global_opt, ctx_io);
+        auto body_bnd = alt.body.bind(global_opt, ctx_io);
         Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
@@ -154,10 +154,10 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Analytic_context ctx_next(&ctx_io);
         // Bind the loop initializer, condition, step expression and loop body recursively.
-        auto init_bnd = alt.init.bind(ctx_next);
-        auto cond_bnd = alt.cond.bind(ctx_next);
-        auto step_bnd = alt.step.bind(ctx_next);
-        auto body_bnd = alt.body.bind(ctx_next);
+        auto init_bnd = alt.init.bind(global_opt, ctx_next);
+        auto cond_bnd = alt.cond.bind(global_opt, ctx_next);
+        auto step_bnd = alt.step.bind(global_opt, ctx_next);
+        auto body_bnd = alt.body.bind(global_opt, ctx_next);
         Statement::S_for alt_bnd = { std::move(init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
@@ -168,20 +168,20 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
         do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, { });
         // Bind the range initializer and loop body recursively.
-        auto range_init_bnd = alt.range_init.bind(ctx_next);
-        auto body_bnd = alt.body.bind(ctx_next);
+        auto range_init_bnd = alt.range_init.bind(global_opt, ctx_next);
+        auto body_bnd = alt.body.bind(global_opt, ctx_next);
         Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_try: {
         const auto &alt = this->m_stor.as<S_try>();
         // The `try` branch needs no special treatement.
-        auto body_try_bnd = alt.body_try.bind(ctx_io);
+        auto body_try_bnd = alt.body_try.bind(global_opt, ctx_io);
         // The exception variable shall not outlast the `catch` body.
         Analytic_context ctx_next(&ctx_io);
         do_safe_set_named_reference(ctx_next, "exception", alt.except_name, { });
         // Bind the `catch` branch recursively.
-        auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next);
+        auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next, global_opt);
         Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
         return std::move(alt_bnd);
       }
@@ -200,14 +200,14 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
         // Bind the exception initializer recursively.
-        auto expr_bnd = alt.expr.bind(ctx_io);
+        auto expr_bnd = alt.expr.bind(global_opt, ctx_io);
         Statement::S_throw alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
         // Bind the result initializer recursively.
-        auto expr_bnd = alt.expr.bind(ctx_io);
+        auto expr_bnd = alt.expr.bind(global_opt, ctx_io);
         Statement::S_return alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
@@ -217,19 +217,19 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io) const
     }
   }
 
-Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
+Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const
   {
     switch(Index(this->m_stor.index())) {
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(global_opt, ctx_io);
         return Block::status_next;
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
         // Execute the body.
-        return alt.body.execute(ref_out, ctx_io);
+        return alt.body.execute(ref_out, global_opt, ctx_io);
       }
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
@@ -237,7 +237,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // A variable becomes visible before its initializer, where it is initialized to `null`.
         do_safe_set_named_reference(ctx_io, "variable", alt.name, { });
         // Create a variable using the initializer.
-        ref_out = alt.init.evaluate(ctx_io);
+        ref_out = alt.init.evaluate(global_opt, ctx_io);
         auto value = ref_out.read();
         auto var = rocket::make_refcounted<Variable>(std::move(value), alt.immutable);
         // Reset the reference.
@@ -255,7 +255,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next);
+        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         auto var = rocket::make_refcounted<Variable>(D_function(std::move(func)), true);
         // Reset the reference.
@@ -268,8 +268,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
-        ref_out = alt.cond.evaluate(ctx_io);
-        const auto status = (ref_out.read().test() ? alt.branch_true : alt.branch_false).execute(ref_out, ctx_io);
+        ref_out = alt.cond.evaluate(global_opt, ctx_io);
+        const auto status = (ref_out.read().test() ? alt.branch_true : alt.branch_false).execute(ref_out, global_opt, ctx_io);
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
           return status;
@@ -279,7 +279,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
         // Evaluate the control expression.
-        ref_out = alt.ctrl.evaluate(ctx_io);
+        ref_out = alt.ctrl.evaluate(global_opt, ctx_io);
         const auto value_ctrl = ref_out.read();
         // Note that all `switch` clauses share the same context.
         // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
@@ -304,7 +304,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             ctx_test = std::ref(ctx_second);
           } else {
             // This is a `case` clause.
-            ref_out = it->first.evaluate(ctx_next);
+            ref_out = it->first.evaluate(global_opt, ctx_next);
             const auto value_comp = ref_out.read();
             if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
@@ -318,7 +318,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         }
         // Iterate from the match clause to the end of the body, falling through clause boundaries if any.
         for(auto it = match; it != alt.clauses.end(); ++it) {
-          const auto status = it->second.execute_in_place(ref_out, ctx_next);
+          const auto status = it->second.execute_in_place(ref_out, ctx_next, global_opt);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_switch })) {
             // Break out of the body as requested.
             break;
@@ -335,7 +335,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         for(;;) {
           // Execute the loop body.
           Executive_context ctx_next(&ctx_io);
-          const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+          const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -346,7 +346,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           }
           // Check the loop condition.
           // This differs from a `while` loop where the context for the loop body is destroyed before this check.
-          ref_out = alt.cond.evaluate(ctx_next);
+          ref_out = alt.cond.evaluate(global_opt, ctx_next);
           if(ref_out.read().test() == false) {
             break;
           }
@@ -357,12 +357,12 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_while>();
         for(;;) {
           // Check the loop condition.
-          ref_out = alt.cond.evaluate(ctx_io);
+          ref_out = alt.cond.evaluate(global_opt, ctx_io);
           if(ref_out.read().test() == false) {
             break;
           }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_io);
+          const auto status = alt.body.execute(ref_out, global_opt, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -380,18 +380,18 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Executive_context ctx_next(&ctx_io);
         // Execute the initializer. The status is ignored.
         ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
-        alt.init.execute_in_place(ref_out, ctx_next);
+        alt.init.execute_in_place(ref_out, ctx_next, global_opt);
         ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
         for(;;) {
           // Check the loop condition.
           if(alt.cond.empty() == false) {
-            ref_out = alt.cond.evaluate(ctx_next);
+            ref_out = alt.cond.evaluate(global_opt, ctx_next);
             if(ref_out.read().test() == false) {
               break;
             }
           }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, ctx_next);
+          const auto status = alt.body.execute(ref_out, global_opt, ctx_next);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
             // Break out of the body as requested.
             break;
@@ -401,7 +401,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             return status;
           }
           // Evaluate the loop step expression.
-          alt.step.evaluate(ctx_next);
+          alt.step.evaluate(global_opt, ctx_next);
         }
         return Block::status_next;
       }
@@ -413,7 +413,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
-        auto mapped = alt.range_init.evaluate(ctx_for);
+        auto mapped = alt.range_init.evaluate(global_opt, ctx_for);
         ref_out = mapped;
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
@@ -432,7 +432,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -460,7 +460,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -484,7 +484,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         try {
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
-          const auto status = alt.body_try.execute(ref_out, ctx_io);
+          const auto status = alt.body_try.execute(ref_out, global_opt, ctx_io);
           if(status != Block::status_next) {
             // Forward anything unexpected to the caller.
             return status;
@@ -523,7 +523,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           ref_out = std::move(ref_c);
           ctx_next.set_named_reference(String::shallow("__backtrace"), ref_out);
           // Execute the `catch` body.
-          const auto status = alt.body_catch.execute(ref_out, ctx_next);
+          const auto status = alt.body_catch.execute(ref_out, global_opt, ctx_next);
           if(status != Block::status_next) {
             // Forward anything unexpected to the caller.
             return status;
@@ -564,14 +564,14 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(global_opt, ctx_io);
         ASTERIA_DEBUG_LOG("Throwing exception: ", ref_out.read());
         throw Exception(ref_out);
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(ctx_io);
+        ref_out = alt.expr.evaluate(global_opt, ctx_io);
         return Block::status_return;
       }
       default: {

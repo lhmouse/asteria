@@ -25,10 +25,10 @@ class Expression
     ~Expression();
 
   public:
-    Expression bind(const Analytic_context &ctx) const;
+    Expression bind(const Global_context *global_opt, const Analytic_context &ctx) const;
     bool empty() const noexcept;
-    bool evaluate_partial(Vector<Reference> &stack_io, const Executive_context &ctx) const;
-    Reference evaluate(const Executive_context &ctx) const;
+    bool evaluate_partial(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const;
+    Reference evaluate(Global_context *global_opt, const Executive_context &ctx) const;
   };
 
 }

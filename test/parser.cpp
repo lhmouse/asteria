@@ -40,8 +40,8 @@ int main()
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
-    Executive_context ctx(nullptr);
-    auto res = code.execute_as_function_in_place(ctx);
+    Executive_context ctx;
+    auto res = code.execute_as_function_in_place(ctx, nullptr);
     ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
     auto qr = ctx.get_named_reference_opt(String::shallow("a"));
     ASTERIA_TEST_CHECK(qr);

@@ -22,27 +22,27 @@ void Block::fly_over_in_place(Abstract_context &ctx_io) const
     }
   }
 
-Block Block::bind_in_place(Analytic_context &ctx_io) const
+Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context *global_opt) const
   {
     Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      auto alt_bnd = stmt.bind_in_place(ctx_io);
+      auto alt_bnd = stmt.bind_in_place(ctx_io, global_opt);
       stmts_bnd.emplace_back(std::move(alt_bnd));
     }
     return std::move(stmts_bnd);
   }
 
-Block Block::bind(const Analytic_context &ctx) const
+Block Block::bind(const Global_context *global_opt, const Analytic_context &ctx) const
   {
     Analytic_context ctx_next(&ctx);
-    return this->bind_in_place(ctx_next);
+    return this->bind_in_place(ctx_next, global_opt);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const
   {
     for(const auto &stmt : this->m_stmts) {
-      const auto status = stmt.execute_in_place(ref_out, ctx_io);
+      const auto status = stmt.execute_in_place(ref_out, ctx_io, global_opt);
       if(status != status_next) {
         // Forward anything unexpected to the caller.
         return status;
@@ -51,10 +51,10 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     return status_next;
   }
 
-Reference Block::execute_as_function_in_place(Executive_context &ctx_io) const
+Reference Block::execute_as_function_in_place(Executive_context &ctx_io, Global_context *global_opt) const
   {
     Reference ref;
-    const auto status = this->execute_in_place(ref, ctx_io);
+    const auto status = this->execute_in_place(ref, ctx_io, global_opt);
     switch(status) {
       case status_next: {
         // Return `null` because the control flow reached the end of the function.
@@ -81,10 +81,10 @@ Reference Block::execute_as_function_in_place(Executive_context &ctx_io) const
     }
   }
 
-Block::Status Block::execute(Reference &ref_out, const Executive_context &ctx) const
+Block::Status Block::execute(Reference &ref_out, Global_context *global_opt, const Executive_context &ctx) const
   {
     Executive_context ctx_next(&ctx);
-    return this->execute_in_place(ref_out, ctx_next);
+    return this->execute_in_place(ref_out, ctx_next, global_opt);
   }
 
 }

@@ -152,8 +152,8 @@ class Xpnode
     ~Xpnode();
 
   public:
-    Xpnode bind(const Analytic_context &ctx) const;
-    void evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const;
+    Xpnode bind(const Global_context *global_opt, const Analytic_context &ctx) const;
+    void evaluate(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const;
   };
 
 }

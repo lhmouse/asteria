@@ -13,12 +13,12 @@ Expression::~Expression()
   {
   }
 
-Expression Expression::bind(const Analytic_context &ctx) const
+Expression Expression::bind(const Global_context *global_opt, const Analytic_context &ctx) const
   {
     Vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
-      auto node_bnd = node.bind(ctx);
+      auto node_bnd = node.bind(global_opt, ctx);
       nodes_bnd.emplace_back(std::move(node_bnd));
     }
     return std::move(nodes_bnd);
@@ -29,14 +29,14 @@ bool Expression::empty() const noexcept
     return this->m_nodes.empty();
   }
 
-bool Expression::evaluate_partial(Vector<Reference> &stack_io, const Executive_context &ctx) const
+bool Expression::evaluate_partial(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const
   {
     if(this->m_nodes.empty()) {
       return false;
     }
     const auto stack_size_old = stack_io.size();
     for(const auto &node : this->m_nodes) {
-      node.evaluate(stack_io, ctx);
+      node.evaluate(stack_io, global_opt, ctx);
       ROCKET_ASSERT(stack_io.size() >= stack_size_old);
     }
     if(stack_io.size() - stack_size_old != 1) {
@@ -45,10 +45,10 @@ bool Expression::evaluate_partial(Vector<Reference> &stack_io, const Executive_c
     return true;
   }
 
-Reference Expression::evaluate(const Executive_context &ctx) const
+Reference Expression::evaluate(Global_context *global_opt, const Executive_context &ctx) const
   {
     Vector<Reference> stack;
-    if(this->evaluate_partial(stack, ctx) == false) {
+    if(this->evaluate_partial(stack, global_opt, ctx) == false) {
       return { };
     }
     return std::move(stack.mut_back());
