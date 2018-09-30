@@ -13,14 +13,15 @@ namespace Asteria {
 class Instantiated_function : public Abstract_function
   {
   private:
-    Vector<String> m_params;
     String m_file;
     Uint32 m_line;
+    String m_name;
+    Vector<String> m_params;
     Block m_body;
 
   public:
-    Instantiated_function(Vector<String> params, String file, Uint32 line, Block body) noexcept
-      : m_params(std::move(params)), m_file(std::move(file)), m_line(line), m_body(std::move(body))
+    Instantiated_function(String file, Uint32 line, String name, Vector<String> params, Block body) noexcept
+      : m_file(std::move(file)), m_line(line), m_name(std::move(name)), m_params(std::move(params)), m_body(std::move(body))
       {
       }
     ~Instantiated_function();

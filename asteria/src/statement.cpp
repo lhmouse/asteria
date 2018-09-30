@@ -256,7 +256,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
+        auto func = rocket::make_refcounted<Instantiated_function>(alt.file, alt.line, alt.name, alt.params, std::move(body_bnd));
         auto var = rocket::make_refcounted<Variable>(D_function(std::move(func)), true);
         // Reset the reference.
         Reference_root::S_variable ref_c = { std::move(var) };

@@ -33,25 +33,29 @@ namespace {
 
 }
 
-void Executive_context::initialize_for_function(const Vector<String> &params, const String &file, Uint32 line, Reference self, Vector<Reference> args)
+void Executive_context::initialize_for_function(String file, Uint32 line, String func, const Vector<String> &params, Reference self, Vector<Reference> args)
   {
     // Set up parameters.
-    for(const auto &name : params) {
+    auto eparg = args.mut_begin();
+    for(const auto &param : params) {
       Reference ref;
-      if(args.empty() == false) {
-        ref = std::move(args.mut_front());
-        args.erase(args.begin());
+      if(eparg != args.end()) {
+        ref = std::move(*eparg);
+        ++eparg;
       }
-      if(name.empty() == false) {
-        if(is_name_reserved(name)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
-        }
-        this->set_named_reference(name, std::move(ref.materialize()));
+      if(param.empty()) {
+        continue;
       }
+      if(is_name_reserved(param)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
+      }
+      this->set_named_reference(param, std::move(ref.materialize()));
     }
+    args.erase(args.begin(), eparg);
     // Set up system variables.
-    this->set_named_reference(String::shallow("__file"), do_make_constant(D_string(file)));
+    this->set_named_reference(String::shallow("__file"), do_make_constant(D_string(std::move(file))));
     this->set_named_reference(String::shallow("__line"), do_make_constant(D_integer(line)));
+    this->set_named_reference(String::shallow("__func"), do_make_constant(D_string(std::move(func))));
     this->set_named_reference(String::shallow("__this"), std::move(self.materialize()));
     this->set_named_reference(String::shallow("__varg"), do_make_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
   }

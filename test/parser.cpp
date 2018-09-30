@@ -29,9 +29,9 @@ int main()
       }
       s = sub(s, 2);
       func add() {
-        s += 3;
+        s += __varg();
       }
-      add();
+      add('a', 'b', 'c');
       return s;
     )__");
     Token_stream tis;
