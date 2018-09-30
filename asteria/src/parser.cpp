@@ -1644,6 +1644,24 @@ Parser_error Parser::get_parser_error() const noexcept
     }
   }
 
+bool Parser::empty() const noexcept
+  {
+    switch(this->state()) {
+      case state_empty: {
+        return true;
+      }
+      case state_error: {
+        return true;
+      }
+      case state_success: {
+        return this->m_stor.as<Vector<Statement>>().empty();
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      }
+    }
+  }
+
 bool Parser::load(Token_stream &tstrm_io)
   try {
     // This has to be done before anything else because of possibility of exceptions.
@@ -1661,11 +1679,11 @@ bool Parser::load(Token_stream &tstrm_io)
       }
     }
     // Accept the result.
-    this->m_stor.emplace<Block>(std::move(stmts));
+    this->m_stor.set(std::move(stmts));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
-    ASTERIA_DEBUG_LOG("Parser error: line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(),
-                      ", code = ", err.get_code(), " (", Parser_error::get_code_description(err.get_code()), ")");
+    ASTERIA_DEBUG_LOG("Parser error: line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(),
+                      ", code = ", err.code(), " (", Parser_error::get_code_description(err.code()), ")");
     this->m_stor.set(std::move(err));
     return false;
   }
@@ -1673,24 +1691,6 @@ bool Parser::load(Token_stream &tstrm_io)
 void Parser::clear() noexcept
   {
     this->m_stor.set(nullptr);
-  }
-
-const Block & Parser::get_document() const
-  {
-    switch(this->state()) {
-      case state_empty: {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-      case state_error: {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
-      }
-      case state_success: {
-        return this->m_stor.as<Block>();
-      }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
-    }
   }
 
 Block Parser::extract_document()
@@ -1703,9 +1703,9 @@ Block Parser::extract_document()
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
       case state_success: {
-        auto block = std::move(this->m_stor.as<Block>());
+        auto stmts = std::move(this->m_stor.as<Vector<Statement>>());
         this->m_stor.set(nullptr);
-        return block;
+        return std::move(stmts);
       }
       default: {
         ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");

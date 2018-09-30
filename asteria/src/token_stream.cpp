@@ -804,6 +804,24 @@ Parser_error Token_stream::get_parser_error() const noexcept
     }
   }
 
+bool Token_stream::empty() const noexcept
+  {
+    switch(this->state()) {
+      case state_empty: {
+        return true;
+      }
+      case state_error: {
+        return true;
+      }
+      case state_success: {
+        return this->m_stor.as<Vector<Token>>().empty();
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      }
+    }
+  }
+
 bool Token_stream::load(std::istream &cstrm_io, const String &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.
@@ -890,11 +908,11 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
     }
     // Accept the result.
     std::reverse(seq.mut_begin(), seq.mut_end());
-    this->m_stor.emplace<Vector<Token>>(std::move(seq));
+    this->m_stor.set(std::move(seq));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
-    ASTERIA_DEBUG_LOG("Parser error: line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(),
-                      ", code = ", err.get_code(), " (", Parser_error::get_code_description(err.get_code()), ")");
+    ASTERIA_DEBUG_LOG("Parser error: line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(),
+                      ", code = ", err.code(), " (", Parser_error::get_code_description(err.code()), ")");
     this->m_stor.set(std::move(err));
     return false;
   }
@@ -902,24 +920,6 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
 void Token_stream::clear() noexcept
   {
     this->m_stor.set(nullptr);
-  }
-
-bool Token_stream::empty() const noexcept
-  {
-    switch(this->state()) {
-      case state_empty: {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-      case state_error: {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
-      }
-      case state_success: {
-        return this->m_stor.as<Vector<Token>>().empty();
-      }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
-    }
   }
 
 const Token * Token_stream::peek_opt() const noexcept
