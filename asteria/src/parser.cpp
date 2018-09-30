@@ -645,7 +645,7 @@ namespace {
   class Infix_element_base
     {
     public:
-      enum Precedence
+      enum Precedence : Uint8
         {
           precedence_multiplicative  =  1,
           precedence_additive        =  2,
@@ -686,7 +686,7 @@ namespace {
     public:
       Precedence precedence() const noexcept override
         {
-          return precedence_assignment;
+          return std::numeric_limits<Precedence>::max();
         }
       void extract(Vector<Xpnode> &nodes_out) override
         {
