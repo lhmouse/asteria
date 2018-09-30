@@ -86,7 +86,7 @@ class Xpnode
       };
     struct S_subscript
       {
-        String name;
+        String name;  // If this is empty then the subscript is to be popped from the stack.
       };
     struct S_operator_rpn
       {
