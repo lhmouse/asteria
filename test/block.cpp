@@ -79,7 +79,7 @@ int main()
 
     Executive_context ctx;
     Reference ref;
-    auto status = block.execute_in_place(ref, ctx);
+    auto status = block.execute_in_place(ref, ctx, nullptr);
     ASTERIA_TEST_CHECK(status == Block::status_next);
     auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);

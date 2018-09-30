@@ -6,6 +6,7 @@
 #include "statement.hpp"
 #include "analytic_context.hpp"
 #include "executive_context.hpp"
+#include "global_context.hpp"
 #include "abstract_function.hpp"
 #include "instantiated_function.hpp"
 #include "backtracer.hpp"
@@ -115,8 +116,9 @@ Xpnode::~Xpnode()
 
 namespace {
 
-  std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Abstract_context &ctx, const String &name)
+  std::pair<const Abstract_context *, const Reference *> do_name_lookup(const Global_context *global_opt, const Abstract_context &ctx, const String &name)
     {
+      auto next = global_opt;
       auto qctx = &ctx;
       do {
         const auto qref = qctx->get_named_reference_opt(name);
@@ -125,6 +127,9 @@ namespace {
         }
         qctx = qctx->get_parent_opt();
         if(!qctx) {
+          qctx = rocket::exchange(next, nullptr);
+        }
+        if(!qctx) {
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
         }
       } while(true);
@@ -132,7 +137,7 @@ namespace {
 
 }
 
-Xpnode Xpnode::bind(const Analytic_context &ctx) const
+Xpnode Xpnode::bind(const Global_context *global_opt, const Analytic_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {
@@ -147,7 +152,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         if(ctx.is_name_reserved(alt.name) == false) {
           // Look for the reference in the current context.
           // Don't bind it onto something in a analytic context which will soon get destroyed.
-          const auto pair = do_name_lookup(ctx, alt.name);
+          const auto pair = do_name_lookup(global_opt, ctx, alt.name);
           if(pair.first->is_analytic() == false) {
             Xpnode::S_bound_reference alt_bnd = { *(pair.second) };
             return std::move(alt_bnd);
@@ -168,15 +173,15 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next);
+        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
         Xpnode::S_closure_function alt_bnd = { alt.file, alt.line, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_branch: {
         const auto &alt = this->m_stor.as<S_branch>();
         // Bind both branches recursively.
-        auto branch_true_bnd = alt.branch_true.bind(ctx);
-        auto branch_false_bnd = alt.branch_false.bind(ctx);
+        auto branch_true_bnd = alt.branch_true.bind(global_opt, ctx);
+        auto branch_false_bnd = alt.branch_false.bind(global_opt, ctx);
         Xpnode::S_branch alt_bnd = { alt.assign, std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
@@ -213,7 +218,7 @@ Xpnode Xpnode::bind(const Analytic_context &ctx) const
       case index_coalescence: {
         const auto &alt = this->m_stor.as<S_coalescence>();
         // Bind the null branch recursively.
-        auto branch_null_bnd = alt.branch_null.bind(ctx);
+        auto branch_null_bnd = alt.branch_null.bind(global_opt, ctx);
         Xpnode::S_coalescence alt_bnd = { alt.assign, std::move(branch_null_bnd) };
         return std::move(alt_bnd);
       }
@@ -247,10 +252,10 @@ namespace {
       return ref;
     }
 
-  Reference do_traced_call(const String &file, Uint32 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
+  Reference do_traced_call(Global_context *global_opt, const String &file, Uint32 line, const D_function &func, Reference &&self, Vector<Reference> &&args)
     try {
       ASTERIA_DEBUG_LOG("Entering function \'", file, ':', line, "\'...");
-      auto res = func->invoke(std::move(self), std::move(args));
+      auto res = func->invoke(global_opt, std::move(self), std::move(args));
       ASTERIA_DEBUG_LOG("Leaving function \'", file, ':', line, "\'...");
       return res;
     } catch(...) {
@@ -506,7 +511,7 @@ namespace {
 
 }
 
-void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx) const
+void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {
@@ -519,7 +524,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
       case index_named_reference: {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Look for the reference in the current context.
-        const auto pair = do_name_lookup(ctx, alt.name);
+        const auto pair = do_name_lookup(global_opt, ctx, alt.name);
         if(pair.first->is_analytic()) {
           ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
         }
@@ -538,7 +543,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next);
+        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
         auto func = rocket::make_refcounted<Instantiated_function>(alt.params, alt.file, alt.line, std::move(body_bnd));
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.emplace_back(std::move(ref_c));
@@ -550,7 +555,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         auto cond = do_pop_reference(stack_io);
         // Read the condition and pick a branch.
         const auto stack_size_old = stack_io.size();
-        const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, ctx);
+        const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, global_opt, ctx);
         if(has_result) {
           ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
           // The result will have been pushed onto `stack_io`.
@@ -588,7 +593,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         if(!*qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer is made.");
         }
-        auto result = do_traced_call(alt.file, alt.line, *qfunc, std::move(callee.zoom_out()), std::move(args));
+        auto result = do_traced_call(global_opt, alt.file, alt.line, *qfunc, std::move(callee.zoom_out()), std::move(args));
         result.dematerialize();
         stack_io.emplace_back(std::move(result));
         return;
@@ -1205,7 +1210,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, const Executive_context &ctx)
         // Read the condition. If it is null, evaluate the branch.
         if(cond.read().type() == Value::type_null) {
           const auto stack_size_old = stack_io.size();
-          const auto has_result = alt.branch_null.evaluate_partial(stack_io, ctx);
+          const auto has_result = alt.branch_null.evaluate_partial(stack_io, global_opt, ctx);
           if(has_result) {
             ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
             // The result will have been pushed onto `stack_io`.
