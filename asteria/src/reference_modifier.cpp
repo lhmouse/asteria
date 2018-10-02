@@ -40,15 +40,6 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
             auto rit = arr.begin() + static_cast<Diff>(rindex);
             return &(rit[0]);
           }
-//          case Value::type_opaque: {
-//            const auto &opq = parent.check<D_opaque>();
-//            if(!opq) {
-//              ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
-//              return nullptr;
-//            }
-//            const auto qmem = opq->open_member(alt.index, false);
-//            return qmem;
-//          }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
           }
@@ -75,8 +66,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
               ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
               return nullptr;
             }
-            const auto qmem = opq->open_member(alt.key, false);
-            return qmem;
+            return opq->get_member_opt(alt.key);
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
@@ -143,25 +133,6 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             }
             return &(rit[0]);
           }
-//          case Value::type_opaque: {
-//            const auto &opq = parent.check<D_opaque>();
-//            if(!opq) {
-//              if(!create_new) {
-//                ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
-//                return nullptr;
-//              }
-//              ASTERIA_THROW_RUNTIME_ERROR("An attempt to create a member through a null opaque pointer was made.");
-//            }
-//            if(erased_out_opt) {
-//              *erased_out_opt = opq->unset_member(alt.index);
-//              return erased_out_opt;
-//            }
-//            const auto qmem = opq->open_member(alt.index, create_new);
-//            if(create_new && !qmem) {
-//              ASTERIA_THROW_RUNTIME_ERROR("`open_member()` (of `", typeid(*opq).name(), "`) returned a null pointer when `create_new` was `true`.");
-//            }
-//            return qmem;
-//          }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
           }
@@ -209,11 +180,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
               *erased_out_opt = opq->unset_member(alt.key);
               return erased_out_opt;
             }
-            const auto qmem = opq->open_member(alt.key, create_new);
-            if(create_new && !qmem) {
-              ASTERIA_THROW_RUNTIME_ERROR("`open_member()` (of `", typeid(*opq).name(), "`) returned a null pointer when `create_new` was `true`.");
-            }
-            return qmem;
+            return !create_new ? opq->get_member_opt(alt.key) : &(opq->open_member(alt.key));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
