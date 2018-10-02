@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-bool Abstract_context::is_name_reserved(const String &name)
+bool Abstract_context::is_name_reserved(const String &name) noexcept
   {
     return name.empty() || name.starts_with("__");
   }
@@ -24,7 +24,7 @@ const Reference * Abstract_context::get_named_reference_opt(const String &name) 
     }
     return &(it->second);
   }
-Reference * Abstract_context::get_named_reference_opt(const String &name) noexcept
+Reference * Abstract_context::get_named_reference_opt(const String &name)
   {
     const auto it = this->m_named_refs.find_mut(name);
     if(it == this->m_named_refs.end()) {
