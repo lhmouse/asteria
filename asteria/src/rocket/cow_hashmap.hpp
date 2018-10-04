@@ -26,9 +26,8 @@
  * 3. Comparison operators are not provided.
  * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
  * 5. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
- * 6. `equal_range()` functions are not provided.
- * 7. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
- * 8. `erase()` may move elements around and invalidate iterators.
+ * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
+ * 7. `erase()` may move elements around and invalidate iterators.
  */
 
 namespace rocket {
