@@ -18,7 +18,6 @@ String Variadic_arguer::describe() const
 
 Reference Variadic_arguer::invoke(Global_context * /*global_opt*/, Reference /*self*/, Vector<Reference> args) const
   {
-    const auto nvarg = static_cast<Sint64>(this->m_vargs.size());
     switch(args.size()) {
       case 1: {
         // Return the argument at the index specified.
@@ -28,24 +27,17 @@ Reference Variadic_arguer::invoke(Global_context * /*global_opt*/, Reference /*s
           ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
         }
         // Return the argument at the given index.
-        auto rindex = *qindex;
-        if(rindex < 0) {
-          // Wrap negative indices.
-          rindex += nvarg;
-        }
-        if(rindex < 0) {
-          ASTERIA_DEBUG_LOG("Variadic argument index fell before the front: index = ", *qindex, ", nvarg = ", nvarg);
-          return { };
-        }
-        if(rindex >= nvarg) {
-          ASTERIA_DEBUG_LOG("Variadic argument index fell after the back: index = ", *qindex, ", nvarg = ", nvarg);
+        Uint64 bfill, efill;
+        auto rindex = wrap_index(bfill, efill, *qindex, this->m_vargs.size());
+        if(rindex >= this->m_vargs.size()) {
+          ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->m_vargs.size());
           return { };
         }
         return this->m_vargs.at(static_cast<Size>(rindex));
       }
       case 0: {
         // Return the number of variadic arguments.
-        Reference_root::S_constant ref_c = { D_integer(nvarg) };
+        Reference_root::S_constant ref_c = { D_integer(this->m_vargs.size()) };
         return std::move(ref_c);
       }
       default: {

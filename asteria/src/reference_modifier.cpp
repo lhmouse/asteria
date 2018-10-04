@@ -23,22 +23,13 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           }
           case Value::type_array: {
             const auto &arr = parent.check<D_array>();
-            const auto ssize = static_cast<Sint64>(arr.size());
-            auto rindex = alt.index;
-            if(rindex < 0) {
-              // Wrap negative indices.
-              rindex += ssize;
-            }
-            if(rindex < 0) {
-              ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
+            Uint64 bfill, efill;
+            auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
+            if(rindex >= arr.size()) {
+              ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return nullptr;
             }
-            if(rindex >= ssize) {
-              ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
-              return nullptr;
-            }
-            auto rit = arr.begin() + static_cast<Diff>(rindex);
-            return &(rit[0]);
+            return &(arr.at(static_cast<Size>(rindex)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -93,45 +84,31 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             // Fallthrough.
           case Value::type_array:
             auto &arr = parent.check<D_array>();
-            const auto ssize = static_cast<Sint64>(arr.size());
-            auto rindex = alt.index;
-            if(rindex < 0) {
-              // Wrap negative indices.
-              rindex += ssize;
-            }
-            D_array::iterator rit;
-            if(rindex < 0) {
+            Uint64 bfill, efill;
+            auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
+            if(rindex >= arr.size()) {
               if(!create_new) {
-                ASTERIA_DEBUG_LOG("Array index fell before the front: index = ", alt.index, ", parent = ", parent);
+                ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
                 return nullptr;
               }
-              const auto size_add = 0 - static_cast<Uint64>(rindex);
-              if(size_add >= arr.max_size() - arr.size()) {
-                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
+              auto rsize_add = bfill | efill;
+              if(rsize_add >= arr.max_size() - arr.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", rsize_add, "` would exceed system resource limits.");
               }
-              rit = arr.insert(arr.begin(), static_cast<Size>(size_add));
-              goto ma;
+              if(bfill != 0) {
+                arr.insert(arr.begin(), static_cast<Size>(bfill));
+                rindex += bfill;
+              }
+              if(efill != 0) {
+                arr.append(efill);
+              }
             }
-            if(rindex >= ssize) {
-              if(!create_new) {
-                ASTERIA_DEBUG_LOG("Array index fell after the back: index = ", alt.index, ", parent = ", parent);
-                return nullptr;
-              }
-              const auto size_add = static_cast<Uint64>(rindex) + 1 - arr.size();
-              if(size_add >= arr.max_size() - arr.size()) {
-                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
-              }
-              rit = arr.insert(arr.end(), static_cast<Size>(size_add)) + static_cast<Diff>(size_add - 1);
-              goto ma;
-            }
-            rit = arr.mut_begin() + static_cast<Diff>(rindex);
-  ma:
             if(erased_out_opt) {
-              *erased_out_opt = std::move(rit[0]);
-              arr.erase(rit);
+              *erased_out_opt = std::move(arr.mut(static_cast<Size>(rindex)));
+              arr.erase(arr.begin() + static_cast<Diff>(rindex));
               return erased_out_opt;
             }
-            return &(rit[0]);
+            return &(arr.mut(static_cast<Size>(rindex)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -149,17 +126,16 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             // Fallthrough.
           case Value::type_object:
             auto &obj = parent.check<D_object>();
-            D_object::iterator rit;
+            auto rit = D_object::iterator();
             if(!create_new) {
               rit = obj.find_mut(alt.key);
               if(rit == obj.end()) {
                 ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
                 return nullptr;
               }
-              goto mo;
+            } else {
+              rit = obj.try_emplace(alt.key).first;
             }
-            rit = obj.try_emplace(alt.key).first;
-  mo:
             if(erased_out_opt) {
               *erased_out_opt = std::move(rit->second);
               obj.erase(rit);

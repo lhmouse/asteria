@@ -8,6 +8,7 @@
 #include "rocket/insertable_ostream.hpp"
 #include <iomanip>
 #include <exception>
+#include <cstdint>
 
 namespace Asteria {
 
@@ -183,6 +184,27 @@ inline Quote quote(const rocket::cow_string &str) noexcept
   }
 
 extern std::ostream & operator<<(std::ostream &os, const Quote &q);
+
+///////////////////////////////////////////////////////////////////////////////
+// Miscellaneous
+///////////////////////////////////////////////////////////////////////////////
+
+inline std::uint64_t wrap_index(std::uint64_t &bfill_out, std::uint64_t &efill_out, std::int64_t index, std::size_t size)
+  {
+    const auto rsize = static_cast<std::int64_t>(size);
+    auto rindex = index;
+    if(rindex < 0) {
+      rindex += rsize;
+    }
+    bfill_out = 0;
+    efill_out = 0;
+    if(rindex < 0) {
+      bfill_out = 0 - static_cast<std::uint64_t>(rindex);
+    } else if(rindex >= rsize) {
+      efill_out = static_cast<std::uint64_t>(rindex) - size + 1;
+    }
+    return static_cast<std::uint64_t>(rindex);
+  }
 
 }
 
