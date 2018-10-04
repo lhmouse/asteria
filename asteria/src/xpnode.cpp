@@ -128,9 +128,9 @@ namespace {
         qctx = qctx->get_parent_opt();
         if(!qctx) {
           qctx = rocket::exchange(next, nullptr);
-        }
-        if(!qctx) {
-          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
+          if(!qctx) {
+            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
+          }
         }
       } while(true);
     }
