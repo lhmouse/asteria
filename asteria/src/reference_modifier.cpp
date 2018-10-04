@@ -54,10 +54,14 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           case Value::type_opaque: {
             const auto &opq = parent.check<D_opaque>();
             if(!opq) {
-              ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
+              ASTERIA_THROW_RUNTIME_ERROR("A null opaque pointer was encountered.");
+            }
+            auto qmem = opq->get_member_opt(alt.key);
+            if(!qmem) {
+              ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
             }
-            return opq->get_member_opt(alt.key);
+            return qmem;
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
@@ -126,15 +130,10 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             // Fallthrough.
           case Value::type_object:
             auto &obj = parent.check<D_object>();
-            auto rit = D_object::iterator();
-            if(!create_new) {
-              rit = obj.find_mut(alt.key);
-              if(rit == obj.end()) {
-                ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
-                return nullptr;
-              }
-            } else {
-              rit = obj.try_emplace(alt.key).first;
+            auto rit = create_new ? obj.try_emplace(alt.key).first : obj.find_mut(alt.key);
+            if(rit == obj.end()) {
+              ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
+              return nullptr;
             }
             if(erased_out_opt) {
               *erased_out_opt = std::move(rit->second);
@@ -144,19 +143,28 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             return &(rit->second);
           }
           case Value::type_opaque: {
-            const auto &opq = parent.check<D_opaque>();
+            auto &opq = parent.check<D_opaque>();
             if(!opq) {
-              if(!create_new) {
-                ASTERIA_DEBUG_LOG("Null opaque pointer encountered.");
-                return nullptr;
+              ASTERIA_THROW_RUNTIME_ERROR("A null opaque pointer was encountered.");
+            }
+            if(opq.unique() == false) {
+              ASTERIA_DEBUG_LOG("Cloning opaque data: typeid = ", typeid(*opq).name());
+              opq->clone(opq);
+              if(opq.unique() == false) {
+                ASTERIA_THROW_RUNTIME_ERROR("`clone()` must allocate a unique object: typeid = ", typeid(*opq).name());
               }
-              ASTERIA_THROW_RUNTIME_ERROR("An attempt to create a member through a null opaque pointer was made.");
+            }
+            auto qmem = create_new ? &(opq->open_member(alt.key)) : opq->get_member_opt(alt.key);
+            if(!qmem) {
+              ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
+              return nullptr;
             }
             if(erased_out_opt) {
-              *erased_out_opt = opq->unset_member(alt.key);
+              *erased_out_opt = std::move(*qmem);
+              opq->unset_member(alt.key);
               return erased_out_opt;
             }
-            return !create_new ? opq->get_member_opt(alt.key) : &(opq->open_member(alt.key));
+            return qmem;
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Key `", alt.key, "` cannot be applied to `", parent, "`.");
