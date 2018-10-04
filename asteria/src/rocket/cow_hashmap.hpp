@@ -1367,12 +1367,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       // N.B. This function is a non-standard extension.
       template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-      cow_hashmap & assign(inputT first, inputT last)
-        {
-          this->clear();
-          this->insert(::std::move(first), ::std::move(last));
-          return *this;
-        }
+        cow_hashmap & assign(inputT first, inputT last)
+          {
+            this->clear();
+            this->insert(::std::move(first), ::std::move(last));
+            return *this;
+          }
 
       void swap(cow_hashmap &other) noexcept
         {
