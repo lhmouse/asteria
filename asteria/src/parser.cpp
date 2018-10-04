@@ -1148,6 +1148,7 @@ namespace {
       }
       Vector<Xpnode> init;
       if(do_match_punctuator(tstrm_io, Token::punctuator_assign) != false) {
+        // The initializer is optional.
         if(do_accept_expression(init, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
@@ -1261,6 +1262,7 @@ namespace {
       }
       Vector<Statement> branch_false;
       if(do_match_keyword(tstrm_io, Token::keyword_else) != false) {
+        // The `else` branch is optional.
         if(do_accept_statement_as_block(branch_false, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1390,7 +1392,7 @@ namespace {
       // for-statement ::=
       //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
       // for-statement-range ::=
-      //   "each" identifier "," identifier ":" expression
+      //   "each" identifier ( "," identifier | "") ":" expression
       // for-statement-triplet ::=
       //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
       if(do_match_keyword(tstrm_io, Token::keyword_for) == false) {
@@ -1409,11 +1411,11 @@ namespace {
         if(do_accept_identifier(key_name, tstrm_io) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
-        if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
-          throw do_make_parser_error(tstrm_io, Parser_error::code_comma_expected);
-        }
-        if(do_accept_identifier(mapped_name, tstrm_io) == false) {
-          throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
+        if(do_match_punctuator(tstrm_io, Token::punctuator_comma) != false) {
+          // The mapped reference is optional.
+          if(do_accept_identifier(mapped_name, tstrm_io) == false) {
+            throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
+          }
         }
         if(do_match_punctuator(tstrm_io, Token::punctuator_colon) == false) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);

@@ -91,7 +91,7 @@ while-statement ::=
 for-statement ::=
 	"for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
 for-statement-range ::=
-	"each" identifier "," identifier ":" expression
+	"each" identifier ( "," identifier | "") ":" expression
 for-statement-triplet ::=
 	( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
 
