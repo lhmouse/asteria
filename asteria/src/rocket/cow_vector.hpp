@@ -24,8 +24,9 @@
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
  * 3. The copy constructor and copy assignment operator will not throw exceptions.
  * 4. The specialization for `bool` is not provided.
- * 5. Comparison operators are not provided.
- * 6. The value type may be incomplete. It need be neither copy-assignable nor move-assignable, but must be swappable.
+ * 5. `emplace()` is not provided.
+ * 6. Comparison operators are not provided.
+ * 7. The value type may be incomplete. It need be neither copy-assignable nor move-assignable, but must be swappable.
  */
 
 namespace rocket {
@@ -1132,13 +1133,6 @@ template<typename valueT, typename allocatorT>
           return *ptr;
         }
 
-      template<typename ...paramsT>
-        iterator emplace(const_iterator tins, paramsT &&...params)
-          {
-            const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-            const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::emplace_back, ::std::forward<paramsT>(params)...);
-            return iterator(this->m_sth, ptr);
-          }
       iterator insert(const_iterator tins, const value_type &value)
         {
           const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
