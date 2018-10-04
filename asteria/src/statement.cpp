@@ -22,11 +22,11 @@ namespace {
 
   void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const String &name, Reference ref)
     {
-      if(ctx_io.is_name_reserved(name)) {
-        ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
-      }
       if(name.empty()) {
         return;
+      }
+      if(ctx_io.is_name_reserved(name)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
       }
       ctx_io.set_named_reference(name, std::move(ref));
     }
@@ -430,7 +430,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               Reference_modifier::S_array_index refmod_c = { it - array.begin() };
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
@@ -458,7 +458,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               Reference_modifier::S_object_key refmod_c = { it->first };
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", ref_out.read());
+              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
