@@ -217,6 +217,18 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
     }
   }
 
+namespace {
+
+  Sptr<Variable> do_create_variable(Reference &ref_out)
+    {
+      auto var = rocket::make_refcounted<Variable>();
+      Reference_root::S_variable ref_c = { var };
+      ref_out = std::move(ref_c);
+      return var;
+    }
+
+}
+
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const
   {
     switch(Index(this->m_stor.index())) {
@@ -235,15 +247,11 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, { });
+        const auto var = do_create_variable(ref_out);
+        do_safe_set_named_reference(ctx_io, "variable", alt.name, ref_out);
         // Create a variable using the initializer.
         ref_out = alt.init.evaluate(global_opt, ctx_io);
-        auto value = ref_out.read();
-        auto var = rocket::make_refcounted<Variable>(std::move(value), alt.immutable);
-        // Reset the reference.
-        Reference_root::S_variable ref_c = { std::move(var) };
-        ref_out = std::move(ref_c);
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, ref_out);
+        var->reset(ref_out.read(), alt.immutable);
         ASTERIA_DEBUG_LOG("Created named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", ref_out.read());
         return Block::status_next;
       }
@@ -251,17 +259,14 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_io, "function", alt.name, { });
+        const auto var = do_create_variable(ref_out);
+        do_safe_set_named_reference(ctx_io, "function", alt.name, ref_out);
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
         Instantiated_function func(alt.file, alt.line, alt.name, alt.params, std::move(body_bnd));
-        auto var = rocket::make_refcounted<Variable>(D_function(std::move(func)), true);
-        // Reset the reference.
-        Reference_root::S_variable ref_c = { std::move(var) };
-        ref_out = std::move(ref_c);
-        do_safe_set_named_reference(ctx_io, "function", alt.name, ref_out);
+        var->reset(D_function(std::move(func)), true);
         ASTERIA_DEBUG_LOG("Created named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
         return Block::status_next;
       }
@@ -431,6 +436,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
+              mapped.zoom_out();
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
@@ -441,7 +447,6 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
                 // Forward anything unexpected to the caller.
                 return status;
               }
-              mapped.zoom_out();
             }
             break;
           }
@@ -459,6 +464,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
+              mapped.zoom_out();
               // Execute the loop body.
               const auto status = alt.body.execute_in_place(ref_out, ctx_next, global_opt);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
@@ -469,7 +475,6 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
                 // Forward anything unexpected to the caller.
                 return status;
               }
-              mapped.zoom_out();
             }
             break;
           }

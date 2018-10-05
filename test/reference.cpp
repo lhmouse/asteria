@@ -38,7 +38,7 @@ int main()
     ASTERIA_TEST_CHECK(val.type() == Value::type_boolean);
     ASTERIA_TEST_CHECK(val.check<D_boolean>() == true);
 
-    ref = Reference_root::S_temporary { nullptr };
+    ref = Reference_root::S_temporary { D_null() };
     ref.materialize();
     ref.zoom_in(Reference_modifier::S_array_index { -3 });
     val = ref.read();
