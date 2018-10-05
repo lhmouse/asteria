@@ -336,6 +336,7 @@ namespace {
           { "--",    Token::punctuator_dec         },
           { "-=",    Token::punctuator_sub_eq      },
           { ".",     Token::punctuator_dot         },
+          { "...",   Token::punctuator_ellipsis    },
           { "/",     Token::punctuator_div         },
           { "/=",    Token::punctuator_div_eq      },
           { ":",     Token::punctuator_colon       },

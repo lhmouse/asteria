@@ -259,6 +259,9 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
       case punctuator_coales_eq: {
         return "?\?=";
       }
+      case punctuator_ellipsis: {
+        return "...";
+      }
       default: {
         return "<unknown punctuator>";
       }
