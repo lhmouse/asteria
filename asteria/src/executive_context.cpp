@@ -24,10 +24,10 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
 
 namespace {
 
-  template<typename ValueT>
-    inline Reference do_make_constant(ValueT &&value)
+  template<typename XvalueT>
+    inline Reference do_make_constant(XvalueT &&value)
       {
-        Reference_root::S_constant ref_c = { std::forward<ValueT>(value) };
+        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
         return std::move(ref_c);
       }
 

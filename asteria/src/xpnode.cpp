@@ -252,14 +252,14 @@ namespace {
       } while(true);
     }
 
-  template<typename ValueT>
-    void do_set_result(Reference &ref_io, bool assign, ValueT &&value)
+  template<typename XvalueT>
+    void do_set_result(Reference &ref_io, bool assign, XvalueT &&value)
       {
         ASTERIA_DEBUG_LOG("Setting result: ", Value(value));
         if(assign) {
-          ref_io.write(std::forward<ValueT>(value));
+          ref_io.write(std::forward<XvalueT>(value));
         } else {
-          Reference_root::S_temporary ref_c = { std::forward<ValueT>(value) };
+          Reference_root::S_temporary ref_c = { std::forward<XvalueT>(value) };
           ref_io = std::move(ref_c);
         }
       }
