@@ -53,7 +53,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           }
           case Value::type_opaque: {
             const auto &opq = parent.check<D_opaque>();
-            auto qmem = const_cast<Abstract_opaque *>(opq.get())->get_member_opt(alt.key);
+            auto qmem = opq.get()->get_member_opt(alt.key);
             if(!qmem) {
               ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
