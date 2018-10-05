@@ -41,6 +41,7 @@ class Token
         keyword_infinity  = 23,
         keyword_this      = 24,
         keyword_unset     = 25,
+        keyword_lengthof  = 26,
       };
     enum Punctuator : Uint8
       {

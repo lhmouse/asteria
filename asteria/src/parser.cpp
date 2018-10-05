@@ -121,7 +121,7 @@ namespace {
   bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // prefix-operator ::=
-      //   "+" | "-" | "~" | "!" | "++" | "--" | "unset"
+      //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof"
       const auto qtok = tstrm_io.peek_opt();
       if(!qtok) {
         return false;
@@ -133,6 +133,11 @@ namespace {
           switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset: {
               xop = Xpnode::xop_prefix_unset;
+              tstrm_io.shift();
+              break;
+            }
+            case Token::keyword_lengthof: {
+              xop = Xpnode::xop_prefix_lengthof;
               tstrm_io.shift();
               break;
             }

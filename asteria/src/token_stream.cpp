@@ -268,6 +268,7 @@ namespace {
           { "func",      Token::keyword_func      },
           { "if",        Token::keyword_if        },
           { "infinity",  Token::keyword_infinity  },
+          { "lengthof",  Token::keyword_lengthof     },
           { "nan",       Token::keyword_nan       },
           { "null",      Token::keyword_null      },
           { "return",    Token::keyword_return    },

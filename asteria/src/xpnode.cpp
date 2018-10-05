@@ -44,6 +44,9 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       case xop_prefix_unset: {
         return "prefix `unset`";
       }
+      case xop_prefix_lengthof: {
+        return "prefix `lengthof`";
+      }
       case xop_infix_cmp_eq: {
         return "equality comparison";
       }
@@ -786,6 +789,36 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
             do_set_result(rhs, alt.assign, std::move(result));
             stack_io.emplace_back(std::move(rhs));
             break;
+          }
+          case xop_prefix_lengthof: {
+            auto rhs = do_pop_reference(stack_io);
+            // Return the number of elements in `rhs`.
+            auto rhs_value = rhs.read();
+            if(rhs_value.type() == Value::type_null) {
+              auto result = D_integer(0);
+              do_set_result(rhs, alt.assign, std::move(result));
+              stack_io.emplace_back(std::move(rhs));
+              break;
+            }
+            if(rhs_value.type() == Value::type_string) {
+              auto result = D_integer(rhs_value.check<D_string>().size());
+              do_set_result(rhs, alt.assign, std::move(result));
+              stack_io.emplace_back(std::move(rhs));
+              break;
+            }
+            if(rhs_value.type() == Value::type_array) {
+              auto result = D_integer(rhs_value.check<D_array>().size());
+              do_set_result(rhs, alt.assign, std::move(result));
+              stack_io.emplace_back(std::move(rhs));
+              break;
+            }
+            if(rhs_value.type() == Value::type_object) {
+              auto result = D_integer(rhs_value.check<D_object>().size());
+              do_set_result(rhs, alt.assign, std::move(result));
+              stack_io.emplace_back(std::move(rhs));
+              break;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_infix_cmp_eq: {
             auto rhs = do_pop_reference(stack_io);

@@ -88,6 +88,9 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       case keyword_unset: {
         return "unset";
       }
+      case keyword_lengthof: {
+        return "lengthof";
+      }
       default: {
         return "<unknown keyword>";
       }
