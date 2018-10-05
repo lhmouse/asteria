@@ -158,7 +158,7 @@ const char * Runtime_error::what() const noexcept
     return this->m_msg.c_str();
   }
 
-void throw_runtime_error(const char *funcsig, Formatter &&fmt)
+[[noreturn]] void throw_runtime_error(const char *funcsig, Formatter &&fmt)
   {
     auto &oss = fmt.get_stream();
     oss.set_caret(0);
