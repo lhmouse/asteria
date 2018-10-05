@@ -1118,10 +1118,10 @@ namespace {
         if(elem_got == false) {
           break;
         }
-        const auto prec = elem->precedence();
         // Assignment operations have the lowest precedence and group from right to left.
-        if(prec != elem->precedence_assignment) {
-          while((stack.size() >= 2) && (stack.back()->precedence() <= prec)) {
+        const auto prec_top = stack.back()->precedence();
+        if(prec_top != Infix_element_base::precedence_assignment) {
+          while((stack.size() >= 2) && (prec_top <= elem->precedence())) {
             stack.at(stack.size() - 2)->append(std::move(*(stack.back())));
             stack.pop_back();
           }
