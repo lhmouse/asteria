@@ -847,7 +847,7 @@ namespace {
       if(do_accept_infix_element(branch_null, tstrm_io) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_null)));
+      elem_out.reset(new Infix_selection(Infix_selection::sop_coales, assign, Vector<Xpnode>(), std::move(branch_null)));
       return true;
     }
 
