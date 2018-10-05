@@ -11,18 +11,9 @@ Variable::~Variable()
   {
   }
 
-void Variable::set_value(Value value)
+[[noreturn]] void Variable::do_throw_immutable() const
   {
-    if(this->m_immutable) {
-      ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", get_value(), "` is immutable and cannot be modified.");
-    }
-    this->m_value = std::move(value);
-  }
-
-void Variable::reset(Value value, bool immutable)
-  {
-    this->m_value = std::move(value);
-    this->m_immutable = immutable;
+    ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", this->m_value, "` is immutable and cannot be modified.");
   }
 
 }

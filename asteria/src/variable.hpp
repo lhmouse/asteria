@@ -20,16 +20,20 @@ class Variable : public Sbase<Variable>
       : m_value(), m_immutable(false)
       {
       }
-    Variable(Value value, bool immutable)
-      : m_value(std::move(value)), m_immutable(immutable)
-      {
-      }
+    template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
+      Variable(XvalueT &&value, bool immutable)
+        : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
+        {
+        }
     ~Variable();
 
     Variable(const Variable &)
       = delete;
     Variable & operator=(const Variable &)
       = delete;
+
+  private:
+    [[noreturn]] void do_throw_immutable() const;
 
   public:
     const Value & get_value() const noexcept
@@ -44,8 +48,20 @@ class Variable : public Sbase<Variable>
       {
         return this->m_immutable;
       }
-    void set_value(Value value);
-    void reset(Value value, bool immutable);
+    template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
+      void set_value(XvalueT &&value)
+        {
+          if(this->m_immutable) {
+            this->do_throw_immutable();
+          }
+          this->m_value = std::forward<XvalueT>(value);
+        }
+    template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
+      void reset(XvalueT &&value, bool immutable)
+        {
+          this->m_value = std::forward<XvalueT>(value);
+          this->m_immutable = immutable;
+        }
   };
 
 }
