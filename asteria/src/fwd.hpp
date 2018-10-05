@@ -69,7 +69,9 @@ class Parser;
 // Runtime Objects
 class Value;
 class Abstract_opaque;
+class Shared_opaque_wrapper;
 class Abstract_function;
+class Shared_function_wrapper;
 class Reference_root;
 class Reference_modifier;
 class Reference;
@@ -87,8 +89,8 @@ using D_boolean   = Boolean;
 using D_integer   = Sint64;
 using D_real      = Xfloat;
 using D_string    = String;
-using D_opaque    = Sptr<Abstract_opaque>;
-using D_function  = Sptr<const Abstract_function>;
+using D_opaque    = Shared_opaque_wrapper;
+using D_function  = Shared_function_wrapper;
 using D_array     = Vector<Value>;
 using D_object    = Dictionary<Value>;
 

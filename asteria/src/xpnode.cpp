@@ -552,7 +552,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         Analytic_context ctx_next(&ctx);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        auto func = rocket::make_refcounted<Instantiated_function>(alt.file, alt.line, String::shallow("<closure function>"), alt.params, std::move(body_bnd));
+        Instantiated_function func(alt.file, alt.line, String::shallow("<closure function>"), alt.params, std::move(body_bnd));
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.emplace_back(std::move(ref_c));
         return;
@@ -597,9 +597,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         const auto qfunc = tgt_value.opt<D_function>();
         if(!qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
-        }
-        if(!*qfunc) {
-          ASTERIA_THROW_RUNTIME_ERROR("An attempt to call a null function pointer is made.");
         }
         const auto encl_func = do_get_enclosing_func(ctx);
         ASTERIA_DEBUG_LOG("Entering function `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");

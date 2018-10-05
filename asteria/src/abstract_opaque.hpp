@@ -17,8 +17,8 @@ class Abstract_opaque : public Sbase<Abstract_opaque>
     virtual ~Abstract_opaque();
 
   public:
-    virtual String describe() const = 0;
     virtual Abstract_opaque * clone(Sptr<Abstract_opaque> &value_out) const = 0;
+    virtual String describe() const = 0;
     virtual Value * get_member_opt(const String &key) = 0;
     virtual Value & open_member(const String &key) = 0;
     virtual void unset_member(const String &key) = 0;

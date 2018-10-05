@@ -53,10 +53,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           }
           case Value::type_opaque: {
             const auto &opq = parent.check<D_opaque>();
-            if(!opq) {
-              ASTERIA_THROW_RUNTIME_ERROR("A null opaque pointer was encountered.");
-            }
-            auto qmem = opq->get_member_opt(alt.key);
+            auto qmem = const_cast<Abstract_opaque *>(opq.get())->get_member_opt(alt.key);
             if(!qmem) {
               ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
@@ -144,24 +141,14 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
           }
           case Value::type_opaque: {
             auto &opq = parent.check<D_opaque>();
-            if(!opq) {
-              ASTERIA_THROW_RUNTIME_ERROR("A null opaque pointer was encountered.");
-            }
-            if(opq.unique() == false) {
-              ASTERIA_DEBUG_LOG("Cloning opaque data: typeid = ", typeid(*opq).name());
-              opq->clone(opq);
-              if(opq.unique() == false) {
-                ASTERIA_THROW_RUNTIME_ERROR("`clone()` must allocate a unique object: typeid = ", typeid(*opq).name());
-              }
-            }
-            auto qmem = create_new ? &(opq->open_member(alt.key)) : opq->get_member_opt(alt.key);
+            auto qmem = create_new ? &(opq.mut()->open_member(alt.key)) : opq.mut()->get_member_opt(alt.key);
             if(!qmem) {
               ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
             }
             if(erased_out_opt) {
               *erased_out_opt = std::move(*qmem);
-              opq->unset_member(alt.key);
+              opq.mut()->unset_member(alt.key);
               return erased_out_opt;
             }
             return qmem;

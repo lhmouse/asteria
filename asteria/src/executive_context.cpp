@@ -57,7 +57,7 @@ void Executive_context::initialize_for_function(String file, Uint32 line, String
     this->set_named_reference(String::shallow("__line"), do_make_constant(D_integer(line)));
     this->set_named_reference(String::shallow("__func"), do_make_constant(D_string(std::move(func))));
     this->set_named_reference(String::shallow("__this"), std::move(self.materialize()));
-    this->set_named_reference(String::shallow("__varg"), do_make_constant(D_function(rocket::make_refcounted<Variadic_arguer>(file, line, std::move(args)))));
+    this->set_named_reference(String::shallow("__varg"), do_make_constant(D_function(Variadic_arguer(file, line, std::move(args)))));
   }
 
 }

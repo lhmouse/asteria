@@ -60,7 +60,9 @@ pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp  \
   asteria/src/abstract_opaque.hpp  \
+  asteria/src/shared_opaque_wrapper.hpp  \
   asteria/src/abstract_function.hpp  \
+  asteria/src/shared_function_wrapper.hpp  \
   asteria/src/value.hpp  \
   asteria/src/reference_root.hpp  \
   asteria/src/reference_modifier.hpp  \
