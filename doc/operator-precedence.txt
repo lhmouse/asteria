@@ -1,6 +1,8 @@
 Precedence (descending)       Operators                     Associativity
 ===============================================================================
-Postfix operators             ++   --                       Left-to-right
+                              ++   --
+Postfix operators             ()   []                       Left-to-right
+                              .
 -------------------------------------------------------------------------------
                               +   -   ~   !
 Prefix operators              ++   --                       Right-to-left
