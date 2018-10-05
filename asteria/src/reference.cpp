@@ -92,7 +92,7 @@ Reference & Reference::zoom_out()
       return *this;
     }
     // If there is no modifier, set `*this` to a null reference.
-    Reference_root::S_constant ref_c = { D_null() };
+    Reference_root::S_constant ref_c = { nullptr };
     this->m_root = std::move(ref_c);
     this->m_modifiers.clear();
     return *this;

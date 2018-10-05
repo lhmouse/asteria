@@ -27,6 +27,14 @@ class Reference
         : m_root(std::forward<XrootT>(xroot)), m_modifiers()
         {
         }
+    // This assignment operator does not accept lvalues.
+    template<typename XrootT, typename std::enable_if<(Reference_root::Variant::index_of<XrootT>::value || true)>::type * = nullptr>
+      Reference & operator=(XrootT &&xroot)
+        {
+          this->m_root = std::forward<XrootT>(xroot);
+          this->m_modifiers.clear();
+          return *this;
+        }
     ~Reference();
 
     Reference(const Reference &) noexcept;

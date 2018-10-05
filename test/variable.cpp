@@ -13,5 +13,5 @@ int main()
     var.set_value(D_string(String::shallow("hello")));
     ASTERIA_TEST_CHECK(var.get_value().type() == Value::type_string);
     var.set_immutable(true);
-    ASTERIA_TEST_CHECK_CATCH(var.set_value(D_null()));
+    ASTERIA_TEST_CHECK_CATCH(var.set_value(nullptr));
   }

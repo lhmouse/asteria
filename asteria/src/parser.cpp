@@ -245,7 +245,7 @@ namespace {
           const auto &alt = qtok->check<Token::S_keyword>();
           switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_null: {
-              value_out = D_null();
+              value_out = nullptr;
               tstrm_io.shift();
               break;
             }

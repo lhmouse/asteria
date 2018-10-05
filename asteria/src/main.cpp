@@ -16,7 +16,7 @@ using namespace Asteria;
 int main()
   {
     D_array arr;
-    arr.emplace_back(D_null());
+    arr.emplace_back(nullptr);
     arr.emplace_back(D_boolean(true));
     Value first(std::move(arr));
 

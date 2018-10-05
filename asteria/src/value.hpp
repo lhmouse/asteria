@@ -63,6 +63,12 @@ class Value
         : m_stor(std::forward<AltT>(alt))
         {
         }
+    template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
+      Value & operator=(AltT &&alt)
+        {
+          this->m_stor = std::forward<AltT>(alt);
+          return *this;
+        }
     ~Value();
 
     Value(const Value &) noexcept;
