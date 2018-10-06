@@ -208,7 +208,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         const auto &alt = this->m_stor.as<S_return>();
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(global_opt, ctx_io);
-        Statement::S_return alt_bnd = { std::move(expr_bnd) };
+        Statement::S_return alt_bnd = { alt.by_ref, std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       default: {
@@ -502,10 +502,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           try {
             Backtracer::unpack_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {
-            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_reference().read());
-            // Copy the reference into the scope.
-            auto &except = e.get_reference();
-            ref_out = except.dematerialize();
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());
+            // Copy the value.
+            Reference_root::S_temporary ref_c = { e.get_value() };
+            ref_out = std::move(ref_c);
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
             // Create a temporary string.
@@ -571,13 +571,19 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_throw>();
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(global_opt, ctx_io);
-        ASTERIA_DEBUG_LOG("Throwing exception: ", ref_out.read());
-        throw Exception(ref_out);
+        auto value = ref_out.read();
+        ASTERIA_DEBUG_LOG("Throwing exception: ", value);
+        throw Exception(std::move(value));
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(global_opt, ctx_io);
+        // If `by_ref` is `false`, replace it with a temporary value.
+        if((alt.by_ref == false) && (ref_out.is_temporary() == false)) {
+          Reference_root::S_temporary ref_c = { ref_out.read() };
+          ref_out = std::move(ref_c);
+        }
         return Block::status_return;
       }
       default: {

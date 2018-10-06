@@ -1538,9 +1538,14 @@ namespace {
   bool do_accept_return_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
     {
       // return-statement ::=
-      //   "return" expression-opt ";"
+      //   "return" ( "&" | "" ) expression-opt ";"
       if(do_match_keyword(tstrm_io, Token::keyword_return) == false) {
         return false;
+      }
+      bool by_ref = false;
+      if(do_match_punctuator(tstrm_io, Token::punctuator_andb) != false) {
+        // The reference specifier is optional.
+        by_ref = true;
       }
       Vector<Xpnode> expr;
       if(do_accept_expression(expr, tstrm_io) == false) {
@@ -1549,7 +1554,7 @@ namespace {
       if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
-      Statement::S_return stmt_c = { std::move(expr) };
+      Statement::S_return stmt_c = { by_ref, std::move(expr) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }

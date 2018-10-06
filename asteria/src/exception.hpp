@@ -5,7 +5,7 @@
 #define ASTERIA_EXCEPTION_HPP_
 
 #include "fwd.hpp"
-#include "reference.hpp"
+#include "value.hpp"
 #include <exception>
 
 namespace Asteria {
@@ -13,28 +13,27 @@ namespace Asteria {
 class Exception : public virtual std::exception
   {
   private:
-    Reference m_ref;
+    Value m_value;
 
   public:
-    explicit Exception(Reference ref) noexcept
-      : m_ref(std::move(ref))
-      {
-      }
+    template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
+      explicit Exception(XvalueT &&value)
+        : m_value(std::forward<XvalueT>(value))
+        {
+        }
     ~Exception();
 
   public:
+    const Value & get_value() const noexcept
+      {
+        return this->m_value;
+      }
+    Value & get_value() noexcept
+      {
+        return this->m_value;
+      }
+
     const char * what() const noexcept override;
-
-    const Reference & get_reference() const noexcept
-      {
-        return this->m_ref;
-      }
-    Reference & get_reference() noexcept
-      {
-        return this->m_ref;
-      }
-
-    Reference & set_reference(Reference ref) noexcept;
   };
 
 }

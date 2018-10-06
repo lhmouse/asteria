@@ -102,7 +102,7 @@ continue-statement ::=
 throw-statement ::=
 	"throw" expression ";"
 return-statement ::=
-	"return" expression-opt ";"
+	"return" ( "&" | "" ) expression-opt ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement

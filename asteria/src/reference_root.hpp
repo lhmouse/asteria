@@ -68,14 +68,6 @@ class Reference_root
       {
         return Index(this->m_stor.index());
       }
-    bool unique() const noexcept
-      {
-        const auto qvar = this->m_stor.get<S_variable>();
-        if(!qvar) {
-          return false;
-        }
-        return qvar->var.unique();
-      }
 
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;

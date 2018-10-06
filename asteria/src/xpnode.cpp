@@ -605,7 +605,6 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         ASTERIA_DEBUG_LOG("Entering function `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
         try {
           tgt = qfunc->get()->invoke(global_opt, std::move(tgt.zoom_out()), std::move(args));
-          tgt.dematerialize();
         } catch(...) {
           ASTERIA_DEBUG_LOG("Tracing exception thrown from `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
           throw Backtracer(alt.file, alt.line, encl_func);

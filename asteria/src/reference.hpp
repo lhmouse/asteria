@@ -50,9 +50,15 @@ class Reference
     Reference & zoom_in(Reference_modifier modifier);
     Reference & zoom_out();
 
-    bool is_constant() const noexcept;
+    bool is_constant() const noexcept
+      {
+        return this->m_root.index() == Reference_root::index_constant;
+      }
+    bool is_temporary() const noexcept
+      {
+        return this->m_root.index() == Reference_root::index_temporary;
+      }
     Reference & materialize();
-    Reference & dematerialize();
   };
 
 }

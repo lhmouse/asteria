@@ -98,11 +98,6 @@ Reference & Reference::zoom_out()
     return *this;
   }
 
-bool Reference::is_constant() const noexcept
-  {
-    return this->m_root.index() == Reference_root::index_constant;
-  }
-
 Reference & Reference::materialize()
   {
     if(this->m_root.index() == Reference_root::index_variable) {
@@ -112,19 +107,6 @@ Reference & Reference::materialize()
     auto value = this->read();
     auto var = rocket::make_refcounted<Variable>(std::move(value), false);
     Reference_root::S_variable ref_c = { std::move(var) };
-    this->m_root = std::move(ref_c);
-    this->m_modifiers.clear();
-    return *this;
-  }
-
-Reference & Reference::dematerialize()
-  {
-    if(this->m_root.unique() == false) {
-      return *this;
-    }
-    // Create a temporary value and assign it to `*this`.
-    auto value = this->read();
-    Reference_root::S_temporary ref_c = { std::move(value) };
     this->m_root = std::move(ref_c);
     this->m_modifiers.clear();
     return *this;

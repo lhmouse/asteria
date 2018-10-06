@@ -15,11 +15,4 @@ const char * Exception::what() const noexcept
     return "Asteria::Exception";
   }
 
-Reference & Exception::set_reference(Reference ref) noexcept
-  {
-    this->m_ref = std::move(ref);
-    return this->m_ref;
-  }
-
-
 }

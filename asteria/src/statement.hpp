@@ -99,6 +99,7 @@ class Statement
       };
     struct S_return
       {
+        bool by_ref;
         Expression expr;
       };
 

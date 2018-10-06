@@ -21,10 +21,13 @@
 1. First-class functions.
 2. Closure functions (lambda expressions).
 3. Exceptions.
-4. Flexible syntax, similar to **C++** and **JavaScript**.
+4. Flexible syntax similar to **C++** and **JavaScript**.
 5. Regular grammar.
-6. Passing by reference only, including the operand of a `throw` statement and the return value of a function.
-7. No garbage collector. Objects are managed using referencing counting. Non-user-defined types have been designed in such a way that circular reference is impossible.
+6. Pass-by-reference function arguments.  
+Return values are passed by value by default, but can also be passed by reference using the `return&` syntax.
+7. No garbage collector.  
+Objects are managed using referencing counting.  
+Primitive types have been designed in such a way that circular reference is impossible.
 
 # License
 
