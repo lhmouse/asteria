@@ -1120,16 +1120,16 @@ namespace {
         }
         // Assignment operations have the lowest precedence and group from right to left.
         const auto prec_top = stack.back()->precedence();
-        if(prec_top != Infix_element_base::precedence_assignment) {
+        if(prec_top < Infix_element_base::precedence_assignment) {
           while((stack.size() >= 2) && (prec_top <= elem->precedence())) {
-            stack.at(stack.size() - 2)->append(std::move(*(stack.back())));
+            stack.rbegin()[1]->append(std::move(*(stack.back())));
             stack.pop_back();
           }
         }
         stack.emplace_back(std::move(elem));
       }
       while(stack.size() >= 2) {
-        stack.at(stack.size() - 2)->append(std::move(*(stack.back())));
+        stack.rbegin()[1]->append(std::move(*(stack.back())));
         stack.pop_back();
       }
       stack.front()->extract(nodes_out);
