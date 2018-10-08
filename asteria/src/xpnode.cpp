@@ -247,7 +247,7 @@ namespace {
         }
         qctx = qctx->get_parent_opt();
         if(!qctx) {
-          return String::shallow("<unknown function>");
+          return String::shallow("<top level>");
         }
       } while(true);
     }
@@ -601,11 +601,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         if(!qfunc) {
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
+        // This is the `this` reference.
+        auto self = std::move(tgt.zoom_out());
         const auto encl_func = do_get_enclosing_func(ctx);
         ASTERIA_DEBUG_LOG("Beginning function call inside `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
         try {
           ASTERIA_DEBUG_LOG("  Target: ", qfunc->get()->describe());
-          tgt = qfunc->get()->invoke(global_opt, std::move(tgt.zoom_out()), std::move(args));
+          tgt = qfunc->get()->invoke(global_opt, std::move(self), std::move(args));
         } catch(...) {
           ASTERIA_DEBUG_LOG("Caught exception thrown inside `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
           throw Backtracer(alt.file, alt.line, encl_func);
