@@ -6,11 +6,11 @@
 
 namespace Asteria {
 
-[[noreturn]] void Backtracer::unpack_and_rethrow(Vector<Backtracer> &btv_out, const std::exception_ptr &etop)
+[[noreturn]] void Backtracer::unpack_and_rethrow(Vector<Backtracer> &btv_out, std::exception_ptr etop)
   {
     // Rethrow the exception. If `Backtracer` is caught, a new element is appended to `btv_out` and the nested
     // exception is rethrown. This procedure is repeated until something other than `Backtracer` is thrown.
-    auto eptr = etop;
+    auto eptr = std::move(etop);
     do {
       try {
         std::rethrow_exception(eptr);
@@ -23,6 +23,11 @@ namespace Asteria {
 
 Backtracer::~Backtracer()
   {
+  }
+
+const char * Backtracer::what() const noexcept
+  {
+    return "Asteria::Backtracer";
   }
 
 }

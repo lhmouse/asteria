@@ -9,10 +9,10 @@
 
 namespace Asteria {
 
-class Backtracer : public virtual std::nested_exception
+class Backtracer : public virtual std::exception, public virtual std::nested_exception
   {
   public:
-    [[noreturn]] static void unpack_and_rethrow(Vector<Backtracer> &btv_out, const std::exception_ptr &etop);
+    [[noreturn]] static void unpack_and_rethrow(Vector<Backtracer> &btv_out, std::exception_ptr etop);
 
   private:
     String m_file;
@@ -39,6 +39,8 @@ class Backtracer : public virtual std::nested_exception
       {
         return this->m_func;
       }
+
+    const char * what() const noexcept override;
   };
 
 }
