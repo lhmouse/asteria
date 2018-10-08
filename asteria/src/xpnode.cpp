@@ -374,7 +374,7 @@ namespace {
     {
       using limits = std::numeric_limits<D_integer>;
       if(rhs < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
       }
       if(rhs > limits::digits) {
         return 0;
@@ -388,7 +388,7 @@ namespace {
     {
       using limits = std::numeric_limits<D_integer>;
       if(rhs < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
       }
       if(rhs > limits::digits) {
         return 0;
@@ -402,7 +402,7 @@ namespace {
     {
       using limits = std::numeric_limits<D_integer>;
       if(rhs < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
       }
       if(rhs > limits::digits) {
         ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
@@ -422,7 +422,7 @@ namespace {
     {
       using limits = std::numeric_limits<D_integer>;
       if(rhs < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` was negative.");
+        ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
       }
       if(rhs > limits::digits) {
         ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
@@ -497,7 +497,7 @@ namespace {
   D_string do_duplicate(const D_string &lhs, D_integer rhs)
     {
       if(rhs < 0) {
-        ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` was negative.");
+        ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
       }
       D_string res;
       const auto count = static_cast<Uint64>(rhs);
