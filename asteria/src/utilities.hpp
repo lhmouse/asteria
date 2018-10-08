@@ -72,7 +72,8 @@ class Formatter
         }
   };
 
-#define ASTERIA_CREATE_FORMATTER(...)         (::std::move((::Asteria::Formatter(), __VA_ARGS__)))
+#define ASTERIA_FORMAT(fmt_, ...)             (static_cast<::Asteria::Formatter &&>(fmt_), __VA_ARGS__)
+#define ASTERIA_CREATE_FORMATTER(...)         (::std::move(ASTERIA_FORMAT(::Asteria::Formatter(), __VA_ARGS__)))
 #define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).get_stream().extract_string())
 
 constexpr bool are_debug_logs_enabled() noexcept
