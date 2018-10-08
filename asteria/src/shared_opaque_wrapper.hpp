@@ -12,7 +12,7 @@ namespace Asteria {
 class Shared_opaque_wrapper
   {
   private:
-    Sptr<Abstract_opaque> m_ptr;
+    Rcptr<Abstract_opaque> m_ptr;
 
   public:
     template<typename ElementT, typename std::enable_if<std::is_base_of<Abstract_opaque, typename std::decay<ElementT>::type>::value>::type * = nullptr>

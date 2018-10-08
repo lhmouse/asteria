@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Variable : public Sbase<Variable>
+class Variable : public Rcbase<Variable>
   {
   private:
     Value m_value;

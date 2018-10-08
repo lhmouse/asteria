@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Abstract_function : public Sbase<Abstract_function>
+class Abstract_function : public Rcbase<Abstract_function>
   {
   public:
     Abstract_function() noexcept

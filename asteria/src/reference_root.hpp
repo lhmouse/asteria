@@ -24,7 +24,7 @@ class Reference_root
       };
     struct S_variable
       {
-        Sptr<Variable> var;
+        Rcptr<Variable> var;
       };
 
     enum Index : Uint8

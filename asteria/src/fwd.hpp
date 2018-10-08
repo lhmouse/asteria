@@ -44,9 +44,9 @@ template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
 
 template<typename ElementT>
-  using Sbase = rocket::refcounted_base<ElementT>;
+  using Rcbase = rocket::refcounted_base<ElementT>;
 template<typename ElementT>
-  using Sptr = rocket::refcounted_ptr<ElementT>;
+  using Rcptr = rocket::refcounted_ptr<ElementT>;
 
 // General Utilities
 class Formatter;

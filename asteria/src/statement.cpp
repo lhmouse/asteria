@@ -219,7 +219,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
 namespace {
 
-  Sptr<Variable> do_create_variable(Reference &ref_out)
+  Rcptr<Variable> do_create_variable(Reference &ref_out)
     {
       auto var = rocket::make_refcounted<Variable>();
       Reference_root::S_variable ref_c = { var };

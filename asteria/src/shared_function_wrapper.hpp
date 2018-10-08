@@ -12,7 +12,7 @@ namespace Asteria {
 class Shared_function_wrapper
   {
   private:
-    Sptr<Abstract_function> m_ptr;
+    Rcptr<Abstract_function> m_ptr;
 
   public:
     template<typename ElementT, typename std::enable_if<std::is_base_of<Abstract_function, typename std::decay<ElementT>::type>::value>::type * = nullptr>
