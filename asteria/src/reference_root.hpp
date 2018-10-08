@@ -68,6 +68,16 @@ class Reference_root
       {
         return Index(this->m_stor.index());
       }
+    template<typename AltT>
+      const AltT * opt() const noexcept
+        {
+          return this->m_stor.get<AltT>();
+        }
+    template<typename AltT>
+      const AltT & check() const
+        {
+          return this->m_stor.as<AltT>();
+        }
 
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;

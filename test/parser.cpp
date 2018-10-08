@@ -6,6 +6,8 @@
 #include "../src/token_stream.hpp"
 #include "../src/executive_context.hpp"
 #include "../src/reference.hpp"
+#include "../src/exception.hpp"
+#include "../src/backtracer.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -13,26 +15,16 @@ using namespace Asteria;
 int main()
   {
     std::istringstream iss(R"__(
-      var a = 0;
-      for(var i = 1; i <= 5; ++i) {
-        a += i + a * i;
+      func third() {
+        throw "meow";
       }
-      // assert(a == 719);
-      var b = [1,2,3,5];
-      var s = 0;
-      for(each k, v : b) {
-        s += (k % 2 == 0) ? +v : -v;
+      func second() {
+        return third();
       }
-      // assert(s == -3);
-      func sub(a, b) {
-        return a - b;
+      func first() {
+        return second();
       }
-      s = sub(s, 2);
-      func add() {
-        s += __varg();
-      }
-      add('a', 'b', 'c');
-      return s;
+      first();
     )__");
     Token_stream tis;
     ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
@@ -40,10 +32,16 @@ int main()
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
+    Vector<Backtracer> btv;
     Executive_context ctx;
-    auto res = code.execute_as_function_in_place(ctx, nullptr);
-    ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
-    auto qr = ctx.get_named_reference_opt(String::shallow("a"));
-    ASTERIA_TEST_CHECK(qr);
-    ASTERIA_TEST_CHECK(qr->read().check<D_integer>() == 719);
+    try {
+      try {
+        auto res = code.execute_as_function_in_place(ctx, nullptr);
+        ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
+      } catch(...) {
+        Backtracer::unpack_and_rethrow(btv, std::current_exception());
+      }
+    } catch(Exception &e) {
+      ASTERIA_DEBUG_LOG("caught: ", e.get_value());
+    }
   }
