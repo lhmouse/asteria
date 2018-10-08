@@ -251,8 +251,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_io, "variable", alt.name, ref_out);
         // Create a variable using the initializer.
         ref_out = alt.init.evaluate(global_opt, ctx_io);
-        var->reset(ref_out.read(), alt.immutable);
-        ASTERIA_DEBUG_LOG("Created named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", ref_out.read());
+        auto value = ref_out.read();
+        ASTERIA_DEBUG_LOG("Creating named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", value);
+        var->reset(std::move(value), alt.immutable);
         return Block::status_next;
       }
       case index_func_def: {
@@ -265,9 +266,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        Instantiated_function func(alt.file, alt.line, alt.name, alt.params, std::move(body_bnd));
+        auto func = Instantiated_function(alt.file, alt.line, alt.name, alt.params, std::move(body_bnd));
+        ASTERIA_DEBUG_LOG("Creating named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
         var->reset(D_function(std::move(func)), true);
-        ASTERIA_DEBUG_LOG("Created named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
         return Block::status_next;
       }
       case index_if: {
@@ -419,7 +420,6 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
         auto mapped = alt.range_init.evaluate(global_opt, ctx_for);
-        ref_out = mapped;
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
           case Value::type_array: {
@@ -427,10 +427,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             for(auto it = array.begin(); it != array.end(); ++it) {
               Executive_context ctx_next(&ctx_for);
               // Initialize the per-loop key constant.
-              Reference_root::S_constant ref_c = { D_integer(it - array.begin()) };
-              ref_out = std::move(ref_c);
-              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name, ": ", ref_out.read());
+              auto key = D_integer(it - array.begin());
+              ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
+              Reference_root::S_constant ref_c = { std::move(key) };
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_modifier::S_array_index refmod_c = { it - array.begin() };
               mapped.zoom_in(std::move(refmod_c));
@@ -455,10 +455,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             for(auto it = object.begin(); it != object.end(); ++it) {
               Executive_context ctx_next(&ctx_for);
               // Initialize the per-loop key constant.
-              Reference_root::S_constant ref_c = { D_string(it->first) };
-              ref_out = std::move(ref_c);
-              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, ref_out);
-              ASTERIA_DEBUG_LOG("Created key constant with `for each` scope: name = ", alt.key_name, ": ", ref_out.read());
+              auto key = D_string(it->first);
+              ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
+              Reference_root::S_constant ref_c = { std::move(key) };
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_modifier::S_object_key refmod_c = { it->first };
               mapped.zoom_in(std::move(refmod_c));
@@ -499,21 +499,16 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           Executive_context ctx_next(&ctx_io);
           // Identify the dynamic type of the exception.
           Vector<Backtracer> btv;
+          Value evalue;
           try {
             Backtracer::unpack_and_rethrow(btv, std::current_exception());
           } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());
-            // Copy the value.
-            Reference_root::S_temporary ref_c = { e.get_value() };
-            ref_out = std::move(ref_c);
+            evalue = e.get_value();
           } catch(std::exception &e) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
-            // Create a temporary string.
-            Reference_root::S_temporary ref_c = { D_string(e.what()) };
-            ref_out = std::move(ref_c);
+            evalue = D_string(e.what());
           }
-          do_safe_set_named_reference(ctx_next, "exception", alt.except_name, ref_out);
-          ASTERIA_DEBUG_LOG("Created exception reference with `catch` scope: name = ", alt.except_name, ": ", ref_out.read());
           // Initialize the backtrace array.
           D_array backtrace;
           backtrace.reserve(btv.size());
@@ -525,9 +520,11 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ref_out = std::move(ref_c);
-          ctx_next.set_named_reference(String::shallow("__backtrace"), ref_out);
+          Reference_root::S_temporary btref_c = { std::move(backtrace) };
+          ctx_next.set_named_reference(String::shallow("__backtrace"), std::move(btref_c));
+          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", evalue);
+          Reference_root::S_temporary eref_c = { std::move(evalue) };
+          do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(eref_c));
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, global_opt, ctx_next);
           if(status != Block::status_next) {
