@@ -51,6 +51,7 @@ Reference Expression::evaluate(Global_context *global_opt, const Executive_conte
     if(this->evaluate_partial(stack, global_opt, ctx) == false) {
       return { };
     }
+    ROCKET_ASSERT(stack.empty() == false);
     return std::move(stack.mut_back());
   }
 
