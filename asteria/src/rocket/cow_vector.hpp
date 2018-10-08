@@ -699,9 +699,10 @@ namespace details_cow_vector {
       }
 
   // Insertion helpers.
-  constexpr struct append_tag
+  struct append_tag
     {
-    } append;
+    }
+  constexpr append;
 
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
@@ -709,9 +710,10 @@ namespace details_cow_vector {
         vec->append(::std::forward<paramsT>(params)...);
       }
 
-  constexpr struct emplace_back_tag
+  struct emplace_back_tag
     {
-    } emplace_back;
+    }
+  constexpr emplace_back;
 
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
@@ -719,9 +721,10 @@ namespace details_cow_vector {
         vec->emplace_back(::std::forward<paramsT>(params)...);
       }
 
-  constexpr struct push_back_tag
+  struct push_back_tag
     {
-    } push_back;
+    }
+  constexpr push_back;
 
   template<typename vectorT, typename ...paramsT>
     inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
