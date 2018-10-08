@@ -86,29 +86,37 @@ Reference & Reference::zoom_in(Reference_modifier mod)
 
 Reference & Reference::zoom_out()
   {
-    if(this->m_mods.empty() == false) {
-      // Drop the last modifier.
-      this->m_mods.pop_back();
+    if(this->m_mods.empty()) {
+      // If there is no modifier, set `*this` to a null reference.
+      Reference_root::S_constant ref_c = { D_null() };
+      *this = std::move(ref_c);
       return *this;
     }
-    // If there is no modifier, set `*this` to a null reference.
-    Reference_root::S_constant ref_c = { D_null() };
-    this->m_root = std::move(ref_c);
-    this->m_mods.clear();
+    // Drop the last modifier.
+    this->m_mods.pop_back();
     return *this;
   }
 
-Reference & Reference::materialize()
+Reference & Reference::convert_to_temporary()
+  {
+    if(this->m_root.index() == Reference_root::index_temporary) {
+      return *this;
+    }
+    // Create an rvalue.
+    Reference_root::S_temporary ref_c = { this->read() };
+    *this = std::move(ref_c);
+    return *this;
+  }
+
+Reference & Reference::convert_to_variable()
   {
     if(this->m_root.index() == Reference_root::index_variable) {
       return *this;
     }
     // Create an lvalue by allocating a variable and assign it to `*this`.
-    auto value = this->read();
-    auto var = rocket::make_refcounted<Variable>(std::move(value), false);
+    auto var = rocket::make_refcounted<Variable>(this->read(), false);
     Reference_root::S_variable ref_c = { std::move(var) };
-    this->m_root = std::move(ref_c);
-    this->m_mods.clear();
+    *this = std::move(ref_c);
     return *this;
   }
 

@@ -21,10 +21,10 @@ int main()
     ival = Reference_root::S_constant { D_integer(3) };
     aval = Reference_root::S_constant { D_array() };
 
-    cond.materialize();
-    dval.materialize();
-    ival.materialize();
-    aval.materialize();
+    cond.convert_to_variable();
+    dval.convert_to_variable();
+    ival.convert_to_variable();
+    aval.convert_to_variable();
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr

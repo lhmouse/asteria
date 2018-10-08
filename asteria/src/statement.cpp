@@ -580,9 +580,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(global_opt, ctx_io);
         // If `by_ref` is `false`, replace it with a temporary value.
-        if((alt.by_ref == false) && (ref_out.is_temporary() == false)) {
-          Reference_root::S_temporary ref_c = { ref_out.read() };
-          ref_out = std::move(ref_c);
+        if(alt.by_ref == false) {
+          ref_out.convert_to_temporary();
         }
         return Block::status_return;
       }

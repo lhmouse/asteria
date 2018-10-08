@@ -47,10 +47,6 @@ class Reference
       {
         return this->m_root.index() == Reference_root::index_constant;
       }
-    bool is_temporary() const noexcept
-      {
-        return this->m_root.index() == Reference_root::index_temporary;
-      }
 
     Value read() const;
     Value & write(Value value) const;
@@ -59,7 +55,8 @@ class Reference
     Reference & zoom_in(Reference_modifier mod);
     Reference & zoom_out();
 
-    Reference & materialize();
+    Reference & convert_to_temporary();
+    Reference & convert_to_variable();
   };
 
 }

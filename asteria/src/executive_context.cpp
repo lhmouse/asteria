@@ -49,14 +49,14 @@ void Executive_context::initialize_for_function(String file, Uint32 line, String
       if(is_name_reserved(param)) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
-      this->set_named_reference(param, std::move(ref.materialize()));
+      this->set_named_reference(param, std::move(ref.convert_to_variable()));
     }
     args.erase(args.begin(), eparg);
     // Set up system variables.
     this->set_named_reference(String::shallow("__file"), do_make_constant(D_string(std::move(file))));
     this->set_named_reference(String::shallow("__line"), do_make_constant(D_integer(line)));
     this->set_named_reference(String::shallow("__func"), do_make_constant(D_string(std::move(func))));
-    this->set_named_reference(String::shallow("__this"), std::move(self.materialize()));
+    this->set_named_reference(String::shallow("__this"), std::move(self.convert_to_variable()));
     this->set_named_reference(String::shallow("__varg"), do_make_constant(D_function(Variadic_arguer(file, line, std::move(args)))));
   }
 
