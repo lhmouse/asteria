@@ -233,25 +233,6 @@ Xpnode Xpnode::bind(const Global_context *global_opt, const Analytic_context &ct
 
 namespace {
 
-  String do_get_enclosing_func(const Executive_context &ctx)
-    {
-      auto qctx = &ctx;
-      do {
-        const auto qref = qctx->get_named_reference_opt(String::shallow("__func"));
-        if(qref) {
-          auto value = qref->read();
-          const auto qstr = value.opt<D_string>();
-          if(qstr) {
-            return std::move(*qstr);
-          }
-        }
-        qctx = qctx->get_parent_opt();
-        if(!qctx) {
-          return String::shallow("<top level>");
-        }
-      } while(true);
-    }
-
   template<typename XvalueT>
     void do_set_result(Reference &ref_io, bool assign, XvalueT &&value)
       {
@@ -603,16 +584,27 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         }
         // This is the `this` reference.
         auto self = std::move(tgt.zoom_out());
-        const auto encl_func = do_get_enclosing_func(ctx);
-        ASTERIA_DEBUG_LOG("Beginning function call inside `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
+        ASTERIA_DEBUG_LOG("Beginning function call at \'", alt.file, ':', alt.line, "\'...\n",
+                          qfunc->get()->describe());
         try {
-          ASTERIA_DEBUG_LOG("  Target: ", qfunc->get()->describe());
           tgt = qfunc->get()->invoke(global_opt, std::move(self), std::move(args));
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.file, ':', alt.line, "\'...");
         } catch(...) {
-          ASTERIA_DEBUG_LOG("Caught exception thrown inside `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
-          throw Backtracer(alt.file, alt.line, encl_func);
+          ASTERIA_DEBUG_LOG("Caught exception thrown inside function call at \'", alt.file, ':', alt.line, "\'...");
+          // Get the name of the enclosing function.
+          for(auto qctx = &ctx; qctx; qctx = qctx->get_parent_opt()) {
+            const auto qref = qctx->get_named_reference_opt(String::shallow("__func"));
+            if(!qref) {
+              continue;
+            }
+            auto value = qref->read();
+            const auto qstr = value.opt<D_string>();
+            if(qstr) {
+              throw Backtracer(alt.file, alt.line, std::move(*qstr));
+            }
+          }
+          throw Backtracer(alt.file, alt.line, String::shallow("<top level>"));
         }
-        ASTERIA_DEBUG_LOG("Returned from function call inside `", encl_func, "` at \'", alt.file, ':', alt.line, "\'...");
         stack_io.emplace_back(std::move(tgt));
         return;
       }
