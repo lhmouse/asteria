@@ -897,7 +897,7 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
                          do_accept_string_literal(seq, reader) ||
                          do_accept_noescape_string_literal(seq, reader) ||
                          do_accept_numeric_literal(seq, reader);
-        if(token_got == false) {
+        if(!token_got) {
           ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
           throw do_make_parser_error(reader, 1, Parser_error::code_token_character_unrecognized);
         }

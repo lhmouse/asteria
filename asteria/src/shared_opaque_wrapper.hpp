@@ -28,7 +28,7 @@ class Shared_opaque_wrapper
       }
     Abstract_opaque * mut()
       {
-        if(this->m_ptr.unique() == false) {
+        if(!this->m_ptr.unique()) {
           this->m_ptr->clone(this->m_ptr);
           ROCKET_ASSERT(this->m_ptr.unique());
         }

@@ -152,11 +152,11 @@ Xpnode Xpnode::bind(const Global_context *global_opt, const Analytic_context &ct
       case index_named_reference: {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
-        if(ctx.is_name_reserved(alt.name) == false) {
+        if(!ctx.is_name_reserved(alt.name)) {
           // Look for the reference in the current context.
           // Don't bind it onto something in a analytic context which will soon get destroyed.
           const auto pair = do_name_lookup(global_opt, ctx, alt.name);
-          if(pair.first->is_analytic() == false) {
+          if(!pair.first->is_analytic()) {
             Xpnode::S_bound_reference alt_bnd = { *(pair.second) };
             return std::move(alt_bnd);
           }
@@ -612,7 +612,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         const auto &alt = this->m_stor.as<S_subscript>();
         // Get the subscript.
         Value sub_value;
-        if(alt.name.empty() == false) {
+        if(!alt.name.empty()) {
           sub_value = D_string(alt.name);
         } else {
           auto sub = do_pop_reference(stack_io);
@@ -733,7 +733,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
             auto rhs_value = rhs.read();
-            auto result = rhs_value.test() == false;
+            auto result = !rhs_value.test();
             do_set_result(rhs, alt.assign, std::move(result));
             stack_io.emplace_back(std::move(rhs));
             break;

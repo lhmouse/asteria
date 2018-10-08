@@ -317,16 +317,16 @@ namespace {
       //   statement-list | ""
       // statement-list ::=
       //   statement statement-list-opt
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
         return false;
       }
       for(;;) {
         bool stmt_got = do_accept_statement(stmts_out, tstrm_io);
-        if(stmt_got == false) {
+        if(!stmt_got) {
           break;
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_brace_or_statement_expected);
       }
       return true;
@@ -335,7 +335,7 @@ namespace {
   bool do_accept_block_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
     {
       Vector<Statement> stmts;
-      if(do_accept_block_statement_list(stmts, tstrm_io) == false) {
+      if(!do_accept_block_statement_list(stmts, tstrm_io)) {
         return false;
       }
       Statement::S_block stmt_c = { std::move(stmts) };
@@ -350,15 +350,15 @@ namespace {
       // identifier-list ::=
       //   identifier ( "," identifier-list | "" )
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         return false;
       }
       for(;;) {
         names_out.emplace_back(std::move(name));
-        if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
           break;
         }
-        if(do_accept_identifier(name, tstrm_io) == false) {
+        if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
       }
@@ -368,7 +368,7 @@ namespace {
   bool do_accept_named_reference(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         return false;
       }
       Xpnode::S_named_reference node_c = { std::move(name) };
@@ -379,7 +379,7 @@ namespace {
   bool do_accept_literal(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       Value value;
-      if(do_accept_literal(value, tstrm_io) == false) {
+      if(!do_accept_literal(value, tstrm_io)) {
         return false;
       }
       Xpnode::S_literal node_c = { std::move(value) };
@@ -389,7 +389,7 @@ namespace {
 
   bool do_accept_this(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
-      if(do_match_keyword(tstrm_io, Token::keyword_this) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
         return false;
       }
       Xpnode::S_named_reference node_c = { String::shallow("__this") };
@@ -405,21 +405,21 @@ namespace {
       do_tell_source_location(file, line, tstrm_io);
       // closure-function ::=
       //   "func" "(" identifier-list-opt ")" statement
-      if(do_match_keyword(tstrm_io, Token::keyword_func) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
         return false;
       }
       Vector<String> params;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_identifier_list(params, tstrm_io) == false) {
+      if(!do_accept_identifier_list(params, tstrm_io)) {
         // This is optional.
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> body;
-      if(do_accept_statement_as_block(body, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Xpnode::S_closure_function node_c = { std::move(file), line, std::move(params), std::move(body) };
@@ -437,22 +437,22 @@ namespace {
       //   expression ( comma-or-semicolon array-element-list-opt | "" )
       // comma-or-semicolon ::=
       //   "," | ";"
-      if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
         return false;
       }
       Size elem_cnt = 0;
       for(;;) {
-        if(do_accept_expression(nodes_out, tstrm_io) == false) {
+        if(!do_accept_expression(nodes_out, tstrm_io)) {
           break;
         }
         ++elem_cnt;
         bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
                         do_match_punctuator(tstrm_io, Token::punctuator_semicol);
-        if(has_next == false) {
+        if(!has_next) {
           break;
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_or_expression_expected);
       }
       Xpnode::S_unnamed_array node_c = { elem_cnt };
@@ -468,7 +468,7 @@ namespace {
       //   key-mapped-list | ""
       // key-mapped-list ::=
       //   ( string-literal | identifier ) "=" expression ( comma-or-semicolon key-mapped-list-opt | "" )
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
         return false;
       }
       Vector<String> keys;
@@ -478,26 +478,26 @@ namespace {
         bool key_got = do_accept_string_literal(key, tstrm_io) ||
                        do_accept_identifier(key, tstrm_io) ||
                        do_accept_keyword_as_identifier(key, tstrm_io);
-        if(key_got == false) {
+        if(!key_got) {
           break;
         }
-        if(do_match_punctuator(tstrm_io, Token::punctuator_assign) == false) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_equals_sign_expected);
         }
         if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
           throw duplicate_key_error;
         }
-        if(do_accept_expression(nodes_out, tstrm_io) == false) {
+        if(!do_accept_expression(nodes_out, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
         keys.emplace_back(std::move(key));
         bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
                         do_match_punctuator(tstrm_io, Token::punctuator_semicol);
-        if(has_next == false) {
+        if(!has_next) {
           break;
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_brace_or_object_key_expected);
       }
       Xpnode::S_unnamed_object node_c = { std::move(keys) };
@@ -509,13 +509,13 @@ namespace {
     {
       // nested-expression ::=
       //   "(" expression ")"
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         return false;
       }
-      if(do_accept_expression(nodes_out, tstrm_io) == false) {
+      if(!do_accept_expression(nodes_out, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       return true;
@@ -546,22 +546,22 @@ namespace {
       //   argument-list | ""
       // argument-list ::=
       //   expression ( "," argument-list | "" )
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         return false;
       }
       Size arg_cnt = 0;
       if(do_accept_expression(nodes_out, tstrm_io) != false) {
         for(;;) {
           ++arg_cnt;
-          if(do_match_punctuator(tstrm_io, Token::punctuator_comma) == false) {
+          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
             break;
           }
-          if(do_accept_expression(nodes_out, tstrm_io) == false) {
+          if(!do_accept_expression(nodes_out, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
           }
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_or_argument_expected);
       }
       Xpnode::S_function_call node_c = { std::move(file), line, arg_cnt };
@@ -573,13 +573,13 @@ namespace {
     {
       // postfix-subscript ::=
       //   "[" expression "]"
-      if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
         return false;
       }
-      if(do_accept_expression(nodes_out, tstrm_io) == false) {
+      if(!do_accept_expression(nodes_out, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_expected);
       }
       Xpnode::S_subscript node_c = { String() };
@@ -591,11 +591,11 @@ namespace {
     {
       // postfix-member-access ::=
       //   "." identifier
-      if(do_match_punctuator(tstrm_io, Token::punctuator_dot) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_dot)) {
         return false;
       }
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
       Xpnode::S_subscript node_c = { std::move(name) };
@@ -616,18 +616,18 @@ namespace {
       // postfix-operator-list ::=
       //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
       Vector<Xpnode> prefixes;
-      if(do_accept_prefix_operator(prefixes, tstrm_io) == false) {
-        if(do_accept_primary_expression(nodes_out, tstrm_io) == false) {
+      if(!do_accept_prefix_operator(prefixes, tstrm_io)) {
+        if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
           return false;
         }
       } else {
         for(;;) {
           bool prefix_got = do_accept_prefix_operator(prefixes, tstrm_io);
-          if(prefix_got == false) {
+          if(!prefix_got) {
             break;
           }
         }
-        if(do_accept_primary_expression(nodes_out, tstrm_io) == false) {
+        if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
       }
@@ -636,11 +636,11 @@ namespace {
                            do_accept_postfix_function_call(nodes_out, tstrm_io) ||
                            do_accept_postfix_subscript(nodes_out, tstrm_io) ||
                            do_accept_postfix_member_access(nodes_out, tstrm_io);
-        if(postfix_got == false) {
+        if(!postfix_got) {
           break;
         }
       }
-      while(prefixes.empty() == false) {
+      while(!prefixes.empty()) {
         nodes_out.emplace_back(std::move(prefixes.mut_back()));
         prefixes.pop_back();
       }
@@ -706,7 +706,7 @@ namespace {
   bool do_accept_infix_head(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       Vector<Xpnode> nodes;
-      if(do_accept_infix_element(nodes, tstrm_io) == false) {
+      if(!do_accept_infix_element(nodes, tstrm_io)) {
         return false;
       }
       elem_out.reset(new Infix_head(std::move(nodes)));
@@ -779,21 +779,21 @@ namespace {
   bool do_accept_infix_selection_quest(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_quest) == false) {
-        if(do_match_punctuator(tstrm_io, Token::punctuator_quest_eq) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_quest_eq)) {
           return false;
         }
         assign = true;
       }
       Vector<Xpnode> branch_true;
-      if(do_accept_expression(branch_true, tstrm_io) == false) {
+      if(!do_accept_expression(branch_true, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_colon) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
       }
       Vector<Xpnode> branch_false;
-      if(do_accept_infix_element(branch_false, tstrm_io) == false) {
+      if(!do_accept_infix_element(branch_false, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       elem_out.reset(new Infix_selection(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false)));
@@ -803,14 +803,14 @@ namespace {
   bool do_accept_infix_selection_and(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_andl) == false) {
-        if(do_match_punctuator(tstrm_io, Token::punctuator_andl_eq) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_andl_eq)) {
           return false;
         }
         assign = true;
       }
       Vector<Xpnode> branch_true;
-      if(do_accept_infix_element(branch_true, tstrm_io) == false) {
+      if(!do_accept_infix_element(branch_true, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       elem_out.reset(new Infix_selection(Infix_selection::sop_and, assign, std::move(branch_true), Vector<Xpnode>()));
@@ -820,14 +820,14 @@ namespace {
   bool do_accept_infix_selection_or(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_orl) == false) {
-        if(do_match_punctuator(tstrm_io, Token::punctuator_orl_eq) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_orl_eq)) {
           return false;
         }
         assign = true;
       }
       Vector<Xpnode> branch_false;
-      if(do_accept_infix_element(branch_false, tstrm_io) == false) {
+      if(!do_accept_infix_element(branch_false, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_false)));
@@ -837,14 +837,14 @@ namespace {
   bool do_accept_infix_selection_coales(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_coales) == false) {
-        if(do_match_punctuator(tstrm_io, Token::punctuator_coales_eq) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_coales_eq)) {
           return false;
         }
         assign = true;
       }
       Vector<Xpnode> branch_null;
-      if(do_accept_infix_element(branch_null, tstrm_io) == false) {
+      if(!do_accept_infix_element(branch_null, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       elem_out.reset(new Infix_selection(Infix_selection::sop_coales, assign, Vector<Xpnode>(), std::move(branch_null)));
@@ -1085,7 +1085,7 @@ namespace {
         }
       }
       Vector<Xpnode> rhs;
-      if(do_accept_infix_element(rhs, tstrm_io) == false) {
+      if(!do_accept_infix_element(rhs, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
       elem_out.reset(new Infix_operator(xop, assign, std::move(rhs)));
@@ -1104,7 +1104,7 @@ namespace {
       //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
       //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
       std::unique_ptr<Infix_element_base> elem;
-      if(do_accept_infix_head(elem, tstrm_io) == false) {
+      if(!do_accept_infix_head(elem, tstrm_io)) {
         return false;
       }
       Vector<std::unique_ptr<Infix_element_base>> stack;
@@ -1115,7 +1115,7 @@ namespace {
                         do_accept_infix_selection_or(elem, tstrm_io) ||
                         do_accept_infix_selection_coales(elem, tstrm_io) ||
                         do_accept_infix_operator(elem, tstrm_io);
-        if(elem_got == false) {
+        if(!elem_got) {
           break;
         }
         // Assignment operations have the lowest precedence and group from right to left.
@@ -1144,21 +1144,21 @@ namespace {
       //   equal-initializer | ""
       // equal-initializer ::=
       //   "=" expression
-      if(do_match_keyword(tstrm_io, Token::keyword_var) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_var)) {
         return false;
       }
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
       Vector<Xpnode> init;
       if(do_match_punctuator(tstrm_io, Token::punctuator_assign) != false) {
         // The initializer is optional.
-        if(do_accept_expression(init, tstrm_io) == false) {
+        if(!do_accept_expression(init, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_var_def stmt_c = { std::move(name), false, std::move(init) };
@@ -1172,21 +1172,21 @@ namespace {
       //   "const" identifier equal-initailizer ";"
       // equal-initializer ::=
       //   "=" expression
-      if(do_match_keyword(tstrm_io, Token::keyword_const) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_const)) {
         return false;
       }
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_assign) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_equals_sign_expected);
       }
       Vector<Xpnode> init;
-      if(do_accept_expression(init, tstrm_io) == false) {
+      if(!do_accept_expression(init, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_var_def stmt_c = { std::move(name), true, std::move(init) };
@@ -1202,25 +1202,25 @@ namespace {
       do_tell_source_location(file, line, tstrm_io);
       // function-definition ::=
       //   "func" identifier "(" identifier-list-opt ")" statement
-      if(do_match_keyword(tstrm_io, Token::keyword_func) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
         return false;
       }
       String name;
-      if(do_accept_identifier(name, tstrm_io) == false) {
+      if(!do_accept_identifier(name, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
       Vector<String> params;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_identifier_list(params, tstrm_io) == false) {
+      if(!do_accept_identifier_list(params, tstrm_io)) {
         // This is optional.
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> body;
-      if(do_accept_statement_as_block(body, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Statement::S_func_def stmt_c = { std::move(file), line, std::move(name), std::move(params), std::move(body) };
@@ -1233,10 +1233,10 @@ namespace {
       // expression-statement ::=
       //   expression ";"
       Vector<Xpnode> expr;
-      if(do_accept_expression(expr, tstrm_io) == false) {
+      if(!do_accept_expression(expr, tstrm_io)) {
         return false;
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_expr stmt_c = { std::move(expr) };
@@ -1248,27 +1248,27 @@ namespace {
     {
       // if-statement ::=
       //   "if" "(" expression ")" statement ( "else" statement | "" )
-      if(do_match_keyword(tstrm_io, Token::keyword_if) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
         return false;
       }
       Vector<Xpnode> cond;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_expression(cond, tstrm_io) == false) {
+      if(!do_accept_expression(cond, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> branch_true;
-      if(do_accept_statement_as_block(branch_true, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(branch_true, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Vector<Statement> branch_false;
       if(do_match_keyword(tstrm_io, Token::keyword_else) != false) {
         // The `else` branch is optional.
-        if(do_accept_statement_as_block(branch_false, tstrm_io) == false) {
+        if(!do_accept_statement_as_block(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
       }
@@ -1287,46 +1287,46 @@ namespace {
       //   switch-clause-list | ""
       // switch-clause-list ::=
       //   ( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
-      if(do_match_keyword(tstrm_io, Token::keyword_switch) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_switch)) {
         return false;
       }
       Vector<Xpnode> ctrl;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_expression(ctrl, tstrm_io) == false) {
+      if(!do_accept_expression(ctrl, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Bivector<Expression, Block> clauses;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_brace_expected);
       }
       for(;;) {
         Vector<Xpnode> cond;
-        if(do_match_keyword(tstrm_io, Token::keyword_default) == false) {
-          if(do_match_keyword(tstrm_io, Token::keyword_case) == false) {
+        if(!do_match_keyword(tstrm_io, Token::keyword_default)) {
+          if(!do_match_keyword(tstrm_io, Token::keyword_case)) {
             break;
           }
-          if(do_accept_expression(cond, tstrm_io) == false) {
+          if(!do_accept_expression(cond, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
           }
         }
-        if(do_match_punctuator(tstrm_io, Token::punctuator_colon) == false) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
         }
         Vector<Statement> stmts;
         for(;;) {
           bool stmt_got = do_accept_statement(stmts, tstrm_io);
-          if(stmt_got == false) {
+          if(!stmt_got) {
             break;
           }
         }
         clauses.emplace_back(std::move(cond), std::move(stmts));
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_brace_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_brace_or_switch_clause_expected);
       }
       Statement::S_switch stmt_c = { std::move(ctrl), std::move(clauses) };
@@ -1338,27 +1338,27 @@ namespace {
     {
       // do-while-statement ::=
       //   "do" statement "while" "(" expression ")" ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_do) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_do)) {
         return false;
       }
       Vector<Statement> body;
-      if(do_accept_statement_as_block(body, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_while) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_keyword_while_expected);
       }
       Vector<Xpnode> cond;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_expression(cond, tstrm_io) == false) {
+      if(!do_accept_expression(cond, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_do_while stmt_c = { std::move(body), std::move(cond) };
@@ -1370,21 +1370,21 @@ namespace {
     {
       // while-statement ::=
       //   "while" "(" expression ")" statement
-      if(do_match_keyword(tstrm_io, Token::keyword_while) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
         return false;
       }
       Vector<Xpnode> cond;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
-      if(do_accept_expression(cond, tstrm_io) == false) {
+      if(!do_accept_expression(cond, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> body;
-      if(do_accept_statement_as_block(body, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Statement::S_while stmt_c = { std::move(cond), std::move(body) };
@@ -1400,7 +1400,7 @@ namespace {
       //   "each" identifier ( "," identifier | "") ":" expression
       // for-statement-triplet ::=
       //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
-      if(do_match_keyword(tstrm_io, Token::keyword_for) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_for)) {
         return false;
       }
       // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
@@ -1409,47 +1409,47 @@ namespace {
       Vector<Statement> init;
       Vector<Xpnode> cond;
       Vector<Xpnode> step;
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
       if(do_match_keyword(tstrm_io, Token::keyword_each) != false) {
-        if(do_accept_identifier(key_name, tstrm_io) == false) {
+        if(!do_accept_identifier(key_name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
         if(do_match_punctuator(tstrm_io, Token::punctuator_comma) != false) {
           // The mapped reference is optional.
-          if(do_accept_identifier(mapped_name, tstrm_io) == false) {
+          if(!do_accept_identifier(mapped_name, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
           }
         }
-        if(do_match_punctuator(tstrm_io, Token::punctuator_colon) == false) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
         }
-        if(do_accept_expression(step, tstrm_io) == false) {
+        if(!do_accept_expression(step, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
       } else {
         bool init_got = do_accept_variable_definition(init, tstrm_io) ||
                         do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
                         do_accept_expression_statement(init, tstrm_io);
-        if(init_got == false) {
+        if(!init_got) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_for_statement_initializer_expected);
         }
-        if(do_accept_expression(cond, tstrm_io) == false) {
+        if(!do_accept_expression(cond, tstrm_io)) {
           // This is optional.
         }
-        if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        if(do_accept_expression(step, tstrm_io) == false) {
+        if(!do_accept_expression(step, tstrm_io)) {
           // This is optional.
         }
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> body;
-      if(do_accept_statement_as_block(body, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       if(key_name.empty()) {
@@ -1466,7 +1466,7 @@ namespace {
     {
       // break-statement ::=
       //   "break" ( "switch" | "while" | "for" ) ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_break) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_break)) {
         return false;
       }
       Statement::Target target = Statement::target_unspec;
@@ -1483,7 +1483,7 @@ namespace {
         goto z;
       }
     z:
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_break stmt_c = { target };
@@ -1495,7 +1495,7 @@ namespace {
     {
       // continue-statement ::=
       //   "continue" ( "while" | "for" ) ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_continue) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_continue)) {
         return false;
       }
       Statement::Target target = Statement::target_unspec;
@@ -1508,7 +1508,7 @@ namespace {
         goto z;
       }
     z:
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_continue stmt_c = { target };
@@ -1520,14 +1520,14 @@ namespace {
     {
       // throw-statement ::=
       //   "throw" expression ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_throw) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
         return false;
       }
       Vector<Xpnode> expr;
-      if(do_accept_expression(expr, tstrm_io) == false) {
+      if(!do_accept_expression(expr, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_throw stmt_c = { std::move(expr) };
@@ -1539,7 +1539,7 @@ namespace {
     {
       // return-statement ::=
       //   "return" ( "&" | "" ) expression-opt ";"
-      if(do_match_keyword(tstrm_io, Token::keyword_return) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_return)) {
         return false;
       }
       bool by_ref = false;
@@ -1548,10 +1548,10 @@ namespace {
         by_ref = true;
       }
       Vector<Xpnode> expr;
-      if(do_accept_expression(expr, tstrm_io) == false) {
+      if(!do_accept_expression(expr, tstrm_io)) {
         // This is optional.
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_semicol) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
       Statement::S_return stmt_c = { by_ref, std::move(expr) };
@@ -1563,28 +1563,28 @@ namespace {
     {
       // try-statement ::=
       //   "try" statement "catch" "(" identifier ")" statement
-      if(do_match_keyword(tstrm_io, Token::keyword_try) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_try)) {
         return false;
       }
       Vector<Statement> body_try;
-      if(do_accept_statement_as_block(body_try, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body_try, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      if(do_match_keyword(tstrm_io, Token::keyword_catch) == false) {
+      if(!do_match_keyword(tstrm_io, Token::keyword_catch)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_keyword_catch_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_op) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
       }
       String except_name;
-      if(do_accept_identifier(except_name, tstrm_io) == false) {
+      if(!do_accept_identifier(except_name, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
       }
-      if(do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl) == false) {
+      if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
       }
       Vector<Statement> body_catch;
-      if(do_accept_statement_as_block(body_catch, tstrm_io) == false) {
+      if(!do_accept_statement_as_block(body_catch, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
       Statement::S_try stmt_c = { std::move(body_try), std::move(except_name), std::move(body_catch) };
@@ -1683,10 +1683,10 @@ bool Parser::load(Token_stream &tstrm_io)
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
     Vector<Statement> stmts;
-    while(tstrm_io.empty() == false) {
+    while(!tstrm_io.empty()) {
       // document ::=
       //   statement-list-opt
-      if(do_accept_statement(stmts, tstrm_io) == false) {
+      if(!do_accept_statement(stmts, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
     }

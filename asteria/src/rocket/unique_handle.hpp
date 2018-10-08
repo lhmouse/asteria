@@ -112,8 +112,8 @@ namespace details_unique_handle {
 template<typename handleT, typename closerT>
   class unique_handle
     {
-      static_assert(is_array<handleT>::value == false, "`handleT` must not be an array type.");
-      static_assert(is_trivial<handleT>::value != false, "`handleT` must be a trivial type.");
+      static_assert(!is_array<handleT>::value, "`handleT` must not be an array type.");
+      static_assert(is_trivial<handleT>::value, "`handleT` must be a trivial type.");
 
     public:
       using handle_type  = handleT;

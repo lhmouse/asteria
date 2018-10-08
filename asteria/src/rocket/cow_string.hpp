@@ -598,7 +598,7 @@ namespace details_cow_string {
 template<typename charT, typename traitsT, typename allocatorT>
   class basic_cow_string
     {
-      static_assert(is_array<charT>::value == false, "`charT` must not be an array type.");
+      static_assert(!is_array<charT>::value, "`charT` must not be an array type.");
       static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
       static_assert(is_same<typename allocatorT::value_type, charT>::value, "`allocatorT::value_type` must denote the same type as `charT`.");
 
@@ -764,7 +764,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           const auto len = this->size();
           auto cap = this->m_sth.check_size_add(len, cap_add);
-          if((this->unique() == false) || (this->capacity() < cap)) {
+          if(!this->unique() || (this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
             // Reserve more space for non-debug builds.
             cap = noadl::max(cap, len + len / 2 + 31);
@@ -806,7 +806,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto len_old = this->size();
           ROCKET_ASSERT(tpos <= len_old);
           ROCKET_ASSERT(tn <= len_old - tpos);
-          if(this->unique() == false) {
+          if(!this->unique()) {
             const auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
             return ptr + tpos;
           }
@@ -963,7 +963,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto len = this->size();
           const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
           // If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
-          if((this->unique() != false) && (this->capacity() >= cap_new)) {
+          if(this->unique() && (this->capacity() >= cap_new)) {
             return;
           }
           this->do_reallocate(0, 0, len, cap_new);
@@ -974,7 +974,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           const auto len = this->size();
           const auto cap_min = this->m_sth.round_up_capacity(len);
           // Don't increase memory usage.
-          if((this->unique() == false) || (this->capacity() <= cap_min)) {
+          if(!this->unique() || (this->capacity() <= cap_min)) {
             return;
           }
           this->do_reallocate(0, 0, len, len);
@@ -982,7 +982,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       void clear() noexcept
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             this->deallocate();
             return;
           }
@@ -1124,7 +1124,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           ROCKET_ASSERT(first <= last);
           return this->append(first, static_cast<size_type>(last - first));
         }
-      template<typename inputT, typename enable_if<is_convertible<inputT, const value_type *>::value == false, typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
+      template<typename inputT, typename enable_if<!(is_convertible<inputT, const value_type *>::value), typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
         basic_cow_string & append(inputT first, inputT last)
           {
             if(first == last) {
@@ -1177,7 +1177,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           }
           const auto len_old = this->size();
           ROCKET_ASSERT(n <= len_old);
-          if(this->unique() == false) {
+          if(!this->unique()) {
             this->do_reallocate(0, 0, len_old - n, len_old);
             return *this;
           }
@@ -1434,7 +1434,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       // N.B. This is a non-standard extension.
       value_type * mut_data()
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             return this->do_reallocate(0, 0, this->size(), this->size() | 1);
           }
           return this->m_sth.mut_data_unchecked();
@@ -1519,7 +1519,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       size_type rfind(value_type ch, size_type to = npos) const noexcept
         {
-          return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) != false; });
+          return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch); });
         }
 
       size_type find_first_of(shallow sh, size_type from = 0) const noexcept
@@ -1597,7 +1597,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       size_type find_first_not_of(value_type ch, size_type from = 0) const noexcept
         {
-          return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) == false; });
+          return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch); });
         }
 
       size_type find_last_not_of(shallow sh, size_type to = npos) const noexcept
@@ -1623,7 +1623,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       size_type find_last_not_of(value_type ch, size_type to = npos) const noexcept
         {
-          return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch) == false; });
+          return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch); });
         }
 
       // N.B. This is a non-standard extension.

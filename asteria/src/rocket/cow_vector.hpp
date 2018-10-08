@@ -737,7 +737,7 @@ namespace details_cow_vector {
 template<typename valueT, typename allocatorT>
   class cow_vector
     {
-      static_assert(is_array<valueT>::value == false, "`valueT` must not be an array type.");
+      static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
       static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
 
     public:
@@ -854,7 +854,7 @@ template<typename valueT, typename allocatorT>
         {
           const auto cnt = this->size();
           auto cap = this->m_sth.check_size_add(cnt, cap_add);
-          if((this->unique() == false) || (this->capacity() < cap)) {
+          if(!this->unique() || (this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
             // Reserve more space for non-debug builds.
             cap = noadl::max(cap, cnt + cnt / 2 + 7);
@@ -881,7 +881,7 @@ template<typename valueT, typename allocatorT>
           const auto cnt_old = this->size();
           ROCKET_ASSERT(tpos <= cnt_old);
           ROCKET_ASSERT(tn <= cnt_old - tpos);
-          if(this->unique() == false) {
+          if(!this->unique()) {
             const auto ptr = this->do_reallocate(tpos, tpos + tn, cnt_old - (tpos + tn), cnt_old);
             return ptr + tpos;
           }
@@ -989,7 +989,7 @@ template<typename valueT, typename allocatorT>
           const auto cnt = this->size();
           const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
           // If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
-          if((this->unique() != false) && (this->capacity() >= cap_new)) {
+          if(this->unique() && (this->capacity() >= cap_new)) {
             return;
           }
           this->do_reallocate(0, 0, cnt, cap_new);
@@ -1000,7 +1000,7 @@ template<typename valueT, typename allocatorT>
           const auto cnt = this->size();
           const auto cap_min = this->m_sth.round_up_capacity(cnt);
           // Don't increase memory usage.
-          if((this->unique() == false) || (this->capacity() <= cap_min)) {
+          if(!this->unique() || (this->capacity() <= cap_min)) {
             return;
           }
           this->do_reallocate(0, 0, cnt, cnt);
@@ -1008,7 +1008,7 @@ template<typename valueT, typename allocatorT>
         }
       void clear() noexcept
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             this->deallocate();
             return;
           }
@@ -1194,7 +1194,7 @@ template<typename valueT, typename allocatorT>
           }
           const auto cnt_old = this->size();
           ROCKET_ASSERT(n <= cnt_old);
-          if(this->unique() == false) {
+          if(!this->unique()) {
             this->do_reallocate(0, 0, cnt_old - n, cnt_old);
             return *this;
           }
@@ -1254,7 +1254,7 @@ template<typename valueT, typename allocatorT>
       // N.B. This is a non-standard extension.
       value_type * mut_data()
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             return this->do_reallocate(0, 0, this->size(), this->size() | 1);
           }
           return this->m_sth.mut_data_unchecked();

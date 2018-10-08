@@ -353,7 +353,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // Check the loop condition.
           // This differs from a `while` loop where the context for the loop body is destroyed before this check.
           ref_out = alt.cond.evaluate(global_opt, ctx_next);
-          if(ref_out.read().test() == false) {
+          if(!ref_out.read().test()) {
             break;
           }
         }
@@ -364,7 +364,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         for(;;) {
           // Check the loop condition.
           ref_out = alt.cond.evaluate(global_opt, ctx_io);
-          if(ref_out.read().test() == false) {
+          if(!ref_out.read().test()) {
             break;
           }
           // Execute the loop body.
@@ -390,9 +390,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
         for(;;) {
           // Check the loop condition.
-          if(alt.cond.empty() == false) {
+          if(!alt.cond.empty()) {
             ref_out = alt.cond.evaluate(global_opt, ctx_next);
-            if(ref_out.read().test() == false) {
+            if(!ref_out.read().test()) {
               break;
             }
           }
@@ -577,7 +577,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Evaluate the expression.
         ref_out = alt.expr.evaluate(global_opt, ctx_io);
         // If `by_ref` is `false`, replace it with a temporary value.
-        if(alt.by_ref == false) {
+        if(!alt.by_ref) {
           ref_out.convert_to_temporary();
         }
         return Block::status_return;

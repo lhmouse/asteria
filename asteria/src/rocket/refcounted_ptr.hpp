@@ -193,7 +193,7 @@ namespace details_refcounted_ptr {
             if(!ptr) {
               return;
             }
-            if(ptr->refcount_base::drop_reference() == false) {
+            if(!ptr->refcount_base::drop_reference()) {
               return;
             }
             // Remove cv-qualifiers, then move-construct the deleter out of the object,
@@ -311,7 +311,7 @@ template<typename elementT, typename deleterT>
 template<typename elementT>
   class refcounted_ptr
     {
-      static_assert(is_array<elementT>::value == false, "`elementT` must not be an array type.");
+      static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
 
       template<typename>
         friend class refcounted_ptr;

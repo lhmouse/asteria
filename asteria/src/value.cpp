@@ -76,7 +76,7 @@ bool Value::test() const noexcept
       }
       case type_string: {
         const auto &alt = this->check<D_string>();
-        return alt.empty() == false;
+        return !alt.empty();
       }
       case type_opaque:
       case type_function: {
@@ -84,11 +84,10 @@ bool Value::test() const noexcept
       }
       case type_array: {
         const auto &alt = this->check<D_array>();
-        return alt.empty() == false;
+        return !alt.empty();
       }
       case type_object: {
-        const auto &alt = this->check<D_object>();
-        return alt.empty() == false;
+        return true;
       }
       default: {
         ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");

@@ -145,7 +145,7 @@ template<typename elementT>
 template<typename elementT>
   inline bool is_none_of(const elementT &elem, initializer_list<elementT> init)
     {
-      return is_any_of(elem, init) == false;
+      return !is_any_of(elem, init);
     }
 
 template<typename enumT>

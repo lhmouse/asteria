@@ -48,10 +48,10 @@ bool Expression::evaluate_partial(Vector<Reference> &stack_io, Global_context *g
 Reference Expression::evaluate(Global_context *global_opt, const Executive_context &ctx) const
   {
     Vector<Reference> stack;
-    if(this->evaluate_partial(stack, global_opt, ctx) == false) {
+    if(!this->evaluate_partial(stack, global_opt, ctx)) {
       return { };
     }
-    ROCKET_ASSERT(stack.empty() == false);
+    ROCKET_ASSERT(!stack.empty());
     return std::move(stack.mut_back());
   }
 

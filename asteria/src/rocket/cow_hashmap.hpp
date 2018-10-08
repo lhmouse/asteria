@@ -802,8 +802,8 @@ namespace details_cow_hashmap {
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT>
   class cow_hashmap
     {
-      static_assert(is_array<keyT>::value == false, "`keyT` must not be an array type.");
-      static_assert(is_array<mappedT>::value == false, "`mappedT` must not be an array type.");
+      static_assert(!is_array<keyT>::value, "`keyT` must not be an array type.");
+      static_assert(!is_array<mappedT>::value, "`mappedT` must not be an array type.");
       static_assert(is_same<typename allocatorT::value_type, pair<const keyT, mappedT>>::value, "`allocatorT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
 
     public:
@@ -950,7 +950,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         {
           const auto cnt = this->size();
           auto cap = this->m_sth.check_size_add(cnt, cap_add);
-          if((this->unique() == false) || (this->capacity() < cap)) {
+          if(!this->unique() || (this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
             // Reserve more space for non-debug builds.
             cap = noadl::max(cap, cnt + cnt / 2 + 7);
@@ -966,7 +966,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       details_cow_hashmap::value_handle<allocator_type> * do_mut_table()
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             return this->do_reallocate(0, 0, this->bucket_count(), this->size());
           }
           return this->m_sth.mut_data_unchecked();
@@ -978,7 +978,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           const auto nbkt_old = this->bucket_count();
           ROCKET_ASSERT(tpos <= nbkt_old);
           ROCKET_ASSERT(tn <= nbkt_old - tpos);
-          if(this->unique() == false) {
+          if(!this->unique()) {
             const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
             return ptr;
           }
@@ -1042,7 +1042,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           const auto cnt = this->size();
           const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
           // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write upon modification.
-          if((this->unique() != false) && (this->capacity() >= cap_new)) {
+          if(this->unique() && (this->capacity() >= cap_new)) {
             return;
           }
           this->do_reallocate(0, 0, this->bucket_count(), cap_new);
@@ -1053,7 +1053,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           const auto cnt = this->size();
           const auto cap_min = this->m_sth.round_up_capacity(cnt);
           // Don't increase memory usage.
-          if((this->unique() == false) || (this->capacity() <= cap_min)) {
+          if(!this->unique() || (this->capacity() <= cap_min)) {
             return;
           }
           this->do_reallocate(0, 0, cnt, cnt);
@@ -1061,7 +1061,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       void clear() noexcept
         {
-          if(this->unique() == false) {
+          if(!this->unique()) {
             this->deallocate();
             return;
           }
@@ -1196,7 +1196,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           {
             this->do_reserve_more(1);
             const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
-            if(result.second == false) {
+            if(!result.second) {
               result.first->get()->second = ::std::forward<yvalueT>(yvalue);
             }
             return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
@@ -1206,7 +1206,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           {
             this->do_reserve_more(1);
             const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
-            if(result.second == false) {
+            if(!result.second) {
               result.first->get()->second = ::std::forward<yvalueT>(yvalue);
             }
             return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
@@ -1241,7 +1241,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
       // N.B. This function may throw `std::bad_alloc()`.
       // N.B. The return type differs from `std::unordered_map`.
-      template<typename ykeyT, typename enable_if<is_convertible<ykeyT, const_iterator>::value == false>::type * = nullptr>
+      template<typename ykeyT, typename enable_if<!(is_convertible<ykeyT, const_iterator>::value)>::type * = nullptr>
         bool erase(const ykeyT &key)
           {
             const auto toff = this->m_sth.index_of(key);
