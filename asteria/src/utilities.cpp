@@ -130,6 +130,15 @@ namespace {
 
 }
 
+bool are_debug_logs_enabled() noexcept
+  {
+#ifdef ASTERIA_ENABLE_DEBUG_LOGS
+    return true;
+#else
+    return false;
+#endif
+  }
+
 bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept
   try {
     auto &oss = fmt.get_stream();

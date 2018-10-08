@@ -76,15 +76,7 @@ class Formatter
 #define ASTERIA_CREATE_FORMATTER(...)         (::std::move(ASTERIA_FORMAT(::Asteria::Formatter(), __VA_ARGS__)))
 #define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).get_stream().extract_string())
 
-constexpr bool are_debug_logs_enabled() noexcept
-  {
-#ifdef ASTERIA_ENABLE_DEBUG_LOGS
-    return true;
-#else
-    return false;
-#endif
-  }
-
+extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept;
 
 #define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
