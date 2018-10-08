@@ -14,17 +14,17 @@ class Reference
   {
   private:
     Reference_root m_root;
-    Vector<Reference_modifier> m_modifiers;
+    Vector<Reference_modifier> m_mods;
 
   public:
     Reference() noexcept
-      : m_root(), m_modifiers()
+      : m_root(), m_mods()
       {
       }
     // This constructor does not accept lvalues.
     template<typename XrootT, typename std::enable_if<(Reference_root::Variant::index_of<XrootT>::value || true)>::type * = nullptr>
       Reference(XrootT &&xroot)
-        : m_root(std::forward<XrootT>(xroot)), m_modifiers()
+        : m_root(std::forward<XrootT>(xroot)), m_mods()
         {
         }
     // This assignment operator does not accept lvalues.
@@ -32,7 +32,7 @@ class Reference
       Reference & operator=(XrootT &&xroot)
         {
           this->m_root = std::forward<XrootT>(xroot);
-          this->m_modifiers.clear();
+          this->m_mods.clear();
           return *this;
         }
     ~Reference();
@@ -43,13 +43,6 @@ class Reference
     Reference & operator=(Reference &&) noexcept;
 
   public:
-    Value read() const;
-    Value & write(Value value) const;
-    Value unset() const;
-
-    Reference & zoom_in(Reference_modifier modifier);
-    Reference & zoom_out();
-
     bool is_constant() const noexcept
       {
         return this->m_root.index() == Reference_root::index_constant;
@@ -58,6 +51,14 @@ class Reference
       {
         return this->m_root.index() == Reference_root::index_temporary;
       }
+
+    Value read() const;
+    Value & write(Value value) const;
+    Value unset() const;
+
+    Reference & zoom_in(Reference_modifier mod);
+    Reference & zoom_out();
+
     Reference & materialize();
   };
 
