@@ -63,28 +63,23 @@ bool Value::test() const noexcept
         return false;
       }
       case type_boolean: {
-        const auto &alt = this->check<D_boolean>();
-        return alt;
+        return this->check<D_boolean>();
       }
       case type_integer: {
-        const auto &alt = this->check<D_integer>();
-        return alt != 0;
+        return this->check<D_integer>() != 0;
       }
       case type_real: {
-        const auto &alt = this->check<D_real>();
-        return std::fpclassify(alt) != FP_ZERO;
+        return std::fpclassify(this->check<D_real>()) != FP_ZERO;
       }
       case type_string: {
-        const auto &alt = this->check<D_string>();
-        return !alt.empty();
+        return !(this->check<D_string>().empty());
       }
       case type_opaque:
       case type_function: {
         return true;
       }
       case type_array: {
-        const auto &alt = this->check<D_array>();
-        return !alt.empty();
+        return !(this->check<D_array>().empty());
       }
       case type_object: {
         return true;
@@ -113,8 +108,9 @@ namespace {
 
 Value::Compare Value::compare(const Value &other) const noexcept
   {
-    // `null` is considered to be equal to `null` and less than anything else.
+    // Values of different types can only be compared if either of them is `null`.
     if(this->type() != other.type()) {
+      // `null` is considered to be equal to `null` and less than anything else.
       if(this->type() == type_null) {
         return Value::compare_less;
       }
@@ -123,7 +119,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
       return Value::compare_unordered;
     }
-    // If both operands have the same type, perform normal comparison.
+    // If both values have the same type, perform normal comparison.
     switch(this->type()) {
       case type_null: {
         return Value::compare_equal;
