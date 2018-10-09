@@ -219,13 +219,13 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
       case type_opaque: {
         const auto &alt = this->check<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*(alt.get())).name() <<"\") " <<quote(alt.get()->describe());
+        os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_function: {
         const auto &alt = this->check<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*(alt.get())).name() <<"\") " <<quote(alt.get()->describe());
+        os <<"function(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_array: {

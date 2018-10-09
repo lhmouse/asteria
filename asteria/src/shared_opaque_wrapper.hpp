@@ -34,6 +34,14 @@ class Shared_opaque_wrapper
         }
         return this->m_ptr.get();
       }
+    const Abstract_opaque & operator*() const noexcept
+      {
+        return *(this->get());
+      }
+    const Abstract_opaque * operator->() const noexcept
+      {
+        return this->get();
+      }
   };
 
 }

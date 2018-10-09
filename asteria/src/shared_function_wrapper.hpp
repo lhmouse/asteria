@@ -26,6 +26,14 @@ class Shared_function_wrapper
       {
         return this->m_ptr.get();
       }
+    const Abstract_function & operator*() const noexcept
+      {
+        return *(this->get());
+      }
+    const Abstract_function * operator->() const noexcept
+      {
+        return this->get();
+      }
   };
 
 }
