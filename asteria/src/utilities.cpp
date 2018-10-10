@@ -18,11 +18,6 @@ namespace Asteria {
 // Formatter
 ///////////////////////////////////////////////////////////////////////////////
 
-Formatter::Formatter()
-  : m_stream()
-  {
-    this->m_stream.setf(std::ios::boolalpha);
-  }
 Formatter::~Formatter()
   {
   }
@@ -31,62 +26,77 @@ void Formatter::do_put(bool value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(char value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(signed char value)
   {
     this->m_stream <<static_cast<int>(value);
   }
+
 void Formatter::do_put(unsigned char value)
   {
     this->m_stream <<static_cast<unsigned>(value);
   }
+
 void Formatter::do_put(short value)
   {
     this->m_stream <<static_cast<int>(value);
   }
+
 void Formatter::do_put(unsigned short value)
   {
     this->m_stream <<static_cast<unsigned>(value);
   }
+
 void Formatter::do_put(int value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(unsigned value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(long value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(unsigned long value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(long long value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(unsigned long long value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(const char *value)
   {
     this->m_stream <<value;
   }
+
 void Formatter::do_put(const signed char *value)
   {
     this->m_stream <<static_cast<const void *>(value);
   }
+
 void Formatter::do_put(const unsigned char *value)
   {
     this->m_stream <<static_cast<const void *>(value);
   }
+
 void Formatter::do_put(const void *value)
   {
     this->m_stream <<value;

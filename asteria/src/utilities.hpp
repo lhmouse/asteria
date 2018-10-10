@@ -22,7 +22,10 @@ class Formatter
     rocket::insertable_ostream m_stream;
 
   public:
-    Formatter();
+    Formatter()
+      {
+        this->m_stream.setf(std::ios::boolalpha);
+      }
     ~Formatter();
 
     Formatter(const Formatter &)
