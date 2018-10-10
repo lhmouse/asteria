@@ -5,7 +5,6 @@
 #include "instantiated_function.hpp"
 #include "reference.hpp"
 #include "executive_context.hpp"
-#include "global_context.hpp"
 #include "statement.hpp"
 #include "utilities.hpp"
 
