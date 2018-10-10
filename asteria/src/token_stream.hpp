@@ -22,7 +22,7 @@ class Token_stream
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_error, Vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    rocket::variant<Nullptr, Parser_error, Vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
     Token_stream() noexcept

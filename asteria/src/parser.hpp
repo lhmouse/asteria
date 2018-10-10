@@ -22,7 +22,7 @@ class Parser
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_error, Vector<Statement>> m_stor;
+    rocket::variant<Nullptr, Parser_error, Vector<Statement>> m_stor;
 
   public:
     Parser() noexcept
