@@ -217,18 +217,6 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
     }
   }
 
-namespace {
-
-  Rcptr<Variable> do_create_variable(Reference &ref_out)
-    {
-      auto var = rocket::make_refcounted<Variable>();
-      Reference_root::S_variable ref_c = { var };
-      ref_out = std::move(ref_c);
-      return var;
-    }
-
-}
-
 Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const
   {
     switch(Index(this->m_stor.index())) {
@@ -247,8 +235,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = do_create_variable(ref_out);
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, ref_out);
+        const auto var = rocket::make_refcounted<Variable>();
+        Reference_root::S_variable ref_c = { var };
+        do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
         ref_out = alt.init.evaluate(global_opt, ctx_io);
         auto value = ref_out.read();
@@ -260,8 +249,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = do_create_variable(ref_out);
-        do_safe_set_named_reference(ctx_io, "function", alt.name, ref_out);
+        const auto var = rocket::make_refcounted<Variable>();
+        Reference_root::S_variable ref_c = { var };
+        do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
