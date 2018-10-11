@@ -24,6 +24,7 @@ const Reference * Abstract_context::get_named_reference_opt(const String &name) 
     }
     return &(it->second);
   }
+
 Reference * Abstract_context::get_named_reference_opt(const String &name)
   {
     const auto it = this->m_named_refs.find_mut(name);
@@ -32,10 +33,12 @@ Reference * Abstract_context::get_named_reference_opt(const String &name)
     }
     return &(it->second);
   }
+
 Reference & Abstract_context::open_named_reference(const String &name)
   {
     return this->m_named_refs.try_emplace(name).first->second;
   }
+
 void Abstract_context::set_named_reference(const String &name, Reference ref)
   {
     this->m_named_refs.insert_or_assign(name, std::move(ref));
