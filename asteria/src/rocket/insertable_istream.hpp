@@ -35,7 +35,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       enum : size_type { npos = string_type::npos };
 
     private:
-      streambuf_type m_sb;
+      mutable streambuf_type m_sb;
 
     public:
       explicit basic_insertable_istream(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in)
@@ -56,7 +56,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     public:
       streambuf_type * rdbuf() const noexcept
         {
-          return const_cast<streambuf_type *>(&(this->m_sb));
+          return &(this->m_sb);
         }
 
       const string_type & get_string() const
