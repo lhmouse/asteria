@@ -9,7 +9,7 @@
 #include "global_context.hpp"
 #include "abstract_function.hpp"
 #include "instantiated_function.hpp"
-#include "backtracer.hpp"
+#include "exception.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -586,21 +586,17 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
         try {
           tgt = qfunc->get()->invoke(global_opt, std::move(self), std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.file, ':', alt.line, "\'...");
-        } catch(...) {
-          ASTERIA_DEBUG_LOG("Caught exception thrown inside function call at \'", alt.file, ':', alt.line, "\'...");
-          // Get the name of the enclosing function.
-          for(auto qctx = &ctx; qctx; qctx = qctx->get_parent_opt()) {
-            const auto qref = qctx->get_named_reference_opt(String::shallow("__func"));
-            if(!qref) {
-              continue;
-            }
-            auto value = qref->read();
-            const auto qstr = value.opt<D_string>();
-            if(qstr) {
-              throw Backtracer(alt.file, alt.line, std::move(*qstr));
-            }
-          }
-          throw Backtracer(alt.file, alt.line, String::shallow("<top level>"));
+        } catch(Exception &except) {
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.file, ':', alt.line, "\': value = ", except.get_value());
+          // Append backtrace information and rethrow the exception.
+          except.append_backtrace(alt.file, alt.line);
+          throw;
+        } catch(std::exception &stdex) {
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.file, ':', alt.line, "\': what = ", stdex.what());
+          // Here we behave as if a `string` had been thrown.
+          Exception except(stdex);
+          except.append_backtrace(alt.file, alt.line);
+          throw except;
         }
         stack_io.emplace_back(std::move(tgt));
         return;

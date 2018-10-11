@@ -1518,6 +1518,10 @@ namespace {
 
   bool do_accept_throw_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
     {
+      // Copy these parameters before reading from the stream which is destructive.
+      String file;
+      Uint32 line = 0;
+      do_tell_source_location(file, line, tstrm_io);
       // throw-statement ::=
       //   "throw" expression ";"
       if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
@@ -1530,7 +1534,7 @@ namespace {
       if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
-      Statement::S_throw stmt_c = { std::move(expr) };
+      Statement::S_throw stmt_c = { std::move(file), line, std::move(expr) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }

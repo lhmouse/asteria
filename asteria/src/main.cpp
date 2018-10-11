@@ -5,7 +5,6 @@
 #include "utilities.hpp"
 #include "value.hpp"
 #include "reference.hpp"
-#include "backtracer.hpp"
 #include "exception.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"

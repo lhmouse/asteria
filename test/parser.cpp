@@ -7,7 +7,6 @@
 #include "../src/executive_context.hpp"
 #include "../src/reference.hpp"
 #include "../src/exception.hpp"
-#include "../src/backtracer.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -24,7 +23,11 @@ int main()
       func first() {
         return second();
       }
-      first();
+      try {
+        first();
+      } catch(e) {
+        return e;
+      }
     )__");
     Token_stream tis;
     ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
@@ -32,16 +35,6 @@ int main()
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
-    Vector<Backtracer> btv;
-    Executive_context ctx;
-    try {
-      try {
-        auto res = code.execute_as_function(nullptr, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
-        ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
-      } catch(...) {
-        Backtracer::unpack_and_rethrow(btv, std::current_exception());
-      }
-    } catch(Exception &e) {
-      ASTERIA_DEBUG_LOG("caught: ", e.get_value());
-    }
+    auto res = code.execute_as_function(nullptr, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
+    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

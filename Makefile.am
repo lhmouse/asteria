@@ -78,7 +78,6 @@ pkginclude_HEADERS =  \
   asteria/src/statement.hpp  \
   asteria/src/block.hpp  \
   asteria/src/instantiated_function.hpp  \
-  asteria/src/backtracer.hpp  \
   asteria/src/parser_error.hpp  \
   asteria/src/token.hpp  \
   asteria/src/token_stream.hpp  \
@@ -104,7 +103,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/statement.cpp  \
   asteria/src/block.cpp  \
   asteria/src/instantiated_function.cpp  \
-  asteria/src/backtracer.cpp  \
   asteria/src/parser_error.cpp  \
   asteria/src/token.cpp  \
   asteria/src/token_stream.cpp  \

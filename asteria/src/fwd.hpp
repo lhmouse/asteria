@@ -52,7 +52,6 @@ template<typename ElementT>
 class Formatter;
 class Runtime_error;
 class Exception;
-class Backtracer;
 
 // Lexical Elements
 class Xpnode;

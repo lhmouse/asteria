@@ -9,7 +9,6 @@
 #include "variable.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"
-#include "backtracer.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -201,7 +200,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         const auto &alt = this->m_stor.as<S_throw>();
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(global_opt, ctx_io);
-        Statement::S_throw alt_bnd = { std::move(expr_bnd) };
+        Statement::S_throw alt_bnd = { alt.file, alt.line, std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_return: {
@@ -481,37 +480,39 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             // Forward anything unexpected to the caller.
             return status;
           }
-        } catch(...) {
-          // The exception variable shall not outlast the loop body.
-          Executive_context ctx_next(&ctx_io);
-          // Identify the dynamic type of the exception.
-          Vector<Backtracer> btv;
-          Value evalue;
+        } catch(std::exception &stdex) {
+          // Translate the exception as needed.
+          Exception except(String::shallow(""), 0, D_null());
           try {
-            Backtracer::unpack_and_rethrow(btv, std::current_exception());
+            throw;
           } catch(Exception &e) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());
-            evalue = e.get_value();
-          } catch(std::exception &e) {
-            ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());
-            evalue = D_string(e.what());
+            except = std::move(e);
+          } catch(...) {
+            ASTERIA_DEBUG_LOG("Caught `std::exception`: ", stdex.what());
+            except = Exception(std::move(stdex));
           }
+          // The exception variable shall not outlast the loop body.
+          Executive_context ctx_next(&ctx_io);
+          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
+          Reference_root::S_temporary eref_c = { std::move(except.get_value()) };
+          do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(eref_c));
           // Initialize the backtrace array.
           D_array backtrace;
-          backtrace.reserve(btv.size());
-          for(auto it = btv.rbegin(); it != btv.rend(); ++it) {
-            D_object elem;
-            elem.insert_or_assign(String::shallow("file"), D_string(it->file()));
-            elem.insert_or_assign(String::shallow("line"), D_integer(it->line()));
-            elem.insert_or_assign(String::shallow("func"), D_string(it->func()));
+          backtrace.reserve(1 + except.get_backtrace().size());
+          D_object elem;
+          elem.insert_or_assign(String::shallow("file"), D_string(except.get_file()));
+          elem.insert_or_assign(String::shallow("line"), D_integer(except.get_line()));
+          backtrace.emplace_back(std::move(elem));
+          for(auto &pair : except.get_backtrace()) {
+            elem.clear();
+            elem.insert_or_assign(String::shallow("file"), D_string(pair.first));
+            elem.insert_or_assign(String::shallow("line"), D_integer(pair.second));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary btref_c = { std::move(backtrace) };
           ctx_next.set_named_reference(String::shallow("__backtrace"), std::move(btref_c));
-          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", evalue);
-          Reference_root::S_temporary eref_c = { std::move(evalue) };
-          do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(eref_c));
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, global_opt, ctx_next);
           if(status != Block::status_next) {
@@ -557,7 +558,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ref_out = alt.expr.evaluate(global_opt, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing exception: ", value);
-        throw Exception(std::move(value));
+        throw Exception(alt.file, alt.line, std::move(value));
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();

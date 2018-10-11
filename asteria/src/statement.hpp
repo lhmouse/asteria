@@ -95,6 +95,8 @@ class Statement
       };
     struct S_throw
       {
+        String file;
+        Uint32 line;
         Expression expr;
       };
     struct S_return
