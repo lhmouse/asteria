@@ -252,11 +252,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto var = rocket::make_refcounted<Variable>();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
-        // Bind the function body recursively.
-        Analytic_context ctx_next(&ctx_io);
-        ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        auto func = Instantiated_function(alt.file, alt.line, alt.name, alt.params, std::move(body_bnd));
+        // Instantiate the function here.
+        auto func = alt.body.instantiate_function(global_opt, ctx_io, alt.file, alt.line, alt.name, alt.params);
         ASTERIA_DEBUG_LOG("Creating named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;

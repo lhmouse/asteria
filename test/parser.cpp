@@ -36,7 +36,7 @@ int main()
     Executive_context ctx;
     try {
       try {
-        auto res = code.execute_as_function_in_place(ctx, nullptr);
+        auto res = code.execute_as_function(nullptr, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
         ASTERIA_TEST_CHECK(res.read().check<D_integer>() == -2);
       } catch(...) {
         Backtracer::unpack_and_rethrow(btv, std::current_exception());

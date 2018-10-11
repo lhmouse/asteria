@@ -532,11 +532,8 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
       }
       case index_closure_function: {
         const auto &alt = this->m_stor.as<S_closure_function>();
-        // Bind the function body recursively.
-        Analytic_context ctx_next(&ctx);
-        ctx_next.initialize_for_function(alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next, global_opt);
-        auto func = Instantiated_function(alt.file, alt.line, String::shallow("<closure function>"), alt.params, std::move(body_bnd));
+        // Instantiate the closure function.
+        auto func = alt.body.instantiate_function(global_opt, ctx, alt.file, alt.line, String::shallow("<closure function>"), alt.params);
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.emplace_back(std::move(ref_c));
         return;
