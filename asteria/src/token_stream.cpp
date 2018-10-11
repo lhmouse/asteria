@@ -19,19 +19,21 @@ namespace {
   class Source_reader
     {
     private:
-      std::istream &m_stream;
-      const String &m_file;
+      const std::reference_wrapper<std::istream> m_strm;
+      const String m_file;
+
       String m_str;
       Uint32 m_line;
       Size m_offset;
 
     public:
-      Source_reader(std::istream &xstream, const String &xfile)
-        : m_stream(xstream), m_file(xfile), m_str(), m_line(0), m_offset(0)
+      Source_reader(std::istream &xstrm, String xfile)
+        : m_strm(xstrm), m_file(std::move(xfile)),
+          m_str(), m_line(0), m_offset(0)
         {
           // Check whether the stream can be read from.
           // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
-          if(this->m_stream.fail()) {
+          if(this->m_strm.get().fail()) {
             throw Parser_error(0, 0, 0, Parser_error::code_istream_open_failure);
           }
         }
@@ -42,7 +44,7 @@ namespace {
     public:
       std::istream & stream() const noexcept
         {
-          return this->m_stream;
+          return this->m_strm;
         }
       const String & file() const noexcept
         {
@@ -56,12 +58,12 @@ namespace {
       bool advance_line()
         {
           // Call `getline()` via ADL.
-          getline(this->m_stream, this->m_str);
+          getline(this->m_strm.get(), this->m_str);
           // Check `bad()` before `fail()` because the latter checks for both `badbit` and `failbit`.
-          if(this->m_stream.bad()) {
+          if(this->m_strm.get().bad()) {
             throw Parser_error(this->m_line, this->m_offset, 0, Parser_error::code_istream_badbit_set);
           }
-          if(this->m_stream.fail()) {
+          if(this->m_strm.get().fail()) {
             return false;
           }
           // A line has been read successfully.
