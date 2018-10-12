@@ -576,7 +576,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
     }
   }
 
-void Statement::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Statement::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     switch(Index(this->m_stor.index())) {
       case index_expr: {

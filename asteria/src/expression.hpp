@@ -5,6 +5,7 @@
 #define ASTERIA_EXPRESSION_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
@@ -30,7 +31,7 @@ class Expression
     bool evaluate_partial(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const;
     Reference evaluate(Global_context &global, const Executive_context &ctx) const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 }

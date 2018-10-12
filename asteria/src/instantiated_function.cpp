@@ -31,7 +31,7 @@ String Instantiated_function::describe() const
     return fmt.get_stream().extract_string();
   }
 
-void Instantiated_function::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Instantiated_function::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     this->m_body.collect_variables(callback, param);
   }

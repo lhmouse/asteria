@@ -18,7 +18,7 @@ String Variadic_arguer::describe() const
     return fmt.get_stream().extract_string();
   }
 
-void Variadic_arguer::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Variadic_arguer::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     for(const auto &varg : this->m_vargs) {
       varg.collect_variables(callback, param);

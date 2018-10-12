@@ -266,7 +266,7 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
     }
   }
 
-void Value::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Value::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     switch(this->type()) {
       case type_null:

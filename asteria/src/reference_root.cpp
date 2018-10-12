@@ -56,7 +56,7 @@ Value & Reference_root::dereference_mutable() const
     }
   }
 
-void Reference_root::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Reference_root::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     switch(this->index()) {
       case index_constant: {

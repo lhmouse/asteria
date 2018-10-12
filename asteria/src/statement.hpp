@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "expression.hpp"
 #include "block.hpp"
 
@@ -159,7 +160,7 @@ class Statement
     Statement bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
     Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 }
