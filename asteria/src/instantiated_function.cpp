@@ -36,9 +36,9 @@ void Instantiated_function::collect_variables(bool (*callback)(void *, const Rcp
     this->m_body.collect_variables(callback, param);
   }
 
-Reference Instantiated_function::invoke(Global_context *global_opt, Reference self, Vector<Reference> args) const
+Reference Instantiated_function::invoke(Global_context &global, Reference self, Vector<Reference> args) const
   {
-    return this->m_body.execute_as_function(global_opt, this->m_file, this->m_line, this->m_name, this->m_params, std::move(self), std::move(args));
+    return this->m_body.execute_as_function(global, this->m_file, this->m_line, this->m_name, this->m_params, std::move(self), std::move(args));
   }
 
 }

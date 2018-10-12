@@ -5,6 +5,7 @@
 #include "../src/block.hpp"
 #include "../src/xpnode.hpp"
 #include "../src/statement.hpp"
+#include "../src/global_context.hpp"
 #include "../src/executive_context.hpp"
 
 using namespace Asteria;
@@ -77,9 +78,10 @@ int main()
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     auto block = Block(std::move(text));
 
+    Global_context global;
     Executive_context ctx;
     Reference ref;
-    auto status = block.execute_in_place(ref, ctx, nullptr);
+    auto status = block.execute_in_place(ref, ctx, global);
     ASTERIA_TEST_CHECK(status == Block::status_next);
     auto qref = ctx.get_named_reference_opt(String::shallow("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);

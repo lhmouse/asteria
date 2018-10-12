@@ -20,7 +20,7 @@ class Abstract_function : public Rcbase<Abstract_function>
     virtual String describe() const = 0;
     virtual void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const = 0;
 
-    virtual Reference invoke(Global_context *global_opt, Reference self, Vector<Reference> args) const = 0;
+    virtual Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const = 0;
   };
 
 }

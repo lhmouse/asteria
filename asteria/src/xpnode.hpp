@@ -153,8 +153,8 @@ class Xpnode
     ~Xpnode();
 
   public:
-    Xpnode bind(const Global_context *global_opt, const Analytic_context &ctx) const;
-    void evaluate(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const;
+    Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;
+    void evaluate(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const;
 
     void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };

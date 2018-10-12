@@ -40,14 +40,14 @@ class Block
 
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
-    Block bind_in_place(Analytic_context &ctx_io, const Global_context *global_opt) const;
-    Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const;
+    Block bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
+    Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;
 
-    Block bind(const Global_context *global_opt, const Analytic_context &ctx) const;
-    Status execute(Reference &ref_out, Global_context *global_opt, const Executive_context &ctx) const;
+    Block bind(const Global_context &global, const Analytic_context &ctx) const;
+    Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
-    Instantiated_function instantiate_function(Global_context *global_opt, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const;
-    Reference execute_as_function(Global_context *global_opt, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const;
+    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const;
+    Reference execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const;
 
     void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };

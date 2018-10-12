@@ -30,7 +30,7 @@ class Instantiated_function : public Abstract_function
     String describe() const override;
     void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const override;
 
-    Reference invoke(Global_context *global_opt, Reference self, Vector<Reference> args) const override;
+    Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const override;
   };
 
 }

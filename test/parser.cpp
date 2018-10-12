@@ -4,10 +4,10 @@
 #include "_test_init.hpp"
 #include "../src/parser.hpp"
 #include "../src/token_stream.hpp"
+#include "../src/global_context.hpp"
 #include "../src/executive_context.hpp"
 #include "../src/reference.hpp"
 #include "../src/exception.hpp"
-#include "../src/garbage_collector.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -15,29 +15,28 @@ using namespace Asteria;
 int main()
   {
     std::istringstream iss(R"__(
-      var one = 1;
-      func fib(n) {
-        return n <= one ? one : fib(n-1) + fib(n-2);
+      func third() {
+        throw "meow";
       }
-      return fib(10) + one;
+      func second() {
+        return third();
+      }
+      func first() {
+        return second();
+      }
+      try {
+        first();
+      } catch(e) {
+        return e;
+      }
     )__");
     Token_stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("my_file")));
+    ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
-    Garbage_collector gc;
-    {
-      Reference result;
-      Executive_context ctx;
-      code.execute_in_place(result, ctx, nullptr);
-      auto q = ctx.get_named_reference_opt(String::shallow("fib"));
-      ASTERIA_TEST_CHECK(q);
-      q->collect_variables(
-        [](void *param, const Rcptr<Variable> &var)
-          { return static_cast<Garbage_collector *>(param)->track_variable(var), false; },
-        &gc);
-    }
-    gc.collect();
+    Global_context global;
+    auto res = code.execute_as_function(global, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
+    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }
