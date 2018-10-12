@@ -56,7 +56,7 @@ class Reference
     Reference & zoom_out();
 
     Reference & convert_to_temporary();
-    Reference & convert_to_variable();
+    Reference & convert_to_variable(Global_context &global);
 
     void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };

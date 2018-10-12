@@ -5,6 +5,7 @@
 #include "block.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
+#include "global_context.hpp"
 #include "analytic_context.hpp"
 #include "executive_context.hpp"
 #include "instantiated_function.hpp"
@@ -69,7 +70,7 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 Reference Block::execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const
   {
     Executive_context ctx_next(nullptr);
-    ctx_next.initialize_for_function(std::move(file), line, std::move(name), params, std::move(self), std::move(args));
+    ctx_next.initialize_for_function(global, std::move(file), line, std::move(name), params, std::move(self), std::move(args));
     // Execute the body.
     Reference result;
     const auto status = this->execute_in_place(result, ctx_next, global);

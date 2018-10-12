@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "statement.hpp"
 #include "xpnode.hpp"
+#include "global_context.hpp"
 #include "analytic_context.hpp"
 #include "executive_context.hpp"
 #include "variable.hpp"
@@ -234,7 +235,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>();
+        const auto var = global.create_tracked_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
@@ -248,7 +249,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>();
+        const auto var = global.create_tracked_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
