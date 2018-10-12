@@ -65,33 +65,19 @@ void Garbage_collector::collect()
   {
     // https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     ASTERIA_DEBUG_LOG("GC begins: variable_count = ", this->m_vars.size());
-    this->m_gcrefs.clear();
-    // Add tracked variables. Note that `m_vars` is sorted.
-    for(const auto &root : this->m_vars) {
-      this->m_gcrefs.emplace_back(root, 0);
-    }
-    // Add variables that are reachable indirectly from tracked ones.
-    for(const auto &root : this->m_vars) {
-      root->get_value().collect_variables(
-        [](void *param, const rocket::refcounted_ptr<Variable> &var)
-          {
-            const auto self = static_cast<Garbage_collector *>(param);
-            const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
-            if(range.first != range.second) {
-              return false;
-            }
-            self->m_gcrefs.insert(range.second, std::make_pair(var, 0));
-            return true;
-          },
-        this);
-    }
-    ASTERIA_DEBUG_LOG("  Number of reachable variables in total: ", this->m_gcrefs.size());
-    // Initialize each gcref counter to the reference count of its variable.
-    for(auto it = this->m_gcrefs.mut_begin(); it != this->m_gcrefs.mut_end(); ++it) {
-      it->second = it->first.use_count();
-    }
-    // Drop references from `m_vars` or `m_gcrefs`, either directly or indirectly.
-    const auto drop_gcref =
+    // Define some common functions.
+    const auto gather_gcref =
+      [](void *param, const rocket::refcounted_ptr<Variable> &var)
+        {
+          const auto self = static_cast<Garbage_collector *>(param);
+          const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
+          if(range.first != range.second) {
+            return false;
+          }
+          self->m_gcrefs.insert(range.second, std::make_pair(var, 0));
+          return true;
+        };
+    const auto decrement_gcref =
       [](void *param, const rocket::refcounted_ptr<Variable> &var)
         {
           const auto self = static_cast<Garbage_collector *>(param);
@@ -101,12 +87,28 @@ void Garbage_collector::collect()
           }
           return false;
         };
+    // Add variables that are either tracked or reachable indirectly from tracked ones.
+    this->m_gcrefs.clear();
+    this->m_gcrefs.reserve(this->m_vars.size() * 4);
     for(const auto &root : this->m_vars) {
-      drop_gcref(this, root);
+      // Note that `m_vars` is sorted.
+      this->m_gcrefs.emplace_back(root, 0);
+    }
+    for(const auto &root : this->m_vars) {
+      root->get_value().collect_variables(gather_gcref, this);
+    }
+    ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_gcrefs.size());
+    // Initialize each gcref counter to the reference count of its variable.
+    for(auto it = this->m_gcrefs.mut_begin(); it != this->m_gcrefs.mut_end(); ++it) {
+      it->second = it->first.use_count();
+    }
+    // Drop references from `m_vars` or `m_gcrefs`, either directly or indirectly.
+    for(const auto &root : this->m_vars) {
+      decrement_gcref(this, root);
     }
     for(const auto &pair : this->m_gcrefs) {
-      drop_gcref(this, pair.first);
-      pair.first->get_value().collect_variables(drop_gcref, this);
+      decrement_gcref(this, pair.first);
+      pair.first->get_value().collect_variables(decrement_gcref, this);
     }
     // Collect each variable whose gcref counter is zero.
     for(const auto &pair : this->m_gcrefs) {
