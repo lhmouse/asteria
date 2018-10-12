@@ -13,10 +13,11 @@ class Garbage_collector
   {
   private:
     Vector<rocket::refcounted_ptr<Variable>> m_vars;  // This is a flat map.
+    Bivector<rocket::refcounted_ptr<Variable>, long> m_gcrefs;  // This is a flat map.
 
   public:
     Garbage_collector() noexcept
-      : m_vars()
+      : m_vars(), m_gcrefs()
       {
       }
     ~Garbage_collector();
@@ -29,7 +30,7 @@ class Garbage_collector
   public:
     bool track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    Size collect();
+    void collect();
   };
 
 }
