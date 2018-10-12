@@ -1269,7 +1269,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
     }
   }
 
-void Xpnode::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Xpnode::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {

@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 #include "expression.hpp"
@@ -156,7 +157,7 @@ class Xpnode
     Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;
     void evaluate(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 }

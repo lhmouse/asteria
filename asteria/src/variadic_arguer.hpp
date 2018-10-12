@@ -5,6 +5,7 @@
 #define ASTERIA_VARIADIC_ARGUER_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "abstract_function.hpp"
 #include "reference.hpp"
 
@@ -26,7 +27,7 @@ class Variadic_arguer : public Abstract_function
 
   public:
     String describe() const override;
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const override;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const override;
 
     Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const override;
   };

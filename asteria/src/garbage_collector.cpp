@@ -13,7 +13,7 @@ Garbage_collector::~Garbage_collector()
   {
   }
 
-bool Garbage_collector::track_variable(const Rcptr<Variable> &var)
+bool Garbage_collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
     ROCKET_ASSERT(var);
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
@@ -29,7 +29,7 @@ bool Garbage_collector::track_variable(const Rcptr<Variable> &var)
     return true;
   }
 
-bool Garbage_collector::untrack_variable(const Rcptr<Variable> &var) noexcept
+bool Garbage_collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
   {
     ROCKET_ASSERT(this->m_vars.unique());
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
@@ -46,7 +46,7 @@ namespace {
   // Algorithm:
   //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 
-  using Gcref_vector = Bivector<Rcptr<Variable>, long>;
+  using Gcref_vector = Bivector<rocket::refcounted_ptr<Variable>, long>;
 
   struct Gcref_comparator
     {
@@ -54,17 +54,17 @@ namespace {
         {
           return lhs.first < rhs.first;
         }
-      bool operator()(const Gcref_vector::value_type &lhs, const Rcptr<Variable> &rhs) const noexcept
+      bool operator()(const Gcref_vector::value_type &lhs, const rocket::refcounted_ptr<Variable> &rhs) const noexcept
         {
           return lhs.first < rhs;
         }
-      bool operator()(const Rcptr<Variable> &lhs, const Gcref_vector::value_type &rhs) const noexcept
+      bool operator()(const rocket::refcounted_ptr<Variable> &lhs, const Gcref_vector::value_type &rhs) const noexcept
         {
           return lhs < rhs.first;
         }
     };
 
-  bool do_insert_gcref(void *param, const Rcptr<Variable> &var)
+  bool do_insert_gcref(void *param, const rocket::refcounted_ptr<Variable> &var)
     {
       auto &gcrefs = *(static_cast<Gcref_vector *>(param));
       const auto range = std::equal_range(gcrefs.mut_begin(), gcrefs.mut_end(), var, Gcref_comparator());
@@ -78,7 +78,7 @@ namespace {
       return true;
     }
 
-  bool do_decrement_gcref(void *param, const Rcptr<Variable> &var)
+  bool do_decrement_gcref(void *param, const rocket::refcounted_ptr<Variable> &var)
     {
       auto &gcrefs = *(static_cast<Gcref_vector *>(param));
       const auto range = std::equal_range(gcrefs.mut_begin(), gcrefs.mut_end(), var, Gcref_comparator());

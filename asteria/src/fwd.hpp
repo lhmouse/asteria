@@ -12,7 +12,6 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
-#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
@@ -42,11 +41,6 @@ template<typename FirstT, typename SecondT>
   using Bivector = rocket::cow_vector<std::pair<FirstT, SecondT>>;
 template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
-
-template<typename ElementT>
-  using Rcbase = rocket::refcounted_base<ElementT>;
-template<typename ElementT>
-  using Rcptr = rocket::refcounted_ptr<ElementT>;
 
 // General Utilities
 class Formatter;

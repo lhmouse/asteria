@@ -5,13 +5,14 @@
 #define ASTERIA_GARBAGE_COLLECTOR_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
 class Garbage_collector
   {
   private:
-    Vector<Rcptr<Variable>> m_vars;  // This is a flat map.
+    Vector<rocket::refcounted_ptr<Variable>> m_vars;  // This is a flat map.
 
   public:
     Garbage_collector() noexcept
@@ -26,8 +27,8 @@ class Garbage_collector
       = delete;
 
   public:
-    bool track_variable(const Rcptr<Variable> &var);
-    bool untrack_variable(const Rcptr<Variable> &var) noexcept;
+    bool track_variable(const rocket::refcounted_ptr<Variable> &var);
+    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
     Size collect();
   };
 

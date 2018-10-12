@@ -5,6 +5,7 @@
 #define ASTERIA_BLOCK_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
@@ -49,7 +50,7 @@ class Block
     Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const;
     Reference execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 }

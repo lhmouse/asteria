@@ -99,7 +99,7 @@ Reference Block::execute_as_function(Global_context &global, String file, Uint32
     }
   }
 
-void Block::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+void Block::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
   {
     for(const auto &stmt : this->m_stmts) {
       stmt.collect_variables(callback, param);

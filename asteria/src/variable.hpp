@@ -5,11 +5,12 @@
 #define ASTERIA_VARIABLE_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "value.hpp"
 
 namespace Asteria {
 
-class Variable : public Rcbase<Variable>
+class Variable : public rocket::refcounted_base<Variable>
   {
   private:
     Value m_value;

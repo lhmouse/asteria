@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "shared_opaque_wrapper.hpp"
 #include "shared_function_wrapper.hpp"
 
@@ -107,7 +108,7 @@ class Value
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, Size indent_increment = 2, Size indent_next = 0) const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)

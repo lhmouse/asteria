@@ -24,7 +24,7 @@ class Reference_root
       };
     struct S_variable
       {
-        Rcptr<Variable> var;
+        rocket::refcounted_ptr<Variable> var;
       };
 
     enum Index : Uint8
@@ -82,7 +82,7 @@ class Reference_root
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;
 
-    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
+    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
 
 }

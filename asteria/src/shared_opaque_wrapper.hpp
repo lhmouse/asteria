@@ -5,6 +5,7 @@
 #define ASTERIA_SHARED_OPAQUE_WRAPPER_HPP_
 
 #include "fwd.hpp"
+#include "rocket/refcounted_ptr.hpp"
 #include "abstract_opaque.hpp"
 
 namespace Asteria {
@@ -12,7 +13,7 @@ namespace Asteria {
 class Shared_opaque_wrapper
   {
   private:
-    Rcptr<Abstract_opaque> m_ptr;
+    rocket::refcounted_ptr<Abstract_opaque> m_ptr;
 
   public:
     template<typename ElementT, typename std::enable_if<std::is_base_of<Abstract_opaque, typename std::decay<ElementT>::type>::value>::type * = nullptr>
