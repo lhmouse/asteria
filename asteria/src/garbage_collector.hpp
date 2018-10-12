@@ -20,6 +20,11 @@ class Garbage_collector
       }
     ~Garbage_collector();
 
+    Garbage_collector(const Garbage_collector &)
+      = delete;
+    Garbage_collector & operator=(const Garbage_collector &)
+      = delete;
+
   public:
     bool track_variable(const Rcptr<Variable> &var);
     bool untrack_variable(const Rcptr<Variable> &var) noexcept;
