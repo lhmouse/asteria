@@ -5,12 +5,15 @@
 #include "../src/expression.hpp"
 #include "../src/xpnode.hpp"
 #include "../src/statement.hpp"
+#include "../src/global_context.hpp"
 #include "../src/executive_context.hpp"
 
 using namespace Asteria;
 
 int main()
   {
+    Global_context global;
+
     Executive_context ctx;
     auto &cond = ctx.open_named_reference(String::shallow("cond"));
     auto &dval = ctx.open_named_reference(String::shallow("dval"));
@@ -55,7 +58,7 @@ int main()
     }
     auto expr = Expression(std::move(nodes));
 
-    auto result = expr.evaluate(nullptr, ctx);
+    auto result = expr.evaluate(global, ctx);
     auto value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();
@@ -66,7 +69,7 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond.write(D_integer(42));
-    result = expr.evaluate(nullptr, ctx);
+    result = expr.evaluate(global, ctx);
     value = dval.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival.read();

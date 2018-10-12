@@ -23,21 +23,21 @@ void Block::fly_over_in_place(Abstract_context &ctx_io) const
     }
   }
 
-Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context *global_opt) const
+Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &global) const
   {
     Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      auto alt_bnd = stmt.bind_in_place(ctx_io, global_opt);
+      auto alt_bnd = stmt.bind_in_place(ctx_io, global);
       stmts_bnd.emplace_back(std::move(alt_bnd));
     }
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
   {
     for(const auto &stmt : this->m_stmts) {
-      const auto status = stmt.execute_in_place(ref_out, ctx_io, global_opt);
+      const auto status = stmt.execute_in_place(ref_out, ctx_io, global);
       if(status != status_next) {
         return status;
       }
@@ -45,34 +45,34 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     return status_next;
   }
 
-Block Block::bind(const Global_context *global_opt, const Analytic_context &ctx) const
+Block Block::bind(const Global_context &global, const Analytic_context &ctx) const
   {
     Analytic_context ctx_next(&ctx);
-    return this->bind_in_place(ctx_next, global_opt);
+    return this->bind_in_place(ctx_next, global);
   }
 
-Block::Status Block::execute(Reference &ref_out, Global_context *global_opt, const Executive_context &ctx) const
+Block::Status Block::execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
   {
     Executive_context ctx_next(&ctx);
-    return this->execute_in_place(ref_out, ctx_next, global_opt);
+    return this->execute_in_place(ref_out, ctx_next, global);
   }
 
-Instantiated_function Block::instantiate_function(Global_context *global_opt, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const
+Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const
   {
     Analytic_context ctx_next(&ctx);
     ctx_next.initialize_for_function(params);
     // Bind the body recursively.
-    auto body_bnd = this->bind_in_place(ctx_next, global_opt);
+    auto body_bnd = this->bind_in_place(ctx_next, global);
     return Instantiated_function(std::move(file), line, std::move(name), std::move(params), std::move(body_bnd));
   }
 
-Reference Block::execute_as_function(Global_context *global_opt, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const
+Reference Block::execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const
   {
     Executive_context ctx_next(nullptr);
     ctx_next.initialize_for_function(std::move(file), line, std::move(name), params, std::move(self), std::move(args));
     // Execute the body.
     Reference result;
-    const auto status = this->execute_in_place(result, ctx_next, global_opt);
+    const auto status = this->execute_in_place(result, ctx_next, global);
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.
