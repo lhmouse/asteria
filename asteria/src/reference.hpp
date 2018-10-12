@@ -57,6 +57,8 @@ class Reference
 
     Reference & convert_to_temporary();
     Reference & convert_to_variable();
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 }

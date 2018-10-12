@@ -106,6 +106,8 @@ class Value
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, Size indent_increment = 2, Size indent_next = 0) const;
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)

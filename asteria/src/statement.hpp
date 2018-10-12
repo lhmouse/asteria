@@ -76,7 +76,7 @@ class Statement
       {
         String key_name;
         String mapped_name;
-        Expression range_init;
+        Expression init;
         Block body;
       };
     struct S_try
@@ -158,6 +158,8 @@ class Statement
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io, const Global_context *global_opt) const;
     Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context *global_opt) const;
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 }

@@ -81,6 +81,8 @@ class Reference_root
 
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 }

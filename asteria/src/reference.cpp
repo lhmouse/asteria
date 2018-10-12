@@ -120,4 +120,9 @@ Reference & Reference::convert_to_variable()
     return *this;
   }
 
+void Reference::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    this->m_root.collect_variables(callback, param);
+  }
+
 }

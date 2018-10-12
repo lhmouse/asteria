@@ -48,6 +48,8 @@ class Block
 
     Instantiated_function instantiate_function(Global_context *global_opt, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const;
     Reference execute_as_function(Global_context *global_opt, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const;
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 }

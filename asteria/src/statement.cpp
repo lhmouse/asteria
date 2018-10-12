@@ -167,9 +167,9 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, { });
         // Bind the range initializer and loop body recursively.
-        auto range_init_bnd = alt.range_init.bind(global_opt, ctx_next);
+        auto init_bnd = alt.init.bind(global_opt, ctx_next);
         auto body_bnd = alt.body.bind(global_opt, ctx_next);
-        Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(range_init_bnd), std::move(body_bnd) };
+        Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(init_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_try: {
@@ -405,7 +405,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
-        auto mapped = alt.range_init.evaluate(global_opt, ctx_for);
+        auto mapped = alt.init.evaluate(global_opt, ctx_for);
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
           case Value::type_array: {
@@ -569,6 +569,97 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           ref_out.convert_to_temporary();
         }
         return Block::status_return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
+      }
+    }
+  }
+
+void Statement::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    switch(Index(this->m_stor.index())) {
+      case index_expr: {
+        const auto &alt = this->m_stor.as<S_expr>();
+        alt.expr.collect_variables(callback, param);
+        return;
+      }
+      case index_block: {
+        const auto &alt = this->m_stor.as<S_block>();
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_var_def: {
+        const auto &alt = this->m_stor.as<S_var_def>();
+        alt.init.collect_variables(callback, param);
+        return;
+      }
+      case index_func_def: {
+        const auto &alt = this->m_stor.as<S_func_def>();
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_if: {
+        const auto &alt = this->m_stor.as<S_if>();
+        alt.cond.collect_variables(callback, param);
+        alt.branch_true.collect_variables(callback, param);
+        alt.branch_false.collect_variables(callback, param);
+        return;
+      }
+      case index_switch: {
+        const auto &alt = this->m_stor.as<S_switch>();
+        alt.ctrl.collect_variables(callback, param);
+        for(const auto &pair : alt.clauses) {
+          pair.first.collect_variables(callback, param);
+          pair.second.collect_variables(callback, param);
+        }
+        return;
+      }
+      case index_do_while: {
+        const auto &alt = this->m_stor.as<S_do_while>();
+        alt.body.collect_variables(callback, param);
+        alt.cond.collect_variables(callback, param);
+        return;
+      }
+      case index_while: {
+        const auto &alt = this->m_stor.as<S_while>();
+        alt.cond.collect_variables(callback, param);
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_for: {
+        const auto &alt = this->m_stor.as<S_for>();
+        alt.init.collect_variables(callback, param);
+        alt.cond.collect_variables(callback, param);
+        alt.step.collect_variables(callback, param);
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_for_each: {
+        const auto &alt = this->m_stor.as<S_for_each>();
+        alt.init.collect_variables(callback, param);
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_try: {
+        const auto &alt = this->m_stor.as<S_try>();
+        alt.body_try.collect_variables(callback, param);
+        alt.body_catch.collect_variables(callback, param);
+        return;
+      }
+      case index_break:
+      case index_continue: {
+        return;
+      }
+      case index_throw: {
+        const auto &alt = this->m_stor.as<S_throw>();
+        alt.expr.collect_variables(callback, param);
+        return;
+      }
+      case index_return: {
+        const auto &alt = this->m_stor.as<S_return>();
+        alt.expr.collect_variables(callback, param);
+        return;
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
