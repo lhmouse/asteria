@@ -91,19 +91,20 @@ namespace {
 
 }
 
-void Garbage_collector::collect()
+Size Garbage_collector::collect()
   {
     ASTERIA_DEBUG_LOG("GC begins: variable_count = ", this->m_vars.size());
     Gcref_vector gcrefs;
     gcrefs.reserve(this->m_vars.size() * 4);
-    // Find all reachable references.
+    // Add tracked variables.
     for(const auto &root : this->m_vars) {
-      // Add `root` itself.
       do_insert_gcref(&gcrefs, root);
-      // Add all variables reachable from `root`.
+    }
+    // Add variables reachable indirectly from tracked ones.
+    for(const auto &root : this->m_vars) {
       root->get_value().collect_variables(do_insert_gcref, &gcrefs);
     }
-    ASTERIA_DEBUG_LOG("  Number of variables found: ", gcrefs.size());
+    ASTERIA_DEBUG_LOG("  Number of reachable variables in total: ", gcrefs.size());
     // Initialize each gcref counter to the reference count of its variable.
     for(auto it = gcrefs.mut_begin(); it != gcrefs.mut_end(); ++it) {
       it->second = it->first.use_count();
@@ -117,15 +118,18 @@ void Garbage_collector::collect()
       pair.first->get_value().collect_variables(do_decrement_gcref, &gcrefs);
     }
     // Collect each variable whose gcref counter equals one.
+    Size ncollected = 0;
     for(const auto &pair : gcrefs) {
       if(pair.second > 1) {
         continue;
       }
-      ASTERIA_DEBUG_LOG("  Collecting unreachale variable: ", pair.first->get_value());
+      ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", pair.first->get_value());
       pair.first->reset(D_null(), false);
       this->untrack_variable(pair.first);
+      ++ncollected;
     }
     ASTERIA_DEBUG_LOG("GC ends: variable_count = ", this->m_vars.size());
+    return ncollected;
   }
 
 }
