@@ -23,7 +23,7 @@ bool Garbage_collector::track_variable(const rocket::refcounted_ptr<Variable> &v
     }
     if((this->m_vars.size() > 127) && (this->m_vars.size() == this->m_vars.capacity())) {
       ASTERIA_DEBUG_LOG("Performing automatic garbage collection: variable_count = ", this->m_vars.size());
-      this->collect();
+      this->collect(false);
     }
     this->m_vars.insert(range.second, var);
     return true;
@@ -61,10 +61,10 @@ namespace {
 
 }
 
-void Garbage_collector::collect()
+void Garbage_collector::collect(bool unreserve)
   {
     // https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
-    ASTERIA_DEBUG_LOG("GC begins: variable_count = ", this->m_vars.size());
+    ASTERIA_DEBUG_LOG("Garbage collection begins.");
     // Define some common functions.
     const auto gather_gcref =
       [](void *param, const rocket::refcounted_ptr<Variable> &var)
@@ -119,7 +119,21 @@ void Garbage_collector::collect()
       pair.first->reset(D_null(), false);
       this->untrack_variable(pair.first);
     }
-    ASTERIA_DEBUG_LOG("GC ends: variable_count = ", this->m_vars.size());
+    ASTERIA_DEBUG_LOG("  Number of variables uncollected in total: ", this->m_vars.size());
+    // Transfer surviving variables to the tied collector, if any.
+    const auto tied = this->m_tied_opt;
+    if(tied) {
+      while(!this->m_vars.empty()) {
+        tied->track_variable(this->m_vars.back());
+        this->m_vars.pop_back();
+      }
+    }
+    // Dispose reserved storage if requested.
+    if(unreserve) {
+      this->m_vars.shrink_to_fit();
+      this->m_gcrefs.shrink_to_fit();
+    }
+    ASTERIA_DEBUG_LOG("Garbage collection ends.");
   }
 
 }
