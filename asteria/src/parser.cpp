@@ -703,7 +703,25 @@ namespace {
         }
     };
 
-  bool do_accept_infix_head(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  struct Infix_element_deleter
+    {
+      constexpr Infix_element_base * null() const noexcept
+        {
+          return nullptr;
+        }
+      constexpr bool is_null(Infix_element_base *elem) const noexcept
+        {
+          return !elem;
+        }
+      void close(Infix_element_base *elem) const noexcept
+        {
+          delete elem;
+        }
+    };
+
+  using Infix_element_ptr = rocket::unique_handle<Infix_element_base *, Infix_element_deleter>;
+
+  bool do_accept_infix_head(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       Vector<Xpnode> nodes;
       if(!do_accept_infix_element(nodes, tstrm_io)) {
@@ -776,7 +794,7 @@ namespace {
         }
     };
 
-  bool do_accept_infix_selection_quest(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_quest(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -800,7 +818,7 @@ namespace {
       return true;
     }
 
-  bool do_accept_infix_selection_and(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_and(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
@@ -817,7 +835,7 @@ namespace {
       return true;
     }
 
-  bool do_accept_infix_selection_or(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_or(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
@@ -834,7 +852,7 @@ namespace {
       return true;
     }
 
-  bool do_accept_infix_selection_coales(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_coales(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -927,7 +945,7 @@ namespace {
         }
     };
 
-  bool do_accept_infix_operator(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_operator(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
     {
       // infix-operator ::=
       //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1103,11 +1121,11 @@ namespace {
       // infix-selection ::=
       //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
       //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
-      std::unique_ptr<Infix_element_base> elem;
+      Infix_element_ptr elem;
       if(!do_accept_infix_head(elem, tstrm_io)) {
         return false;
       }
-      Vector<std::unique_ptr<Infix_element_base>> stack;
+      Vector<Infix_element_ptr> stack;
       stack.emplace_back(std::move(elem));
       for(;;) {
         bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||

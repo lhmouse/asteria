@@ -42,6 +42,7 @@
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/refcounted_ptr.hpp"
+#include "rocket/unique_handle.hpp"
 
 namespace Asteria {
 
