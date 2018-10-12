@@ -23,7 +23,7 @@ class Garbage_collector
   public:
     bool track_variable(const Rcptr<Variable> &var);
     bool untrack_variable(const Rcptr<Variable> &var) noexcept;
-    void collect();
+    Size collect();
   };
 
 }
