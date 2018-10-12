@@ -647,7 +647,7 @@ namespace {
       return true;
     }
 
-  class Infix_element_base
+  class Infix_element_base : public rocket::refcounted_base<Infix_element_base>
     {
     public:
       enum Precedence : Uint8
@@ -703,31 +703,13 @@ namespace {
         }
     };
 
-  struct Infix_element_deleter
-    {
-      constexpr Infix_element_base * null() const noexcept
-        {
-          return nullptr;
-        }
-      constexpr bool is_null(Infix_element_base *elem) const noexcept
-        {
-          return !elem;
-        }
-      void close(Infix_element_base *elem) const noexcept
-        {
-          delete elem;
-        }
-    };
-
-  using Infix_element_ptr = rocket::unique_handle<Infix_element_base *, Infix_element_deleter>;
-
-  bool do_accept_infix_head(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_head(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       Vector<Xpnode> nodes;
       if(!do_accept_infix_element(nodes, tstrm_io)) {
         return false;
       }
-      elem_out.reset(new Infix_head(std::move(nodes)));
+      elem_out = rocket::make_refcounted<Infix_head>(std::move(nodes));
       return true;
     }
 
@@ -794,7 +776,7 @@ namespace {
         }
     };
 
-  bool do_accept_infix_selection_quest(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_quest(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -814,11 +796,11 @@ namespace {
       if(!do_accept_infix_element(branch_false, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_selection(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false)));
+      elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false));
       return true;
     }
 
-  bool do_accept_infix_selection_and(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_and(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
@@ -831,11 +813,11 @@ namespace {
       if(!do_accept_infix_element(branch_true, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_selection(Infix_selection::sop_and, assign, std::move(branch_true), Vector<Xpnode>()));
+      elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_and, assign, std::move(branch_true), Vector<Xpnode>());
       return true;
     }
 
-  bool do_accept_infix_selection_or(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_or(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
@@ -848,11 +830,11 @@ namespace {
       if(!do_accept_infix_element(branch_false, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_false)));
+      elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_false));
       return true;
     }
 
-  bool do_accept_infix_selection_coales(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_selection_coales(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       bool assign = false;
       if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -865,7 +847,7 @@ namespace {
       if(!do_accept_infix_element(branch_null, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_selection(Infix_selection::sop_coales, assign, Vector<Xpnode>(), std::move(branch_null)));
+      elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_coales, assign, Vector<Xpnode>(), std::move(branch_null));
       return true;
     }
 
@@ -945,7 +927,7 @@ namespace {
         }
     };
 
-  bool do_accept_infix_operator(Infix_element_ptr &elem_out, Token_stream &tstrm_io)
+  bool do_accept_infix_operator(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
     {
       // infix-operator ::=
       //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1106,7 +1088,7 @@ namespace {
       if(!do_accept_infix_element(rhs, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
       }
-      elem_out.reset(new Infix_operator(xop, assign, std::move(rhs)));
+      elem_out = rocket::make_refcounted<Infix_operator>(xop, assign, std::move(rhs));
       return true;
     }
 
@@ -1121,11 +1103,11 @@ namespace {
       // infix-selection ::=
       //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
       //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
-      Infix_element_ptr elem;
+      rocket::refcounted_ptr<Infix_element_base> elem;
       if(!do_accept_infix_head(elem, tstrm_io)) {
         return false;
       }
-      Vector<Infix_element_ptr> stack;
+      Vector<rocket::refcounted_ptr<Infix_element_base>> stack;
       stack.emplace_back(std::move(elem));
       for(;;) {
         bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
