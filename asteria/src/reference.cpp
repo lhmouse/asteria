@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "reference.hpp"
+#include "global_context.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -108,13 +109,14 @@ Reference & Reference::convert_to_temporary()
     return *this;
   }
 
-Reference & Reference::convert_to_variable()
+Reference & Reference::convert_to_variable(Global_context &global)
   {
     if(this->m_root.index() == Reference_root::index_variable) {
       return *this;
     }
     // Create an lvalue by allocating a variable and assign it to `*this`.
-    auto var = rocket::make_refcounted<Variable>(this->read(), false);
+    auto var = global.create_tracked_variable();
+    var->reset(this->read(), false);
     Reference_root::S_variable ref_c = { std::move(var) };
     *this = std::move(ref_c);
     return *this;

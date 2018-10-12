@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
+#include "garbage_collector.hpp"
 
 namespace Asteria {
 
@@ -20,6 +21,8 @@ class Global_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
+
+    rocket::refcounted_ptr<Variable> create_tracked_variable();
   };
 
 }

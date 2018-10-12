@@ -3,6 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../src/reference.hpp"
+#include "../src/global_context.hpp"
 
 using namespace Asteria;
 
@@ -29,7 +30,8 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(ref.write(D_boolean(true)));
 
-    ref.convert_to_variable();
+    Global_context global;
+    ref.convert_to_variable(global);
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);
@@ -39,7 +41,7 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_boolean>() == true);
 
     ref = Reference_root::S_temporary { D_null() };
-    ref.convert_to_variable();
+    ref.convert_to_variable(global);
     ref.zoom_in(Reference_modifier::S_array_index { -3 });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);
