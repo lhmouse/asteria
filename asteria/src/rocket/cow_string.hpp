@@ -706,14 +706,14 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string & operator=(const basic_cow_string &other) noexcept
         {
-          this->assign(other);
           allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+          this->assign(other);
           return *this;
         }
       basic_cow_string & operator=(basic_cow_string &&other) noexcept
         {
-          this->assign(::std::move(other));
           allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
+          this->assign(::std::move(other));
           return *this;
         }
       basic_cow_string & operator=(initializer_list<value_type> init)
@@ -1419,10 +1419,10 @@ template<typename charT, typename traitsT, typename allocatorT>
 
       void swap(basic_cow_string &other) noexcept
         {
+          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
           this->m_sth.exchange_with(other.m_sth);
           ::std::swap(this->m_ptr, other.m_ptr);
           ::std::swap(this->m_len, other.m_len);
-          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         }
 
       // 24.3.2.7, string operations
