@@ -6,6 +6,7 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::pair<>
+#include <array> // std::array<>
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include "rocket/preprocessor_utilities.h"
@@ -35,6 +36,8 @@ using Diff      = std::ptrdiff_t;
 using Xfloat    = long double;
 using String    = rocket::cow_string;
 
+template<typename ElementT, Size sizeT>
+  using Array = std::array<ElementT, sizeT>;
 template<typename ElementT>
   using Vector = rocket::cow_vector<ElementT>;
 template<typename FirstT, typename SecondT>
