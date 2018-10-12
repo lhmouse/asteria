@@ -56,4 +56,31 @@ Value & Reference_root::dereference_mutable() const
     }
   }
 
+void Reference_root::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    switch(this->index()) {
+      case index_constant: {
+        const auto &alt = this->check<S_constant>();
+        alt.src.collect_variables(callback, param);
+        return;
+      }
+      case index_temporary: {
+        const auto &alt = this->check<S_temporary>();
+        alt.value.collect_variables(callback, param);
+        return;
+      }
+      case index_variable: {
+        const auto &alt = this->check<S_variable>();
+        if((*callback)(param, alt.var)) {
+          // Descend into this variable recursively when the callback returns `true`.
+          alt.var->get_value().collect_variables(callback, param);
+        }
+        return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
+      }
+    }
+  }
+
 }

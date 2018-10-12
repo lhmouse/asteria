@@ -266,4 +266,40 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
     }
   }
 
+void Value::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    switch(this->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real:
+      case type_string:
+      case type_opaque: {
+        return;
+      }
+      case type_function: {
+        const auto &alt = this->check<D_function>();
+        alt->collect_variables(callback, param);
+        return;
+      }
+      case type_array: {
+        const auto &alt = this->check<D_array>();
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
+          it->collect_variables(callback, param);
+        }
+        return;
+      }
+      case type_object: {
+        const auto &alt = this->check<D_object>();
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
+          it->second.collect_variables(callback, param);
+        }
+        return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      }
+    }
+  }
+
 }

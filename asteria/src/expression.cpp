@@ -55,4 +55,11 @@ Reference Expression::evaluate(Global_context *global_opt, const Executive_conte
     return std::move(stack.mut_back());
   }
 
+void Expression::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    for(const auto &node : this->m_nodes) {
+      node.collect_variables(callback, param);
+    }
+  }
+
 }

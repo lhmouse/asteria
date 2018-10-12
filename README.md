@@ -25,9 +25,8 @@
 5. Regular grammar.
 6. Pass-by-reference function arguments.  
 Return values are passed by value by default, but can also be passed by reference using the `return&` syntax.
-7. No garbage collector.  
-Objects are managed using referencing counting.  
-Primitive types have been designed in such a way that circular reference is impossible.
+7. Minimal garbage collection support.
+Objects are managed using referencing counting. Primitive types are copy-on-write hence circular reference is impossible.
 
 # License
 

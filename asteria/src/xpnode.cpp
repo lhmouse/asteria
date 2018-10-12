@@ -1268,4 +1268,49 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context *global_opt, c
     }
   }
 
+void Xpnode::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    switch(Index(this->m_stor.index())) {
+      case index_literal: {
+        const auto &alt = this->m_stor.as<S_literal>();
+        alt.value.collect_variables(callback, param);
+        return;
+      }
+      case index_named_reference: {
+        return;
+      }
+      case index_bound_reference: {
+        const auto &alt = this->m_stor.as<S_bound_reference>();
+        alt.ref.collect_variables(callback, param);
+        return;
+      }
+      case index_closure_function: {
+        const auto &alt = this->m_stor.as<S_closure_function>();
+        alt.body.collect_variables(callback, param);
+        return;
+      }
+      case index_branch: {
+        const auto &alt = this->m_stor.as<S_branch>();
+        alt.branch_true.collect_variables(callback, param);
+        alt.branch_false.collect_variables(callback, param);
+        return;
+      }
+      case index_function_call:
+      case index_subscript:
+      case index_operator_rpn:
+      case index_unnamed_array:
+      case index_unnamed_object: {
+        return;
+      }
+      case index_coalescence: {
+        const auto &alt = this->m_stor.as<S_coalescence>();
+        alt.branch_null.collect_variables(callback, param);
+        return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
+      }
+    }
+  }
+
 }

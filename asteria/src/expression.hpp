@@ -29,6 +29,8 @@ class Expression
     bool empty() const noexcept;
     bool evaluate_partial(Vector<Reference> &stack_io, Global_context *global_opt, const Executive_context &ctx) const;
     Reference evaluate(Global_context *global_opt, const Executive_context &ctx) const;
+
+    void collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const;
   };
 
 }

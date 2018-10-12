@@ -99,4 +99,11 @@ Reference Block::execute_as_function(Global_context *global_opt, String file, Ui
     }
   }
 
+void Block::collect_variables(bool (*callback)(void *, const Rcptr<Variable> &), void *param) const
+  {
+    for(const auto &stmt : this->m_stmts) {
+      stmt.collect_variables(callback, param);
+    }
+  }
+
 }

@@ -75,6 +75,7 @@ class Reference_root;
 class Reference_modifier;
 class Reference;
 class Variable;
+class Garbage_collector;
 class Abstract_context;
 class Analytic_context;
 class Executive_context;
