@@ -13,12 +13,14 @@ class Garbage_collector : public rocket::refcounted_base<Garbage_collector>
   {
   private:
     Garbage_collector *m_tied_opt;
+
     Vector<rocket::refcounted_ptr<Variable>> m_vars;  // This is a flat map.
     Bivector<rocket::refcounted_ptr<Variable>, long> m_gcrefs;  // This is a flat map.
 
   public:
     Garbage_collector() noexcept
-      : m_tied_opt(nullptr), m_vars(), m_gcrefs()
+      : m_tied_opt(nullptr),
+        m_vars(), m_gcrefs()
       {
       }
     ~Garbage_collector();
