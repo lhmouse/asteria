@@ -88,13 +88,8 @@ void Garbage_collector::collect(bool unreserve)
           return false;
         };
     // Add variables that are either tracked or reachable indirectly from tracked ones.
-    this->m_gcrefs.clear();
-    this->m_gcrefs.reserve(this->m_vars.size() * 4);
     for(const auto &root : this->m_vars) {
-      // Note that `m_vars` is sorted.
-      this->m_gcrefs.emplace_back(root, 0);
-    }
-    for(const auto &root : this->m_vars) {
+      gather_gcref(this, root);
       root->get_value().collect_variables(gather_gcref, this);
     }
     ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_gcrefs.size());
@@ -110,19 +105,21 @@ void Garbage_collector::collect(bool unreserve)
       decrement_gcref(this, pair.first);
       pair.first->get_value().collect_variables(decrement_gcref, this);
     }
-    // Collect each variable whose gcref counter is zero.
-    for(const auto &pair : this->m_gcrefs) {
-      if(pair.second > 0) {
-        continue;
+    // Collect each variable whose gcref counter has reached zero.
+    while(!this->m_gcrefs.empty()) {
+      const auto &pair = this->m_gcrefs.back();
+      if(pair.second <= 0) {
+        ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", pair.first->get_value());
+        pair.first->reset(D_null(), false);
+        this->untrack_variable(pair.first);
       }
-      ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", pair.first->get_value());
-      pair.first->reset(D_null(), false);
-      this->untrack_variable(pair.first);
+      this->m_gcrefs.pop_back();
     }
     ASTERIA_DEBUG_LOG("  Number of variables uncollected in total: ", this->m_vars.size());
     // Transfer surviving variables to the tied collector, if any.
     const auto tied = this->m_tied_opt;
     if(tied) {
+      // Take care about exception safety.
       while(!this->m_vars.empty()) {
         tied->track_variable(this->m_vars.back());
         this->m_vars.pop_back();
