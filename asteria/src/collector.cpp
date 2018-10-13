@@ -16,14 +16,14 @@ Collector::~Collector()
 bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
     ROCKET_ASSERT(var);
+    if((this->m_vars.size() > 127) && (this->m_vars.size() == this->m_vars.capacity())) {
+      ASTERIA_DEBUG_LOG("Performing automatic garbage collection: variable_count = ", this->m_vars.size());
+      this->collect(false);
+    }
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
     if(range.first != range.second) {
       // The variable already exists.
       return false;
-    }
-    if((this->m_vars.size() > 127) && (this->m_vars.size() == this->m_vars.capacity())) {
-      ASTERIA_DEBUG_LOG("Performing automatic garbage collection: variable_count = ", this->m_vars.size());
-      this->collect(false);
     }
     this->m_vars.insert(range.second, var);
     return true;

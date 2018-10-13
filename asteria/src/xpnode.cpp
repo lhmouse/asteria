@@ -121,20 +121,21 @@ namespace {
 
   std::pair<std::reference_wrapper<const Abstract_context>, Reference> do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
     {
-      // Look for the name in `ctx` and its ancestors.
-      for(auto qctx = &ctx; qctx; qctx = qctx->get_parent_opt()) {
+      auto spare = &global;
+      auto qctx = &ctx;
+      for(;;) {
         const auto qref = qctx->get_named_reference_opt(name);
         if(qref) {
           return std::make_pair(std::ref(*qctx), *qref);
         }
+        qctx = qctx->get_parent_opt();
+        if(!qctx) {
+          qctx = rocket::exchange(spare, nullptr);
+          if(!qctx) {
+            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
+          }
+        }
       }
-      // Look for the name in `global`.
-      const auto qref = global.get_named_reference_opt(name);
-      if(qref) {
-        return std::make_pair(std::ref(global), *qref);
-      }
-      // Not found...
-      ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
     }
 
 }

@@ -17,8 +17,8 @@ class Collector
     Bivector<rocket::refcounted_ptr<Variable>, long> m_gcrefs;  // This is a flat map.
 
   public:
-    Collector() noexcept
-      : m_tied_opt(nullptr), m_vars(), m_gcrefs()
+    explicit Collector(Collector *tied_opt) noexcept
+      : m_tied_opt(tied_opt), m_vars(), m_gcrefs()
       {
       }
     ~Collector();

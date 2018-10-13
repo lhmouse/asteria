@@ -28,9 +28,9 @@ int main()
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
+    Global_context global;
     Reference result;
     Executive_context ctx;
-    Global_context global;
     code.execute_in_place(result, ctx, global);
     ASTERIA_TEST_CHECK(result.read().check<D_integer>() == 90);
   }
