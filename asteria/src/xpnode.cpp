@@ -152,7 +152,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
       case index_named_reference: {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
-        if(ctx.is_name_reserved(alt.name)) {
+        if(Abstract_context::is_name_reserved(alt.name)) {
           // Copy it as-is.
           Xpnode::S_named_reference alt_bnd = { alt.name };
           return std::move(alt_bnd);

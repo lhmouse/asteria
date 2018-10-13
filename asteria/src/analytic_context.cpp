@@ -28,7 +28,7 @@ void Analytic_context::initialize_for_function(const Vector<String> &params)
       if(param.empty()) {
         continue;
       }
-      if(this->is_name_reserved(param)) {
+      if(Abstract_context::is_name_reserved(param)) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       this->set_named_reference(param, { });
