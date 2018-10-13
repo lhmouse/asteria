@@ -74,6 +74,7 @@ pkginclude_HEADERS =  \
   asteria/src/analytic_context.hpp  \
   asteria/src/executive_context.hpp  \
   asteria/src/global_context.hpp  \
+  asteria/src/global_collector.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/expression.hpp  \
   asteria/src/statement.hpp  \
@@ -99,6 +100,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/analytic_context.cpp  \
   asteria/src/executive_context.cpp  \
   asteria/src/global_context.cpp  \
+  asteria/src/global_collector.cpp  \
   asteria/src/variadic_arguer.cpp  \
   asteria/src/xpnode.cpp  \
   asteria/src/expression.cpp  \
