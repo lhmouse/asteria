@@ -6,20 +6,16 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
-#include "global_collector.hpp"
 
 namespace Asteria {
 
 class Global_context : public Abstract_context
   {
   private:
-    rocket::refcounted_ptr<Global_collector> m_collector_opt;
+    rocket::refcounted_ptr<Global_collector> m_coll;
 
   public:
-    Global_context() noexcept
-      : m_collector_opt()
-      {
-      }
+    Global_context();
     ~Global_context();
 
   public:

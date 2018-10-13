@@ -9,11 +9,7 @@
 namespace Asteria {
 
 Global_collector::~Global_collector()
-  try {
-    this->perform_garbage_collection(100, true);
-  } catch(std::exception &e) {
-    ASTERIA_DEBUG_LOG("An exception was thrown while performing the final GC and some variables might have leaked: ", e.what());
-    return;
+  {
   }
 
 rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable()

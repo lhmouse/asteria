@@ -46,7 +46,7 @@ void Executive_context::initialize_for_function(Global_context &global, String f
       if(param.empty()) {
         continue;
       }
-      if(is_name_reserved(param)) {
+      if(this->is_name_reserved(param)) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       this->set_named_reference(param, std::move(ref.convert_to_variable(global)));

@@ -14,10 +14,13 @@ Reference::~Reference()
 
 Reference::Reference(const Reference &) noexcept
   = default;
+
 Reference & Reference::operator=(const Reference &) noexcept
   = default;
+
 Reference::Reference(Reference &&) noexcept
   = default;
+
 Reference & Reference::operator=(Reference &&) noexcept
   = default;
 
