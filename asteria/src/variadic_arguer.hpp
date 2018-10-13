@@ -5,9 +5,9 @@
 #define ASTERIA_VARIADIC_ARGUER_HPP_
 
 #include "fwd.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "abstract_function.hpp"
 #include "reference.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

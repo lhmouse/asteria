@@ -5,12 +5,12 @@
 #define ASTERIA_XPNODE_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 #include "expression.hpp"
 #include "block.hpp"
+#include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

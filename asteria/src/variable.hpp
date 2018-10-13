@@ -5,8 +5,8 @@
 #define ASTERIA_VARIABLE_HPP_
 
 #include "fwd.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "value.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

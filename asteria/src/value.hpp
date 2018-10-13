@@ -5,10 +5,10 @@
 #define ASTERIA_VALUE_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "shared_opaque_wrapper.hpp"
 #include "shared_function_wrapper.hpp"
+#include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

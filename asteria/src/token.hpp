@@ -5,8 +5,8 @@
 #define ASTERIA_TOKEN_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
 #include "parser_error.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 

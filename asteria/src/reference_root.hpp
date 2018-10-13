@@ -5,9 +5,9 @@
 #define ASTERIA_REFERENCE_ROOT_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
 #include "value.hpp"
 #include "variable.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 

@@ -5,9 +5,9 @@
 #define ASTERIA_TOKEN_STREAM_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
 #include "parser_error.hpp"
 #include "token.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 

@@ -5,8 +5,8 @@
 #define ASTERIA_SHARED_FUNCTION_WRAPPER_HPP_
 
 #include "fwd.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "abstract_function.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

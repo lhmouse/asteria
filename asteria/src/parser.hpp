@@ -5,9 +5,9 @@
 #define ASTERIA_PARSER_HPP_
 
 #include "fwd.hpp"
-#include "rocket/variant.hpp"
 #include "parser_error.hpp"
 #include "block.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 

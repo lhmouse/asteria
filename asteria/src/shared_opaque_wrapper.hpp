@@ -5,8 +5,8 @@
 #define ASTERIA_SHARED_OPAQUE_WRAPPER_HPP_
 
 #include "fwd.hpp"
-#include "rocket/refcounted_ptr.hpp"
 #include "abstract_opaque.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
