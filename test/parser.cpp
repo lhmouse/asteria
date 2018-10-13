@@ -8,7 +8,6 @@
 #include "../src/executive_context.hpp"
 #include "../src/reference.hpp"
 #include "../src/exception.hpp"
-#include "../src/garbage_collector.hpp"
 #include <sstream>
 
 using namespace Asteria;

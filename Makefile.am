@@ -68,7 +68,7 @@ pkginclude_HEADERS =  \
   asteria/src/reference_modifier.hpp  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp  \
-  asteria/src/garbage_collector.hpp  \
+  asteria/src/collector.hpp  \
   asteria/src/exception.hpp  \
   asteria/src/abstract_context.hpp  \
   asteria/src/analytic_context.hpp  \
@@ -93,7 +93,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/reference_modifier.cpp  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp  \
-  asteria/src/garbage_collector.cpp  \
+  asteria/src/collector.cpp  \
   asteria/src/exception.cpp  \
   asteria/src/abstract_context.cpp  \
   asteria/src/analytic_context.cpp  \

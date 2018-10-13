@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
-#include "garbage_collector.hpp"
+#include "collector.hpp"
 
 namespace Asteria {
 

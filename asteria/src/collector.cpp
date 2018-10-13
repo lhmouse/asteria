@@ -2,18 +2,18 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
-#include "garbage_collector.hpp"
+#include "collector.hpp"
 #include "variable.hpp"
 #include "utilities.hpp"
 #include <algorithm>
 
 namespace Asteria {
 
-Garbage_collector::~Garbage_collector()
+Collector::~Collector()
   {
   }
 
-bool Garbage_collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
+bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
     ROCKET_ASSERT(var);
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
@@ -29,7 +29,7 @@ bool Garbage_collector::track_variable(const rocket::refcounted_ptr<Variable> &v
     return true;
   }
 
-bool Garbage_collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
+bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
   {
     ROCKET_ASSERT(this->m_vars.unique());
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
@@ -61,7 +61,7 @@ namespace {
 
 }
 
-void Garbage_collector::collect(bool unreserve)
+void Collector::collect(bool unreserve)
   {
     // https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     ASTERIA_DEBUG_LOG("Garbage collection begins.");
@@ -69,7 +69,7 @@ void Garbage_collector::collect(bool unreserve)
     const auto gather_gcref =
       [](void *param, const rocket::refcounted_ptr<Variable> &var)
         {
-          const auto self = static_cast<Garbage_collector *>(param);
+          const auto self = static_cast<Collector *>(param);
           const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
           if(range.first != range.second) {
             return false;
@@ -80,7 +80,7 @@ void Garbage_collector::collect(bool unreserve)
     const auto decrement_gcref =
       [](void *param, const rocket::refcounted_ptr<Variable> &var)
         {
-          const auto self = static_cast<Garbage_collector *>(param);
+          const auto self = static_cast<Collector *>(param);
           const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
           if(range.first != range.second) {
             --(range.first->second);
