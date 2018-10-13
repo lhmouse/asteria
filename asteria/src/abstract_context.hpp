@@ -5,14 +5,12 @@
 #define ASTERIA_ABSTRACT_CONTEXT_HPP_
 
 #include "fwd.hpp"
+#include "reference.hpp"
 
 namespace Asteria {
 
 class Abstract_context
   {
-  public:
-    static bool is_name_reserved(const String &name) noexcept;
-
   private:
     Dictionary<Reference> m_named_refs;
 
@@ -35,10 +33,9 @@ class Abstract_context
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
 
-    const Reference * get_named_reference_opt(const String &name) const noexcept;
-    Reference * get_named_reference_opt(const String &name);
-    Reference & open_named_reference(const String &name);
-    void set_named_reference(const String &name, Reference ref);
+    virtual bool is_name_reserved(const String &name) const noexcept;
+    virtual const Reference * get_named_reference_opt(const String &name) const noexcept;
+    virtual void set_named_reference(const String &name, Reference ref);
   };
 
 }

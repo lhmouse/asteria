@@ -25,7 +25,7 @@ namespace {
       if(name.empty()) {
         return;
       }
-      if(Abstract_context::is_name_reserved(name)) {
+      if(ctx_io.is_name_reserved(name)) {
         ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
       }
       ctx_io.set_named_reference(name, std::move(ref));
