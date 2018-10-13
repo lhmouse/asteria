@@ -61,6 +61,7 @@ class Parser_error;
 class Token;
 class Token_stream;
 class Parser;
+class Single_source_file;
 
 // Runtime Objects
 class Value;

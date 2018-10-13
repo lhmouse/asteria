@@ -83,7 +83,8 @@ pkginclude_HEADERS =  \
   asteria/src/parser_error.hpp  \
   asteria/src/token.hpp  \
   asteria/src/token_stream.hpp  \
-  asteria/src/parser.hpp
+  asteria/src/parser.hpp  \
+  asteria/src/simple_source_file.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
@@ -110,7 +111,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/parser_error.cpp  \
   asteria/src/token.cpp  \
   asteria/src/token_stream.cpp  \
-  asteria/src/parser.cpp
+  asteria/src/parser.cpp  \
+  asteria/src/simple_source_file.cpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
@@ -134,6 +136,7 @@ check_PROGRAMS = \
   test/expression.test  \
   test/block.test  \
   test/token_stream.test  \
-  test/parser.test
+  test/parser.test  \
+  test/simple_source_file.test
 
 TESTS = ${check_PROGRAMS}

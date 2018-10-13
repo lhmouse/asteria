@@ -19,6 +19,11 @@ class Global_context : public Abstract_context
     Global_context();
     ~Global_context();
 
+    Global_context(const Global_context &)
+      = delete;
+    Global_context & operator=(const Global_context &)
+      = delete;
+
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;

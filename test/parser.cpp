@@ -15,22 +15,28 @@ using namespace Asteria;
 int main()
   {
     std::istringstream iss(R"__(
-      var one = 1;
-      const two = 2;
-      func fib(n) {
-        return n <= one ? one : fib(n - one) + fib(n - two);
+      func third() {
+        throw "meow";
       }
-      return fib(10) + one;
+      func second() {
+        return third();
+      }
+      func first() {
+        return second();
+      }
+      try {
+        first();
+      } catch(e) {
+        return e;
+      }
     )__");
     Token_stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("my_file")));
+    ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
     Global_context global;
-    Reference result;
-    Executive_context ctx;
-    code.execute_in_place(result, ctx, global);
-    ASTERIA_TEST_CHECK(result.read().check<D_integer>() == 90);
+    auto res = code.execute_as_function(global, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
+    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

@@ -58,13 +58,13 @@ Block::Status Block::execute(Reference &ref_out, Global_context &global, const E
     return this->execute_in_place(ref_out, ctx_next, global);
   }
 
-Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, Vector<String> params) const
+Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, const Vector<String> &params) const
   {
     Analytic_context ctx_next(&ctx);
     ctx_next.initialize_for_function(params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Instantiated_function(std::move(file), line, std::move(name), std::move(params), std::move(body_bnd));
+    return Instantiated_function(std::move(file), line, std::move(name), params, std::move(body_bnd));
   }
 
 Reference Block::execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const
