@@ -13,21 +13,17 @@ using namespace Asteria;
 int main()
   {
     Global_context global;
-
     Executive_context ctx;
-    auto &cond = ctx.open_named_reference(String::shallow("cond"));
-    auto &dval = ctx.open_named_reference(String::shallow("dval"));
-    auto &ival = ctx.open_named_reference(String::shallow("ival"));
-    auto &aval = ctx.open_named_reference(String::shallow("aval"));
 
-    dval = Reference_root::S_constant { D_real(1.5) };
-    ival = Reference_root::S_constant { D_integer(3) };
-    aval = Reference_root::S_constant { D_array() };
+    const auto cond = rocket::make_refcounted<Variable>();
+    const auto dval = rocket::make_refcounted<Variable>(D_real(1.5), false);
+    const auto ival = rocket::make_refcounted<Variable>(D_integer(3), false);
+    const auto aval = rocket::make_refcounted<Variable>(D_array(), false);
 
-    cond.convert_to_variable(global);
-    dval.convert_to_variable(global);
-    ival.convert_to_variable(global);
-    aval.convert_to_variable(global);
+    ctx.set_named_reference(String::shallow("cond"), Reference_root::S_variable { cond });
+    ctx.set_named_reference(String::shallow("dval"), Reference_root::S_variable { dval });
+    ctx.set_named_reference(String::shallow("ival"), Reference_root::S_variable { ival });
+    ctx.set_named_reference(String::shallow("aval"), Reference_root::S_variable { aval });
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr
@@ -59,22 +55,22 @@ int main()
     auto expr = Expression(std::move(nodes));
 
     auto result = expr.evaluate(global, ctx);
-    auto value = dval.read();
+    auto value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
-    value = ival.read();
+    value = ival->get_value();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
-    value = aval.read();
+    value = aval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_real>() == 1.75);
     value = result.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
-    cond.write(D_integer(42));
+    cond->set_value(D_integer(42));
     result = expr.evaluate(global, ctx);
-    value = dval.read();
+    value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
-    value = ival.read();
+    value = ival->get_value();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
-    value = aval.read();
+    value = aval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == "hello,hello,hello,");
     value = result.read();
     ASTERIA_TEST_CHECK(value.check<D_string>() == "hello,hello,hello,");

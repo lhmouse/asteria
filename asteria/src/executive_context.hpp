@@ -13,6 +13,11 @@ class Executive_context : public Abstract_context
   {
   private:
     const Executive_context *m_parent_opt;
+    Reference m_file;
+    Reference m_line;
+    Reference m_func;
+    Reference m_self;
+    Reference m_varg;
 
   public:
     explicit Executive_context(const Executive_context *parent_opt = nullptr) noexcept
@@ -24,6 +29,8 @@ class Executive_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Executive_context * get_parent_opt() const noexcept override;
+
+    const Reference * get_named_reference_opt(const String &name) const noexcept override;
 
     void initialize_for_function(Global_context &global, String file, Uint32 line, String func, const Vector<String> &params, Reference self, Vector<Reference> args);
   };
