@@ -1698,8 +1698,9 @@ bool Parser::load(Token_stream &tstrm_io)
     this->m_stor.set(std::move(stmts));
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
-    ASTERIA_DEBUG_LOG("Parser error: line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(),
-                      ", code = ", err.code(), " (", Parser_error::get_code_description(err.code()), ")");
+    ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
+                      "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
+                      "code = ", err.code(), ": ", Parser_error::get_code_description(err.code()));
     this->m_stor.set(std::move(err));
     return false;
   }

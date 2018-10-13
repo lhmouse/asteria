@@ -583,11 +583,11 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         }
         // This is the `this` reference.
         auto self = std::move(tgt.zoom_out());
-        ASTERIA_DEBUG_LOG("Beginning function call at \'", alt.file, ':', alt.line, "\'...\n",
+        ASTERIA_DEBUG_LOG("Beginning function call at \'", alt.file, ':', alt.line, "\':\n",
                           qfunc->get()->describe());
         try {
           tgt = qfunc->get()->invoke(global, std::move(self), std::move(args));
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.file, ':', alt.line, "\'...");
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.file, ':', alt.line, "\'.");
         } catch(Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.file, ':', alt.line, "\': value = ", except.get_value());
           // Append backtrace information and rethrow the exception.

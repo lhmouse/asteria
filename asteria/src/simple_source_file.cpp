@@ -13,8 +13,9 @@ namespace {
 
   [[noreturn]] void do_throw_parser_error(const Parser_error &err)
     {
-      ASTERIA_THROW_RUNTIME_ERROR("There was an error in source data: line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(),
-                                  ", code = ", err.code(), " (", Parser_error::get_code_description(err.code()), ")");
+      ASTERIA_THROW_RUNTIME_ERROR("There was an error in the source code provided:\n",
+                                  "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
+                                  "code = ", err.code(), ": ", Parser_error::get_code_description(err.code()));
     }
 
 }
