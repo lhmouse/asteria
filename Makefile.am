@@ -12,7 +12,8 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
 %.hpp.gch: %.hpp
-	${AM_V_CXX}${CXXCOMPILE} -x c++-header -Wno-error $< -o $@
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
+	${AM_V_GEN}${LIBTOOL} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$3"' _ $@.lo -o $@
 
 BUILT_SOURCES =  \
   asteria/src/precompiled.hpp.gch
