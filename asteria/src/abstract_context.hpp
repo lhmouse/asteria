@@ -34,7 +34,7 @@ class Abstract_context
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
 
     virtual bool is_name_reserved(const String &name) const noexcept;
-    virtual const Reference * get_named_reference_opt(const String &name) const noexcept;
+    virtual const Reference * get_named_reference_opt(const String &name) const;
     virtual void set_named_reference(const String &name, Reference ref);
   };
 

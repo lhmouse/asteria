@@ -21,7 +21,7 @@ bool Abstract_context::is_name_reserved(const String &name) const noexcept
     return name.empty() || name.starts_with("__");
   }
 
-const Reference * Abstract_context::get_named_reference_opt(const String &name) const noexcept
+const Reference * Abstract_context::get_named_reference_opt(const String &name) const
   {
     const auto it = this->m_named_refs.find(name);
     if(it == this->m_named_refs.end()) {

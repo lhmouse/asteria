@@ -33,7 +33,7 @@ namespace {
 
 }
 
-const Reference * Executive_context::get_named_reference_opt(const String &name) const noexcept
+const Reference * Executive_context::get_named_reference_opt(const String &name) const
   {
     // Deal with pre-defined variables.
     // If you add new entries or alter existent entries here, you must update `Analytic_context` as well.
