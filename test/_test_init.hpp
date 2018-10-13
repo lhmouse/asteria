@@ -4,15 +4,15 @@
 #ifndef ASTERIA_TEST_INIT_HPP_
 #define ASTERIA_TEST_INIT_HPP_
 
-#include "../src/precompiled.hpp"
-#include "../src/fwd.hpp"
+#include "../asteria/src/precompiled.hpp"
+#include "../asteria/src/fwd.hpp"
 #include <iostream> // std::cerr, operator<<()
 #include <exception> // std::terminate(), std::exception
 
 #ifndef ENABLE_DEBUG_LOGS
 #  define ENABLE_DEBUG_LOGS   1
 #endif
-#include "../src/utilities.hpp"
+#include "../asteria/src/utilities.hpp"
 
 #define ASTERIA_TEST_CHECK(expr_)  \
     do {  \

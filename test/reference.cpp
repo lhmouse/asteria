@@ -2,8 +2,8 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../src/reference.hpp"
-#include "../src/global_context.hpp"
+#include "../asteria/src/reference.hpp"
+#include "../asteria/src/global_context.hpp"
 
 using namespace Asteria;
 
