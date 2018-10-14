@@ -15,13 +15,13 @@ class Instantiated_function : public Abstract_function
   private:
     String m_file;
     Uint32 m_line;
-    String m_name;
+    String m_func;
     Vector<String> m_params;
-    Block m_body;
+    Block m_body_bnd;
 
   public:
-    Instantiated_function(String file, Uint32 line, String name, Vector<String> params, Block body) noexcept
-      : m_file(std::move(file)), m_line(line), m_name(std::move(name)), m_params(std::move(params)), m_body(std::move(body))
+    Instantiated_function(const String &file, Uint32 line, const String &func, const Vector<String> &params, Block body_bnd)
+      : m_file(file), m_line(line), m_func(func), m_params(params), m_body_bnd(std::move(body_bnd))
       {
       }
     ~Instantiated_function();

@@ -491,7 +491,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             except = std::move(e);
           } catch(...) {
             ASTERIA_DEBUG_LOG("Caught `std::exception`: ", stdex.what());
-            except = Exception(std::move(stdex));
+            except = Exception(stdex);
           }
           // The exception variable shall not outlast the loop body.
           Executive_context ctx_next(&ctx_io);

@@ -19,8 +19,8 @@ class Variadic_arguer : public Abstract_function
     Vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(String file, Uint32 line, Vector<Reference> vargs)
-      : m_file(std::move(file)), m_line(line), m_vargs(std::move(vargs))
+    Variadic_arguer(const String &file, Uint32 line, Vector<Reference> vargs)
+      : m_file(file), m_line(line), m_vargs(std::move(vargs))
       {
       }
     ~Variadic_arguer();

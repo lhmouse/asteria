@@ -47,8 +47,8 @@ class Block
     Block bind(const Global_context &global, const Analytic_context &ctx) const;
     Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
-    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, String file, Uint32 line, String name, const Vector<String> &params) const;
-    Reference execute_as_function(Global_context &global, String file, Uint32 line, String name, const Vector<String> &params, Reference self, Vector<Reference> args) const;
+    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const String &file, Uint32 line, const String &func, const Vector<String> &params) const;
+    Reference execute_as_function(Global_context &global, const String &file, Uint32 line, const String &func, const Vector<String> &params, Reference self, Vector<Reference> args) const;
 
     void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };

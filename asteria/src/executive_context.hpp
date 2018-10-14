@@ -31,7 +31,7 @@ class Executive_context : public Abstract_context
     const Executive_context * get_parent_opt() const noexcept override;
     const Reference * get_named_reference_opt(const String &name) const override;
 
-    void initialize_for_function(Global_context &global, String file, Uint32 line, String func, const Vector<String> &params, Reference self, Vector<Reference> args);
+    void initialize_for_function(Global_context &global, const String &file, Uint32 line, const String &func, const Vector<String> &params, Reference self, Vector<Reference> args);
   };
 
 }

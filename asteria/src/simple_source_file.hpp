@@ -13,15 +13,19 @@ namespace Asteria {
 class Simple_source_file
   {
   private:
-    String m_filename;
+    String m_file;
     Block m_code;
 
   public:
-    Simple_source_file(std::istream &cstrm_io, String filename);
+    Simple_source_file(std::istream &cstrm_io, const String &file);
     ~Simple_source_file();
 
   public:
-    const String & get_filename() const noexcept;
+    const String & get_file() const noexcept
+      {
+        return this->m_file;
+      }
+
     Reference execute(Global_context &global, Vector<Reference> args) const;
   };
 

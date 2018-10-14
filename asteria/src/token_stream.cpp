@@ -27,8 +27,8 @@ namespace {
       Size m_offset;
 
     public:
-      Source_reader(std::istream &xstrm, String xfile)
-        : m_strm(xstrm), m_file(std::move(xfile)),
+      Source_reader(std::istream &xstrm, const String &xfile)
+        : m_strm(xstrm), m_file(xfile),
           m_str(), m_line(0), m_offset(0)
         {
           // Check whether the stream can be read from.
@@ -915,8 +915,8 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
-                      "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
-                      "code = ", err.code(), ": ", Parser_error::get_code_description(err.code()));
+                      "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
+                      "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
     this->m_stor.set(std::move(err));
     return false;
   }

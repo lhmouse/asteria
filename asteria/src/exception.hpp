@@ -21,8 +21,8 @@ class Exception : public virtual std::exception
 
   public:
     template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-      Exception(String file, Uint32 line, XvalueT &&value)
-        : m_file(std::move(file)), m_line(line), m_value(std::forward<XvalueT>(value))
+      Exception(const String &file, Uint32 line, XvalueT &&value)
+        : m_file(file), m_line(line), m_value(std::forward<XvalueT>(value))
         {
         }
     explicit Exception(const std::exception &stdex)
@@ -53,9 +53,9 @@ class Exception : public virtual std::exception
       {
         return this->m_backtrace;
       }
-    void append_backtrace(String file, Uint32 line)
+    void append_backtrace(const String &file, Uint32 line)
       {
-        this->m_backtrace.emplace_back(std::move(file), line);
+        this->m_backtrace.emplace_back(file, line);
       }
 
     const char * what() const noexcept override;

@@ -59,7 +59,7 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     return nullptr;
   }
 
-void Executive_context::initialize_for_function(Global_context &global, String file, Uint32 line, String func, const Vector<String> &params, Reference self, Vector<Reference> args)
+void Executive_context::initialize_for_function(Global_context &global, const String &file, Uint32 line, const String &func, const Vector<String> &params, Reference self, Vector<Reference> args)
   {
     // Materialie parameters.
     for(const auto &param : params) {
@@ -76,9 +76,9 @@ void Executive_context::initialize_for_function(Global_context &global, String f
       }
     }
     // Set pre-defined variables.
-    this->m_file = do_make_constant(D_string(std::move(file)));
+    this->m_file = do_make_constant(D_string(file));
     this->m_line = do_make_constant(D_integer(line));
-    this->m_func = do_make_constant(D_string(std::move(func)));
+    this->m_func = do_make_constant(D_string(func));
     this->m_self = std::move(self);
     this->m_varg = do_make_constant(D_function(Variadic_arguer(file, line, std::move(args))));
   }
