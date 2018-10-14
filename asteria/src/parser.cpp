@@ -28,14 +28,13 @@ namespace {
       return Parser_error(qtok->get_line(), qtok->get_offset(), qtok->get_length(), code);
     }
 
-  inline void do_tell_source_location(String &file_out, Uint32 &line_out, const Token_stream &tstrm_io)
+  inline Source_location do_tell_source_location(const Token_stream &tstrm_io)
     {
       const auto qtok = tstrm_io.peek_opt();
       if(!qtok) {
-        return;
+        return Source_location(String::shallow("<no token>"), 0);
       }
-      file_out = qtok->get_file();
-      line_out = qtok->get_line();
+      return Source_location(qtok->get_file(), qtok->get_line());
     }
 
   bool do_match_keyword(Token_stream &tstrm_io, Token::Keyword keyword)
@@ -399,9 +398,7 @@ namespace {
   bool do_accept_closure_function(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
-      String file;
-      Uint32 line = 0;
-      do_tell_source_location(file, line, tstrm_io);
+      auto loc = do_tell_source_location(tstrm_io);
       // closure-function ::=
       //   "func" "(" identifier-list-opt ")" statement
       if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
@@ -421,7 +418,7 @@ namespace {
       if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      Xpnode::S_closure_function node_c = { Function_header(std::move(file), line, String::shallow("<closure function>"), std::move(params)), std::move(body) };
+      Xpnode::S_closure_function node_c = { Function_header(std::move(loc), String::shallow("<closure function>"), std::move(params)), std::move(body) };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -536,9 +533,7 @@ namespace {
   bool do_accept_postfix_function_call(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
-      String file;
-      Uint32 line = 0;
-      do_tell_source_location(file, line, tstrm_io);
+      auto loc = do_tell_source_location(tstrm_io);
       // postfix-function-call ::=
       //   "(" argument-list-opt ")"
       // argument-list-opt ::=
@@ -563,7 +558,7 @@ namespace {
       if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_or_argument_expected);
       }
-      Xpnode::S_function_call node_c = { Source_location(std::move(file), line), arg_cnt };
+      Xpnode::S_function_call node_c = { std::move(loc), arg_cnt };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -1196,9 +1191,7 @@ namespace {
   bool do_accept_function_definition(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
-      String file;
-      Uint32 line = 0;
-      do_tell_source_location(file, line, tstrm_io);
+      auto loc = do_tell_source_location(tstrm_io);
       // function-definition ::=
       //   "func" identifier "(" identifier-list-opt ")" statement
       if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
@@ -1222,7 +1215,7 @@ namespace {
       if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      Statement::S_func_def stmt_c = { Function_header(std::move(file), line, std::move(name), std::move(params)), std::move(body) };
+      Statement::S_func_def stmt_c = { Function_header(std::move(loc), std::move(name), std::move(params)), std::move(body) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }
@@ -1518,9 +1511,7 @@ namespace {
   bool do_accept_throw_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
     {
       // Copy these parameters before reading from the stream which is destructive.
-      String file;
-      Uint32 line = 0;
-      do_tell_source_location(file, line, tstrm_io);
+      auto loc = do_tell_source_location(tstrm_io);
       // throw-statement ::=
       //   "throw" expression ";"
       if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
@@ -1533,7 +1524,7 @@ namespace {
       if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
-      Statement::S_throw stmt_c = { Source_location(std::move(file), line), std::move(expr) };
+      Statement::S_throw stmt_c = { std::move(loc), std::move(expr) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }
