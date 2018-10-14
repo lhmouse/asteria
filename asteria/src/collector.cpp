@@ -18,6 +18,7 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     if((this->m_vars.size() > 127) && (this->m_vars.size() == this->m_vars.capacity())) {
       ASTERIA_DEBUG_LOG("Performing automatic garbage collection: variable_count = ", this->m_vars.size());
       this->collect(false);
+      this->m_vars.reserve(this->m_vars.size() * 2);
     }
     const auto range = std::equal_range(this->m_vars.begin(), this->m_vars.end(), var);
     if(range.first != range.second) {
@@ -64,7 +65,7 @@ void Collector::collect(bool unreserve)
   {
     // https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     ASTERIA_DEBUG_LOG("Garbage collection begins.");
-    // Define some common functions.
+    // Add variables that are either tracked or reachable indirectly from tracked ones.
     const auto gather_gcref =
       [](void *param, const rocket::refcounted_ptr<Variable> &var)
         {
@@ -76,17 +77,6 @@ void Collector::collect(bool unreserve)
           self->m_gcrefs.insert(range.second, std::make_pair(var, 0));
           return true;
         };
-    const auto decrement_gcref =
-      [](void *param, const rocket::refcounted_ptr<Variable> &var)
-        {
-          const auto self = static_cast<Collector *>(param);
-          const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
-          if(range.first != range.second) {
-            --(range.first->second);
-          }
-          return false;
-        };
-    // Add variables that are either tracked or reachable indirectly from tracked ones.
     for(const auto &root : this->m_vars) {
       gather_gcref(this, root);
       root->get_value().collect_variables(gather_gcref, this);
@@ -97,6 +87,16 @@ void Collector::collect(bool unreserve)
       it->second = it->first.use_count();
     }
     // Drop references from `m_vars` or `m_gcrefs`, either directly or indirectly.
+    const auto decrement_gcref =
+      [](void *param, const rocket::refcounted_ptr<Variable> &var)
+        {
+          const auto self = static_cast<Collector *>(param);
+          const auto range = std::equal_range(self->m_gcrefs.mut_begin(), self->m_gcrefs.mut_end(), var, Gcref_comparator());
+          if(range.first != range.second) {
+            --(range.first->second);
+          }
+          return false;
+        };
     for(const auto &root : this->m_vars) {
       decrement_gcref(this, root);
     }
