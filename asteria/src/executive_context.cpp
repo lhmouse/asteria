@@ -22,17 +22,6 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-namespace {
-
-  template<typename XvalueT>
-    inline Reference do_make_constant(XvalueT &&value)
-      {
-        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
-        return std::move(ref_c);
-      }
-
-}
-
 const Reference * Executive_context::get_named_reference_opt(const String &name) const
   {
     const auto qbase = this->Abstract_context::get_named_reference_opt(name);
@@ -59,9 +48,26 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     return nullptr;
   }
 
+namespace {
+
+  template<typename XvalueT>
+    inline void do_set_constant(Reference &ref_out, XvalueT &&value)
+      {
+        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
+        ref_out = std::move(ref_c);
+      }
+
+}
+
 void Executive_context::initialize_for_function(Global_context &global, const String &file, Uint32 line, const String &func, const Vector<String> &params, Reference self, Vector<Reference> args)
   {
-    // Materialie parameters.
+    // Set pre-defined variables.
+    do_set_constant(this->m_file, D_string(file));
+    do_set_constant(this->m_line, D_integer(line));
+    do_set_constant(this->m_func, D_string(func));
+    // Set the `this` parameter.
+    this->m_self = std::move(self);
+    // Materialie other parameters.
     for(const auto &param : params) {
       Reference arg;
       if(!args.empty()) {
@@ -75,12 +81,7 @@ void Executive_context::initialize_for_function(Global_context &global, const St
         this->Abstract_context::set_named_reference(param, std::move(arg.convert_to_variable(global)));
       }
     }
-    // Set pre-defined variables.
-    this->m_file = do_make_constant(D_string(file));
-    this->m_line = do_make_constant(D_integer(line));
-    this->m_func = do_make_constant(D_string(func));
-    this->m_self = std::move(self);
-    this->m_varg = do_make_constant(D_function(Variadic_arguer(file, line, std::move(args))));
+    do_set_constant(this->m_varg, D_function(Variadic_arguer(file, line, std::move(args))));
   }
 
 }
