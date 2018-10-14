@@ -35,6 +35,10 @@ namespace {
 
 const Reference * Executive_context::get_named_reference_opt(const String &name) const
   {
+    const auto qbase = this->Abstract_context::get_named_reference_opt(name);
+    if(qbase) {
+      return qbase;
+    }
     // Deal with pre-defined variables.
     // If you add new entries or alter existent entries here, you must update `Analytic_context` as well.
     if(name == "__file") {
@@ -52,8 +56,7 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     if(name == "__varg") {
       return &(this->m_varg);
     }
-    // Call the overriden function with anything unhandled.
-    return Abstract_context::get_named_reference_opt(name);
+    return nullptr;
   }
 
 void Executive_context::initialize_for_function(Global_context &global, String file, Uint32 line, String func, const Vector<String> &params, Reference self, Vector<Reference> args)
@@ -69,7 +72,7 @@ void Executive_context::initialize_for_function(Global_context &global, String f
         if(this->is_name_reserved(param)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
         }
-        this->set_named_reference(param, std::move(arg.convert_to_variable(global)));
+        this->Abstract_context::set_named_reference(param, std::move(arg.convert_to_variable(global)));
       }
     }
     // Set pre-defined variables.

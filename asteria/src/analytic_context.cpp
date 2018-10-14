@@ -23,6 +23,10 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
 
 const Reference * Analytic_context::get_named_reference_opt(const String &name) const
   {
+    const auto qbase = this->Abstract_context::get_named_reference_opt(name);
+    if(qbase) {
+      return qbase;
+    }
     // Deal with pre-defined variables.
     // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
     if(name == "__file") {
@@ -40,8 +44,7 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
     if(name == "__varg") {
       return &(this->m_dummy);
     }
-    // Call the overriden function with anything unhandled.
-    return Abstract_context::get_named_reference_opt(name);
+    return nullptr;
   }
 
 void Analytic_context::initialize_for_function(const Vector<String> &params)
@@ -52,7 +55,7 @@ void Analytic_context::initialize_for_function(const Vector<String> &params)
         if(this->is_name_reserved(param)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
         }
-        this->set_named_reference(param, { });
+        this->Abstract_context::set_named_reference(param, { });
       }
     }
   }
