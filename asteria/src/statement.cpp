@@ -49,7 +49,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped function", alt.name, { });
+        do_safe_set_named_reference(ctx_io, "skipped function", alt.head.get_func(), { });
         return;
       }
       case index_if:
@@ -100,12 +100,12 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "function", alt.name, { });
+        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), { });
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
-        ctx_next.initialize_for_function(alt.params);
+        ctx_next.initialize_for_function(alt.head);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Statement::S_func_def alt_bnd = { alt.file, alt.line, alt.name, alt.params, std::move(body_bnd) };
+        Statement::S_func_def alt_bnd = { alt.head, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_if: {
@@ -201,7 +201,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         const auto &alt = this->m_stor.as<S_throw>();
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_throw alt_bnd = { alt.file, alt.line, std::move(expr_bnd) };
+        Statement::S_throw alt_bnd = { alt.loc, std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_return: {
@@ -251,10 +251,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // A function becomes visible before its definition, where it is initialized to `null`.
         const auto var = global.create_tracked_variable();
         Reference_root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
+        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), std::move(ref_c));
         // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.file, alt.line, alt.name, alt.params);
-        ASTERIA_DEBUG_LOG("Creating named function: name = ", alt.name, ", file:line = ", alt.file, ':', alt.line);
+        auto func = alt.body.instantiate_function(global, ctx_io, alt.head);
+        ASTERIA_DEBUG_LOG("Creating named function: prototype = ", alt.head, ", location = ", alt.head.get_location());
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
       }
@@ -482,38 +482,41 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             return status;
           }
         } catch(std::exception &stdex) {
-          // Translate the exception as needed.
-          Exception except(String::shallow(""), 0, D_null());
-          try {
-            throw;
-          } catch(Exception &e) {
-            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());
-            except = std::move(e);
-          } catch(...) {
-            ASTERIA_DEBUG_LOG("Caught `std::exception`: ", stdex.what());
-            except = Exception(stdex);
-          }
-          // The exception variable shall not outlast the loop body.
-          Executive_context ctx_next(&ctx_io);
-          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
-          Reference_root::S_temporary eref_c = { std::move(except.get_value()) };
-          do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(eref_c));
-          // Initialize the backtrace array.
+          // Prepare the backtrace as an `array` for processing by code inside `catch`.
           D_array backtrace;
-          backtrace.reserve(1 + except.get_backtrace().size());
-          D_object elem;
-          elem.insert_or_assign(String::shallow("file"), D_string(except.get_file()));
-          elem.insert_or_assign(String::shallow("line"), D_integer(except.get_line()));
-          backtrace.emplace_back(std::move(elem));
-          for(auto &pair : except.get_backtrace()) {
-            elem.clear();
-            elem.insert_or_assign(String::shallow("file"), D_string(pair.first));
-            elem.insert_or_assign(String::shallow("line"), D_integer(pair.second));
-            backtrace.emplace_back(std::move(elem));
+          const auto push_backtrace =
+            [&](const Source_location &loc)
+              {
+                D_object elem;
+                elem.insert_or_assign(String::shallow("file"), D_string(loc.get_file()));
+                elem.insert_or_assign(String::shallow("line"), D_integer(loc.get_line()));
+                backtrace.emplace_back(std::move(elem));
+              };
+          // The exception variable shall not outlast the `catch` body.
+          Executive_context ctx_next(&ctx_io);
+          try {
+            // Translate the exception as needed.
+            throw;
+          } catch(Exception &except) {
+            // Handle an `Asteria::Exception`.
+            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
+            Reference_root::S_temporary ref_c = { except.get_value() };
+            do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
+            // Unpack the backtrace array.
+            backtrace.reserve(1 + except.get_backtrace().size());
+            push_backtrace(except.get_location());
+            std::for_each(except.get_backtrace().begin(), except.get_backtrace().end(), push_backtrace);
+          } catch(...) {
+            // Handle an `std::exception`.
+            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", stdex.what());
+            Reference_root::S_temporary ref_c = { D_string(stdex.what()) };
+            do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
+            // We say the exception was thrown from native code.
+            push_backtrace(Exception(stdex).get_location());
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_root::S_temporary btref_c = { std::move(backtrace) };
-          ctx_next.set_named_reference(String::shallow("__backtrace"), std::move(btref_c));
+          Reference_root::S_temporary ref_c = { std::move(backtrace) };
+          ctx_next.set_named_reference(String::shallow("__backtrace"), std::move(ref_c));
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, global, ctx_next);
           if(status != Block::status_next) {
@@ -559,7 +562,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         ref_out = alt.expr.evaluate(global, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing exception: ", value);
-        throw Exception(alt.file, alt.line, std::move(value));
+        throw Exception(alt.loc, std::move(value));
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();

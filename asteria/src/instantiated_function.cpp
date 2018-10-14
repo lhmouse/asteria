@@ -16,19 +16,7 @@ Instantiated_function::~Instantiated_function()
 
 String Instantiated_function::describe() const
   {
-    Formatter fmt;
-    ASTERIA_FORMAT(fmt, "function `", this->m_func, "(");
-    auto it = this->m_params.begin();
-    while(this->m_params.end() - it > 1) {
-      ASTERIA_FORMAT(fmt, *it, ", ");
-      ++it;
-    }
-    if(it != this->m_params.end()) {
-      ASTERIA_FORMAT(fmt, *it);
-      ++it;
-    }
-    ASTERIA_FORMAT(fmt, ")` @@ ", this->m_file, ':', this->m_line);
-    return fmt.get_stream().extract_string();
+    return ASTERIA_FORMAT_STRING("function `", this->m_head, "` at \'", this->m_head.get_location(), "\'");
   }
 
 void Instantiated_function::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
@@ -38,7 +26,7 @@ void Instantiated_function::collect_variables(bool (*callback)(void *, const roc
 
 Reference Instantiated_function::invoke(Global_context &global, Reference self, Vector<Reference> args) const
   {
-    return this->m_body_bnd.execute_as_function(global, this->m_file, this->m_line, this->m_func, this->m_params, std::move(self), std::move(args));
+    return this->m_body_bnd.execute_as_function(global, this->m_head, &(this->m_zvarg), std::move(self), std::move(args));
   }
 
 }

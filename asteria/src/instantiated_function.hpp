@@ -6,6 +6,8 @@
 
 #include "fwd.hpp"
 #include "abstract_function.hpp"
+#include "function_header.hpp"
+#include "variadic_arguer.hpp"
 #include "block.hpp"
 
 namespace Asteria {
@@ -13,15 +15,13 @@ namespace Asteria {
 class Instantiated_function : public Abstract_function
   {
   private:
-    String m_file;
-    Uint32 m_line;
-    String m_func;
-    Vector<String> m_params;
+    Function_header m_head;
+    Shared_function_wrapper m_zvarg;
     Block m_body_bnd;
 
   public:
-    Instantiated_function(const String &file, Uint32 line, const String &func, const Vector<String> &params, Block body_bnd)
-      : m_file(file), m_line(line), m_func(func), m_params(params), m_body_bnd(std::move(body_bnd))
+    Instantiated_function(const Function_header &head, Block body_bnd)
+      : m_head(head), m_zvarg(Variadic_arguer(head.get_location(), { })), m_body_bnd(std::move(body_bnd))
       {
       }
     ~Instantiated_function();

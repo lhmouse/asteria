@@ -10,7 +10,6 @@
 #include "xpnode.hpp"
 #include "expression.hpp"
 #include "utilities.hpp"
-#include <algorithm>
 
 namespace Asteria {
 
@@ -422,7 +421,7 @@ namespace {
       if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      Xpnode::S_closure_function node_c = { std::move(file), line, std::move(params), std::move(body) };
+      Xpnode::S_closure_function node_c = { Function_header(std::move(file), line, String::shallow("<closure function>"), std::move(params)), std::move(body) };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -564,7 +563,7 @@ namespace {
       if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_or_argument_expected);
       }
-      Xpnode::S_function_call node_c = { std::move(file), line, arg_cnt };
+      Xpnode::S_function_call node_c = { Source_location(std::move(file), line), arg_cnt };
       nodes_out.emplace_back(std::move(node_c));
       return true;
     }
@@ -1223,7 +1222,7 @@ namespace {
       if(!do_accept_statement_as_block(body, tstrm_io)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
-      Statement::S_func_def stmt_c = { std::move(file), line, std::move(name), std::move(params), std::move(body) };
+      Statement::S_func_def stmt_c = { Function_header(std::move(file), line, std::move(name), std::move(params)), std::move(body) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }
@@ -1534,7 +1533,7 @@ namespace {
       if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
         throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
       }
-      Statement::S_throw stmt_c = { std::move(file), line, std::move(expr) };
+      Statement::S_throw stmt_c = { Source_location(std::move(file), line), std::move(expr) };
       stmts_out.emplace_back(std::move(stmt_c));
       return true;
     }

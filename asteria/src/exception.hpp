@@ -5,6 +5,7 @@
 #define ASTERIA_EXCEPTION_HPP_
 
 #include "fwd.hpp"
+#include "source_location.hpp"
 #include "value.hpp"
 #include <exception>
 
@@ -13,49 +14,40 @@ namespace Asteria {
 class Exception : public virtual std::exception
   {
   private:
-    String m_file;
-    Uint32 m_line;
+    Source_location m_loc;
     Value m_value;
 
-    Bivector<String, Uint32> m_backtrace;
+    Vector<Source_location> m_backtrace;
 
   public:
     template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-      Exception(const String &file, Uint32 line, XvalueT &&value)
-        : m_file(file), m_line(line), m_value(std::forward<XvalueT>(value))
+      Exception(const Source_location &loc, XvalueT &&value)
+        : m_loc(loc), m_value(std::forward<XvalueT>(value))
         {
         }
     explicit Exception(const std::exception &stdex)
-      : m_file(String::shallow("<native code>")), m_line(0), m_value(D_string(stdex.what()))
+      : m_loc(String::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
     ~Exception();
 
   public:
-    const String & get_file() const noexcept
+    const Source_location & get_location() const noexcept
       {
-        return this->m_file;
-      }
-    Uint32 get_line() const noexcept
-      {
-        return this->m_line;
+        return this->m_loc;
       }
     const Value & get_value() const noexcept
       {
         return this->m_value;
       }
 
-    const Bivector<String, Uint32> & get_backtrace() const noexcept
+    const Vector<Source_location> & get_backtrace() const noexcept
       {
         return this->m_backtrace;
       }
-    Bivector<String, Uint32> & get_backtrace() noexcept
+    void append_backtrace(const Source_location &loc)
       {
-        return this->m_backtrace;
-      }
-    void append_backtrace(const String &file, Uint32 line)
-      {
-        this->m_backtrace.emplace_back(file, line);
+        this->m_backtrace.emplace_back(loc);
       }
 
     const char * what() const noexcept override;

@@ -5,6 +5,7 @@
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"
+#include "function_header.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -42,7 +43,7 @@ Simple_source_file::~Simple_source_file()
 
 Reference Simple_source_file::execute(Global_context &global, Vector<Reference> args) const
   {
-    return this->m_code.execute_as_function(global, this->m_file, 0, String::shallow("<top level>"), { }, { }, std::move(args));
+    return this->m_code.execute_as_function(global, Function_header(this->m_file, 0, String::shallow("<file scope>"), { }), nullptr, { }, std::move(args));
   }
 
 }

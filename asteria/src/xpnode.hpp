@@ -7,6 +7,7 @@
 #include "fwd.hpp"
 #include "value.hpp"
 #include "reference.hpp"
+#include "function_header.hpp"
 #include "expression.hpp"
 #include "block.hpp"
 #include "rocket/variant.hpp"
@@ -69,9 +70,7 @@ class Xpnode
       };
     struct S_closure_function
       {
-        String file;
-        Uint32 line;
-        Vector<String> params;
+        Function_header head;
         Block body;
       };
     struct S_branch
@@ -82,8 +81,7 @@ class Xpnode
       };
     struct S_function_call
       {
-        String file;
-        Uint32 line;
+        Source_location loc;
         Size arg_cnt;
       };
     struct S_subscript

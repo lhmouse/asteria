@@ -71,11 +71,14 @@ pkginclude_HEADERS =  \
   asteria/src/variable.hpp  \
   asteria/src/collector.hpp  \
   asteria/src/exception.hpp  \
+  asteria/src/source_location.hpp  \
+  asteria/src/function_header.hpp  \
   asteria/src/abstract_context.hpp  \
   asteria/src/analytic_context.hpp  \
   asteria/src/executive_context.hpp  \
   asteria/src/global_context.hpp  \
   asteria/src/global_collector.hpp  \
+  asteria/src/variadic_arguer.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/expression.hpp  \
   asteria/src/statement.hpp  \
@@ -98,6 +101,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/variable.cpp  \
   asteria/src/collector.cpp  \
   asteria/src/exception.cpp  \
+  asteria/src/source_location.cpp  \
+  asteria/src/function_header.cpp  \
   asteria/src/abstract_context.cpp  \
   asteria/src/analytic_context.cpp  \
   asteria/src/executive_context.cpp  \

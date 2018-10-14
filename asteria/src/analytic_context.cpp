@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "analytic_context.hpp"
+#include "function_header.hpp"
 #include "reference.hpp"
 #include "utilities.hpp"
 
@@ -47,15 +48,14 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
     return nullptr;
   }
 
-void Analytic_context::initialize_for_function(const Vector<String> &params)
+void Analytic_context::initialize_for_function(const Function_header &head)
   {
-    // Materialize parameters.
-    for(const auto &param : params) {
+    for(const auto &param : head.get_params()) {
       if(!param.empty()) {
         if(this->is_name_reserved(param)) {
           ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
         }
-        this->Abstract_context::set_named_reference(param, { });
+        this->Abstract_context::set_named_reference(param, this->m_dummy);
       }
     }
   }

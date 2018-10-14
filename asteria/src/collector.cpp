@@ -5,7 +5,6 @@
 #include "collector.hpp"
 #include "variable.hpp"
 #include "utilities.hpp"
-#include <algorithm>
 
 namespace Asteria {
 

@@ -8,6 +8,7 @@
 #include "../asteria/src/executive_context.hpp"
 #include "../asteria/src/reference.hpp"
 #include "../asteria/src/exception.hpp"
+#include "../asteria/src/function_header.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -37,6 +38,6 @@ int main()
     const auto code = pr.extract_document();
 
     Global_context global;
-    auto res = code.execute_as_function(global, String::shallow("file again"), 42, String::shallow("<top level>"), { }, { }, { });
+    auto res = code.execute_as_function(global, Function_header(String::shallow("file again"), 42, String::shallow("<top level>"), { }), nullptr, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

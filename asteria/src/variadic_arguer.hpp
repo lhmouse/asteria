@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_function.hpp"
+#include "source_location.hpp"
 #include "reference.hpp"
 #include "rocket/refcounted_ptr.hpp"
 
@@ -14,13 +15,12 @@ namespace Asteria {
 class Variadic_arguer : public Abstract_function
   {
   private:
-    String m_file;
-    Uint32 m_line;
+    Source_location m_loc;
     Vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(const String &file, Uint32 line, Vector<Reference> vargs)
-      : m_file(file), m_line(line), m_vargs(std::move(vargs))
+    Variadic_arguer(const Source_location &loc, Vector<Reference> vargs)
+      : m_loc(loc), m_vargs(std::move(vargs))
       {
       }
     ~Variadic_arguer();

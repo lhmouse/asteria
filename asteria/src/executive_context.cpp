@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "executive_context.hpp"
+#include "function_header.hpp"
 #include "reference.hpp"
 #include "variadic_arguer.hpp"
 #include "utilities.hpp"
@@ -59,16 +60,16 @@ namespace {
 
 }
 
-void Executive_context::initialize_for_function(Global_context &global, const String &file, Uint32 line, const String &func, const Vector<String> &params, Reference self, Vector<Reference> args)
+void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args)
   {
     // Set pre-defined variables.
-    do_set_constant(this->m_file, D_string(file));
-    do_set_constant(this->m_line, D_integer(line));
-    do_set_constant(this->m_func, D_string(func));
+    do_set_constant(this->m_file, D_string(head.get_file()));
+    do_set_constant(this->m_line, D_integer(head.get_line()));
+    do_set_constant(this->m_func, D_string(head.get_func()));
     // Set the `this` parameter.
     this->m_self = std::move(self);
     // Materialie other parameters.
-    for(const auto &param : params) {
+    for(const auto &param : head.get_params()) {
       Reference arg;
       if(!args.empty()) {
         arg = std::move(args.mut_front());
@@ -81,7 +82,11 @@ void Executive_context::initialize_for_function(Global_context &global, const St
         this->Abstract_context::set_named_reference(param, std::move(arg.convert_to_variable(global)));
       }
     }
-    do_set_constant(this->m_varg, D_function(Variadic_arguer(file, line, std::move(args))));
+    if(args.empty() && zvarg_opt) {
+      do_set_constant(this->m_varg, D_function(*zvarg_opt));
+    } else {
+      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
+    }
   }
 
 }

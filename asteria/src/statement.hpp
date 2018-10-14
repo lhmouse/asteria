@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "expression.hpp"
+#include "function_header.hpp"
 #include "block.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/refcounted_ptr.hpp"
@@ -39,10 +40,7 @@ class Statement
       };
     struct S_func_def
       {
-        String file;
-        Uint32 line;
-        String name;
-        Vector<String> params;
+        Function_header head;
         Block body;
       };
     struct S_if
@@ -96,8 +94,7 @@ class Statement
       };
     struct S_throw
       {
-        String file;
-        Uint32 line;
+        Source_location loc;
         Expression expr;
       };
     struct S_return

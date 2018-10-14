@@ -13,9 +13,7 @@ Variadic_arguer::~Variadic_arguer()
 
 String Variadic_arguer::describe() const
   {
-    Formatter fmt;
-    ASTERIA_FORMAT(fmt, "variadic argument accessor @@ ", this->m_file, ':', this->m_line);
-    return fmt.get_stream().extract_string();
+    return ASTERIA_FORMAT_STRING("variadic argument accessor at \'", this->m_loc, "\'");
   }
 
 void Variadic_arguer::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const

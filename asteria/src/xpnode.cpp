@@ -177,9 +177,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
-        ctx_next.initialize_for_function(alt.params);
+        ctx_next.initialize_for_function(alt.head);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Xpnode::S_closure_function alt_bnd = { alt.file, alt.line, alt.params, std::move(body_bnd) };
+        Xpnode::S_closure_function alt_bnd = { alt.head, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_branch: {
@@ -193,7 +193,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
       case index_function_call: {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
-        Xpnode::S_function_call alt_bnd = { alt.file, alt.line, alt.arg_cnt };
+        Xpnode::S_function_call alt_bnd = { alt.loc, alt.arg_cnt };
         return std::move(alt_bnd);
       }
       case index_subscript: {
@@ -535,7 +535,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
       case index_closure_function: {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Instantiate the closure function.
-        auto func = alt.body.instantiate_function(global, ctx, alt.file, alt.line, String::shallow("<closure function>"), alt.params);
+        auto func = alt.body.instantiate_function(global, ctx, alt.head);
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.emplace_back(std::move(ref_c));
         return;
@@ -583,21 +583,20 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         }
         // This is the `this` reference.
         auto self = std::move(tgt.zoom_out());
-        ASTERIA_DEBUG_LOG("Beginning function call at \'", alt.file, ':', alt.line, "\':\n",
-                          qfunc->get()->describe());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", qfunc->get()->describe());
         try {
           tgt = qfunc->get()->invoke(global, std::move(self), std::move(args));
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.file, ':', alt.line, "\'.");
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.file, ':', alt.line, "\': value = ", except.get_value());
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
           // Append backtrace information and rethrow the exception.
-          except.append_backtrace(alt.file, alt.line);
+          except.append_backtrace(alt.loc);
           throw;
         } catch(std::exception &stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.file, ':', alt.line, "\': what = ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.loc, "\': what = ", stdex.what());
           // Here we behave as if a `string` had been thrown.
           Exception except(stdex);
-          except.append_backtrace(alt.file, alt.line);
+          except.append_backtrace(alt.loc);
           throw except;
         }
         stack_io.emplace_back(std::move(tgt));
