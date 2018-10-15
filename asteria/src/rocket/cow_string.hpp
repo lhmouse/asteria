@@ -1825,7 +1825,7 @@ using cow_u32string  = basic_cow_string<char32_t>;
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
       res.reserve(lhs.size() + rhs.size());
       res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
@@ -1834,7 +1834,7 @@ template<typename ...paramsT>
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
       const auto rhs_len = basic_cow_string<paramsT...>::traits_type::length(rhs);
       res.reserve(lhs.size() + rhs_len);
       res.append(lhs.data(), lhs.size());
@@ -1844,7 +1844,7 @@ template<typename ...paramsT>
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::value_type rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
       res.reserve(lhs.size() + 1);
       res.append(lhs.data(), lhs.size());
       res.push_back(rhs);
@@ -1852,35 +1852,9 @@ template<typename ...paramsT>
     }
 
 template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::shallow rhs)
-    {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
-      res.assign(::std::move(lhs));
-      res.append(rhs.data(), rhs.size());
-      return res;
-    }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, const typename basic_cow_string<paramsT...>::value_type *rhs)
-    {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
-      const auto rhs_len = basic_cow_string<paramsT...>::traits_type::length(rhs);
-      res.assign(::std::move(lhs));
-      res.append(rhs, rhs_len);
-      return res;
-    }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::value_type rhs)
-    {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
-      res.assign(::std::move(lhs));
-      res.push_back(rhs);
-      return res;
-    }
-
-template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(rhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
       res.reserve(lhs.size() + rhs.size());
       res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
@@ -1889,7 +1863,7 @@ template<typename ...paramsT>
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(rhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
       const auto lhs_len = basic_cow_string<paramsT...>::traits_type::length(lhs);
       res.reserve(lhs_len + rhs.size());
       res.append(lhs, lhs_len);
@@ -1899,7 +1873,7 @@ template<typename ...paramsT>
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::value_type lhs, const basic_cow_string<paramsT...> &rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(rhs.get_allocator());
+      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
       res.reserve(1 + rhs.size());
       res.push_back(lhs);
       res.append(rhs.data(), rhs.size());
@@ -1907,27 +1881,45 @@ template<typename ...paramsT>
     }
 
 template<typename ...paramsT>
+  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::shallow rhs)
+    {
+      auto res = std::move(lhs);
+      res.append(rhs.data(), rhs.size());
+      return res;
+    }
+template<typename ...paramsT>
+  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, const typename basic_cow_string<paramsT...>::value_type *rhs)
+    {
+      auto res = std::move(lhs);
+      res.append(rhs, basic_cow_string<paramsT...>::traits_type::length(rhs));
+      return res;
+    }
+template<typename ...paramsT>
+  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::value_type rhs)
+    {
+      auto res = std::move(lhs);
+      res.push_back(rhs);
+      return res;
+    }
+
+template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::shallow lhs, basic_cow_string<paramsT...> &&rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(rhs.get_allocator()));
-      res.assign(::std::move(rhs));
+      auto res = std::move(rhs);
       res.insert(0, lhs.data(), lhs.size());
       return res;
     }
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const typename basic_cow_string<paramsT...>::value_type *lhs, basic_cow_string<paramsT...> &&rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(rhs.get_allocator()));
-      const auto lhs_len = basic_cow_string<paramsT...>::traits_type::length(lhs);
-      res.assign(::std::move(rhs));
-      res.insert(0, lhs, lhs_len);
+      auto res = std::move(rhs);
+      res.insert(0, lhs, basic_cow_string<paramsT...>::traits_type::length(lhs));
       return res;
     }
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::value_type lhs, basic_cow_string<paramsT...> &&rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(rhs.get_allocator()));
-      res.assign(::std::move(rhs));
+      auto res = std::move(rhs);
       res.insert(0, 1, lhs);
       return res;
     }
@@ -1935,22 +1927,22 @@ template<typename ...paramsT>
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(lhs.get_allocator());
-      res.assign(typename basic_cow_string<paramsT...>::shallow(lhs));
+      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      res.reserve(lhs.size() + rhs.size());
+      res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
       return res;
     }
 template<typename ...paramsT>
   inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, basic_cow_string<paramsT...> &&rhs)
     {
-      auto &&res = basic_cow_string<paramsT...>(::std::move(lhs.get_allocator()));
-      if(lhs.size() + rhs.size() <= lhs.capacity()) {
-        res.assign(::std::move(lhs));
-        res.append(rhs.data(), rhs.size());
-      } else {
-        res.assign(::std::move(rhs));
+      if((lhs.size() + rhs.size() > lhs.capacity()) && (lhs.size() + rhs.size() <= rhs.capacity())) {
+        auto res = std::move(rhs);
         res.insert(0, lhs.data(), lhs.size());
+        return res;
       }
+      auto res = std::move(lhs);
+      res.append(rhs);
       return res;
     }
 
