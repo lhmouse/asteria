@@ -119,14 +119,16 @@ Xpnode::~Xpnode()
 
 namespace {
 
-  std::pair<std::reference_wrapper<const Abstract_context>, Reference> do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
+  using Refpair = std::pair<std::reference_wrapper<const Abstract_context>, std::reference_wrapper<const Reference>>;
+
+  Refpair do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
     {
       auto spare = &global;
       auto qctx = &ctx;
       for(;;) {
         const auto qref = qctx->get_named_reference_opt(name);
         if(qref) {
-          return std::make_pair(std::ref(*qctx), *qref);
+          return std::make_pair(std::ref(*qctx), std::ref(*qref));
         }
         qctx = qctx->get_parent_opt();
         if(!qctx) {
