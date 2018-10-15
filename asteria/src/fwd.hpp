@@ -33,7 +33,8 @@ using Sintptr   = std::intptr_t;
 using Uintptr   = std::uintptr_t;
 using Size      = std::size_t;
 using Diff      = std::ptrdiff_t;
-using Xfloat    = long double;
+using Float32   = float;
+using Float64   = double;
 using String    = rocket::cow_string;
 
 template<typename ElementT, Size sizeT>
@@ -88,7 +89,7 @@ class Instantiated_function;
 using D_null      = Nullptr;
 using D_boolean   = Boolean;
 using D_integer   = Sint64;
-using D_real      = Xfloat;
+using D_real      = Float64;
 using D_string    = String;
 using D_opaque    = Shared_opaque_wrapper;
 using D_function  = Shared_function_wrapper;

@@ -120,7 +120,7 @@ class Token
       };
     struct S_real_literal
       {
-        Xfloat value;
+        Float64 value;
       };
     struct S_string_literal
       {

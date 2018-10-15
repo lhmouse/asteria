@@ -744,7 +744,7 @@ namespace {
       }
       // Parse the literal as a floating-point number.
       // Parse the integral part.
-      Xfloat value = 0;
+      Float64 value = 0;
       bool zero = true;
       for(auto i = int_begin; i != int_end; ++i) {
         const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
@@ -760,7 +760,7 @@ namespace {
         throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_real_literal_overflow);
       }
       // Parse the fractional part.
-      Xfloat frac = 0;
+      Float64 frac = 0;
       for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
         const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
         if(!dptr) {
