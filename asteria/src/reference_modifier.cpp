@@ -101,7 +101,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
                 rindex += bfill;
               }
               if(efill != 0) {
-                arr.append(efill);
+                arr.append(static_cast<Size>(efill));
               }
             }
             if(erased_out_opt) {
