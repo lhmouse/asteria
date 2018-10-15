@@ -18,8 +18,8 @@ namespace {
   class Source_reader
     {
     private:
-      const std::reference_wrapper<std::istream> m_strm;
-      const String m_file;
+      std::reference_wrapper<std::istream> m_strm;
+      String m_file;
 
       String m_str;
       Uint32 m_line;
@@ -282,7 +282,9 @@ namespace {
           { "var",       Token::keyword_var       },
           { "while",     Token::keyword_while     },
         };
+#ifdef ROCKET_DEBUG
       ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
+#endif
       auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), bptr[0], Prefix_comparator());
       for(;;) {
         if(range.first == range.second) {
@@ -374,7 +376,9 @@ namespace {
           { "}",     Token::punctuator_brace_cl    },
           { "~",     Token::punctuator_notb        },
         };
+#ifdef ROCKET_DEBUG
       ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
+#endif
       // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
       // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
       auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_comparator());
