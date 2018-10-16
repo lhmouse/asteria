@@ -1822,119 +1822,119 @@ using cow_wstring    = basic_cow_string<wchar_t>;
 using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
 
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs)
     {
-      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
       res.reserve(lhs.size() + rhs.size());
       res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs)
     {
-      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
-      const auto rhs_len = basic_cow_string<paramsT...>::traits_type::length(rhs);
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
+      const auto rhs_len = traitsT::length(rhs);
       res.reserve(lhs.size() + rhs_len);
       res.append(lhs.data(), lhs.size());
       res.append(rhs, rhs_len);
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::value_type rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, charT rhs)
     {
-      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
       res.reserve(lhs.size() + 1);
       res.append(lhs.data(), lhs.size());
       res.push_back(rhs);
       return res;
     }
 
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
     {
-      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
       res.reserve(lhs.size() + rhs.size());
       res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
     {
-      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
-      const auto lhs_len = basic_cow_string<paramsT...>::traits_type::length(lhs);
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
+      const auto lhs_len = traitsT::length(lhs);
       res.reserve(lhs_len + rhs.size());
       res.append(lhs, lhs_len);
       res.append(rhs.data(), rhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::value_type lhs, const basic_cow_string<paramsT...> &rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
     {
-      auto res = basic_cow_string<paramsT...>(rhs.get_allocator());
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
       res.reserve(1 + rhs.size());
       res.push_back(lhs);
       res.append(rhs.data(), rhs.size());
       return res;
     }
 
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::shallow rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs)
     {
       auto res = std::move(lhs);
       res.append(rhs.data(), rhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, const typename basic_cow_string<paramsT...>::value_type *rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, const charT *rhs)
     {
       auto res = std::move(lhs);
-      res.append(rhs, basic_cow_string<paramsT...>::traits_type::length(rhs));
+      res.append(rhs, traitsT::length(rhs));
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, typename basic_cow_string<paramsT...>::value_type rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, charT rhs)
     {
       auto res = std::move(lhs);
       res.push_back(rhs);
       return res;
     }
 
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::shallow lhs, basic_cow_string<paramsT...> &&rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
       auto res = std::move(rhs);
       res.insert(0, lhs.data(), lhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const typename basic_cow_string<paramsT...>::value_type *lhs, basic_cow_string<paramsT...> &&rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
       auto res = std::move(rhs);
-      res.insert(0, lhs, basic_cow_string<paramsT...>::traits_type::length(lhs));
+      res.insert(0, lhs, traitsT::length(lhs));
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(typename basic_cow_string<paramsT...>::value_type lhs, basic_cow_string<paramsT...> &&rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
       auto res = std::move(rhs);
       res.insert(0, 1, lhs);
       return res;
     }
 
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
     {
-      auto res = basic_cow_string<paramsT...>(lhs.get_allocator());
+      auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
       res.reserve(lhs.size() + rhs.size());
       res.append(lhs.data(), lhs.size());
       res.append(rhs.data(), rhs.size());
       return res;
     }
-template<typename ...paramsT>
-  inline basic_cow_string<paramsT...> operator+(basic_cow_string<paramsT...> &&lhs, basic_cow_string<paramsT...> &&rhs)
+template<typename charT, typename traitsT, typename allocatorT>
+  inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
       if((lhs.size() + rhs.size() > lhs.capacity()) && (lhs.size() + rhs.size() <= rhs.capacity())) {
         auto res = std::move(rhs);
@@ -1946,219 +1946,166 @@ template<typename ...paramsT>
       return res;
     }
 
-template<typename ...paramsT>
-  inline bool operator==(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator==(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
     }
-template<typename ...paramsT>
-  inline bool operator!=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator!=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
     }
-template<typename ...paramsT>
-  inline bool operator<(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
     }
-template<typename ...paramsT>
-  inline bool operator>(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
     }
-template<typename ...paramsT>
-  inline bool operator<=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
     }
-template<typename ...paramsT>
-  inline bool operator>=(const basic_cow_string<paramsT...> &lhs, typename basic_cow_string<paramsT...>::shallow rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
-    }
-
-template<typename ...paramsT>
-  inline bool operator==(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) == 0;
-    }
-template<typename ...paramsT>
-  inline bool operator!=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) != 0;
-    }
-template<typename ...paramsT>
-  inline bool operator<(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) < 0;
-    }
-template<typename ...paramsT>
-  inline bool operator>(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) > 0;
-    }
-template<typename ...paramsT>
-  inline bool operator<=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) <= 0;
-    }
-template<typename ...paramsT>
-  inline bool operator>=(const basic_cow_string<paramsT...> &lhs, const typename basic_cow_string<paramsT...>::value_type *rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs, basic_cow_string<paramsT...>::traits_type::length(rhs)) >= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
     }
 
-template<typename ...paramsT>
-  inline bool operator==(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator==(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) == 0;
     }
-template<typename ...paramsT>
-  inline bool operator!=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator!=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) != 0;
     }
-template<typename ...paramsT>
-  inline bool operator<(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) < 0;
     }
-template<typename ...paramsT>
-  inline bool operator>(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) > 0;
     }
-template<typename ...paramsT>
-  inline bool operator<=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) <= 0;
     }
-template<typename ...paramsT>
-  inline bool operator>=(typename basic_cow_string<paramsT...>::shallow lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
-    }
-
-template<typename ...paramsT>
-  inline bool operator==(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) == 0;
-    }
-template<typename ...paramsT>
-  inline bool operator!=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) != 0;
-    }
-template<typename ...paramsT>
-  inline bool operator<(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) < 0;
-    }
-template<typename ...paramsT>
-  inline bool operator>(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) > 0;
-    }
-template<typename ...paramsT>
-  inline bool operator<=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) <= 0;
-    }
-template<typename ...paramsT>
-  inline bool operator>=(const typename basic_cow_string<paramsT...>::value_type *lhs, const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs, basic_cow_string<paramsT...>::traits_type::length(lhs), rhs.data(), rhs.size()) >= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) >= 0;
     }
 
-template<typename ...paramsT>
-  inline bool operator==(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator==(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
     }
-template<typename ...paramsT>
-  inline bool operator!=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator!=(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
     }
-template<typename ...paramsT>
-  inline bool operator<(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
     }
-template<typename ...paramsT>
-  inline bool operator>(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
     }
-template<typename ...paramsT>
-  inline bool operator<=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<=(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>=(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
     }
 
-template<typename ...paramsT>
-  inline bool operator>=(const basic_cow_string<paramsT...> &lhs, const basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator==(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
-      return basic_cow_string<paramsT...>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) == 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator!=(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) != 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) < 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) > 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<=(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) <= 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>=(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) >= 0;
     }
 
-template<typename ...paramsT>
-  inline void swap(basic_cow_string<paramsT...> &lhs, basic_cow_string<paramsT...> &rhs) noexcept
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator==(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator!=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
+    }
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator<=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
+    }
+
+template<typename charT, typename traitsT, typename allocatorT>
+  inline bool operator>=(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
+    {
+      return basic_cow_string<charT, traitsT, allocatorT>::comparator::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
+    }
+
+template<typename charT, typename traitsT, typename allocatorT>
+  inline void swap(basic_cow_string<charT, traitsT, allocatorT> &lhs, basic_cow_string<charT, traitsT, allocatorT> &rhs) noexcept
     {
       lhs.swap(rhs);
-    }
-
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_iterator begin(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.begin();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_iterator end(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.end();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_reverse_iterator rbegin(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.rbegin();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_reverse_iterator rend(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.rend();
-    }
-
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_iterator cbegin(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.cbegin();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_iterator cend(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.cend();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_reverse_iterator crbegin(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.crbegin();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::const_reverse_iterator crend(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.crend();
-    }
-
-template<typename ...paramsT>
-  inline bool empty(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.empty();
-    }
-template<typename ...paramsT>
-  inline typename basic_cow_string<paramsT...>::size_type size(const basic_cow_string<paramsT...> &rhs) noexcept
-    {
-      return rhs.size();
     }
 
 template<typename charT, typename traitsT, typename allocatorT>

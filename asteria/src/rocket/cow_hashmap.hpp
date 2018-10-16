@@ -1408,43 +1408,10 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
     };
 
-template<typename ...paramsT>
-  inline void swap(cow_hashmap<paramsT...> &lhs, cow_hashmap<paramsT...> &rhs) noexcept
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT>
+  inline void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocatorT> &lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocatorT> &rhs) noexcept
     {
       lhs.swap(rhs);
-    }
-
-template<typename ...paramsT>
-  inline typename cow_hashmap<paramsT...>::const_iterator begin(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.begin();
-    }
-template<typename ...paramsT>
-  inline typename cow_hashmap<paramsT...>::const_iterator end(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.end();
-    }
-
-template<typename ...paramsT>
-  inline typename cow_hashmap<paramsT...>::const_iterator cbegin(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.cbegin();
-    }
-template<typename ...paramsT>
-  inline typename cow_hashmap<paramsT...>::const_iterator cend(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.cend();
-    }
-
-template<typename ...paramsT>
-  inline bool empty(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.empty();
-    }
-template<typename ...paramsT>
-  inline typename cow_hashmap<paramsT...>::size_type size(const cow_hashmap<paramsT...> &rhs) noexcept
-    {
-      return rhs.size();
     }
 
 }
