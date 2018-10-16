@@ -137,21 +137,28 @@ namespace details_static_vector {
         union { value_type m_ebase[capacityT]; };
 
       public:
-        explicit constexpr storage_handle(const allocator_type &alloc) noexcept
+        explicit storage_handle(const allocator_type &alloc) noexcept
           : allocator_base(alloc),
             m_nelem(0)
           {
+#ifdef ROCKET_DEBUG
+            ::std::memset(this->m_ebase, '*', sizeof(this->m_ebase));
+#endif
           }
-        explicit constexpr storage_handle(allocator_type &&alloc) noexcept
+        explicit storage_handle(allocator_type &&alloc) noexcept
           : allocator_base(::std::move(alloc)),
             m_nelem(0)
           {
+#ifdef ROCKET_DEBUG
+            ::std::memset(this->m_ebase, '*', sizeof(this->m_ebase));
+#endif
           }
         ~storage_handle()
           {
             this->pop_back_n_unchecked(this->size());
 #ifdef ROCKET_DEBUG
             this->m_nelem = 0xCD99;
+            ::std::memset(this->m_ebase, '~', sizeof(this->m_ebase));
 #endif
           }
 
@@ -188,7 +195,7 @@ namespace details_static_vector {
             }
             return base + add;
           }
-        constexpr const value_type * data() const noexcept
+        const value_type * data() const noexcept
           {
             return this->m_ebase;
           }
@@ -196,12 +203,12 @@ namespace details_static_vector {
           {
             return this->m_ebase;
           }
-        constexpr size_type size() const noexcept
+        size_type size() const noexcept
           {
             return this->m_nelem;
           }
 
-        constexpr operator const storage_handle * () const noexcept
+        operator const storage_handle * () const noexcept
           {
             return this;
           }
