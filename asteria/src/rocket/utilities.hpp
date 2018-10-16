@@ -9,7 +9,7 @@
 #include <utility> // std::swap(), std::move(), std::forward()
 #include <new> // placement new
 #include <initializer_list> // std::initializer_list<>
-#include <iosfwd> // std::ios_base, std::basic_ios<>
+#include <ios> // std::ios_base, std::basic_ios<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
 namespace rocket {

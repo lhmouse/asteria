@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
+#include "reference_stack.hpp"
 #include "analytic_context.hpp"
 #include "executive_context.hpp"
 #include "global_context.hpp"
@@ -249,14 +250,12 @@ namespace {
         }
       }
 
-  Reference do_pop_reference(Vector<Reference> &stack_io)
+  Reference do_pop_reference(Reference_stack &stack_io)
     {
       if(stack_io.empty()) {
         ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack is empty, which means the expression is probably invalid.");
       }
-      auto ref = std::move(stack_io.mut_back());
-      stack_io.pop_back();
-      return ref;
+      return stack_io.pop();
     }
 
   D_boolean do_logical_not(D_boolean rhs)
@@ -507,14 +506,14 @@ namespace {
 
 }
 
-void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const
+void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {
         const auto &alt = this->m_stor.as<S_literal>();
         // Push the constant.
         Reference_root::S_constant ref_c = { alt.value };
-        stack_io.emplace_back(std::move(ref_c));
+        stack_io.push(std::move(ref_c));
         return;
       }
       case index_named_reference: {
@@ -525,13 +524,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
           ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
         }
         // Push the reference found.
-        stack_io.emplace_back(std::move(pair.second));
+        stack_io.push(std::move(pair.second));
         return;
       }
       case index_bound_reference: {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         // Push the reference stored.
-        stack_io.emplace_back(alt.ref);
+        stack_io.push(alt.ref);
         return;
       }
       case index_closure_function: {
@@ -539,7 +538,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         // Instantiate the closure function.
         auto func = alt.body.instantiate_function(global, ctx, alt.head);
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
-        stack_io.emplace_back(std::move(ref_c));
+        stack_io.push(std::move(ref_c));
         return;
       }
       case index_branch: {
@@ -552,9 +551,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         if(has_result) {
           ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
           // The result will have been pushed onto `stack_io`.
-          ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
+          ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.top().read());
           if(alt.assign) {
-            auto &result = stack_io.mut_back();
+            auto &result = stack_io.top();
             cond.write(result.read());
             result = std::move(cond);
           }
@@ -563,7 +562,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         ROCKET_ASSERT(stack_io.size() == stack_size_old);
         // Push the condition if the branch is empty.
         ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
-        stack_io.emplace_back(std::move(cond));
+        stack_io.push(std::move(cond));
         return;
       }
       case index_function_call: {
@@ -601,7 +600,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
           except.append_backtrace(alt.loc);
           throw except;
         }
-        stack_io.emplace_back(std::move(tgt));
+        stack_io.push(std::move(tgt));
         return;
       }
       case index_subscript: {
@@ -631,7 +630,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             ASTERIA_THROW_RUNTIME_ERROR("The value `", sub_value, "` cannot be used as a subscript.");
           }
         }
-        stack_io.emplace_back(std::move(cursor));
+        stack_io.push(std::move(cursor));
         return;
       }
       case index_operator_rpn: {
@@ -646,14 +645,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
               auto result = lhs_value.check<D_integer>();
               do_set_result(lhs, true, do_add(result, D_integer(1)));
               do_set_result(lhs, false, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if(lhs_value.type() == Value::type_real) {
               auto result = lhs_value.check<D_real>();
               do_set_result(lhs, true, do_add(result, D_real(1)));
               do_set_result(lhs, false, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
@@ -667,14 +666,14 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
               auto result = lhs_value.check<D_integer>();
               do_set_result(lhs, true, do_subtract(result, D_integer(1)));
               do_set_result(lhs, false, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if(lhs_value.type() == Value::type_real) {
               auto result = lhs_value.check<D_real>();
               do_set_result(lhs, true, do_subtract(result, D_real(1)));
               do_set_result(lhs, false, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
@@ -685,7 +684,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             // N.B. This is one of the few operators that work on all types.
             auto result = rhs.read();
             do_set_result(rhs, alt.assign, std::move(result));
-            stack_io.emplace_back(std::move(rhs));
+            stack_io.push(std::move(rhs));
             break;
           }
           case xop_prefix_neg: {
@@ -695,13 +694,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if(rhs_value.type() == Value::type_integer) {
               auto result = do_negate(rhs_value.check<D_integer>(), rhs.is_constant());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_string) {
               auto result = do_negate(rhs_value.check<D_real>());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
@@ -713,13 +712,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if(rhs_value.type() == Value::type_boolean) {
               auto result = do_logical_not(rhs_value.check<D_boolean>());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_integer) {
               auto result = do_bitwise_not(rhs_value.check<D_integer>());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
@@ -731,7 +730,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             auto rhs_value = rhs.read();
             auto result = !rhs_value.test();
             do_set_result(rhs, alt.assign, std::move(result));
-            stack_io.emplace_back(std::move(rhs));
+            stack_io.push(std::move(rhs));
             break;
           }
           case xop_prefix_inc: {
@@ -742,13 +741,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if(rhs_value.type() == Value::type_integer) {
               auto result = do_add(rhs_value.check<D_integer>(), D_integer(1));
               do_set_result(rhs, true, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_real) {
               auto result = do_add(rhs_value.check<D_real>(), D_real(1));
               do_set_result(rhs, true, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
@@ -761,13 +760,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if(rhs_value.type() == Value::type_integer) {
               auto result = do_subtract(rhs_value.check<D_integer>(), D_integer(1));
               do_set_result(rhs, true, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_real) {
               auto result = do_subtract(rhs_value.check<D_real>(), D_real(1));
               do_set_result(rhs, true, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
@@ -777,7 +776,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             // Unset the reference and return the value unset.
             auto result = rhs.unset();
             do_set_result(rhs, alt.assign, std::move(result));
-            stack_io.emplace_back(std::move(rhs));
+            stack_io.push(std::move(rhs));
             break;
           }
           case xop_prefix_lengthof: {
@@ -787,25 +786,25 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if(rhs_value.type() == Value::type_null) {
               auto result = D_integer(0);
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_string) {
               auto result = D_integer(rhs_value.check<D_string>().size());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_array) {
               auto result = D_integer(rhs_value.check<D_array>().size());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             if(rhs_value.type() == Value::type_object) {
               auto result = D_integer(rhs_value.check<D_object>().size());
               do_set_result(rhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(rhs));
+              stack_io.push(std::move(rhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
@@ -820,7 +819,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             auto comp = lhs_value.compare(rhs_value);
             auto result = comp == Value::compare_equal;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_ne: {
@@ -833,7 +832,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             auto comp = lhs_value.compare(rhs_value);
             auto result = comp != Value::compare_equal;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_lt: {
@@ -848,7 +847,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             }
             auto result = comp == Value::compare_less;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_gt: {
@@ -863,7 +862,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             }
             auto result = comp == Value::compare_greater;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_lte: {
@@ -878,7 +877,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             }
             auto result = comp != Value::compare_greater;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_gte: {
@@ -893,7 +892,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             }
             auto result = comp != Value::compare_less;
             do_set_result(lhs, false, result);
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_cmp_3way: {
@@ -924,7 +923,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
                 ASTERIA_TERMINATE("An unknown comparison result `", comp, "` has been encountered.");
               }
             }
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           case xop_infix_add: {
@@ -938,25 +937,25 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_add(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
               auto result = do_add(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_string)) {
               auto result = do_concatenate(lhs_value.check<D_string>(), rhs_value.check<D_string>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -971,19 +970,19 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_subtract(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
               auto result = do_subtract(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -999,31 +998,31 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_multiply(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
               auto result = do_multiply(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_string) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_duplicate(lhs_value.check<D_string>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_string)) {
               auto result = do_duplicate(rhs_value.check<D_string>(), lhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1037,13 +1036,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_divide(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
               auto result = do_divide(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1057,13 +1056,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_modulo(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_real) && (rhs_value.type() == Value::type_real)) {
               auto result = do_modulo(lhs_value.check<D_real>(), rhs_value.check<D_real>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1079,7 +1078,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_logical(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1095,7 +1094,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_logical(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1112,7 +1111,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_left_arithmetic(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1128,7 +1127,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_shift_right_arithmetic(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1143,13 +1142,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_and(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_and(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1164,13 +1163,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_or(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_or(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1185,13 +1184,13 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             if((lhs_value.type() == Value::type_boolean) && (rhs_value.type() == Value::type_boolean)) {
               auto result = do_logical_xor(lhs_value.check<D_boolean>(), rhs_value.check<D_boolean>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             if((lhs_value.type() == Value::type_integer) && (rhs_value.type() == Value::type_integer)) {
               auto result = do_bitwise_xor(lhs_value.check<D_integer>(), rhs_value.check<D_integer>());
               do_set_result(lhs, alt.assign, std::move(result));
-              stack_io.emplace_back(std::move(lhs));
+              stack_io.push(std::move(lhs));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
@@ -1204,7 +1203,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
             // N.B. This is one of the few operators that work on all types.
             auto result = rhs.read();
             do_set_result(lhs, true, std::move(result));
-            stack_io.emplace_back(std::move(lhs));
+            stack_io.push(std::move(lhs));
             break;
           }
           default: {
@@ -1223,7 +1222,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
           array.mut(i) = ref.read();
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
-        stack_io.emplace_back(std::move(ref_c));
+        stack_io.push(std::move(ref_c));
         return;
       }
       case index_unnamed_object: {
@@ -1236,7 +1235,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
           object.insert_or_assign(*it, ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
-        stack_io.emplace_back(std::move(ref_c));
+        stack_io.push(std::move(ref_c));
         return;
       }
       case index_coalescence: {
@@ -1250,9 +1249,9 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
           if(has_result) {
             ROCKET_ASSERT(stack_io.size() == stack_size_old + 1);
             // The result will have been pushed onto `stack_io`.
-            ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.back().read());
+            ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.top().read());
             if(alt.assign) {
-              auto &result = stack_io.mut_back();
+              auto &result = stack_io.top();
               cond.write(result.read());
               result = std::move(cond);
             }
@@ -1262,7 +1261,7 @@ void Xpnode::evaluate(Vector<Reference> &stack_io, Global_context &global, const
         }
         // Push the condition back.
         ASTERIA_DEBUG_LOG("Forwarding the condition as-is: ", cond.read());
-        stack_io.emplace_back(std::move(cond));
+        stack_io.push(std::move(cond));
         return;
       }
       default: {

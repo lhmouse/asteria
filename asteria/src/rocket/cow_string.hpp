@@ -706,14 +706,14 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
       basic_cow_string & operator=(const basic_cow_string &other) noexcept
         {
-          allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
           this->assign(other);
+          allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
           return *this;
         }
       basic_cow_string & operator=(basic_cow_string &&other) noexcept
         {
-          allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
           this->assign(::std::move(other));
+          allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
           return *this;
         }
       basic_cow_string & operator=(initializer_list<value_type> init)
@@ -1420,10 +1420,10 @@ template<typename charT, typename traitsT, typename allocatorT>
 
       void swap(basic_cow_string &other) noexcept
         {
-          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
           this->m_sth.exchange_with(other.m_sth);
           ::std::swap(this->m_ptr, other.m_ptr);
           ::std::swap(this->m_len, other.m_len);
+          allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         }
 
       // 24.3.2.7, string operations
@@ -1885,21 +1885,21 @@ template<typename charT, typename traitsT, typename allocatorT>
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, typename basic_cow_string<charT, traitsT, allocatorT>::shallow rhs)
     {
-      auto res = std::move(lhs);
+      auto res = ::std::move(lhs);
       res.append(rhs.data(), rhs.size());
       return res;
     }
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, const charT *rhs)
     {
-      auto res = std::move(lhs);
+      auto res = ::std::move(lhs);
       res.append(rhs, traitsT::length(rhs));
       return res;
     }
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, charT rhs)
     {
-      auto res = std::move(lhs);
+      auto res = ::std::move(lhs);
       res.push_back(rhs);
       return res;
     }
@@ -1907,21 +1907,21 @@ template<typename charT, typename traitsT, typename allocatorT>
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(typename basic_cow_string<charT, traitsT, allocatorT>::shallow lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
-      auto res = std::move(rhs);
+      auto res = ::std::move(rhs);
       res.insert(0, lhs.data(), lhs.size());
       return res;
     }
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
-      auto res = std::move(rhs);
+      auto res = ::std::move(rhs);
       res.insert(0, lhs, traitsT::length(lhs));
       return res;
     }
 template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
-      auto res = std::move(rhs);
+      auto res = ::std::move(rhs);
       res.insert(0, 1, lhs);
       return res;
     }
@@ -1939,11 +1939,11 @@ template<typename charT, typename traitsT, typename allocatorT>
   inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
     {
       if((lhs.size() + rhs.size() > lhs.capacity()) && (lhs.size() + rhs.size() <= rhs.capacity())) {
-        auto res = std::move(rhs);
+        auto res = ::std::move(rhs);
         res.insert(0, lhs.data(), lhs.size());
         return res;
       }
-      auto res = std::move(lhs);
+      auto res = ::std::move(lhs);
       res.append(rhs);
       return res;
     }
