@@ -5,6 +5,7 @@
 #include "expression.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
+#include "reference_stack.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -29,7 +30,7 @@ bool Expression::empty() const noexcept
     return this->m_nodes.empty();
   }
 
-bool Expression::evaluate_partial(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const
+bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
     if(this->m_nodes.empty()) {
       return false;
@@ -47,12 +48,12 @@ bool Expression::evaluate_partial(Vector<Reference> &stack_io, Global_context &g
 
 Reference Expression::evaluate(Global_context &global, const Executive_context &ctx) const
   {
-    Vector<Reference> stack;
+    Reference_stack stack;
     if(!this->evaluate_partial(stack, global, ctx)) {
       return { };
     }
     ROCKET_ASSERT(!stack.empty());
-    return std::move(stack.mut_back());
+    return std::move(stack.top());
   }
 
 void Expression::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const

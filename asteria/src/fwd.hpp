@@ -75,6 +75,7 @@ class Shared_function_wrapper;
 class Reference_root;
 class Reference_modifier;
 class Reference;
+class Reference_stack;
 class Variable;
 class Collector;
 class Abstract_context;

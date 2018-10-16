@@ -38,12 +38,10 @@
 #include "rocket/insertable_streambuf.hpp"
 #include "rocket/insertable_ostream.hpp"
 #include "rocket/variant.hpp"
-#include "rocket/fill_iterator.hpp"
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/refcounted_ptr.hpp"
-#include "rocket/unique_handle.hpp"
 
 namespace Asteria {
 

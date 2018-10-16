@@ -46,7 +46,8 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/cow_string.hpp  \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \
-  asteria/src/rocket/refcounted_ptr.hpp
+  asteria/src/rocket/refcounted_ptr.hpp  \
+  asteria/src/rocket/static_vector.hpp
 
 lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \
@@ -79,6 +80,7 @@ pkginclude_HEADERS =  \
   asteria/src/global_context.hpp  \
   asteria/src/global_collector.hpp  \
   asteria/src/variadic_arguer.hpp  \
+  asteria/src/reference_stack.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/expression.hpp  \
   asteria/src/statement.hpp  \
@@ -109,6 +111,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/global_context.cpp  \
   asteria/src/global_collector.cpp  \
   asteria/src/variadic_arguer.cpp  \
+  asteria/src/reference_stack.cpp  \
   asteria/src/xpnode.cpp  \
   asteria/src/expression.cpp  \
   asteria/src/statement.cpp  \

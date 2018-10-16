@@ -153,7 +153,7 @@ class Xpnode
 
   public:
     Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;
-    void evaluate(Vector<Reference> &stack_io, Global_context &global, const Executive_context &ctx) const;
+    void evaluate(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const;
 
     void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
   };
