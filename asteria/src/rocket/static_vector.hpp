@@ -901,14 +901,14 @@ template<typename valueT, size_t capacityT, typename allocatorT>
           const auto sr = other.size();
           if(sl < sr) {
             for(auto i = size_type(0); i < sl; ++i) {
-              this->m_sth.data()[i] = std::move(other.m_sth.data()[i]);
+              this->m_sth.data()[i] = ::std::move(other.m_sth.data()[i]);
             }
             for(auto i = sl; i < sr; ++i) {
-              this->m_sth.emplace_back_unchecked(std::move(other.m_sth.data()[i]));
+              this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.data()[i]));
             }
           } else {
             for(auto i = size_type(0); i < sr; ++i) {
-              this->m_sth.data()[i] = std::move(other.m_sth.data()[i]);
+              this->m_sth.data()[i] = ::std::move(other.m_sth.data()[i]);
             }
             this->m_sth.pop_back_n_unchecked(sl - sr);
           }
@@ -948,7 +948,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
               noadl::adl_swap(this->m_sth.data()[i], other.m_sth.data()[i]);
             }
             for(auto i = sl; i < sr; ++i) {
-              this->m_sth.emplace_back_unchecked(std::move(other.m_sth.data()[i]));
+              this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.data()[i]));
             }
             other.m_sth.pop_back_n_unchecked(sr - sl);
           } else {
@@ -956,7 +956,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
               noadl::adl_swap(this->m_sth.data()[i], other.m_sth.data()[i]);
             }
             for(auto i = sr; i < sl; ++i) {
-              other.m_sth.emplace_back_unchecked(std::move(this->m_sth.data()[i]));
+              other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.data()[i]));
             }
             this->m_sth.pop_back_n_unchecked(sl - sr);
           }
