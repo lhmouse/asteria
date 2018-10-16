@@ -1261,17 +1261,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           }
           return const_iterator(this->m_sth, ptr + toff);
         }
-      // N.B. This function may throw `std::bad_alloc()`.
-      // N.B. This is a non-standard extension.
-      iterator find_mut(const key_type &key)
-        {
-          const auto ptr = this->do_mut_table();
-          const auto toff = this->m_sth.index_of(key);
-          if(toff < 0) {
-            return this->mut_end();
-          }
-          return iterator(this->m_sth, ptr + toff);
-        }
       pair<const_iterator, const_iterator> equal_range(const key_type &key) const
         {
           const auto ptr = this->do_get_table();
@@ -1284,6 +1273,18 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           auto tcur = tnext;
           tnext.seek_next();
           return ::std::make_pair(tcur, tnext);
+        }
+
+      // N.B. This function may throw `std::bad_alloc()`.
+      // N.B. This is a non-standard extension.
+      iterator find_mut(const key_type &key)
+        {
+          const auto ptr = this->do_mut_table();
+          const auto toff = this->m_sth.index_of(key);
+          if(toff < 0) {
+            return this->mut_end();
+          }
+          return iterator(this->m_sth, ptr + toff);
         }
       // N.B. This function may throw `std::bad_alloc()`.
       // N.B. This is a non-standard extension.
@@ -1300,17 +1301,37 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           tnext.seek_next();
           return ::std::make_pair(tcur, tnext);
         }
-      // N.B. The return type differs from `std::unordered_map`.
-      bool count(const key_type &key) const
+
+      size_t count(const key_type &key) const
         {
           const auto toff = this->m_sth.index_of(key);
           if(toff < 0) {
-            return false;
+            return 0;
           }
-          return true;
+          return 1;
         }
 
       // 26.5.4.3, element access
+      const mapped_type & at(const key_type &key) const
+        {
+          const auto ptr = this->do_get_table();
+          const auto toff = this->m_sth.index_of(key);
+          if(toff < 0) {
+            noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+          }
+          return ptr[toff].get()->second;
+        }
+
+      // N.B. This is a non-standard extension.
+      mapped_type & mut(const key_type &key)
+        {
+          const auto ptr = this->do_mut_table();
+          const auto toff = this->m_sth.index_of(key);
+          if(toff < 0) {
+            noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+          }
+          return ptr[toff].get()->second;
+        }
       mapped_type & operator[](const key_type &key)
         {
           this->do_reserve_more(1);
@@ -1324,25 +1345,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
                                                                   ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
           return result.first->get()->second;
-        }
-      const mapped_type & at(const key_type &key) const
-        {
-          const auto ptr = this->do_get_table();
-          const auto toff = this->m_sth.index_of(key);
-          if(toff < 0) {
-            noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
-          }
-          return ptr[toff].get()->second;
-        }
-      // N.B. This is a non-standard extension.
-      mapped_type & mut(const key_type &key)
-        {
-          const auto ptr = this->do_mut_table();
-          const auto toff = this->m_sth.index_of(key);
-          if(toff < 0) {
-            noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
-          }
-          return ptr[toff].get()->second;
         }
 
       // N.B. This function is a non-standard extension.

@@ -995,13 +995,6 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
 
       // 24.3.2.5, element access
-      const_reference operator[](size_type pos) const noexcept
-        {
-          const auto len = this->size();
-          // Reading from the character at `size()` is permitted.
-          ROCKET_ASSERT(pos <= len);
-          return this->c_str()[pos];
-        }
       const_reference at(size_type pos) const
         {
           const auto len = this->size();
@@ -1010,6 +1003,13 @@ template<typename charT, typename traitsT, typename allocatorT>
                                       static_cast<long long>(pos), static_cast<long long>(len));
           }
           return this->data()[pos];
+        }
+      const_reference operator[](size_type pos) const noexcept
+        {
+          const auto len = this->size();
+          // Reading from the character at `size()` is permitted.
+          ROCKET_ASSERT(pos <= len);
+          return this->c_str()[pos];
         }
       const_reference front() const noexcept
         {
@@ -1023,6 +1023,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           ROCKET_ASSERT(len > 0);
           return this->data()[len - 1];
         }
+
       // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
       // N.B. This is a non-standard extension.
       reference mut(size_type pos)
@@ -1430,6 +1431,11 @@ template<typename charT, typename traitsT, typename allocatorT>
         {
           return this->m_ptr;
         }
+      const value_type * c_str() const noexcept
+        {
+          return this->m_ptr;
+        }
+
       // Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
       // N.B. This is a non-standard extension.
       value_type * mut_data()
@@ -1438,10 +1444,6 @@ template<typename charT, typename traitsT, typename allocatorT>
             return this->do_reallocate(0, 0, this->size(), this->size() | 1);
           }
           return this->m_sth.mut_data_unchecked();
-        }
-      const value_type * c_str() const noexcept
-        {
-          return this->m_ptr;
         }
 
       // N.B. The return type differs from `std::basic_string`.

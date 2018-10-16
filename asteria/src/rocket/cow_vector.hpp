@@ -1021,12 +1021,6 @@ template<typename valueT, typename allocatorT>
         }
 
       // element access
-      const_reference operator[](size_type pos) const noexcept
-        {
-          const auto cnt = this->size();
-          ROCKET_ASSERT(pos < cnt);
-          return this->data()[pos];
-        }
       const_reference at(size_type pos) const
         {
           const auto cnt = this->size();
@@ -1034,6 +1028,12 @@ template<typename valueT, typename allocatorT>
             noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
                                       static_cast<long long>(pos), static_cast<long long>(cnt));
           }
+          return this->data()[pos];
+        }
+      const_reference operator[](size_type pos) const noexcept
+        {
+          const auto cnt = this->size();
+          ROCKET_ASSERT(pos < cnt);
           return this->data()[pos];
         }
       const_reference front() const noexcept
@@ -1048,6 +1048,7 @@ template<typename valueT, typename allocatorT>
           ROCKET_ASSERT(cnt > 0);
           return this->data()[cnt - 1];
         }
+
       // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
       // N.B. This is a non-standard extension.
       reference mut(size_type pos)
@@ -1250,6 +1251,7 @@ template<typename valueT, typename allocatorT>
         {
           return this->m_sth.data();
         }
+
       // Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
       // N.B. This is a non-standard extension.
       value_type * mut_data()
