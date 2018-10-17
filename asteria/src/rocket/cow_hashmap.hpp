@@ -192,7 +192,7 @@ namespace details_cow_hashmap {
             }
 
         template<typename xpointerT, typename predT>
-          static typename copy_const_from<handle_type, decltype(::std::declval<xpointerT &>())>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
+          static typename copy_const_from<handle_type, decltype(*(::std::declval<xpointerT>()))>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
             {
               static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
               const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
