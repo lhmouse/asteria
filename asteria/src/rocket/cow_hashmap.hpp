@@ -13,6 +13,7 @@
 #include <functional> // std::hash<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
+#include <cstdint> // std::uint32_t
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -56,6 +57,7 @@ using ::std::pair;
 using ::std::hash;
 using ::std::size_t;
 using ::std::ptrdiff_t;
+using ::std::uint32_t;
 
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;
@@ -183,10 +185,13 @@ namespace details_cow_hashmap {
               ROCKET_ASSERT(nbkt != 0);
               // Conversion between an unsigned integer type and a floating point type results in performance penalty.
               // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
-              const auto seed = hval * static_cast<size_t>(0xA17870F5D4F51B49);
-              const auto ratio = static_cast<double>(static_cast<ptrdiff_t>(seed / 2)) / static_cast<double>(static_cast<size_t>(-1) / 2 + 1);
+              const auto fcast = [](size_t x) { return static_cast<double>(static_cast<ptrdiff_t>(x)); };
+              const auto ucast = [](double y) { return static_cast<size_t>(static_cast<ptrdiff_t>(y)); };
+              // Multiplication is faster than division.
+              const auto seed = static_cast<uint32_t>(hval * 0xEDB88320);
+              const auto ratio = fcast(seed >> 1) / double(0x80000000);
               ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-              const auto pos = static_cast<size_type>(static_cast<ptrdiff_t>(ratio * static_cast<double>(static_cast<ptrdiff_t>(nbkt))));
+              const auto pos = ucast(fcast(nbkt) * ratio);
               ROCKET_ASSERT(pos < nbkt);
               return pos;
             }
