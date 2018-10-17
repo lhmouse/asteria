@@ -57,70 +57,6 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
 namespace details_static_vector {
 
-  template<typename allocatorT>
-    struct rotator
-      {
-        using allocator_type   = allocatorT;
-        using value_type       = typename allocator_type::value_type;
-        using size_type        = typename allocator_traits<allocator_type>::size_type;
-
-        static void rotate(value_type *ptr, size_type begin, size_type seek, size_type end)
-          {
-            ROCKET_ASSERT(begin <= seek);
-            ROCKET_ASSERT(seek <= end);
-            auto bot = begin;
-            auto brk = seek;
-            //   |<- isl ->|<- isr ->|
-            //   bot       brk       end
-            // > 0 1 2 3 4 5 6 7 8 9 -
-            auto isl = brk - bot;
-            if(isl == 0) {
-              return;
-            }
-            auto isr = end - brk;
-            if(isr == 0) {
-              return;
-            }
-            auto stp = brk;
-          r:
-            if(isl < isr) {
-              // Before:  bot   brk           end
-              //        > 0 1 2 3 4 5 6 7 8 9 -
-              // After:         bot   brk     end
-              //        > 3 4 5 0 1 2 6 7 8 9 -
-              do {
-                noadl::adl_swap(ptr[bot++], ptr[brk++]);
-              } while(bot != stp);
-              // `isr` will have been decreased by `isl`, which will not result in zero.
-              isr = end - brk;
-              // `isl` is unchanged.
-              stp = brk;
-              goto r;
-            }
-            if(isl > isr) {
-              // Before:  bot           brk   end
-              //        > 0 1 2 3 4 5 6 7 8 9 -
-              // After:       bot       brk   end
-              //        > 7 8 9 3 4 5 6 0 1 2 -
-              do {
-                noadl::adl_swap(ptr[bot++], ptr[brk++]);
-              } while(brk != end);
-              // `isl` will have been decreased by `isr`, which will not result in zero.
-              isl = stp - bot;
-              // `isr` is unchanged.
-              brk = stp;
-              goto r;
-            }
-            // Before:  bot       brk       end
-            //        > 0 1 2 3 4 5 6 7 8 9 -
-            // After:             bot       brk
-            //        > 5 6 7 8 9 0 1 2 3 4 -
-            do {
-              noadl::adl_swap(ptr[bot++], ptr[brk++]);
-            } while(bot != stp);
-          }
-      };
-
   template<typename allocatorT, size_t capacityT>
     class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
       {
@@ -590,7 +526,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
             details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
             const auto cnt_add = this->size() - cnt_old;
             const auto ptr = this->m_sth.data();
-            details_static_vector::rotator<allocator_type>::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
+            noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
             return ptr + tpos;
           }
       value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
@@ -599,7 +535,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
           ROCKET_ASSERT(tpos <= cnt_old);
           ROCKET_ASSERT(tn <= cnt_old - tpos);
           const auto ptr = this->m_sth.data();
-          details_static_vector::rotator<allocator_type>::rotate(ptr, tpos, tpos + tn, cnt_old);
+          noadl::rotate(ptr, tpos, tpos + tn, cnt_old);
           this->m_sth.pop_back_n_unchecked(tn);
           return ptr + tpos;
         }

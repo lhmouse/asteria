@@ -130,6 +130,63 @@ template<typename elementT>
     }
 
 template<typename elementT>
+  void rotate(elementT *ptr, size_t begin, size_t seek, size_t end)
+    {
+      ROCKET_ASSERT(begin <= seek);
+      ROCKET_ASSERT(seek <= end);
+      auto bot = begin;
+      auto brk = seek;
+      //   |<- isl ->|<- isr ->|
+      //   bot       brk       end
+      // > 0 1 2 3 4 5 6 7 8 9 -
+      auto isl = brk - bot;
+      if(isl == 0) {
+        return;
+      }
+      auto isr = end - brk;
+      if(isr == 0) {
+        return;
+      }
+      auto stp = brk;
+    r:
+      if(isl < isr) {
+        // Before:  bot   brk           end
+        //        > 0 1 2 3 4 5 6 7 8 9 -
+        // After:         bot   brk     end
+        //        > 3 4 5 0 1 2 6 7 8 9 -
+        do {
+          noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        } while(bot != stp);
+        // `isr` will have been decreased by `isl`, which will not result in zero.
+        isr = end - brk;
+        // `isl` is unchanged.
+        stp = brk;
+        goto r;
+      }
+      if(isl > isr) {
+        // Before:  bot           brk   end
+        //        > 0 1 2 3 4 5 6 7 8 9 -
+        // After:       bot       brk   end
+        //        > 7 8 9 3 4 5 6 0 1 2 -
+        do {
+          noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        } while(brk != end);
+        // `isl` will have been decreased by `isr`, which will not result in zero.
+        isl = stp - bot;
+        // `isr` is unchanged.
+        brk = stp;
+        goto r;
+      }
+      // Before:  bot       brk       end
+      //        > 0 1 2 3 4 5 6 7 8 9 -
+      // After:             bot       brk
+      //        > 5 6 7 8 9 0 1 2 3 4 -
+      do {
+        noadl::adl_swap(ptr[bot++], ptr[brk++]);
+      } while(bot != stp);
+    }
+
+template<typename elementT>
   inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
     {
       auto ptr = init.begin();
