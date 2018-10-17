@@ -17,14 +17,14 @@ Global_context::Global_context()
 
 Global_context::~Global_context()
   {
+    ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
     // Perform the final garbage collection.
     try {
       this->do_clear_named_references();
-      this->perform_garbage_collection(100, true);
+      this->m_coll->perform_garbage_collection(100, false);
     } catch(std::exception &e) {
       ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
     }
-    ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
   }
 
 bool Global_context::is_analytic() const noexcept
