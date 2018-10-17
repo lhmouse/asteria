@@ -132,8 +132,6 @@ template<typename elementT>
 template<typename elementT>
   void rotate(elementT *ptr, size_t begin, size_t seek, size_t end)
     {
-      ROCKET_ASSERT(begin <= seek);
-      ROCKET_ASSERT(seek <= end);
       auto bot = begin;
       auto brk = seek;
       //   |<- isl ->|<- isr ->|
