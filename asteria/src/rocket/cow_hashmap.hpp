@@ -188,7 +188,7 @@ namespace details_cow_hashmap {
               const auto fcast = [](size_t x) { return static_cast<double>(static_cast<ptrdiff_t>(x)); };
               const auto ucast = [](double y) { return static_cast<size_t>(static_cast<ptrdiff_t>(y)); };
               // Multiplication is faster than division.
-              const auto seed = static_cast<uint32_t>(hval * 0xEDB88320);
+              const auto seed = static_cast<uint32_t>(hval * 0xBA0DC66B);
               const auto ratio = fcast(seed >> 1) / double(0x80000000);
               ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
               const auto pos = ucast(fcast(nbkt) * ratio);
