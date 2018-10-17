@@ -186,9 +186,9 @@ namespace details_cow_hashmap {
               const auto seed = hval * static_cast<size_t>(0xA17870F5D4F51B49);
               const auto ratio = static_cast<double>(static_cast<ptrdiff_t>(seed / 2)) / static_cast<double>(static_cast<size_t>(-1) / 2 + 1);
               ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-              const auto rpos = static_cast<double>(static_cast<ptrdiff_t>(nbkt)) * ratio;
-              ROCKET_ASSERT((0 <= rpos) && (rpos < static_cast<double>(static_cast<ptrdiff_t>(nbkt))));
-              return static_cast<size_type>(static_cast<ptrdiff_t>(rpos));
+              const auto pos = static_cast<size_type>(static_cast<ptrdiff_t>(ratio * static_cast<double>(static_cast<ptrdiff_t>(nbkt))));
+              ROCKET_ASSERT(pos < nbkt);
+              return pos;
             }
 
         template<typename xpointerT, typename predT>
