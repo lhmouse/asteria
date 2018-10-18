@@ -36,7 +36,7 @@ using ::std::add_lvalue_reference;
 template<typename handleT, typename closerT>
   class unique_handle;
 
-namespace details_unique_handle {
+  namespace details_unique_handle {
 
   template<typename handleT, typename closerT>
     class stored_handle : private allocator_wrapper_base_for<closerT>::type
@@ -136,7 +136,7 @@ namespace details_unique_handle {
           }
       };
 
-}
+  }
 
 template<typename handleT, typename closerT>
   class unique_handle

@@ -42,7 +42,7 @@ template<typename elementT, typename deleterT = default_delete<elementT>>
 template<typename elementT>
   class refcounted_ptr;
 
-namespace details_refcounted_ptr {
+  namespace details_refcounted_ptr {
 
   class refcount_base
     {
@@ -249,7 +249,7 @@ namespace details_refcounted_ptr {
             }
       };
 
-}
+  }
 
 template<typename elementT, typename deleterT>
   class refcounted_base : protected virtual details_refcounted_ptr::refcount_base, private virtual allocator_wrapper_base_for<deleterT>::type

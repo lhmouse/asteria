@@ -13,7 +13,7 @@ Token_stream::~Token_stream()
   {
   }
 
-namespace {
+  namespace {
 
   class Source_reader
     {
@@ -790,7 +790,7 @@ namespace {
       return true;
     }
 
-}
+  }
 
 Parser_error Token_stream::get_parser_error() const noexcept
   {

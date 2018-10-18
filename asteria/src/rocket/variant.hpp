@@ -34,7 +34,7 @@ using ::std::type_info;
 template<typename ...altsT>
   class variant;
 
-namespace details_variant {
+  namespace details_variant {
 
   template<unsigned indexT, typename ...typesT>
     struct type_getter
@@ -136,7 +136,7 @@ namespace details_variant {
         alignas(max_of<alignof(altsT)...>::value + 0) char bytes[max_of<sizeof(altsT)...>::value + 0];
       };
 
-  namespace details_is_nothrow_swappable {
+    namespace details_is_nothrow_swappable {
 
     using ::std::swap;
 
@@ -146,7 +146,7 @@ namespace details_variant {
         {
         };
 
-  }
+    }
 
   template<typename typeT>
     struct is_nothrow_swappable
@@ -248,7 +248,7 @@ namespace details_variant {
       throw;
     }
 
-}
+  }
 
 template<typename ...altsT>
   class variant

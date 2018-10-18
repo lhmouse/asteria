@@ -41,7 +41,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     return true;
   }
 
-namespace {
+  namespace {
 
   struct Gcref_comparator
     {
@@ -59,7 +59,7 @@ namespace {
         }
     };
 
-}
+  }
 
 void Collector::collect(bool unreserve)
   {

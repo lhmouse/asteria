@@ -55,7 +55,7 @@ using ::std::uintptr_t;
 template<typename valueT, size_t capacityT, typename allocatorT = allocator<valueT>>
   class static_vector;
 
-namespace details_static_vector {
+  namespace details_static_vector {
 
   template<typename allocatorT, size_t capacityT>
     class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
@@ -396,7 +396,7 @@ namespace details_static_vector {
         vec->push_back(::std::forward<paramsT>(params)...);
       }
 
-  namespace details_is_nothrow_swappable {
+    namespace details_is_nothrow_swappable {
 
     using ::std::swap;
 
@@ -406,7 +406,7 @@ namespace details_static_vector {
         {
         };
 
-  }
+    }
 
   template<typename typeT>
     struct is_nothrow_swappable
@@ -414,7 +414,7 @@ namespace details_static_vector {
       {
       };
 
-}
+  }
 
 template<typename valueT, size_t capacityT, typename allocatorT>
   class static_vector

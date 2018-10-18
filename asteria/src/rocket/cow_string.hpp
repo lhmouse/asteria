@@ -60,7 +60,7 @@ using ::std::ptrdiff_t;
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
   class basic_cow_string;
 
-namespace details_cow_string {
+  namespace details_cow_string {
 
   template<typename allocatorT>
     struct basic_storage
@@ -593,7 +593,7 @@ namespace details_cow_string {
         str->push_back(::std::forward<paramsT>(params)...);
       }
 
-}
+  }
 
 template<typename charT, typename traitsT, typename allocatorT>
   class basic_cow_string

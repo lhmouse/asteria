@@ -18,7 +18,7 @@ using ::std::true_type;
 using ::std::remove_reference;
 using ::std::is_nothrow_constructible;
 
-namespace details_allocator_utilities {
+  namespace details_allocator_utilities {
 
   template<typename typeT>
     struct is_final
@@ -61,7 +61,7 @@ namespace details_allocator_utilities {
           }
       };
 
-}
+  }
 
 template<typename allocatorT>
   struct allocator_wrapper_base_for

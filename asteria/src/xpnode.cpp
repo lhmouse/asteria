@@ -118,7 +118,7 @@ Xpnode::~Xpnode()
   {
   }
 
-namespace {
+  namespace {
 
   using Refpair = std::pair<std::reference_wrapper<const Abstract_context>, std::reference_wrapper<const Reference>>;
 
@@ -141,7 +141,7 @@ namespace {
       }
     }
 
-}
+  }
 
 Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) const
   {
@@ -236,7 +236,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     }
   }
 
-namespace {
+  namespace {
 
   template<typename XvalueT>
     void do_set_result(Reference &ref_io, bool assign, XvalueT &&value)
@@ -504,7 +504,7 @@ namespace {
       return res;
     }
 
-}
+  }
 
 void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {

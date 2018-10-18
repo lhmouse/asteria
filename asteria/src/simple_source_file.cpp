@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-namespace {
+  namespace {
 
   [[noreturn]] void do_throw_parser_error(const Parser_error &err)
     {
@@ -19,7 +19,7 @@ namespace {
                                   "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
     }
 
-}
+  }
 
 Simple_source_file::Simple_source_file(std::istream &cstrm_io, const String &file)
   : m_file(file)

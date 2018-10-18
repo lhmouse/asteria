@@ -17,7 +17,7 @@ Parser::~Parser()
   {
   }
 
-namespace {
+  namespace {
 
   inline Parser_error do_make_parser_error(const Token_stream &tstrm_io, Parser_error::Code code)
     {
@@ -1630,7 +1630,7 @@ namespace {
              do_accept_nonblock_statement(stmts_out, tstrm_io);
     }
 
-}
+  }
 
 Parser_error Parser::get_parser_error() const noexcept
   {

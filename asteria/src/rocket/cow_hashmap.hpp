@@ -62,7 +62,7 @@ using ::std::uint32_t;
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;
 
-namespace details_cow_hashmap {
+  namespace details_cow_hashmap {
 
   template<typename allocatorT>
     class value_handle
@@ -801,7 +801,7 @@ namespace details_cow_hashmap {
         return lhs.tell() != rhs.tell();
       }
 
-}
+  }
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT>
   class cow_hashmap

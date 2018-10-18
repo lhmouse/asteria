@@ -14,7 +14,7 @@
 
 namespace rocket {
 
-namespace noadl = ::rocket;
+  namespace noadl = ::rocket;
 
 using ::std::common_type;
 using ::std::is_nothrow_constructible;
@@ -87,7 +87,7 @@ template<typename iteratorT, typename functionT, typename ...paramsT>
       } while(++it != last);
     }
 
-namespace details_utilities {
+  namespace details_utilities {
 
   template<typename iteratorT>
     constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
@@ -109,7 +109,7 @@ namespace details_utilities {
         return static_cast<size_t>(last - first);
       }
 
-}
+  }
 
 template<typename iteratorT>
   constexpr size_t estimate_distance(iteratorT first, iteratorT last)

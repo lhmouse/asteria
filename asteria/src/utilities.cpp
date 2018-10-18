@@ -102,7 +102,7 @@ void Formatter::do_put(const void *value)
     this->m_stream <<value;
   }
 
-namespace {
+  namespace {
 
   int do_print_time(char *str, std::size_t cap)
     {
@@ -138,7 +138,7 @@ namespace {
       } while(true);
     }
 
-}
+  }
 
 bool are_debug_logs_enabled() noexcept
   {
