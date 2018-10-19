@@ -1270,12 +1270,12 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
     }
   }
 
-void Xpnode::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Xpnode::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
       case index_literal: {
         const auto &alt = this->m_stor.as<S_literal>();
-        alt.value.collect_variables(callback, param);
+        alt.value.enumerate_variables(callback);
         return;
       }
       case index_named_reference: {
@@ -1283,18 +1283,18 @@ void Xpnode::collect_variables(bool (*callback)(void *, const rocket::refcounted
       }
       case index_bound_reference: {
         const auto &alt = this->m_stor.as<S_bound_reference>();
-        alt.ref.collect_variables(callback, param);
+        alt.ref.enumerate_variables(callback);
         return;
       }
       case index_closure_function: {
         const auto &alt = this->m_stor.as<S_closure_function>();
-        alt.body.collect_variables(callback, param);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_branch: {
         const auto &alt = this->m_stor.as<S_branch>();
-        alt.branch_true.collect_variables(callback, param);
-        alt.branch_false.collect_variables(callback, param);
+        alt.branch_true.enumerate_variables(callback);
+        alt.branch_false.enumerate_variables(callback);
         return;
       }
       case index_function_call:
@@ -1306,7 +1306,7 @@ void Xpnode::collect_variables(bool (*callback)(void *, const rocket::refcounted
       }
       case index_coalescence: {
         const auto &alt = this->m_stor.as<S_coalescence>();
-        alt.branch_null.collect_variables(callback, param);
+        alt.branch_null.enumerate_variables(callback);
         return;
       }
       default: {

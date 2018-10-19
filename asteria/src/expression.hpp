@@ -31,7 +31,7 @@ class Expression
     bool evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const;
     Reference evaluate(Global_context &global, const Executive_context &ctx) const;
 
-    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 }

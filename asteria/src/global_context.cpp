@@ -21,7 +21,7 @@ Global_context::~Global_context()
     // Perform the final garbage collection.
     try {
       this->do_clear_named_references();
-      this->m_coll->perform_garbage_collection(100, false);
+      this->m_coll->perform_garbage_collection(100);
     } catch(std::exception &e) {
       ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
     }
@@ -41,9 +41,9 @@ rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable()
     return this->m_coll->create_tracked_variable();
   }
 
-void Global_context::perform_garbage_collection(unsigned gen_max, bool unreserve)
+void Global_context::perform_garbage_collection(unsigned gen_limit)
   {
-    return this->m_coll->perform_garbage_collection(gen_max, unreserve);
+    return this->m_coll->perform_garbage_collection(gen_limit);
   }
 
 }

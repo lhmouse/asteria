@@ -16,10 +16,10 @@ String Variadic_arguer::describe() const
     return ASTERIA_FORMAT_STRING("variadic argument accessor at \'", this->m_loc, "\'");
   }
 
-void Variadic_arguer::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     for(const auto &varg : this->m_vargs) {
-      varg.collect_variables(callback, param);
+      varg.enumerate_variables(callback);
     }
   }
 

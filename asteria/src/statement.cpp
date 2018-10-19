@@ -580,75 +580,75 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
     }
   }
 
-void Statement::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Statement::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
-        alt.expr.collect_variables(callback, param);
+        alt.expr.enumerate_variables(callback);
         return;
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
-        alt.body.collect_variables(callback, param);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
-        alt.init.collect_variables(callback, param);
+        alt.init.enumerate_variables(callback);
         return;
       }
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
-        alt.body.collect_variables(callback, param);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
-        alt.cond.collect_variables(callback, param);
-        alt.branch_true.collect_variables(callback, param);
-        alt.branch_false.collect_variables(callback, param);
+        alt.cond.enumerate_variables(callback);
+        alt.branch_true.enumerate_variables(callback);
+        alt.branch_false.enumerate_variables(callback);
         return;
       }
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
-        alt.ctrl.collect_variables(callback, param);
+        alt.ctrl.enumerate_variables(callback);
         for(const auto &pair : alt.clauses) {
-          pair.first.collect_variables(callback, param);
-          pair.second.collect_variables(callback, param);
+          pair.first.enumerate_variables(callback);
+          pair.second.enumerate_variables(callback);
         }
         return;
       }
       case index_do_while: {
         const auto &alt = this->m_stor.as<S_do_while>();
-        alt.body.collect_variables(callback, param);
-        alt.cond.collect_variables(callback, param);
+        alt.body.enumerate_variables(callback);
+        alt.cond.enumerate_variables(callback);
         return;
       }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
-        alt.cond.collect_variables(callback, param);
-        alt.body.collect_variables(callback, param);
+        alt.cond.enumerate_variables(callback);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_for: {
         const auto &alt = this->m_stor.as<S_for>();
-        alt.init.collect_variables(callback, param);
-        alt.cond.collect_variables(callback, param);
-        alt.step.collect_variables(callback, param);
-        alt.body.collect_variables(callback, param);
+        alt.init.enumerate_variables(callback);
+        alt.cond.enumerate_variables(callback);
+        alt.step.enumerate_variables(callback);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_for_each: {
         const auto &alt = this->m_stor.as<S_for_each>();
-        alt.init.collect_variables(callback, param);
-        alt.body.collect_variables(callback, param);
+        alt.init.enumerate_variables(callback);
+        alt.body.enumerate_variables(callback);
         return;
       }
       case index_try: {
         const auto &alt = this->m_stor.as<S_try>();
-        alt.body_try.collect_variables(callback, param);
-        alt.body_catch.collect_variables(callback, param);
+        alt.body_try.enumerate_variables(callback);
+        alt.body_catch.enumerate_variables(callback);
         return;
       }
       case index_break:
@@ -657,12 +657,12 @@ void Statement::collect_variables(bool (*callback)(void *, const rocket::refcoun
       }
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
-        alt.expr.collect_variables(callback, param);
+        alt.expr.enumerate_variables(callback);
         return;
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
-        alt.expr.collect_variables(callback, param);
+        alt.expr.enumerate_variables(callback);
         return;
       }
       default: {

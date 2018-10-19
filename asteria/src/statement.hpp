@@ -157,7 +157,7 @@ class Statement
     Statement bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
     Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;
 
-    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 }

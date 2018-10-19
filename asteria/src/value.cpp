@@ -269,7 +269,7 @@ void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) cons
     }
   }
 
-void Value::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Value::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(this->type()) {
       case type_null:
@@ -282,20 +282,20 @@ void Value::collect_variables(bool (*callback)(void *, const rocket::refcounted_
       }
       case type_function: {
         const auto &alt = this->check<D_function>();
-        alt->collect_variables(callback, param);
+        alt->enumerate_variables(callback);
         return;
       }
       case type_array: {
         const auto &alt = this->check<D_array>();
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          it->collect_variables(callback, param);
+          it->enumerate_variables(callback);
         }
         return;
       }
       case type_object: {
         const auto &alt = this->check<D_object>();
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          it->second.collect_variables(callback, param);
+          it->second.enumerate_variables(callback);
         }
         return;
       }

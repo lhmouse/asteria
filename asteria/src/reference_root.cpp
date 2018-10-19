@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "reference_root.hpp"
+#include "abstract_variable_callback.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -56,24 +57,24 @@ Value & Reference_root::dereference_mutable() const
     }
   }
 
-void Reference_root::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Reference_root::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(this->index()) {
       case index_constant: {
         const auto &alt = this->check<S_constant>();
-        alt.src.collect_variables(callback, param);
+        alt.src.enumerate_variables(callback);
         return;
       }
       case index_temporary: {
         const auto &alt = this->check<S_temporary>();
-        alt.value.collect_variables(callback, param);
+        alt.value.enumerate_variables(callback);
         return;
       }
       case index_variable: {
         const auto &alt = this->check<S_variable>();
-        if((*callback)(param, alt.var)) {
+        if(callback.accept(alt.var)) {
           // Descend into this variable recursively when the callback returns `true`.
-          alt.var->get_value().collect_variables(callback, param);
+          alt.var->enumerate_variables(callback);
         }
         return;
       }

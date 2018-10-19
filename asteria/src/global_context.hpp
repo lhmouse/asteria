@@ -29,7 +29,7 @@ class Global_context : public Abstract_context
     const Abstract_context * get_parent_opt() const noexcept override;
 
     rocket::refcounted_ptr<Variable> create_tracked_variable();
-    void perform_garbage_collection(unsigned gen_max, bool unreserve);
+    void perform_garbage_collection(unsigned gen_limit);
   };
 
 }

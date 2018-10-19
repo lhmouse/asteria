@@ -108,7 +108,7 @@ class Value
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, Size indent_increment = 2, Size indent_next = 0) const;
 
-    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)

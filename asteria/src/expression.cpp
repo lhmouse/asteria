@@ -56,10 +56,10 @@ Reference Expression::evaluate(Global_context &global, const Executive_context &
     return std::move(stack.top());
   }
 
-void Expression::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Expression::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     for(const auto &node : this->m_nodes) {
-      node.collect_variables(callback, param);
+      node.enumerate_variables(callback);
     }
   }
 

@@ -125,9 +125,9 @@ Reference & Reference::convert_to_variable(Global_context &global)
     return *this;
   }
 
-void Reference::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Reference::enumerate_variables(const Abstract_variable_callback &callback) const
   {
-    this->m_root.collect_variables(callback, param);
+    this->m_root.enumerate_variables(callback);
   }
 
 }
