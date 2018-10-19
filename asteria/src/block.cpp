@@ -100,10 +100,10 @@ Reference Block::execute_as_function(Global_context &global, const Function_head
     }
   }
 
-void Block::collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const
+void Block::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     for(const auto &stmt : this->m_stmts) {
-      stmt.collect_variables(callback, param);
+      stmt.enumerate_variables(callback);
     }
   }
 

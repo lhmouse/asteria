@@ -50,7 +50,7 @@ class Block
     Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Function_header &head) const;
     Reference execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args) const;
 
-    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 }

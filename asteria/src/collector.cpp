@@ -14,6 +14,26 @@ Collector::~Collector()
 
 bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
+    return true;
+  }
+
+bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
+  {
+    return true;
+  }
+
+bool Collector::auto_collect()
+  {
+    return false;
+  }
+
+void Collector::collect()
+  {
+  }
+
+#if 0
+bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
+  {
     ROCKET_ASSERT(var);
     if(this->m_vars.size() == this->m_vars.capacity()) {
       ASTERIA_DEBUG_LOG("Performing automatic garbage collection: variable_count = ", this->m_vars.size());
@@ -131,5 +151,6 @@ void Collector::collect(bool unreserve)
     }
     ASTERIA_DEBUG_LOG("Garbage collection ends.");
   }
+#endif
 
 }

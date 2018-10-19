@@ -82,7 +82,7 @@ class Reference_root
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;
 
-    void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 }

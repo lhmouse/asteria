@@ -19,17 +19,18 @@ rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable()
     return var;
   }
 
-void Global_collector::perform_garbage_collection(unsigned gen_max, bool unreserve)
+void Global_collector::perform_garbage_collection(unsigned gen_limit)
   {
     auto qcoll = &(this->m_gen_zero);
-    auto gen_cur = gen_max;
+    unsigned gen_cur = 0;
     do {
-      ASTERIA_DEBUG_LOG("Performing garbage collection: generation = ", gen_cur, ", unreserve = ", unreserve);
-      qcoll->collect(unreserve);
-      if(gen_cur == 0) {
+      ASTERIA_DEBUG_LOG("Generation ", gen_cur, " garbage collection begins.");
+      qcoll->collect();
+      ASTERIA_DEBUG_LOG("Generation ", gen_cur, " garbage collection ends.");
+      ++gen_cur;
+      if(gen_cur > gen_limit) {
         break;
       }
-      --gen_cur;
       qcoll = qcoll->get_tied_collector_opt();
       if(!qcoll) {
         break;

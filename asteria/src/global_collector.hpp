@@ -32,7 +32,7 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
 
   public:
     rocket::refcounted_ptr<Variable> create_tracked_variable();
-    void perform_garbage_collection(unsigned gen_max, bool unreserve);
+    void perform_garbage_collection(unsigned gen_limit);
   };
 
 }

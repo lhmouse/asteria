@@ -63,6 +63,8 @@ class Variable : public rocket::refcounted_base<Variable>
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;
       }
+
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
 
 }

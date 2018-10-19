@@ -7,18 +7,23 @@
 #include "fwd.hpp"
 #include "rocket/refcounted_ptr.hpp"
 
+// TODO
+#include <boost/container/flat_set.hpp>
+#include <boost/container/flat_map.hpp>
+
 namespace Asteria {
 
 class Collector
   {
   private:
     Collector *m_tied_opt;
-    Vector<rocket::refcounted_ptr<Variable>> m_vars;  // This is a flat map.
-    Bivector<rocket::refcounted_ptr<Variable>, long> m_gcrefs;  // This is a flat map.
+    long m_recur;
+    boost::container::flat_set<rocket::refcounted_ptr<Variable>> m_vars;
+    boost::container::flat_map<rocket::refcounted_ptr<Variable>, long> m_gcrefs;
 
   public:
     explicit Collector(Collector *tied_opt) noexcept
-      : m_tied_opt(tied_opt), m_vars(), m_gcrefs()
+      : m_tied_opt(tied_opt), m_recur(0), m_vars(), m_gcrefs()
       {
       }
     ~Collector();
@@ -40,7 +45,9 @@ class Collector
 
     bool track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    void collect(bool unreserve);
+
+    bool auto_collect();
+    void collect();
   };
 
 }

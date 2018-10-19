@@ -19,7 +19,7 @@ class Abstract_function : public rocket::refcounted_base<Abstract_function>
 
   public:
     virtual String describe() const = 0;
-    virtual void collect_variables(bool (*callback)(void *, const rocket::refcounted_ptr<Variable> &), void *param) const = 0;
+    virtual void enumerate_variables(const Abstract_variable_callback &callback) const = 0;
 
     virtual Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const = 0;
   };
