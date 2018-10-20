@@ -205,14 +205,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           // Phase one: Probe from `first` to the end of the table.
           for(size_type i = first; i != nbkt; ++i) {
             const auto bkt = ptr->data + i;
-            if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
+            if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
               return bkt;
             }
           }
           // Phase two: Probe from the beginning of the table to `last`.
           for(size_type i = 0; i != last; ++i) {
             const auto bkt = ptr->data + i;
-            if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
+            if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
               return bkt;
             }
           }
@@ -578,7 +578,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
             [&](const value_handle<allocatorT> *tbkt)
               { return this->as_key_equal()(tbkt->get()->first, ykey); });
-          if(!bkt || !(bkt->get())) {
+          if((max_load_factor_reciprocal == 1) && !bkt) {
+            return -1;
+          }
+          if(!bkt->get()) {
             return -1;
           }
           const auto toff = bkt - ptr->data;
