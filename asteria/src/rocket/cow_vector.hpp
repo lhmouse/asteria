@@ -10,6 +10,7 @@
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
+#include <typeinfo> // typeid()
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstdint> // std::uintptr_t
 #include <cstring> // std::memset()
@@ -136,7 +137,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           [[noreturn]] void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
             {
               // Throw an exception unconditionally, even when there is nothing to copy.
-              noadl::throw_domain_error("cow_vector: The `value_type` of this `cow_vector` is not copy-constructible.");
+              noadl::throw_domain_error("cow_vector: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
             }
       };
   template<typename allocatorT>

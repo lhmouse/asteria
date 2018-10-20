@@ -10,6 +10,7 @@
 #include <iterator> // std::iterator_traits<>, std::forward_iterator_tag
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval(), std::pair<>
+#include <typeinfo> // typeid()
 #include <functional> // std::hash<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
@@ -263,7 +264,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             {
               // `allocatorT::value_type` is not copy-constructible.
               // Throw an exception unconditionally, even when there is nothing to copy.
-              noadl::throw_domain_error("cow_hashmap: The `keyT` or `mappedT` of this `cow_hashmap` is not copy-constructible.");
+              noadl::throw_domain_error("cow_hashmap: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
             }
       };
 
