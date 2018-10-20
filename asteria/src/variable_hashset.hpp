@@ -8,9 +8,6 @@
 #include "variable.hpp"
 #include "rocket/refcounted_ptr.hpp"
 
-// TODO
-#include <unordered_set>
-
 namespace Asteria {
 
 class Variable_hashset
@@ -19,16 +16,6 @@ class Variable_hashset
     rocket::refcounted_ptr<Variable> *m_data;
     Size m_nbkt;
     Size m_size;
-
-// TODO
-struct phash
-  {
-    Size operator()(const rocket::refcounted_ptr<Variable> &p) const noexcept
-      {
-        return std::hash<void *>()(p.get());
-      }
-  };
-std::unordered_set<rocket::refcounted_ptr<Variable>, phash> m_set;
 
   public:
     Variable_hashset() noexcept
@@ -43,30 +30,26 @@ std::unordered_set<rocket::refcounted_ptr<Variable>, phash> m_set;
       = delete;
 
   private:
-    void do_rehash(Size nbkt);
+    void do_reserve(Size res_arg);
+    Diff do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
+    bool do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept;
+    void do_erase_unchecked(Size tpos) noexcept;
 
   public:
     bool empty() const noexcept
       {
-// TODO
-return this->m_set.empty();
         return this->m_size == 0;
       }
     Size size() const noexcept
       {
-// TODO
-return this->m_set.size();
         return this->m_size;
       }
     void clear() noexcept
       {
-// TODO
-return this->m_set.clear();
-        const auto bptr = this->m_data;
-        auto eptr = bptr + this->m_nbkt;
-        while(eptr != bptr) {
-          --eptr;
-          eptr->reset();
+        const auto data = this->m_data;
+        const auto nbkt = this->m_nbkt;
+        for(Size i = 0; i != nbkt; ++i) {
+          data[i] = nullptr;
         }
         this->m_size = 0;
       }
@@ -74,45 +57,50 @@ return this->m_set.clear();
     template<typename FuncT>
       void for_each(FuncT &&func) const
       {
-// TODO
-return std::for_each(this->m_set.begin(), this->m_set.end(), std::forward<FuncT>(func)), (void)0;
-        auto bptr = this->m_data;
-        const auto eptr = bptr + this->m_nbkt;
-        while(bptr != eptr) {
-          if(*bptr) {
-            std::forward<FuncT>(func)(*bptr);
+        const auto data = this->m_data;
+        const auto nbkt = this->m_nbkt;
+        for(Size i = 0; i != nbkt; ++i) {
+          if(data[i]) {
+            std::forward<FuncT>(func)(data[i]);
           }
-          ++bptr;
         }
       }
-    bool has(const rocket::refcounted_ptr<Variable> &var) const
+    bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept
       {
-// TODO
-return this->m_set.count(var);
-        return false;
+        const auto toff = this->do_find(var);
+        if(toff < 0) {
+          return false;
+        }
+        return true;
+      }
+    Size max_size() const noexcept
+      {
+        const auto max_nbkts = Size(-1) / 2 / sizeof(rocket::refcounted_ptr<Variable>);
+        return max_nbkts / 2;
       }
     void reserve(Size res_arg)
       {
-        this->m_set.reserve(res_arg);
+        this->do_reserve(res_arg);
       }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
-// TODO
-return this->m_set.insert(var).second;
-        return true;
+        if(this->m_size >= this->m_nbkt / 2) {
+          this->do_reserve(this->m_size + 1);
+        }
+        return this->do_insert_unchecked(var);
       }
     bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept
       {
-// TODO
-return this->m_set.erase(var);
+        const auto toff = this->do_find(var);
+        if(toff < 0) {
+          return false;
+        }
+        this->do_erase_unchecked(static_cast<Size>(toff));
         return true;
       }
 
-
     void swap(Variable_hashset &other) noexcept
       {
-// TODO
-return this->m_set.swap(other.m_set);
          std::swap(this->m_data, other.m_data);
          std::swap(this->m_nbkt, other.m_nbkt);
          std::swap(this->m_size, other.m_size);

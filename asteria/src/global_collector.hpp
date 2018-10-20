@@ -18,9 +18,9 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
 
   public:
     Global_collector() noexcept
-      : m_gen_two(nullptr, 40),
-        m_gen_one(&(this->m_gen_two), 200),
-        m_gen_zero(&(this->m_gen_one), 1000)
+      : m_gen_two(nullptr, 15),
+        m_gen_one(&(this->m_gen_two), 50),
+        m_gen_zero(&(this->m_gen_one), 400)
       {
       }
     ~Global_collector();
