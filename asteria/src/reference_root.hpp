@@ -51,16 +51,16 @@ class Reference_root
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Reference_root(AltT &&alt)
-        : m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_stor(std::forward<AltT>(alt))
+      {
+      }
     // This assignment operator does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Reference_root & operator=(AltT &&alt)
-        {
-          this->m_stor = std::forward<AltT>(alt);
-          return *this;
-        }
+      {
+        this->m_stor = std::forward<AltT>(alt);
+        return *this;
+      }
     ~Reference_root();
 
   public:
@@ -70,14 +70,14 @@ class Reference_root
       }
     template<typename AltT>
       const AltT * opt() const noexcept
-        {
-          return this->m_stor.get<AltT>();
-        }
+      {
+        return this->m_stor.get<AltT>();
+      }
     template<typename AltT>
       const AltT & check() const
-        {
-          return this->m_stor.as<AltT>();
-        }
+      {
+        return this->m_stor.as<AltT>();
+      }
 
     const Value & dereference_readonly() const;
     Value & dereference_mutable() const;

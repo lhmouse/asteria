@@ -18,9 +18,9 @@ class Shared_function_wrapper
   public:
     template<typename ElementT, typename std::enable_if<std::is_base_of<Abstract_function, typename std::decay<ElementT>::type>::value>::type * = nullptr>
       explicit Shared_function_wrapper(ElementT &&elem)
-        : m_ptr(rocket::make_refcounted<typename std::decay<ElementT>::type>(std::forward<ElementT>(elem)))
-        {
-        }
+      : m_ptr(rocket::make_refcounted<typename std::decay<ElementT>::type>(std::forward<ElementT>(elem)))
+      {
+      }
 
   public:
     const Abstract_function * get() const noexcept

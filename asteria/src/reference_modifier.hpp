@@ -39,16 +39,16 @@ class Reference_modifier
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Reference_modifier(AltT &&alt)
-        : m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_stor(std::forward<AltT>(alt))
+      {
+      }
     // This assignment operator does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Reference_modifier & operator=(AltT &&alt)
-        {
-          this->m_stor = std::forward<AltT>(alt);
-          return *this;
-        }
+      {
+        this->m_stor = std::forward<AltT>(alt);
+        return *this;
+      }
     ~Reference_modifier();
 
   public:

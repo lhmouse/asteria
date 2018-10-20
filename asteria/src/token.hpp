@@ -161,9 +161,9 @@ class Token
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Token(const String &file, Uint32 line, Size offset, Size length, AltT &&alt)
-        : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
+      {
+      }
     ~Token();
 
   public:
@@ -190,14 +190,14 @@ class Token
       }
     template<typename AltT>
       const AltT * opt() const noexcept
-        {
-          return this->m_stor.get<AltT>();
-        }
+      {
+        return this->m_stor.get<AltT>();
+      }
     template<typename AltT>
       const AltT & check() const
-        {
-          return this->m_stor.as<AltT>();
-        }
+      {
+        return this->m_stor.as<AltT>();
+      }
 
     void dump(std::ostream &os) const;
   };

@@ -97,15 +97,15 @@ bool Value::test() const noexcept
 
   template<typename ElementT>
     inline Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
-      {
-        if(lhs < rhs) {
-          return Value::compare_less;
-        }
-        if(rhs < lhs) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+    {
+      if(lhs < rhs) {
+        return Value::compare_less;
       }
+      if(rhs < lhs) {
+        return Value::compare_greater;
+      }
+      return Value::compare_equal;
+    }
 
   }
 

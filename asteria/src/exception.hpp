@@ -22,9 +22,9 @@ class Exception : public virtual std::exception
   public:
     template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
       Exception(const Source_location &loc, XvalueT &&value)
-        : m_loc(loc), m_value(std::forward<XvalueT>(value))
-        {
-        }
+      : m_loc(loc), m_value(std::forward<XvalueT>(value))
+      {
+      }
     explicit Exception(const std::exception &stdex)
       : m_loc(String::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
       {

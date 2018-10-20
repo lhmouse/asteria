@@ -240,15 +240,15 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
   template<typename XvalueT>
     void do_set_result(Reference &ref_io, bool assign, XvalueT &&value)
-      {
-        ASTERIA_DEBUG_LOG("Setting result: ", Value(value));
-        if(assign) {
-          ref_io.write(std::forward<XvalueT>(value));
-        } else {
-          Reference_root::S_temporary ref_c = { std::forward<XvalueT>(value) };
-          ref_io = std::move(ref_c);
-        }
+    {
+      ASTERIA_DEBUG_LOG("Setting result: ", Value(value));
+      if(assign) {
+        ref_io.write(std::forward<XvalueT>(value));
+      } else {
+        Reference_root::S_temporary ref_c = { std::forward<XvalueT>(value) };
+        ref_io = std::move(ref_c);
       }
+    }
 
   Reference do_pop_reference(Reference_stack &stack_io)
     {

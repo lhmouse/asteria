@@ -31,10 +31,10 @@ class Token_stream
       }
     ~Token_stream();
 
-   Token_stream(const Token_stream &)
-     = delete;
-   Token_stream & operator=(const Token_stream &)
-     = delete;
+    Token_stream(const Token_stream &)
+      = delete;
+    Token_stream & operator=(const Token_stream &)
+      = delete;
 
   public:
     State state() const noexcept

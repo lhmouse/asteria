@@ -147,9 +147,9 @@ class Statement
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Statement(AltT &&alt)
-        : m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_stor(std::forward<AltT>(alt))
+      {
+      }
     ~Statement();
 
   public:

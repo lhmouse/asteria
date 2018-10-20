@@ -61,15 +61,15 @@ class Value
       }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Value(AltT &&alt)
-        : m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_stor(std::forward<AltT>(alt))
+      {
+      }
     template<typename AltT, typename std::enable_if<std::is_constructible<Variant, AltT &&>::value>::type * = nullptr>
       Value & operator=(AltT &&alt)
-        {
-          this->m_stor = std::forward<AltT>(alt);
-          return *this;
-        }
+      {
+        this->m_stor = std::forward<AltT>(alt);
+        return *this;
+      }
     ~Value();
 
     Value(const Value &) noexcept;
@@ -84,25 +84,25 @@ class Value
       }
     template<typename AltT>
       const AltT * opt() const noexcept
-        {
-          return this->m_stor.get<AltT>();
-        }
+      {
+        return this->m_stor.get<AltT>();
+      }
     template<typename AltT>
       const AltT & check() const
-        {
-          return this->m_stor.as<AltT>();
-        }
+      {
+        return this->m_stor.as<AltT>();
+      }
 
     template<typename AltT>
       AltT * opt() noexcept
-        {
-          return this->m_stor.get<AltT>();
-        }
+      {
+        return this->m_stor.get<AltT>();
+      }
     template<typename AltT>
       AltT & check()
-        {
-          return this->m_stor.as<AltT>();
-        }
+      {
+        return this->m_stor.as<AltT>();
+      }
 
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;

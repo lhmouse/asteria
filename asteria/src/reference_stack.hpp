@@ -75,23 +75,23 @@ class Reference_stack
       }
     template<typename ParamT>
       Reference & push(ParamT &&param)
-        {
-          auto cur = this->m_scur;
-          const auto off = this->m_size % this->m_head.refs.capacity();
-          if(off == 0) {
-            cur = this->do_reserve_one_more();
-          }
-          // Create a new reference or reuse an existent one.
-          if(off == cur->refs.size()) {
-            cur->refs.emplace_back(std::forward<ParamT>(param));
-          } else {
-            cur->refs[off] = std::forward<ParamT>(param);
-          }
-          this->m_scur = cur;
-          this->m_size += 1;
-          ROCKET_ASSERT(this->m_size != 0);
-          return cur->refs[off];
-       }
+      {
+        auto cur = this->m_scur;
+        const auto off = this->m_size % this->m_head.refs.capacity();
+        if(off == 0) {
+          cur = this->do_reserve_one_more();
+        }
+        // Create a new reference or reuse an existent one.
+        if(off == cur->refs.size()) {
+          cur->refs.emplace_back(std::forward<ParamT>(param));
+        } else {
+          cur->refs[off] = std::forward<ParamT>(param);
+        }
+        this->m_scur = cur;
+        this->m_size += 1;
+        ROCKET_ASSERT(this->m_size != 0);
+        return cur->refs[off];
+      }
     Reference pop() noexcept
       {
         ROCKET_ASSERT(this->m_size != 0);

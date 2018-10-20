@@ -24,17 +24,17 @@ class Reference
     // This constructor does not accept lvalues.
     template<typename XrootT, typename std::enable_if<(Reference_root::Variant::index_of<XrootT>::value || true)>::type * = nullptr>
       Reference(XrootT &&xroot)
-        : m_root(std::forward<XrootT>(xroot)), m_mods()
-        {
-        }
+      : m_root(std::forward<XrootT>(xroot)), m_mods()
+      {
+      }
     // This assignment operator does not accept lvalues.
     template<typename XrootT, typename std::enable_if<(Reference_root::Variant::index_of<XrootT>::value || true)>::type * = nullptr>
       Reference & operator=(XrootT &&xroot)
-        {
-          this->m_root = std::forward<XrootT>(xroot);
-          this->m_mods.clear();
-          return *this;
-        }
+      {
+        this->m_root = std::forward<XrootT>(xroot);
+        this->m_mods.clear();
+        return *this;
+      }
     ~Reference();
 
     Reference(const Reference &) noexcept;

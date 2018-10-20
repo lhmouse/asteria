@@ -146,9 +146,9 @@ class Xpnode
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
       Xpnode(AltT &&alt)
-        : m_stor(std::forward<AltT>(alt))
-        {
-        }
+      : m_stor(std::forward<AltT>(alt))
+      {
+      }
     ~Xpnode();
 
   public:

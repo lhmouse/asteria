@@ -53,10 +53,10 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
 
   template<typename XvalueT>
     inline void do_set_constant(Reference &ref_out, XvalueT &&value)
-      {
-        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
-        ref_out = std::move(ref_c);
-      }
+    {
+      Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
+      ref_out = std::move(ref_c);
+    }
 
   }
 

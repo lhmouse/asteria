@@ -36,9 +36,9 @@ class Formatter
   private:
     template<typename ValueT>
       void do_put(const ValueT &value)
-        {
-          this->m_stream <<value;
-        }
+      {
+        this->m_stream <<value;
+      }
     void do_put(bool value);
     void do_put(char value);
     void do_put(signed char value);
@@ -67,12 +67,12 @@ class Formatter
       }
     template<typename ValueT>
       Formatter & operator,(const ValueT &value) noexcept
-        try {
-          this->do_put(value);
-          return *this;
-        } catch(...) {
-          return *this;
-        }
+      try {
+        this->do_put(value);
+        return *this;
+      } catch(...) {
+        return *this;
+      }
   };
 
 #define ASTERIA_FORMAT(fmt_, ...)             (static_cast<::Asteria::Formatter &&>(fmt_), __VA_ARGS__)
