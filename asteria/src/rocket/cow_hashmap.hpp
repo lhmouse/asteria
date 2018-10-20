@@ -577,7 +577,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
           const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
             [&](const value_handle<allocatorT> *tbkt)
-              { return this->as_key_equal()(tbkt->get()->first, ykey); });
+              { return this->as_key_equal()(tbkt->get()->first, ykey); }
+            );
           if((max_load_factor_reciprocal == 1) && !bkt) {
             return -1;
           }
@@ -608,7 +609,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
           const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
             [&](const value_handle<allocatorT> *tbkt)
-              { return this->as_key_equal()(tbkt->get()->first, ykey); });
+              { return this->as_key_equal()(tbkt->get()->first, ykey); }
+            );
           ROCKET_ASSERT(bkt);
           if(bkt->get()) {
             // A duplicate key has been found.
@@ -665,7 +667,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 eptr = bkt->set(eptr);
                 ROCKET_ASSERT(!eptr);
                 return false;
-              });
+              }
+            );
         }
     };
 
