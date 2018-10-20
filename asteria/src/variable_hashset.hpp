@@ -30,7 +30,7 @@ class Variable_hashset
       = delete;
 
   private:
-    void do_reserve(Size res_arg);
+    void do_rehash(Size res_arg);
     Diff do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
     bool do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept;
     void do_erase_unchecked(Size tpos) noexcept;
@@ -75,18 +75,24 @@ class Variable_hashset
       }
     Size max_size() const noexcept
       {
-        const auto max_nbkts = Size(-1) / 2 / sizeof(rocket::refcounted_ptr<Variable>);
-        return max_nbkts / 2;
+        const auto max_nbkt = Size(-1) / 2 / sizeof(rocket::refcounted_ptr<Variable>);
+        return max_nbkt / 2;
+      }
+    Size capacity() const noexcept
+      {
+        const auto nbkt = this->m_nbkt;
+        return nbkt / 2;
       }
     void reserve(Size res_arg)
       {
-        this->do_reserve(res_arg);
+        if(res_arg <= this->capacity()) {
+          return;
+        }
+        this->do_rehash(res_arg);
       }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
-        if(this->m_size >= this->m_nbkt / 2) {
-          this->do_reserve(this->m_size + 1);
-        }
+        this->reserve(this->size() + 1);
         return this->do_insert_unchecked(var);
       }
     bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept
