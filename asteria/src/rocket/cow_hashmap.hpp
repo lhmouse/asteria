@@ -182,7 +182,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         {
           static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
           const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(nbkt != 0);
           // Conversion between an unsigned integer type and a floating point type results in performance penalty.
           // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
           const auto fcast = [](size_t x) { return static_cast<double>(static_cast<ptrdiff_t>(x)); };
@@ -201,7 +200,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         {
           static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
           const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(nbkt != 0);
           // Phase one: Probe from `first` to the end of the table.
           for(size_type i = first; i != nbkt; ++i) {
             const auto bkt = ptr->data + i;
