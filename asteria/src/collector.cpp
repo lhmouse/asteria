@@ -204,11 +204,12 @@ void Collector::collect()
         );
     }
     this->m_staging.clear();
+    this->m_counter = 0;
+    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
+    // This comes last.
     if(collect_next) {
       tied->auto_collect();
     }
-    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
-    this->m_counter = 0;
   }
 
 }
