@@ -57,11 +57,8 @@ Variable_hashset::~Variable_hashset()
 
   }
 
-void Variable_hashset::do_reserve(Size res_arg)
+void Variable_hashset::do_rehash(Size res_arg)
   {
-    if(res_arg <= this->m_nbkt / 2) {
-      return;
-    }
     if(res_arg > this->max_size()) {
       rocket::throw_length_error("Variable_hashset::do_reserve(): A table of `%lld` variables is too large and cannot be allocated.",
                                  static_cast<long long>(res_arg));
