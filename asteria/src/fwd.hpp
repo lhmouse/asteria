@@ -77,6 +77,7 @@ class Reference_modifier;
 class Reference;
 class Reference_stack;
 class Variable;
+class Variable_hashset;
 class Abstract_variable_callback;
 class Collector;
 class Abstract_context;

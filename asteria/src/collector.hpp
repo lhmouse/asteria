@@ -5,11 +5,7 @@
 #define ASTERIA_COLLECTOR_HPP_
 
 #include "fwd.hpp"
-#include "rocket/refcounted_ptr.hpp"
-
-// TODO
-#include <boost/container/flat_set.hpp>
-#include <boost/container/flat_map.hpp>
+#include "variable_hashset.hpp"
 
 namespace Asteria {
 
@@ -17,13 +13,15 @@ class Collector
   {
   private:
     Collector *m_tied_opt;
+    Size m_threshold;
+    Size m_counter;
     long m_recur;
-    boost::container::flat_set<rocket::refcounted_ptr<Variable>> m_vars;
-    boost::container::flat_map<rocket::refcounted_ptr<Variable>, long> m_gcrefs;
+    Variable_hashset m_tracked;
+    Variable_hashset m_staging;
 
   public:
-    explicit Collector(Collector *tied_opt) noexcept
-      : m_tied_opt(tied_opt), m_recur(0), m_vars(), m_gcrefs()
+    Collector(Collector *tied_opt, Size threshold) noexcept
+      : m_tied_opt(tied_opt), m_threshold(threshold), m_counter(0), m_recur(0)
       {
       }
     ~Collector();
@@ -41,6 +39,15 @@ class Collector
     void tie_collector(Collector *tied_opt) noexcept
       {
         this->m_tied_opt = tied_opt;
+      }
+
+    Size get_threshold() const noexcept
+      {
+        return this->m_threshold;
+      }
+    void set_threshold(Size threshold) noexcept
+      {
+        this->m_threshold = threshold;
       }
 
     bool track_variable(const rocket::refcounted_ptr<Variable> &var);

@@ -73,6 +73,7 @@ class Reference_stack
         const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
         return cur->refs[off];
       }
+
     template<typename ParamT>
       Reference & push(ParamT &&param)
       {

@@ -15,6 +15,7 @@ class Variable : public rocket::refcounted_base<Variable>
   private:
     Value m_value;
     bool m_immutable;
+    long m_gcref;  // This is uninitialized by default.
 
   public:
     Variable()
@@ -62,6 +63,15 @@ class Variable : public rocket::refcounted_base<Variable>
       {
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;
+      }
+
+    long get_gcref() const noexcept
+      {
+        return this->m_gcref;
+      }
+    void set_gcref(long gcref) noexcept
+      {
+        this->m_gcref = gcref;
       }
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
