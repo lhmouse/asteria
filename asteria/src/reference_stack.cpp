@@ -18,7 +18,7 @@ Reference_stack::~Reference_stack()
     }
   }
 
-Reference_stack::Storage * Reference_stack::do_reserve_one_more()
+Reference_stack::Chunk * Reference_stack::do_reserve_one_more()
   {
     auto cur = this->m_last;
     auto off = this->m_size % this->m_head.refs.capacity();
@@ -34,7 +34,7 @@ Reference_stack::Storage * Reference_stack::do_reserve_one_more()
     if(next) {
       return next;
     }
-    next = new Storage(cur);
+    next = new Chunk(cur);
     cur->next = next;
     return next;
   }

@@ -13,21 +13,21 @@ namespace Asteria {
 class Reference_stack
   {
   private:
-    struct Storage
+    struct Chunk
       {
-        Storage *prev;
-        Storage *next;
+        Chunk *prev;
+        Chunk *next;
         rocket::static_vector<Reference, 16> refs;
 
-        explicit Storage(Storage *xprev) noexcept
+        explicit Chunk(Chunk *xprev) noexcept
           : prev(xprev), next(nullptr), refs()
           {
           }
       };
 
     Size m_size;
-    Storage *m_last;
-    Storage m_head;
+    Chunk *m_last;
+    Chunk m_head;
 
   public:
     Reference_stack() noexcept
@@ -42,7 +42,7 @@ class Reference_stack
       = delete;
 
   private:
-    Storage * do_reserve_one_more();
+    Chunk * do_reserve_one_more();
 
   public:
     bool empty() const noexcept
