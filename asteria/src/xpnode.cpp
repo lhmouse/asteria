@@ -120,9 +120,9 @@ Xpnode::~Xpnode()
 
   namespace {
 
-  using Refpair = std::pair<std::reference_wrapper<const Abstract_context>, std::reference_wrapper<const Reference>>;
-
-  Refpair do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
+  std::pair<std::reference_wrapper<const Abstract_context>,
+            std::reference_wrapper<const Reference>>
+    do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
     {
       auto spare = &global;
       auto qctx = &ctx;
@@ -167,7 +167,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           Xpnode::S_named_reference alt_bnd = { alt.name };
           return std::move(alt_bnd);
         }
-        Xpnode::S_bound_reference alt_bnd = { std::move(pair.second) };
+        Xpnode::S_bound_reference alt_bnd = { pair.second };
         return std::move(alt_bnd);
       }
       case index_bound_reference: {
@@ -524,7 +524,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
         }
         // Push the reference found.
-        stack_io.push(std::move(pair.second));
+        stack_io.push(pair.second);
         return;
       }
       case index_bound_reference: {

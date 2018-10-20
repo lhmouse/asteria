@@ -101,7 +101,8 @@ class Reference_stack
         // Iterate to the previous block if the last block becomes empty.
         auto ref = std::move(cur->refs[off]);
         if(off == 0) {
-          cur = this->m_scur->prev;
+          auto prev = cur->prev;
+          cur = prev;
         }
         this->m_scur = cur;
         this->m_size -= 1;
