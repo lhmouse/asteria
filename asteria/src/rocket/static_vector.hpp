@@ -783,7 +783,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return iterator(this->m_sth, ptr);
       }
 
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
@@ -791,14 +791,14 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         const auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
         const auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
     static_vector & pop_back(size_type n = 1)
       {

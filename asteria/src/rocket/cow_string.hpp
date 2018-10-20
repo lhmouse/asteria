@@ -898,25 +898,25 @@ template<typename charT, typename traitsT, typename allocatorT>
         return this->rend();
       }
 
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator mut_begin()
       {
         return iterator(this, this->mut_data());
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator mut_end()
       {
         return iterator(this, this->mut_data() + this->size());
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     reverse_iterator mut_rbegin()
       {
         return reverse_iterator(this->mut_end());
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     reverse_iterator mut_rend()
       {
@@ -1154,7 +1154,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->do_erase_no_bound_check(tpos, this->do_clamp_substr(tpos, tn));
         return *this;
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
@@ -1162,14 +1162,14 @@ template<typename charT, typename traitsT, typename allocatorT>
         const auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
         const auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
     basic_cow_string & pop_back(size_type n = 1)
       {
@@ -1436,7 +1436,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         return this->m_ptr;
       }
 
-    // Get a pointer to mutable data. This function may throw `std::bad_alloc()`.
+    // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     value_type * mut_data()
       {

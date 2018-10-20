@@ -1017,13 +1017,13 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->end();
       }
 
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator mut_begin()
       {
         return iterator(this->m_sth, details_cow_hashmap::needs_adjust, this->do_mut_table());
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator mut_end()
       {
@@ -1234,7 +1234,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->insert_or_assign(::std::move(key), ::std::forward<yvalueT>(yvalue)).first;
       }
 
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
@@ -1242,14 +1242,14 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         const auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
         const auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
     template<typename ykeyT, typename enable_if<!(is_convertible<ykeyT, const_iterator>::value)>::type * = nullptr>
       bool erase(const ykeyT &key)
@@ -1286,7 +1286,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return ::std::make_pair(tcur, tnext);
       }
 
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     iterator find_mut(const key_type &key)
       {
@@ -1297,7 +1297,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return iterator(this->m_sth, ptr + toff);
       }
-    // N.B. This function may throw `std::bad_alloc()`.
+    // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     pair<iterator, iterator> mut_equal_range(const key_type &key)
       {
