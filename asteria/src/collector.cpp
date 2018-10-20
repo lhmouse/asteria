@@ -167,6 +167,14 @@ void Collector::collect()
             ));
         }
       );
+#ifdef ROCKET_DEBUG
+    this->m_staging.for_each(
+      [&](const rocket::refcounted_ptr<Variable> &root)
+        {
+          ROCKET_ASSERT(root->get_gcref() <= root.use_count());
+        }
+      );
+#endif
     ///////////////////////////////////////////////////////////////////////////
     // Phase 4
     //   Wipe out unreachable variables, whose `gcref` counters exceed
@@ -175,7 +183,6 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          ROCKET_ASSERT(root->get_gcref() <= root.use_count());
           if(root->get_gcref() < root.use_count()) {
             return;
           }
