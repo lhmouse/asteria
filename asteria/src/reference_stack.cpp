@@ -8,7 +8,7 @@ namespace Asteria {
 
 Reference_stack::~Reference_stack()
   {
-    auto cur = this->m_last;
+    auto cur = this->m_scur;
     while(cur) {
       auto prev = cur->prev;
       if(cur != &(this->m_head)) {
@@ -20,22 +20,15 @@ Reference_stack::~Reference_stack()
 
 Reference_stack::Chunk * Reference_stack::do_reserve_one_more()
   {
-    auto cur = this->m_last;
-    auto off = this->m_size % this->m_head.refs.capacity();
-    if(off != 0) {
-      // The last block is not full.
-      return cur;
-    }
-    // The last block is full so we have to allocate a new block.
+    auto cur = this->m_scur;
     if(!cur) {
       return &(this->m_head);
     }
     auto next = cur->next;
-    if(next) {
-      return next;
+    if(!next) {
+      next = new Chunk(cur);
+      cur->next = next;
     }
-    next = new Chunk(cur);
-    cur->next = next;
     return next;
   }
 

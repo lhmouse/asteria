@@ -25,13 +25,13 @@ class Reference_stack
           }
       };
 
-    Size m_size;
-    Chunk *m_last;
     Chunk m_head;
+    Chunk *m_scur;
+    Size m_size;
 
   public:
     Reference_stack() noexcept
-      : m_size(0), m_last(nullptr), m_head(nullptr)
+      : m_head(nullptr), m_scur(nullptr), m_size(0)
       {
       }
     ~Reference_stack();
@@ -55,51 +55,56 @@ class Reference_stack
       }
     void clear() noexcept
       {
+        this->m_scur = nullptr;
         this->m_size = 0;
-        this->m_last = nullptr;
       }
 
     const Reference & top() const noexcept
       {
         ROCKET_ASSERT(this->m_size != 0);
-        auto off = (this->m_size - 1) % this->m_head.refs.capacity();
-        auto cur = this->m_last;
+        const auto cur = this->m_scur;
+        const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
         return cur->refs[off];
       }
     Reference & top() noexcept
       {
         ROCKET_ASSERT(this->m_size != 0);
-        auto off = (this->m_size - 1) % this->m_head.refs.capacity();
-        auto cur = this->m_last;
+        const auto cur = this->m_scur;
+        const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
         return cur->refs[off];
       }
     template<typename ParamT>
       Reference & push(ParamT &&param)
         {
-          auto off = this->m_size % this->m_head.refs.capacity();
-          auto cur = this->do_reserve_one_more();
+          auto cur = this->m_scur;
+          const auto off = this->m_size % this->m_head.refs.capacity();
+          if(off == 0) {
+            cur = this->do_reserve_one_more();
+          }
           // Create a new reference or reuse an existent one.
           if(off == cur->refs.size()) {
             cur->refs.emplace_back(std::forward<ParamT>(param));
           } else {
             cur->refs[off] = std::forward<ParamT>(param);
           }
-          ++(this->m_size);
-          this->m_last = cur;
+          this->m_scur = cur;
+          this->m_size += 1;
+          ROCKET_ASSERT(this->m_size != 0);
           return cur->refs[off];
-        }
+       }
     Reference pop() noexcept
       {
         ROCKET_ASSERT(this->m_size != 0);
-        --(this->m_size);
-        auto off = this->m_size % this->m_head.refs.capacity();
-        auto cur = this->m_last;
-        auto ref = std::move(cur->refs[off]);
+        auto cur = this->m_scur;
+        const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
+        // Do not destroy the element so it can be reused later.
         // Iterate to the previous block if the last block becomes empty.
+        auto ref = std::move(cur->refs[off]);
         if(off == 0) {
-          cur = cur->prev;
-          this->m_last = cur;
+          cur = this->m_scur->prev;
         }
+        this->m_scur = cur;
+        this->m_size -= 1;
         return ref;
       }
   };
