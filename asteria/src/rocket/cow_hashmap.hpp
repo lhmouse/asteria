@@ -203,7 +203,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
           ROCKET_ASSERT(nbkt != 0);
           // Phase one: Probe from `first` to the end of the table.
-          for(auto i = first; i != nbkt; ++i) {
+          for(size_type i = first; i != nbkt; ++i) {
             const auto bkt = ptr->data + i;
             if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
               return bkt;
