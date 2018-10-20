@@ -91,7 +91,10 @@ return std::for_each(this->m_set.begin(), this->m_set.end(), std::forward<FuncT>
 return this->m_set.count(var);
         return false;
       }
-
+    void reserve(Size res_arg)
+      {
+        this->m_set.reserve(res_arg);
+      }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
 // TODO
