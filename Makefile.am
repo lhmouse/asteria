@@ -70,6 +70,7 @@ pkginclude_HEADERS =  \
   asteria/src/reference_modifier.hpp  \
   asteria/src/reference.hpp  \
   asteria/src/variable.hpp  \
+  asteria/src/variable_hashset.hpp  \
   asteria/src/abstract_variable_callback.hpp  \
   asteria/src/collector.hpp  \
   asteria/src/exception.hpp  \
@@ -102,6 +103,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/reference_modifier.cpp  \
   asteria/src/reference.cpp  \
   asteria/src/variable.cpp  \
+  asteria/src/variable_hashset.cpp  \
   asteria/src/abstract_variable_callback.cpp  \
   asteria/src/collector.cpp  \
   asteria/src/exception.cpp  \
