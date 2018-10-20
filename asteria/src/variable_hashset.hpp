@@ -75,7 +75,7 @@ class Variable_hashset
       }
     Size max_size() const noexcept
       {
-        const auto max_nbkt = Size(-1) / 2 / sizeof(rocket::refcounted_ptr<Variable>);
+        const auto max_nbkt = Size(-1) / 2 / sizeof(*(this->m_data));
         return max_nbkt / 2;
       }
     Size capacity() const noexcept
