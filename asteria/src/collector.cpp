@@ -108,24 +108,29 @@ void Collector::collect()
     if(!sentry) {
       return;
     }
-    // https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
+    // The algorithm here is basically described at
+    //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
+    // However, we initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
+    // This saves us a phase below.
     ASTERIA_DEBUG_LOG("Garbage collection begins: this = ", static_cast<void *>(this), ", tracked_variables = ", this->m_tracked.size());
+    this->m_staging.clear();
+    this->m_staging.reserve(this->m_tracked.size() * 9 / 8);
     ///////////////////////////////////////////////////////////////////////////
     // Phase 1
     //   Add variables that are either tracked or reachable from tracked ones
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
-    this->m_staging.clear();
-    this->m_staging.reserve(this->m_tracked.size() * 9 / 8);
     this->m_tracked.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          // Add those directly reachable.
+          // Directly reachable.
+          root->set_gcref(0);
           this->m_staging.insert(root);
-          // Add those indirectly reachable.
+          // Indirectly reachable.
           root->enumerate_variables(do_make_variable_callback(
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
+                var->set_gcref(0);
                 return this->m_staging.insert(var);
               }
             ));
@@ -134,37 +139,29 @@ void Collector::collect()
     ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_staging.size());
     ///////////////////////////////////////////////////////////////////////////
     // Phase 2
-    //   Initialize `gcref` of each staged variable to its reference count,
-    //   not including the one of `m_staging`.
-    ///////////////////////////////////////////////////////////////////////////
-    this->m_staging.for_each(
-      [&](const rocket::refcounted_ptr<Variable> &root)
-        {
-          root->set_gcref(root.use_count() - 1);
-        }
-      );
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 3
     //   Drop references directly from `m_tracked`.
     ///////////////////////////////////////////////////////////////////////////
     this->m_tracked.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          root->set_gcref(root->get_gcref() - 1);
+          root->set_gcref(root->get_gcref() + 1);
           return false;
         }
       );
     ///////////////////////////////////////////////////////////////////////////
-    // Phase 4
+    // Phase 3
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
+          // Directly reachable.
+          root->set_gcref(root->get_gcref() + 1);
+          // Indirectly reachable.
           root->enumerate_variables(do_make_variable_callback(
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
-                var->set_gcref(var->get_gcref() - 1);
+                var->set_gcref(var->get_gcref() + 1);
                 return false;
               }
             ));
@@ -172,13 +169,14 @@ void Collector::collect()
       );
     ///////////////////////////////////////////////////////////////////////////
     // Phase 4
-    //   Wipe out variables whose `gcref` counters have reached zero.
+    //   Wipe out unreachable variables, whose `gcref` counters exceed
+    //   their reference counts.
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          ROCKET_ASSERT(root->get_gcref() >= 0);
-          if(root->get_gcref() > 0) {
+          ROCKET_ASSERT(root->get_gcref() <= root->use_count());
+          if(root->get_gcref() < root->use_count()) {
             return;
           }
           ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
@@ -190,12 +188,15 @@ void Collector::collect()
     // Phase 6
     //   Transfer surviving variables to the tied collector, if any.
     ///////////////////////////////////////////////////////////////////////////
-    const auto tied = this->m_tied_opt;
     bool collect_next = false;
+    const auto tied = this->m_tied_opt;
     if(tied) {
       this->m_staging.for_each(
         [&](const rocket::refcounted_ptr<Variable> &root)
           {
+            if(root->get_gcref() >= root->use_count()) {
+              return;
+            }
             tied->m_tracked.insert(root);
             ++(tied->m_counter);
             collect_next |= tied->m_counter > tied->m_threshold;
@@ -203,13 +204,12 @@ void Collector::collect()
           }
         );
     }
-    this->m_staging.clear();
-    this->m_counter = 0;
-    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
-    // This comes last.
     if(collect_next) {
       tied->auto_collect();
     }
+    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
+    this->m_counter = 0;
+    this->m_staging.clear();
   }
 
 }
