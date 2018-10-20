@@ -180,37 +180,27 @@ void Collector::collect()
     //   Wipe out unreachable variables, whose `gcref` counters exceed
     //   their reference counts.
     ///////////////////////////////////////////////////////////////////////////
+    bool collect_next = false;
+    const auto tied = this->m_tied_opt;
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(root->get_gcref() < root.use_count()) {
+          if(root->get_gcref() >= root.use_count()) {
+            ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
+            root->reset(D_null(), true);
+            this->m_tracked.erase(root);
             return;
           }
-          ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
-          root->reset(D_null(), true);
-          this->m_tracked.erase(root);
-        }
-      );
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 6
-    //   Transfer surviving variables to the tied collector, if any.
-    ///////////////////////////////////////////////////////////////////////////
-    bool collect_next = false;
-    const auto tied = this->m_tied_opt;
-    if(tied) {
-      this->m_staging.for_each(
-        [&](const rocket::refcounted_ptr<Variable> &root)
-          {
-            if(root->get_gcref() >= root.use_count()) {
-              return;
-            }
+          if(tied) {
+            ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
             tied->m_tracked.insert(root);
             ++(tied->m_counter);
             collect_next |= tied->m_counter > tied->m_threshold;
             this->m_tracked.erase(root);
+            return;
           }
-        );
-    }
+        }
+      );
     if(collect_next) {
       tied->auto_collect();
     }
