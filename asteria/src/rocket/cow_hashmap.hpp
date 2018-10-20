@@ -165,8 +165,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
   // Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
   template<typename typeT, typename otherT>
-    struct copy_const_from
-      : conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
+    struct copy_const_from : conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
       {
       };
 

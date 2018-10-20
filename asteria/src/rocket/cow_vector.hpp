@@ -105,8 +105,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
   template<typename allocatorT>
-    struct copy_trivially
-      : integral_constant<bool, is_trivial<typename allocatorT::value_type>::value && is_std_allocator<allocatorT>::value>
+    struct copy_trivially : integral_constant<bool, is_trivial<typename allocatorT::value_type>::value && is_std_allocator<allocatorT>::value>
       {
       };
 

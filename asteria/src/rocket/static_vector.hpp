@@ -401,16 +401,14 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
     using ::std::swap;
 
     template<typename typeT>
-      struct is_nothrow_swappable
-        : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
+      struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
         {
         };
 
     }
 
   template<typename typeT>
-    struct is_nothrow_swappable
-      : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
+    struct is_nothrow_swappable : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
       {
       };
 

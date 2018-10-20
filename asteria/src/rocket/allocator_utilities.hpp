@@ -64,8 +64,8 @@ using ::std::is_nothrow_constructible;
   }
 
 template<typename allocatorT>
-  struct allocator_wrapper_base_for
-    : conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
+  struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value,
+                                                  details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
     {
     };
 
@@ -118,13 +118,11 @@ template<typename allocatorT>
     };
 
 template<typename allocatorT>
-  struct is_std_allocator
-    : false_type
+  struct is_std_allocator : false_type
     {
     };
 template<typename valueT>
-  struct is_std_allocator<::std::allocator<valueT>>
-    : true_type
+  struct is_std_allocator<::std::allocator<valueT>> : true_type
     {
     };
 

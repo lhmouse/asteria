@@ -2133,8 +2133,7 @@ template<typename charT, typename traitsT, typename allocatorT>
             state |= ios_base::eofbit;
             break;
           }
-          const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
-                                          : (str.size() >= str.max_size());
+          const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width) : (str.size() >= str.max_size());
           if(enough) {
             break;
           }
@@ -2184,8 +2183,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           if(rem == 0) {
             break;
           }
-          const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
-                                                           : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
+          const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off) : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
           if(written == 0) {
             state |= ios_base::failbit;
             break;
