@@ -37,7 +37,7 @@ Variable_hashset::~Variable_hashset()
     rocket::refcounted_ptr<Variable> * do_linear_probe(rocket::refcounted_ptr<Variable> * data, Size nbkt, Size first, Size last, PredT &&pred)
     {
       // Phase one: Probe from `first` to the end of the table.
-      for(auto i = first; i != nbkt; ++i) {
+      for(Size i = first; i != nbkt; ++i) {
         const auto bkt = data + i;
         if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
           return bkt;
