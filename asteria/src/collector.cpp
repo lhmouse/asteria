@@ -175,8 +175,8 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          ROCKET_ASSERT(root->get_gcref() <= root->use_count());
-          if(root->get_gcref() < root->use_count()) {
+          ROCKET_ASSERT(root->get_gcref() <= root.use_count());
+          if(root->get_gcref() < root.use_count()) {
             return;
           }
           ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
@@ -194,7 +194,7 @@ void Collector::collect()
       this->m_staging.for_each(
         [&](const rocket::refcounted_ptr<Variable> &root)
           {
-            if(root->get_gcref() >= root->use_count()) {
+            if(root->get_gcref() >= root.use_count()) {
               return;
             }
             tied->m_tracked.insert(root);

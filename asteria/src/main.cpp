@@ -16,7 +16,7 @@ int main()
       func fib(n) {
         return n <= 1 ? 1 : fib(n-1) + fib(n-2);
       }
-      return fib(27);
+      return fib(30);
     )__");
     Simple_source_file code(iss, String::shallow("my_file"));
     Global_context global;
