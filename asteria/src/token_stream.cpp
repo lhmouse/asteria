@@ -250,7 +250,7 @@ Token_stream::~Token_stream()
         {
           char first[12];
           Token::Keyword second;
-          long : 0;
+          Uintptr : 0;
         }
       static constexpr s_keywords[] =
         {
@@ -316,7 +316,7 @@ Token_stream::~Token_stream()
         {
           char first[6];
           Token::Punctuator second;
-          long : 0;
+          Uintptr : 0;
         }
       static constexpr s_punctuators[] =
         {
