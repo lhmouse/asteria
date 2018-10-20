@@ -113,6 +113,7 @@ void Collector::collect()
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.clear();
+    this->m_staging.reserve(this->m_tracked.size() * 9 / 8);
     this->m_tracked.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
