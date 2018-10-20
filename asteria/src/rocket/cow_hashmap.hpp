@@ -131,7 +131,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           const auto nbkt = max_nbkt_for_nblk(this->nblk);
           // `allocator_type::pointer` need not be a trivial type.
           // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
-          for(auto i = size_type(0); i < nbkt; ++i) {
+          for(size_type i = 0; i < nbkt; ++i) {
             noadl::construct_at(this->data + i);
           }
           this->nelem = 0;
@@ -140,7 +140,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       ~handle_storage()
         {
           const auto nbkt = max_nbkt_for_nblk(this->nblk);
-          for(auto i = size_type(0); i < nbkt; ++i) {
+          for(size_type i = 0; i < nbkt; ++i) {
             const auto eptr = this->data[i].set(nullptr);
             if(!eptr) {
                 continue;
@@ -149,7 +149,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             allocator_traits<allocator_type>::deallocate(this->alloc, eptr, size_t(1));
           }
           // `allocator_type::pointer` need not be a trivial type.
-          for(auto i = size_type(0); i < nbkt; ++i) {
+          for(size_type i = 0; i < nbkt; ++i) {
             noadl::destroy_at(this->data + i);
           }
 #ifdef ROCKET_DEBUG
@@ -210,7 +210,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
           }
           // Phase two: Probe from the beginning of the table to `last`.
-          for(auto i = size_type(0); i != last; ++i) {
+          for(size_type i = 0; i != last; ++i) {
             const auto bkt = ptr->data + i;
             if(!(bkt->get()) || ::std::forward<predT>(pred)(bkt)) {
               return bkt;
