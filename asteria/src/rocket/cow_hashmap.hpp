@@ -104,7 +104,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
     };
 
   template<typename allocatorT>
-    struct handle_storage
+    struct pointer_storage
     {
       using allocator_type   = allocatorT;
       using handle_type      = value_handle<allocator_type>;
@@ -112,11 +112,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
       static constexpr size_type min_nblk_for_nbkt(size_type nbkt) noexcept
         {
-          return (nbkt * sizeof(handle_type) + sizeof(handle_storage) - 1) / sizeof(handle_storage) + 1;
+          return (nbkt * sizeof(handle_type) + sizeof(pointer_storage) - 1) / sizeof(pointer_storage) + 1;
         }
       static constexpr size_type max_nbkt_for_nblk(size_type nblk) noexcept
         {
-          return (nblk - 1) * sizeof(handle_storage) / sizeof(handle_type);
+          return (nblk - 1) * sizeof(pointer_storage) / sizeof(handle_type);
         }
 
       atomic<long> nref;
@@ -125,7 +125,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       size_type nelem;
       union { handle_type data[0]; };
 
-      handle_storage(const allocator_type &xalloc, size_type xnblk) noexcept
+      pointer_storage(const allocator_type &xalloc, size_type xnblk) noexcept
         : alloc(xalloc), nblk(xnblk)
         {
           const auto nbkt = max_nbkt_for_nblk(this->nblk);
@@ -137,7 +137,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           this->nelem = 0;
           this->nref.store(1, ::std::memory_order_release);
         }
-      ~handle_storage()
+      ~pointer_storage()
         {
           const auto nbkt = max_nbkt_for_nblk(this->nblk);
           for(size_type i = 0; i < nbkt; ++i) {
@@ -157,9 +157,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 #endif
         }
 
-      handle_storage(const handle_storage &)
+      pointer_storage(const pointer_storage &)
         = delete;
-      handle_storage & operator=(const handle_storage &)
+      pointer_storage & operator=(const pointer_storage &)
         = delete;
     };
 
@@ -180,8 +180,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       template<typename xpointerT>
         static size_type origin(xpointerT ptr, size_t hval)
         {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
-          const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+          static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
+          const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
           // Conversion between an unsigned integer type and a floating point type results in performance penalty.
           // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
           const auto fcast = [](size_t x) { return static_cast<double>(static_cast<ptrdiff_t>(x)); };
@@ -198,8 +198,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       template<typename xpointerT, typename predT>
         static typename copy_const_from<handle_type, decltype(*(::std::declval<xpointerT>()))>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
         {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
-          const auto nbkt = handle_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+          static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
+          const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
           // Phase one: Probe from `first` to the end of the table.
           for(size_type i = first; i != nbkt; ++i) {
             const auto bkt = ptr->data + i;
@@ -226,8 +226,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       template<typename xpointerT, typename ypointerT>
         void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
         {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, handle_storage<allocatorT>>::value, "???");
+          static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
+          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, pointer_storage<allocatorT>>::value, "???");
           for(auto i = off; i != off + cnt; ++i) {
             const auto eptr_old = ptr_old->data[i].get();
             if(!eptr_old) {
@@ -272,8 +272,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       template<typename xpointerT, typename ypointerT>
         void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
         {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, handle_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, handle_storage<allocatorT>>::value, "???");
+          static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
+          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, pointer_storage<allocatorT>>::value, "???");
           for(auto i = off; i != off + cnt; ++i) {
             const auto eptr_old = ptr_old->data[i].get();
             if(!eptr_old) {
@@ -326,7 +326,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
       using hasher_base       = typename allocator_wrapper_base_for<hasher>::type;
       using key_equal_base    = typename allocator_wrapper_base_for<key_equal>::type;
-      using storage           = handle_storage<allocator_type>;
+      using storage           = pointer_storage<allocator_type>;
       using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
       using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
 
