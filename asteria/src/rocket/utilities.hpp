@@ -23,6 +23,7 @@ using ::std::underlying_type;
 using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
+using ::std::integral_constant;
 using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::ios_base;
@@ -38,12 +39,25 @@ template<typename typeT, typename withT>
     return old;
   }
 
-template<typename lhsT, typename rhsT>
-  inline void adl_swap(lhsT &lhs, rhsT &rhs)
-  {
-    using ::std::swap;
-    swap(lhs, rhs);
+  namespace details_utilities {
+
+  using ::std::swap;
+
+  template<typename typeT>
+    struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
+    {
+    };
+
+  template<typename typeT>
+    constexpr void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
+    {
+      swap(lhs, rhs);
+    }
+
   }
+
+  using details_utilities::is_nothrow_swappable;
+  using details_utilities::adl_swap;
 
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
@@ -147,13 +161,13 @@ template<typename iteratorT>
   }
 
 template<typename elementT, typename ...paramsT>
-  constexpr inline elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+  constexpr elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
 
 template<typename elementT>
-  constexpr inline void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+  constexpr void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     return ptr->~elementT();
   }

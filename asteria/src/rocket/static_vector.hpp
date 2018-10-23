@@ -396,22 +396,6 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
       vec->push_back(::std::forward<paramsT>(params)...);
     }
 
-    namespace details_is_nothrow_swappable {
-
-    using ::std::swap;
-
-    template<typename typeT>
-      struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
-      {
-      };
-
-    }
-
-  template<typename typeT>
-    struct is_nothrow_swappable : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
-    {
-    };
-
   }
 
 template<typename valueT, size_t capacityT, typename allocatorT>
@@ -873,7 +857,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return *this;
       }
 
-    void swap(static_vector &other) noexcept(details_static_vector::is_nothrow_swappable<value_type>::value && is_nothrow_move_constructible<value_type>::value)
+    void swap(static_vector &other) noexcept(is_nothrow_swappable<value_type>::value && is_nothrow_move_constructible<value_type>::value)
       {
         const auto sl = this->size();
         const auto sr = other.size();
