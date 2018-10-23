@@ -20,6 +20,9 @@ using ::std::common_type;
 using ::std::is_nothrow_constructible;
 using ::std::is_nothrow_destructible;
 using ::std::underlying_type;
+using ::std::conditional;
+using ::std::false_type;
+using ::std::true_type;
 using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::ios_base;
@@ -27,7 +30,7 @@ using ::std::basic_ios;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
-template<typename withT, typename typeT>
+template<typename typeT, typename withT>
   inline typeT exchange(typeT &ref, withT &&with)
   {
     auto old = ::std::move(ref);
@@ -47,6 +50,7 @@ template<typename lhsT, typename rhsT>
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs) : ::std::forward<lhsT>(lhs);
   }
+
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
   {
@@ -78,6 +82,7 @@ template<typename iteratorT, typename functionT, typename ...paramsT>
       ::std::forward<functionT>(func)(it, params...);
     }
   }
+
 template<typename iteratorT, typename functionT, typename ...paramsT>
   inline void ranged_do_while(iteratorT first, iteratorT last, functionT &&func, const paramsT &...params)
   {
@@ -91,6 +96,24 @@ template<typename ...unusedT>
   struct make_void
   {
     using type = void;
+  };
+
+template<typename ...typesT>
+  struct conjunction : true_type
+  {
+  };
+template<typename firstT, typename ...restT>
+  struct conjunction<firstT, restT...> : conditional<(firstT::value ? false : true), firstT, conjunction<restT...>>::type
+  {
+  };
+
+template<typename ...typesT>
+  struct disjunction : false_type
+  {
+  };
+template<typename firstT, typename ...restT>
+  struct disjunction<firstT, restT...> : conditional<(firstT::value ? true : false), firstT, disjunction<restT...>>::type
+  {
   };
 
   namespace details_utilities {
@@ -120,19 +143,19 @@ template<typename ...unusedT>
 template<typename iteratorT>
   constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_utilities::estimate_distance(typename iterator_traits<iteratorT>::iterator_category(),
-                                                ::std::move(first), ::std::move(last));
+    return details_utilities::estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), ::std::move(first), ::std::move(last));
   }
 
 template<typename elementT, typename ...paramsT>
-  inline elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+  constexpr inline elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
+
 template<typename elementT>
-  inline void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+  constexpr inline void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
-    ptr->~elementT();
+    return ptr->~elementT();
   }
 
 template<typename elementT>
@@ -203,6 +226,7 @@ template<typename elementT>
       }
     } while(true);
   }
+
 template<typename elementT>
   inline bool is_none_of(const elementT &elem, initializer_list<elementT> init)
   {
@@ -210,7 +234,7 @@ template<typename elementT>
   }
 
 template<typename enumT>
-  constexpr inline typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
+  constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
   {
     return static_cast<typename underlying_type<enumT>::type>(value);
   }
