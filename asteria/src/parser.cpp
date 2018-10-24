@@ -1671,7 +1671,7 @@ bool Parser::empty() const noexcept
 bool Parser::load(Token_stream &tstrm_io)
   try {
     // This has to be done before anything else because of possibility of exceptions.
-    this->m_stor.set(nullptr);
+    this->m_stor = nullptr;
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
     //   Parse the document recursively.
@@ -1685,19 +1685,19 @@ bool Parser::load(Token_stream &tstrm_io)
       }
     }
     // Accept the result.
-    this->m_stor.set(std::move(stmts));
+    this->m_stor = std::move(stmts);
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
                       "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
                       "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
-    this->m_stor.set(std::move(err));
+    this->m_stor = std::move(err);
     return false;
   }
 
 void Parser::clear() noexcept
   {
-    this->m_stor.set(nullptr);
+    this->m_stor = nullptr;
   }
 
 Block Parser::extract_document()
@@ -1711,7 +1711,7 @@ Block Parser::extract_document()
       }
       case state_success: {
         auto stmts = std::move(this->m_stor.as<Vector<Statement>>());
-        this->m_stor.set(nullptr);
+        this->m_stor = nullptr;
         return std::move(stmts);
       }
       default: {

@@ -831,7 +831,7 @@ bool Token_stream::empty() const noexcept
 bool Token_stream::load(std::istream &cstrm_io, const String &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.
-    this->m_stor.set(nullptr);
+    this->m_stor = nullptr;
     // Store tokens parsed here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
     Vector<Token> seq;
@@ -914,19 +914,19 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
     }
     // Accept the result.
     std::reverse(seq.mut_begin(), seq.mut_end());
-    this->m_stor.set(std::move(seq));
+    this->m_stor = std::move(seq);
     return true;
   } catch(Parser_error &err) {  // Don't play this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
                       "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
                       "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
-    this->m_stor.set(std::move(err));
+    this->m_stor = std::move(err);
     return false;
   }
 
 void Token_stream::clear() noexcept
   {
-    this->m_stor.set(nullptr);
+    this->m_stor = nullptr;
   }
 
 const Token * Token_stream::peek_opt() const noexcept
