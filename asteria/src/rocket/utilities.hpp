@@ -49,7 +49,7 @@ template<typename typeT, typename withT>
       };
 
     template<typename typeT>
-      constexpr void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
+      void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
       {
         swap(lhs, rhs);
       }
@@ -167,7 +167,7 @@ template<typename elementT, typename ...paramsT>
   }
 
 template<typename elementT>
-  constexpr void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+  void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     return ptr->~elementT();
   }
