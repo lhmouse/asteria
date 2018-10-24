@@ -115,6 +115,8 @@ template<typename ...alternativesT>
         noadl::destroy_at(static_cast<alternativeT *>(tptr));
       }
 
+    // In a `catch` block that is conditionally unreachable, use of `throw` is possibly subject to compiler warnings,
+    // which can be eliminated by calling this function instead.
     [[noreturn]] inline void rethrow_current_exception()
       {
         throw;
