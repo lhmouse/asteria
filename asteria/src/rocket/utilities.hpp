@@ -253,6 +253,12 @@ template<typename enumT>
     return static_cast<typename underlying_type<enumT>::type>(value);
   }
 
+template<typename elementT, size_t countT>
+  constexpr size_t countof(const elementT (&)[countT]) noexcept
+  {
+    return countT;
+  }
+
 }
 
 #endif
