@@ -102,43 +102,43 @@ void Formatter::do_put(const void *value)
     this->m_stream <<value;
   }
 
-  namespace {
+    namespace {
 
-  int do_print_time(char *str, std::size_t cap)
-    {
-      int len;
+    int do_print_time(char *str, std::size_t cap)
+      {
+        int len;
 #ifdef _WIN32
-      ::SYSTEMTIME s;
-      ::GetSystemTime(&s);
-      len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                          s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
+        ::SYSTEMTIME s;
+        ::GetSystemTime(&s);
+        len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                            s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
 #else
-      ::timespec t;
-      int err = ::clock_gettime(CLOCK_REALTIME, &t);
-      ROCKET_ASSERT(err == 0);
-      ::tm s;
-      ::localtime_r(&(t.tv_sec), &s);
-      len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                          s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
+        ::timespec t;
+        int err = ::clock_gettime(CLOCK_REALTIME, &t);
+        ROCKET_ASSERT(err == 0);
+        ::tm s;
+        ::localtime_r(&(t.tv_sec), &s);
+        len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+                            s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
 #endif
-      return len;
-    }
+        return len;
+      }
 
-  void do_replace_all(rocket::cow_string &str, char ch, const char *reps)
-    {
-      const auto repn = std::char_traits<char>::length(reps);
-      auto pos = static_cast<rocket::cow_string::size_type>(0);
-      do {
-        pos = str.find(ch, pos);
-        if(pos == str.npos) {
-          break;
-        }
-        str.replace(pos, 1, reps, repn);
-        pos += repn;
-      } while(true);
-    }
+    void do_replace_all(rocket::cow_string &str, char ch, const char *reps)
+      {
+        const auto repn = std::char_traits<char>::length(reps);
+        auto pos = static_cast<rocket::cow_string::size_type>(0);
+        do {
+          pos = str.find(ch, pos);
+          if(pos == str.npos) {
+            break;
+          }
+          str.replace(pos, 1, reps, repn);
+          pos += repn;
+        } while(true);
+      }
 
-  }
+    }
 
 bool are_debug_logs_enabled() noexcept
   {

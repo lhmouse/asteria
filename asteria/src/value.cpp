@@ -93,21 +93,21 @@ bool Value::test() const noexcept
     }
   }
 
-  namespace {
+    namespace {
 
-  template<typename ElementT>
-    inline Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
-    {
-      if(lhs < rhs) {
-        return Value::compare_less;
+    template<typename ElementT>
+      inline Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
+      {
+        if(lhs < rhs) {
+          return Value::compare_less;
+        }
+        if(rhs < lhs) {
+          return Value::compare_greater;
+        }
+        return Value::compare_equal;
       }
-      if(rhs < lhs) {
-        return Value::compare_greater;
-      }
-      return Value::compare_equal;
+
     }
-
-  }
 
 Value::Compare Value::compare(const Value &other) const noexcept
   {
@@ -178,14 +178,14 @@ Value::Compare Value::compare(const Value &other) const noexcept
     }
   }
 
-  namespace {
+    namespace {
 
-  inline Indent do_indent_or_space(Size indent_increment, Size indent_next)
-    {
-      return (indent_increment != 0) ? Indent('\n', indent_next) : Indent(' ', 0);
+    inline Indent do_indent_or_space(Size indent_increment, Size indent_next)
+      {
+        return (indent_increment != 0) ? Indent('\n', indent_next) : Indent(' ', 0);
+      }
+
     }
-
-  }
 
 void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) const
   {

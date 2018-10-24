@@ -43,63 +43,63 @@ bool Collector::auto_collect()
     return true;
   }
 
-  namespace {
+    namespace {
 
-  class Sentry
-    {
-    private:
-      long m_old;
-      std::reference_wrapper<long> m_ref;
-
-    public:
-      explicit Sentry(long &ref) noexcept
-        : m_old(ref), m_ref(ref)
-        {
-          this->m_ref += 1;
-        }
-      ~Sentry()
-        {
-          this->m_ref -= 1;
-        }
-
-      Sentry(const Sentry &)
-        = delete;
-      Sentry & operator=(const Sentry &)
-        = delete;
-
-    public:
-      explicit operator bool () const noexcept
-        {
-          return this->m_old == 0;
-        }
-    };
-
-  template<typename FunctionT>
-    class Variable_callback : public Abstract_variable_callback
-    {
-    private:
-      FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
-
-    public:
-      explicit Variable_callback(FunctionT &&func)
-        : m_func(std::forward<FunctionT>(func))
-        {
-        }
-
-    public:
-      bool accept(const rocket::refcounted_ptr<Variable> &var) const override
-        {
-          return this->m_func(var);
-        }
-    };
-
-  template<typename FunctionT>
-    inline Variable_callback<FunctionT> do_make_variable_callback(FunctionT &&func)
+    class Sentry
       {
-        return Variable_callback<FunctionT>(std::forward<FunctionT>(func));
-      }
+      private:
+        long m_old;
+        std::reference_wrapper<long> m_ref;
 
-  }
+      public:
+        explicit Sentry(long &ref) noexcept
+          : m_old(ref), m_ref(ref)
+          {
+            this->m_ref += 1;
+          }
+        ~Sentry()
+          {
+            this->m_ref -= 1;
+          }
+
+        Sentry(const Sentry &)
+          = delete;
+        Sentry & operator=(const Sentry &)
+          = delete;
+
+      public:
+        explicit operator bool () const noexcept
+          {
+            return this->m_old == 0;
+          }
+      };
+
+    template<typename FunctionT>
+      class Variable_callback : public Abstract_variable_callback
+      {
+      private:
+        FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
+
+      public:
+        explicit Variable_callback(FunctionT &&func)
+          : m_func(std::forward<FunctionT>(func))
+          {
+          }
+
+      public:
+        bool accept(const rocket::refcounted_ptr<Variable> &var) const override
+          {
+            return this->m_func(var);
+          }
+      };
+
+    template<typename FunctionT>
+      inline Variable_callback<FunctionT> do_make_variable_callback(FunctionT &&func)
+        {
+          return Variable_callback<FunctionT>(std::forward<FunctionT>(func));
+        }
+
+    }
 
 void Collector::collect()
   {

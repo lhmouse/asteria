@@ -10,16 +10,16 @@
 
 namespace Asteria {
 
-  namespace {
+    namespace {
 
-  [[noreturn]] void do_throw_parser_error(const Parser_error &err)
-    {
-      ASTERIA_THROW_RUNTIME_ERROR("There was an error in the source code provided:\n",
-                                  "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
-                                  "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
+    [[noreturn]] void do_throw_parser_error(const Parser_error &err)
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("There was an error in the source code provided:\n",
+                                    "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
+                                    "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
+      }
+
     }
-
-  }
 
 Simple_source_file::Simple_source_file(std::istream &cstrm_io, const String &file)
   : m_file(file)

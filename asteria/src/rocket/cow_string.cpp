@@ -5,14 +5,14 @@
 
 namespace rocket {
 
-  namespace details_cow_string {
+    namespace details_cow_string {
 
-  template class shallow_base<char>;
-  //template class shallow_base<wchar_t>;
-  //template class shallow_base<char16_t>;
-  //template class shallow_base<char32_t>;
+    template class shallow_base<char>;
+    //template class shallow_base<wchar_t>;
+    //template class shallow_base<char16_t>;
+    //template class shallow_base<char32_t>;
 
-  }
+    }
 
 template class basic_cow_string<char>;
 //template class basic_cow_string<wchar_t>;

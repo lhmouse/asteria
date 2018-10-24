@@ -56,619 +56,619 @@ using ::std::uintptr_t;
 template<typename valueT, typename allocatorT = allocator<valueT>>
   class cow_vector;
 
-  namespace details_cow_vector {
+    namespace details_cow_vector {
 
-  template<typename allocatorT>
-    struct basic_storage
-    {
-      using allocator_type   = allocatorT;
-      using value_type       = typename allocator_type::value_type;
-      using size_type        = typename allocator_traits<allocator_type>::size_type;
+    template<typename allocatorT>
+      struct basic_storage
+      {
+        using allocator_type   = allocatorT;
+        using value_type       = typename allocator_type::value_type;
+        using size_type        = typename allocator_traits<allocator_type>::size_type;
 
-      static constexpr size_type min_nblk_for_nelem(size_type nelem) noexcept
-        {
-          return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
-        }
-      static constexpr size_type max_nelem_for_nblk(size_type nblk) noexcept
-        {
-          return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);
-        }
-
-      atomic<long> nref;
-      allocator_type alloc;
-      size_type nblk;
-      size_type nelem;
-      union { value_type data[0]; };
-
-      basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
-        : alloc(xalloc), nblk(xnblk)
-        {
-          this->nelem = 0;
-          this->nref.store(1, ::std::memory_order_release);
-        }
-      ~basic_storage()
-        {
-          auto nrem = this->nelem;
-          while(nrem != 0) {
-            --nrem;
-            allocator_traits<allocator_type>::destroy(this->alloc, this->data + nrem);
+        static constexpr size_type min_nblk_for_nelem(size_type nelem) noexcept
+          {
+            return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
           }
+        static constexpr size_type max_nelem_for_nblk(size_type nblk) noexcept
+          {
+            return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);
+          }
+
+        atomic<long> nref;
+        allocator_type alloc;
+        size_type nblk;
+        size_type nelem;
+        union { value_type data[0]; };
+
+        basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
+          : alloc(xalloc), nblk(xnblk)
+          {
+            this->nelem = 0;
+            this->nref.store(1, ::std::memory_order_release);
+          }
+        ~basic_storage()
+          {
+            auto nrem = this->nelem;
+            while(nrem != 0) {
+              --nrem;
+              allocator_traits<allocator_type>::destroy(this->alloc, this->data + nrem);
+            }
 #ifdef ROCKET_DEBUG
-          this->nelem = 0xCCAA;
+            this->nelem = 0xCCAA;
 #endif
-        }
-
-      basic_storage(const basic_storage &)
-        = delete;
-      basic_storage & operator=(const basic_storage &)
-        = delete;
-    };
-
-  template<typename allocatorT>
-    struct copy_trivially : integral_constant<bool, is_trivial<typename allocatorT::value_type>::value && is_std_allocator<allocatorT>::value>
-    {
-    };
-
-  template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value, bool memcpyT = copy_trivially<allocatorT>::value>
-    struct copy_storage_helper
-    {
-      // This is the generic version.
-      template<typename xpointerT, typename ypointerT>
-        void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
-        {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
-          // Copy elements one by one.
-          auto nelem = ptr->nelem;
-          const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(cnt <= cap - nelem);
-          for(auto i = off; i != off + cnt; ++i) {
-            allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
-            ptr->nelem = (nelem += 1);
           }
-        }
-    };
-  template<typename allocatorT, bool memcpyT>
-    struct copy_storage_helper<allocatorT, false, memcpyT>
-    {
-      // This specialization is used when `allocatorT::value_type` is not copy-constructible.
-      template<typename xpointerT, typename ypointerT>
-        [[noreturn]] void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
-        {
-          // Throw an exception unconditionally, even when there is nothing to copy.
-          noadl::throw_domain_error("cow_vector: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
-        }
-    };
-  template<typename allocatorT>
-    struct copy_storage_helper<allocatorT, true, true>
-    {
-      // This specialization is used when `std::allocator` is to be used to copy a trivial type.
-      template<typename xpointerT, typename ypointerT>
-        void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
-        {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
-          // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-          auto nelem = ptr->nelem;
-          const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(cnt <= cap - nelem);
-          ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
-          ptr->nelem = (nelem += cnt);
-        }
-    };
 
-  template<typename allocatorT, bool memcpyT = copy_trivially<allocatorT>::value>
-    struct move_storage_helper
-    {
-      // This is the generic version.
-      template<typename xpointerT, typename ypointerT>
-        void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
-        {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
-          // Move elements one by one.
-          auto nelem = ptr->nelem;
-          const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(cnt <= cap - nelem);
-          for(auto i = off; i != off + cnt; ++i) {
-            allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
-            ptr->nelem = (nelem += 1);
+        basic_storage(const basic_storage &)
+          = delete;
+        basic_storage & operator=(const basic_storage &)
+          = delete;
+      };
+
+    template<typename allocatorT>
+      struct copy_trivially : integral_constant<bool, is_trivial<typename allocatorT::value_type>::value && is_std_allocator<allocatorT>::value>
+      {
+      };
+
+    template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value, bool memcpyT = copy_trivially<allocatorT>::value>
+      struct copy_storage_helper
+      {
+        // This is the generic version.
+        template<typename xpointerT, typename ypointerT>
+          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+          {
+            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+            // Copy elements one by one.
+            auto nelem = ptr->nelem;
+            const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            ROCKET_ASSERT(cnt <= cap - nelem);
+            for(auto i = off; i != off + cnt; ++i) {
+              allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
+              ptr->nelem = (nelem += 1);
+            }
           }
-        }
-    };
-  template<typename allocatorT>
-    struct move_storage_helper<allocatorT, true>
-    {
-      // This specialization is used when `std::allocator` is to be used to move a trivial type.
-      template<typename xpointerT, typename ypointerT>
-        void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
-        {
-          static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-          static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
-          // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
-          auto nelem = ptr->nelem;
-          const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
-          ROCKET_ASSERT(cnt <= cap - nelem);
-          ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
+      };
+    template<typename allocatorT, bool memcpyT>
+      struct copy_storage_helper<allocatorT, false, memcpyT>
+      {
+        // This specialization is used when `allocatorT::value_type` is not copy-constructible.
+        template<typename xpointerT, typename ypointerT>
+          [[noreturn]] void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+          {
+            // Throw an exception unconditionally, even when there is nothing to copy.
+            noadl::throw_domain_error("cow_vector: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
+          }
+      };
+    template<typename allocatorT>
+      struct copy_storage_helper<allocatorT, true, true>
+      {
+        // This specialization is used when `std::allocator` is to be used to copy a trivial type.
+        template<typename xpointerT, typename ypointerT>
+          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+          {
+            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+            // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+            auto nelem = ptr->nelem;
+            const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            ROCKET_ASSERT(cnt <= cap - nelem);
+            ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
+            ptr->nelem = (nelem += cnt);
+          }
+      };
+
+    template<typename allocatorT, bool memcpyT = copy_trivially<allocatorT>::value>
+      struct move_storage_helper
+      {
+        // This is the generic version.
+        template<typename xpointerT, typename ypointerT>
+          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+          {
+            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+            // Move elements one by one.
+            auto nelem = ptr->nelem;
+            const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            ROCKET_ASSERT(cnt <= cap - nelem);
+            for(auto i = off; i != off + cnt; ++i) {
+              allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
+              ptr->nelem = (nelem += 1);
+            }
+          }
+      };
+    template<typename allocatorT>
+      struct move_storage_helper<allocatorT, true>
+      {
+        // This specialization is used when `std::allocator` is to be used to move a trivial type.
+        template<typename xpointerT, typename ypointerT>
+          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+          {
+            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
+            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
+            // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
+            auto nelem = ptr->nelem;
+            const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            ROCKET_ASSERT(cnt <= cap - nelem);
+            ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
 #ifdef ROCKET_DEBUG
-          ::std::memset(ptr_old->data + off, '/', sizeof(ptr->data[0]) * cnt);
+            ::std::memset(ptr_old->data + off, '/', sizeof(ptr->data[0]) * cnt);
 #endif
-          ptr->nelem = (nelem += cnt);
-        }
-    };
-
-  template<typename allocatorT>
-    class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
-    {
-    public:
-      using allocator_type   = allocatorT;
-      using value_type       = typename allocator_type::value_type;
-      using size_type        = typename allocator_traits<allocator_type>::size_type;
-
-    private:
-      using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
-      using storage           = basic_storage<allocator_type>;
-      using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
-      using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
-
-    private:
-      storage_pointer m_ptr;
-      void (*m_smf)(storage_pointer, bool);
-
-    public:
-      explicit constexpr storage_handle(const allocator_type &alloc) noexcept
-        : allocator_base(alloc),
-          m_ptr(), m_smf()
-        {
-        }
-      explicit constexpr storage_handle(allocator_type &&alloc) noexcept
-        : allocator_base(::std::move(alloc)),
-          m_ptr(), m_smf()
-        {
-        }
-      ~storage_handle()
-        {
-          this->deallocate();
-        }
-
-      storage_handle(const storage_handle &)
-        = delete;
-      storage_handle & operator=(const storage_handle &)
-        = delete;
-
-    private:
-      void do_reset(storage_pointer ptr_new, void (*smf_new)(storage_pointer, bool)) noexcept
-        {
-          const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-          const auto smf = noadl::exchange(this->m_smf, smf_new);
-          if(!ptr) {
-            return;
+            ptr->nelem = (nelem += cnt);
           }
-          (*smf)(ptr, false);
-        }
+      };
 
-      static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref)
-        {
-          if(to_add_ref) {
-            // Increment the reference count.
-            const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-            ROCKET_ASSERT(nref_old >= 1);
-          } else {
-            // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
-            if(nref_old > 1) {
+    template<typename allocatorT>
+      class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
+      {
+      public:
+        using allocator_type   = allocatorT;
+        using value_type       = typename allocator_type::value_type;
+        using size_type        = typename allocator_traits<allocator_type>::size_type;
+
+      private:
+        using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
+        using storage           = basic_storage<allocator_type>;
+        using storage_allocator = typename allocator_traits<allocator_type>::template rebind_alloc<storage>;
+        using storage_pointer   = typename allocator_traits<storage_allocator>::pointer;
+
+      private:
+        storage_pointer m_ptr;
+        void (*m_smf)(storage_pointer, bool);
+
+      public:
+        explicit constexpr storage_handle(const allocator_type &alloc) noexcept
+          : allocator_base(alloc),
+            m_ptr(), m_smf()
+          {
+          }
+        explicit constexpr storage_handle(allocator_type &&alloc) noexcept
+          : allocator_base(::std::move(alloc)),
+            m_ptr(), m_smf()
+          {
+          }
+        ~storage_handle()
+          {
+            this->deallocate();
+          }
+
+        storage_handle(const storage_handle &)
+          = delete;
+        storage_handle & operator=(const storage_handle &)
+          = delete;
+
+      private:
+        void do_reset(storage_pointer ptr_new, void (*smf_new)(storage_pointer, bool)) noexcept
+          {
+            const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            const auto smf = noadl::exchange(this->m_smf, smf_new);
+            if(!ptr) {
               return;
             }
-            ROCKET_ASSERT(nref_old == 1);
-            // If it has been decremented to zero, deallocate the block.
-            auto st_alloc = storage_allocator(ptr->alloc);
-            const auto nblk = ptr->nblk;
-            noadl::destroy_at(noadl::unfancy(ptr));
-#ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
-#endif
-            allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+            (*smf)(ptr, false);
           }
-        }
 
-    public:
-      const allocator_type & as_allocator() const noexcept
-        {
-          return static_cast<const allocator_base &>(*this);
-        }
-      allocator_type & as_allocator() noexcept
-        {
-          return static_cast<allocator_base &>(*this);
-        }
-
-      bool unique() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(!ptr) {
-            return false;
-          }
-          return ptr->nref.load(::std::memory_order_relaxed) == 1;
-        }
-      size_type capacity() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(!ptr) {
-            return 0;
-          }
-          return storage::max_nelem_for_nblk(ptr->nblk);
-        }
-      size_type max_size() const noexcept
-        {
-          auto st_alloc = storage_allocator(this->as_allocator());
-          const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-          return storage::max_nelem_for_nblk(max_nblk / 2);
-        }
-      size_type check_size_add(size_type base, size_type add) const
-        {
-          const auto cap_max = this->max_size();
-          ROCKET_ASSERT(base <= cap_max);
-          if(cap_max - base < add) {
-            noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
-          }
-          return base + add;
-        }
-      size_type round_up_capacity(size_type res_arg) const
-        {
-          const auto cap = this->check_size_add(0, res_arg);
-          const auto nblk = storage::min_nblk_for_nelem(cap);
-          return storage::max_nelem_for_nblk(nblk);
-        }
-      const value_type * data() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(!ptr) {
-            return nullptr;
-          }
-          return ptr->data;
-        }
-      size_type size() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(!ptr) {
-            return 0;
-          }
-          return ptr->nelem;
-        }
-      value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
-        {
-          if(res_arg == 0) {
-            // Deallocate the block.
-            this->deallocate();
-            return nullptr;
-          }
-          const auto cap = this->check_size_add(0, res_arg);
-          // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-          const auto nblk = storage::min_nblk_for_nelem(cap);
-          auto st_alloc = storage_allocator(this->as_allocator());
-          const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
-#ifdef ROCKET_DEBUG
-          ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
-#endif
-          noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
-          const auto ptr_old = this->m_ptr;
-          if(ptr_old) {
-            try {
-              // Copy or move elements into the new block.
-              // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
-              if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)) {
-                copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
-                copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
-              } else {
-                move_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
-                move_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+        static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref)
+          {
+            if(to_add_ref) {
+              // Increment the reference count.
+              const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
+              ROCKET_ASSERT(nref_old >= 1);
+            } else {
+              // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
+              const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
+              if(nref_old > 1) {
+                return;
               }
-            } catch(...) {
-              // If an exception is thrown, deallocate the new block, then rethrow the exception.
+              ROCKET_ASSERT(nref_old == 1);
+              // If it has been decremented to zero, deallocate the block.
+              auto st_alloc = storage_allocator(ptr->alloc);
+              const auto nblk = ptr->nblk;
               noadl::destroy_at(noadl::unfancy(ptr));
+#ifdef ROCKET_DEBUG
+              ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
+#endif
               allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
-              throw;
             }
           }
-          // Replace the current block.
-          this->do_reset(ptr, &do_manipulate_storage);
-          return ptr->data;
-        }
-      void deallocate() noexcept
-        {
-          this->do_reset(storage_pointer(), nullptr);
-        }
 
-      void share_with(const storage_handle &other) noexcept
-        {
-          const auto ptr = other.m_ptr;
-          if(ptr) {
-            // Increment the reference count.
-            (*(other.m_smf))(ptr, true);
+      public:
+        const allocator_type & as_allocator() const noexcept
+          {
+            return static_cast<const allocator_base &>(*this);
           }
-          this->do_reset(ptr, other.m_smf);
-        }
-      void share_with(storage_handle &&other) noexcept
-        {
-          const auto ptr = other.m_ptr;
-          if(ptr) {
-            // Detach the block.
-            other.m_ptr = storage_pointer();
+        allocator_type & as_allocator() noexcept
+          {
+            return static_cast<allocator_base &>(*this);
           }
-          this->do_reset(ptr, other.m_smf);
-        }
-      void exchange_with(storage_handle &other) noexcept
-        {
-          ::std::swap(this->m_ptr, other.m_ptr);
-          ::std::swap(this->m_smf, other.m_smf);
-        }
 
-      constexpr operator const storage_handle * () const noexcept
-        {
-          return this;
-        }
-      operator storage_handle * () noexcept
-        {
-          return this;
-        }
-
-      value_type * mut_data_unchecked() noexcept
-        {
-          auto ptr = this->m_ptr;
-          if(!ptr) {
-            return nullptr;
+        bool unique() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return false;
+            }
+            return ptr->nref.load(::std::memory_order_relaxed) == 1;
           }
-          ROCKET_ASSERT(this->unique());
-          return ptr->data;
-        }
-      template<typename ...paramsT>
-        value_type * emplace_back_unchecked(paramsT &&...params)
-        {
-          ROCKET_ASSERT(this->unique());
-          ROCKET_ASSERT(this->size() < this->capacity());
-          const auto ptr = this->m_ptr;
-          ROCKET_ASSERT(ptr);
-          auto nelem = ptr->nelem;
-          allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
-          ptr->nelem = (nelem += 1);
-          return ptr->data + nelem - 1;
-        }
-      void pop_back_n_unchecked(size_type n) noexcept
-        {
-          ROCKET_ASSERT(this->unique());
-          ROCKET_ASSERT(n <= this->size());
-          if(n == 0) {
-            return;
+        size_type capacity() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return 0;
+            }
+            return storage::max_nelem_for_nblk(ptr->nblk);
           }
-          const auto ptr = this->m_ptr;
-          ROCKET_ASSERT(ptr);
-          auto nelem = ptr->nelem;
-          for(auto i = n; i != 0; --i) {
-            ptr->nelem = (nelem -= 1);
-            allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
+        size_type max_size() const noexcept
+          {
+            auto st_alloc = storage_allocator(this->as_allocator());
+            const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
+            return storage::max_nelem_for_nblk(max_nblk / 2);
           }
-        }
-    };
+        size_type check_size_add(size_type base, size_type add) const
+          {
+            const auto cap_max = this->max_size();
+            ROCKET_ASSERT(base <= cap_max);
+            if(cap_max - base < add) {
+              noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
+                                        static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
+            }
+            return base + add;
+          }
+        size_type round_up_capacity(size_type res_arg) const
+          {
+            const auto cap = this->check_size_add(0, res_arg);
+            const auto nblk = storage::min_nblk_for_nelem(cap);
+            return storage::max_nelem_for_nblk(nblk);
+          }
+        const value_type * data() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return nullptr;
+            }
+            return ptr->data;
+          }
+        size_type size() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return 0;
+            }
+            return ptr->nelem;
+          }
+        value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+          {
+            if(res_arg == 0) {
+              // Deallocate the block.
+              this->deallocate();
+              return nullptr;
+            }
+            const auto cap = this->check_size_add(0, res_arg);
+            // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
+            const auto nblk = storage::min_nblk_for_nelem(cap);
+            auto st_alloc = storage_allocator(this->as_allocator());
+            const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
+#ifdef ROCKET_DEBUG
+            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
+#endif
+            noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
+            const auto ptr_old = this->m_ptr;
+            if(ptr_old) {
+              try {
+                // Copy or move elements into the new block.
+                // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
+                if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)) {
+                  copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
+                  copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+                } else {
+                  move_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
+                  move_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+                }
+              } catch(...) {
+                // If an exception is thrown, deallocate the new block, then rethrow the exception.
+                noadl::destroy_at(noadl::unfancy(ptr));
+                allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
+                throw;
+              }
+            }
+            // Replace the current block.
+            this->do_reset(ptr, &do_manipulate_storage);
+            return ptr->data;
+          }
+        void deallocate() noexcept
+          {
+            this->do_reset(storage_pointer(), nullptr);
+          }
 
-  template<typename vectorT, typename valueT>
-    class vector_iterator
-    {
-      template<typename, typename>
-        friend class vector_iterator;
-      friend vectorT;
+        void share_with(const storage_handle &other) noexcept
+          {
+            const auto ptr = other.m_ptr;
+            if(ptr) {
+              // Increment the reference count.
+              (*(other.m_smf))(ptr, true);
+            }
+            this->do_reset(ptr, other.m_smf);
+          }
+        void share_with(storage_handle &&other) noexcept
+          {
+            const auto ptr = other.m_ptr;
+            if(ptr) {
+              // Detach the block.
+              other.m_ptr = storage_pointer();
+            }
+            this->do_reset(ptr, other.m_smf);
+          }
+        void exchange_with(storage_handle &other) noexcept
+          {
+            ::std::swap(this->m_ptr, other.m_ptr);
+            ::std::swap(this->m_smf, other.m_smf);
+          }
 
-    public:
-      using iterator_category  = ::std::random_access_iterator_tag;
-      using value_type         = valueT;
-      using pointer            = value_type *;
-      using reference          = value_type &;
-      using difference_type    = ptrdiff_t;
+        constexpr operator const storage_handle * () const noexcept
+          {
+            return this;
+          }
+        operator storage_handle * () noexcept
+          {
+            return this;
+          }
 
-      using parent_type   = storage_handle<typename vectorT::allocator_type>;
+        value_type * mut_data_unchecked() noexcept
+          {
+            auto ptr = this->m_ptr;
+            if(!ptr) {
+              return nullptr;
+            }
+            ROCKET_ASSERT(this->unique());
+            return ptr->data;
+          }
+        template<typename ...paramsT>
+          value_type * emplace_back_unchecked(paramsT &&...params)
+          {
+            ROCKET_ASSERT(this->unique());
+            ROCKET_ASSERT(this->size() < this->capacity());
+            const auto ptr = this->m_ptr;
+            ROCKET_ASSERT(ptr);
+            auto nelem = ptr->nelem;
+            allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
+            ptr->nelem = (nelem += 1);
+            return ptr->data + nelem - 1;
+          }
+        void pop_back_n_unchecked(size_type n) noexcept
+          {
+            ROCKET_ASSERT(this->unique());
+            ROCKET_ASSERT(n <= this->size());
+            if(n == 0) {
+              return;
+            }
+            const auto ptr = this->m_ptr;
+            ROCKET_ASSERT(ptr);
+            auto nelem = ptr->nelem;
+            for(auto i = n; i != 0; --i) {
+              ptr->nelem = (nelem -= 1);
+              allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
+            }
+          }
+      };
 
-    private:
-      const parent_type *m_ref;
-      value_type *m_ptr;
+    template<typename vectorT, typename valueT>
+      class vector_iterator
+      {
+        template<typename, typename>
+          friend class vector_iterator;
+        friend vectorT;
 
-    private:
-      constexpr vector_iterator(const parent_type *ref, value_type *ptr) noexcept
-        : m_ref(ref), m_ptr(ptr)
-        {
-        }
+      public:
+        using iterator_category  = ::std::random_access_iterator_tag;
+        using value_type         = valueT;
+        using pointer            = value_type *;
+        using reference          = value_type &;
+        using difference_type    = ptrdiff_t;
 
-    public:
-      constexpr vector_iterator() noexcept
-        : vector_iterator(nullptr, nullptr)
-        {
-        }
-      template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
-        constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
-          : vector_iterator(other.m_ref, other.m_ptr)
-        {
-        }
+        using parent_type   = storage_handle<typename vectorT::allocator_type>;
 
-    private:
-      value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
-        {
-          const auto ref = this->m_ref;
-          ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-          const auto dist = static_cast<size_t>(ptr - ref->data());
-          ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
-          ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
-          return ptr;
-        }
+      private:
+        const parent_type *m_ref;
+        value_type *m_ptr;
 
-    public:
-      const parent_type * parent() const noexcept
-        {
-          return this->m_ref;
-        }
+      private:
+        constexpr vector_iterator(const parent_type *ref, value_type *ptr) noexcept
+          : m_ref(ref), m_ptr(ptr)
+          {
+          }
 
-      value_type * tell() const noexcept
-        {
-          const auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
-          return ptr;
-        }
-      value_type * tell_owned_by(const parent_type *ref) const noexcept
-        {
-          ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
-          return this->tell();
-        }
-      vector_iterator & seek(value_type *ptr) noexcept
-        {
-          this->m_ptr = this->do_assert_valid_pointer(ptr, false);
-          return *this;
-        }
+      public:
+        constexpr vector_iterator() noexcept
+          : vector_iterator(nullptr, nullptr)
+          {
+          }
+        template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
+          constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+            : vector_iterator(other.m_ref, other.m_ptr)
+          {
+          }
 
-      reference operator*() const noexcept
-        {
-          const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-          return *ptr;
-        }
-      pointer operator->() const noexcept
-        {
-          const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
-          return ptr;
-        }
-      reference operator[](difference_type off) const noexcept
-        {
-          const auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
-          return *ptr;
-        }
-    };
+      private:
+        value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
+          {
+            const auto ref = this->m_ref;
+            ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+            const auto dist = static_cast<size_t>(ptr - ref->data());
+            ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
+            ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
+            return ptr;
+          }
 
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> & operator++(vector_iterator<vectorT, valueT> &rhs) noexcept
-    {
-      return rhs.seek(rhs.tell() + 1);
+      public:
+        const parent_type * parent() const noexcept
+          {
+            return this->m_ref;
+          }
+
+        value_type * tell() const noexcept
+          {
+            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
+            return ptr;
+          }
+        value_type * tell_owned_by(const parent_type *ref) const noexcept
+          {
+            ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
+            return this->tell();
+          }
+        vector_iterator & seek(value_type *ptr) noexcept
+          {
+            this->m_ptr = this->do_assert_valid_pointer(ptr, false);
+            return *this;
+          }
+
+        reference operator*() const noexcept
+          {
+            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            return *ptr;
+          }
+        pointer operator->() const noexcept
+          {
+            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            return ptr;
+          }
+        reference operator[](difference_type off) const noexcept
+          {
+            const auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
+            return *ptr;
+          }
+      };
+
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> & operator++(vector_iterator<vectorT, valueT> &rhs) noexcept
+      {
+        return rhs.seek(rhs.tell() + 1);
+      }
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> & operator--(vector_iterator<vectorT, valueT> &rhs) noexcept
+      {
+        return rhs.seek(rhs.tell() - 1);
+      }
+
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+      {
+        auto res = lhs;
+        lhs.seek(lhs.tell() + 1);
+        return res;
+      }
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+      {
+        auto res = lhs;
+        lhs.seek(lhs.tell() - 1);
+        return res;
+      }
+
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> & operator+=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+      {
+        return lhs.seek(lhs.tell() + rhs);
+      }
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> & operator-=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+      {
+        return lhs.seek(lhs.tell() - rhs);
+      }
+
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+      {
+        auto res = lhs;
+        res.seek(res.tell() + rhs);
+        return res;
+      }
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+      {
+        auto res = lhs;
+        res.seek(res.tell() - rhs);
+        return res;
+      }
+
+    template<typename vectorT, typename valueT>
+      inline vector_iterator<vectorT, valueT> operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs, const vector_iterator<vectorT, valueT> &rhs) noexcept
+      {
+        auto res = rhs;
+        res.seek(res.tell() + lhs);
+        return res;
+      }
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
+      }
+
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell() == rhs.tell();
+      }
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell() != rhs.tell();
+      }
+
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell_owned_by(rhs.parent()) < rhs.tell();
+      }
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator>(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell_owned_by(rhs.parent()) > rhs.tell();
+      }
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator<=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();
+      }
+    template<typename vectorT, typename xvalueT, typename yvalueT>
+      inline bool operator>=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+      {
+        return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();
+      }
+
+    // Insertion helpers.
+    struct append_tag
+      {
+      }
+    constexpr append;
+
+    template<typename vectorT, typename ...paramsT>
+      inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
+      {
+        vec->append(::std::forward<paramsT>(params)...);
+      }
+
+    struct emplace_back_tag
+      {
+      }
+    constexpr emplace_back;
+
+    template<typename vectorT, typename ...paramsT>
+      inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
+      {
+        vec->emplace_back(::std::forward<paramsT>(params)...);
+      }
+
+    struct push_back_tag
+      {
+      }
+    constexpr push_back;
+
+    template<typename vectorT, typename ...paramsT>
+      inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
+      {
+        vec->push_back(::std::forward<paramsT>(params)...);
+      }
+
     }
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> & operator--(vector_iterator<vectorT, valueT> &rhs) noexcept
-    {
-      return rhs.seek(rhs.tell() - 1);
-    }
-
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT> &lhs, int) noexcept
-    {
-      auto res = lhs;
-      lhs.seek(lhs.tell() + 1);
-      return res;
-    }
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT> &lhs, int) noexcept
-    {
-      auto res = lhs;
-      lhs.seek(lhs.tell() - 1);
-      return res;
-    }
-
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> & operator+=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
-    {
-      return lhs.seek(lhs.tell() + rhs);
-    }
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> & operator-=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
-    {
-      return lhs.seek(lhs.tell() - rhs);
-    }
-
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
-    {
-      auto res = lhs;
-      res.seek(res.tell() + rhs);
-      return res;
-    }
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
-    {
-      auto res = lhs;
-      res.seek(res.tell() - rhs);
-      return res;
-    }
-
-  template<typename vectorT, typename valueT>
-    inline vector_iterator<vectorT, valueT> operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs, const vector_iterator<vectorT, valueT> &rhs) noexcept
-    {
-      auto res = rhs;
-      res.seek(res.tell() + lhs);
-      return res;
-    }
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
-    }
-
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell() == rhs.tell();
-    }
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell() != rhs.tell();
-    }
-
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell_owned_by(rhs.parent()) < rhs.tell();
-    }
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator>(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell_owned_by(rhs.parent()) > rhs.tell();
-    }
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator<=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();
-    }
-  template<typename vectorT, typename xvalueT, typename yvalueT>
-    inline bool operator>=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
-    {
-      return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();
-    }
-
-  // Insertion helpers.
-  struct append_tag
-    {
-    }
-  constexpr append;
-
-  template<typename vectorT, typename ...paramsT>
-    inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
-    {
-      vec->append(::std::forward<paramsT>(params)...);
-    }
-
-  struct emplace_back_tag
-    {
-    }
-  constexpr emplace_back;
-
-  template<typename vectorT, typename ...paramsT>
-    inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
-    {
-      vec->emplace_back(::std::forward<paramsT>(params)...);
-    }
-
-  struct push_back_tag
-    {
-    }
-  constexpr push_back;
-
-  template<typename vectorT, typename ...paramsT>
-    inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
-    {
-      vec->push_back(::std::forward<paramsT>(params)...);
-    }
-
-  }
 
 template<typename valueT, typename allocatorT>
   class cow_vector

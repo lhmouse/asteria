@@ -49,16 +49,16 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     return nullptr;
   }
 
-  namespace {
+    namespace {
 
-  template<typename XvalueT>
-    inline void do_set_constant(Reference &ref_out, XvalueT &&value)
-    {
-      Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
-      ref_out = std::move(ref_c);
+    template<typename XvalueT>
+      inline void do_set_constant(Reference &ref_out, XvalueT &&value)
+      {
+        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
+        ref_out = std::move(ref_c);
+      }
+
     }
-
-  }
 
 void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args)
   {

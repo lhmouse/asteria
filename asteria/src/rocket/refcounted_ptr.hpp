@@ -42,214 +42,214 @@ template<typename elementT, typename deleterT = default_delete<elementT>>
 template<typename elementT>
   class refcounted_ptr;
 
-  namespace details_refcounted_ptr {
+    namespace details_refcounted_ptr {
 
-  class refcount_base
-    {
-    private:
-      mutable atomic<long> m_nref;
+    class refcount_base
+      {
+      private:
+        mutable atomic<long> m_nref;
 
-    public:
-      constexpr refcount_base() noexcept
-        : m_nref(1)
-        {
-        }
-      constexpr refcount_base(const refcount_base &) noexcept
-        : refcount_base()
-        {
-        }
-      refcount_base & operator=(const refcount_base &) noexcept
-        {
-          return *this;
-        }
-      ~refcount_base()
-        {
-          // The reference count shall be either zero or one here.
-          if(this->m_nref.load(::std::memory_order_relaxed) > 1) {
-            ::std::terminate();
+      public:
+        constexpr refcount_base() noexcept
+          : m_nref(1)
+          {
           }
-        }
+        constexpr refcount_base(const refcount_base &) noexcept
+          : refcount_base()
+          {
+          }
+        refcount_base & operator=(const refcount_base &) noexcept
+          {
+            return *this;
+          }
+        ~refcount_base()
+          {
+            // The reference count shall be either zero or one here.
+            if(this->m_nref.load(::std::memory_order_relaxed) > 1) {
+              ::std::terminate();
+            }
+          }
 
-    public:
-      long reference_count() const noexcept
-        {
-          return this->m_nref.load(::std::memory_order_relaxed);
-        }
-      bool try_add_reference() const noexcept
-        {
-          auto nref_old = this->m_nref.load(::std::memory_order_relaxed);
-          do {
-            if(nref_old == 0) {
+      public:
+        long reference_count() const noexcept
+          {
+            return this->m_nref.load(::std::memory_order_relaxed);
+          }
+        bool try_add_reference() const noexcept
+          {
+            auto nref_old = this->m_nref.load(::std::memory_order_relaxed);
+            do {
+              if(nref_old == 0) {
+                return false;
+              }
+              if(this->m_nref.compare_exchange_strong(nref_old, nref_old + 1, ::std::memory_order_relaxed)) {
+                return true;
+              }
+            } while(true);
+          }
+        void add_reference() const noexcept
+          {
+            auto nref_old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
+            ROCKET_ASSERT(nref_old >= 1);
+          }
+        bool drop_reference() const noexcept
+          {
+            auto nref_old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
+            if(nref_old > 1) {
               return false;
             }
-            if(this->m_nref.compare_exchange_strong(nref_old, nref_old + 1, ::std::memory_order_relaxed)) {
-              return true;
+            ROCKET_ASSERT(nref_old == 1);
+            return true;
+          }
+      };
+
+    template<typename ...unusedT>
+      struct make_void
+      {
+        using type = void;
+      };
+
+    template<typename resultT, typename sourceT, typename = void>
+      struct static_cast_or_dynamic_cast_helper
+      {
+        constexpr resultT operator()(sourceT &&src) const
+          {
+            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
+    template<typename resultT, typename sourceT>
+      struct static_cast_or_dynamic_cast_helper<resultT, sourceT, typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
+      {
+        constexpr resultT operator()(sourceT &&src) const
+          {
+            return static_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
+
+    template<typename elementT>
+      class stored_pointer
+      {
+      public:
+        using element_type  = elementT;
+        using pointer       = element_type *;
+
+      private:
+        pointer m_ptr;
+
+      public:
+        constexpr stored_pointer() noexcept
+          : m_ptr()
+          {
+          }
+        ~stored_pointer()
+          {
+            this->reset(pointer());
+          }
+
+        stored_pointer(const stored_pointer &)
+          = delete;
+        stored_pointer & operator=(const stored_pointer &)
+          = delete;
+
+      private:
+        template<typename yelementT, typename deleterT>
+          deleterT & do_locate_deleter(refcounted_base<yelementT, deleterT> *ptr) const
+          {
+            return ptr->as_deleter();
+          }
+
+      public:
+        long use_count() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return 0;
             }
-          } while(true);
-        }
-      void add_reference() const noexcept
-        {
-          auto nref_old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
-          ROCKET_ASSERT(nref_old >= 1);
-        }
-      bool drop_reference() const noexcept
-        {
-          auto nref_old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
-          if(nref_old > 1) {
-            return false;
+            return ptr->refcount_base::reference_count();
           }
-          ROCKET_ASSERT(nref_old == 1);
-          return true;
-        }
-    };
-
-  template<typename ...unusedT>
-    struct make_void
-    {
-      using type = void;
-    };
-
-  template<typename resultT, typename sourceT, typename = void>
-    struct static_cast_or_dynamic_cast_helper
-    {
-      constexpr resultT operator()(sourceT &&src) const
-        {
-          return dynamic_cast<resultT>(::std::forward<sourceT>(src));
-        }
-    };
-  template<typename resultT, typename sourceT>
-    struct static_cast_or_dynamic_cast_helper<resultT, sourceT, typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
-    {
-      constexpr resultT operator()(sourceT &&src) const
-        {
-          return static_cast<resultT>(::std::forward<sourceT>(src));
-        }
-    };
-
-  template<typename elementT>
-    class stored_pointer
-    {
-    public:
-      using element_type  = elementT;
-      using pointer       = element_type *;
-
-    private:
-      pointer m_ptr;
-
-    public:
-      constexpr stored_pointer() noexcept
-        : m_ptr()
-        {
-        }
-      ~stored_pointer()
-        {
-          this->reset(pointer());
-        }
-
-      stored_pointer(const stored_pointer &)
-        = delete;
-      stored_pointer & operator=(const stored_pointer &)
-        = delete;
-
-    private:
-      template<typename yelementT, typename deleterT>
-        deleterT & do_locate_deleter(refcounted_base<yelementT, deleterT> *ptr) const
-        {
-          return ptr->as_deleter();
-        }
-
-    public:
-      long use_count() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(!ptr) {
-            return 0;
+        pointer get() const noexcept
+          {
+            return this->m_ptr;
           }
-          return ptr->refcount_base::reference_count();
-        }
-      pointer get() const noexcept
-        {
-          return this->m_ptr;
-        }
-      pointer copy_release() const noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(ptr) {
-            ptr->refcount_base::add_reference();
+        pointer copy_release() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(ptr) {
+              ptr->refcount_base::add_reference();
+            }
+            return ptr;
           }
-          return ptr;
-        }
-      pointer release() noexcept
-        {
-          const auto ptr = this->m_ptr;
-          if(ptr) {
-            this->m_ptr = pointer();
+        pointer release() noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(ptr) {
+              this->m_ptr = pointer();
+            }
+            return ptr;
           }
-          return ptr;
-        }
-      void reset(pointer ptr_new) noexcept
-        {
-          const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-          if(!ptr) {
-            return;
+        void reset(pointer ptr_new) noexcept
+          {
+            const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            if(!ptr) {
+              return;
+            }
+            if(!ptr->refcount_base::drop_reference()) {
+              return;
+            }
+            // Remove cv-qualifiers, then move-construct the deleter out of the object,
+            // which is used to delete the object thereafter.
+            const auto nkptr = const_cast<typename remove_cv<element_type>::type *>(ptr);
+            auto tdel = ::std::move(this->do_locate_deleter(nkptr));
+            ::std::move(tdel)(nkptr);
           }
-          if(!ptr->refcount_base::drop_reference()) {
-            return;
+        void exchange(stored_pointer &other) noexcept
+          {
+            ::std::swap(this->m_ptr, other.m_ptr);
           }
-          // Remove cv-qualifiers, then move-construct the deleter out of the object,
-          // which is used to delete the object thereafter.
-          const auto nkptr = const_cast<typename remove_cv<element_type>::type *>(ptr);
-          auto tdel = ::std::move(this->do_locate_deleter(nkptr));
-          ::std::move(tdel)(nkptr);
-        }
-      void exchange(stored_pointer &other) noexcept
-        {
-          ::std::swap(this->m_ptr, other.m_ptr);
-        }
-    };
+      };
 
-  struct static_caster
-    {
-      template<typename resultT, typename sourceT>
-        static constexpr resultT do_cast(sourceT &&src)
-        {
-          return static_cast<resultT>(::std::forward<sourceT>(src));
-        }
-    };
-  struct dynamic_caster
-    {
-      template<typename resultT, typename sourceT>
-        static constexpr resultT do_cast(sourceT &&src)
-        {
-          return dynamic_cast<resultT>(::std::forward<sourceT>(src));
-        }
-    };
-  struct const_caster
-    {
-      template<typename resultT, typename sourceT>
-        static constexpr resultT do_cast(sourceT &&src)
-        {
-          return const_cast<resultT>(::std::forward<sourceT>(src));
-        }
-    };
-
-  template<typename resultptrT, typename casterT>
-    struct pointer_cast_helper
-    {
-      template<typename sourceptrT>
-        resultptrT operator()(sourceptrT &&iptr) const
-        {
-          const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(iptr.get());
-          if(!ptr) {
-            return nullptr;
+    struct static_caster
+      {
+        template<typename resultT, typename sourceT>
+          static constexpr resultT do_cast(sourceT &&src)
+          {
+            return static_cast<resultT>(::std::forward<sourceT>(src));
           }
-          auto tptr = ::std::forward<sourceptrT>(iptr);
-          tptr.release();
-          return resultptrT(ptr);
-        }
-    };
+      };
+    struct dynamic_caster
+      {
+        template<typename resultT, typename sourceT>
+          static constexpr resultT do_cast(sourceT &&src)
+          {
+            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
+    struct const_caster
+      {
+        template<typename resultT, typename sourceT>
+          static constexpr resultT do_cast(sourceT &&src)
+          {
+            return const_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
 
-  }
+    template<typename resultptrT, typename casterT>
+      struct pointer_cast_helper
+      {
+        template<typename sourceptrT>
+          resultptrT operator()(sourceptrT &&iptr) const
+          {
+            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(iptr.get());
+            if(!ptr) {
+              return nullptr;
+            }
+            auto tptr = ::std::forward<sourceptrT>(iptr);
+            tptr.release();
+            return resultptrT(ptr);
+          }
+      };
+
+    }
 
 template<typename elementT, typename deleterT>
   class refcounted_base : protected virtual details_refcounted_ptr::refcount_base, private virtual allocator_wrapper_base_for<deleterT>::type

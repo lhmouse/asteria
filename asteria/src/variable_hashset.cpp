@@ -16,46 +16,46 @@ Variable_hashset::~Variable_hashset()
     ::operator delete(data);
   }
 
-  namespace {
+    namespace {
 
-  Size do_get_origin(Size nbkt, const rocket::refcounted_ptr<Variable> &var) noexcept
-    {
-      // Conversion between an unsigned integer type and a floating point type results in performance penalty.
-      // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
-      const auto fcast = [](Size x) { return static_cast<double>(static_cast<Diff>(x)); };
-      const auto ucast = [](double y) { return static_cast<Size>(static_cast<Diff>(y)); };
-      // Multiplication is faster than division.
-      const auto seed = static_cast<Uint32>(reinterpret_cast<Uintptr>(var.get()) * 0x82F63B78);
-      const auto ratio = fcast(seed >> 1) / double(0x80000000);
-      ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-      const auto pos = ucast(fcast(nbkt) * ratio);
-      ROCKET_ASSERT(pos < nbkt);
-      return pos;
-    }
-
-  template<typename PredT>
-    rocket::refcounted_ptr<Variable> * do_linear_probe(rocket::refcounted_ptr<Variable> * data, Size nbkt, Size first, Size last, PredT &&pred)
-    {
-      // Phase one: Probe from `first` to the end of the table.
-      for(Size i = first; i != nbkt; ++i) {
-        const auto bkt = data + i;
-        if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
-          return bkt;
-        }
+    Size do_get_origin(Size nbkt, const rocket::refcounted_ptr<Variable> &var) noexcept
+      {
+        // Conversion between an unsigned integer type and a floating point type results in performance penalty.
+        // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
+        const auto fcast = [](Size x) { return static_cast<double>(static_cast<Diff>(x)); };
+        const auto ucast = [](double y) { return static_cast<Size>(static_cast<Diff>(y)); };
+        // Multiplication is faster than division.
+        const auto seed = static_cast<Uint32>(reinterpret_cast<Uintptr>(var.get()) * 0x82F63B78);
+        const auto ratio = fcast(seed >> 1) / double(0x80000000);
+        ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
+        const auto pos = ucast(fcast(nbkt) * ratio);
+        ROCKET_ASSERT(pos < nbkt);
+        return pos;
       }
-      // Phase two: Probe from the beginning of the table to `last`.
-      for(Size i = 0; i != last; ++i) {
-        const auto bkt = data + i;
-        if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
-          return bkt;
-        }
-      }
-      // The table is full.
-      // This is not possible as there shall always be empty slots in the table.
-      ROCKET_ASSERT(false);
-    }
 
-  }
+    template<typename PredT>
+      rocket::refcounted_ptr<Variable> * do_linear_probe(rocket::refcounted_ptr<Variable> * data, Size nbkt, Size first, Size last, PredT &&pred)
+      {
+        // Phase one: Probe from `first` to the end of the table.
+        for(Size i = first; i != nbkt; ++i) {
+          const auto bkt = data + i;
+          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
+            return bkt;
+          }
+        }
+        // Phase two: Probe from the beginning of the table to `last`.
+        for(Size i = 0; i != last; ++i) {
+          const auto bkt = data + i;
+          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
+            return bkt;
+          }
+        }
+        // The table is full.
+        // This is not possible as there shall always be empty slots in the table.
+        ROCKET_ASSERT(false);
+      }
+
+    }
 
 void Variable_hashset::do_rehash(Size res_arg)
   {

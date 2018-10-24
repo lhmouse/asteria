@@ -14,7 +14,7 @@
 
 namespace rocket {
 
-  namespace noadl = ::rocket;
+    namespace noadl = ::rocket;
 
 using ::std::common_type;
 using ::std::is_nothrow_constructible;
@@ -39,22 +39,22 @@ template<typename typeT, typename withT>
     return old;
   }
 
-  namespace details_utilities {
+    namespace details_utilities {
 
-  using ::std::swap;
+    using ::std::swap;
 
-  template<typename typeT>
-    struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
-    {
-    };
+    template<typename typeT>
+      struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
+      {
+      };
 
-  template<typename typeT>
-    constexpr void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
-    {
-      swap(lhs, rhs);
+    template<typename typeT>
+      constexpr void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
+      {
+        swap(lhs, rhs);
+      }
+
     }
-
-  }
 
   using details_utilities::is_nothrow_swappable;
   using details_utilities::adl_swap;
@@ -130,29 +130,29 @@ template<typename firstT, typename ...restT>
   {
   };
 
-  namespace details_utilities {
+    namespace details_utilities {
 
-  template<typename iteratorT>
-    constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
-    {
-      return 0;
-    }
-  template<typename iteratorT>
-    inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
-    {
-      size_t total = 0;
-      for(auto it = ::std::move(first); it != last; ++it) {
-        ++total;
+    template<typename iteratorT>
+      constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+      {
+        return 0;
       }
-      return total;
-    }
-  template<typename iteratorT>
-    constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
-    {
-      return static_cast<size_t>(last - first);
-    }
+    template<typename iteratorT>
+      inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
+      {
+        size_t total = 0;
+        for(auto it = ::std::move(first); it != last; ++it) {
+          ++total;
+        }
+        return total;
+      }
+    template<typename iteratorT>
+      constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
+      {
+        return static_cast<size_t>(last - first);
+      }
 
-  }
+    }
 
 template<typename iteratorT>
   constexpr size_t estimate_distance(iteratorT first, iteratorT last)
