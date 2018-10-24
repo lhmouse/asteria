@@ -49,13 +49,10 @@ Value::~Value()
 
 Value::Value(const Value &) noexcept
   = default;
-
 Value & Value::operator=(const Value &) noexcept
   = default;
-
 Value::Value(Value &&) noexcept
   = default;
-
 Value & Value::operator=(Value &&) noexcept
   = default;
 
