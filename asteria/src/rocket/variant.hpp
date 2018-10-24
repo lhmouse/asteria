@@ -32,6 +32,7 @@ template<typename ...alternativesT>
 
     namespace details_variant {
 
+    // Main template definition for no type parameters.
     template<size_t minlenT, typename ...typesT>
       struct aligned_union
       {
@@ -40,7 +41,15 @@ template<typename ...alternativesT>
             char bytes[minlenT];
           };
       };
-
+    // Specialization for a size of zero and no type parameters. This has to exist to avoid arrays of zero elements.
+    template<>
+      struct aligned_union<0>
+      {
+        union type
+          {
+          };
+      };
+    // Specialization for at least one type parameter.
     template<size_t minlenT, typename firstT, typename ...restT>
       struct aligned_union<minlenT, firstT, restT...>
       {
