@@ -6,7 +6,9 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval(), std::swap()
-#include <typeinfo>
+#include <typeinfo> // std::type_info
+#include <cstring> // std::memset()
+#include <cstddef> // std::size_t
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
@@ -14,538 +16,455 @@
 namespace rocket {
 
 using ::std::common_type;
-using ::std::is_convertible;
 using ::std::decay;
-using ::std::remove_cv;
-using ::std::enable_if;
 using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_assignable;
 using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_move_constructible;
 using ::std::is_nothrow_copy_assignable;
 using ::std::is_nothrow_move_assignable;
-using ::std::is_nothrow_destructible;
 using ::std::integral_constant;
-using ::std::conditional;
-using ::std::false_type;
-using ::std::true_type;
+using ::std::enable_if;
 using ::std::type_info;
+using ::std::size_t;
 
-template<typename ...altsT>
+template<typename ...alternativesT>
   class variant;
 
-  namespace details_variant {
+    namespace details_variant {
 
-  template<unsigned indexT, typename ...typesT>
-    struct type_getter
+    template<size_t minlenT, typename ...typesT>
+      struct aligned_union
       {
-      };
-  template<typename firstT, typename ...remainingT>
-    struct type_getter<0, firstT, remainingT...>
-      {
-        using type = firstT;
-      };
-  template<unsigned indexT, typename firstT, typename ...remainingT>
-    struct type_getter<indexT, firstT, remainingT...>
-      : type_getter<indexT - 1, remainingT...>
-      {
+        union type
+          {
+            char bytes[minlenT];
+          };
       };
 
-  template<unsigned indexT, typename targetT, typename ...typesT>
-    struct type_finder
+    template<size_t minlenT, typename firstT, typename ...restT>
+      struct aligned_union<minlenT, firstT, restT...>
       {
-      };
-  template<unsigned indexT, typename targetT, typename firstT, typename ...remainingT>
-    struct type_finder<indexT, targetT, firstT, remainingT...>
-      : type_finder<indexT + 1, targetT, remainingT...>
-      {
-      };
-  template<unsigned indexT, typename targetT, typename ...remainingT>
-    struct type_finder<indexT, targetT, targetT, remainingT...>
-      : integral_constant<unsigned, indexT>
-      {
-      };
+        union type
+          {
+            firstT first;
+            typename aligned_union<minlenT, restT...>::type rest;
 
-  template<typename ...typesT>
-    struct conjunction
-      : true_type
-      {
-      };
-  template<typename firstT, typename ...remainingT>
-    struct conjunction<firstT, remainingT...>
-      : conditional<firstT::value, conjunction<remainingT...>, false_type>::type
-      {
-      };
-
-  template<typename targetT, typename ...typesT>
-    struct has_type_recursive
-      : false_type
-      {
-      };
-  template<typename targetT, typename firstT, typename ...remainingT>
-    struct has_type_recursive<targetT, firstT, remainingT...>
-      : has_type_recursive<targetT, remainingT...>
-      {
-      };
-  template<typename targetT, typename ...remainingT>
-    struct has_type_recursive<targetT, targetT, remainingT...>
-      : true_type
-      {
-      };
-  template<typename targetT, typename ...altsT, typename ...remainingT>
-    struct has_type_recursive<targetT, variant<altsT...>, remainingT...>
-      : conditional<has_type_recursive<targetT, altsT...>::value, true_type, has_type_recursive<targetT, remainingT...>>::type
-      {
-      };
-  template<typename ...altsT, typename ...remainingT>
-    struct has_type_recursive<variant<altsT...>, variant<altsT...>, remainingT...>
-      : true_type
-      {
-      };
-
-  template<unsigned indexT, typename targetT, typename ...typesT>
-    struct recursive_type_finder
-      {
-      };
-  template<unsigned indexT, typename targetT, typename firstT, typename ...remainingT>
-    struct recursive_type_finder<indexT, targetT, firstT, remainingT...>
-      : conditional<has_type_recursive<targetT, firstT>::value, integral_constant<unsigned, indexT>, recursive_type_finder<indexT + 1, targetT, remainingT...>>::type
-      {
-      };
-
-  template<size_t firstT, size_t ...remainingT>
-    struct max_of
-      : max_of<firstT, max_of<remainingT...>::value>
-      {
-      };
-  template<size_t firstT>
-    struct max_of<firstT>
-      : integral_constant<size_t, firstT>
-      {
-      };
-  template<size_t firstT, size_t secondT>
-    struct max_of<firstT, secondT>
-      : integral_constant<size_t, !(firstT < secondT) ? firstT : secondT>
-      {
-      };
-
-  template<typename ...altsT>
-    struct basic_storage
-      {
-        // The `+ 0` parts are necessary to work around a bug in GCC 4.8.
-        alignas(max_of<alignof(altsT)...>::value + 0) char bytes[max_of<sizeof(altsT)...>::value + 0];
-      };
-
-    namespace details_is_nothrow_swappable {
-
-    using ::std::swap;
-
-    template<typename typeT>
-      struct is_nothrow_swappable
-        : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
-        {
-        };
-
-    }
-
-  template<typename typeT>
-    struct is_nothrow_swappable
-      : details_is_nothrow_swappable::is_nothrow_swappable<typeT>
-      {
-      };
-
-  template<typename ...altsT>
-    struct visit_helper
-      {
-        template<typename voidT, typename visitorT, typename ...paramsT>
-          void operator()(voidT * /*stor*/, unsigned /*index*/, visitorT &&/*visitor*/, paramsT &&.../*params*/) const
-            {
-              ROCKET_ASSERT_MSG(false, "The type index provided was out of range.");
-            }
-      };
-  template<typename firstT, typename ...remainingT>
-    struct visit_helper<firstT, remainingT...>
-      {
-        template<typename voidT, typename visitorT, typename ...paramsT>
-          void operator()(voidT *stor, unsigned index, visitorT &&visitor, paramsT &&...params) const
-            {
-              if(index == 0) {
-                ::std::forward<visitorT>(visitor)(reinterpret_cast<firstT *>(stor), ::std::forward<paramsT>(params)...);
-              } else {
-                visit_helper<remainingT...>()(stor, index - 1, ::std::forward<visitorT>(visitor), ::std::forward<paramsT>(params)...);
+            type() noexcept
+              {
               }
-            }
+            ~type()
+              {
+              }
+          };
       };
 
-  struct visitor_copy_construct
-    {
-      template<typename altT>
-        void operator()(altT *ptr, const void *src) const
-          {
-            noadl::construct_at(ptr, *(static_cast<const altT *>(src)));
-          }
-    };
-  struct visitor_move_construct
-    {
-      template<typename altT>
-        void operator()(altT *ptr, void *src) const
-          {
-            noadl::construct_at(ptr, ::std::move(*(static_cast<altT *>(src))));
-          }
-    };
-  struct visitor_copy_assign
-    {
-      template<typename altT>
-        void operator()(altT *ptr, const void *src) const
-          {
-            *ptr = *(static_cast<const altT *>(src));
-          }
-    };
-  struct visitor_move_assign
-    {
-      template<typename altT>
-        void operator()(altT *ptr, void *src) const
-          {
-            *ptr = ::std::move(*(static_cast<altT *>(src)));
-          }
-    };
-  struct visitor_destroy
-    {
-      template<typename altT>
-        void operator()(altT *ptr) const
-          {
-            noadl::destroy_at(ptr);
-          }
-    };
-  struct visitor_get_type_info
-    {
-      template<typename altT>
-        void operator()(const altT *ptr, const type_info **ti) const
-          {
-            *ti = &(typeid(*ptr));
-          }
-    };
-  struct visitor_wrapper
-    {
-      template<typename altT, typename nextT>
-        void operator()(altT *ptr, nextT &&next) const
-          {
-            ::std::forward<nextT>(next)(*ptr);
-          }
-    };
-  struct visitor_swap
-    {
-      template<typename altT, typename sourceT>
-        void operator()(altT *ptr, sourceT *src) const
-          {
-            noadl::adl_swap(*ptr, *(static_cast<altT *>(src)));
-          }
-    };
+    template<size_t indexT, typename targetT, typename ...alternativesT>
+      struct type_finder  // no value
+      {
+      };
+    template<size_t indexT, typename targetT, typename firstT, typename ...restT>
+      struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
+      {
+      };
+    template<size_t indexT, typename firstT, typename ...restT>
+      struct type_finder<indexT, firstT, firstT, restT...> : integral_constant<size_t, indexT>
+      {
+      };
 
-  // This function silences the warning about `throw` statements inside a possible `noexcept` function.
-  [[noreturn]] inline void rethrow_current_exception()
-    {
-      throw;
+    template<size_t indexT, typename ...alternativesT>
+      struct type_getter  // no type
+      {
+      };
+    template<size_t indexT, typename firstT, typename ...restT>
+      struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
+      {
+      };
+    template<typename firstT, typename ...restT>
+      struct type_getter<0, firstT, restT...> : enable_if<true, firstT>
+      {
+      };
+
+    template<typename alternativeT>
+      void wrapped_copy_construct(void *tptr, const void *rptr)
+      {
+        noadl::construct_at(static_cast<alternativeT *>(tptr), *(static_cast<const alternativeT *>(rptr)));
+      }
+    template<typename alternativeT>
+      void wrapped_move_construct(void *tptr, void *rptr)
+      {
+        noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*(static_cast<alternativeT *>(rptr))));
+      }
+    template<typename alternativeT>
+      void wrapped_copy_assign(void *tptr, const void *rptr)
+      {
+        *(static_cast<alternativeT *>(tptr)) = *(static_cast<const alternativeT *>(rptr));
+      }
+    template<typename alternativeT>
+      void wrapped_move_assign(void *tptr, void *rptr)
+      {
+        *(static_cast<alternativeT *>(tptr)) = ::std::move(*(static_cast<alternativeT *>(rptr)));
+      }
+    template<typename alternativeT>
+      void wrapped_swap(void *tptr, void *rptr)
+      {
+        noadl::adl_swap(*(static_cast<alternativeT *>(tptr)), *(static_cast<alternativeT *>(rptr)));
+      }
+    template<typename alternativeT>
+      void wrapped_destroy(void *tptr) noexcept
+      {
+        noadl::destroy_at(static_cast<alternativeT *>(tptr));
+      }
+
+    [[noreturn]] inline void rethrow_current_exception()
+      {
+        throw;
+      }
+
     }
 
+template<typename ...alternativesT>
+  class variant
+  {
+    static_assert(sizeof...(alternativesT) > 0, "At least one alternative type must be provided.");
+    static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value, "No move constructors of alternative types are allowed to throw exceptions.");
+
+  public:
+    template<typename targetT>
+      struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
+      {
+      };
+
+    template<size_t indexT>
+      struct type_at : details_variant::type_getter<indexT, alternativesT...>
+      {
+      };
+
+  private:
+    // shared tables
+    static const type_info *const (s_table_type_info[]);
+    static void (*const (s_table_copy_construct[]))(void *, const void *);
+    static void (*const (s_table_move_construct[]))(void *, void *);
+    static void (*const (s_table_copy_assign[]))(void *, const void *);
+    static void (*const (s_table_move_assign[]))(void *, void *);
+    static void (*const (s_table_swap[]))(void *, void *);
+    static void (*const (s_table_destroy[]))(void *);
+
+  private:
+    struct storage
+      {
+        typename details_variant::aligned_union<1, alternativesT...>::type bytes;
+
+        operator const void * () const noexcept
+          {
+            return this;
+          }
+        operator void * () noexcept
+          {
+            return this;
+          }
+        template<typename otherT>
+          operator const otherT * () const noexcept
+          {
+            return static_cast<const otherT *>(static_cast<const void *>(*this));
+          }
+        template<typename otherT>
+          operator otherT * () noexcept
+          {
+            return static_cast<otherT *>(static_cast<void *>(*this));
+          }
+      };
+
+    unsigned short m_index;
+    storage m_stor;
+
+  public:
+    // 23.7.3.1, constructors
+    variant() noexcept(is_nothrow_constructible<typename type_at<0>::type>::value)
+      {
+        constexpr auto index_new = size_t(0);
+        // Value-initialize the first alternative in place.
+        noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor));
+        this->m_index = index_new;
+      }
+    template<typename paramT, typename enable_if<(index_of<typename decay<paramT>::type>::value || true)>::type * = nullptr>
+      variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
+      {
+        constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
+        // Copy/move-initialize the alternative in place.
+        noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramT>(param));
+        this->m_index = index_new;
+      }
+    variant(const variant &other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
+      {
+        const auto index_new = other.m_index;
+        // Copy-construct the active alternative in place.
+        (*(s_table_copy_construct[index_new]))(this->m_stor, other.m_stor);
+        this->m_index = index_new;
+      }
+    variant(variant &&other) noexcept
+      {
+        const auto index_new = other.m_index;
+        // Move-construct the active alternative in place.
+        (*(s_table_move_construct[index_new]))(this->m_stor, other.m_stor);
+        this->m_index = index_new;
+      }
+    // 23.7.3.3, assignment
+    template<typename paramT, typename enable_if<(index_of<paramT>::value || true)>::type * = nullptr>
+      variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...>::value)
+      {
+        const auto index_old = this->m_index;
+        constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
+        if(index_old == index_new) {
+          // Copy-assign the alternative in place.
+          *(static_cast<typename type_at<index_new>::type *>(this->m_stor)) = param;
+          return *this;
+        }
+        // Make a backup.
+        storage backup;
+        (*(s_table_move_construct[index_old]))(backup, this->m_stor);
+        // Destroy the old alternative.
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        try {
+          // Copy-construct the alternative in place.
+          noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), param);
+          this->m_index = index_new;
+          (*(s_table_destroy[index_old]))(backup);
+        } catch(...) {
+          // Move the backup back in case of exceptions.
+          (*(s_table_move_construct[index_old]))(this->m_stor, backup);
+          (*(s_table_destroy[index_old]))(backup);
+          details_variant::rethrow_current_exception();
+        }
+        return *this;
+      }
+    // N.B. This assignment operator only accepts rvalues hence no backup is needed.
+    template<typename paramT, typename enable_if<(index_of<paramT>::value || true)>::type * = nullptr>
+      variant & operator=(paramT &&param) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
+      {
+        const auto index_old = this->m_index;
+        constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
+        if(index_old == index_new) {
+          // Move-assign the alternative in place.
+          *(static_cast<typename type_at<index_new>::type *>(this->m_stor)) = ::std::move(param);
+          return *this;
+        }
+        // Destroy the old alternative.
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        // Move-construct the alternative in place.
+        noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::move(param));
+        this->m_index = index_new;
+        return *this;
+      }
+    variant & operator=(const variant &other) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...>::value)
+      {
+        const auto index_old = this->m_index;
+        const auto index_new = other.m_index;
+        if(index_old == index_new) {
+          // Copy-assign the alternative in place.
+          (*(s_table_copy_assign[index_new]))(this->m_stor, other.m_stor);
+          return *this;
+        }
+        // Make a backup.
+        storage backup;
+        (*(s_table_move_construct[index_old]))(backup, this->m_stor);
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        try {
+          // Copy-construct the alternative in place.
+          (*(s_table_copy_construct[index_new]))(this->m_stor, other.m_stor);
+          this->m_index = index_new;
+          (*(s_table_destroy[index_old]))(backup);
+        } catch(...) {
+          // Move the backup back in case of exceptions.
+          (*(s_table_move_construct[index_old]))(this->m_stor, backup);
+          (*(s_table_destroy[index_old]))(backup);
+          details_variant::rethrow_current_exception();
+        }
+        return *this;
+      }
+    variant & operator=(variant &&other) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
+      {
+        const auto index_old = this->m_index;
+        const auto index_new = other.m_index;
+        if(index_old == index_new) {
+          // Move-assign the alternative in place.
+          (*(s_table_move_assign[index_new]))(this->m_stor, other.m_stor);
+          return *this;
+        }
+        // Move-construct the alternative in place.
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        (*(s_table_move_construct[index_new]))(this->m_stor, other.m_stor);
+        this->m_index = index_new;
+        return *this;
+      }
+    // 23.7.3.2, destructor
+    ~variant()
+      {
+        const auto index_old = this->m_index;
+        // Destroy the active alternative in place.
+        (*(s_table_destroy[index_old]))(this->m_stor);
+#ifdef ROCKET_DEBUG
+        ::std::memset(&(this->m_stor), '#', sizeof(this->m_stor));
+        this->m_index = 0xA596;
+#endif
+      }
+
+  public:
+    // 23.7.3.5, value status
+    size_t index() const noexcept
+      {
+        return this->m_index;
+      }
+    const type_info & type() const noexcept
+      {
+        return *(s_table_type_info[this->m_index]);
+      }
+
+    template<size_t indexT>
+      const typename type_at<indexT>::type * get() const noexcept
+      {
+        if(this->m_index != indexT) {
+          return nullptr;
+        }
+        return static_cast<const typename type_at<indexT>::type *>(this->m_stor);
+      }
+    template<typename targetT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
+      const targetT * get() const noexcept
+      {
+        return this->get<index_of<targetT>::value>();
+      }
+    template<size_t indexT>
+      typename type_at<indexT>::type * get() noexcept
+      {
+        if(this->m_index != indexT) {
+          return nullptr;
+        }
+        return static_cast<typename type_at<indexT>::type *>(this->m_stor);
+      }
+    template<typename targetT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
+      targetT * get() noexcept
+      {
+        return this->get<index_of<targetT>::value>();
+      }
+
+    template<size_t indexT>
+      const typename type_at<indexT>::type & as() const
+      {
+        const auto ptr = this->get<indexT>();
+        if(!ptr) {
+          noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+                                        static_cast<int>(indexT), typeid(typename type_at<indexT>::type).name(), static_cast<int>(this->index()), this->type().name());
+        }
+        return *ptr;
+      }
+    template<typename targetT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
+      const targetT & as() const
+      {
+        return this->as<index_of<targetT>::value>();
+      }
+    template<size_t indexT>
+      typename type_at<indexT>::type & as()
+      {
+        const auto ptr = this->get<indexT>();
+        if(!ptr) {
+          noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
+                                        static_cast<int>(indexT), typeid(typename type_at<indexT>::type).name(), static_cast<int>(this->index()), this->type().name());
+        }
+        return *ptr;
+      }
+    template<typename targetT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
+      targetT & as()
+      {
+        return this->as<index_of<targetT>::value>();
+      }
+
+    // 23.7.3.4, modifiers
+    template<size_t indexT, typename ...paramsT>
+      typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value)
+      {
+        const auto index_old = this->m_index;
+        constexpr auto index_new = indexT;
+        // Make a backup.
+        storage backup;
+        (*(s_table_move_construct[index_old]))(backup, this->m_stor);
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        try {
+          // Construct the alternative in place.
+          noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramsT>(params)...);
+          this->m_index = index_new;
+          (*(s_table_destroy[index_old]))(backup);
+        } catch(...) {
+          // Move the backup back in case of exceptions.
+          (*(s_table_move_construct[index_old]))(this->m_stor, backup);
+          (*(s_table_destroy[index_old]))(backup);
+          details_variant::rethrow_current_exception();
+        }
+        return *(static_cast<typename type_at<index_new>::type *>(this->m_stor));
+      }
+    template<typename targetT, typename ...paramsT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
+      targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
+      {
+        return this->emplace<index_of<typename decay<targetT>::type>::value>(::std::forward<paramsT>(params)...);
+      }
+
+    // 23.7.3.6, swap
+    void swap(variant &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
+      {
+        const auto index_old = this->m_index;
+        const auto index_new = other.m_index;
+        if(index_old == index_new) {
+          // Swap both alternatives in place.
+          (*(s_table_swap[index_new]))(this->m_stor, other.m_stor);
+          return;
+        }
+        // Make a backup.
+        storage backup;
+        (*(s_table_move_construct[index_old]))(backup, this->m_stor);
+        (*(s_table_destroy[index_old]))(this->m_stor);
+        // Move-construct the other alternative in place.
+        (*(s_table_move_construct[index_new]))(this->m_stor, other.m_stor);
+        (*(s_table_destroy[index_new]))(other.m_stor);
+        this->m_index = index_new;
+        // Move the backup into `other`.
+        (*(s_table_move_construct[index_old]))(other.m_stor, backup);
+        (*(s_table_destroy[index_old]))(backup);
+        other.m_index = index_old;
+      }
+  };
+
+template<typename ...alternativesT>
+  void swap(variant<alternativesT...> &lhs, variant<alternativesT...> &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
+  {
+    lhs.swap(other);
   }
 
-template<typename ...altsT>
-  class variant
-    {
-    public:
-      template<unsigned indexT>
-        struct at
-          : details_variant::type_getter<indexT, altsT...>
-          {
-          };
-      template<typename altT>
-        struct index_of
-          : details_variant::type_finder<0, altT, altsT...>
-          {
-          };
+// shared tables
+template<typename ...alternativesT>
+  const type_info *const (variant<alternativesT...>::s_table_type_info[]) =
+  { &typeid(alternativesT)... };
 
-      template<typename ...addT>
-        struct prepend
-          : common_type<variant<addT..., altsT...>>
-          {
-          };
-      template<typename ...addT>
-        struct append
-          : common_type<variant<altsT..., addT...>>
-          {
-          };
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_copy_construct[]))(void *, const void *) =
+  { &details_variant::wrapped_copy_construct<alternativesT>... };
 
-    private:
-      unsigned m_turnout : 1;
-      unsigned m_index : 15;
-      details_variant::basic_storage<altsT...> m_buffers[2];
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_move_construct[]))(void *, void *) =
+  { &details_variant::wrapped_move_construct<alternativesT>... };
 
-    private:
-      const void * do_get_front_buffer() const noexcept
-        {
-          const auto turnout = this->m_turnout;
-          return this->m_buffers + turnout;
-        }
-      void * do_get_front_buffer() noexcept
-        {
-          const auto turnout = this->m_turnout;
-          return this->m_buffers + turnout;
-        }
-      const void * do_get_back_buffer() const noexcept
-        {
-          const auto turnout = this->m_turnout;
-          return this->m_buffers + (turnout ^ 1);
-        }
-      void * do_get_back_buffer() noexcept
-        {
-          const auto turnout = this->m_turnout;
-          return this->m_buffers + (turnout ^ 1);
-        }
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_copy_assign[]))(void *, const void *) =
+  { &details_variant::wrapped_copy_assign<alternativesT>... };
 
-      void do_set_up_new_buffer(unsigned index_new) noexcept
-        {
-          const auto turnout_old = this->m_turnout;
-          this->m_turnout = (turnout_old ^ 1) & 0x0001;
-          const auto index_old = this->m_index;
-          this->m_index = index_new & 0x7FFF;
-          // Destroy the old buffer and poison its contents.
-          details_variant::visit_helper<altsT...>()(this->m_buffers + turnout_old, index_old,
-                                                    details_variant::visitor_destroy());
-#ifdef ROCKET_DEBUG
-          ::std::memset(this->m_buffers + turnout_old, '@', sizeof(this->m_buffers[0]));
-#endif
-        }
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_move_assign[]))(void *, void *) =
+  { &details_variant::wrapped_move_assign<alternativesT>... };
 
-    public:
-      variant() noexcept(is_nothrow_constructible<typename details_variant::type_getter<0, altsT...>::type>::value)
-        : m_turnout(0)
-        {
-          // Value-initialize the first alternative.
-          constexpr auto eindex = unsigned(0);
-          using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-          // Default-construct the first alternative in-place.
-          const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-          noadl::construct_at(ptr);
-          this->m_index = 0;
-        }
-      template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
-        variant(altT &&alt)
-          : m_turnout(0)
-          {
-            // This overload enables construction using an alternative of nested variants.
-            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            // Construct the alternative in-place.
-            const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(alt));
-            this->m_index = eindex;
-          }
-      variant(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_constructible<altsT>...>::value)
-        : m_turnout(0)
-        {
-          // Copy-construct the active alternative from `other`.
-          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                    details_variant::visitor_copy_construct(), other.do_get_front_buffer());
-          this->m_index = other.m_index;
-        }
-      variant(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_constructible<altsT>...>::value)
-        : m_turnout(0)
-        {
-          // Move-construct the active alternative from `other`.
-          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
-          this->m_index = other.m_index;
-        }
-      template<typename altT, typename enable_if<details_variant::has_type_recursive<typename decay<altT>::type, altsT...>::value>::type * = nullptr>
-        variant & operator=(altT &&alt)
-          {
-            // This overload, unlike `set()`, enables assignment using an alternative of nested variants.
-            constexpr auto eindex = details_variant::recursive_type_finder<0, typename decay<altT>::type, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            if(this->m_index == eindex) {
-              // Assign the active alternative using perfect forwarding.
-              const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<altT>(alt);
-              return *this;
-            }
-            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
-            const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(alt));
-            this->do_set_up_new_buffer(eindex);
-            return *this;
-          }
-      variant & operator=(const variant &other) noexcept(details_variant::conjunction<is_nothrow_copy_assignable<altsT>..., is_nothrow_copy_constructible<altsT>...>::value)
-        {
-          if(this->m_index == other.m_index) {
-            // Copy-assign the active alternative from `other`
-            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                      details_variant::visitor_copy_assign(), other.do_get_front_buffer());
-            return *this;
-          }
-          // Copy-construct the active alternative from `other`, then destroy the old alternative.
-          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                    details_variant::visitor_copy_construct(), other.do_get_front_buffer());
-          this->do_set_up_new_buffer(other.m_index);
-          return *this;
-        }
-      variant & operator=(variant &&other) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
-        {
-          if(this->m_index == other.m_index) {
-            // Move-assign the active alternative from `other`
-            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                      details_variant::visitor_move_assign(), other.do_get_front_buffer());
-            return *this;
-          }
-          // Move-construct the active alternative from `other`, then destroy the old alternative.
-          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
-          this->do_set_up_new_buffer(other.m_index);
-          return *this;
-        }
-      ~variant()
-        {
-          // Destroy the active alternative and poison all contents.
-          details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                    details_variant::visitor_destroy());
-#ifdef ROCKET_DEBUG
-          this->m_index = 0x6EAD;
-          ::std::memset(m_buffers, '#', sizeof(m_buffers));
-#endif
-        }
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_swap[]))(void *, void *) =
+  { &details_variant::wrapped_swap<alternativesT>... };
 
-    public:
-      unsigned index() const noexcept
-        {
-          ROCKET_ASSERT(this->m_index < sizeof...(altsT));
-          return this->m_index;
-        }
-      const type_info & type() const noexcept
-        {
-          auto ti = static_cast<const type_info *>(nullptr);
-          details_variant::visit_helper<const altsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                          details_variant::visitor_get_type_info(), &ti);
-          ROCKET_ASSERT(ti);
-          return *ti;
-        }
-      template<typename altT>
-        const altT * get() const noexcept
-          {
-            constexpr auto eindex = details_variant::type_finder<0, altT, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            if(this->m_index != eindex) {
-              return nullptr;
-            }
-            return static_cast<const etype *>(this->do_get_front_buffer());
-          }
-      template<typename altT>
-        altT * get() noexcept
-          {
-            constexpr auto eindex = details_variant::type_finder<0, altT, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            if(this->m_index != eindex) {
-              return nullptr;
-            }
-            return static_cast<etype *>(this->do_get_front_buffer());
-          }
-      template<typename altT>
-        const altT & as() const
-          {
-            const auto ptr = this->get<altT>();
-            if(!ptr) {
-              noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                            static_cast<int>(index_of<altT>::value), typeid(altT).name(), static_cast<int>(this->index()), this->type().name());
-            }
-            return *ptr;
-          }
-      template<typename altT>
-        altT & as()
-          {
-            const auto ptr = this->get<altT>();
-            if(!ptr) {
-              noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                            static_cast<int>(index_of<altT>::value), typeid(altT).name(), static_cast<int>(this->index()), this->type().name());
-            }
-            return *ptr;
-          }
-      template<typename altT, typename ...paramsT>
-        altT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<altT, paramsT &&...>::value)
-          {
-            // This overload, unlike `operator=()`, does not accept an alternative of nested variants.
-            constexpr auto eindex = details_variant::type_finder<0, typename remove_cv<altT>::type, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
-            const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<paramsT>(params)...);
-            this->do_set_up_new_buffer(eindex);
-            return *ptr;
-          }
-      template<typename altT>
-        altT & set(altT &&alt) noexcept(details_variant::conjunction<is_nothrow_move_assignable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
-          {
-            // This overload, unlike `operator=()`, does not accept an alternative of nested variants.
-            constexpr auto eindex = details_variant::type_finder<0, typename decay<altT>::type, altsT...>::value;
-            using etype = typename details_variant::type_getter<eindex, altsT...>::type;
-            if(this->m_index == eindex) {
-              // Assign the active alternative using perfect forwarding.
-              const auto ptr = static_cast<etype *>(this->do_get_front_buffer());
-              *ptr = ::std::forward<altT>(alt);
-              return *ptr;
-            }
-            // Construct the active alternative using perfect forwarding, then destroy the old alternative.
-            const auto ptr = static_cast<etype *>(this->do_get_back_buffer());
-            noadl::construct_at(ptr, ::std::forward<altT>(alt));
-            this->do_set_up_new_buffer(eindex);
-            return *ptr;
-          }
-
-      template<typename visitorT>
-        void visit(visitorT &&visitor) const
-          {
-            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                      details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
-          }
-      template<typename visitorT>
-        void visit(visitorT &&visitor)
-          {
-            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), this->m_index,
-                                                      details_variant::visitor_wrapper(), ::std::forward<visitorT>(visitor));
-          }
-
-      void swap(variant &other) noexcept(details_variant::conjunction<details_variant::is_nothrow_swappable<altsT>..., is_nothrow_move_constructible<altsT>...>::value)
-        {
-          if(this->m_index == other.m_index) {
-            // Swap the active alternatives.
-            details_variant::visit_helper<altsT...>()(this->do_get_front_buffer(), other.m_index,
-                                                      details_variant::visitor_swap(), other.do_get_front_buffer());
-            return;
-          }
-          // Move-construct the active alternative in `*this` from `other`.
-          details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                    details_variant::visitor_move_construct(), other.do_get_front_buffer());
-          try {
-            // Move-construct the active alternative in `other` from `*this`.
-            details_variant::visit_helper<altsT...>()(other.do_get_back_buffer(), this->m_index,
-                                                      details_variant::visitor_move_construct(), this->do_get_front_buffer());
-          } catch(...) {
-            // In case of an exception, the second object will not have been constructed.
-            // Destroy the first object that has just been constructed, then rethrow the exception.
-            details_variant::visit_helper<altsT...>()(this->do_get_back_buffer(), other.m_index,
-                                                      details_variant::visitor_destroy());
-            details_variant::rethrow_current_exception();
-          }
-          // Destroy both alternatives.
-          const auto this_index = this->m_index;
-          this->do_set_up_new_buffer(other.m_index);
-          other.do_set_up_new_buffer(this_index);
-        }
-    };
-
-template<typename ...altsT>
-  void swap(variant<altsT...> &lhs, variant<altsT...> &other) noexcept(noexcept(lhs.swap(other)))
-    {
-      lhs.swap(other);
-    }
+template<typename ...alternativesT>
+  void (*const (variant<alternativesT...>::s_table_destroy[]))(void *) =
+  { &details_variant::wrapped_destroy<alternativesT>... };
 
 }
 
