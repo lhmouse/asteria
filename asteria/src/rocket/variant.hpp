@@ -105,32 +105,37 @@ template<typename ...alternativesT>
     template<typename alternativeT>
       void wrapped_copy_construct(void *tptr, const void *rptr)
       {
-        noadl::construct_at(static_cast<alternativeT *>(tptr), *(static_cast<const alternativeT *>(rptr)));
+        noadl::construct_at(static_cast<alternativeT *>(tptr), *static_cast<const alternativeT *>(rptr));
       }
     template<typename alternativeT>
       void wrapped_move_construct(void *tptr, void *rptr)
       {
-        noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*(static_cast<alternativeT *>(rptr))));
+        noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*static_cast<alternativeT *>(rptr)));
       }
     template<typename alternativeT>
       void wrapped_copy_assign(void *tptr, const void *rptr)
       {
-        *(static_cast<alternativeT *>(tptr)) = *(static_cast<const alternativeT *>(rptr));
+        *static_cast<alternativeT *>(tptr) = *static_cast<const alternativeT *>(rptr);
       }
     template<typename alternativeT>
       void wrapped_move_assign(void *tptr, void *rptr)
       {
-        *(static_cast<alternativeT *>(tptr)) = ::std::move(*(static_cast<alternativeT *>(rptr)));
-      }
-    template<typename alternativeT>
-      void wrapped_swap(void *tptr, void *rptr)
-      {
-        noadl::adl_swap(*(static_cast<alternativeT *>(tptr)), *(static_cast<alternativeT *>(rptr)));
+        *static_cast<alternativeT *>(tptr) = ::std::move(*static_cast<alternativeT *>(rptr));
       }
     template<typename alternativeT>
       void wrapped_destroy(void *tptr) noexcept
       {
         noadl::destroy_at(static_cast<alternativeT *>(tptr));
+      }
+    template<typename alternativeT, typename voidT, typename visitorT>
+      void wrapped_visit(voidT *tptr, visitorT &visitor)
+      {
+        ::std::forward<visitorT>(visitor)(*static_cast<alternativeT *>(tptr));
+      }
+    template<typename alternativeT>
+      void wrapped_swap(void *tptr, void *rptr)
+      {
+        noadl::adl_swap(*static_cast<alternativeT *>(tptr), *static_cast<alternativeT *>(rptr));
       }
 
     }
@@ -229,7 +234,7 @@ template<typename ...alternativesT>
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
-          *(static_cast<typename type_at<index_new>::type *>(this->m_stor)) = param;
+          *static_cast<typename type_at<index_new>::type *>(this->m_stor) = param;
           return *this;
         }
         // Make a backup.
@@ -260,7 +265,7 @@ template<typename ...alternativesT>
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
-          *(static_cast<typename type_at<index_new>::type *>(this->m_stor)) = ::std::move(param);
+          *static_cast<typename type_at<index_new>::type *>(this->m_stor) = ::std::move(param);
           return *this;
         }
         // Destroy the old alternative.
@@ -336,6 +341,7 @@ template<typename ...alternativesT>
         return *(s_table_type_info[this->m_index]);
       }
 
+    // accessors
     template<size_t indexT>
       const typename type_at<indexT>::type * get() const noexcept
       {
@@ -394,6 +400,19 @@ template<typename ...alternativesT>
         return this->as<index_of<targetT>::value>();
       }
 
+    template<typename visitorT>
+      void visit(visitorT &&visitor) const
+      {
+        static void (*const s_jump_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, const void, visitorT>... };
+        return (*(s_jump_table[this->m_index]))(this->m_stor, visitor);
+      }
+    template<typename visitorT>
+      void visit(visitorT &&visitor)
+      {
+        static void (*const s_jump_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, void, visitorT>... };
+        return (*(s_jump_table[this->m_index]))(this->m_stor, visitor);
+      }
+
     // 23.7.3.4, modifiers
     template<size_t indexT, typename ...paramsT>
       typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value)
@@ -417,7 +436,7 @@ template<typename ...alternativesT>
           // Wrapping the `throw` expression in a lambda could silence this warning.
           []{ throw; }();
         }
-        return *(static_cast<typename type_at<index_new>::type *>(this->m_stor));
+        return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
       }
     template<typename targetT, typename ...paramsT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
       targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
