@@ -185,7 +185,7 @@ template<typename ...alternativesT>
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
-        static void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
+        static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
@@ -194,7 +194,7 @@ template<typename ...alternativesT>
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
-        static void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
+        static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
@@ -203,7 +203,7 @@ template<typename ...alternativesT>
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
           return;
         }
-        static void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
+        static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
@@ -212,7 +212,7 @@ template<typename ...alternativesT>
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
-        static void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
+        static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_destroy(size_t rindex, void *tptr)
@@ -221,7 +221,7 @@ template<typename ...alternativesT>
           // There is nothing to do.
           return;
         }
-        static void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
+        static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
         (*(s_table[rindex]))(tptr);
       }
 
@@ -372,7 +372,7 @@ template<typename ...alternativesT>
       }
     const type_info & type() const noexcept
       {
-        static const type_info *const s_table[] = { &typeid(alternativesT)... };
+        static constexpr const type_info *const s_table[] = { &typeid(alternativesT)... };
         return *(s_table[this->m_index]);
       }
 
@@ -438,13 +438,13 @@ template<typename ...alternativesT>
     template<typename visitorT>
       void visit(visitorT &&visitor) const
       {
-        static void (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, const void, visitorT>... };
+        static constexpr void (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, const void, visitorT>... };
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
     template<typename visitorT>
       void visit(visitorT &&visitor)
       {
-        static void (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, void, visitorT>... };
+        static constexpr void (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, void, visitorT>... };
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
 
@@ -486,7 +486,7 @@ template<typename ...alternativesT>
         const auto index_new = other.m_index;
         if(index_old == index_new) {
           // Swap both alternatives in place.
-          static void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
+          static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
           (*(s_table[index_old]))(this->m_stor, other.m_stor);
           return;
         }
