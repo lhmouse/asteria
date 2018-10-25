@@ -10,14 +10,14 @@ addons:
     packages:
       - checkinstall
 
-compiler:
-  - gcc
-  - clang
-
 matrix:
   include:
-    - env: "_options=\"--enable-debug-logs\""
-    - env: "_options=\"\""
+    env:
+      - "_options=\"--enable-debug-logs\""
+      - "_options=\"\""
+    compiler:
+      - gcc
+      - clang
 
 install:
   - "mkdir -p m4"
