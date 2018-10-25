@@ -20,7 +20,7 @@ matrix:
 install:
   - "mkdir -p m4"
   - "autoreconf -ifv"
-  - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_DEBUG -D_LIBCPP_DEBUG\" ${_options}"
+  - "./configure CPPFLAGS=\"-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC -D_DEBUG -D_LIBCPP_DEBUG\" --disable-silent-rules ${_options}"
   - "make -j$(nproc)"
 
 script:
