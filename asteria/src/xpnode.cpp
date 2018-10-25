@@ -655,7 +655,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
           case xop_postfix_dec: {
             // Decrement the operand and return the old value.
@@ -676,7 +676,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
           case xop_prefix_pos: {
             auto rhs = do_pop_reference(stack_io);
@@ -703,7 +703,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(rhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_notb: {
             auto rhs = do_pop_reference(stack_io);
@@ -721,7 +721,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(rhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_notl: {
             auto rhs = do_pop_reference(stack_io);
@@ -750,7 +750,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(rhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_dec: {
             auto rhs = do_pop_reference(stack_io);
@@ -769,7 +769,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(rhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_unset: {
             auto rhs = do_pop_reference(stack_io);
@@ -807,7 +807,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(rhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_infix_cmp_eq: {
             auto rhs = do_pop_reference(stack_io);
@@ -958,7 +958,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sub: {
             auto rhs = do_pop_reference(stack_io);
@@ -985,7 +985,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_mul: {
             auto rhs = do_pop_reference(stack_io);
@@ -1025,7 +1025,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_div: {
             auto rhs = do_pop_reference(stack_io);
@@ -1045,7 +1045,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_mod: {
             auto rhs = do_pop_reference(stack_io);
@@ -1065,7 +1065,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sll: {
             auto rhs = do_pop_reference(stack_io);
@@ -1081,7 +1081,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_srl: {
             auto rhs = do_pop_reference(stack_io);
@@ -1097,7 +1097,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sla: {
             auto rhs = do_pop_reference(stack_io);
@@ -1114,7 +1114,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sra: {
             auto rhs = do_pop_reference(stack_io);
@@ -1130,7 +1130,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_andb: {
             auto rhs = do_pop_reference(stack_io);
@@ -1151,7 +1151,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_orb: {
             auto rhs = do_pop_reference(stack_io);
@@ -1172,7 +1172,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_xorb: {
             auto rhs = do_pop_reference(stack_io);
@@ -1193,7 +1193,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               stack_io.push(std::move(lhs));
               break;
             }
-            ASTERIA_THROW_RUNTIME_ERROR("The ", get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_assign: {
             auto rhs = do_pop_reference(stack_io);

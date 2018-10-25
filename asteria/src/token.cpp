@@ -281,13 +281,13 @@ void Token::dump(std::ostream &os) const
       case index_keyword: {
         const auto &alt = this->check<S_keyword>();
         // keyword `if`
-        os <<"keyword `" <<get_keyword(alt.keyword) <<"`";
+        os <<"keyword `" <<Token::get_keyword(alt.keyword) <<"`";
         return;
       }
       case index_punctuator: {
         const auto &alt = this->check<S_punctuator>();
         // punctuator `;`
-        os <<"punctuator `" <<get_punctuator(alt.punct) <<"`";
+        os <<"punctuator `" <<Token::get_punctuator(alt.punct) <<"`";
         return;
       }
       case index_identifier: {
