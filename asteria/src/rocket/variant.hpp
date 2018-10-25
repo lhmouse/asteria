@@ -141,7 +141,7 @@ template<typename ...alternativesT>
 
     template<typename typeT>
       struct trivial_copy_construct :
-#if ROCKET_TRIVIAL_TYPE_TRAITS
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
         ::std::is_trivially_copy_constructible<typeT>
 #else
         ::std::has_trivial_copy_constructor<typeT>
@@ -150,7 +150,7 @@ template<typename ...alternativesT>
       };
     template<typename typeT>
       struct trivial_move_construct :
-#if ROCKET_TRIVIAL_TYPE_TRAITS
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
         ::std::is_trivially_move_constructible<typeT>
 #else
         ::std::has_trivial_copy_constructor<typeT>
@@ -159,7 +159,7 @@ template<typename ...alternativesT>
       };
     template<typename typeT>
       struct trivial_copy_assign :
-#if ROCKET_TRIVIAL_TYPE_TRAITS
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
         ::std::is_trivially_copy_assignable<typeT>
 #else
         ::std::has_trivial_copy_assign<typeT>
@@ -168,7 +168,7 @@ template<typename ...alternativesT>
       };
     template<typename typeT>
       struct trivial_move_assign :
-#if ROCKET_TRIVIAL_TYPE_TRAITS
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
         ::std::is_trivially_move_assignable<typeT>
 #else
         ::std::has_trivial_copy_assign<typeT>
