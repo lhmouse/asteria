@@ -124,13 +124,6 @@ template<typename ...alternativesT>
         noadl::destroy_at(static_cast<alternativeT *>(tptr));
       }
 
-    // In a `catch` block that is conditionally unreachable, use of `throw` is possibly subject to compiler warnings,
-    // which can be eliminated by calling this function instead.
-    [[noreturn]] inline void rethrow_current_exception()
-      {
-        throw;
-      }
-
     }
 
 template<typename ...alternativesT>
@@ -152,13 +145,13 @@ template<typename ...alternativesT>
 
   private:
     // shared tables
-    static const type_info *const (s_table_type_info[]);
-    static void (*const (s_table_copy_construct[]))(void *, const void *);
-    static void (*const (s_table_move_construct[]))(void *, void *);
-    static void (*const (s_table_copy_assign[]))(void *, const void *);
-    static void (*const (s_table_move_assign[]))(void *, void *);
-    static void (*const (s_table_swap[]))(void *, void *);
-    static void (*const (s_table_destroy[]))(void *);
+    static const type_info *const s_table_type_info[];
+    static void (*const s_table_copy_construct[])(void *, const void *);
+    static void (*const s_table_move_construct[])(void *, void *);
+    static void (*const s_table_copy_assign[])(void *, const void *);
+    static void (*const s_table_move_assign[])(void *, void *);
+    static void (*const s_table_swap[])(void *, void *);
+    static void (*const s_table_destroy[])(void *);
 
   private:
     struct storage
@@ -244,7 +237,9 @@ template<typename ...alternativesT>
           // Move the backup back in case of exceptions.
           (*(s_table_move_construct[index_old]))(this->m_stor, backup);
           (*(s_table_destroy[index_old]))(backup);
-          details_variant::rethrow_current_exception();
+          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
+          // Wrapping the `throw` expression in a lambda could silence this warning.
+          []{ throw; }();
         }
         return *this;
       }
@@ -288,7 +283,9 @@ template<typename ...alternativesT>
           // Move the backup back in case of exceptions.
           (*(s_table_move_construct[index_old]))(this->m_stor, backup);
           (*(s_table_destroy[index_old]))(backup);
-          details_variant::rethrow_current_exception();
+          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
+          // Wrapping the `throw` expression in a lambda could silence this warning.
+          []{ throw; }();
         }
         return *this;
       }
@@ -407,7 +404,9 @@ template<typename ...alternativesT>
           // Move the backup back in case of exceptions.
           (*(s_table_move_construct[index_old]))(this->m_stor, backup);
           (*(s_table_destroy[index_old]))(backup);
-          details_variant::rethrow_current_exception();
+          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
+          // Wrapping the `throw` expression in a lambda could silence this warning.
+          []{ throw; }();
         }
         return *(static_cast<typename type_at<index_new>::type *>(this->m_stor));
       }
@@ -450,31 +449,31 @@ template<typename ...alternativesT>
 
 // shared tables
 template<typename ...alternativesT>
-  const type_info *const (variant<alternativesT...>::s_table_type_info[]) =
+  const type_info *const variant<alternativesT...>::s_table_type_info[] =
   { &typeid(alternativesT)... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_copy_construct[]))(void *, const void *) =
+  void (*const variant<alternativesT...>::s_table_copy_construct[])(void *, const void *) =
   { &details_variant::wrapped_copy_construct<alternativesT>... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_move_construct[]))(void *, void *) =
+  void (*const variant<alternativesT...>::s_table_move_construct[])(void *, void *) =
   { &details_variant::wrapped_move_construct<alternativesT>... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_copy_assign[]))(void *, const void *) =
+  void (*const variant<alternativesT...>::s_table_copy_assign[])(void *, const void *) =
   { &details_variant::wrapped_copy_assign<alternativesT>... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_move_assign[]))(void *, void *) =
+  void (*const variant<alternativesT...>::s_table_move_assign[])(void *, void *) =
   { &details_variant::wrapped_move_assign<alternativesT>... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_swap[]))(void *, void *) =
+  void (*const variant<alternativesT...>::s_table_swap[])(void *, void *) =
   { &details_variant::wrapped_swap<alternativesT>... };
 
 template<typename ...alternativesT>
-  void (*const (variant<alternativesT...>::s_table_destroy[]))(void *) =
+  void (*const variant<alternativesT...>::s_table_destroy[])(void *) =
   { &details_variant::wrapped_destroy<alternativesT>... };
 
 }
