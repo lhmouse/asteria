@@ -128,7 +128,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         pointer_storage(const allocator_type &xalloc, size_type xnblk) noexcept
           : alloc(xalloc), nblk(xnblk)
           {
-            const auto nbkt = max_nbkt_for_nblk(this->nblk);
+            const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             // `allocator_type::pointer` need not be a trivial type.
             // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
             for(size_type i = 0; i < nbkt; ++i) {
@@ -139,7 +139,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
         ~pointer_storage()
           {
-            const auto nbkt = max_nbkt_for_nblk(this->nblk);
+            const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             for(size_type i = 0; i < nbkt; ++i) {
               const auto eptr = this->data[i].set(nullptr);
               if(!eptr) {
