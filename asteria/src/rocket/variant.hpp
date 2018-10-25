@@ -22,10 +22,6 @@ using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_move_constructible;
 using ::std::is_nothrow_copy_assignable;
 using ::std::is_nothrow_move_assignable;
-using ::std::is_trivially_copy_constructible;
-using ::std::is_trivially_move_constructible;
-using ::std::is_trivially_copy_assignable;
-using ::std::is_trivially_move_assignable;
 using ::std::is_trivially_destructible;
 using ::std::integral_constant;
 using ::std::enable_if;
@@ -143,6 +139,43 @@ template<typename ...alternativesT>
         noadl::adl_swap(*static_cast<alternativeT *>(tptr), *static_cast<alternativeT *>(rptr));
       }
 
+    template<typename typeT>
+      struct trivial_copy_construct :
+#if ROCKET_TRIVIAL_TYPE_TRAITS
+        ::std::is_trivially_copy_constructible<typeT>
+#else
+        ::std::has_trivial_copy_constructor<typeT>
+#endif
+      {
+      };
+    template<typename typeT>
+      struct trivial_move_construct :
+#if ROCKET_TRIVIAL_TYPE_TRAITS
+        ::std::is_trivially_move_constructible<typeT>
+#else
+        ::std::has_trivial_copy_constructor<typeT>
+#endif
+      {
+      };
+    template<typename typeT>
+      struct trivial_copy_assign :
+#if ROCKET_TRIVIAL_TYPE_TRAITS
+        ::std::is_trivially_copy_assignable<typeT>
+#else
+        ::std::has_trivial_copy_assign<typeT>
+#endif
+      {
+      };
+    template<typename typeT>
+      struct trivial_move_assign :
+#if ROCKET_TRIVIAL_TYPE_TRAITS
+        ::std::is_trivially_move_assignable<typeT>
+#else
+        ::std::has_trivial_copy_assign<typeT>
+#endif
+      {
+      };
+
     }
 
 template<typename ...alternativesT>
@@ -181,7 +214,7 @@ template<typename ...alternativesT>
 
     static inline void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
       {
-        if(conjunction<is_trivially_copy_constructible<alternativesT>...>::value) {
+        if(conjunction<details_variant::trivial_copy_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
@@ -190,7 +223,7 @@ template<typename ...alternativesT>
       }
     static inline void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
-        if(conjunction<is_trivially_move_constructible<alternativesT>...>::value) {
+        if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
@@ -199,7 +232,7 @@ template<typename ...alternativesT>
       }
     static inline void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
-        if(conjunction<is_trivially_copy_assignable<alternativesT>...>::value) {
+        if(conjunction<details_variant::trivial_copy_assign<alternativesT>...>::value) {
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
           return;
         }
@@ -208,7 +241,7 @@ template<typename ...alternativesT>
       }
     static inline void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
-        if(conjunction<is_trivially_move_assignable<alternativesT>...>::value) {
+        if(conjunction<details_variant::trivial_move_assign<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
