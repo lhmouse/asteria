@@ -32,11 +32,28 @@ template<typename ...alternativesT>
 
     namespace details_variant {
 
+    template<typename firstT, typename secondT>
+      union union_pair
+      {
+        using first_type   = firstT;
+        using second_type  = secondT;
+
+        firstT first;
+        secondT second;
+
+        union_pair() noexcept
+          {
+          }
+        ~union_pair()
+          {
+          }
+      };
+
     // Main template definition for no type parameters.
     template<size_t minlenT, typename ...typesT>
       struct aligned_union
       {
-        union type
+        struct type
           {
             char bytes[minlenT];
           };
@@ -45,7 +62,7 @@ template<typename ...alternativesT>
     template<>
       struct aligned_union<0>
       {
-        union type
+        struct type
           {
           };
       };
@@ -53,17 +70,9 @@ template<typename ...alternativesT>
     template<size_t minlenT, typename firstT, typename ...restT>
       struct aligned_union<minlenT, firstT, restT...>
       {
-        union type
+        struct type
           {
-            firstT first;
-            typename aligned_union<minlenT, restT...>::type rest;
-
-            type() noexcept
-              {
-              }
-            ~type()
-              {
-              }
+            union_pair<firstT, typename aligned_union<minlenT, restT...>::type> pair;
           };
       };
 
