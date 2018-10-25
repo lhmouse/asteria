@@ -441,12 +441,12 @@ template<typename ...alternativesT>
         (*(s_table_destroy[index_old]))(this->m_stor);
         // Move-construct the other alternative in place.
         (*(s_table_move_construct[index_new]))(this->m_stor, other.m_stor);
-        (*(s_table_destroy[index_new]))(other.m_stor);
         this->m_index = index_new;
+        (*(s_table_destroy[index_new]))(other.m_stor);
         // Move the backup into `other`.
         (*(s_table_move_construct[index_old]))(other.m_stor, backup);
-        (*(s_table_destroy[index_old]))(backup);
         other.m_index = index_old;
+        (*(s_table_destroy[index_old]))(backup);
       }
   };
 
