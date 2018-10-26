@@ -47,15 +47,6 @@ Value::~Value()
   {
   }
 
-Value::Value(const Value &) noexcept
-  = default;
-Value & Value::operator=(const Value &) noexcept
-  = default;
-Value::Value(Value &&) noexcept
-  = default;
-Value & Value::operator=(Value &&) noexcept
-  = default;
-
 bool Value::test() const noexcept
   {
     switch(this->type()) {

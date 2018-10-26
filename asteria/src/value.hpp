@@ -72,11 +72,6 @@ class Value
       }
     ~Value();
 
-    Value(const Value &) noexcept;
-    Value & operator=(const Value &) noexcept;
-    Value(Value &&) noexcept;
-    Value & operator=(Value &&) noexcept;
-
   public:
     Type type() const noexcept
       {

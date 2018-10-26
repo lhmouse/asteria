@@ -37,11 +37,6 @@ class Reference
       }
     ~Reference();
 
-    Reference(const Reference &) noexcept;
-    Reference & operator=(const Reference &) noexcept;
-    Reference(Reference &&) noexcept;
-    Reference & operator=(Reference &&) noexcept;
-
   public:
     bool is_constant() const noexcept
       {
