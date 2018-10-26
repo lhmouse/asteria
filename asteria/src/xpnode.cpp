@@ -578,15 +578,15 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         auto tgt = do_pop_reference(stack_io);
         const auto tgt_value = tgt.read();
         // Make sure it is really a function.
-        const auto qfunc = tgt_value.opt<D_function>();
-        if(!qfunc) {
+        if(tgt_value.type() != Value::type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
+        const auto &func = tgt_value.check<D_function>();
         // This is the `this` reference.
         auto self = std::move(tgt.zoom_out());
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", qfunc->get()->describe());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func->describe());
         try {
-          tgt = qfunc->get()->invoke(global, std::move(self), std::move(args));
+          tgt = func->invoke(global, std::move(self), std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());

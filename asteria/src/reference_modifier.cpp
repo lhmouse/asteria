@@ -53,7 +53,7 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           }
           case Value::type_opaque: {
             const auto &opq = parent.check<D_opaque>();
-            auto qmem = opq.get()->get_member_opt(alt.key);
+            auto qmem = opq->get_member_opt(alt.key);
             if(!qmem) {
               ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
@@ -141,14 +141,14 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
           }
           case Value::type_opaque: {
             auto &opq = parent.check<D_opaque>();
-            auto qmem = create_new ? &(opq.mut()->open_member(alt.key)) : opq.mut()->get_member_opt(alt.key);
+            auto qmem = create_new ? std::addressof(opq.mut().open_member(alt.key)) : opq.mut().get_member_opt(alt.key);
             if(!qmem) {
               ASTERIA_DEBUG_LOG("Opaque member was not found: key = ", alt.key);
               return nullptr;
             }
             if(erased_out_opt) {
               *erased_out_opt = std::move(*qmem);
-              opq.mut()->unset_member(alt.key);
+              opq.mut().unset_member(alt.key);
               return erased_out_opt;
             }
             return qmem;
