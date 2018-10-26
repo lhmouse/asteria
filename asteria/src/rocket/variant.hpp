@@ -526,7 +526,7 @@ template<typename ...alternativesT>
             ::std::memcpy(other.m_stor, temp, sizeof(storage));
           } else {
             static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
-            (*(s_table[rindex]))(this->m_stor, other.m_stor);
+            (*(s_table[index_old]))(this->m_stor, other.m_stor);
           }
           return;
         }
