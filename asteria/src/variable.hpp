@@ -27,12 +27,7 @@ class Variable : public rocket::refcounted_base<Variable>
       : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
       {
       }
-    ~Variable();
-
-    Variable(const Variable &)
-      = delete;
-    Variable & operator=(const Variable &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Variable);
 
   private:
     [[noreturn]] void do_throw_immutable() const;

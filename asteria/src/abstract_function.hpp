@@ -15,7 +15,7 @@ class Abstract_function : public rocket::refcounted_base<Abstract_function>
     Abstract_function() noexcept
       {
       }
-    virtual ~Abstract_function();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Abstract_function, virtual);
 
   public:
     virtual String describe() const = 0;

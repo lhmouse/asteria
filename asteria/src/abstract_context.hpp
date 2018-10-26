@@ -19,12 +19,7 @@ class Abstract_context
       : m_named_refs()
       {
       }
-    virtual ~Abstract_context();
-
-    Abstract_context(const Abstract_context &)
-      = delete;
-    Abstract_context & operator=(const Abstract_context &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Abstract_context, virtual);
 
   protected:
     void do_clear_named_references() noexcept;

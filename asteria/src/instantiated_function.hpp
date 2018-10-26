@@ -24,7 +24,7 @@ class Instantiated_function : public Abstract_function
       : m_head(head), m_zvarg(Variadic_arguer(head.get_location(), { })), m_body_bnd(std::move(body_bnd))
       {
       }
-    ~Instantiated_function();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Instantiated_function);
 
   public:
     String describe() const override;

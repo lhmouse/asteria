@@ -57,15 +57,10 @@ bool Collector::auto_collect()
           {
             this->m_ref += 1;
           }
-        ~Sentry()
+        ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Sentry)
           {
             this->m_ref -= 1;
           }
-
-        Sentry(const Sentry &)
-          = delete;
-        Sentry & operator=(const Sentry &)
-          = delete;
 
       public:
         explicit operator bool () const noexcept

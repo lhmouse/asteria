@@ -24,12 +24,7 @@ class Collector
       : m_tied_opt(tied_opt), m_threshold(threshold), m_counter(0), m_recur(0)
       {
       }
-    ~Collector();
-
-    Collector(const Collector &)
-      = delete;
-    Collector & operator=(const Collector &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Collector);
 
   public:
     Collector * get_tied_collector_opt() const noexcept

@@ -23,7 +23,7 @@ class Variadic_arguer : public Abstract_function
       : m_loc(loc), m_vargs(std::move(vargs))
       {
       }
-    ~Variadic_arguer();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Variadic_arguer);
 
   public:
     String describe() const override;

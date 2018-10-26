@@ -21,7 +21,7 @@ class Analytic_context : public Abstract_context
       : m_parent_opt(parent_opt)
       {
       }
-    ~Analytic_context();
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Analytic_context);
 
   public:
     bool is_analytic() const noexcept override;

@@ -149,7 +149,7 @@ class Xpnode
       : m_stor(std::forward<AltT>(alt))
       {
       }
-    ~Xpnode();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Xpnode);
 
   public:
     Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;

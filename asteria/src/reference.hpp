@@ -35,7 +35,7 @@ class Reference
         this->m_mods.clear();
         return *this;
       }
-    ~Reference();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Reference);
 
   public:
     bool is_constant() const noexcept

@@ -34,12 +34,7 @@ class Reference_stack
       : m_head(nullptr), m_scur(nullptr), m_size(0)
       {
       }
-    ~Reference_stack();
-
-    Reference_stack(const Reference_stack &)
-      = delete;
-    Reference_stack & operator=(const Reference_stack &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Reference_stack);
 
   private:
     Chunk * do_reserve_one_more();

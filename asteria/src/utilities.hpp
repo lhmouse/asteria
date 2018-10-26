@@ -6,6 +6,7 @@
 
 #include "rocket/compatibility.h"
 #include "rocket/insertable_ostream.hpp"
+#include "rocket/preprocessor_utilities.h"
 #include <iomanip>
 #include <exception>
 #include <cstdint>
@@ -26,12 +27,7 @@ class Formatter
       {
         this->m_stream.setf(std::ios::boolalpha);
       }
-    ~Formatter();
-
-    Formatter(const Formatter &)
-      = delete;
-    Formatter & operator=(const Formatter &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Formatter);
 
   private:
     template<typename ValueT>
@@ -95,7 +91,7 @@ class Runtime_error : public virtual std::exception
       : m_msg(std::move(msg))
       {
       }
-    ~Runtime_error();
+    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Runtime_error);
 
   public:
     const char * what() const noexcept override;

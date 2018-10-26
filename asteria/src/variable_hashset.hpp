@@ -22,12 +22,7 @@ class Variable_hashset
       : m_data(nullptr), m_nbkt(0), m_size(0)
       {
       }
-    ~Variable_hashset();
-
-    Variable_hashset(const Variable_hashset &)
-      = delete;
-    Variable_hashset & operator=(const Variable_hashset &)
-      = delete;
+    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
 
   private:
     void do_rehash(Size res_arg);
