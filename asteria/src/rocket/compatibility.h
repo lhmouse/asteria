@@ -4,6 +4,8 @@
 #ifndef ROCKET_COMPATIBILITY_H_
 #define ROCKET_COMPATIBILITY_H_
 
+#include <cstdbool> // standard library configuration macros
+
 #if defined(__clang__)
 #  define ROCKET_CLANG       1
 #elif defined(__GNUC__)
