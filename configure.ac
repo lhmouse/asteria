@@ -19,5 +19,13 @@ AM_COND_IF([enable_debug_logs], [
   AC_DEFINE([ASTERIA_ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
 ])
 
+AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [enable debug checks]))
+AM_CONDITIONAL([enable_debug], [test "${enable_debug}" == "yes"])
+AM_COND_IF([enable_debug], [
+  AC_DEFINE([_GLIBCXX_DEBUG], [1], [Define to 1 to enable debug checks of libstdc++.])
+  AC_DEFINE([_LIBCPP_DEBUG], [1], [Define to 1 to enable debug checks of libc++.])
+  AC_DEFINE([_DEBUG], [1], [Define to 1 to enable debug checks of MSVC standard library.])
+])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
