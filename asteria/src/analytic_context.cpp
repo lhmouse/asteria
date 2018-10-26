@@ -17,6 +17,7 @@ bool Analytic_context::is_analytic() const noexcept
   {
     return true;
   }
+
 const Abstract_context * Analytic_context::get_parent_opt() const noexcept
   {
     return this->m_parent_opt;

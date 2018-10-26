@@ -18,6 +18,7 @@ bool Executive_context::is_analytic() const noexcept
   {
     return false;
   }
+
 const Executive_context * Executive_context::get_parent_opt() const noexcept
   {
     return this->m_parent_opt;

@@ -31,6 +31,7 @@ bool Global_context::is_analytic() const noexcept
   {
     return false;
   }
+
 const Abstract_context * Global_context::get_parent_opt() const noexcept
   {
     return nullptr;
