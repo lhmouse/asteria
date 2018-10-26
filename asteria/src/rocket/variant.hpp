@@ -216,46 +216,46 @@ template<typename ...alternativesT>
       {
         if(conjunction<details_variant::trivial_copy_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
-          return;
+        } else {
+          static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
+          (*(s_table[rindex]))(tptr, rptr);
         }
-        static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
         if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
-          return;
+        } else {
+          static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
+          (*(s_table[rindex]))(tptr, rptr);
         }
-        static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
         if(conjunction<details_variant::trivial_copy_assign<alternativesT>...>::value) {
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
-          return;
+        } else {
+          static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
+          (*(s_table[rindex]))(tptr, rptr);
         }
-        static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
         if(conjunction<details_variant::trivial_move_assign<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
-          return;
+        } else {
+          static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
+          (*(s_table[rindex]))(tptr, rptr);
         }
-        static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
       }
     static inline void do_dispatch_destroy(size_t rindex, void *tptr)
       {
         if(conjunction<is_trivially_destructible<alternativesT>...>::value) {
           // There is nothing to do.
-          return;
+        } else {
+          static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
+          (*(s_table[rindex]))(tptr);
         }
-        static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
-        (*(s_table[rindex]))(tptr);
       }
 
   private:
@@ -517,24 +517,30 @@ template<typename ...alternativesT>
       {
         const auto index_old = this->m_index;
         const auto index_new = other.m_index;
+        storage temp;
         if(index_old == index_new) {
           // Swap both alternatives in place.
-          static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
-          (*(s_table[index_old]))(this->m_stor, other.m_stor);
+          if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
+            ::std::memcpy(temp, this->m_stor, sizeof(storage));
+            ::std::memcpy(this->m_stor, other.m_stor, sizeof(storage));
+            ::std::memcpy(other.m_stor, temp, sizeof(storage));
+          } else {
+            static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
+            (*(s_table[rindex]))(this->m_stor, other.m_stor);
+          }
           return;
         }
-        // Make a backup.
-        storage backup;
-        variant::do_dispatch_move_construct(index_old, backup, this->m_stor);
+        // Swap active alternatives using an indeterminate buffer.
+        variant::do_dispatch_move_construct(index_old, temp, this->m_stor);
         variant::do_dispatch_destroy(index_old, this->m_stor);
         // Move-construct the other alternative in place.
         variant::do_dispatch_move_construct(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
         variant::do_dispatch_destroy(index_new, other.m_stor);
-        // Move the backup into `other`.
-        variant::do_dispatch_move_construct(index_old, other.m_stor, backup);
+        // Move the temp into `other`.
+        variant::do_dispatch_move_construct(index_old, other.m_stor, temp);
         other.m_index = index_old;
-        variant::do_dispatch_destroy(index_old, backup);
+        variant::do_dispatch_destroy(index_old, temp);
       }
   };
 
