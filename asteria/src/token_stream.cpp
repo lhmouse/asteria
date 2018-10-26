@@ -36,9 +36,9 @@ Token_stream::~Token_stream()
               throw Parser_error(0, 0, 0, Parser_error::code_istream_open_failure);
             }
           }
-
-        Source_reader(const Source_reader &) = delete;
-        Source_reader & operator=(const Source_reader &) = delete;
+        ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Source_reader)
+          {
+          }
 
       public:
         std::istream & stream() const noexcept
