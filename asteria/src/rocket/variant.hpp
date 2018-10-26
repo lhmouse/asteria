@@ -406,6 +406,7 @@ template<typename ...alternativesT>
     const type_info & type() const noexcept
       {
         static constexpr const type_info *const s_table[] = { &typeid(alternativesT)... };
+        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
         return *(s_table[this->m_index]);
       }
 
@@ -472,12 +473,14 @@ template<typename ...alternativesT>
       void visit(visitorT &&visitor) const
       {
         static constexpr void (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, const void, visitorT>... };
+        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
     template<typename visitorT>
       void visit(visitorT &&visitor)
       {
         static constexpr void (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, void, visitorT>... };
+        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
 
