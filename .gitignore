@@ -50,3 +50,4 @@ tmp
 *.*~
 *.orig
 *.rej
+*.out
