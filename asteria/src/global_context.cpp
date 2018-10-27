@@ -10,7 +10,7 @@
 namespace Asteria {
 
 Global_context::Global_context()
-  : m_coll(rocket::make_refcounted<Global_collector>())
+  : m_gcoll(rocket::make_refcounted<Global_collector>())
   {
     ASTERIA_DEBUG_LOG("`Global_context` constructor: ", static_cast<void *>(this));
   }
@@ -20,8 +20,8 @@ Global_context::~Global_context()
     ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
     // Perform the final garbage collection.
     try {
-      this->do_clear_named_references();
-      this->m_coll->perform_garbage_collection(100);
+      this->m_dict.clear();
+      this->m_gcoll->perform_garbage_collection(100);
     } catch(std::exception &e) {
       ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
     }
@@ -37,14 +37,31 @@ const Abstract_context * Global_context::get_parent_opt() const noexcept
     return nullptr;
   }
 
+const Reference * Global_context::get_named_reference_opt(const String &name) const
+  {
+    // Check for overriden references.
+    const auto qref = this->m_dict.get_opt(name);
+    if(qref) {
+      return qref;
+    }
+    // Check for references from the standard library.
+    // TODO std
+    return nullptr;
+  }
+
+void Global_context::set_named_reference(const String &name, Reference ref)
+  {
+    this->m_dict.set(name, std::move(ref));
+  }
+
 rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable()
   {
-    return this->m_coll->create_tracked_variable();
+    return this->m_gcoll->create_tracked_variable();
   }
 
 void Global_context::perform_garbage_collection(unsigned gen_limit)
   {
-    return this->m_coll->perform_garbage_collection(gen_limit);
+    return this->m_gcoll->perform_garbage_collection(gen_limit);
   }
 
 }

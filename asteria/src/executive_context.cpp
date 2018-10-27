@@ -26,13 +26,14 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
 
 const Reference * Executive_context::get_named_reference_opt(const String &name) const
   {
-    const auto qbase = this->Abstract_context::get_named_reference_opt(name);
-    if(qbase) {
-      return qbase;
+    // Check for overriden references.
+    const auto qref = this->m_dict.get_opt(name);
+    if(qref) {
+      return qref;
     }
-    if(this->is_name_reserved(name)) {
-      // Deal with pre-defined variables.
-      // If you add new entries or alter existent entries here, you must update `Analytic_context` as well.
+    // Deal with pre-defined variables.
+    if(name.starts_with("__")) {
+      // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
       if(name == "__file") {
         return &(this->m_file);
       }
@@ -50,6 +51,11 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
       }
     }
     return nullptr;
+  }
+
+void Executive_context::set_named_reference(const String &name, Reference ref)
+  {
+    this->m_dict.set(name, std::move(ref));
   }
 
     namespace {
@@ -70,26 +76,23 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     do_set_constant(this->m_line, D_integer(head.get_line()));
     do_set_constant(this->m_func, D_string(head.get_func()));
     // Set the `this` parameter.
-    this->m_self = std::move(self);
-    // Materialie other parameters.
-    for(const auto &param : head.get_params()) {
-      Reference arg;
-      if(!args.empty()) {
-        arg = std::move(args.mut_front());
+    this->m_self = std::move(self.convert_to_variable(global));
+    // Set other parameters.
+    for(const auto &name : head.get_params()) {
+      const bool has_arg = !args.empty();
+      if(has_arg) {
+        self = std::move(args.mut_front());
         args.erase(args.begin());
       }
-      if(!param.empty()) {
-        if(this->is_name_reserved(param)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
-        }
-        this->Abstract_context::set_named_reference(param, std::move(arg.convert_to_variable(global)));
+      if(name.empty()) {
+        continue;
       }
+      if(name.starts_with("__")) {
+        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
+      }
+      this->m_dict.set(name, std::move(self.convert_to_variable(global)));
     }
-    if(args.empty() && zvarg_opt) {
-      do_set_constant(this->m_varg, D_function(*zvarg_opt));
-    } else {
-      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
-    }
+    do_set_constant(this->m_varg, (args.empty() && zvarg_opt) ? D_function(*zvarg_opt) : D_function(Variadic_arguer(head.get_location(), std::move(args))));
   }
 
 }

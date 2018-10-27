@@ -6,13 +6,15 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
+#include "reference_dictionary.hpp"
 
 namespace Asteria {
 
 class Analytic_context : public Abstract_context
   {
   private:
-    const Abstract_context *m_parent_opt;
+    const Abstract_context *const m_parent_opt;
+    Reference_dictionary m_dict;
     Reference m_dummy;
     Vector<String> m_params;
 
@@ -26,7 +28,9 @@ class Analytic_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
+
     const Reference * get_named_reference_opt(const String &name) const override;
+    void set_named_reference(const String &name, Reference ref) override;
 
     void initialize_for_function(const Function_header &head);
   };

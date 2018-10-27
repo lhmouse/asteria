@@ -25,12 +25,13 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
 
 const Reference * Analytic_context::get_named_reference_opt(const String &name) const
   {
-    const auto qbase = this->Abstract_context::get_named_reference_opt(name);
-    if(qbase) {
-      return qbase;
+    // Check for overriden references.
+    const auto qref = this->m_dict.get_opt(name);
+    if(qref) {
+      return qref;
     }
-    if(this->is_name_reserved(name)) {
-      // Deal with pre-defined variables.
+    // Deal with pre-defined variables.
+    if(name.starts_with("__")) {
       // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
       if(name == "__file") {
         return &(this->m_dummy);
@@ -51,15 +52,21 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
     return nullptr;
   }
 
+void Analytic_context::set_named_reference(const String &name, Reference /*ref*/)
+  {
+    this->m_dict.set(name, this->m_dummy);
+  }
+
 void Analytic_context::initialize_for_function(const Function_header &head)
   {
-    for(const auto &param : head.get_params()) {
-      if(!param.empty()) {
-        if(this->is_name_reserved(param)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
-        }
-        this->Abstract_context::set_named_reference(param, this->m_dummy);
+    for(const auto &name : head.get_params()) {
+      if(name.empty()) {
+        continue;
       }
+      if(name.starts_with("__")) {
+        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
+      }
+      this->m_dict.set(name, this->m_dummy);
     }
   }
 
