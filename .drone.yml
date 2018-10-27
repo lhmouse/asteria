@@ -3,20 +3,20 @@ matrix:
     - 64
     - 32
   options:
-    - "--enable-debug-logs"
     - ""
+    - "--enable-debug-logs"
 
 build:
-  image: "teaci/msys$${arch}"
+  image: teaci/msys$${arch}
   pull: true
-  shell: "mingw$${arch}"
+  shell: mingw$${arch}
   commands:
-    - "mkdir -p m4"
-    - "autoreconf -ifv"
-    - "./configure --enable-debug --disable-werror --disable-silent-rules $${options}"
-    - "make -j$(nproc)"
-    - "./check_includes.sh"
-    - "make -j$(nproc) check"
+    - mkdir -p m4
+    - autoreconf -ifv
+    - ./configure --enable-debug --disable-werror --disable-silent-rules $${options}
+    - make -j$(nproc)
+    - ./check_includes.sh
+    - make -j$(nproc) check
 
 notify:
   irc:
