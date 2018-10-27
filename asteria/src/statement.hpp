@@ -150,7 +150,7 @@ class Statement
       : m_stor(std::forward<AltT>(alt))
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Statement);
+    ROCKET_COPYABLE_DESTRUCTOR(Statement);
 
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;

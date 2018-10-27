@@ -36,7 +36,7 @@ Token_stream::~Token_stream()
               throw Parser_error(0, 0, 0, Parser_error::code_istream_open_failure);
             }
           }
-        ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Source_reader)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Source_reader)
           {
           }
 

@@ -31,6 +31,27 @@ using ::std::basic_ios;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 
+#define ROCKET_COPYABLE_DESTRUCTOR(c_, ...)  \
+    c_(const c_ &)              = default;  \
+    c_ & operator=(const c_ &)  = default;  \
+    c_(c_ &&)                   = default;  \
+    c_ & operator=(c_ &&)       = default;  \
+    __VA_ARGS__ ~c_()
+
+#define ROCKET_MOVABLE_DESTRUCTOR(c_, ...)  \
+    c_(const c_ &)              =  delete;  \
+    c_ & operator=(const c_ &)  =  delete;  \
+    c_(c_ &&)                   = default;  \
+    c_ & operator=(c_ &&)       = default;  \
+    __VA_ARGS__ ~c_()
+
+#define ROCKET_NONCOPYABLE_DESTRUCTOR(c_, ...)  \
+    c_(const c_ &)              = delete;  \
+    c_ & operator=(const c_ &)  = delete;  \
+    c_(c_ &&)                   = delete;  \
+    c_ & operator=(c_ &&)       = delete;  \
+    __VA_ARGS__ ~c_()
+
 template<typename typeT, typename withT>
   inline typeT exchange(typeT &ref, withT &&with)
   {

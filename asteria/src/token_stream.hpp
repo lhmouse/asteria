@@ -29,7 +29,7 @@ class Token_stream
       : m_stor()
       {
       }
-    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Token_stream);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Token_stream);
 
   public:
     State state() const noexcept

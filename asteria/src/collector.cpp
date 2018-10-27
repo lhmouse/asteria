@@ -57,7 +57,7 @@ bool Collector::auto_collect()
           {
             this->m_ref += 1;
           }
-        ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Sentry)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Sentry)
           {
             this->m_ref -= 1;
           }

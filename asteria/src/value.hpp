@@ -70,7 +70,7 @@ class Value
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Value);
+    ROCKET_COPYABLE_DESTRUCTOR(Value);
 
   public:
     Type type() const noexcept

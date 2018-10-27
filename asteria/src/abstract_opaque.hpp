@@ -15,7 +15,7 @@ class Abstract_opaque : public rocket::refcounted_base<Abstract_opaque>
     Abstract_opaque() noexcept
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Abstract_opaque, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Abstract_opaque, virtual);
 
   public:
     virtual String describe() const = 0;

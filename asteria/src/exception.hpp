@@ -29,7 +29,7 @@ class Exception : public virtual std::exception
       : m_loc(String::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Exception);
+    ROCKET_COPYABLE_DESTRUCTOR(Exception);
 
   public:
     const Source_location & get_location() const noexcept

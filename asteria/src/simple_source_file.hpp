@@ -18,7 +18,7 @@ class Simple_source_file
 
   public:
     Simple_source_file(std::istream &cstrm_io, const String &file);
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Simple_source_file);
+    ROCKET_COPYABLE_DESTRUCTOR(Simple_source_file);
 
   public:
     const String & get_file() const noexcept

@@ -23,7 +23,7 @@ class Expression
       : m_nodes(std::move(nodes))
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Expression);
+    ROCKET_COPYABLE_DESTRUCTOR(Expression);
 
   public:
     Expression bind(const Global_context &global, const Analytic_context &ctx) const;

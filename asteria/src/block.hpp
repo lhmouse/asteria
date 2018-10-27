@@ -37,7 +37,7 @@ class Block
       : m_stmts(std::move(stmts))
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Block);
+    ROCKET_COPYABLE_DESTRUCTOR(Block);
 
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;

@@ -17,7 +17,7 @@ class Global_context : public Abstract_context
 
   public:
     Global_context();
-    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Global_context);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Global_context);
 
   public:
     bool is_analytic() const noexcept override;

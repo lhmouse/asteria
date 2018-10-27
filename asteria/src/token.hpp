@@ -164,7 +164,7 @@ class Token
       : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Token);
+    ROCKET_COPYABLE_DESTRUCTOR(Token);
 
   public:
     const String & get_file() const noexcept

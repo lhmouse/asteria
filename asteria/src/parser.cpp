@@ -664,7 +664,7 @@ Parser::~Parser()
         Infix_element_base() noexcept
           {
           }
-        ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Infix_element_base, virtual);
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Infix_element_base, virtual);
 
       public:
         virtual Precedence precedence() const noexcept = 0;

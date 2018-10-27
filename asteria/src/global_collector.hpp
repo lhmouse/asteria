@@ -23,7 +23,7 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
         m_gen_zero(&(this->m_gen_one), 400)
       {
       }
-    ROCKET_DECLARE_NONCOPYABLE_DESTRUCTOR(Global_collector);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Global_collector);
 
   public:
     rocket::refcounted_ptr<Variable> create_tracked_variable();

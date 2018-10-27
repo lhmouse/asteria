@@ -61,7 +61,7 @@ class Reference_root
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Reference_root);
+    ROCKET_COPYABLE_DESTRUCTOR(Reference_root);
 
   public:
     Index index() const noexcept

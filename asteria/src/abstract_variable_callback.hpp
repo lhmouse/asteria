@@ -15,7 +15,7 @@ class Abstract_variable_callback
     Abstract_variable_callback() noexcept
       {
       }
-    ROCKET_DECLARE_COPYABLE_DESTRUCTOR(Abstract_variable_callback, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Abstract_variable_callback, virtual);
 
   public:
     virtual bool accept(const rocket::refcounted_ptr<Variable> &var) const = 0;
