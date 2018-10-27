@@ -6,7 +6,6 @@
 
 #include "fwd.hpp"
 #include "reference.hpp"
-#include "rocket/static_vector.hpp"
 
 namespace Asteria {
 
@@ -17,7 +16,7 @@ class Reference_stack
       {
         Chunk *prev;
         Chunk *next;
-        rocket::static_vector<Reference, 16> refs;
+        Svector<Reference, 16> refs;
 
         explicit Chunk(Chunk *xprev) noexcept
           : prev(xprev), next(nullptr), refs()

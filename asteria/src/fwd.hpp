@@ -13,6 +13,7 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
+#include "rocket/static_vector.hpp"
 
 namespace Asteria {
 
@@ -45,6 +46,8 @@ template<typename FirstT, typename SecondT>
   using Bivector = rocket::cow_vector<std::pair<FirstT, SecondT>>;
 template<typename ElementT>
   using Dictionary = rocket::cow_hashmap<String, ElementT, String::hash, String::equal_to>;
+template<typename ElementT, Size capacityT>
+  using Svector = rocket::static_vector<ElementT, capacityT>;
 
 // General Utilities
 class Formatter;
