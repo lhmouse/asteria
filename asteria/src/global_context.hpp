@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
-#include "reference_dictionary.hpp"
+#include "reference.hpp"
 #include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
@@ -14,7 +14,7 @@ namespace Asteria {
 class Global_context : public Abstract_context
   {
   private:
-    Reference_dictionary m_dict;
+    Dictionary<Reference> m_dict;
     rocket::refcounted_ptr<Global_collector> m_gcoll;
 
   public:

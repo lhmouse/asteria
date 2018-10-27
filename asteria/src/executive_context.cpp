@@ -27,9 +27,9 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
 const Reference * Executive_context::get_named_reference_opt(const String &name) const
   {
     // Check for overriden references.
-    const auto qref = this->m_dict.get_opt(name);
-    if(qref) {
-      return qref;
+    const auto qit = this->m_dict.find(name);
+    if(qit != this->m_dict.end()) {
+      return &(qit->second);
     }
     // Deal with pre-defined variables.
     if(name.starts_with("__")) {
@@ -55,7 +55,7 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
 
 void Executive_context::set_named_reference(const String &name, Reference ref)
   {
-    this->m_dict.set(name, std::move(ref));
+    this->m_dict.insert_or_assign(name, std::move(ref));
   }
 
     namespace {
@@ -88,10 +88,10 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       }
       if(i < args.size()) {
         // There is a corresponding argument. Move it.
-        this->m_dict.set(name, std::move(args.mut(i)));
+        this->m_dict.insert_or_assign(name, std::move(args.mut(i)));
       } else {
         // There is no corresponding argument. Default to `null`.
-        this->m_dict.set(name, Reference());
+        this->m_dict.insert_or_assign(name, Reference());
       }
     }
     // Set the variadic argument getter.

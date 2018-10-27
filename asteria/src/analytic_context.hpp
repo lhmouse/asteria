@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
-#include "reference_dictionary.hpp"
+#include "reference.hpp"
 
 namespace Asteria {
 
@@ -14,7 +14,7 @@ class Analytic_context : public Abstract_context
   {
   private:
     const Abstract_context *const m_parent_opt;
-    Reference_dictionary m_dict;
+    Dictionary<Reference> m_dict;
     Reference m_dummy;
     Vector<String> m_params;
 

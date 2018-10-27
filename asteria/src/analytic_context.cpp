@@ -26,9 +26,9 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
 const Reference * Analytic_context::get_named_reference_opt(const String &name) const
   {
     // Check for overriden references.
-    const auto qref = this->m_dict.get_opt(name);
-    if(qref) {
-      return qref;
+    const auto qit = this->m_dict.find(name);
+    if(qit != this->m_dict.end()) {
+      return &(qit->second);
     }
     // Deal with pre-defined variables.
     if(name.starts_with("__")) {
@@ -54,7 +54,7 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
 
 void Analytic_context::set_named_reference(const String &name, Reference /*ref*/)
   {
-    this->m_dict.set(name, this->m_dummy);
+    this->m_dict.insert_or_assign(name, this->m_dummy);
   }
 
 void Analytic_context::initialize_for_function(const Function_header &head)
@@ -67,7 +67,7 @@ void Analytic_context::initialize_for_function(const Function_header &head)
       if(name.starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
       }
-      this->m_dict.set(name, this->m_dummy);
+      this->m_dict.insert_or_assign(name, this->m_dummy);
     }
   }
 

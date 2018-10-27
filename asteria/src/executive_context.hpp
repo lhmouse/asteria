@@ -6,7 +6,7 @@
 
 #include "fwd.hpp"
 #include "abstract_context.hpp"
-#include "reference_dictionary.hpp"
+#include "reference.hpp"
 
 namespace Asteria {
 
@@ -14,7 +14,7 @@ class Executive_context : public Abstract_context
   {
   private:
     const Executive_context *const m_parent_opt;
-    Reference_dictionary m_dict;
+    Dictionary<Reference> m_dict;
     Reference m_file;
     Reference m_line;
     Reference m_func;
