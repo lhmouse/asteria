@@ -25,13 +25,13 @@ class Reference_stack
           }
       };
 
-    Chunk m_head;
     Chunk *m_scur;
     Size m_size;
+    Chunk m_head;
 
   public:
     Reference_stack() noexcept
-      : m_head(nullptr), m_scur(nullptr), m_size(0)
+      : m_scur(nullptr), m_size(0), m_head(nullptr)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_stack);
