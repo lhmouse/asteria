@@ -30,22 +30,24 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     if(qbase) {
       return qbase;
     }
-    // Deal with pre-defined variables.
-    // If you add new entries or alter existent entries here, you must update `Analytic_context` as well.
-    if(name == "__file") {
-      return &(this->m_file);
-    }
-    if(name == "__line") {
-      return &(this->m_line);
-    }
-    if(name == "__func") {
-      return &(this->m_func);
-    }
-    if(name == "__this") {
-      return &(this->m_self);
-    }
-    if(name == "__varg") {
-      return &(this->m_varg);
+    if(this->is_name_reserved(name)) {
+      // Deal with pre-defined variables.
+      // If you add new entries or alter existent entries here, you must update `Analytic_context` as well.
+      if(name == "__file") {
+        return &(this->m_file);
+      }
+      if(name == "__line") {
+        return &(this->m_line);
+      }
+      if(name == "__func") {
+        return &(this->m_func);
+      }
+      if(name == "__this") {
+        return &(this->m_self);
+      }
+      if(name == "__varg") {
+        return &(this->m_varg);
+      }
     }
     return nullptr;
   }

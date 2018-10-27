@@ -29,22 +29,24 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
     if(qbase) {
       return qbase;
     }
-    // Deal with pre-defined variables.
-    // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
-    if(name == "__file") {
-      return &(this->m_dummy);
-    }
-    if(name == "__line") {
-      return &(this->m_dummy);
-    }
-    if(name == "__func") {
-      return &(this->m_dummy);
-    }
-    if(name == "__this") {
-      return &(this->m_dummy);
-    }
-    if(name == "__varg") {
-      return &(this->m_dummy);
+    if(this->is_name_reserved(name)) {
+      // Deal with pre-defined variables.
+      // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
+      if(name == "__file") {
+        return &(this->m_dummy);
+      }
+      if(name == "__line") {
+        return &(this->m_dummy);
+      }
+      if(name == "__func") {
+        return &(this->m_dummy);
+      }
+      if(name == "__this") {
+        return &(this->m_dummy);
+      }
+      if(name == "__varg") {
+        return &(this->m_dummy);
+      }
     }
     return nullptr;
   }
