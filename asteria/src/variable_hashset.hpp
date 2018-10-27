@@ -13,7 +13,17 @@ namespace Asteria {
 class Variable_hashset
   {
   private:
-    rocket::refcounted_ptr<Variable> *m_data;
+    struct Bucket
+      {
+        rocket::refcounted_ptr<Variable> var;
+
+        explicit operator bool () const noexcept
+          {
+            return !!this->var;
+          }
+      };
+
+    Bucket *m_data;
     Size m_nbkt;
     Size m_size;
 
@@ -44,7 +54,7 @@ class Variable_hashset
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(Size i = 0; i != nbkt; ++i) {
-          data[i] = nullptr;
+          data[i] = { };
         }
         this->m_size = 0;
       }
@@ -56,7 +66,7 @@ class Variable_hashset
         const auto nbkt = this->m_nbkt;
         for(Size i = 0; i != nbkt; ++i) {
           if(data[i]) {
-            std::forward<FuncT>(func)(data[i]);
+            std::forward<FuncT>(func)(data[i].var);
           }
         }
       }
@@ -78,6 +88,7 @@ class Variable_hashset
         const auto nbkt = this->m_nbkt;
         return nbkt / 2;
       }
+
     void reserve(Size res_arg)
       {
         if(res_arg <= this->capacity()) {

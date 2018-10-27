@@ -33,20 +33,20 @@ Variable_hashset::~Variable_hashset()
         return pos;
       }
 
-    template<typename PredT>
-      rocket::refcounted_ptr<Variable> * do_linear_probe(rocket::refcounted_ptr<Variable> * data, Size nbkt, Size first, Size last, PredT &&pred)
+    template<typename BucketT, typename PredT>
+      BucketT * do_linear_probe(BucketT * data, Size nbkt, Size first, Size last, PredT &&pred)
       {
         // Phase one: Probe from `first` to the end of the table.
         for(Size i = first; i != nbkt; ++i) {
           const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
+          if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
             return bkt;
           }
         }
         // Phase two: Probe from the beginning of the table to `last`.
         for(Size i = 0; i != last; ++i) {
           const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
+          if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
             return bkt;
           }
         }
@@ -66,7 +66,7 @@ void Variable_hashset::do_rehash(Size res_arg)
     // Round up the capacity for efficiency.
     const auto nbkt = res_arg * 2 | this->m_size * 3 | 32;
     // Allocate the new table. This may throw `std::bad_alloc`.
-    const auto data = static_cast<rocket::refcounted_ptr<Variable> *>(::operator new(nbkt * sizeof(rocket::refcounted_ptr<Variable>)));
+    const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(rocket::refcounted_ptr<Variable>)));
     // Initialize the table. This will not throw exceptions.
     for(Size i = 0; i != nbkt; ++i) {
       rocket::construct_at(data + i);
@@ -77,7 +77,7 @@ void Variable_hashset::do_rehash(Size res_arg)
     for(Size i = 0; i != nbkt_old; ++i) {
       if(data_old[i]) {
         // Find a bucket for it.
-        const auto origin = do_get_origin(nbkt, data_old[i]);
+        const auto origin = do_get_origin(nbkt, data_old[i].var);
         const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &) { return false; });
         ROCKET_ASSERT(!*qbkt);
         *qbkt = std::move(data_old[i]);
@@ -123,7 +123,7 @@ bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable
       // Already exists.
       return false;
     }
-    *qbkt = var;
+    *qbkt = { var };
     this->m_size += 1;
     return true;
   }
@@ -136,7 +136,7 @@ void Variable_hashset::do_erase_unchecked(Size tpos) noexcept
     ROCKET_ASSERT(tpos < nbkt);
     // Nullify the bucket.
     ROCKET_ASSERT(data[tpos]);
-    data[tpos] = nullptr;
+    data[tpos] = { };
     this->m_size -= 1;
     // Relocate elements after the erasure point.
     do_linear_probe(data, nbkt, tpos + 1, tpos,
@@ -150,7 +150,7 @@ void Variable_hashset::do_erase_unchecked(Size tpos) noexcept
           const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &) { return false; });
           ROCKET_ASSERT(!*qbkt);
           // Insert it into the new bucket.
-          *qbkt = std::move(var);
+          *qbkt = { std::move(var) };
           return false;
         }
       );
