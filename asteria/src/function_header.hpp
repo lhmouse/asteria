@@ -43,9 +43,13 @@ class Function_header
       {
         return this->m_func;
       }
-    const Vector<String> & get_params() const noexcept
+    Size get_param_count() const noexcept
       {
-        return this->m_params;
+        return this->m_params.size();
+      }
+    const String & get_param_name(Size index) const
+      {
+        return this->m_params.at(index);
       }
   };
 

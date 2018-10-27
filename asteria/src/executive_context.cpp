@@ -78,21 +78,34 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     // Set the `this` parameter.
     this->m_self = std::move(self.convert_to_variable(global));
     // Set other parameters.
-    for(const auto &name : head.get_params()) {
-      const bool has_arg = !args.empty();
-      if(has_arg) {
-        self = std::move(args.mut_front());
-        args.erase(args.begin());
-      }
+    for(Size i = 0; i < head.get_param_count(); ++i) {
+      const auto &name = head.get_param_name(i);
       if(name.empty()) {
         continue;
       }
       if(name.starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
       }
-      this->m_dict.set(name, std::move(self.convert_to_variable(global)));
+      if(i < args.size()) {
+        // There is a corresponding argument. Move it.
+        this->m_dict.set(name, std::move(args.mut(i)));
+      } else {
+        // There is no corresponding argument. Default to `null`.
+        this->m_dict.set(name, Reference());
+      }
     }
-    do_set_constant(this->m_varg, (args.empty() && zvarg_opt) ? D_function(*zvarg_opt) : D_function(Variadic_arguer(head.get_location(), std::move(args))));
+    // Set the variadic argument getter.
+    if(head.get_param_count() < args.size()) {
+      // There are more arguments than parameters. Create an argument getter from those.
+      args.erase(args.begin(), args.begin() + static_cast<Diff>(head.get_param_count()));
+      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
+    } else if(!zvarg_opt) {
+      // There is no variadic arg. Create a zeroary argument getter.
+      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), { })));
+    } else {
+      // There is no variadic arg. Copy the existent zeroary argument getter.
+      do_set_constant(this->m_varg, D_function(*zvarg_opt));
+    }
   }
 
 }

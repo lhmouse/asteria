@@ -59,7 +59,8 @@ void Analytic_context::set_named_reference(const String &name, Reference /*ref*/
 
 void Analytic_context::initialize_for_function(const Function_header &head)
   {
-    for(const auto &name : head.get_params()) {
+    for(Size i = 0; i < head.get_param_count(); ++i) {
+      const auto &name = head.get_param_name(i);
       if(name.empty()) {
         continue;
       }

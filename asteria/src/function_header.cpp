@@ -10,11 +10,11 @@ std::ostream & operator<<(std::ostream &os, const Function_header &head)
   {
     os <<head.get_func() <<'(';
     bool needs_comma = true;
-    for(const auto &param : head.get_params()) {
+    for(Size i = 0; i < head.get_param_count(); ++i) {
       if(rocket::exchange(needs_comma, true)) {
-        os <<',' <<' ';
+        os <<", ";
       }
-      os <<param;
+      os <<head.get_param_name(i);
     }
     os <<')';
     return os;
