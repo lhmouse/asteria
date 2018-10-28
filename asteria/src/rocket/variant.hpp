@@ -307,7 +307,6 @@ template<typename ...alternativesT>
         // Make a backup.
         storage backup;
         variant::do_dispatch_move_construct(index_old, backup, this->m_stor);
-        // Destroy the old alternative.
         variant::do_dispatch_destroy(index_old, this->m_stor);
         try {
           // Copy-construct the alternative in place.
