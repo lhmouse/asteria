@@ -54,7 +54,7 @@ class Variable_hashset
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          data[i] = { };
+          data[i].var.reset();
         }
         this->m_size = 0;
       }
