@@ -1,4 +1,4 @@
-|CI            |Category  |Host OS       |Build for OS        |Build Status     |
+|CI            |Category  |Build on OS   |Host OS             |Build Status     |
 |:-------------|:---------|:-------------|:-------------------|:----------------|
 |**Travis CI** |Primary   |Ubuntu Trusty |Ubuntu Trusty       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
 |**Tea CI**    |Secondary |Wine          |Windows Server 2003 |[![Build Status](https://tea-ci.org/api/badges/lhmouse/asteria/status.svg)](https://tea-ci.org/lhmouse/asteria) |
