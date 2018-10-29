@@ -702,13 +702,13 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_head(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_head(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         rocket::cow_vector<Xpnode> nodes;
         if(!do_accept_infix_element(nodes, tstrm_io)) {
           return false;
         }
-        elem_out.reset(new Infix_head(std::move(nodes)));
+        elem_out = rocket::make_unique<Infix_head>(std::move(nodes));
         return true;
       }
 
@@ -775,7 +775,7 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_selection_quest(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_quest(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -795,11 +795,11 @@ Parser::~Parser()
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out.reset(new Infix_selection(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false)));
+        elem_out = rocket::make_unique<Infix_selection>(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false));
         return true;
       }
 
-    bool do_accept_infix_selection_and(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_and(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
@@ -812,11 +812,11 @@ Parser::~Parser()
         if(!do_accept_infix_element(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out.reset(new Infix_selection(Infix_selection::sop_and, assign, std::move(branch_true), rocket::cow_vector<Xpnode>()));
+        elem_out = rocket::make_unique<Infix_selection>(Infix_selection::sop_and, assign, std::move(branch_true), rocket::cow_vector<Xpnode>());
         return true;
       }
 
-    bool do_accept_infix_selection_or(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_or(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
@@ -829,11 +829,11 @@ Parser::~Parser()
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, rocket::cow_vector<Xpnode>(), std::move(branch_false)));
+        elem_out = rocket::make_unique<Infix_selection>(Infix_selection::sop_or, assign, rocket::cow_vector<Xpnode>(), std::move(branch_false));
         return true;
       }
 
-    bool do_accept_infix_selection_coales(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_coales(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -846,7 +846,7 @@ Parser::~Parser()
         if(!do_accept_infix_element(branch_null, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out.reset(new Infix_selection(Infix_selection::sop_coales, assign, rocket::cow_vector<Xpnode>(), std::move(branch_null)));
+        elem_out = rocket::make_unique<Infix_selection>(Infix_selection::sop_coales, assign, rocket::cow_vector<Xpnode>(), std::move(branch_null));
         return true;
       }
 
@@ -926,7 +926,7 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_operator(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_operator(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         // infix-operator ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1087,7 +1087,7 @@ Parser::~Parser()
         if(!do_accept_infix_element(rhs, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out.reset(new Infix_operator(xop, assign, std::move(rhs)));
+        elem_out = rocket::make_unique<Infix_operator>(xop, assign, std::move(rhs));
         return true;
       }
 
@@ -1102,11 +1102,11 @@ Parser::~Parser()
         // infix-selection ::=
         //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
         //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
-        std::unique_ptr<Infix_element_base> elem;
+        rocket::unique_ptr<Infix_element_base> elem;
         if(!do_accept_infix_head(elem, tstrm_io)) {
           return false;
         }
-        rocket::cow_vector<std::unique_ptr<Infix_element_base>> stack;
+        rocket::cow_vector<rocket::unique_ptr<Infix_element_base>> stack;
         stack.emplace_back(std::move(elem));
         for(;;) {
           bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||

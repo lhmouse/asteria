@@ -46,6 +46,7 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/cow_string.hpp  \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \
+  asteria/src/rocket/unique_ptr.hpp  \
   asteria/src/rocket/refcounted_ptr.hpp  \
   asteria/src/rocket/static_vector.hpp
 

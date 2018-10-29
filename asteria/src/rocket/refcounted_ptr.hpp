@@ -161,7 +161,7 @@ template<typename elementT>
             }
             return ptr->refcount_base::reference_count();
           }
-        pointer get() const noexcept
+        constexpr pointer get() const noexcept
           {
             return this->m_ptr;
           }
@@ -385,7 +385,7 @@ template<typename elementT>
       {
         return this->m_sth.use_count();
       }
-    pointer get() const noexcept
+    constexpr pointer get() const noexcept
       {
         return this->m_sth.get();
       }
@@ -401,10 +401,13 @@ template<typename elementT>
         ROCKET_ASSERT(ptr);
         return ptr;
       }
-    explicit operator bool () const noexcept
+    explicit constexpr operator bool () const noexcept
       {
-        const auto ptr = this->get();
-        return !!ptr;
+        return !!(this->get());
+      }
+    constexpr operator pointer () const noexcept
+      {
+        return this->get();
       }
 
     // 23.11.1.2.5, modifiers
