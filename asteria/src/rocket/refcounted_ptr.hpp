@@ -103,12 +103,6 @@ template<typename elementT>
           }
       };
 
-    template<typename ...unusedT>
-      struct make_void
-      {
-        using type = void;
-      };
-
     template<typename resultT, typename sourceT, typename = void>
       struct static_cast_or_dynamic_cast_helper
       {
