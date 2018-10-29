@@ -39,14 +39,14 @@ Variable_hashset::~Variable_hashset()
         // Phase one: Probe from `first` to the end of the table.
         for(std::size_t i = first; i != nbkt; ++i) {
           const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
+          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
             return bkt;
           }
         }
         // Phase two: Probe from the beginning of the table to `last`.
         for(std::size_t i = 0; i != last; ++i) {
           const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
+          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
             return bkt;
           }
         }
@@ -66,8 +66,9 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
     // Round up the capacity for efficiency.
     const auto nbkt = res_arg * 2 | this->m_size * 3 | 32;
     // Allocate the new table. This may throw `std::bad_alloc`.
-    const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(rocket::refcounted_ptr<Variable>)));
+    const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(Bucket)));
     // Initialize the table. This will not throw exceptions.
+    static_assert(std::is_nothrow_constructible<Bucket>::value, "??");
     for(std::size_t i = 0; i != nbkt; ++i) {
       rocket::construct_at(data + i);
     }
@@ -78,7 +79,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
       if(data_old[i]) {
         // Find a bucket for it.
         const auto origin = do_get_origin(nbkt, data_old[i].var);
-        const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &) { return false; });
+        const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
         ROCKET_ASSERT(!*qbkt);
         *qbkt = std::move(data_old[i]);
       }
@@ -99,8 +100,7 @@ std::ptrdiff_t Variable_hashset::do_find(const rocket::refcounted_ptr<Variable> 
     const auto nbkt = this->m_nbkt;
     // Looking for the variable using linear probing.
     const auto origin = do_get_origin(nbkt, var);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &cand) { return cand == var; }
-      );
+    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
     if(!*qbkt) {
       // Not found.
       return -1;
@@ -118,7 +118,7 @@ bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable
     ROCKET_ASSERT(this->m_size < nbkt / 2);
     // Find a bucket for the new element.
     const auto origin = do_get_origin(nbkt, var);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &cand) { return cand == var; });
+    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
     if(*qbkt) {
       // Already exists.
       return false;
@@ -140,17 +140,17 @@ void Variable_hashset::do_erase_unchecked(std::size_t tpos) noexcept
     this->m_size -= 1;
     // Relocate elements after the erasure point.
     do_linear_probe(data, nbkt, tpos + 1, tpos,
-      [&](rocket::refcounted_ptr<Variable> &cand)
+      [&](Bucket &cand)
         {
           // Remove the element from the old bucket.
-          auto var = std::move(cand);
+          auto old = std::move(cand);
           ROCKET_ASSERT(!cand);
           // Find a new bucket for it.
-          const auto origin = do_get_origin(nbkt, var);
-          const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const rocket::refcounted_ptr<Variable> &) { return false; });
+          const auto origin = do_get_origin(nbkt, old.var);
+          const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
           ROCKET_ASSERT(!*qbkt);
           // Insert it into the new bucket.
-          *qbkt = { std::move(var) };
+          *qbkt = std::move(old);
           return false;
         }
       );
