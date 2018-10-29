@@ -36,7 +36,7 @@ using ::std::add_lvalue_reference;
 using ::std::basic_ostream;
 using ::std::nullptr_t;
 
-template<typename elementT, typename deleterT = default_delete<elementT>>
+template<typename elementT, typename deleterT = default_delete<const elementT>>
   class refcounted_base;
 
 template<typename elementT>
@@ -147,9 +147,9 @@ template<typename elementT>
 
       private:
         template<typename yelementT, typename deleterT>
-          deleterT & do_locate_deleter(refcounted_base<yelementT, deleterT> *ptr) const
+          const deleterT & do_locate_deleter(const refcounted_base<yelementT, deleterT> &base) const
           {
-            return ptr->as_deleter();
+            return base.as_deleter();
           }
 
       public:
@@ -190,11 +190,9 @@ template<typename elementT>
             if(!ptr->refcount_base::drop_reference()) {
               return;
             }
-            // Remove cv-qualifiers, then move-construct the deleter out of the object,
-            // which is used to delete the object thereafter.
-            const auto nkptr = const_cast<typename remove_cv<element_type>::type *>(ptr);
-            auto tdel = ::std::move(this->do_locate_deleter(nkptr));
-            ::std::move(tdel)(nkptr);
+            // Copy-construct a deleter from the object, which is used to delete the object thereafter.
+            auto tdel = stored_pointer::do_locate_deleter(*ptr);
+            ::std::move(tdel)(ptr);
           }
         void exchange(stored_pointer &other) noexcept
           {
