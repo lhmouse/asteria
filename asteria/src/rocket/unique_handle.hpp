@@ -119,6 +119,7 @@ template<typename handleT, typename closerT>
             return h;
           }
       };
+
     template<typename pointerT>
       struct dereference_helper<pointerT, typename make_void<decltype(*(::std::declval<pointerT>()))>::type>
       {
