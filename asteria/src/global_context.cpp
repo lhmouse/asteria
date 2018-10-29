@@ -40,9 +40,9 @@ const Abstract_context * Global_context::get_parent_opt() const noexcept
 const Reference * Global_context::get_named_reference_opt(const String &name) const
   {
     // Check for overriden references.
-    const auto qit = this->m_dict.find(name);
-    if(qit != this->m_dict.end()) {
-      return &(qit->second);
+    const auto qref = this->m_dict.get_opt(name);
+    if(qref) {
+      return qref;
     }
     // Check for references from the standard library.
     // TODO std
@@ -51,7 +51,7 @@ const Reference * Global_context::get_named_reference_opt(const String &name) co
 
 void Global_context::set_named_reference(const String &name, Reference ref)
   {
-    this->m_dict.insert_or_assign(name, std::move(ref));
+    this->m_dict.set(name, std::move(ref));
   }
 
 rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable()

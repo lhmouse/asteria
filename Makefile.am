@@ -83,6 +83,7 @@ pkginclude_HEADERS =  \
   asteria/src/global_collector.hpp  \
   asteria/src/variadic_arguer.hpp  \
   asteria/src/reference_stack.hpp  \
+  asteria/src/reference_dictionary.hpp  \
   asteria/src/xpnode.hpp  \
   asteria/src/expression.hpp  \
   asteria/src/statement.hpp  \
@@ -116,6 +117,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/global_collector.cpp  \
   asteria/src/variadic_arguer.cpp  \
   asteria/src/reference_stack.cpp  \
+  asteria/src/reference_dictionary.cpp  \
   asteria/src/xpnode.cpp  \
   asteria/src/expression.cpp  \
   asteria/src/statement.cpp  \
