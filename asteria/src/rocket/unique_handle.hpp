@@ -6,6 +6,7 @@
 
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::swap(), std::declval()
+#include <iosfwd> // std::basic_ostream<>
 #include "compatibility.h"
 #include "assert.hpp"
 #include "allocator_utilities.hpp"
@@ -32,6 +33,7 @@ using ::std::conditional;
 using ::std::false_type;
 using ::std::true_type;
 using ::std::add_lvalue_reference;
+using ::std::basic_ostream;
 
 template<typename handleT, typename closerT>
   class unique_handle;
@@ -275,6 +277,12 @@ template<typename handleT, typename closerT>
   inline void swap(unique_handle<handleT, closerT> &lhs, unique_handle<handleT, closerT> &rhs) noexcept
   {
     lhs.swap(rhs);
+  }
+
+template<typename charT, typename traitsT, typename handleT, typename closerT>
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const unique_handle<handleT, closerT> &rhs)
+  {
+    return os << rhs.get();
   }
 
 }

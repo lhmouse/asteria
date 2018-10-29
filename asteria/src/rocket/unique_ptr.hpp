@@ -20,16 +20,10 @@ namespace rocket {
 
 using ::std::default_delete;
 using ::std::atomic;
-using ::std::remove_reference;
-using ::std::remove_pointer;
-using ::std::remove_cv;
 using ::std::enable_if;
-using ::std::conditional;
 using ::std::is_nothrow_constructible;
 using ::std::is_convertible;
 using ::std::is_array;
-using ::std::is_reference;
-using ::std::integral_constant;
 using ::std::add_lvalue_reference;
 using ::std::basic_ostream;
 using ::std::nullptr_t;
@@ -165,13 +159,13 @@ template<typename elementT, typename deleterT = default_delete<const elementT>>
       struct pointer_cast_helper
       {
         template<typename sourceptrT>
-          resultptrT operator()(sourceptrT &&iptr) const
+          resultptrT operator()(sourceptrT &&sptr) const
           {
-            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(iptr.get());
+            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
             if(!ptr) {
               return nullptr;
             }
-            auto tptr = ::std::forward<sourceptrT>(iptr);
+            auto tptr = ::std::forward<sourceptrT>(sptr);
             tptr.release();
             return resultptrT(ptr);
           }
@@ -198,7 +192,7 @@ template<typename elementT, typename deleterT>
 
   public:
     // 23.11.1.2.1, constructors
-    constexpr unique_ptr() noexcept(is_nothrow_constructible<deleter_type>::value)
+    constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       : m_sth()
       {
       }
@@ -305,93 +299,93 @@ template<typename elementT, typename deleterT>
       }
   };
 
-template<typename xelementT, typename yelementT>
-  inline bool operator==(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs) noexcept
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator==(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
-template<typename xelementT, typename yelementT>
-  inline bool operator!=(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs) noexcept
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator!=(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
-template<typename xelementT, typename yelementT>
-  inline bool operator<(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs)
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator<(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs)
   {
     return lhs.get() < rhs.get();
   }
-template<typename xelementT, typename yelementT>
-  inline bool operator>(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs)
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator>(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs)
   {
     return lhs.get() > rhs.get();
   }
-template<typename xelementT, typename yelementT>
-  inline bool operator<=(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs)
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator<=(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs)
   {
     return lhs.get() <= rhs.get();
   }
-template<typename xelementT, typename yelementT>
-  inline bool operator>=(const unique_ptr<xelementT> &lhs, const unique_ptr<yelementT> &rhs)
+template<typename xelementT, typename xdeleterT, typename yelementT, typename ydeleterT>
+  inline bool operator>=(const unique_ptr<xelementT, xdeleterT> &lhs, const unique_ptr<yelementT, ydeleterT> &rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT>
-  inline bool operator==(const unique_ptr<elementT> &lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT>
+  inline bool operator==(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
   {
     return !(lhs.get());
   }
-template<typename elementT>
-  inline bool operator!=(const unique_ptr<elementT> &lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT>
+  inline bool operator!=(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
   {
     return !!(lhs.get());
   }
 
-template<typename elementT>
-  inline bool operator==(nullptr_t, const unique_ptr<elementT> &rhs) noexcept
+template<typename elementT, typename deleterT>
+  inline bool operator==(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
   {
     return !(rhs.get());
   }
-template<typename elementT>
-  inline bool operator!=(nullptr_t, const unique_ptr<elementT> &rhs) noexcept
+template<typename elementT, typename deleterT>
+  inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
   {
     return !!(rhs.get());
   }
 
-template<typename elementT>
-  inline void swap(unique_ptr<elementT> &lhs, unique_ptr<elementT> &rhs) noexcept
+template<typename elementT, typename deleterT>
+  inline void swap(unique_ptr<elementT, deleterT> &lhs, unique_ptr<elementT, deleterT> &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
-template<typename resultT, typename sourceT>
-  inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT> &&iptr) noexcept
+template<typename charT, typename traitsT, typename elementT, typename deleterT>
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const unique_ptr<elementT, deleterT> &rhs)
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(::std::move(iptr));
+    return os << rhs.get();
   }
 
 template<typename resultT, typename sourceT>
-  inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT> &&iptr) noexcept
+  inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(::std::move(iptr));
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(::std::move(sptr));
   }
 
 template<typename resultT, typename sourceT>
-  inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT> &&iptr) noexcept
+  inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(::std::move(iptr));
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(::std::move(sptr));
+  }
+
+template<typename resultT, typename sourceT>
+  inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
+  {
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(::std::move(sptr));
   }
 
 template<typename elementT, typename ...paramsT>
   inline unique_ptr<elementT> make_unique(paramsT &&...params)
   {
     return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
-  }
-
-template<typename charT, typename traitsT, typename elementT>
-  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const unique_ptr<elementT> &iptr)
-  {
-    return os << iptr.get();
   }
 
 }

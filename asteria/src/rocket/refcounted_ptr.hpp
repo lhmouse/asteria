@@ -22,16 +22,10 @@ namespace rocket {
 
 using ::std::default_delete;
 using ::std::atomic;
-using ::std::remove_reference;
-using ::std::remove_pointer;
-using ::std::remove_cv;
 using ::std::enable_if;
-using ::std::conditional;
 using ::std::is_nothrow_constructible;
 using ::std::is_convertible;
 using ::std::is_array;
-using ::std::is_reference;
-using ::std::integral_constant;
 using ::std::add_lvalue_reference;
 using ::std::basic_ostream;
 using ::std::nullptr_t;
@@ -229,13 +223,13 @@ template<typename elementT>
       struct pointer_cast_helper
       {
         template<typename sourceptrT>
-          resultptrT operator()(sourceptrT &&iptr) const
+          resultptrT operator()(sourceptrT &&sptr) const
           {
-            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(iptr.get());
+            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
             if(!ptr) {
               return nullptr;
             }
-            auto tptr = ::std::forward<sourceptrT>(iptr);
+            auto tptr = ::std::forward<sourceptrT>(sptr);
             tptr.release();
             return resultptrT(ptr);
           }
@@ -486,49 +480,49 @@ template<typename elementT>
     lhs.swap(rhs);
   }
 
-template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
+template<typename charT, typename traitsT, typename elementT>
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const refcounted_ptr<elementT> &rhs)
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(iptr);
-  }
-template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
-  {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(iptr));
+    return os << rhs.get();
   }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
+  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(iptr);
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
+  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(iptr));
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(sptr));
   }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &iptr) noexcept
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(iptr);
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&iptr) noexcept
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(::std::move(iptr));
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(sptr));
+  }
+
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
+  {
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(sptr);
+  }
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  {
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(::std::move(sptr));
   }
 
 template<typename elementT, typename ...paramsT>
   inline refcounted_ptr<elementT> make_refcounted(paramsT &&...params)
   {
     return refcounted_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
-  }
-
-template<typename charT, typename traitsT, typename elementT>
-  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const refcounted_ptr<elementT> &iptr)
-  {
-    return os << iptr.get();
   }
 
 }
