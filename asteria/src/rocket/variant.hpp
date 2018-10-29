@@ -254,9 +254,11 @@ template<typename ...alternativesT>
           // There is nothing to do.
           return;
         }
-        static constexpr bool s_can_elide[] = { is_trivially_destructible<alternativesT>::value... };
-        if(s_can_elide[rindex]) {
-          return;
+        if(disjunction<is_trivially_destructible<alternativesT>...>::value) {
+          static constexpr bool s_can_elide[] = { is_trivially_destructible<alternativesT>::value... };
+          if(s_can_elide[rindex]) {
+            return;
+          }
         }
         static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
         (*(s_table[rindex]))(tptr);
