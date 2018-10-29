@@ -19,7 +19,7 @@ class Variable_hashset
 
         explicit operator bool () const noexcept
           {
-            return !!this->var;
+            return this->var != nullptr;
           }
       };
 

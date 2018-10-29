@@ -16,7 +16,6 @@ class Exception : public virtual std::exception
   private:
     Source_location m_loc;
     Value m_value;
-
     Vector<Source_location> m_backtrace;
 
   public:
