@@ -106,11 +106,13 @@ class Reference_dictionary
       }
     bool set(const rocket::cow_string &name, const Reference &ref)
       {
+        ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
         return this->do_insert_or_assign_unchecked(name, Reference(ref));
       }
     bool set(const rocket::cow_string &name, Reference &&ref)
       {
+        ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
         return this->do_insert_or_assign_unchecked(name, std::move(ref));
       }

@@ -98,6 +98,7 @@ class Variable_hashset
       }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
+        ROCKET_ASSERT(var);
         this->reserve(this->size() + 1);
         return this->do_insert_unchecked(var);
       }

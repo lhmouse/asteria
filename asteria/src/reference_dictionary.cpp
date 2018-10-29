@@ -64,7 +64,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
                                  static_cast<long long>(res_arg));
     }
     // Round up the capacity for efficiency.
-    const auto nbkt = res_arg * 2 | this->m_size * 3 | 32;
+    const auto nbkt = res_arg * 2 | this->m_size * 3 | 8;
     // Allocate the new table. This may throw `std::bad_alloc`.
     const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(Bucket)));
     // Initialize the table. This will not throw exceptions.
@@ -112,6 +112,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::cow_string &name) con
 
 bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::cow_string &name, Reference &&ref) noexcept
   {
+    ROCKET_ASSERT(!name.empty());
     const auto data = this->m_data;
     ROCKET_ASSERT(data);
     const auto nbkt = this->m_nbkt;
@@ -124,7 +125,8 @@ bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::cow_strin
       qbkt->ref = std::move(ref);
       return false;
     }
-    *qbkt = { name, std::move(ref) };
+    qbkt->name = name;
+    qbkt->ref = std::move(ref);
     this->m_size += 1;
     return true;
   }

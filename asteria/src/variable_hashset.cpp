@@ -123,7 +123,7 @@ bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable
       // Already exists.
       return false;
     }
-    *qbkt = { var };
+    qbkt->var = var;
     this->m_size += 1;
     return true;
   }
