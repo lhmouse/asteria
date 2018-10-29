@@ -16,7 +16,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : Uint8
+    enum Target : std::uint8_t
       {
         target_unspec  = 0,
         target_switch  = 1,
@@ -34,7 +34,7 @@ class Statement
       };
     struct S_var_def
       {
-        String name;
+        rocket::cow_string name;
         bool immutable;
         Expression init;
       };
@@ -52,7 +52,7 @@ class Statement
     struct S_switch
       {
         Expression ctrl;
-        Bivector<Expression, Block> clauses;
+        rocket::cow_vector<std::pair<Expression, Block>> clauses;
       };
     struct S_do_while
       {
@@ -73,15 +73,15 @@ class Statement
       };
     struct S_for_each
       {
-        String key_name;
-        String mapped_name;
+        rocket::cow_string key_name;
+        rocket::cow_string mapped_name;
         Expression init;
         Block body;
       };
     struct S_try
       {
         Block body_try;
-        String except_name;
+        rocket::cow_string except_name;
         Block body_catch;
       };
     struct S_break
@@ -103,7 +103,7 @@ class Statement
         Expression expr;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_expr      =  0,
         index_block     =  1,

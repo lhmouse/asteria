@@ -14,14 +14,14 @@ class Reference_modifier
   public:
     struct S_array_index
       {
-        Sint64 index;
+        std::int64_t index;
       };
     struct S_object_key
       {
-        String key;
+        rocket::cow_string key;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_array_index  = 0,
         index_object_key   = 1,

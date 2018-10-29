@@ -21,7 +21,7 @@ namespace Asteria {
 
     }
 
-Simple_source_file::Simple_source_file(std::istream &cstrm_io, const String &file)
+Simple_source_file::Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &file)
   : m_file(file)
   {
     ASTERIA_DEBUG_LOG("`Simple_source_file` constructor: ", static_cast<void *>(this));
@@ -45,9 +45,9 @@ Simple_source_file::~Simple_source_file()
     ASTERIA_DEBUG_LOG("`Simple_source_file` destructor: ", static_cast<void *>(this));
   }
 
-Reference Simple_source_file::execute(Global_context &global, Vector<Reference> args) const
+Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> args) const
   {
-    return this->m_code.execute_as_function(global, Function_header(this->m_file, 0, String::shallow("<file scope>"), { }), nullptr, { }, std::move(args));
+    return this->m_code.execute_as_function(global, Function_header(this->m_file, 0, rocket::cow_string::shallow("<file scope>"), { }), nullptr, { }, std::move(args));
   }
 
 }

@@ -14,7 +14,7 @@ class Reference
   {
   private:
     Reference_root m_root;
-    Vector<Reference_modifier> m_mods;
+    rocket::cow_vector<Reference_modifier> m_mods;
 
   public:
     Reference() noexcept

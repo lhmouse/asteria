@@ -13,20 +13,20 @@ namespace Asteria {
 class Simple_source_file
   {
   private:
-    String m_file;
+    rocket::cow_string m_file;
     Block m_code;
 
   public:
-    Simple_source_file(std::istream &cstrm_io, const String &file);
+    Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &file);
     ROCKET_COPYABLE_DESTRUCTOR(Simple_source_file);
 
   public:
-    const String & get_file() const noexcept
+    const rocket::cow_string & get_file() const noexcept
       {
         return this->m_file;
       }
 
-    Reference execute(Global_context &global, Vector<Reference> args) const;
+    Reference execute(Global_context &global, rocket::cow_vector<Reference> args) const;
   };
 
 }

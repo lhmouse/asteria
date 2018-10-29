@@ -10,7 +10,7 @@ Variable_hashset::~Variable_hashset()
   {
     const auto data = this->m_data;
     const auto nbkt = this->m_nbkt;
-    for(Size i = 0; i != nbkt; ++i) {
+    for(std::size_t i = 0; i != nbkt; ++i) {
       rocket::destroy_at(data + i);
     }
     ::operator delete(data);
@@ -18,14 +18,14 @@ Variable_hashset::~Variable_hashset()
 
     namespace {
 
-    Size do_get_origin(Size nbkt, const rocket::refcounted_ptr<Variable> &var) noexcept
+    std::size_t do_get_origin(std::size_t nbkt, const rocket::refcounted_ptr<Variable> &var) noexcept
       {
         // Conversion between an unsigned integer type and a floating point type results in performance penalty.
         // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
-        const auto fcast = [](Size x) { return static_cast<double>(static_cast<Diff>(x)); };
-        const auto ucast = [](double y) { return static_cast<Size>(static_cast<Diff>(y)); };
+        const auto fcast = [](std::size_t x) { return static_cast<double>(static_cast<std::ptrdiff_t>(x)); };
+        const auto ucast = [](double y) { return static_cast<std::size_t>(static_cast<std::ptrdiff_t>(y)); };
         // Multiplication is faster than division.
-        const auto seed = static_cast<Uint32>(reinterpret_cast<Uintptr>(var.get()) * 0x82F63B78);
+        const auto seed = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(var.get()) * 0x82F63B78);
         const auto ratio = fcast(seed >> 1) / double(0x80000000);
         ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
         const auto pos = ucast(fcast(nbkt) * ratio);
@@ -34,17 +34,17 @@ Variable_hashset::~Variable_hashset()
       }
 
     template<typename BucketT, typename PredT>
-      BucketT * do_linear_probe(BucketT * data, Size nbkt, Size first, Size last, PredT &&pred)
+      BucketT * do_linear_probe(BucketT * data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
       {
         // Phase one: Probe from `first` to the end of the table.
-        for(Size i = first; i != nbkt; ++i) {
+        for(std::size_t i = first; i != nbkt; ++i) {
           const auto bkt = data + i;
           if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
             return bkt;
           }
         }
         // Phase two: Probe from the beginning of the table to `last`.
-        for(Size i = 0; i != last; ++i) {
+        for(std::size_t i = 0; i != last; ++i) {
           const auto bkt = data + i;
           if(!*bkt || std::forward<PredT>(pred)(bkt->var)) {
             return bkt;
@@ -57,7 +57,7 @@ Variable_hashset::~Variable_hashset()
 
     }
 
-void Variable_hashset::do_rehash(Size res_arg)
+void Variable_hashset::do_rehash(std::size_t res_arg)
   {
     if(res_arg > this->max_size()) {
       rocket::throw_length_error("Variable_hashset::do_reserve(): A table of `%lld` variables is too large and cannot be allocated.",
@@ -68,13 +68,13 @@ void Variable_hashset::do_rehash(Size res_arg)
     // Allocate the new table. This may throw `std::bad_alloc`.
     const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(rocket::refcounted_ptr<Variable>)));
     // Initialize the table. This will not throw exceptions.
-    for(Size i = 0; i != nbkt; ++i) {
+    for(std::size_t i = 0; i != nbkt; ++i) {
       rocket::construct_at(data + i);
     }
     // Rehash elements and move them into the new table. This will not throw exceptions, either.
     const auto data_old = this->m_data;
     const auto nbkt_old = this->m_nbkt;
-    for(Size i = 0; i != nbkt_old; ++i) {
+    for(std::size_t i = 0; i != nbkt_old; ++i) {
       if(data_old[i]) {
         // Find a bucket for it.
         const auto origin = do_get_origin(nbkt, data_old[i].var);
@@ -90,7 +90,7 @@ void Variable_hashset::do_rehash(Size res_arg)
     this->m_nbkt = nbkt;
   }
 
-Diff Variable_hashset::do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept
+std::ptrdiff_t Variable_hashset::do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept
   {
     const auto data = this->m_data;
     if(!data) {
@@ -128,7 +128,7 @@ bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable
     return true;
   }
 
-void Variable_hashset::do_erase_unchecked(Size tpos) noexcept
+void Variable_hashset::do_erase_unchecked(std::size_t tpos) noexcept
   {
     const auto data = this->m_data;
     ROCKET_ASSERT(data);

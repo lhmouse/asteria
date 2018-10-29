@@ -24,8 +24,8 @@ class Variable_hashset
       };
 
     Bucket *m_data;
-    Size m_nbkt;
-    Size m_size;
+    std::size_t m_nbkt;
+    std::size_t m_size;
 
   public:
     Variable_hashset() noexcept
@@ -35,17 +35,17 @@ class Variable_hashset
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
 
   private:
-    void do_rehash(Size res_arg);
-    Diff do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
+    void do_rehash(std::size_t res_arg);
+    std::ptrdiff_t do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
     bool do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    void do_erase_unchecked(Size tpos) noexcept;
+    void do_erase_unchecked(std::size_t tpos) noexcept;
 
   public:
     bool empty() const noexcept
       {
         return this->m_size == 0;
       }
-    Size size() const noexcept
+    std::size_t size() const noexcept
       {
         return this->m_size;
       }
@@ -53,7 +53,7 @@ class Variable_hashset
       {
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
-        for(Size i = 0; i != nbkt; ++i) {
+        for(std::size_t i = 0; i != nbkt; ++i) {
           data[i] = { };
         }
         this->m_size = 0;
@@ -64,7 +64,7 @@ class Variable_hashset
       {
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
-        for(Size i = 0; i != nbkt; ++i) {
+        for(std::size_t i = 0; i != nbkt; ++i) {
           if(data[i]) {
             std::forward<FuncT>(func)(data[i].var);
           }
@@ -78,18 +78,18 @@ class Variable_hashset
         }
         return true;
       }
-    Size max_size() const noexcept
+    std::size_t max_size() const noexcept
       {
-        const auto max_nbkt = Size(-1) / 2 / sizeof(*(this->m_data));
+        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
         return max_nbkt / 2;
       }
-    Size capacity() const noexcept
+    std::size_t capacity() const noexcept
       {
         const auto nbkt = this->m_nbkt;
         return nbkt / 2;
       }
 
-    void reserve(Size res_arg)
+    void reserve(std::size_t res_arg)
       {
         if(res_arg <= this->capacity()) {
           return;
@@ -107,7 +107,7 @@ class Variable_hashset
         if(toff < 0) {
           return false;
         }
-        this->do_erase_unchecked(static_cast<Size>(toff));
+        this->do_erase_unchecked(static_cast<std::size_t>(toff));
         return true;
       }
 

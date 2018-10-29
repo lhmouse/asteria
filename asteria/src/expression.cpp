@@ -16,7 +16,7 @@ Expression::~Expression()
 
 Expression Expression::bind(const Global_context &global, const Analytic_context &ctx) const
   {
-    Vector<Xpnode> nodes_bnd;
+    rocket::cow_vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
       auto node_bnd = node.bind(global, ctx);

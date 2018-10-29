@@ -19,14 +19,14 @@ Token_stream::~Token_stream()
       {
       private:
         std::reference_wrapper<std::istream> m_strm;
-        String m_file;
+        rocket::cow_string m_file;
 
-        String m_str;
-        Uint32 m_line;
-        Size m_offset;
+        rocket::cow_string m_str;
+        std::uint32_t m_line;
+        std::size_t m_offset;
 
       public:
-        Source_reader(std::istream &xstrm, const String &xfile)
+        Source_reader(std::istream &xstrm, const rocket::cow_string &xfile)
           : m_strm(xstrm), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
@@ -45,12 +45,12 @@ Token_stream::~Token_stream()
           {
             return this->m_strm;
           }
-        const String & file() const noexcept
+        const rocket::cow_string & file() const noexcept
           {
             return this->m_file;
           }
 
-        Uint32 line() const noexcept
+        std::uint32_t line() const noexcept
           {
             return this->m_line;
           }
@@ -71,7 +71,7 @@ Token_stream::~Token_stream()
             ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
             return true;
           }
-        Size offset() const noexcept
+        std::size_t offset() const noexcept
           {
             return this->m_offset;
           }
@@ -79,31 +79,31 @@ Token_stream::~Token_stream()
           {
             return this->m_str.data() + this->m_offset;
           }
-        Size size_avail() const noexcept
+        std::size_t size_avail() const noexcept
           {
             return this->m_str.size() - this->m_offset;
           }
-        char peek(Size add = 0) const noexcept
+        char peek(std::size_t add = 0) const noexcept
           {
             if(add > this->size_avail()) {
               return 0;
             }
             return this->data_avail()[add];
           }
-        void consume(Size add)
+        void consume(std::size_t add)
           {
             if(add > this->size_avail()) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
             this->m_offset += add;
           }
-        void rewind(Size xoffset = 0) noexcept
+        void rewind(std::size_t xoffset = 0) noexcept
           {
             this->m_offset = xoffset;
           }
       };
 
-    inline Parser_error do_make_parser_error(const Source_reader &reader, Size length, Parser_error::Code code)
+    inline Parser_error do_make_parser_error(const Source_reader &reader, std::size_t length, Parser_error::Code code)
       {
         return Parser_error(reader.line(), reader.offset(), length, code);
       }
@@ -111,9 +111,9 @@ Token_stream::~Token_stream()
     class Tack
       {
       private:
-        Uint32 m_line;
-        Size m_offset;
-        Size m_length;
+        std::uint32_t m_line;
+        std::size_t m_offset;
+        std::size_t m_length;
 
       public:
         constexpr Tack() noexcept
@@ -122,15 +122,15 @@ Token_stream::~Token_stream()
           }
 
       public:
-        constexpr Uint32 line() const noexcept
+        constexpr std::uint32_t line() const noexcept
           {
             return this->m_line;
           }
-        constexpr Size offset() const noexcept
+        constexpr std::size_t offset() const noexcept
           {
             return this->m_offset;
           }
-        constexpr Size length() const noexcept
+        constexpr std::size_t length() const noexcept
           {
             return this->m_length;
           }
@@ -138,7 +138,7 @@ Token_stream::~Token_stream()
           {
             return this->m_line != 0;
           }
-        Tack & set(const Source_reader &reader, Size xlength) noexcept
+        Tack & set(const Source_reader &reader, std::size_t xlength) noexcept
           {
             this->m_line = reader.line();
             this->m_offset = reader.offset();
@@ -207,7 +207,7 @@ Token_stream::~Token_stream()
       }
 
     template<typename TokenT>
-      void do_push_token(Vector<Token> &seq_out, Source_reader &reader_io, Size length, TokenT &&token_c)
+      void do_push_token(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io, std::size_t length, TokenT &&token_c)
       {
         seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
         reader_io.consume(length);
@@ -232,7 +232,7 @@ Token_stream::~Token_stream()
           }
       };
 
-    bool do_accept_identifier_or_keyword(Vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_identifier_or_keyword(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -244,13 +244,13 @@ Token_stream::~Token_stream()
         // Get an identifier.
         const auto eptr = bptr + reader_io.size_avail();
         auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch); });
-        const auto tlen = static_cast<Size>(tptr - bptr);
+        const auto tlen = static_cast<std::size_t>(tptr - bptr);
         // Check whether this identifier matches a keyword.
         struct Keyword_element
           {
             char first[12];
             Token::Keyword second;
-            Uintptr : 0;
+            std::uintptr_t : 0;
           }
         static constexpr s_keywords[] =
           {
@@ -289,7 +289,7 @@ Token_stream::~Token_stream()
         for(;;) {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
-            Token::S_identifier token_c = { String(bptr, tlen) };
+            Token::S_identifier token_c = { rocket::cow_string(bptr, tlen) };
             do_push_token(seq_out, reader_io, tlen, std::move(token_c));
             return true;
           }
@@ -304,7 +304,7 @@ Token_stream::~Token_stream()
         }
       }
 
-    bool do_accept_punctuator(Vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_punctuator(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         const auto bptr = reader_io.data_avail();
@@ -316,7 +316,7 @@ Token_stream::~Token_stream()
           {
             char first[6];
             Token::Punctuator second;
-            Uintptr : 0;
+            std::uintptr_t : 0;
           }
         static constexpr s_punctuators[] =
           {
@@ -400,7 +400,7 @@ Token_stream::~Token_stream()
         }
       }
 
-    bool do_accept_string_literal(Vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_string_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -409,8 +409,8 @@ Token_stream::~Token_stream()
           return false;
         }
         // Get a string literal with regard to escape sequences.
-        Size tlen = 1;
-        String value;
+        std::size_t tlen = 1;
+        rocket::cow_string value;
         for(;;) {
           const auto qavail = reader_io.size_avail() - tlen;
           if(qavail == 0) {
@@ -549,7 +549,7 @@ Token_stream::~Token_stream()
         return true;
       }
 
-    bool do_accept_noescape_string_literal(Vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_noescape_string_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
       {
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
@@ -558,8 +558,8 @@ Token_stream::~Token_stream()
           return false;
         }
         // Escape sequences do not have special meanings inside single quotation marks.
-        Size tlen = 1;
-        String value;
+        std::size_t tlen = 1;
+        rocket::cow_string value;
         {
           auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, '\'');
           if(!tptr) {
@@ -567,14 +567,14 @@ Token_stream::~Token_stream()
           }
           tptr += 1;
           value.append(bptr + 1, tptr - 1);
-          tlen = static_cast<Size>(tptr - bptr);
+          tlen = static_cast<std::size_t>(tptr - bptr);
         }
         Token::S_string_literal token_c = { std::move(value) };
         do_push_token(seq_out, reader_io, tlen, std::move(token_c));
         return true;
       }
 
-    bool do_accept_numeric_literal(Vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_numeric_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -602,11 +602,11 @@ Token_stream::~Token_stream()
         // 1. If `frac_begin` equals `int_end` then there is no fractional part.
         // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
         unsigned radix = 10;
-        Size int_begin = 0, int_end = 0;
-        Size frac_begin = 0, frac_end = 0;
+        std::size_t int_begin = 0, int_end = 0;
+        std::size_t frac_begin = 0, frac_end = 0;
         unsigned exp_base = 0;
         bool exp_sign = false;
-        Size exp_begin = 0, exp_end = 0;
+        std::size_t exp_begin = 0, exp_end = 0;
         // Check for radix prefixes.
         if(bptr[int_begin] == '0') {
           auto next = bptr[int_begin + 1];
@@ -627,7 +627,7 @@ Token_stream::~Token_stream()
         }
         // Look for the end of the integral part.
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
-        int_end = static_cast<Size>(tptr - bptr);
+        int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
           throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
         }
@@ -638,7 +638,7 @@ Token_stream::~Token_stream()
         if(next == '.') {
           frac_begin += 1;
           tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
-          frac_end = static_cast<Size>(tptr - bptr);
+          frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
           }
@@ -676,7 +676,7 @@ Token_stream::~Token_stream()
             }
           }
           tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch); });
-          exp_end = static_cast<Size>(tptr - bptr);
+          exp_end = static_cast<std::size_t>(tptr - bptr);
           if(exp_end == exp_begin) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
           }
@@ -714,14 +714,14 @@ Token_stream::~Token_stream()
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
-          Uint64 value = 0;
+          std::uint64_t value = 0;
           for(auto i = int_begin; i != int_end; ++i) {
             const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
             if(!dptr) {
               continue;
             }
-            const auto dvalue = static_cast<Uint64>((dptr - s_digits) / 2);
-            const auto bound = (std::numeric_limits<Uint64>::max() - dvalue) / radix;
+            const auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
+            const auto bound = (std::numeric_limits<std::uint64_t>::max() - dvalue) / radix;
             if(value > bound) {
               throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
             }
@@ -730,7 +730,7 @@ Token_stream::~Token_stream()
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              const auto bound = std::numeric_limits<Uint64>::max() / exp_base;
+              const auto bound = std::numeric_limits<std::uint64_t>::max() / exp_base;
               if(value > bound) {
                 throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
               }
@@ -744,7 +744,7 @@ Token_stream::~Token_stream()
         }
         // Parse the literal as a floating-point number.
         // Parse the integral part.
-        Float64 value = 0;
+        double value = 0;
         bool zero = true;
         for(auto i = int_begin; i != int_end; ++i) {
           const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
@@ -760,7 +760,7 @@ Token_stream::~Token_stream()
           throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_real_literal_overflow);
         }
         // Parse the fractional part.
-        Float64 frac = 0;
+        double frac = 0;
         for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
           const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
           if(!dptr) {
@@ -820,7 +820,7 @@ bool Token_stream::empty() const noexcept
         return true;
       }
       case state_success: {
-        return this->m_stor.as<Vector<Token>>().empty();
+        return this->m_stor.as<rocket::cow_vector<Token>>().empty();
       }
       default: {
         ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
@@ -828,13 +828,13 @@ bool Token_stream::empty() const noexcept
     }
   }
 
-bool Token_stream::load(std::istream &cstrm_io, const String &file)
+bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
     // Store tokens parsed here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
-    Vector<Token> seq;
+    rocket::cow_vector<Token> seq;
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
@@ -872,7 +872,7 @@ bool Token_stream::load(std::istream &cstrm_io, const String &file)
           tptr += 2;
           // Finish this comment and resume from the end of it.
           bcomm.clear();
-          reader.consume(static_cast<Size>(tptr - bptr));
+          reader.consume(static_cast<std::size_t>(tptr - bptr));
           continue;
         }
         // Read a character.
@@ -939,7 +939,7 @@ const Token * Token_stream::peek_opt() const noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
       case state_success: {
-        const auto &alt = this->m_stor.as<Vector<Token>>();
+        const auto &alt = this->m_stor.as<rocket::cow_vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }
@@ -961,7 +961,7 @@ Token Token_stream::shift()
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
       case state_success: {
-        auto &alt = this->m_stor.as<Vector<Token>>();
+        auto &alt = this->m_stor.as<rocket::cow_vector<Token>>();
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }

@@ -27,10 +27,10 @@ class Instantiated_function : public Abstract_function
     ROCKET_COPYABLE_DESTRUCTOR(Instantiated_function);
 
   public:
-    String describe() const override;
+    rocket::cow_string describe() const override;
     void enumerate_variables(const Abstract_variable_callback &callback) const override;
 
-    Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const override;
+    Reference invoke(Global_context &global, Reference self, rocket::cow_vector<Reference> args) const override;
   };
 
 }

@@ -23,7 +23,7 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Analytic_context::get_named_reference_opt(const String &name) const
+const Reference * Analytic_context::get_named_reference_opt(const rocket::cow_string &name) const
   {
     // Check for overriden references.
     const auto qref = this->m_dict.get_opt(name);
@@ -52,14 +52,14 @@ const Reference * Analytic_context::get_named_reference_opt(const String &name) 
     return nullptr;
   }
 
-void Analytic_context::set_named_reference(const String &name, Reference /*ref*/)
+void Analytic_context::set_named_reference(const rocket::cow_string &name, Reference /*ref*/)
   {
     this->m_dict.set(name, this->m_dummy);
   }
 
 void Analytic_context::initialize_for_function(const Function_header &head)
   {
-    for(Size i = 0; i < head.get_param_count(); ++i) {
+    for(std::size_t i = 0; i < head.get_param_count(); ++i) {
       const auto &name = head.get_param_name(i);
       if(name.empty()) {
         continue;

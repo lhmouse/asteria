@@ -18,7 +18,7 @@ namespace Asteria {
 class Xpnode
   {
   public:
-    enum Xop : Uint8
+    enum Xop : std::uint8_t
       {
         // Postfix operators
         xop_postfix_inc      = 10,  // ++
@@ -62,7 +62,7 @@ class Xpnode
       };
     struct S_named_reference
       {
-        String name;
+        rocket::cow_string name;
       };
     struct S_bound_reference
       {
@@ -82,11 +82,11 @@ class Xpnode
     struct S_function_call
       {
         Source_location loc;
-        Size arg_cnt;
+        std::size_t arg_cnt;
       };
     struct S_subscript
       {
-        String name;  // If this is empty then the subscript is to be popped from the stack.
+        rocket::cow_string name;  // If this is empty then the subscript is to be popped from the stack.
       };
     struct S_operator_rpn
       {
@@ -95,11 +95,11 @@ class Xpnode
       };
     struct S_unnamed_array
       {
-        Size elem_cnt;
+        std::size_t elem_cnt;
       };
     struct S_unnamed_object
       {
-        Vector<String> keys;
+        rocket::cow_vector<rocket::cow_string> keys;
       };
     struct S_coalescence
       {
@@ -107,7 +107,7 @@ class Xpnode
         Expression branch_null;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_literal           =  0,
         index_named_reference   =  1,

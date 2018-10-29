@@ -27,7 +27,7 @@ class Reference_root
         rocket::refcounted_ptr<Variable> var;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_constant   = 0,
         index_temporary  = 1,

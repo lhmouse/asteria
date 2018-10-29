@@ -16,20 +16,20 @@ class Variadic_arguer : public Abstract_function
   {
   private:
     Source_location m_loc;
-    Vector<Reference> m_vargs;
+    rocket::cow_vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(const Source_location &loc, Vector<Reference> vargs)
+    Variadic_arguer(const Source_location &loc, rocket::cow_vector<Reference> vargs)
       : m_loc(loc), m_vargs(std::move(vargs))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);
 
   public:
-    String describe() const override;
+    rocket::cow_string describe() const override;
     void enumerate_variables(const Abstract_variable_callback &callback) const override;
 
-    Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const override;
+    Reference invoke(Global_context &global, Reference self, rocket::cow_vector<Reference> args) const override;
   };
 
 }

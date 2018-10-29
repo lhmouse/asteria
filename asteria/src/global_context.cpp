@@ -37,7 +37,7 @@ const Abstract_context * Global_context::get_parent_opt() const noexcept
     return nullptr;
   }
 
-const Reference * Global_context::get_named_reference_opt(const String &name) const
+const Reference * Global_context::get_named_reference_opt(const rocket::cow_string &name) const
   {
     // Check for overriden references.
     const auto qref = this->m_dict.get_opt(name);
@@ -49,7 +49,7 @@ const Reference * Global_context::get_named_reference_opt(const String &name) co
     return nullptr;
   }
 
-void Global_context::set_named_reference(const String &name, Reference ref)
+void Global_context::set_named_reference(const rocket::cow_string &name, Reference ref)
   {
     this->m_dict.set(name, std::move(ref));
   }

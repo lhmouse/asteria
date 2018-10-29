@@ -11,7 +11,7 @@ namespace Asteria {
 class Parser_error
   {
   public:
-    enum Code : Uint32
+    enum Code : std::uint32_t
       {
         // Special
         code_success                                    =   0,
@@ -70,27 +70,27 @@ class Parser_error
     static const char * get_code_description(Code code) noexcept;
 
   private:
-    Uint32 m_line;
-    Size m_offset;
-    Size m_length;
+    std::uint32_t m_line;
+    std::size_t m_offset;
+    std::size_t m_length;
     Code m_code;
 
   public:
-    constexpr Parser_error(Uint32 line, Size offset, Size xlength, Code code) noexcept
+    constexpr Parser_error(std::uint32_t line, std::size_t offset, std::size_t xlength, Code code) noexcept
       : m_line(line), m_offset(offset), m_length(xlength), m_code(code)
       {
       }
 
   public:
-    constexpr Uint32 get_line() const noexcept
+    constexpr std::uint32_t get_line() const noexcept
       {
         return this->m_line;
       }
-    constexpr Size get_offset() const noexcept
+    constexpr std::size_t get_offset() const noexcept
       {
         return this->m_offset;
       }
-    constexpr Size get_length() const noexcept
+    constexpr std::size_t get_length() const noexcept
       {
         return this->m_length;
       }

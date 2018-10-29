@@ -16,7 +16,7 @@ class Exception : public virtual std::exception
   private:
     Source_location m_loc;
     Value m_value;
-    Vector<Source_location> m_backtrace;
+    rocket::cow_vector<Source_location> m_backtrace;
 
   public:
     template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
@@ -25,7 +25,7 @@ class Exception : public virtual std::exception
       {
       }
     explicit Exception(const std::exception &stdex)
-      : m_loc(String::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
+      : m_loc(rocket::cow_string::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Exception);
@@ -40,7 +40,7 @@ class Exception : public virtual std::exception
         return this->m_value;
       }
 
-    const Vector<Source_location> & get_backtrace() const noexcept
+    const rocket::cow_vector<Source_location> & get_backtrace() const noexcept
       {
         return this->m_backtrace;
       }

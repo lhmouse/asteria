@@ -25,8 +25,8 @@ class Global_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
 
-    const Reference * get_named_reference_opt(const String &name) const override;
-    void set_named_reference(const String &name, Reference ref) override;
+    const Reference * get_named_reference_opt(const rocket::cow_string &name) const override;
+    void set_named_reference(const rocket::cow_string &name, Reference ref) override;
 
     rocket::refcounted_ptr<Variable> create_tracked_variable();
     void perform_garbage_collection(unsigned gen_limit);

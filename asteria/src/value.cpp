@@ -168,14 +168,14 @@ Value::Compare Value::compare(const Value &other) const noexcept
 
     namespace {
 
-    inline Indent do_indent_or_space(Size indent_increment, Size indent_next)
+    inline Indent do_indent_or_space(std::size_t indent_increment, std::size_t indent_next)
       {
         return (indent_increment != 0) ? Indent('\n', indent_next) : Indent(' ', 0);
       }
 
     }
 
-void Value::dump(std::ostream &os, Size indent_increment, Size indent_next) const
+void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
       case type_null: {

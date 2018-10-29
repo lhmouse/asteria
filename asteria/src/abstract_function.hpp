@@ -18,10 +18,10 @@ class Abstract_function : public rocket::refcounted_base<Abstract_function>
     ROCKET_COPYABLE_DESTRUCTOR(Abstract_function, virtual);
 
   public:
-    virtual String describe() const = 0;
+    virtual rocket::cow_string describe() const = 0;
     virtual void enumerate_variables(const Abstract_variable_callback &callback) const = 0;
 
-    virtual Reference invoke(Global_context &global, Reference self, Vector<Reference> args) const = 0;
+    virtual Reference invoke(Global_context &global, Reference self, rocket::cow_vector<Reference> args) const = 0;
   };
 
 }

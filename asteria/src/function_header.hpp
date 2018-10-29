@@ -13,15 +13,15 @@ class Function_header
   {
   private:
     Source_location m_loc;
-    String m_func;
-    Vector<String> m_params;
+    rocket::cow_string m_func;
+    rocket::cow_vector<rocket::cow_string> m_params;
 
   public:
-    Function_header(Source_location loc, String func, Vector<String> params)
+    Function_header(Source_location loc, rocket::cow_string func, rocket::cow_vector<rocket::cow_string> params)
       : m_loc(std::move(loc)), m_func(std::move(func)), m_params(std::move(params))
       {
       }
-    Function_header(String file, Uint32 line, String func, Vector<String> params)
+    Function_header(rocket::cow_string file, std::uint32_t line, rocket::cow_string func, rocket::cow_vector<rocket::cow_string> params)
       : m_loc(std::move(file), line), m_func(std::move(func)), m_params(std::move(params))
       {
       }
@@ -31,23 +31,23 @@ class Function_header
       {
         return this->m_loc;
       }
-    const String & get_file() const noexcept
+    const rocket::cow_string & get_file() const noexcept
       {
         return this->m_loc.get_file();
       }
-    Uint32 get_line() const noexcept
+    std::uint32_t get_line() const noexcept
       {
         return this->m_loc.get_line();
       }
-    const String & get_func() const noexcept
+    const rocket::cow_string & get_func() const noexcept
       {
         return this->m_func;
       }
-    Size get_param_count() const noexcept
+    std::size_t get_param_count() const noexcept
       {
         return this->m_params.size();
       }
-    const String & get_param_name(Size index) const
+    const rocket::cow_string & get_param_name(std::size_t index) const
       {
         return this->m_params.at(index);
       }

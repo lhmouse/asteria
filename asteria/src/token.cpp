@@ -305,7 +305,7 @@ void Token::dump(std::ostream &os) const
       case index_real_literal: {
         const auto &alt = this->check<S_real_literal>();
         // real-number-literal `123.456`
-        os <<"real-number-literal `" <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<Float64>::max_digits10) <<alt.value <<"`";
+        os <<"real-number-literal `" <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<double>::max_digits10) <<alt.value <<"`";
         return;
       }
       case index_string_literal: {

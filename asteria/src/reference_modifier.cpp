@@ -23,13 +23,13 @@ const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
           }
           case Value::type_array: {
             const auto &arr = parent.check<D_array>();
-            Uint64 bfill, efill;
+            std::uint64_t bfill, efill;
             auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
             if(rindex >= arr.size()) {
               ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return nullptr;
             }
-            return &(arr.at(static_cast<Size>(rindex)));
+            return &(arr.at(static_cast<std::size_t>(rindex)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -85,7 +85,7 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
             // Fallthrough.
           case Value::type_array:
             auto &arr = parent.check<D_array>();
-            Uint64 bfill, efill;
+            std::uint64_t bfill, efill;
             auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
             if(rindex >= arr.size()) {
               if(!create_new) {
@@ -97,19 +97,19 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new, Va
                 ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", rsize_add, "` would exceed system resource limits.");
               }
               if(bfill != 0) {
-                arr.insert(arr.begin(), static_cast<Size>(bfill));
+                arr.insert(arr.begin(), static_cast<std::size_t>(bfill));
                 rindex += bfill;
               }
               if(efill != 0) {
-                arr.append(static_cast<Size>(efill));
+                arr.append(static_cast<std::size_t>(efill));
               }
             }
             if(erased_out_opt) {
-              *erased_out_opt = std::move(arr.mut(static_cast<Size>(rindex)));
-              arr.erase(arr.begin() + static_cast<Diff>(rindex));
+              *erased_out_opt = std::move(arr.mut(static_cast<std::size_t>(rindex)));
+              arr.erase(arr.begin() + static_cast<std::ptrdiff_t>(rindex));
               return erased_out_opt;
             }
-            return &(arr.mut(static_cast<Size>(rindex)));
+            return &(arr.mut(static_cast<std::size_t>(rindex)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");

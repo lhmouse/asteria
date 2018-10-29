@@ -16,7 +16,7 @@ class Reference_stack
       {
         Chunk *prev;
         Chunk *next;
-        Svector<Reference, 16> refs;
+        rocket::static_vector<Reference, 16> refs;
 
         explicit Chunk(Chunk *xprev) noexcept
           : prev(xprev), next(nullptr), refs()
@@ -25,7 +25,7 @@ class Reference_stack
       };
 
     Chunk *m_scur;
-    Size m_size;
+    std::size_t m_size;
     Chunk m_head;
 
   public:
@@ -43,7 +43,7 @@ class Reference_stack
       {
         return this->m_size == 0;
       }
-    Size size() const noexcept
+    std::size_t size() const noexcept
       {
         return this->m_size;
       }

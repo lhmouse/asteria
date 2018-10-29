@@ -14,7 +14,7 @@ namespace Asteria {
 class Parser
   {
   public:
-    enum State : Uint8
+    enum State : std::uint8_t
       {
         state_empty    = 0,
         state_error    = 1,
@@ -22,7 +22,7 @@ class Parser
       };
 
   private:
-    rocket::variant<Nullptr, Parser_error, Vector<Statement>> m_stor;
+    rocket::variant<std::nullptr_t, Parser_error, rocket::cow_vector<Statement>> m_stor;
 
   public:
     Parser() noexcept

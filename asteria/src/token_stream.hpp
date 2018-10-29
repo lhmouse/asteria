@@ -14,7 +14,7 @@ namespace Asteria {
 class Token_stream
   {
   public:
-    enum State : Uint8
+    enum State : std::uint8_t
       {
         state_empty    = 0,
         state_error    = 1,
@@ -22,7 +22,7 @@ class Token_stream
       };
 
   private:
-    rocket::variant<Nullptr, Parser_error, Vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    rocket::variant<std::nullptr_t, Parser_error, rocket::cow_vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
     Token_stream() noexcept
@@ -44,7 +44,7 @@ class Token_stream
     Parser_error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(std::istream &cstrm_io, const String &file);
+    bool load(std::istream &cstrm_io, const rocket::cow_string &file);
     void clear() noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();

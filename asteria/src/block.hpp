@@ -12,7 +12,7 @@ namespace Asteria {
 class Block
   {
   public:
-    enum Status : Uint8
+    enum Status : std::uint8_t
       {
         status_next             = 0,
         status_break_unspec     = 1,
@@ -26,14 +26,14 @@ class Block
       };
 
   private:
-    Vector<Statement> m_stmts;
+    rocket::cow_vector<Statement> m_stmts;
 
   public:
     Block() noexcept
       : m_stmts()
       {
       }
-    Block(Vector<Statement> &&stmts) noexcept
+    Block(rocket::cow_vector<Statement> &&stmts) noexcept
       : m_stmts(std::move(stmts))
       {
       }
@@ -48,7 +48,7 @@ class Block
     Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
     Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Function_header &head) const;
-    Reference execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args) const;
+    Reference execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

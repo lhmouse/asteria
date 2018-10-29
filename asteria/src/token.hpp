@@ -13,7 +13,7 @@ namespace Asteria {
 class Token
   {
   public:
-    enum Keyword : Uint8
+    enum Keyword : std::uint8_t
       {
         keyword_var       =  0,
         keyword_const     =  1,
@@ -43,7 +43,7 @@ class Token
         keyword_unset     = 25,
         keyword_lengthof  = 26,
       };
-    enum Punctuator : Uint8
+    enum Punctuator : std::uint8_t
       {
         punctuator_add         =  0,  // +
         punctuator_add_eq      =  1,  // +=
@@ -112,22 +112,22 @@ class Token
       };
     struct S_identifier
       {
-        String name;
+        rocket::cow_string name;
       };
     struct S_integer_literal
       {
-        Uint64 value;
+        std::uint64_t value;
       };
     struct S_real_literal
       {
-        Float64 value;
+        double value;
       };
     struct S_string_literal
       {
-        String value;
+        rocket::cow_string value;
       };
 
-    enum Index : Uint8
+    enum Index : std::uint8_t
       {
         index_keyword          = 0,
         index_punctuator       = 1,
@@ -151,35 +151,35 @@ class Token
     static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
-    String m_file;
-    Uint32 m_line;
-    Size m_offset;
-    Size m_length;
+    rocket::cow_string m_file;
+    std::uint32_t m_line;
+    std::size_t m_offset;
+    std::size_t m_length;
     Variant m_stor;
 
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
-      Token(const String &file, Uint32 line, Size offset, Size length, AltT &&alt)
+      Token(const rocket::cow_string &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
       : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Token);
 
   public:
-    const String & get_file() const noexcept
+    const rocket::cow_string & get_file() const noexcept
       {
         return this->m_file;
       }
-    Uint32 get_line() const noexcept
+    std::uint32_t get_line() const noexcept
       {
         return this->m_line;
       }
-    Size get_offset() const noexcept
+    std::size_t get_offset() const noexcept
       {
         return this->m_offset;
       }
-    Size get_length() const noexcept
+    std::size_t get_length() const noexcept
       {
         return this->m_length;
       }

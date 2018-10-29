@@ -12,7 +12,7 @@ namespace Asteria {
 class Reference_dictionary
   {
   private:
-    Dictionary<Reference> m_dict;
+    rocket::cow_hashmap<rocket::cow_string, Reference, rocket::cow_string::hash, rocket::cow_string::equal_to> m_dict;
 
   public:
     Reference_dictionary() noexcept
@@ -26,7 +26,7 @@ class Reference_dictionary
       {
         return this->m_dict.empty();
       }
-    Size size() const noexcept
+    std::size_t size() const noexcept
       {
         return this->m_dict.size();
       }
@@ -35,7 +35,7 @@ class Reference_dictionary
         this->m_dict.clear();
       }
 
-    const Reference * get_opt(const String &name) const noexcept
+    const Reference * get_opt(const rocket::cow_string &name) const noexcept
       {
         const auto it = this->m_dict.find(name);
         if(it == this->m_dict.end()) {
@@ -43,7 +43,7 @@ class Reference_dictionary
         }
         return &(it->second);
       }
-    Reference * get_opt(const String &name) noexcept
+    Reference * get_opt(const rocket::cow_string &name) noexcept
       {
         const auto it = this->m_dict.find_mut(name);
         if(it == this->m_dict.end()) {
@@ -53,11 +53,11 @@ class Reference_dictionary
       }
 
     template<typename ParamT>
-      Reference & set(const String &name, ParamT &&param)
+      Reference & set(const rocket::cow_string &name, ParamT &&param)
       {
         return this->m_dict.insert_or_assign(name, std::forward<ParamT>(param)).first->second;
       }
-    bool unset(const String &name) noexcept
+    bool unset(const rocket::cow_string &name) noexcept
       {
         return this->m_dict.erase(name);
       }

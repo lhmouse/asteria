@@ -12,14 +12,14 @@ namespace Asteria {
 class Expression
   {
   private:
-    Vector<Xpnode> m_nodes;
+    rocket::cow_vector<Xpnode> m_nodes;
 
   public:
     Expression() noexcept
       : m_nodes()
       {
       }
-    Expression(Vector<Xpnode> &&nodes) noexcept
+    Expression(rocket::cow_vector<Xpnode> &&nodes) noexcept
       : m_nodes(std::move(nodes))
       {
       }

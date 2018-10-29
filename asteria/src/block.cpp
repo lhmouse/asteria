@@ -26,7 +26,7 @@ void Block::fly_over_in_place(Abstract_context &ctx_io) const
 
 Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &global) const
   {
-    Vector<Statement> stmts_bnd;
+    rocket::cow_vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
       auto alt_bnd = stmt.bind_in_place(ctx_io, global);
@@ -67,7 +67,7 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
     return Instantiated_function(head, std::move(body_bnd));
   }
 
-Reference Block::execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args) const
+Reference Block::execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args) const
   {
     Executive_context ctx_next(nullptr);
     ctx_next.initialize_for_function(global, head, zvarg_opt, std::move(self), std::move(args));

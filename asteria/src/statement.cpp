@@ -20,7 +20,7 @@ Statement::~Statement()
 
     namespace {
 
-    void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const String &name, Reference ref)
+    void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const rocket::cow_string &name, Reference ref)
       {
         if(name.empty()) {
           return;
@@ -123,7 +123,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_context ctx_next(&ctx_io);
-        Bivector<Expression, Block> clauses_bnd;
+        rocket::cow_vector<std::pair<Expression, Block>> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
         for(const auto &pair : alt.clauses) {
           auto first_bnd = pair.first.bind(global, ctx_next);
@@ -488,8 +488,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             [&](const Source_location &loc)
               {
                 D_object elem;
-                elem.insert_or_assign(String::shallow("file"), D_string(loc.get_file()));
-                elem.insert_or_assign(String::shallow("line"), D_integer(loc.get_line()));
+                elem.insert_or_assign(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
+                elem.insert_or_assign(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
                 backtrace.emplace_back(std::move(elem));
               };
           // The exception variable shall not outlast the `catch` body.
@@ -516,7 +516,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.set_named_reference(String::shallow("__backtrace"), std::move(ref_c));
+          ctx_next.set_named_reference(rocket::cow_string::shallow("__backtrace"), std::move(ref_c));
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, global, ctx_next);
           if(status != Block::status_next) {

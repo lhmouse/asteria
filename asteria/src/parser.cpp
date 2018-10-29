@@ -32,7 +32,7 @@ Parser::~Parser()
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Source_location(String::shallow("<no token>"), 0);
+          return Source_location(rocket::cow_string::shallow("<no token>"), 0);
         }
         return Source_location(qtok->get_file(), qtok->get_line());
       }
@@ -71,7 +71,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_identifier(String &name_out, Token_stream &tstrm_io)
+    bool do_accept_identifier(rocket::cow_string &name_out, Token_stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -86,7 +86,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_string_literal(String &value_out, Token_stream &tstrm_io)
+    bool do_accept_string_literal(rocket::cow_string &value_out, Token_stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -101,7 +101,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_keyword_as_identifier(String &name_out, Token_stream &tstrm_io)
+    bool do_accept_keyword_as_identifier(rocket::cow_string &name_out, Token_stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -111,12 +111,12 @@ Parser::~Parser()
         if(!qalt) {
           return false;
         }
-        name_out = String::shallow(Token::get_keyword(qalt->keyword));
+        name_out = rocket::cow_string::shallow(Token::get_keyword(qalt->keyword));
         tstrm_io.shift();
         return true;
       }
 
-    bool do_accept_prefix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_prefix_operator(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof"
@@ -193,7 +193,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_postfix_operator(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_postfix_operator(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // postfix-operator ::=
         //   "++" | "--"
@@ -303,11 +303,11 @@ Parser::~Parser()
         return true;
       }
 
-    extern bool do_accept_statement_as_block(Vector<Statement> &stmts_out, Token_stream &tstrm_io);
-    extern bool do_accept_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io);
-    extern bool do_accept_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io);
+    extern bool do_accept_statement_as_block(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io);
+    extern bool do_accept_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io);
+    extern bool do_accept_expression(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io);
 
-    bool do_accept_block_statement_list(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_block_statement_list(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -330,9 +330,9 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_block_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_block_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
-        Vector<Statement> stmts;
+        rocket::cow_vector<Statement> stmts;
         if(!do_accept_block_statement_list(stmts, tstrm_io)) {
           return false;
         }
@@ -341,13 +341,13 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_identifier_list(Vector<String> &names_out, Token_stream &tstrm_io)
+    bool do_accept_identifier_list(rocket::cow_vector<rocket::cow_string> &names_out, Token_stream &tstrm_io)
       {
         // identifier-list-opt ::=
         //   identifier-list | ""
         // identifier-list ::=
         //   identifier ( "," identifier-list | "" )
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
@@ -363,9 +363,9 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_named_reference(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_named_reference(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
@@ -374,7 +374,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_literal(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_literal(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         Value value;
         if(!do_accept_literal(value, tstrm_io)) {
@@ -385,17 +385,17 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_this(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_this(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
           return false;
         }
-        Xpnode::S_named_reference node_c = { String::shallow("__this") };
+        Xpnode::S_named_reference node_c = { rocket::cow_string::shallow("__this") };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
 
-    bool do_accept_closure_function(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_closure_function(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -404,7 +404,7 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
-        Vector<String> params;
+        rocket::cow_vector<rocket::cow_string> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -414,16 +414,16 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> body;
+        rocket::cow_vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Xpnode::S_closure_function node_c = { Function_header(std::move(loc), String::shallow("<closure function>"), std::move(params)), std::move(body) };
+        Xpnode::S_closure_function node_c = { Function_header(std::move(loc), rocket::cow_string::shallow("<closure function>"), std::move(params)), std::move(body) };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
 
-    bool do_accept_unnamed_array(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_unnamed_array(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -436,7 +436,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
           return false;
         }
-        Size elem_cnt = 0;
+        std::size_t elem_cnt = 0;
         for(;;) {
           if(!do_accept_expression(nodes_out, tstrm_io)) {
             break;
@@ -456,7 +456,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_unnamed_object(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_unnamed_object(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -467,10 +467,10 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           return false;
         }
-        Vector<String> keys;
+        rocket::cow_vector<rocket::cow_string> keys;
         for(;;) {
           const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
-          String key;
+          rocket::cow_string key;
           bool key_got = do_accept_string_literal(key, tstrm_io) ||
                          do_accept_identifier(key, tstrm_io) ||
                          do_accept_keyword_as_identifier(key, tstrm_io);
@@ -501,7 +501,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_nested_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_nested_expression(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // nested-expression ::=
         //   "(" expression ")"
@@ -517,7 +517,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_primary_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_primary_expression(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
@@ -530,7 +530,7 @@ Parser::~Parser()
                do_accept_nested_expression(nodes_out, tstrm_io);
       }
 
-    bool do_accept_postfix_function_call(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_postfix_function_call(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -543,7 +543,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           return false;
         }
-        Size arg_cnt = 0;
+        std::size_t arg_cnt = 0;
         if(do_accept_expression(nodes_out, tstrm_io) != false) {
           for(;;) {
             ++arg_cnt;
@@ -563,7 +563,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_postfix_subscript(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_postfix_subscript(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
@@ -576,19 +576,19 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_expected);
         }
-        Xpnode::S_subscript node_c = { String() };
+        Xpnode::S_subscript node_c = { rocket::cow_string() };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_member_access(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_postfix_member_access(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // postfix-member-access ::=
         //   "." identifier
         if(!do_match_punctuator(tstrm_io, Token::punctuator_dot)) {
           return false;
         }
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
@@ -597,7 +597,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_infix_element(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_infix_element(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // infix-element ::=
         //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
@@ -609,7 +609,7 @@ Parser::~Parser()
         //   postfix-operator-list | ""
         // postfix-operator-list ::=
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
-        Vector<Xpnode> prefixes;
+        rocket::cow_vector<Xpnode> prefixes;
         if(!do_accept_prefix_operator(prefixes, tstrm_io)) {
           if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
             return false;
@@ -641,10 +641,10 @@ Parser::~Parser()
         return true;
       }
 
-    class Infix_element_base : public rocket::refcounted_base<Infix_element_base>
+    class Infix_element_base
       {
       public:
-        enum Precedence : Uint8
+        enum Precedence : std::uint8_t
           {
             precedence_multiplicative  =  1,
             precedence_additive        =  2,
@@ -668,7 +668,7 @@ Parser::~Parser()
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Vector<Xpnode> &nodes_out) = 0;
+        virtual void extract(rocket::cow_vector<Xpnode> &nodes_out) = 0;
         virtual void append(Infix_element_base &&elem) = 0;
       };
 
@@ -679,10 +679,10 @@ Parser::~Parser()
     class Infix_head : public Infix_element_base
       {
       private:
-        Vector<Xpnode> m_nodes;
+        rocket::cow_vector<Xpnode> m_nodes;
 
       public:
-        explicit Infix_head(Vector<Xpnode> &&nodes)
+        explicit Infix_head(rocket::cow_vector<Xpnode> &&nodes)
           : m_nodes(std::move(nodes))
           {
           }
@@ -692,7 +692,7 @@ Parser::~Parser()
           {
             return std::numeric_limits<Precedence>::max();
           }
-        void extract(Vector<Xpnode> &nodes_out) override
+        void extract(rocket::cow_vector<Xpnode> &nodes_out) override
           {
             nodes_out.append(std::make_move_iterator(this->m_nodes.mut_begin()), std::make_move_iterator(this->m_nodes.mut_end()));
           }
@@ -702,13 +702,13 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_head(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_head(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
-        Vector<Xpnode> nodes;
+        rocket::cow_vector<Xpnode> nodes;
         if(!do_accept_infix_element(nodes, tstrm_io)) {
           return false;
         }
-        elem_out = rocket::make_refcounted<Infix_head>(std::move(nodes));
+        elem_out.reset(new Infix_head(std::move(nodes)));
         return true;
       }
 
@@ -726,11 +726,11 @@ Parser::~Parser()
       private:
         Sop m_sop;
         bool m_assign;
-        Vector<Xpnode> m_branch_true;
-        Vector<Xpnode> m_branch_false;
+        rocket::cow_vector<Xpnode> m_branch_true;
+        rocket::cow_vector<Xpnode> m_branch_false;
 
       public:
-        Infix_selection(Sop sop, bool assign, Vector<Xpnode> &&branch_true, Vector<Xpnode> &&branch_false)
+        Infix_selection(Sop sop, bool assign, rocket::cow_vector<Xpnode> &&branch_true, rocket::cow_vector<Xpnode> &&branch_false)
           : m_sop(sop), m_assign(assign), m_branch_true(std::move(branch_true)), m_branch_false(std::move(branch_false))
           {
           }
@@ -759,7 +759,7 @@ Parser::~Parser()
               }
             }
           }
-        void extract(Vector<Xpnode> &nodes_out) override
+        void extract(rocket::cow_vector<Xpnode> &nodes_out) override
           {
             if(this->m_sop == sop_coales) {
               Xpnode::S_coalescence node_c = { this->m_assign, std::move(this->m_branch_false) };
@@ -775,7 +775,7 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_selection_quest(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_quest(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -784,22 +784,22 @@ Parser::~Parser()
           }
           assign = true;
         }
-        Vector<Xpnode> branch_true;
+        rocket::cow_vector<Xpnode> branch_true;
         if(!do_accept_expression(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
         }
-        Vector<Xpnode> branch_false;
+        rocket::cow_vector<Xpnode> branch_false;
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false));
+        elem_out.reset(new Infix_selection(Infix_selection::sop_quest, assign, std::move(branch_true), std::move(branch_false)));
         return true;
       }
 
-    bool do_accept_infix_selection_and(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_and(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
@@ -808,15 +808,15 @@ Parser::~Parser()
           }
           assign = true;
         }
-        Vector<Xpnode> branch_true;
+        rocket::cow_vector<Xpnode> branch_true;
         if(!do_accept_infix_element(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_and, assign, std::move(branch_true), Vector<Xpnode>());
+        elem_out.reset(new Infix_selection(Infix_selection::sop_and, assign, std::move(branch_true), rocket::cow_vector<Xpnode>()));
         return true;
       }
 
-    bool do_accept_infix_selection_or(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_or(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
@@ -825,15 +825,15 @@ Parser::~Parser()
           }
           assign = true;
         }
-        Vector<Xpnode> branch_false;
+        rocket::cow_vector<Xpnode> branch_false;
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_or, assign, Vector<Xpnode>(), std::move(branch_false));
+        elem_out.reset(new Infix_selection(Infix_selection::sop_or, assign, rocket::cow_vector<Xpnode>(), std::move(branch_false)));
         return true;
       }
 
-    bool do_accept_infix_selection_coales(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_selection_coales(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -842,11 +842,11 @@ Parser::~Parser()
           }
           assign = true;
         }
-        Vector<Xpnode> branch_null;
+        rocket::cow_vector<Xpnode> branch_null;
         if(!do_accept_infix_element(branch_null, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_refcounted<Infix_selection>(Infix_selection::sop_coales, assign, Vector<Xpnode>(), std::move(branch_null));
+        elem_out.reset(new Infix_selection(Infix_selection::sop_coales, assign, rocket::cow_vector<Xpnode>(), std::move(branch_null)));
         return true;
       }
 
@@ -855,10 +855,10 @@ Parser::~Parser()
       private:
         Xpnode::Xop m_xop;
         bool m_assign;
-        Vector<Xpnode> m_rhs;
+        rocket::cow_vector<Xpnode> m_rhs;
 
       public:
-        Infix_operator(Xpnode::Xop xop, bool assign, Vector<Xpnode> &&rhs)
+        Infix_operator(Xpnode::Xop xop, bool assign, rocket::cow_vector<Xpnode> &&rhs)
           : m_xop(xop), m_assign(assign), m_rhs(std::move(rhs))
           {
           }
@@ -913,7 +913,7 @@ Parser::~Parser()
               }
             }
           }
-        void extract(Vector<Xpnode> &nodes_out) override
+        void extract(rocket::cow_vector<Xpnode> &nodes_out) override
           {
             nodes_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
@@ -926,7 +926,7 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_operator(rocket::refcounted_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_operator(std::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         // infix-operator ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1083,15 +1083,15 @@ Parser::~Parser()
             return false;
           }
         }
-        Vector<Xpnode> rhs;
+        rocket::cow_vector<Xpnode> rhs;
         if(!do_accept_infix_element(rhs, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_refcounted<Infix_operator>(xop, assign, std::move(rhs));
+        elem_out.reset(new Infix_operator(xop, assign, std::move(rhs)));
         return true;
       }
 
-    bool do_accept_expression(Vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
+    bool do_accept_expression(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // expression ::=
         //   infix-element infix-operator-list-opt
@@ -1102,11 +1102,11 @@ Parser::~Parser()
         // infix-selection ::=
         //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
         //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
-        rocket::refcounted_ptr<Infix_element_base> elem;
+        std::unique_ptr<Infix_element_base> elem;
         if(!do_accept_infix_head(elem, tstrm_io)) {
           return false;
         }
-        Vector<rocket::refcounted_ptr<Infix_element_base>> stack;
+        rocket::cow_vector<std::unique_ptr<Infix_element_base>> stack;
         stack.emplace_back(std::move(elem));
         for(;;) {
           bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
@@ -1135,7 +1135,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_variable_definition(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_variable_definition(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // variable-definition ::=
         //   "var" identifier equal-initailizer-opt ";"
@@ -1146,11 +1146,11 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_var)) {
           return false;
         }
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
-        Vector<Xpnode> init;
+        rocket::cow_vector<Xpnode> init;
         if(do_match_punctuator(tstrm_io, Token::punctuator_assign) != false) {
           // The initializer is optional.
           if(!do_accept_expression(init, tstrm_io)) {
@@ -1165,7 +1165,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_immutable_variable_definition(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_immutable_variable_definition(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // immutable-variable-definition ::=
         //   "const" identifier equal-initailizer ";"
@@ -1174,14 +1174,14 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_const)) {
           return false;
         }
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_equals_sign_expected);
         }
-        Vector<Xpnode> init;
+        rocket::cow_vector<Xpnode> init;
         if(!do_accept_expression(init, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
@@ -1193,7 +1193,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_function_definition(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_function_definition(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1202,11 +1202,11 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
-        String name;
+        rocket::cow_string name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
-        Vector<String> params;
+        rocket::cow_vector<rocket::cow_string> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1216,7 +1216,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> body;
+        rocket::cow_vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1225,11 +1225,11 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_expression_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_expression_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // expression-statement ::=
         //   expression ";"
-        Vector<Xpnode> expr;
+        rocket::cow_vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           return false;
         }
@@ -1241,14 +1241,14 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_if_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_if_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // if-statement ::=
         //   "if" "(" expression ")" statement ( "else" statement | "" )
         if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
           return false;
         }
-        Vector<Xpnode> cond;
+        rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1258,11 +1258,11 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> branch_true;
+        rocket::cow_vector<Statement> branch_true;
         if(!do_accept_statement_as_block(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Vector<Statement> branch_false;
+        rocket::cow_vector<Statement> branch_false;
         if(do_match_keyword(tstrm_io, Token::keyword_else) != false) {
           // The `else` branch is optional.
           if(!do_accept_statement_as_block(branch_false, tstrm_io)) {
@@ -1274,7 +1274,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_switch_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_switch_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // switch-statement ::=
         //   "switch" "(" expression ")" switch-block
@@ -1287,7 +1287,7 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_switch)) {
           return false;
         }
-        Vector<Xpnode> ctrl;
+        rocket::cow_vector<Xpnode> ctrl;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1297,12 +1297,12 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Bivector<Expression, Block> clauses;
+        rocket::cow_vector<std::pair<Expression, Block>> clauses;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_brace_expected);
         }
         for(;;) {
-          Vector<Xpnode> cond;
+          rocket::cow_vector<Xpnode> cond;
           if(!do_match_keyword(tstrm_io, Token::keyword_default)) {
             if(!do_match_keyword(tstrm_io, Token::keyword_case)) {
               break;
@@ -1314,7 +1314,7 @@ Parser::~Parser()
           if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_colon_expected);
           }
-          Vector<Statement> stmts;
+          rocket::cow_vector<Statement> stmts;
           for(;;) {
             bool stmt_got = do_accept_statement(stmts, tstrm_io);
             if(!stmt_got) {
@@ -1331,21 +1331,21 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_do_while_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_do_while_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // do-while-statement ::=
         //   "do" statement "while" "(" expression ")" ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_do)) {
           return false;
         }
-        Vector<Statement> body;
+        rocket::cow_vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_keyword_while_expected);
         }
-        Vector<Xpnode> cond;
+        rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1363,14 +1363,14 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_while_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_while_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // while-statement ::=
         //   "while" "(" expression ")" statement
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           return false;
         }
-        Vector<Xpnode> cond;
+        rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1380,7 +1380,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> body;
+        rocket::cow_vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1389,7 +1389,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_for_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_for_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // for-statement ::=
         //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
@@ -1401,11 +1401,11 @@ Parser::~Parser()
           return false;
         }
         // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
-        String key_name;
-        String mapped_name;
-        Vector<Statement> init;
-        Vector<Xpnode> cond;
-        Vector<Xpnode> step;
+        rocket::cow_string key_name;
+        rocket::cow_string mapped_name;
+        rocket::cow_vector<Statement> init;
+        rocket::cow_vector<Xpnode> cond;
+        rocket::cow_vector<Xpnode> step;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -1445,7 +1445,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> body;
+        rocket::cow_vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1459,7 +1459,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_break_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_break_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // break-statement ::=
         //   "break" ( "switch" | "while" | "for" ) ";"
@@ -1488,7 +1488,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_continue_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_continue_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // continue-statement ::=
         //   "continue" ( "while" | "for" ) ";"
@@ -1513,7 +1513,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_throw_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_throw_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1522,7 +1522,7 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
           return false;
         }
-        Vector<Xpnode> expr;
+        rocket::cow_vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
@@ -1534,7 +1534,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_return_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_return_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // return-statement ::=
         //   "return" ( "&" | "" ) expression-opt ";"
@@ -1546,7 +1546,7 @@ Parser::~Parser()
           // The reference specifier is optional.
           by_ref = true;
         }
-        Vector<Xpnode> expr;
+        rocket::cow_vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           // This is optional.
         }
@@ -1558,14 +1558,14 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_try_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_try_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
         if(!do_match_keyword(tstrm_io, Token::keyword_try)) {
           return false;
         }
-        Vector<Statement> body_try;
+        rocket::cow_vector<Statement> body_try;
         if(!do_accept_statement_as_block(body_try, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1575,14 +1575,14 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
-        String except_name;
+        rocket::cow_string except_name;
         if(!do_accept_identifier(except_name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_parenthesis_expected);
         }
-        Vector<Statement> body_catch;
+        rocket::cow_vector<Statement> body_catch;
         if(!do_accept_statement_as_block(body_catch, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
@@ -1591,9 +1591,9 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_nonblock_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_nonblock_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
-        ASTERIA_DEBUG_LOG("Looking for a nonblock statement: ", tstrm_io.empty() ? String::shallow("<no token>") : ASTERIA_FORMAT_STRING(*(tstrm_io.peek_opt())));
+        ASTERIA_DEBUG_LOG("Looking for a nonblock statement: ", tstrm_io.empty() ? rocket::cow_string::shallow("<no token>") : ASTERIA_FORMAT_STRING(*(tstrm_io.peek_opt())));
         // nonblock-statement ::=
         //   null-statement |
         //   variable-definition | immutable-variable-definition | function-definition |
@@ -1619,7 +1619,7 @@ Parser::~Parser()
                do_accept_try_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement_as_block(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_statement_as_block(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1627,7 +1627,7 @@ Parser::~Parser()
                do_accept_nonblock_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement(Vector<Statement> &stmts_out, Token_stream &tstrm_io)
+    bool do_accept_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1665,7 +1665,7 @@ bool Parser::empty() const noexcept
         return true;
       }
       case state_success: {
-        return this->m_stor.as<Vector<Statement>>().empty();
+        return this->m_stor.as<rocket::cow_vector<Statement>>().empty();
       }
       default: {
         ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
@@ -1681,7 +1681,7 @@ bool Parser::load(Token_stream &tstrm_io)
     // Phase 3
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
-    Vector<Statement> stmts;
+    rocket::cow_vector<Statement> stmts;
     while(!tstrm_io.empty()) {
       // document ::=
       //   statement-list-opt
@@ -1715,7 +1715,7 @@ Block Parser::extract_document()
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
       case state_success: {
-        auto stmts = std::move(this->m_stor.as<Vector<Statement>>());
+        auto stmts = std::move(this->m_stor.as<rocket::cow_vector<Statement>>());
         this->m_stor = nullptr;
         return std::move(stmts);
       }

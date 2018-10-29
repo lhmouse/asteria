@@ -24,7 +24,7 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Executive_context::get_named_reference_opt(const String &name) const
+const Reference * Executive_context::get_named_reference_opt(const rocket::cow_string &name) const
   {
     // Check for overriden references.
     const auto qref = this->m_dict.get_opt(name);
@@ -53,7 +53,7 @@ const Reference * Executive_context::get_named_reference_opt(const String &name)
     return nullptr;
   }
 
-void Executive_context::set_named_reference(const String &name, Reference ref)
+void Executive_context::set_named_reference(const rocket::cow_string &name, Reference ref)
   {
     this->m_dict.set(name, std::move(ref));
   }
@@ -69,7 +69,7 @@ void Executive_context::set_named_reference(const String &name, Reference ref)
 
     }
 
-void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, Vector<Reference> args)
+void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args)
   {
     // Set pre-defined variables.
     do_set_constant(this->m_file, D_string(head.get_file()));
@@ -78,7 +78,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     // Set the `this` parameter.
     this->m_self = std::move(self.convert_to_variable(global));
     // Set other parameters.
-    for(Size i = 0; i < head.get_param_count(); ++i) {
+    for(std::size_t i = 0; i < head.get_param_count(); ++i) {
       const auto &name = head.get_param_name(i);
       if(name.empty()) {
         continue;
@@ -97,7 +97,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     // Set the variadic argument getter.
     if(head.get_param_count() < args.size()) {
       // There are more arguments than parameters. Create an argument getter from those.
-      args.erase(args.begin(), args.begin() + static_cast<Diff>(head.get_param_count()));
+      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(head.get_param_count()));
       do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
     } else if(!zvarg_opt) {
       // There is no variadic arg. Create a zeroary argument getter.

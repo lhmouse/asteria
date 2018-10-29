@@ -10,11 +10,11 @@ using namespace Asteria;
 int main()
   {
     Executive_context ctx;
-    ctx.set_named_reference(String::shallow("test"), Reference_root::S_constant{ D_integer(42) });
-    auto qref = ctx.get_named_reference_opt(String::shallow("test"));
+    ctx.set_named_reference(rocket::cow_string::shallow("test"), Reference_root::S_constant{ D_integer(42) });
+    auto qref = ctx.get_named_reference_opt(rocket::cow_string::shallow("test"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 42);
 
-    qref = ctx.get_named_reference_opt(String::shallow("nonexistent"));
+    qref = ctx.get_named_reference_opt(rocket::cow_string::shallow("nonexistent"));
     ASTERIA_TEST_CHECK(qref == nullptr);
   }

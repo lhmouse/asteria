@@ -32,12 +32,12 @@ int main()
       }
     )__");
     Token_stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, String::shallow("dummy file")));
+    ASTERIA_TEST_CHECK(tis.load(iss, rocket::cow_string::shallow("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
     Global_context global;
-    auto res = code.execute_as_function(global, Function_header(String::shallow("file again"), 42, String::shallow("<top level>"), { }), nullptr, { }, { });
+    auto res = code.execute_as_function(global, Function_header(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"), { }), nullptr, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

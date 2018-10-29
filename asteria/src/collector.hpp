@@ -13,14 +13,14 @@ class Collector
   {
   private:
     Collector *m_tied_opt;
-    Size m_threshold;
-    Size m_counter;
+    std::size_t m_threshold;
+    std::size_t m_counter;
     long m_recur;
     Variable_hashset m_tracked;
     Variable_hashset m_staging;
 
   public:
-    Collector(Collector *tied_opt, Size threshold) noexcept
+    Collector(Collector *tied_opt, std::size_t threshold) noexcept
       : m_tied_opt(tied_opt), m_threshold(threshold), m_counter(0), m_recur(0)
       {
       }
@@ -36,11 +36,11 @@ class Collector
         this->m_tied_opt = tied_opt;
       }
 
-    Size get_threshold() const noexcept
+    std::size_t get_threshold() const noexcept
       {
         return this->m_threshold;
       }
-    void set_threshold(Size threshold) noexcept
+    void set_threshold(std::size_t threshold) noexcept
       {
         this->m_threshold = threshold;
       }

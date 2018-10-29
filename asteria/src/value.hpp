@@ -15,7 +15,7 @@ namespace Asteria {
 class Value
   {
   public:
-    enum Compare : Uint8
+    enum Compare : std::uint8_t
       {
         compare_unordered  = 0,
         compare_less       = 1,
@@ -23,7 +23,7 @@ class Value
         compare_greater    = 3,
       };
 
-    enum Type : Uint8
+    enum Type : std::uint8_t
       {
         type_null      = 0,
         type_boolean   = 1,
@@ -101,7 +101,7 @@ class Value
 
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;
-    void dump(std::ostream &os, Size indent_increment = 2, Size indent_next = 0) const;
+    void dump(std::ostream &os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

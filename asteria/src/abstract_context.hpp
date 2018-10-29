@@ -20,8 +20,8 @@ class Abstract_context
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
 
-    virtual const Reference * get_named_reference_opt(const String &name) const = 0;
-    virtual void set_named_reference(const String &name, Reference ref) = 0;
+    virtual const Reference * get_named_reference_opt(const rocket::cow_string &name) const = 0;
+    virtual void set_named_reference(const rocket::cow_string &name, Reference ref) = 0;
   };
 
 }

@@ -122,7 +122,7 @@ Xpnode::~Xpnode()
 
     std::pair<std::reference_wrapper<const Abstract_context>,
               std::reference_wrapper<const Reference>>
-      do_name_lookup(const Global_context &global, const Abstract_context &ctx, const String &name)
+      do_name_lookup(const Global_context &global, const Abstract_context &ctx, const rocket::cow_string &name)
       {
         auto spare = &global;
         auto qctx = &ctx;
@@ -284,7 +284,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(!wrap && (rhs == Limits::min())) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
-        auto reg = static_cast<Uint64>(rhs);
+        auto reg = static_cast<std::uint64_t>(rhs);
         reg = -reg;
         return static_cast<D_integer>(reg);
       }
@@ -363,7 +363,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs > Limits::digits) {
           return 0;
         }
-        auto reg = static_cast<Uint64>(lhs);
+        auto reg = static_cast<std::uint64_t>(lhs);
         reg <<= rhs;
         return static_cast<D_integer>(reg);
       }
@@ -377,7 +377,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs > Limits::digits) {
           return 0;
         }
-        auto reg = static_cast<Uint64>(lhs);
+        auto reg = static_cast<std::uint64_t>(lhs);
         reg >>= rhs;
         return static_cast<D_integer>(reg);
       }
@@ -392,7 +392,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
         }
         const auto bits_rem = static_cast<unsigned char>(Limits::digits - rhs);
-        auto reg = static_cast<Uint64>(lhs);
+        auto reg = static_cast<std::uint64_t>(lhs);
         const auto mask_out = (reg >> bits_rem) << bits_rem;
         const auto mask_sign = -(reg >> Limits::digits) << bits_rem;
         if(mask_out != mask_sign) {
@@ -412,7 +412,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
         }
         const auto bits_rem = static_cast<unsigned char>(Limits::digits - rhs);
-        auto reg = static_cast<Uint64>(lhs);
+        auto reg = static_cast<std::uint64_t>(lhs);
         const auto mask_in = -(reg >> Limits::digits) << bits_rem;
         reg >>= rhs;
         reg |= mask_in;
@@ -481,16 +481,16 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     D_string do_duplicate(const D_string &lhs, D_integer rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
+          ASTERIA_THROW_RUNTIME_ERROR("rocket::cow_string duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
         D_string res;
-        const auto count = static_cast<Uint64>(rhs);
+        const auto count = static_cast<std::uint64_t>(rhs);
         if(count != 0) {
           if(lhs.size() > res.max_size() / count) {
             ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
           }
-          res.reserve(lhs.size() * static_cast<Size>(count));
-          auto mask = std::numeric_limits<Size>::max() / 2 + 1;
+          res.reserve(lhs.size() * static_cast<std::size_t>(count));
+          auto mask = std::numeric_limits<std::size_t>::max() / 2 + 1;
           do {
             if(count & mask) {
               res.append(lhs);
@@ -568,7 +568,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_function_call: {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Allocate the argument vector.
-        Vector<Reference> args;
+        rocket::cow_vector<Reference> args;
         args.resize(alt.arg_cnt);
         for(auto i = alt.arg_cnt - 1; i + 1 != 0; --i) {
           auto arg = do_pop_reference(stack_io);
@@ -916,7 +916,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
                 break;
               }
               case Value::compare_unordered: {
-                do_set_result(lhs, false, D_string(String::shallow("unordered")));
+                do_set_result(lhs, false, D_string(rocket::cow_string::shallow("unordered")));
                 break;
               }
               default: {
