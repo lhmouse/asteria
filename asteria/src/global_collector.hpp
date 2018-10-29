@@ -18,9 +18,9 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
 
   public:
     Global_collector() noexcept
-      : m_gen_two(nullptr, 15),
-        m_gen_one(&(this->m_gen_two), 50),
-        m_gen_zero(&(this->m_gen_one), 400)
+      : m_gen_two(nullptr, 20),
+        m_gen_one(&(this->m_gen_two), 100),
+        m_gen_zero(&(this->m_gen_one), 500)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Global_collector);
