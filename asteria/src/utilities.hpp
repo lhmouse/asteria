@@ -23,7 +23,7 @@ class Formatter
     rocket::insertable_ostream m_stream;
 
   public:
-    Formatter()
+    Formatter() noexcept
       {
         this->m_stream.setf(std::ios::boolalpha);
       }
