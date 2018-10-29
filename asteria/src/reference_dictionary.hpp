@@ -6,6 +6,7 @@
 
 #include "fwd.hpp"
 #include "reference.hpp"
+#include "rocket/static_vector.hpp"
 
 namespace Asteria {
 
@@ -15,11 +16,11 @@ class Reference_dictionary
     struct Bucket
       {
         rocket::cow_string name;
-        Reference ref;
+        rocket::static_vector<Reference, 1> ref_opt;
 
         explicit operator bool () const noexcept
           {
-            return this->name.size() != 0;
+            return this->ref_opt.size() != 0;
           }
       };
 
@@ -66,7 +67,7 @@ class Reference_dictionary
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
           if(data[i]) {
-            std::forward<FuncT>(func)(data[i].name, data[i].ref);
+            std::forward<FuncT>(func)(data[i].name, data[i].ref_opt.front());
           }
         }
       }
@@ -76,7 +77,7 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return &(this->m_data[toff].ref);
+        return this->m_data[toff].ref_opt.data();
       }
     Reference * get_opt(const rocket::cow_string &name) noexcept
       {
@@ -84,7 +85,7 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return &(this->m_data[toff].ref);
+        return this->m_data[toff].ref_opt.data();
       }
     std::size_t max_size() const noexcept
       {
