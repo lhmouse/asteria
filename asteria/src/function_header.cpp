@@ -9,7 +9,7 @@ namespace Asteria {
 std::ostream & operator<<(std::ostream &os, const Function_header &head)
   {
     os <<head.get_func() <<'(';
-    bool needs_comma = true;
+    bool needs_comma = false;
     for(std::size_t i = 0; i < head.get_param_count(); ++i) {
       if(rocket::exchange(needs_comma, true)) {
         os <<", ";
