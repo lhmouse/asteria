@@ -51,7 +51,7 @@ class Reference
     Reference & zoom_out();
 
     Reference & convert_to_temporary();
-    Reference & convert_to_variable(Global_context &global);
+    Reference & convert_to_variable(Global_context &global, bool immutable);
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

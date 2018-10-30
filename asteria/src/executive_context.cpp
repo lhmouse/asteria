@@ -76,7 +76,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     do_set_constant(this->m_line, D_integer(head.get_line()));
     do_set_constant(this->m_func, D_string(head.get_func()));
     // Set the `this` parameter.
-    this->m_self = std::move(self.convert_to_variable(global));
+    this->m_self = std::move(self.convert_to_variable(global, true));
     // Set other parameters.
     for(std::size_t i = 0; i < head.get_param_count(); ++i) {
       const auto &name = head.get_param_name(i);
@@ -88,7 +88,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       }
       if(i < args.size()) {
         // There is a corresponding argument. Move it.
-        this->m_dict.set(name, std::move(args.mut(i)));
+        this->m_dict.set(name, std::move(args.mut(i).convert_to_variable(global, false)));
       } else {
         // There is no corresponding argument. Default to `null`.
         this->m_dict.set(name, Reference());

@@ -100,14 +100,17 @@ Reference & Reference::convert_to_temporary()
     return *this;
   }
 
-Reference & Reference::convert_to_variable(Global_context &global)
+Reference & Reference::convert_to_variable(Global_context &global, bool immutable)
   {
     if(this->m_root.index() == Reference_root::index_variable) {
       return *this;
     }
+    if((this->m_root.index() == Reference_root::index_constant) && immutable) {
+      return *this;
+    }
     // Create an lvalue by allocating a variable and assign it to `*this`.
     auto var = global.create_tracked_variable();
-    var->reset(this->read(), false);
+    var->reset(this->read(), immutable);
     Reference_root::S_variable ref_c = { std::move(var) };
     *this = std::move(ref_c);
     return *this;
