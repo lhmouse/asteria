@@ -250,14 +250,6 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
       }
 
-    Reference do_pop_reference(Reference_stack &stack_io)
-      {
-        if(stack_io.empty()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The evaluation stack is empty, which means the expression is probably invalid.");
-        }
-        return stack_io.pop();
-      }
-
     D_boolean do_logical_not(D_boolean rhs)
       {
         return !rhs;
@@ -544,7 +536,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_branch: {
         const auto &alt = this->m_stor.as<S_branch>();
         // Pop the condition off the stack.
-        auto cond = do_pop_reference(stack_io);
+        auto cond = stack_io.pop();
         // Read the condition and pick a branch.
         const auto stack_size_old = stack_io.size();
         const auto has_result = (cond.read().test() ? alt.branch_true : alt.branch_false).evaluate_partial(stack_io, global, ctx);
@@ -571,11 +563,11 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         rocket::cow_vector<Reference> args;
         args.resize(alt.arg_cnt);
         for(auto i = alt.arg_cnt - 1; i + 1 != 0; --i) {
-          auto arg = do_pop_reference(stack_io);
+          auto arg = stack_io.pop();
           args.mut(i) = std::move(arg);
         }
         // Pop the target off the stack.
-        auto tgt = do_pop_reference(stack_io);
+        auto tgt = stack_io.pop();
         const auto tgt_value = tgt.read();
         // Make sure it is really a function.
         if(tgt_value.type() != Value::type_function) {
@@ -610,10 +602,10 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         if(!alt.name.empty()) {
           sub_value = D_string(alt.name);
         } else {
-          auto sub = do_pop_reference(stack_io);
+          auto sub = stack_io.pop();
           sub_value = sub.read();
         }
-        auto cursor = do_pop_reference(stack_io);
+        auto cursor = stack_io.pop();
         // The subscript operand shall have type `integer` or `string`.
         switch(rocket::weaken_enum(sub_value.type())) {
           case Value::type_integer: {
@@ -639,7 +631,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           case xop_postfix_inc: {
             // Increment the operand and return the old value.
             // `assign` is ignored.
-            auto lhs = do_pop_reference(stack_io);
+            auto lhs = stack_io.pop();
             auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = lhs_value.check<D_integer>();
@@ -660,7 +652,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           case xop_postfix_dec: {
             // Decrement the operand and return the old value.
             // `assign` is ignored.
-            auto lhs = do_pop_reference(stack_io);
+            auto lhs = stack_io.pop();
             auto lhs_value = lhs.read();
             if(lhs_value.type() == Value::type_integer) {
               auto result = lhs_value.check<D_integer>();
@@ -679,7 +671,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "`.");
           }
           case xop_prefix_pos: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Copy the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
             auto result = rhs.read();
@@ -688,7 +680,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_prefix_neg: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Negate the operand to create an rvalue, then return it.
             auto rhs_value = rhs.read();
             if(rhs_value.type() == Value::type_integer) {
@@ -706,7 +698,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_notb: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Perform bitwise not operation on the operand to create an rvalue, then return it.
             auto rhs_value = rhs.read();
             if(rhs_value.type() == Value::type_boolean) {
@@ -724,7 +716,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_notl: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Perform logical NOT operation on the operand to create an rvalue, then return it.
             // N.B. This is one of the few operators that work on all types.
             auto rhs_value = rhs.read();
@@ -734,7 +726,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_prefix_inc: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Increment the operand and return it.
             // `assign` is ignored.
             auto rhs_value = rhs.read();
@@ -753,7 +745,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_dec: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Decrement the operand and return it.
             // `assign` is ignored.
             auto rhs_value = rhs.read();
@@ -772,7 +764,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_prefix_unset: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Unset the reference and return the value unset.
             auto result = rhs.unset();
             do_set_result(rhs, alt.assign, std::move(result));
@@ -780,7 +772,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_prefix_lengthof: {
-            auto rhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
             // Return the number of elements in `rhs`.
             auto rhs_value = rhs.read();
             if(rhs_value.type() == Value::type_null) {
@@ -810,8 +802,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", rhs_value, "`.");
           }
           case xop_infix_cmp_eq: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = lhs.read();
@@ -823,8 +815,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_ne: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Report unordered operands as being unequal.
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = lhs.read();
@@ -836,8 +828,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_lt: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -851,8 +843,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_gt: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -866,8 +858,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_lte: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -881,8 +873,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_gte: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Throw an exception in case of unordered operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -896,8 +888,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_cmp_3way: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // N.B. This is one of the few operators that work on all types.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -927,8 +919,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             break;
           }
           case xop_infix_add: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` and `real` types, return the sum of both operands.
             // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
@@ -961,8 +953,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sub: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` and `real` types, return the difference of both operands.
             auto lhs_value = lhs.read();
@@ -988,8 +980,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_mul: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the boolean type, return the logical AND'd result of both operands.
             // For the integer and real types, return the product of both operands.
             // If either operand has the integer type and the other has the string type, duplicate the string up to the specified number of times.
@@ -1028,8 +1020,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_div: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the integer and real types, return the quotient of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -1048,8 +1040,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_mod: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the integer and real types, return the reminder of both operands.
             auto lhs_value = lhs.read();
             auto rhs_value = rhs.read();
@@ -1068,8 +1060,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sll: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
@@ -1084,8 +1076,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_srl: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
             // Both operands have to be integers.
@@ -1100,8 +1092,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sla: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Shift the first operand to the left by the number of bits specified by the second operand
             // Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
             // If a bit unequal to the sign bit would be shifted into or across the sign bit, an exception is thrown.
@@ -1117,8 +1109,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_sra: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Shift the first operand to the right by the number of bits specified by the second operand
             // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
             // Both operands have to be integers.
@@ -1133,8 +1125,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_andb: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the `boolean` type, return the logical AND'd result of both operands.
             // For the `integer` type, return the bitwise AND'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1154,8 +1146,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_orb: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the `boolean` type, return the logical OR'd result of both operands.
             // For the `integer` type, return the bitwise OR'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1175,8 +1167,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_xorb: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // For the `boolean` type, return the logical XOR'd result of both operands.
             // For the `integer` type, return the bitwise XOR'd result of both operands.
             auto lhs_value = lhs.read();
@@ -1196,8 +1188,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs_value, "` and `", rhs_value, "`.");
           }
           case xop_infix_assign: {
-            auto rhs = do_pop_reference(stack_io);
-            auto lhs = do_pop_reference(stack_io);
+            auto rhs = stack_io.pop();
+            auto lhs = stack_io.pop();
             // Copy the operand referenced by `rhs` to `lhs`.
             // `assign` is ignored.
             // N.B. This is one of the few operators that work on all types.
@@ -1218,7 +1210,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         D_array array;
         array.resize(alt.elem_cnt);
         for(auto i = alt.elem_cnt - 1; i + 1 != 0; --i) {
-          auto ref = do_pop_reference(stack_io);
+          auto ref = stack_io.pop();
           array.mut(i) = ref.read();
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
@@ -1231,7 +1223,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         D_object object;
         object.reserve(alt.keys.size());
         for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
-          auto ref = do_pop_reference(stack_io);
+          auto ref = stack_io.pop();
           object.insert_or_assign(*it, ref.read());
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
@@ -1241,7 +1233,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_coalescence: {
         const auto &alt = this->m_stor.as<S_coalescence>();
         // Pop the condition off the stack.
-        auto cond = do_pop_reference(stack_io);
+        auto cond = stack_io.pop();
         // Read the condition. If it is null, evaluate the branch.
         if(cond.read().type() == Value::type_null) {
           const auto stack_size_old = stack_io.size();
