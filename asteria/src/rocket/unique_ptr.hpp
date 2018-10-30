@@ -19,7 +19,6 @@
 namespace rocket {
 
 using ::std::default_delete;
-using ::std::atomic;
 using ::std::enable_if;
 using ::std::is_nothrow_constructible;
 using ::std::is_convertible;
