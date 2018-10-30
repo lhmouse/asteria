@@ -31,7 +31,7 @@ int main()
     ASTERIA_TEST_CHECK_CATCH(ref.write(D_boolean(true)));
 
     Global_context global;
-    ref.convert_to_variable(global);
+    ref.convert_to_variable(global, false);
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_integer);
     ASTERIA_TEST_CHECK(val.check<D_integer>() == 42);
@@ -41,7 +41,7 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_boolean>() == true);
 
     ref = Reference_root::S_temporary { D_null() };
-    ref.convert_to_variable(global);
+    ref.convert_to_variable(global, false);
     ref.zoom_in(Reference_modifier::S_array_index { -3 });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);

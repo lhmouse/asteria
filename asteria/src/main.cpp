@@ -16,7 +16,7 @@ int main()
       func fib(n) {
         return n <= 1 ? 1 : fib(n-1) + fib(n-2);
       }
-      return fib(30);
+      return fib(20);
     )__");
     Simple_source_file code(iss, rocket::cow_string::shallow("my_file"));
     Global_context global;
