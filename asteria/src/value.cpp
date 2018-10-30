@@ -170,7 +170,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
 
     inline Indent do_indent_or_space(std::size_t indent_increment, std::size_t indent_next)
       {
-        return (indent_increment != 0) ? Indent('\n', indent_next) : Indent(' ', 0);
+        return (indent_increment != 0) ? indent('\n', indent_next) : indent(' ', 0);
       }
 
     }
