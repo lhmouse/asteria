@@ -5,8 +5,9 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "rocket/compatibility.h"
-#include "rocket/insertable_ostream.hpp"
 #include "rocket/utilities.hpp"
+#include "rocket/insertable_ostream.hpp"
+#include "rocket/unique_ptr.hpp"
 #include <iomanip>
 #include <exception>
 #include <cstdint>
@@ -20,47 +21,90 @@ namespace Asteria {
 class Formatter
   {
   private:
-    rocket::insertable_ostream m_stream;
+    rocket::unique_ptr<rocket::insertable_ostream> m_strm;
 
   public:
     Formatter() noexcept
+      : m_strm()
       {
-        this->m_stream.setf(std::ios::boolalpha);
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Formatter);
 
   private:
+    std::ostream & do_open_stream();
+    rocket::cow_string do_extract_string() noexcept;
+
     template<typename ValueT>
       void do_put(const ValueT &value)
       {
-        this->m_stream <<value;
+        this->do_open_stream() << value;
       }
-    void do_put(bool value);
-    void do_put(char value);
-    void do_put(signed char value);
-    void do_put(unsigned char value);
-    void do_put(short value);
-    void do_put(unsigned short value);
-    void do_put(int value);
-    void do_put(unsigned value);
-    void do_put(long value);
-    void do_put(unsigned long value);
-    void do_put(long long value);
-    void do_put(unsigned long long value);
-    void do_put(const char *value);
-    void do_put(const signed char *value);
-    void do_put(const unsigned char *value);
-    void do_put(const void *value);
+    void do_put(bool value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(char value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(signed char value)
+      {
+        this->do_open_stream() << static_cast<int>(value);
+      }
+    void do_put(unsigned char value)
+      {
+        this->do_open_stream() << static_cast<unsigned>(value);
+      }
+    void do_put(short value)
+      {
+        this->do_open_stream() << static_cast<int>(value);
+      }
+    void do_put(unsigned short value)
+      {
+        this->do_open_stream() << static_cast<unsigned>(value);
+      }
+    void do_put(int value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(unsigned value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(long value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(unsigned long value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(long long value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(unsigned long long value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(const char *value)
+      {
+        this->do_open_stream() << value;
+      }
+    void do_put(const signed char *value)
+      {
+        this->do_open_stream() << static_cast<const void *>(value);
+      }
+    void do_put(const unsigned char *value)
+      {
+        this->do_open_stream() << static_cast<const void *>(value);
+      }
+    void do_put(const void *value)
+      {
+        this->do_open_stream() << value;
+      }
 
   public:
-    const rocket::insertable_ostream & get_stream() const noexcept
-      {
-        return this->m_stream;
-      }
-    rocket::insertable_ostream & get_stream() noexcept
-      {
-        return this->m_stream;
-      }
     template<typename ValueT>
       Formatter & operator,(const ValueT &value) noexcept
       try {
@@ -69,11 +113,15 @@ class Formatter
       } catch(...) {
         return *this;
       }
+    rocket::cow_string extract_string() noexcept
+      {
+        return this->do_extract_string();
+      }
   };
 
 #define ASTERIA_FORMAT(fmt_, ...)             (static_cast<::Asteria::Formatter &&>(fmt_), __VA_ARGS__)
 #define ASTERIA_CREATE_FORMATTER(...)         (::std::move(ASTERIA_FORMAT(::Asteria::Formatter(), __VA_ARGS__)))
-#define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).get_stream().extract_string())
+#define ASTERIA_FORMAT_STRING(...)            (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).extract_string())
 
 extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept;

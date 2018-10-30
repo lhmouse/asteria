@@ -22,84 +22,20 @@ Formatter::~Formatter()
   {
   }
 
-void Formatter::do_put(bool value)
+std::ostream & Formatter::do_open_stream()
   {
-    this->m_stream <<value;
+    if(!this->m_strm) {
+      this->m_strm = rocket::make_unique<rocket::insertable_ostream>();
+    }
+    return *(this->m_strm);
   }
 
-void Formatter::do_put(char value)
+rocket::cow_string Formatter::do_extract_string() noexcept
   {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(signed char value)
-  {
-    this->m_stream <<static_cast<int>(value);
-  }
-
-void Formatter::do_put(unsigned char value)
-  {
-    this->m_stream <<static_cast<unsigned>(value);
-  }
-
-void Formatter::do_put(short value)
-  {
-    this->m_stream <<static_cast<int>(value);
-  }
-
-void Formatter::do_put(unsigned short value)
-  {
-    this->m_stream <<static_cast<unsigned>(value);
-  }
-
-void Formatter::do_put(int value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(unsigned value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(long value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(unsigned long value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(long long value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(unsigned long long value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(const char *value)
-  {
-    this->m_stream <<value;
-  }
-
-void Formatter::do_put(const signed char *value)
-  {
-    this->m_stream <<static_cast<const void *>(value);
-  }
-
-void Formatter::do_put(const unsigned char *value)
-  {
-    this->m_stream <<static_cast<const void *>(value);
-  }
-
-void Formatter::do_put(const void *value)
-  {
-    this->m_stream <<value;
+    if(!this->m_strm) {
+      return { };
+    }
+    return this->m_strm->extract_string();
   }
 
     namespace {
@@ -151,14 +87,15 @@ bool are_debug_logs_enabled() noexcept
 
 bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept
   try {
-    auto &oss = fmt.get_stream();
-    oss.set_caret(0);
-    char time_str[64];
-    do_print_time(time_str, sizeof(time_str));
-    oss <<time_str <<" $$ ";
-    oss.set_caret(oss.npos);
-    oss <<" @@ " <<file <<':' <<line;
-    auto str = oss.extract_string();
+    auto str = fmt.extract_string();
+    char temp[64];
+    do_print_time(temp, sizeof(temp));
+    str.insert(0, " $$ ");
+    str.insert(0, temp);
+    str.append(" @@ ");
+    str.append(file);
+    std::sprintf(temp, ":%lu", line);
+    str.append(temp);
     do_replace_all(str, '\n', "\n\t");
     do_replace_all(str, '\0', "[NUL]");
     str.push_back('\n');
@@ -179,10 +116,9 @@ const char * Runtime_error::what() const noexcept
 
 [[noreturn]] void throw_runtime_error(const char *funcsig, Formatter &&fmt)
   {
-    auto &oss = fmt.get_stream();
-    oss.set_caret(0);
-    oss <<funcsig <<": ";
-    auto str = oss.extract_string();
+    auto str = fmt.extract_string();
+    str.insert(0, ": ");
+    str.insert(0, funcsig);
     throw Runtime_error(std::move(str));
   }
 
