@@ -139,7 +139,7 @@ void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept
     ROCKET_ASSERT(tpos < nbkt);
     // Nullify the bucket.
     ROCKET_ASSERT(data[tpos]);
-    data[tpos] = { };
+    data[tpos].ref_opt.clear();
     this->m_size -= 1;
     // Relocate elements after the erasure point.
     do_linear_probe(data, nbkt, tpos + 1, tpos,
