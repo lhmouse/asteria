@@ -14,7 +14,7 @@ Global_collector::~Global_collector()
 
 rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable()
   {
-    auto var = rocket::make_refcounted<Variable>();
+    auto var = rocket::make_refcounted<Variable>(D_null(), true);
     this->m_gen_zero.track_variable(var);
     return var;
   }
