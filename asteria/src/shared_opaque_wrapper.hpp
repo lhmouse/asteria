@@ -52,7 +52,7 @@ class Shared_opaque_wrapper
       }
     const Abstract_opaque * operator->() const noexcept
       {
-        return std::addressof(this->m_ref.get());
+        return &(this->m_ref.get());
       }
   };
 
