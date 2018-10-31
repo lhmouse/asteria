@@ -492,26 +492,25 @@ template<typename resultT, typename sourceT>
     return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
-  {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(sptr));
-  }
-
-template<typename resultT, typename sourceT>
   inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
   {
     return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
-  {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(sptr));
-  }
-
-template<typename resultT, typename sourceT>
   inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
   {
     return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(sptr);
+  }
+
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  {
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(sptr));
+  }
+template<typename resultT, typename sourceT>
+  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  {
+    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(sptr));
   }
 template<typename resultT, typename sourceT>
   inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept

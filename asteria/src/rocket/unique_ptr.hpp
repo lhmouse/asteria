@@ -368,13 +368,11 @@ template<typename resultT, typename sourceT>
   {
     return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(::std::move(sptr));
   }
-
 template<typename resultT, typename sourceT>
   inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(::std::move(sptr));
   }
-
 template<typename resultT, typename sourceT>
   inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
