@@ -88,21 +88,19 @@ class Reference_stack
         ROCKET_ASSERT(this->m_size != 0);
         return cur->refs[off];
       }
-    Reference pop() noexcept
+    void pop() noexcept
       {
         ROCKET_ASSERT(this->m_size != 0);
         auto cur = this->m_scur;
         const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
         // Do not destroy the element so it can be reused later.
         // Iterate to the previous block if the last block becomes empty.
-        auto ref = std::move(cur->refs[off]);
         if(off == 0) {
           auto prev = cur->prev;
           cur = prev;
         }
         this->m_scur = cur;
         this->m_size -= 1;
-        return ref;
       }
   };
 
