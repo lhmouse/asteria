@@ -128,6 +128,12 @@ template<typename ...alternativesT>
       {
         noadl::destroy_at(static_cast<alternativeT *>(tptr));
       }
+    template<typename alternativeT>
+      void wrapped_move_construct_then_destroy(void *tptr, void *rptr)
+      {
+        noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*static_cast<alternativeT *>(rptr)));
+        noadl::destroy_at(static_cast<alternativeT *>(rptr));
+      }
     template<typename alternativeT, typename voidT, typename visitorT>
       void wrapped_visit(voidT *tptr, visitorT &visitor)
       {
@@ -263,6 +269,15 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
         (*(s_table[rindex]))(tptr);
       }
+    static inline void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
+      {
+        if(conjunction<details_variant::trivial_move_construct<alternativesT>..., is_trivially_destructible<alternativesT>...>::value) {
+          ::std::memcpy(tptr, rptr, sizeof(storage));
+          return;
+        }
+        static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct_then_destroy<alternativesT>... };
+        (*(s_table[rindex]))(tptr, rptr);
+      }
 
   private:
     unsigned short m_index;
@@ -312,21 +327,19 @@ template<typename ...alternativesT>
         }
         // Make a backup.
         storage backup;
-        variant::do_dispatch_move_construct(index_old, backup, this->m_stor);
-        variant::do_dispatch_destroy(index_old, this->m_stor);
+        variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         try {
           // Copy-construct the alternative in place.
           noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), param);
           this->m_index = index_new;
-          variant::do_dispatch_destroy(index_old, backup);
         } catch(...) {
           // Move the backup back in case of exceptions.
-          variant::do_dispatch_move_construct(index_old, this->m_stor, backup);
-          variant::do_dispatch_destroy(index_old, backup);
+          variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
           []{ throw; }();
         }
+        variant::do_dispatch_destroy(index_old, backup);
         return *this;
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
@@ -358,21 +371,19 @@ template<typename ...alternativesT>
         }
         // Make a backup.
         storage backup;
-        variant::do_dispatch_move_construct(index_old, backup, this->m_stor);
-        variant::do_dispatch_destroy(index_old, this->m_stor);
+        variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         try {
           // Copy-construct the alternative in place.
           variant::do_dispatch_copy_construct(index_new, this->m_stor, other.m_stor);
           this->m_index = index_new;
-          variant::do_dispatch_destroy(index_old, backup);
         } catch(...) {
           // Move the backup back in case of exceptions.
-          variant::do_dispatch_move_construct(index_old, this->m_stor, backup);
-          variant::do_dispatch_destroy(index_old, backup);
+          variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
           []{ throw; }();
         }
+        variant::do_dispatch_destroy(index_old, backup);
         return *this;
       }
     variant & operator=(variant &&other) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
@@ -497,21 +508,19 @@ template<typename ...alternativesT>
         constexpr auto index_new = indexT;
         // Make a backup.
         storage backup;
-        variant::do_dispatch_move_construct(index_old, backup, this->m_stor);
-        variant::do_dispatch_destroy(index_old, this->m_stor);
+        variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         try {
           // Construct the alternative in place.
           noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramsT>(params)...);
           this->m_index = index_new;
-          variant::do_dispatch_destroy(index_old, backup);
         } catch(...) {
           // Move the backup back in case of exceptions.
-          variant::do_dispatch_move_construct(index_old, this->m_stor, backup);
-          variant::do_dispatch_destroy(index_old, backup);
+          variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
           []{ throw; }();
         }
+        variant::do_dispatch_destroy(index_old, backup);
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
       }
     template<typename targetT, typename ...paramsT, typename enable_if<(index_of<targetT>::value || true)>::type * = nullptr>
@@ -525,13 +534,13 @@ template<typename ...alternativesT>
       {
         const auto index_old = this->m_index;
         const auto index_new = other.m_index;
-        storage temp;
+        storage backup;
         if(index_old == index_new) {
           // Swap both alternatives in place.
           if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
-            ::std::memcpy(temp, this->m_stor, sizeof(storage));
+            ::std::memcpy(backup, this->m_stor, sizeof(storage));
             ::std::memcpy(this->m_stor, other.m_stor, sizeof(storage));
-            ::std::memcpy(other.m_stor, temp, sizeof(storage));
+            ::std::memcpy(other.m_stor, backup, sizeof(storage));
             return;
           }
           static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
@@ -539,16 +548,13 @@ template<typename ...alternativesT>
           return;
         }
         // Swap active alternatives using an indeterminate buffer.
-        variant::do_dispatch_move_construct(index_old, temp, this->m_stor);
-        variant::do_dispatch_destroy(index_old, this->m_stor);
+        variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         // Move-construct the other alternative in place.
-        variant::do_dispatch_move_construct(index_new, this->m_stor, other.m_stor);
+        variant::do_dispatch_move_construct_then_destroy(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
-        variant::do_dispatch_destroy(index_new, other.m_stor);
-        // Move the temp into `other`.
-        variant::do_dispatch_move_construct(index_old, other.m_stor, temp);
+        // Move the backup into `other`.
+        variant::do_dispatch_move_construct_then_destroy(index_old, other.m_stor, backup);
         other.m_index = index_old;
-        variant::do_dispatch_destroy(index_old, temp);
       }
   };
 
