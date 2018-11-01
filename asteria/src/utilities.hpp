@@ -126,7 +126,7 @@ class Formatter
 extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept;
 
-#define ASTERIA_DEBUG_LOG(...)                (::Asteria::are_debug_logs_enabled() && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
+#define ASTERIA_DEBUG_LOG(...)                (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
 #define ASTERIA_TERMINATE(...)                (::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER("FATAL ERROR: ", __VA_ARGS__)), ::std::terminate())
 
 class Runtime_error : public virtual std::exception

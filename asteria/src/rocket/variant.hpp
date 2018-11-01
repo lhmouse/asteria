@@ -262,7 +262,7 @@ template<typename ...alternativesT>
         }
         if(disjunction<is_trivially_destructible<alternativesT>...>::value) {
           static constexpr bool s_can_elide[] = { is_trivially_destructible<alternativesT>::value... };
-          if(s_can_elide[rindex]) {
+          if(ROCKET_EXPECT(s_can_elide[rindex])) {
             return;
           }
         }
