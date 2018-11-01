@@ -262,7 +262,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
         ref_out = alt.cond.evaluate(global, ctx_io);
-        const auto status = (ref_out.read().test() ? alt.branch_true : alt.branch_false).execute(ref_out, global, ctx_io);
+        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto status = branch.get().execute(ref_out, global, ctx_io);
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
           return status;
