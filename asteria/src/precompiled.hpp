@@ -35,15 +35,22 @@
 #include "rocket/preprocessor_utilities.h"
 #include "rocket/assert.hpp"
 #include "rocket/throw.hpp"
+#include "rocket/utilities.hpp"
+#include "rocket/allocator_utilities.hpp"
 #include "rocket/insertable_streambuf.hpp"
+#include "rocket/insertable_istream.hpp"
 #include "rocket/insertable_ostream.hpp"
+#include "rocket/insertable_stream.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/fill_iterator.hpp"
+#include "rocket/transparent_comparators.hpp"
+#include "rocket/unique_handle.hpp"
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
-#include "rocket/static_vector.hpp"
 #include "rocket/unique_ptr.hpp"
 #include "rocket/refcounted_ptr.hpp"
+#include "rocket/static_vector.hpp"
 
 namespace Asteria {
 
