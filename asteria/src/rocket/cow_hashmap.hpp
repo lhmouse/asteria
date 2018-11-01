@@ -1170,66 +1170,36 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->insert(::std::move(value)).first;
       }
 
-    template<typename ...paramsT>
-      pair<iterator, bool> try_emplace(const key_type &key, paramsT &&...params)
+    template<typename ykeyT, typename ...paramsT>
+      pair<iterator, bool> try_emplace(ykeyT &&key, paramsT &&...params)
       {
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(key), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
-        return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
-      }
-    template<typename ...paramsT>
-      pair<iterator, bool> try_emplace(key_type &&key, paramsT &&...params)
-      {
-        this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
+                                                                ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
     // N.B. The hint is ignored.
-    template<typename ...paramsT>
-      iterator try_emplace(const_iterator /*hint*/, const key_type &key, paramsT &&...params)
+    template<typename ykeyT, typename ...paramsT>
+      iterator try_emplace(const_iterator /*hint*/, ykeyT &&key, paramsT &&...params)
       {
-        return this->try_emplace(key, ::std::forward<paramsT>(params)...).first;
-      }
-    // N.B. The hint is ignored.
-    template<typename ...paramsT>
-      iterator try_emplace(const_iterator /*hint*/, key_type &&key, paramsT &&...params)
-      {
-        return this->try_emplace(::std::move(key), ::std::forward<paramsT>(params)...).first;
+        return this->try_emplace(::std::forward<ykeyT>(key), ::std::forward<paramsT>(params)...).first;
       }
 
-    template<typename yvalueT>
-      pair<iterator, bool> insert_or_assign(const key_type &key, yvalueT &&yvalue)
+    template<typename ykeyT, typename yvalueT>
+      pair<iterator, bool> insert_or_assign(ykeyT &&key, yvalueT &&yvalue)
       {
         this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, key, ::std::forward<yvalueT>(yvalue));
-        if(!result.second) {
-          result.first->get()->second = ::std::forward<yvalueT>(yvalue);
-        }
-        return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
-      }
-    template<typename yvalueT>
-      pair<iterator, bool> insert_or_assign(key_type &&key, yvalueT &&yvalue)
-      {
-        this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::move(key), ::std::forward<yvalueT>(yvalue));
+        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
           result.first->get()->second = ::std::forward<yvalueT>(yvalue);
         }
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
     // N.B. The hint is ignored.
-    template<typename yvalueT>
-      iterator insert_or_assign(const_iterator /*hint*/, const key_type &key, yvalueT &&yvalue)
+    template<typename ykeyT, typename yvalueT>
+      iterator insert_or_assign(const_iterator /*hint*/, ykeyT &&key, yvalueT &&yvalue)
       {
-        return this->insert_or_assign(key, ::std::forward<yvalueT>(yvalue)).first;
-      }
-    // N.B. The hint is ignored.
-    template<typename yvalueT>
-      iterator insert_or_assign(const_iterator /*hint*/, key_type &&key, yvalueT &&yvalue)
-      {
-        return this->insert_or_assign(::std::move(key), ::std::forward<yvalueT>(yvalue)).first;
+        return this->insert_or_assign(::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue)).first;
       }
 
     // N.B. This function may throw `std::bad_alloc`.
@@ -1261,7 +1231,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
 
     // map operations
-    const_iterator find(const key_type &key) const
+    template<typename ykeyT>
+      const_iterator find(const ykeyT &key) const
       {
         const auto ptr = this->do_get_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1270,7 +1241,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return const_iterator(this->m_sth, ptr + toff);
       }
-    pair<const_iterator, const_iterator> equal_range(const key_type &key) const
+    template<typename ykeyT>
+      pair<const_iterator, const_iterator> equal_range(const ykeyT &key) const
       {
         const auto ptr = this->do_get_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1286,7 +1258,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    iterator find_mut(const key_type &key)
+    template<typename ykeyT>
+      iterator find_mut(const ykeyT &key)
       {
         const auto ptr = this->do_mut_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1297,7 +1270,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    pair<iterator, iterator> mut_equal_range(const key_type &key)
+    template<typename ykeyT>
+      pair<iterator, iterator> mut_equal_range(const ykeyT &key)
       {
         const auto ptr = this->do_mut_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1311,7 +1285,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return ::std::make_pair(tcur, tnext);
       }
 
-    size_t count(const key_type &key) const
+    template<typename ykeyT>
+      size_t count(const ykeyT &key) const
       {
         const auto toff = this->m_sth.index_of(key);
         if(toff < 0) {
@@ -1321,7 +1296,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
 
     // 26.5.4.3, element access
-    const mapped_type & at(const key_type &key) const
+    template<typename ykeyT>
+      const mapped_type & at(const ykeyT &key) const
       {
         const auto ptr = this->do_get_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1332,7 +1308,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
 
     // N.B. This is a non-standard extension.
-    mapped_type & mut(const key_type &key)
+    template<typename ykeyT>
+      mapped_type & mut(const ykeyT &key)
       {
         const auto ptr = this->do_mut_table();
         const auto toff = this->m_sth.index_of(key);
@@ -1341,18 +1318,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return ptr[toff].get()->second;
       }
-    mapped_type & operator[](const key_type &key)
+    template<typename ykeyT>
+      mapped_type & operator[](ykeyT &&key)
       {
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(key), ::std::forward_as_tuple());
-        return result.first->get()->second;
-      }
-    mapped_type & operator[](key_type &&key)
-      {
-        this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(::std::move(key)), ::std::forward_as_tuple());
+                                                                ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
         return result.first->get()->second;
       }
 
