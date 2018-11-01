@@ -537,12 +537,6 @@ template<typename ...alternativesT>
         storage backup;
         if(index_old == index_new) {
           // Swap both alternatives in place.
-          if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
-            ::std::memcpy(backup, this->m_stor, sizeof(storage));
-            ::std::memcpy(this->m_stor, other.m_stor, sizeof(storage));
-            ::std::memcpy(other.m_stor, backup, sizeof(storage));
-            return;
-          }
           static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
           (*(s_table[index_old]))(this->m_stor, other.m_stor);
           return;
