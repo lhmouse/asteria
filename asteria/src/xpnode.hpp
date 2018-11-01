@@ -91,7 +91,7 @@ class Xpnode
     struct S_operator_rpn
       {
         Xop xop;
-        bool assign;  // This parameter is ignored for `++`, `--`, `=` and all relational operators.
+        bool assign;  // This parameter is ignored for `++`, `--` and `=`.
       };
     struct S_unnamed_array
       {
