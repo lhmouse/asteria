@@ -547,9 +547,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             if(n1 != n2) {
               return 2;
             }
-            if(s1 == s2) {
-              return 0;
-            }
             const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
             return res;
           }
