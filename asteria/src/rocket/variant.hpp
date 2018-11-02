@@ -287,6 +287,9 @@ template<typename ...alternativesT>
     // 23.7.3.1, constructors
     variant() noexcept(is_nothrow_constructible<typename type_at<0>::type>::value)
       {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
+#endif
         constexpr auto index_new = size_t(0);
         // Value-initialize the first alternative in place.
         noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor));
@@ -295,6 +298,9 @@ template<typename ...alternativesT>
     template<typename paramT, typename enable_if<(index_of<typename decay<paramT>::type>::value || true)>::type * = nullptr>
       variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
       {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
+#endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
         noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramT>(param));
@@ -302,6 +308,9 @@ template<typename ...alternativesT>
       }
     variant(const variant &other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
       {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
+#endif
         const auto index_new = other.m_index;
         // Copy-construct the active alternative in place.
         variant::do_dispatch_copy_construct(index_new, this->m_stor, other.m_stor);
@@ -309,6 +318,9 @@ template<typename ...alternativesT>
       }
     variant(variant &&other) noexcept
       {
+#ifdef ROCKET_DEBUG
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
+#endif
         const auto index_new = other.m_index;
         // Move-construct the active alternative in place.
         variant::do_dispatch_move_construct(index_new, this->m_stor, other.m_stor);
@@ -424,7 +436,7 @@ template<typename ...alternativesT>
         // Destroy the active alternative in place.
         variant::do_dispatch_destroy(index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
-        ::std::memset(&(this->m_stor), '#', sizeof(this->m_stor));
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '#', sizeof(this->m_stor));
         this->m_index = 0xA596;
 #endif
       }
