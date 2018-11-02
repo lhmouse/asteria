@@ -126,7 +126,7 @@ Xpnode::~Xpnode()
       {
         auto spare = &global;
         auto qctx = &ctx;
-        for(;;) {
+        do {
           const auto qref = qctx->get_named_reference_opt(name);
           if(qref) {
             return std::make_pair(std::ref(*qctx), std::ref(*qref));
@@ -138,7 +138,7 @@ Xpnode::~Xpnode()
               ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
             }
           }
-        }
+        } while(true);
       }
 
     }
