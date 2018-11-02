@@ -316,13 +316,21 @@ template<typename ...alternativesT>
       }
     // 23.7.3.3, assignment
     template<typename paramT, typename enable_if<(index_of<paramT>::value || true)>::type * = nullptr>
-      variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...>::value)
+      variant & operator=(const paramT &param) noexcept(is_nothrow_copy_assignable<paramT>::value && is_nothrow_copy_constructible<paramT>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
           *static_cast<typename type_at<index_new>::type *>(this->m_stor) = param;
+          return *this;
+        }
+        if(is_nothrow_copy_constructible<paramT>::value) {
+          // Destroy the old alternative.
+          variant::do_dispatch_destroy(index_old, this->m_stor);
+          // Copy-construct the alternative in place.
+          noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), param);
+          this->m_index = index_new;
           return *this;
         }
         // Make a backup.
@@ -344,7 +352,7 @@ template<typename ...alternativesT>
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
     template<typename paramT, typename enable_if<(index_of<paramT>::value || true)>::type * = nullptr>
-      variant & operator=(paramT &&param) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
+      variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -360,13 +368,21 @@ template<typename ...alternativesT>
         this->m_index = index_new;
         return *this;
       }
-    variant & operator=(const variant &other) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>...>::value)
+    variant & operator=(const variant &other) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>..., is_nothrow_copy_constructible<alternativesT>...>::value)
       {
         const auto index_old = this->m_index;
         const auto index_new = other.m_index;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
           variant::do_dispatch_copy_assign(index_new, this->m_stor, other.m_stor);
+          return *this;
+        }
+        if(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value) {
+          // Destroy the old alternative.
+          variant::do_dispatch_destroy(index_old, this->m_stor);
+          // Copy-construct the alternative in place.
+          variant::do_dispatch_copy_construct(index_new, this->m_stor, other.m_stor);
+          this->m_index = index_new;
           return *this;
         }
         // Make a backup.
@@ -506,6 +522,14 @@ template<typename ...alternativesT>
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = indexT;
+        if(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value) {
+          // Destroy the old alternative.
+          variant::do_dispatch_destroy(index_old, this->m_stor);
+          // Construct the alternative in place.
+          noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramsT>(params)...);
+          this->m_index = index_new;
+          return *this;
+        }
         // Make a backup.
         storage backup;
         variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
@@ -534,7 +558,6 @@ template<typename ...alternativesT>
       {
         const auto index_old = this->m_index;
         const auto index_new = other.m_index;
-        storage backup;
         if(index_old == index_new) {
           // Swap both alternatives in place.
           static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
@@ -542,6 +565,7 @@ template<typename ...alternativesT>
           return;
         }
         // Swap active alternatives using an indeterminate buffer.
+        storage backup;
         variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         // Move-construct the other alternative in place.
         variant::do_dispatch_move_construct_then_destroy(index_new, this->m_stor, other.m_stor);
