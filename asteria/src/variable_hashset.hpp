@@ -17,9 +17,10 @@ class Variable_hashset
       {
         rocket::refcounted_ptr<Variable> var;
 
-        explicit operator bool () const noexcept
+        // If no user-provided default constructor was provided, value-initialization would result in
+        // zero-filling preceding calls to actual constructors of members.
+        Bucket() noexcept
           {
-            return this->var != nullptr;
           }
       };
 
@@ -65,7 +66,7 @@ class Variable_hashset
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          if(data[i]) {
+          if(data[i].var) {
             std::forward<FuncT>(func)(data[i].var);
           }
         }

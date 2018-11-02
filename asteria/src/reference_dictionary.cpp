@@ -38,16 +38,16 @@ Reference_dictionary::~Reference_dictionary()
       {
         // Phase one: Probe from `first` to the end of the table.
         for(std::size_t i = first; i != nbkt; ++i) {
-          const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
-            return bkt;
+          const auto qbkt = data + i;
+          if(qbkt->refv.empty() || std::forward<PredT>(pred)(*qbkt)) {
+            return qbkt;
           }
         }
         // Phase two: Probe from the beginning of the table to `last`.
         for(std::size_t i = 0; i != last; ++i) {
-          const auto bkt = data + i;
-          if(!*bkt || std::forward<PredT>(pred)(*bkt)) {
-            return bkt;
+          const auto qbkt = data + i;
+          if(qbkt->refv.empty() || std::forward<PredT>(pred)(*qbkt)) {
+            return qbkt;
           }
         }
         // The table is full.
@@ -76,11 +76,11 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     const auto data_old = this->m_data;
     const auto nbkt_old = this->m_nbkt;
     for(std::size_t i = 0; i != nbkt_old; ++i) {
-      if(data_old[i]) {
+      if(!data_old[i].refv.empty()) {
         // Find a bucket for it.
         const auto origin = do_get_origin(nbkt, data_old[i].name);
         const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-        ROCKET_ASSERT(!*qbkt);
+        ROCKET_ASSERT(qbkt->refv.empty());
         *qbkt = std::move(data_old[i]);
       }
       rocket::destroy_at(data_old + i);
@@ -101,7 +101,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::cow_string &name) con
     // Looking for the variable using linear probing.
     const auto origin = do_get_origin(nbkt, name);
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.name == name; });
-    if(!*qbkt) {
+    if(qbkt->refv.empty()) {
       // Not found.
       return -1;
     }
@@ -120,13 +120,13 @@ bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::cow_strin
     // Find a bucket for the new element.
     const auto origin = do_get_origin(nbkt, name);
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.name == name; });
-    if(*qbkt) {
+    if(!qbkt->refv.empty()) {
       // Already exists.
-      qbkt->ref_opt.front() = std::move(ref);
+      qbkt->refv.front() = std::move(ref);
       return false;
     }
     qbkt->name = name;
-    qbkt->ref_opt.emplace_back(std::move(ref));
+    qbkt->refv.emplace_back(std::move(ref));
     this->m_size += 1;
     return true;
   }
@@ -138,8 +138,8 @@ void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept
     const auto nbkt = this->m_nbkt;
     ROCKET_ASSERT(tpos < nbkt);
     // Nullify the bucket.
-    ROCKET_ASSERT(data[tpos]);
-    data[tpos].ref_opt.clear();
+    ROCKET_ASSERT(!data[tpos].refv.empty());
+    data[tpos].refv.clear();
     this->m_size -= 1;
     // Relocate elements after the erasure point.
     do_linear_probe(data, nbkt, tpos + 1, tpos,
@@ -147,11 +147,11 @@ void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept
         {
           // Remove the element from the old bucket.
           auto old = std::move(cand);
-          ROCKET_ASSERT(!cand);
+          cand.refv.clear();
           // Find a new bucket for it.
           const auto origin = do_get_origin(nbkt, old.name);
           const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-          ROCKET_ASSERT(!*qbkt);
+          ROCKET_ASSERT(qbkt->refv.empty());
           // Insert it into the new bucket.
           *qbkt = std::move(old);
           return false;

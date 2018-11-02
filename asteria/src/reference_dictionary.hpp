@@ -16,11 +16,12 @@ class Reference_dictionary
     struct Bucket
       {
         rocket::cow_string name;
-        rocket::static_vector<Reference, 1> ref_opt;
+        rocket::static_vector<Reference, 1> refv;
 
-        explicit operator bool () const noexcept
+        // If no user-provided default constructor was provided, value-initialization would result in
+        // zero-filling preceding calls to actual constructors of members.
+        Bucket() noexcept
           {
-            return this->ref_opt.size() != 0;
           }
       };
 
@@ -55,7 +56,7 @@ class Reference_dictionary
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          data[i].ref_opt.clear();
+          data[i].refv.clear();
         }
         this->m_size = 0;
       }
@@ -66,8 +67,8 @@ class Reference_dictionary
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          if(data[i]) {
-            std::forward<FuncT>(func)(data[i].name, data[i].ref_opt.front());
+          if(!data[i].refv.empty()) {
+            std::forward<FuncT>(func)(data[i].name, data[i].refv.front());
           }
         }
       }
@@ -77,7 +78,7 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return this->m_data[toff].ref_opt.data();
+        return this->m_data[toff].refv.data();
       }
     Reference * get_opt(const rocket::cow_string &name) noexcept
       {
@@ -85,7 +86,7 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return this->m_data[toff].ref_opt.data();
+        return this->m_data[toff].refv.data();
       }
     std::size_t max_size() const noexcept
       {
