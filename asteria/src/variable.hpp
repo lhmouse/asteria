@@ -37,8 +37,11 @@ class Variable : public rocket::refcounted_base<Variable>
       {
         return this->m_value;
       }
-    Value & get_value() noexcept
+    Value & get_mutable_value() noexcept
       {
+        if(this->m_immutable) {
+          this->do_throw_immutable();
+        }
         return this->m_value;
       }
     bool is_immutable() const noexcept

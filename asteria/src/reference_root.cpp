@@ -46,10 +46,7 @@ Value & Reference_root::dereference_mutable() const
       }
       case index_variable: {
         const auto &alt = this->check<S_variable>();
-        if(alt.var->is_immutable()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The variable having value `", alt.var->get_value(), "` is immutable and cannot be modified.");
-        }
-        return alt.var->get_value();
+        return alt.var->get_mutable_value();
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
