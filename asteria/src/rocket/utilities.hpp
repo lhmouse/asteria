@@ -18,6 +18,7 @@ namespace rocket {
 
 using ::std::common_type;
 using ::std::is_nothrow_constructible;
+using ::std::is_nothrow_default_constructible;
 using ::std::is_nothrow_destructible;
 using ::std::underlying_type;
 using ::std::conditional;
@@ -182,14 +183,23 @@ template<typename iteratorT>
   }
 
 template<typename elementT, typename ...paramsT>
-  constexpr elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+  elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
+    ROCKET_ASSERT(ptr);
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
+  }
+
+template<typename elementT>
+  elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+  {
+    ROCKET_ASSERT(ptr);
+    return ::new(static_cast<void *>(ptr)) elementT;
   }
 
 template<typename elementT>
   void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
+    ROCKET_ASSERT(ptr);
     return ptr->~elementT();
   }
 

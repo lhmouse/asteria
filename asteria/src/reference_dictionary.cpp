@@ -70,7 +70,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     // Initialize the table. This will not throw exceptions.
     static_assert(std::is_nothrow_constructible<Bucket>::value, "??");
     for(std::size_t i = 0; i != nbkt; ++i) {
-      rocket::construct_at(data + i);
+      rocket::default_construct_at(data + i);
     }
     // Rehash elements and move them into the new table. This will not throw exceptions, either.
     const auto data_old = this->m_data;

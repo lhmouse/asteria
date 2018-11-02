@@ -17,12 +17,6 @@ class Reference_dictionary
       {
         rocket::cow_string name;
         rocket::static_vector<Reference, 1> refv;
-
-        // If no user-provided default constructor was provided, value-initialization would result in
-        // zero-filling preceding calls to actual constructors of members.
-        Bucket() noexcept
-          {
-          }
       };
 
       Bucket *m_data;

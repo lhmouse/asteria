@@ -16,12 +16,6 @@ class Variable_hashset
     struct Bucket
       {
         rocket::refcounted_ptr<Variable> var;
-
-        // If no user-provided default constructor was provided, value-initialization would result in
-        // zero-filling preceding calls to actual constructors of members.
-        Bucket() noexcept
-          {
-          }
       };
 
     Bucket *m_data;
