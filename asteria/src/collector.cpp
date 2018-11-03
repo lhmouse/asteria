@@ -106,7 +106,7 @@ void Collector::collect()
     // The algorithm here is basically described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     // However, we initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
-    // This saves us a phase below.
+    // This saves a phase for us below.
     ASTERIA_DEBUG_LOG("Garbage collection begins: this = ", static_cast<void *>(this), ", tracked_variables = ", this->m_tracked.size());
     this->m_staging.clear();
     this->m_staging.reserve(this->m_tracked.size() * 9 / 8);
