@@ -4,11 +4,16 @@
 #ifndef ASTERIA_FWD_HPP_
 #define ASTERIA_FWD_HPP_
 
+#ifdef HAVE_CONFIG_H
+#  include <config.h>
+#endif
+
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward()
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include "rocket/preprocessor_utilities.h"
+#include "rocket/assert.hpp"
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
