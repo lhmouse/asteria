@@ -813,6 +813,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     static_assert(!is_array<keyT>::value, "`keyT` must not be an array type.");
     static_assert(!is_array<mappedT>::value, "`mappedT` must not be an array type.");
     static_assert(is_same<typename allocatorT::value_type, pair<const keyT, mappedT>>::value, "`allocatorT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
+    static_assert(noexcept(::std::declval<const hashT &>()(::std::declval<const keyT &>())), "The hash operation shall not throw exceptions.");
 
   public:
     // types
