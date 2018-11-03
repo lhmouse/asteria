@@ -11,7 +11,7 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval(), std::pair<>
 #include <typeinfo> // typeid()
-#include <functional> // std::hash<>
+#include <functional> // std::hash<>, std::equal_to<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
 #include <cstdint> // std::uint32_t
@@ -20,7 +20,6 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
-#include "transparent_comparators.hpp"
 
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
@@ -56,11 +55,12 @@ using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::pair;
 using ::std::hash;
+using ::std::equal_to;
 using ::std::size_t;
 using ::std::ptrdiff_t;
 using ::std::uint32_t;
 
-template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = transparent_equal_to, typename allocatorT = allocator<pair<const keyT, mappedT>>>
+template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;
 
     namespace details_cow_hashmap {
