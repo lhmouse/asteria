@@ -324,8 +324,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           : string_iterator(nullptr, nullptr)
           {
           }
-        template<typename ycharT, typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
-          constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
+        template<typename ycharT,
+          typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
+            constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
           : string_iterator(other.m_ref, other.m_ptr)
           {
           }
@@ -1122,8 +1123,10 @@ template<typename charT, typename traitsT, typename allocatorT>
         ROCKET_ASSERT(first <= last);
         return this->append(first, static_cast<size_type>(last - first));
       }
-    template<typename inputT, typename enable_if<!(is_convertible<inputT, const value_type *>::value), typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
-      basic_cow_string & append(inputT first, inputT last)
+    template<typename inputT,
+      typename enable_if<!(is_convertible<inputT, const value_type *>::value),
+      typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
+        basic_cow_string & append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;

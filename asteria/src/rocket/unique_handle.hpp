@@ -24,7 +24,6 @@
 
 namespace rocket {
 
-using ::std::enable_if;
 using ::std::is_array;
 using ::std::is_trivial;
 using ::std::is_nothrow_constructible;

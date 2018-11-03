@@ -159,8 +159,9 @@ class Token
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
-      Token(const rocket::cow_string &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
+    template<typename AltT,
+      typename std::enable_if<(Variant::index_of<AltT>::value || true)>::type * = nullptr>
+        Token(const rocket::cow_string &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
       : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
       {
       }

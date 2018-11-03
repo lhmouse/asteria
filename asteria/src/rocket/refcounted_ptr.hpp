@@ -329,14 +329,16 @@ template<typename elementT>
       {
         this->reset(other.m_sth.release());
       }
-    template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-      refcounted_ptr(const refcounted_ptr<yelementT> &other) noexcept
+    template<typename yelementT,
+      typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr(const refcounted_ptr<yelementT> &other) noexcept
       : refcounted_ptr()
       {
         this->reset(other.m_sth.copy_release());
       }
-    template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-      refcounted_ptr(refcounted_ptr<yelementT> &&other) noexcept
+    template<typename yelementT,
+      typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr(refcounted_ptr<yelementT> &&other) noexcept
       : refcounted_ptr()
       {
         this->reset(other.m_sth.release());
@@ -356,14 +358,16 @@ template<typename elementT>
         this->reset(other.m_sth.release());
         return *this;
       }
-    template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-      refcounted_ptr & operator=(const refcounted_ptr<yelementT> &other) noexcept
+    template<typename yelementT,
+      typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr & operator=(const refcounted_ptr<yelementT> &other) noexcept
       {
         this->reset(other.m_sth.copy_release());
         return *this;
       }
-    template<typename yelementT, typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
-      refcounted_ptr & operator=(refcounted_ptr<yelementT> &&other) noexcept
+    template<typename yelementT,
+      typename enable_if<is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value>::type * = nullptr>
+        refcounted_ptr & operator=(refcounted_ptr<yelementT> &&other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;

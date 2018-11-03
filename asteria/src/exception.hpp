@@ -19,8 +19,9 @@ class Exception : public virtual std::exception
     rocket::cow_vector<Source_location> m_backtrace;
 
   public:
-    template<typename XvalueT, typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-      Exception(const Source_location &loc, XvalueT &&value)
+    template<typename XvalueT,
+      typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
+        Exception(const Source_location &loc, XvalueT &&value)
       : m_loc(loc), m_value(std::forward<XvalueT>(value))
       {
       }

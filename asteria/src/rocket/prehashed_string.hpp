@@ -159,8 +159,9 @@ template<typename stringT, typename hashT>
       : m_sth(hf, ::std::move(str))
       {
       }
-    template<typename paramT, typename enable_if<is_convertible<typename remove_reference<paramT>::type &&, string_type>::value>::type * = nullptr>
-      basic_prehashed_string(paramT &&param, const hasher &hf = hasher())
+    template<typename paramT,
+      typename enable_if<is_convertible<typename remove_reference<paramT>::type &&, string_type>::value>::type * = nullptr>
+        basic_prehashed_string(paramT &&param, const hasher &hf = hasher())
       : m_sth(hf, ::std::forward<paramT>(param))
       {
       }

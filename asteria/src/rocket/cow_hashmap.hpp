@@ -712,9 +712,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           : hashmap_iterator(nullptr, nullptr)
           {
           }
-        template<typename yvalueT, typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
-          constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT> &other) noexcept
-            : hashmap_iterator(other.m_ref, other.m_bkt)
+        template<typename yvalueT,
+          typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
+            constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT> &other) noexcept
+          : hashmap_iterator(other.m_ref, other.m_bkt)
           {
           }
 
@@ -1220,8 +1221,9 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type differs from `std::unordered_map`.
-    template<typename ykeyT, typename enable_if<!(is_convertible<ykeyT, const_iterator>::value)>::type * = nullptr>
-      bool erase(const ykeyT &key)
+    template<typename ykeyT,
+      typename enable_if<!(is_convertible<ykeyT, const_iterator>::value)>::type * = nullptr>
+        bool erase(const ykeyT &key)
       {
         const auto toff = this->m_sth.index_of(key);
         if(toff < 0) {
