@@ -4,7 +4,6 @@
 #ifndef ASTERIA_TEST_INIT_HPP_
 #define ASTERIA_TEST_INIT_HPP_
 
-#include "../asteria/src/precompiled.hpp"
 #include "../asteria/src/fwd.hpp"
 #include <iostream> // std::cerr, operator<<()
 #include <exception> // std::terminate(), std::exception

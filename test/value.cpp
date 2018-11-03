@@ -3,6 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../asteria/src/value.hpp"
+#include <cmath>
 
 using namespace Asteria;
 
