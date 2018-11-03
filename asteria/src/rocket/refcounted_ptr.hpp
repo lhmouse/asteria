@@ -122,6 +122,13 @@ template<typename elementT>
         using pointer       = element_type *;
 
       private:
+        template<typename yelementT, typename deleterT>
+          static constexpr const deleterT & do_locate_deleter(const refcounted_base<yelementT, deleterT> &base) noexcept
+          {
+            return base.as_deleter();
+          }
+
+      private:
         pointer m_ptr;
 
       public:
@@ -138,13 +145,6 @@ template<typename elementT>
           = delete;
         stored_pointer & operator=(const stored_pointer &)
           = delete;
-
-      private:
-        template<typename yelementT, typename deleterT>
-          const deleterT & do_locate_deleter(const refcounted_base<yelementT, deleterT> &base) const
-          {
-            return base.as_deleter();
-          }
 
       public:
         long use_count() const noexcept
