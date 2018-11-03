@@ -26,7 +26,7 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
     ROCKET_NONCOPYABLE_DESTRUCTOR(Global_collector);
 
   public:
-    rocket::refcounted_ptr<Variable> create_tracked_variable();
+    rocket::refcounted_ptr<Variable> create_tracked_variable(const Reference *src_opt, bool immutable);
     void perform_garbage_collection(unsigned gen_limit);
   };
 

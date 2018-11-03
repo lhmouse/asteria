@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "global_collector.hpp"
 #include "variable.hpp"
+#include "reference.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -12,9 +13,14 @@ Global_collector::~Global_collector()
   {
   }
 
-rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable()
+rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable(const Reference *src_opt, bool immutable)
   {
-    auto var = rocket::make_refcounted<Variable>(D_null(), true);
+    rocket::refcounted_ptr<Variable> var;
+    if(src_opt) {
+      var = rocket::make_refcounted<Variable>(src_opt->read(), immutable);
+    } else {
+      var = rocket::make_refcounted<Variable>(D_null(), immutable);
+    }
     this->m_gen_zero.track_variable(var);
     return var;
   }

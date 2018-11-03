@@ -109,8 +109,7 @@ Reference & Reference::convert_to_variable(Global_context &global, bool immutabl
       return *this;
     }
     // Create an lvalue by allocating a variable and assign it to `*this`.
-    auto var = global.create_tracked_variable();
-    var->reset(this->read(), immutable);
+    auto var = global.create_tracked_variable(this, immutable);
     Reference_root::S_variable ref_c = { std::move(var) };
     *this = std::move(ref_c);
     return *this;

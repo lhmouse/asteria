@@ -54,9 +54,9 @@ void Global_context::set_named_reference(const rocket::prehashed_string &name, R
     this->m_dict.set(name, std::move(ref));
   }
 
-rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable()
+rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable(const Reference *src_opt, bool immutable)
   {
-    return this->m_gcoll->create_tracked_variable();
+    return this->m_gcoll->create_tracked_variable(src_opt, immutable);
   }
 
 void Global_context::perform_garbage_collection(unsigned gen_limit)
