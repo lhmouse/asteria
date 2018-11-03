@@ -36,7 +36,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
 
 bool Collector::auto_collect()
   {
-    if(this->m_counter <= this->m_threshold) {
+    if(this->m_counter < this->m_threshold) {
       return false;
     }
     this->collect();
