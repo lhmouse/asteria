@@ -18,14 +18,14 @@ Reference_dictionary::~Reference_dictionary()
 
     namespace {
 
-    std::size_t do_get_origin(std::size_t nbkt, const rocket::cow_string &name) noexcept
+    std::size_t do_get_origin(std::size_t nbkt, const rocket::prehashed_string &name) noexcept
       {
         // Conversion between an unsigned integer type and a floating point type results in performance penalty.
         // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
         const auto fcast = [](std::size_t x) { return static_cast<double>(static_cast<std::ptrdiff_t>(x)); };
         const auto ucast = [](double y) { return static_cast<std::size_t>(static_cast<std::ptrdiff_t>(y)); };
         // Multiplication is faster than division.
-        const auto seed = static_cast<std::uint32_t>(rocket::cow_string::hash()(name));
+        const auto seed = static_cast<std::uint32_t>(name.rdhash());
         const auto ratio = fcast(seed >> 1) / double(0x80000000);
         ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
         const auto pos = ucast(fcast(nbkt) * ratio);
@@ -91,7 +91,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     this->m_nbkt = nbkt;
   }
 
-std::ptrdiff_t Reference_dictionary::do_find(const rocket::cow_string &name) const noexcept
+std::ptrdiff_t Reference_dictionary::do_find(const rocket::prehashed_string &name) const noexcept
   {
     const auto data = this->m_data;
     if(!data) {
@@ -110,7 +110,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::cow_string &name) con
     return toff;
   }
 
-bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::cow_string &name, Reference &&ref) noexcept
+bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::prehashed_string &name, Reference &&ref) noexcept
   {
     ROCKET_ASSERT(!name.empty());
     const auto data = this->m_data;

@@ -18,7 +18,7 @@ class Reference_modifier
       };
     struct S_object_key
       {
-        rocket::cow_string key;
+        rocket::prehashed_string key;
       };
 
     enum Index : std::uint8_t

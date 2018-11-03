@@ -51,6 +51,7 @@
 #include "rocket/unique_ptr.hpp"
 #include "rocket/refcounted_ptr.hpp"
 #include "rocket/static_vector.hpp"
+#include "rocket/prehashed_string.hpp"
 
 namespace Asteria {
 

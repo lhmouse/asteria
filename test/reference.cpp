@@ -54,7 +54,7 @@ int main()
     ref.zoom_out();
 
     ref.zoom_in(Reference_modifier::S_array_index { 2 });
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::cow_string::shallow("my_key") });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("my_key")) });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);
     ref.write(D_real(10.5));
@@ -64,11 +64,11 @@ int main()
     ref.zoom_out();
     ref.zoom_out();
     ref.zoom_in(Reference_modifier::S_array_index { -1 });
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::cow_string::shallow("my_key") });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("my_key")) });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_real);
     ASTERIA_TEST_CHECK(val.check<D_real>() == 10.5);
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::cow_string::shallow("invalid_access") });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("invalid_access")) });
     ASTERIA_TEST_CHECK_CATCH(val = ref.read());
     ref.zoom_out();
 

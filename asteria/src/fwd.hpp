@@ -12,6 +12,7 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
+#include "rocket/prehashed_string.hpp"
 
 namespace Asteria {
 
@@ -67,7 +68,7 @@ using D_string    = rocket::cow_string;
 using D_opaque    = Shared_opaque_wrapper;
 using D_function  = Shared_function_wrapper;
 using D_array     = rocket::cow_vector<Value>;
-using D_object    = rocket::cow_hashmap<rocket::cow_string, Value, rocket::cow_string::hash, rocket::cow_string::equal_to>;
+using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value, rocket::prehashed_string::hash>;
 
 }
 

@@ -16,7 +16,7 @@ class Analytic_context : public Abstract_context
     const Abstract_context *const m_parent_opt;
     Reference_dictionary m_dict;
     Reference m_dummy;
-    rocket::cow_vector<rocket::cow_string> m_params;
+    rocket::cow_vector<rocket::prehashed_string> m_params;
 
   public:
     explicit Analytic_context(const Abstract_context *parent_opt) noexcept
@@ -29,8 +29,8 @@ class Analytic_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
 
-    const Reference * get_named_reference_opt(const rocket::cow_string &name) const override;
-    void set_named_reference(const rocket::cow_string &name, Reference ref) override;
+    const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const override;
+    void set_named_reference(const rocket::prehashed_string &name, Reference ref) override;
 
     void initialize_for_function(const Function_header &head);
   };

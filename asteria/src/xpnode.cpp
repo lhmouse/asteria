@@ -122,7 +122,7 @@ Xpnode::~Xpnode()
 
     std::pair<std::reference_wrapper<const Abstract_context>,
               std::reference_wrapper<const Reference>>
-      do_name_lookup(const Global_context &global, const Abstract_context &ctx, const rocket::cow_string &name)
+      do_name_lookup(const Global_context &global, const Abstract_context &ctx, const rocket::prehashed_string &name)
       {
         auto spare = &global;
         auto qctx = &ctx;
@@ -155,7 +155,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
       case index_named_reference: {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
-        if(alt.name.starts_with("__")) {
+        if(alt.name.rdstr().starts_with("__")) {
           // Copy it as-is.
           Xpnode::S_named_reference alt_bnd = { alt.name };
           return std::move(alt_bnd);
@@ -601,12 +601,12 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         // The subscript shall have type `integer` or `string`.
         switch(rocket::weaken_enum(subscript.type())) {
           case Value::type_integer: {
-            Reference_modifier::S_array_index mod_c = { subscript.check<D_integer>() };
+            Reference_modifier::S_array_index mod_c = { std::int64_t(subscript.check<D_integer>()) };
             stack_io.top().zoom_in(std::move(mod_c));
             break;
           }
           case Value::type_string: {
-            Reference_modifier::S_object_key mod_c = { subscript.check<D_string>() };
+            Reference_modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
             stack_io.top().zoom_in(std::move(mod_c));
             break;
           }
