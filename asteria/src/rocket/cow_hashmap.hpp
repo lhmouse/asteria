@@ -872,7 +872,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         this->assign(other);
       }
     cow_hashmap(cow_hashmap &&other) noexcept(is_nothrow_copy_constructible<hasher>::value && is_nothrow_copy_constructible<key_equal>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), ::std::move(other.m_sth.as_allocator()))
       {
         this->assign(::std::move(other));
       }
