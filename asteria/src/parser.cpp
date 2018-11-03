@@ -341,7 +341,7 @@ Parser::~Parser()
         return true;
       }
 
-    bool do_accept_identifier_list(rocket::cow_vector<rocket::cow_string> &names_out, Token_stream &tstrm_io)
+    bool do_accept_identifier_list(rocket::cow_vector<rocket::prehashed_string> &names_out, Token_stream &tstrm_io)
       {
         // identifier-list-opt ::=
         //   identifier-list | ""
@@ -404,7 +404,7 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
-        rocket::cow_vector<rocket::cow_string> params;
+        rocket::cow_vector<rocket::prehashed_string> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
@@ -467,7 +467,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           return false;
         }
-        rocket::cow_vector<rocket::cow_string> keys;
+        rocket::cow_vector<rocket::prehashed_string> keys;
         for(;;) {
           const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_error::code_duplicate_object_key);
           rocket::cow_string key;
@@ -576,7 +576,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_close_bracket_expected);
         }
-        Xpnode::S_subscript node_c = { rocket::cow_string() };
+        Xpnode::S_subscript node_c = { rocket::prehashed_string() };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -1206,7 +1206,7 @@ Parser::~Parser()
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
-        rocket::cow_vector<rocket::cow_string> params;
+        rocket::cow_vector<rocket::prehashed_string> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }

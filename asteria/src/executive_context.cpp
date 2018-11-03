@@ -24,7 +24,7 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Executive_context::get_named_reference_opt(const rocket::cow_string &name) const
+const Reference * Executive_context::get_named_reference_opt(const rocket::prehashed_string &name) const
   {
     // Check for overriden references.
     const auto qref = this->m_dict.get_opt(name);
@@ -32,7 +32,7 @@ const Reference * Executive_context::get_named_reference_opt(const rocket::cow_s
       return qref;
     }
     // Deal with pre-defined variables.
-    if(name.starts_with("__")) {
+    if(name.rdstr().starts_with("__")) {
       // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
       if(name == "__file") {
         return &(this->m_file);
@@ -53,7 +53,7 @@ const Reference * Executive_context::get_named_reference_opt(const rocket::cow_s
     return nullptr;
   }
 
-void Executive_context::set_named_reference(const rocket::cow_string &name, Reference ref)
+void Executive_context::set_named_reference(const rocket::prehashed_string &name, Reference ref)
   {
     this->m_dict.set(name, std::move(ref));
   }
@@ -83,7 +83,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       if(name.empty()) {
         continue;
       }
-      if(name.starts_with("__")) {
+      if(name.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
       }
       if(i < args.size()) {

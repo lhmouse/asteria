@@ -62,7 +62,7 @@ class Xpnode
       };
     struct S_named_reference
       {
-        rocket::cow_string name;
+        rocket::prehashed_string name;
       };
     struct S_bound_reference
       {
@@ -86,7 +86,7 @@ class Xpnode
       };
     struct S_subscript
       {
-        rocket::cow_string name;  // If this is empty then the subscript is to be popped from the stack.
+        rocket::prehashed_string name;  // If this is empty then the subscript is to be popped from the stack.
       };
     struct S_operator_rpn
       {
@@ -99,7 +99,7 @@ class Xpnode
       };
     struct S_unnamed_object
       {
-        rocket::cow_vector<rocket::cow_string> keys;
+        rocket::cow_vector<rocket::prehashed_string> keys;
       };
     struct S_coalescence
       {

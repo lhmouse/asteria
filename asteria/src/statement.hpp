@@ -34,7 +34,7 @@ class Statement
       };
     struct S_var_def
       {
-        rocket::cow_string name;
+        rocket::prehashed_string name;
         bool immutable;
         Expression init;
       };
@@ -73,15 +73,15 @@ class Statement
       };
     struct S_for_each
       {
-        rocket::cow_string key_name;
-        rocket::cow_string mapped_name;
+        rocket::prehashed_string key_name;
+        rocket::prehashed_string mapped_name;
         Expression init;
         Block body;
       };
     struct S_try
       {
         Block body_try;
-        rocket::cow_string except_name;
+        rocket::prehashed_string except_name;
         Block body_catch;
       };
     struct S_break

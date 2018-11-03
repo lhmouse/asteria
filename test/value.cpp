@@ -35,12 +35,12 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == rocket::cow_string::shallow("world"));
 
     D_object object;
-    object.try_emplace(rocket::cow_string::shallow("one"), D_boolean(true));
-    object.try_emplace(rocket::cow_string::shallow("two"), D_string("world"));
+    object.try_emplace(rocket::prehashed_string(rocket::cow_string::shallow("one")), D_boolean(true));
+    object.try_emplace(rocket::prehashed_string(rocket::cow_string::shallow("two")), D_string("world"));
     value = std::move(object);
     ASTERIA_TEST_CHECK(value.type() == Value::type_object);
-    ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::cow_string::shallow("one")).check<D_boolean>() == true);
-    ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::cow_string::shallow("two")).check<D_string>() == rocket::cow_string::shallow("world"));
+    ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::prehashed_string(rocket::cow_string::shallow("one"))).check<D_boolean>() == true);
+    ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::prehashed_string(rocket::cow_string::shallow("two"))).check<D_string>() == rocket::cow_string::shallow("world"));
 
     value = nullptr;
     Value cmp(nullptr);
@@ -123,8 +123,8 @@ int main()
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
 
     object.clear();
-    object.try_emplace(rocket::cow_string::shallow("one"), D_boolean(true));
-    object.try_emplace(rocket::cow_string::shallow("two"), D_string("world"));
+    object.try_emplace(rocket::prehashed_string(rocket::cow_string::shallow("one")), D_boolean(true));
+    object.try_emplace(rocket::prehashed_string(rocket::cow_string::shallow("two")), D_string("world"));
     value = std::move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);

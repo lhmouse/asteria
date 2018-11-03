@@ -15,7 +15,7 @@ class Reference_dictionary
   private:
     struct Bucket
       {
-        rocket::cow_string name;
+        rocket::prehashed_string name;
         rocket::static_vector<Reference, 1> refv;
       };
 
@@ -32,8 +32,8 @@ class Reference_dictionary
 
   private:
     void do_rehash(std::size_t res_arg);
-    std::ptrdiff_t do_find(const rocket::cow_string &name) const noexcept;
-    bool do_insert_or_assign_unchecked(const rocket::cow_string &name, Reference &&ref) noexcept;
+    std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
+    bool do_insert_or_assign_unchecked(const rocket::prehashed_string &name, Reference &&ref) noexcept;
     void do_erase_unchecked(std::size_t tpos) noexcept;
 
   public:
@@ -66,7 +66,7 @@ class Reference_dictionary
           }
         }
       }
-    const Reference * get_opt(const rocket::cow_string &name) const noexcept
+    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
       {
         const auto toff = this->do_find(name);
         if(toff < 0) {
@@ -74,7 +74,7 @@ class Reference_dictionary
         }
         return this->m_data[toff].refv.data();
       }
-    Reference * get_opt(const rocket::cow_string &name) noexcept
+    Reference * get_opt(const rocket::prehashed_string &name) noexcept
       {
         const auto toff = this->do_find(name);
         if(toff < 0) {
@@ -100,19 +100,19 @@ class Reference_dictionary
         }
         this->do_rehash(res_arg);
       }
-    bool set(const rocket::cow_string &name, const Reference &ref)
+    bool set(const rocket::prehashed_string &name, const Reference &ref)
       {
         ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
         return this->do_insert_or_assign_unchecked(name, Reference(ref));
       }
-    bool set(const rocket::cow_string &name, Reference &&ref)
+    bool set(const rocket::prehashed_string &name, Reference &&ref)
       {
         ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
         return this->do_insert_or_assign_unchecked(name, std::move(ref));
       }
-    bool unset(const rocket::cow_string &name) noexcept
+    bool unset(const rocket::prehashed_string &name) noexcept
       {
         const auto toff = this->do_find(name);
         if(toff < 0) {

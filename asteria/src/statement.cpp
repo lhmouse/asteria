@@ -20,12 +20,12 @@ Statement::~Statement()
 
     namespace {
 
-    void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const rocket::cow_string &name, Reference ref)
+    void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const rocket::prehashed_string &name, Reference ref)
       {
         if(name.empty()) {
           return;
         }
-        if(name.starts_with("__")) {
+        if(name.rdstr().starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
         }
         ctx_io.set_named_reference(name, std::move(ref));
