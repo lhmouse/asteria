@@ -601,7 +601,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         // The subscript shall have type `integer` or `string`.
         switch(rocket::weaken_enum(subscript.type())) {
           case Value::type_integer: {
-            Reference_modifier::S_array_index mod_c = { std::int64_t(subscript.check<D_integer>()) };
+            Reference_modifier::S_array_index mod_c = { subscript.check<D_integer>() };
             stack_io.top().zoom_in(std::move(mod_c));
             break;
           }
