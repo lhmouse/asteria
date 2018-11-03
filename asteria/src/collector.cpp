@@ -175,9 +175,6 @@ void Collector::collect()
             return;
           }
           // Mark a variable that is reachable and will not be collected.
-          if(root->get_gcref() < 0) {
-            return;
-          }
           root->set_gcref(-1);
           // Mark variables reachable indirectly.
           root->enumerate_variables(do_make_variable_callback(
