@@ -1764,9 +1764,9 @@ template<typename charT, typename traitsT, typename allocatorT>
 template<typename charT, typename traitsT, typename allocatorT>
   struct basic_cow_string<charT, traitsT, allocatorT>::equal_to
   {
-    using result_type = bool;
-    using first_argument_type = basic_cow_string;
-    using second_argument_type = basic_cow_string;
+    using result_type           = bool;
+    using first_argument_type   = basic_cow_string;
+    using second_argument_type  = basic_cow_string;
 
     result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
       {
