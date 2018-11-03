@@ -1,7 +1,6 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#include "precompiled.hpp"
 #include "simple_source_file.hpp"
 #include "global_context.hpp"
 #include <iostream>
