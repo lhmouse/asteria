@@ -222,7 +222,7 @@ template<typename elementT, typename deleterT>
     template<typename yelementT, typename ydeleterT,
       typename enable_if<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
                          is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value>::type * = nullptr>
-      unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+        unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       : unique_ptr(::std::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
@@ -237,7 +237,7 @@ template<typename elementT, typename deleterT>
     template<typename yelementT, typename ydeleterT,
       typename enable_if<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
                          is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value>::type * = nullptr>
-      unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+        unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       {
         allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());

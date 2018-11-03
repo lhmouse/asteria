@@ -120,8 +120,7 @@ Xpnode::~Xpnode()
 
     namespace {
 
-    std::pair<std::reference_wrapper<const Abstract_context>,
-              std::reference_wrapper<const Reference>>
+    std::pair<std::reference_wrapper<const Abstract_context>, std::reference_wrapper<const Reference>>
       do_name_lookup(const Global_context &global, const Abstract_context &ctx, const rocket::prehashed_string &name)
       {
         auto spare = &global;
