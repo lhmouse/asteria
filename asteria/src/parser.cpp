@@ -850,7 +850,7 @@ Parser::~Parser()
         return true;
       }
 
-    class Infix_operator : public Infix_element_base
+    class Infix_carriage : public Infix_element_base
       {
       private:
         Xpnode::Xop m_xop;
@@ -858,7 +858,7 @@ Parser::~Parser()
         rocket::cow_vector<Xpnode> m_rhs;
 
       public:
-        Infix_operator(Xpnode::Xop xop, bool assign, rocket::cow_vector<Xpnode> &&rhs)
+        Infix_carriage(Xpnode::Xop xop, bool assign, rocket::cow_vector<Xpnode> &&rhs)
           : m_xop(xop), m_assign(assign), m_rhs(std::move(rhs))
           {
           }
@@ -926,9 +926,9 @@ Parser::~Parser()
           }
       };
 
-    bool do_accept_infix_operator(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
+    bool do_accept_infix_carriage(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
-        // infix-operator ::=
+        // infix-carriage ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
         //     "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
         //     "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
@@ -1087,18 +1087,18 @@ Parser::~Parser()
         if(!do_accept_infix_element(rhs, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_operator>(xop, assign, std::move(rhs));
+        elem_out = rocket::make_unique<Infix_carriage>(xop, assign, std::move(rhs));
         return true;
       }
 
     bool do_accept_expression(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // expression ::=
-        //   infix-element infix-operator-list-opt
-        // infix-operator-list-opt ::=
-        //   infix-operator-list | ""
-        // infix-operator-list ::=
-        //   ( infix-selection | infix-operator ) infix-operator-list-opt
+        //   infix-element infix-carriage-list-opt
+        // infix-carriage-list-opt ::=
+        //   infix-carriage-list | ""
+        // infix-carriage-list ::=
+        //   ( infix-selection | infix-carriage ) infix-carriage-list-opt
         // infix-selection ::=
         //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
         //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
@@ -1113,21 +1113,21 @@ Parser::~Parser()
                           do_accept_infix_selection_and(elem, tstrm_io) ||
                           do_accept_infix_selection_or(elem, tstrm_io) ||
                           do_accept_infix_selection_coales(elem, tstrm_io) ||
-                          do_accept_infix_operator(elem, tstrm_io);
+                          do_accept_infix_carriage(elem, tstrm_io);
           if(!elem_got) {
             break;
           }
           // Assignment operations have the lowest precedence and group from right to left.
           const auto prec_top = stack.back()->precedence();
           if(prec_top < Infix_element_base::precedence_assignment) {
-            while((stack.size() >= 2) && (prec_top <= elem->precedence())) {
+            while((stack.size() > 1) && (prec_top <= elem->precedence())) {
               stack.rbegin()[1]->append(std::move(*(stack.back())));
               stack.pop_back();
             }
           }
           stack.emplace_back(std::move(elem));
         }
-        while(stack.size() >= 2) {
+        while(stack.size() > 1) {
           stack.rbegin()[1]->append(std::move(*(stack.back())));
           stack.pop_back();
         }

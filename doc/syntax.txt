@@ -110,7 +110,7 @@ try-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	infix-element infix-operator-list-opt
+	infix-element infix-carriage-list-opt
 infix-element ::=
 	( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
 
@@ -159,14 +159,14 @@ postfix-subscript ::=
 postfix-member-access ::=
 	"." identifier
 
-infix-operator-list-opt ::=
-	infix-operator-list | ""
-infix-operator-list ::=
-	( infix-selection | infix-operator ) infix-operator-list-opt
+infix-carriage-list-opt ::=
+	infix-carriage-list | ""
+infix-carriage-list ::=
+	( infix-selection | infix-carriage ) infix-carriage-list-opt
 infix-selection ::=
 	( "?"  expression ":" | "&&"  | "||"  | "??"  |
 	  "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
-infix-operator ::=
+infix-carriage ::=
 	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
 	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
 	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
