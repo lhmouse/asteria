@@ -916,7 +916,7 @@ bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
     std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor = std::move(seq);
     return true;
-  } catch(Parser_error &err) {  // Don't play this at home.
+  } catch(Parser_error &err) {  // Don't play with this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
                       "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
                       "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
