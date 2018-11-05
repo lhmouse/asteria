@@ -102,9 +102,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       };
 
     template<typename typeT>
-      struct trivial_construct :
+      struct trivial_default_construct :
 #ifdef ROCKET_HAS_TRIVIALITY_TRAITS
-        ::std::is_trivially_constructible<typeT>
+        ::std::is_trivially_default_constructible<typeT>
 #else
         ::std::has_trivial_default_constructor<typeT>
 #endif
@@ -137,7 +137,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           : alloc(xalloc), nblk(xnblk)
           {
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
-            if(trivial_construct<safe_pointer>::value) {
+            if(trivial_default_construct<safe_pointer>::value) {
               // Zero-initialize everything.
               ::std::memset(this->data, 0, sizeof(safe_pointer) * nbkt);
             } else {
