@@ -78,10 +78,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         pointer m_ptr;
 
       public:
-        safe_pointer_wrapper() noexcept
-          : m_ptr()
-          {
-          }
+        constexpr safe_pointer_wrapper() noexcept
+          = default;
 
         safe_pointer_wrapper(const safe_pointer_wrapper &)
           = delete;
@@ -101,6 +99,16 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
             return noadl::exchange(this->m_ptr, ptr);
           }
+      };
+
+    template<typename typeT>
+      struct trivial_construct :
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
+        ::std::is_trivially_constructible<typeT>
+#else
+        ::std::has_trivial_default_constructor<typeT>
+#endif
+      {
       };
 
     template<typename allocatorT>
@@ -129,10 +137,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           : alloc(xalloc), nblk(xnblk)
           {
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
-            // `allocator_type::pointer` need not be a trivial type.
-            // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
-            for(size_type i = 0; i < nbkt; ++i) {
-              noadl::construct_at(this->data + i);
+            if(trivial_construct<safe_pointer>::value) {
+              // Zero-initialize everything.
+              ::std::memset(this->data, 0, sizeof(safe_pointer) * nbkt);
+            } else {
+              // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
+              for(size_type i = 0; i < nbkt; ++i) {
+                noadl::construct_at(this->data + i);
+              }
             }
             this->nelem = 0;
             this->nref.store(1, ::std::memory_order_release);
