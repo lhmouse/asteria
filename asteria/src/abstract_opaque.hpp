@@ -21,11 +21,6 @@ class Abstract_opaque : public rocket::refcounted_base<Abstract_opaque>
     virtual rocket::cow_string describe() const = 0;
     virtual Abstract_opaque * clone(rocket::refcounted_ptr<Abstract_opaque> &value_out) const = 0;
     virtual void enumerate_variables(const Abstract_variable_callback &callback) const = 0;
-
-    virtual const Value * get_member_opt(const rocket::prehashed_string &key) const = 0;
-    virtual Value * get_member_opt(const rocket::prehashed_string &key) = 0;
-    virtual Value & open_member(const rocket::prehashed_string &key) = 0;
-    virtual void unset_member(const rocket::prehashed_string &key) = 0;
   };
 
 }
