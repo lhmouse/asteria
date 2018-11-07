@@ -268,8 +268,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_negate(D_integer rhs, bool wrap)
       {
-        using Limits = std::numeric_limits<D_integer>;
-        if(!wrap && (rhs == Limits::min())) {
+        if(!wrap && (rhs == INT64_MIN)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
         auto reg = static_cast<std::uint64_t>(rhs);
@@ -279,8 +278,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_add(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
-        if((rhs >= 0) ? (lhs > Limits::max() - rhs) : (lhs < Limits::min() - rhs)) {
+        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         return lhs + rhs;
@@ -288,8 +286,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_subtract(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
-        if((rhs >= 0) ? (lhs < Limits::min() + rhs) : (lhs > Limits::max() + rhs)) {
+        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         return lhs - rhs;
@@ -297,14 +294,13 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_multiply(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if((lhs == 0) || (rhs == 0)) {
           return 0;
         }
         if((lhs == 1) || (rhs == 1)) {
           return lhs ^ rhs ^ 1;
         }
-        if((lhs == Limits::min()) || (rhs == Limits::min())) {
+        if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         if((lhs == -1) || (rhs == -1)) {
@@ -312,7 +308,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         const auto slhs = (rhs >= 0) ? lhs : -lhs;
         const auto arhs = std::abs(rhs);
-        if((slhs >= 0) ? (slhs > Limits::max() / arhs) : (slhs < Limits::min() / arhs)) {
+        if((slhs >= 0) ? (slhs > INT64_MAX / arhs) : (slhs < INT64_MIN / arhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         return slhs * arhs;
@@ -320,11 +316,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_divide(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
         }
-        if((lhs == Limits::min()) && (rhs == -1)) {
+        if((lhs == INT64_MIN) && (rhs == -1)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         return lhs / rhs;
@@ -332,11 +327,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_modulo(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
         }
-        if((lhs == Limits::min()) && (rhs == -1)) {
+        if((lhs == INT64_MIN) && (rhs == -1)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         return lhs % rhs;
@@ -344,11 +338,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_shift_left_logical(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        if(rhs > Limits::digits) {
+        if(rhs >= 64) {
           return 0;
         }
         auto reg = static_cast<std::uint64_t>(lhs);
@@ -358,11 +351,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        if(rhs > Limits::digits) {
+        if(rhs >= 64) {
           return 0;
         }
         auto reg = static_cast<std::uint64_t>(lhs);
@@ -372,17 +364,16 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        if(rhs > Limits::digits) {
+        if(rhs >= 64) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
         }
-        const auto bits_rem = static_cast<unsigned char>(Limits::digits - rhs);
+        const auto bits_rem = static_cast<unsigned char>(63 - rhs);
         auto reg = static_cast<std::uint64_t>(lhs);
         const auto mask_out = (reg >> bits_rem) << bits_rem;
-        const auto mask_sign = -(reg >> Limits::digits) << bits_rem;
+        const auto mask_sign = -(reg >> 63) << bits_rem;
         if(mask_out != mask_sign) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
@@ -392,16 +383,15 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
       {
-        using Limits = std::numeric_limits<D_integer>;
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        if(rhs > Limits::digits) {
+        if(rhs >= 64) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
         }
-        const auto bits_rem = static_cast<unsigned char>(Limits::digits - rhs);
+        const auto bits_rem = static_cast<unsigned char>(63 - rhs);
         auto reg = static_cast<std::uint64_t>(lhs);
-        const auto mask_in = -(reg >> Limits::digits) << bits_rem;
+        const auto mask_in = -(reg >> 63) << bits_rem;
         reg >>= rhs;
         reg |= mask_in;
         return static_cast<D_integer>(reg);
