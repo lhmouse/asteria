@@ -459,7 +459,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     D_string do_duplicate(const D_string &lhs, D_integer rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW_RUNTIME_ERROR("rocket::cow_string duplication count `", rhs, "` for `", lhs, "` is negative.");
+          ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
         D_string res;
         const auto count = static_cast<std::uint64_t>(rhs);
@@ -479,6 +479,68 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             res.append(res);
           } while(true);
         }
+        return res;
+      }
+
+    D_string do_move_left(const D_string &lhs, D_integer rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        D_string res;
+        res.assign(lhs.size(), ' ');
+        const auto count = static_cast<std::uint64_t>(rhs);
+        if(count >= lhs.size()) {
+          return res;
+        }
+        const auto bytes_rem = lhs.size() - static_cast<std::size_t>(count);
+        lhs.copy(res.mut_data(), bytes_rem, count);
+        return res;
+      }
+
+    D_string do_move_right(const D_string &lhs, D_integer rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        D_string res;
+        res.assign(lhs.size(), ' ');
+        const auto count = static_cast<std::uint64_t>(rhs);
+        if(count >= lhs.size()) {
+          return res;
+        }
+        const auto bytes_rem = lhs.size() - static_cast<std::size_t>(count);
+        lhs.copy(res.mut_data() + count, bytes_rem);
+        return res;
+      }
+
+    D_string do_extend(const D_string &lhs, D_integer rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        D_string res;
+        const auto count = static_cast<std::uint64_t>(rhs);
+        if(count > res.max_size() - lhs.size()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
+        }
+        res.reserve(lhs.size() + static_cast<std::size_t>(count));
+        res.append(lhs);
+        res.append(static_cast<std::size_t>(count), ' ');
+        return res;
+      }
+
+    D_string do_truncate(const D_string &lhs, D_integer rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        D_string res;
+        const auto count = static_cast<std::uint64_t>(rhs);
+        if(count >= lhs.size()) {
+          return res;
+        }
+        res.append(lhs.data(), lhs.size() - static_cast<std::size_t>(count));
         return res;
       }
 
@@ -961,9 +1023,11 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "` and `", rhs, "`.");
           }
           case xop_infix_sll: {
-            // Both operands have to be integers.
-            // Shift the first operand to the left by the number of bits specified by the second operand.
-            // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            // The second operand shall be an integer.
+            // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
+            // are discarded. Bits shifted in are filled with zeroes.
+            // If the first operand is of type `string`, fill space bytes in the right and discard charactrs from the left. The number of bytes in the first operand
+            // will not be changed.
             auto rhs = stack_io.top().read();
             stack_io.pop();
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
@@ -972,12 +1036,19 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               do_set_result(stack_io, alt, std::move(ref_c));
               break;
             }
+            if((ref_c.value.type() == Value::type_string) && (rhs.type() == Value::type_integer)) {
+              ref_c.value = do_move_left(ref_c.value.check<D_string>(), rhs.check<D_integer>());
+              do_set_result(stack_io, alt, std::move(ref_c));
+              break;
+            }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "` and `", rhs, "`.");
           }
           case xop_infix_srl: {
-            // Both operands have to be integers.
-            // Shift the first operand to the right by the number of bits specified by the second operand.
-            // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+            // The second operand shall be an integer.
+            // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
+            // are discarded. Bits shifted in are filled with zeroes.
+            // If the first operand is of type `string`, fill space bytes in the left and discard charactrs from the right. The number of bytes in the first operand
+            // will not be changed.
             auto rhs = stack_io.top().read();
             stack_io.pop();
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
@@ -986,13 +1057,19 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               do_set_result(stack_io, alt, std::move(ref_c));
               break;
             }
+            if((ref_c.value.type() == Value::type_string) && (rhs.type() == Value::type_integer)) {
+              ref_c.value = do_move_right(ref_c.value.check<D_string>(), rhs.check<D_integer>());
+              do_set_result(stack_io, alt, std::move(ref_c));
+              break;
+            }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "` and `", rhs, "`.");
           }
           case xop_infix_sla: {
-            // Both operands have to be integers.
-            // Shift the first operand to the left by the number of bits specified by the second operand.
-            // Bits shifted out that equal the sign bit are dicarded. Bits shifted in are filled with zeroes.
-            // If a bit unequal to the sign bit would be shifted into or across the sign bit, an exception is thrown.
+            // The second operand shall be an integer.
+            // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
+            // that are equal to the sign bit are discarded. Bits shifted out that are unequal to the sign bit lead to an exception being thrown. Bits shifted in are
+            // filled with zeroes.
+            // If the first operand is of type `string`, fill space bytes in the right.
             auto rhs = stack_io.top().read();
             stack_io.pop();
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
@@ -1001,17 +1078,28 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
               do_set_result(stack_io, alt, std::move(ref_c));
               break;
             }
+            if((ref_c.value.type() == Value::type_string) && (rhs.type() == Value::type_integer)) {
+              ref_c.value = do_extend(ref_c.value.check<D_string>(), rhs.check<D_integer>());
+              do_set_result(stack_io, alt, std::move(ref_c));
+              break;
+            }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "` and `", rhs, "`.");
           }
           case xop_infix_sra: {
-            // Both operands have to be integers.
-            // Shift the first operand to the right by the number of bits specified by the second operand.
-            // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
+            // The second operand shall be an integer.
+            // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
+            // are discarded. Bits shifted in are filled with the sign bit.
+            // If the first operand is of type `string`, discard bytes from the right.
             auto rhs = stack_io.top().read();
             stack_io.pop();
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if((ref_c.value.type() == Value::type_integer) && (rhs.type() == Value::type_integer)) {
               ref_c.value = do_shift_right_arithmetic(ref_c.value.check<D_integer>(), rhs.check<D_integer>());
+              do_set_result(stack_io, alt, std::move(ref_c));
+              break;
+            }
+            if((ref_c.value.type() == Value::type_string) && (rhs.type() == Value::type_integer)) {
+              ref_c.value = do_truncate(ref_c.value.check<D_string>(), rhs.check<D_integer>());
               do_set_result(stack_io, alt, std::move(ref_c));
               break;
             }
