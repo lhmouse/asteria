@@ -81,7 +81,7 @@ class Reference_root
         return this->m_stor.as<AltT>();
       }
 
-    const Value & dereference_readonly() const;
+    const Value & dereference_const() const;
     Value & dereference_mutable() const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;

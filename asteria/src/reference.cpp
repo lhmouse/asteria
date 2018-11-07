@@ -15,11 +15,11 @@ Reference::~Reference()
 Value Reference::read() const
   {
     // Dereference the root.
-    auto cur = std::ref(this->m_root.dereference_readonly());
+    auto cur = std::ref(this->m_root.dereference_const());
     // Apply modifiers.
     const auto end = this->m_mods.end();
     for(auto it = this->m_mods.begin(); it != end; ++it) {
-      const auto qnext = it->apply_readonly_opt(cur);
+      const auto qnext = it->apply_const_opt(cur);
       if(!qnext) {
         return { };
       }

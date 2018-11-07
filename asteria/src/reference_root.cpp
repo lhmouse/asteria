@@ -12,7 +12,7 @@ Reference_root::~Reference_root()
   {
   }
 
-const Value & Reference_root::dereference_readonly() const
+const Value & Reference_root::dereference_const() const
   {
     switch(this->index()) {
       case index_constant: {

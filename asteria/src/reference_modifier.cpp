@@ -12,7 +12,7 @@ Reference_modifier::~Reference_modifier()
   {
   }
 
-const Value * Reference_modifier::apply_readonly_opt(const Value &parent) const
+const Value * Reference_modifier::apply_const_opt(const Value &parent) const
   {
     switch(Index(this->m_stor.index())) {
       case index_array_index: {
