@@ -271,9 +271,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(!wrap && (rhs == INT64_MIN)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
-        auto reg = static_cast<std::uint64_t>(rhs);
-        reg = -reg;
-        return static_cast<D_integer>(reg);
+        auto res = static_cast<std::uint64_t>(rhs);
+        res = -res;
+        return static_cast<D_integer>(res);
       }
 
     D_integer do_add(D_integer lhs, D_integer rhs)
@@ -344,9 +344,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs >= 64) {
           return 0;
         }
-        auto reg = static_cast<std::uint64_t>(lhs);
-        reg <<= rhs;
-        return static_cast<D_integer>(reg);
+        auto res = static_cast<std::uint64_t>(lhs);
+        res <<= rhs;
+        return static_cast<D_integer>(res);
       }
 
     D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
@@ -357,9 +357,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs >= 64) {
           return 0;
         }
-        auto reg = static_cast<std::uint64_t>(lhs);
-        reg >>= rhs;
-        return static_cast<D_integer>(reg);
+        auto res = static_cast<std::uint64_t>(lhs);
+        res >>= rhs;
+        return static_cast<D_integer>(res);
       }
 
     D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
@@ -367,18 +367,21 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
+        auto res = static_cast<std::uint64_t>(lhs);
+        if(res == 0) {
+          return 0;
+        }
         if(rhs >= 64) {
-          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
         const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        auto reg = static_cast<std::uint64_t>(lhs);
-        const auto mask_out = (reg >> bits_rem) << bits_rem;
-        const auto mask_sign = -(reg >> 63) << bits_rem;
+        const auto mask_out = (res >> bits_rem) << bits_rem;
+        const auto mask_sign = -(res >> 63) << bits_rem;
         if(mask_out != mask_sign) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        reg <<= rhs;
-        return static_cast<D_integer>(reg);
+        res <<= rhs;
+        return static_cast<D_integer>(res);
       }
 
     D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
@@ -386,15 +389,18 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
+        auto res = static_cast<std::uint64_t>(lhs);
+        if(res == 0) {
+          return 0;
+        }
         if(rhs >= 64) {
-          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic bit shift count `", rhs, "` for `", lhs, "` is larger than the width of an `integer`.");
+          return 0;
         }
         const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        auto reg = static_cast<std::uint64_t>(lhs);
-        const auto mask_in = -(reg >> 63) << bits_rem;
-        reg >>= rhs;
-        reg |= mask_in;
-        return static_cast<D_integer>(reg);
+        const auto mask_in = -(res >> 63) << bits_rem;
+        res >>= rhs;
+        res |= mask_in;
+        return static_cast<D_integer>(res);
       }
 
     D_integer do_bitwise_not(D_integer rhs)
