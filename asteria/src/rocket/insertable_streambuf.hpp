@@ -228,7 +228,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 extern template class basic_insertable_streambuf<char>;
-//extern template class basic_insertable_streambuf<wchar_t>;
+extern template class basic_insertable_streambuf<wchar_t>;
 
 using insertable_streambuf  = basic_insertable_streambuf<char>;
 using insertable_wstreambuf = basic_insertable_streambuf<wchar_t>;

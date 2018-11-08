@@ -6,6 +6,6 @@
 namespace rocket {
 
 template class basic_insertable_istream<char>;
-//template class basic_insertable_istream<wchar_t>;
+template class basic_insertable_istream<wchar_t>;
 
 }

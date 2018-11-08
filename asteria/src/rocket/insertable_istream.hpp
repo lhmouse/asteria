@@ -86,7 +86,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   = default;
 
 extern template class basic_insertable_istream<char>;
-//extern template class basic_insertable_istream<wchar_t>;
+extern template class basic_insertable_istream<wchar_t>;
 
 using insertable_istream  = basic_insertable_istream<char>;
 using insertable_wistream = basic_insertable_istream<wchar_t>;

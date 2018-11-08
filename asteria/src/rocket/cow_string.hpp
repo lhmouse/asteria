@@ -493,9 +493,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       constexpr charT shallow_base<charT>::s_empty[1];
 
     extern template class shallow_base<char>;
-    //extern template class shallow_base<wchar_t>;
-    //extern template class shallow_base<char16_t>;
-    //extern template class shallow_base<char32_t>;
+    extern template class shallow_base<wchar_t>;
+    extern template class shallow_base<char16_t>;
+    extern template class shallow_base<char32_t>;
 
     template<typename charT, typename traitsT>
       class shallow : public shallow_base<charT>
@@ -1815,9 +1815,9 @@ template<typename charT, typename traitsT, typename allocatorT>
   };
 
 extern template class basic_cow_string<char>;
-//extern template class basic_cow_string<wchar_t>;
-//extern template class basic_cow_string<char16_t>;
-//extern template class basic_cow_string<char32_t>;
+extern template class basic_cow_string<wchar_t>;
+extern template class basic_cow_string<char16_t>;
+extern template class basic_cow_string<char32_t>;
 
 using cow_string     = basic_cow_string<char>;
 using cow_wstring    = basic_cow_string<wchar_t>;
@@ -2158,7 +2158,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 extern template ::std::istream  & operator>>(::std::istream  &is, cow_string  &str);
-//extern template ::std::wistream & operator>>(::std::wistream &is, cow_wstring &str);
+extern template ::std::wistream & operator>>(::std::wistream &is, cow_wstring &str);
 
 template<typename charT, typename traitsT, typename allocatorT>
   basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const basic_cow_string<charT, traitsT, allocatorT> &str)
@@ -2202,7 +2202,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 extern template ::std::ostream  & operator<<(::std::ostream  &os, const cow_string  &str);
-//extern template ::std::wostream & operator<<(::std::wostream &os, const cow_wstring &str);
+extern template ::std::wostream & operator<<(::std::wostream &os, const cow_wstring &str);
 
 template<typename charT, typename traitsT, typename allocatorT>
   basic_istream<charT, traitsT> & getline(basic_istream<charT, traitsT> &is, basic_cow_string<charT, traitsT, allocatorT> &str, charT delim)
@@ -2265,8 +2265,8 @@ template<typename charT, typename traitsT, typename allocatorT>
 
 extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str, char    delim);
 extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str);
-//extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_t delim);
-//extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
+extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_t delim);
+extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
 
 }
 
