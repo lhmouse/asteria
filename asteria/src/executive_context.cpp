@@ -33,7 +33,7 @@ const Reference * Executive_context::get_named_reference_opt(const rocket::preha
     }
     // Deal with pre-defined variables.
     if(name.rdstr().starts_with("__")) {
-      // If you add new entries or alter existent entries here, you must update `Executive_context` as well.
+      // If you add new entries or alter existent entries here, remember to update `Analytic_context` as well.
       if(name == "__file") {
         return &(this->m_file);
       }
