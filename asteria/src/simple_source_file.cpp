@@ -22,12 +22,11 @@ namespace Asteria {
     }
 
 Simple_source_file::Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &file)
-  : m_file(file)
   {
     ASTERIA_DEBUG_LOG("`Simple_source_file` constructor: ", static_cast<void *>(this));
     // Tokenize.
     Token_stream tstrm;
-    if(!tstrm.load(cstrm_io, this->m_file)) {
+    if(!tstrm.load(cstrm_io, file)) {
       do_throw_parser_error(tstrm.get_parser_error());
     }
     // Parse.
@@ -37,6 +36,7 @@ Simple_source_file::Simple_source_file(std::istream &cstrm_io, const rocket::cow
     }
     // TODO: Optimize?
     // Finish.
+    this->m_file = file;
     this->m_code = parser.extract_document();
   }
 

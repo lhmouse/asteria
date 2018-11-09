@@ -10,9 +10,10 @@
 namespace Asteria {
 
 Global_context::Global_context()
-  : m_gcoll(rocket::make_refcounted<Global_collector>())
   {
     ASTERIA_DEBUG_LOG("`Global_context` constructor: ", static_cast<void *>(this));
+    // Create the global garbage collector.
+    this->m_gcoll = rocket::make_refcounted<Global_collector>();
   }
 
 Global_context::~Global_context()
