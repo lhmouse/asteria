@@ -90,9 +90,9 @@ bool Collector::auto_collect()
 
     template<typename FunctionT>
       inline Variable_callback<FunctionT> do_make_variable_callback(FunctionT &&func)
-        {
-          return Variable_callback<FunctionT>(std::forward<FunctionT>(func));
-        }
+      {
+        return Variable_callback<FunctionT>(std::forward<FunctionT>(func));
+      }
 
     }
 

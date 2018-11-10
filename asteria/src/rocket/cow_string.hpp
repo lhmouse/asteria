@@ -1396,12 +1396,12 @@ template<typename charT, typename traitsT, typename allocatorT>
       }
     template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
       basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
-        {
-          const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-          const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-          this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, ::std::move(first), ::std::move(last));
-          return *this;
-        }
+      {
+        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, ::std::move(first), ::std::move(last));
+        return *this;
+      }
     // N.B. This is a non-standard extension.
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, value_type ch)
       {
