@@ -55,12 +55,8 @@ class Reference_modifier
 
   public:
     const Value * apply_const_opt(const Value &parent) const;
-    // 1. If `create_new` is `true`, a new element is created if no one exists, and this function returns a pointer to
-    //    it which is never null.
-    // 2. If `erased_out_opt` is non-null, any existent element is removed, which is move-assigned to `*erased_out_opt`,
-    //    and this function returns `erased_out_opt`.
-    // 3. If no such element is found or created, this function returns a null pointer.
-    Value * apply_mutable_opt(Value &parent, bool create_new, Value *erased_out_opt) const;
+    Value * apply_mutable_opt(Value &parent, bool create_new) const;
+    Value apply_and_erase(Value &parent) const;
   };
 
 }

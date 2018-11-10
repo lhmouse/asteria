@@ -25,7 +25,6 @@ Value Reference::read() const
       }
       cur = std::ref(*qnext);
     }
-    // Return the value found.
     return cur;
   }
 
@@ -36,15 +35,13 @@ Value & Reference::write(Value value) const
     // Apply modifiers.
     const auto end = this->m_mods.end();
     for(auto it = this->m_mods.begin(); it != end; ++it) {
-      const auto qnext = it->apply_mutable_opt(cur, true, nullptr);
+      const auto qnext = it->apply_mutable_opt(cur, true);
       if(!qnext) {
         ROCKET_ASSERT(false);
       }
       cur = std::ref(*qnext);
     }
-    // Set the new value.
-    cur.get() = std::move(value);
-    return cur;
+    return cur.get() = std::move(value);
   }
 
 Value Reference::unset() const
@@ -57,16 +54,13 @@ Value Reference::unset() const
     // Apply modifiers.
     const auto end = this->m_mods.end() - 1;
     for(auto it = this->m_mods.begin(); it != end; ++it) {
-      const auto qnext = it->apply_mutable_opt(cur, false, nullptr);
+      const auto qnext = it->apply_mutable_opt(cur, false);
       if(!qnext) {
         return { };
       }
       cur = std::ref(*qnext);
     }
-    // Erase the element referenced by the last modifier.
-    Value erased;
-    end->apply_mutable_opt(cur, false, &erased);
-    return std::move(erased);
+    return end->apply_and_erase(cur);
   }
 
 Reference & Reference::zoom_in(Reference_modifier mod)
