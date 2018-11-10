@@ -27,6 +27,7 @@ class Global_collector : public rocket::refcounted_base<Global_collector>
 
   public:
     rocket::refcounted_ptr<Variable> create_tracked_variable(const Reference *src_opt, bool immutable);
+    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
     void perform_garbage_collection(unsigned gen_limit);
   };
 

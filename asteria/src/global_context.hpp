@@ -29,6 +29,7 @@ class Global_context : public Abstract_context
     void set_named_reference(const rocket::prehashed_string &name, Reference ref) override;
 
     rocket::refcounted_ptr<Variable> create_tracked_variable(const Reference *src_opt = nullptr, bool immutable = false);
+    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
     void perform_garbage_collection(unsigned gen_limit);
   };
 

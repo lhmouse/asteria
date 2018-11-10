@@ -67,9 +67,31 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
     return Instantiated_function(head, std::move(body_bnd));
   }
 
+    namespace {
+
+    class Variable_disposer
+      {
+      private:
+        std::reference_wrapper<Global_context> m_global;
+        std::reference_wrapper<Executive_context> m_ctx;
+
+      public:
+        Variable_disposer(Global_context &global, Executive_context &ctx)
+          : m_global(global), m_ctx(ctx)
+          {
+          }
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_disposer)
+          {
+            m_ctx.get().dispose_variables(m_global);
+          }
+      };
+
+    }
+
 Reference Block::execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args) const
   {
     Executive_context ctx_next(nullptr);
+    const Variable_disposer disposer(global, ctx_next);
     ctx_next.initialize_for_function(global, head, zvarg_opt, std::move(self), std::move(args));
     // Execute the body.
     Reference result;

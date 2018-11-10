@@ -15,8 +15,8 @@ Collector::~Collector()
 
 bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
-    if(this->m_tracked.empty()) {
-      this->m_tracked.reserve(this->m_threshold | 20);
+    if(this->m_tracked.empty() && (this->m_threshold >= 0)) {
+      this->m_tracked.reserve(static_cast<unsigned long>(this->m_threshold | 20));
     }
     if(!this->m_tracked.insert(var)) {
       return false;
@@ -31,6 +31,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     if(!this->m_tracked.erase(var)) {
       return false;
     }
+    this->m_counter -= 1;
     return true;
   }
 
@@ -45,19 +46,19 @@ bool Collector::auto_collect()
 
     namespace {
 
-    class Sentry
+    class Recursion_sentry
       {
       private:
         long m_old;
         std::reference_wrapper<long> m_ref;
 
       public:
-        explicit Sentry(long &ref) noexcept
+        explicit Recursion_sentry(long &ref) noexcept
           : m_old(ref), m_ref(ref)
           {
             this->m_ref += 1;
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Sentry)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Recursion_sentry)
           {
             this->m_ref -= 1;
           }
@@ -99,7 +100,7 @@ bool Collector::auto_collect()
 void Collector::collect()
   {
     // Ignore recursive requests.
-    const Sentry sentry(this->m_recur);
+    const Recursion_sentry sentry(this->m_recur);
     if(!sentry) {
       return;
     }

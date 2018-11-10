@@ -25,6 +25,20 @@ rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable(const
     return var;
   }
 
+bool Global_collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
+  {
+    auto qcoll = &(this->m_gen_zero);
+    do {
+      if(qcoll->untrack_variable(var)) {
+        return true;
+      }
+      qcoll = qcoll->get_tied_collector_opt();
+      if(!qcoll) {
+        return false;
+      }
+    } while(true);
+  }
+
 void Global_collector::perform_garbage_collection(unsigned gen_limit)
   {
     auto qcoll = &(this->m_gen_zero);
@@ -35,11 +49,11 @@ void Global_collector::perform_garbage_collection(unsigned gen_limit)
       ASTERIA_DEBUG_LOG("Generation ", gen_cur, " garbage collection ends.");
       ++gen_cur;
       if(gen_cur > gen_limit) {
-        break;
+        return;
       }
       qcoll = qcoll->get_tied_collector_opt();
       if(!qcoll) {
-        break;
+        return;
       }
     } while(true);
   }

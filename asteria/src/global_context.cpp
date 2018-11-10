@@ -60,6 +60,11 @@ rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable(const R
     return this->m_gcoll->create_tracked_variable(src_opt, immutable);
   }
 
+bool Global_context::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
+  {
+    return this->m_gcoll->untrack_variable(var);
+  }
+
 void Global_context::perform_garbage_collection(unsigned gen_limit)
   {
     return this->m_gcoll->perform_garbage_collection(gen_limit);

@@ -36,6 +36,7 @@ class Executive_context : public Abstract_context
     void set_named_reference(const rocket::prehashed_string &name, Reference ref) override;
 
     void initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args);
+    void dispose_variables(Global_context &global) noexcept;
   };
 
 }

@@ -108,4 +108,10 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
     }
   }
 
+void Executive_context::dispose_variables(Asteria::Global_context &global) noexcept
+  {
+    this->m_dict.for_each([&](const rocket::prehashed_string /*name*/, const Reference &ref) { ref.dispose_variable(global); });
+    this->m_dict.clear();
+  }
+
 }

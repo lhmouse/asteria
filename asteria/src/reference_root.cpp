@@ -4,6 +4,7 @@
 #include "precompiled.hpp"
 #include "reference_root.hpp"
 #include "abstract_variable_callback.hpp"
+#include "global_context.hpp"
 #include "utilities.hpp"
 
 namespace Asteria {
@@ -72,6 +73,28 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
         if(callback.accept(alt.var)) {
           // Descend into this variable recursively when the callback returns `true`.
           alt.var->enumerate_variables(callback);
+        }
+        return;
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
+      }
+    }
+  }
+
+void Reference_root::dispose_variable(Global_context &global) const noexcept
+  {
+    switch(this->index()) {
+      case index_constant:
+      case index_temporary: {
+        return;
+      }
+      case index_variable: {
+        const auto &alt = this->check<S_variable>();
+        if((alt.var->use_count() <= 2) && global.untrack_variable(alt.var)) {
+          // Wipe out its contents only if it has been detached successfully.
+          ASTERIA_DEBUG_LOG("Disposing variable: ", alt.var->get_value());
+          alt.var->reset(D_null(), true);
         }
         return;
       }
