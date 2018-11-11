@@ -1118,14 +1118,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
 
     // 26.5.4.4, modifiers
-    pair<iterator, bool> insert(const value_type &value)
-      {
-        return this->try_emplace(value.first, value.second);
-      }
-    pair<iterator, bool> insert(value_type &&value)
-      {
-        return this->try_emplace(value.first, ::std::move(value.second));
-      }
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename yvalueT>
       pair<iterator, bool> insert(const pair<ykeyT, yvalueT> &value)
@@ -1158,16 +1150,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     cow_hashmap & insert(initializer_list<value_type> init)
       {
         return this->insert(init.begin(), init.end());
-      }
-    // N.B. The hint is ignored.
-    iterator insert(const_iterator /*hint*/, const value_type &value)
-      {
-        return this->insert(value).first;
-      }
-    // N.B. The hint is ignored.
-    iterator insert(const_iterator /*hint*/, value_type &&value)
-      {
-        return this->insert(::std::move(value)).first;
       }
     // N.B. This is a non-standard extension.
     // N.B. The hint is ignored.
