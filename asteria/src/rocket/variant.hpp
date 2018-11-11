@@ -218,7 +218,7 @@ template<typename ...alternativesT>
           }
       };
 
-    static inline void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
+    static void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
       {
         if(conjunction<details_variant::trivial_copy_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
@@ -227,7 +227,7 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
-    static inline void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
+    static void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
         if(conjunction<details_variant::trivial_move_construct<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
@@ -236,7 +236,7 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
-    static inline void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
+    static void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
         if(conjunction<details_variant::trivial_copy_assign<alternativesT>...>::value) {
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
@@ -245,7 +245,7 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
-    static inline void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
+    static void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
         if(conjunction<details_variant::trivial_move_assign<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
@@ -254,7 +254,7 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
         (*(s_table[rindex]))(tptr, rptr);
       }
-    static inline void do_dispatch_destroy(size_t rindex, void *tptr)
+    static void do_dispatch_destroy(size_t rindex, void *tptr)
       {
         if(conjunction<is_trivially_destructible<alternativesT>...>::value) {
           // There is nothing to do.
@@ -269,7 +269,7 @@ template<typename ...alternativesT>
         static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
         (*(s_table[rindex]))(tptr);
       }
-    static inline void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
+    static void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
       {
         if(conjunction<details_variant::trivial_move_construct<alternativesT>..., is_trivially_destructible<alternativesT>...>::value) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
