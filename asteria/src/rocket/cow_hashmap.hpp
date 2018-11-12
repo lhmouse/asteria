@@ -66,7 +66,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
     namespace details_cow_hashmap {
 
     template<typename allocatorT>
-      class safe_pointer_wrapper
+      class qualified_pointer_wrapper
       {
       public:
         using allocator_type   = allocatorT;
@@ -78,12 +78,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         pointer m_ptr;
 
       public:
-        constexpr safe_pointer_wrapper() noexcept
+        constexpr qualified_pointer_wrapper() noexcept
           = default;
 
-        safe_pointer_wrapper(const safe_pointer_wrapper &)
+        qualified_pointer_wrapper(const qualified_pointer_wrapper &)
           = delete;
-        safe_pointer_wrapper & operator=(const safe_pointer_wrapper &)
+        qualified_pointer_wrapper & operator=(const qualified_pointer_wrapper &)
           = delete;
 
       public:
@@ -115,31 +115,31 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       struct pointer_storage
       {
         using allocator_type   = allocatorT;
-        using safe_pointer     = safe_pointer_wrapper<allocator_type>;
+        using qualified_pointer     = qualified_pointer_wrapper<allocator_type>;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
         static constexpr size_type min_nblk_for_nbkt(size_type nbkt) noexcept
           {
-            return (nbkt * sizeof(safe_pointer) + sizeof(pointer_storage) - 1) / sizeof(pointer_storage) + 1;
+            return (nbkt * sizeof(qualified_pointer) + sizeof(pointer_storage) - 1) / sizeof(pointer_storage) + 1;
           }
         static constexpr size_type max_nbkt_for_nblk(size_type nblk) noexcept
           {
-            return (nblk - 1) * sizeof(pointer_storage) / sizeof(safe_pointer);
+            return (nblk - 1) * sizeof(pointer_storage) / sizeof(qualified_pointer);
           }
 
         atomic<long> nref;
         allocator_type alloc;
         size_type nblk;
         size_type nelem;
-        union { safe_pointer data[0]; };
+        union { qualified_pointer data[0]; };
 
         pointer_storage(const allocator_type &xalloc, size_type xnblk) noexcept
           : alloc(xalloc), nblk(xnblk)
           {
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
-            if(trivial_default_construct<safe_pointer>::value) {
+            if(trivial_default_construct<qualified_pointer>::value) {
               // Zero-initialize everything.
-              ::std::memset(this->data, 0, sizeof(safe_pointer) * nbkt);
+              ::std::memset(this->data, 0, sizeof(qualified_pointer) * nbkt);
             } else {
               // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
               for(size_type i = 0; i < nbkt; ++i) {
@@ -185,7 +185,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       struct linear_prober
       {
         using allocator_type   = allocatorT;
-        using safe_pointer     = safe_pointer_wrapper<allocator_type>;
+        using qualified_pointer     = qualified_pointer_wrapper<allocator_type>;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
         using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
@@ -208,7 +208,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
 
         template<typename xpointerT, typename predT>
-          static typename copy_const_from<safe_pointer, decltype(*(::std::declval<xpointerT>()))>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
+          static typename copy_const_from<qualified_pointer, decltype(*(::std::declval<xpointerT>()))>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
           {
             static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
             const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
@@ -328,7 +328,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using value_type       = typename allocator_type::value_type;
         using hasher           = hashT;
         using key_equal        = eqT;
-        using safe_pointer     = safe_pointer_wrapper<allocator_type>;
+        using qualified_pointer     = qualified_pointer_wrapper<allocator_type>;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
         using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
@@ -484,7 +484,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
             return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
           }
-        const safe_pointer * data() const noexcept
+        const qualified_pointer * data() const noexcept
           {
             const auto ptr = this->m_ptr;
             if(!ptr) {
@@ -500,7 +500,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             return ptr->nelem;
           }
-        safe_pointer * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+        qualified_pointer * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {
             if(res_arg == 0) {
               // Deallocate the block.
@@ -586,7 +586,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
             const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
-              [&](const safe_pointer_wrapper<allocatorT> *tbkt)
+              [&](const qualified_pointer_wrapper<allocatorT> *tbkt)
                 { return this->as_key_equal()(tbkt->get()->first, ykey); }
               );
             if((max_load_factor_reciprocal == 1) && !bkt) {
@@ -599,7 +599,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(toff >= 0);
             return toff;
           }
-        safe_pointer * mut_data_unchecked() noexcept
+        qualified_pointer * mut_data_unchecked() noexcept
           {
             const auto ptr = this->m_ptr;
             if(!ptr) {
@@ -609,7 +609,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             return ptr->data;
           }
         template<typename ykeyT, typename ...paramsT>
-          pair<safe_pointer *, bool> keyed_emplace_unchecked(const ykeyT &ykey, paramsT &&...params)
+          pair<qualified_pointer *, bool> keyed_emplace_unchecked(const ykeyT &ykey, paramsT &&...params)
           {
             ROCKET_ASSERT(this->unique());
             ROCKET_ASSERT(this->element_count() < this->capacity());
@@ -618,7 +618,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             // Find a bucket for the new element.
             const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
             const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
-              [&](const safe_pointer_wrapper<allocatorT> *tbkt)
+              [&](const qualified_pointer_wrapper<allocatorT> *tbkt)
                 { return this->as_key_equal()(tbkt->get()->first, ykey); }
               );
             ROCKET_ASSERT(bkt);
@@ -665,7 +665,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             // Relocate elements that are not placed in their immediate locations.
             linear_prober<allocator_type>::probe(ptr, tpos + tn, tpos,
-              [&](safe_pointer_wrapper<allocator_type> *tbkt)
+              [&](qualified_pointer_wrapper<allocator_type> *tbkt)
                 {
                   // Remove the element from the old bucket.
                   auto eptr = tbkt->set(nullptr);
@@ -703,18 +703,18 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using difference_type    = ptrdiff_t;
 
         using parent_type   = storage_handle<typename hashmapT::allocator_type, typename hashmapT::hasher, typename hashmapT::key_equal>;
-        using safe_pointer  = typename copy_const_from<typename parent_type::safe_pointer, value_type>::type;
+        using qualified_pointer  = typename copy_const_from<typename parent_type::qualified_pointer, value_type>::type;
 
       private:
         const parent_type *m_ref;
-        safe_pointer *m_bkt;
+        qualified_pointer *m_bkt;
 
       private:
-        constexpr hashmap_iterator(const parent_type *ref, safe_pointer *bkt) noexcept
+        constexpr hashmap_iterator(const parent_type *ref, qualified_pointer *bkt) noexcept
           : m_ref(ref), m_bkt(bkt)
           {
           }
-        hashmap_iterator(const parent_type *ref, needs_adjust_tag, safe_pointer *hint) noexcept
+        hashmap_iterator(const parent_type *ref, needs_adjust_tag, qualified_pointer *hint) noexcept
           : m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
           {
           }
@@ -732,7 +732,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
 
       private:
-        safe_pointer * do_assert_valid_bucket(safe_pointer *bkt, bool to_dereference) const noexcept
+        qualified_pointer * do_assert_valid_bucket(qualified_pointer *bkt, bool to_dereference) const noexcept
           {
             const auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
@@ -742,7 +742,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
             return bkt;
           }
-        safe_pointer * do_adjust_forwards(safe_pointer *hint) const noexcept
+        qualified_pointer * do_adjust_forwards(qualified_pointer *hint) const noexcept
           {
             if(hint == nullptr) {
               return nullptr;
@@ -763,11 +763,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             return this->m_ref;
           }
 
-        safe_pointer * tell() const noexcept
+        qualified_pointer * tell() const noexcept
           {
             return this->do_assert_valid_bucket(this->m_bkt, false);
           }
-        safe_pointer * tell_owned_by(const parent_type *ref) const noexcept
+        qualified_pointer * tell_owned_by(const parent_type *ref) const noexcept
           {
             ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
             return this->tell();
@@ -948,7 +948,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
   private:
     // Reallocate the storage to `res_arg` elements.
     // The storage is owned by the current hashmap exclusively after this function returns normally.
-    details_cow_hashmap::safe_pointer_wrapper<allocator_type> * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+    details_cow_hashmap::qualified_pointer_wrapper<allocator_type> * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
       {
         ROCKET_ASSERT(cnt_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());
@@ -982,11 +982,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
-    const details_cow_hashmap::safe_pointer_wrapper<allocator_type> * do_get_table() const noexcept
+    const details_cow_hashmap::qualified_pointer_wrapper<allocator_type> * do_get_table() const noexcept
       {
         return this->m_sth.data();
       }
-    details_cow_hashmap::safe_pointer_wrapper<allocator_type> * do_mut_table()
+    details_cow_hashmap::qualified_pointer_wrapper<allocator_type> * do_mut_table()
       {
         if(!this->unique()) {
           return this->do_reallocate(0, 0, this->bucket_count(), this->size());
@@ -994,7 +994,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->m_sth.mut_data_unchecked();
       }
 
-    details_cow_hashmap::safe_pointer_wrapper<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
+    details_cow_hashmap::qualified_pointer_wrapper<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
       {
         const auto cnt_old = this->size();
         const auto nbkt_old = this->bucket_count();
