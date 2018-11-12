@@ -454,7 +454,7 @@ template<typename ...alternativesT>
         // Destroy the active alternative in place.
         variant::do_dispatch_destroy(index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void *>(&(this->m_stor)), '#', sizeof(this->m_stor));
+        ::std::memset(static_cast<void *>(&(this->m_stor)), '@', sizeof(this->m_stor));
         this->m_index = 0xA596;
 #endif
       }
