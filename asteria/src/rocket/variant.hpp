@@ -218,10 +218,23 @@ template<typename ...alternativesT>
           }
       };
 
+    static constexpr bool do_check_all_of(const bool *bptr, size_t count = sizeof...(alternativesT)) noexcept
+      {
+        return *bptr && ((count == 0) || variant::do_check_all_of(bptr + 1, count - 1));
+      }
+    static constexpr bool do_check_any_of(const bool *bptr, size_t count = sizeof...(alternativesT)) noexcept
+      {
+        return *bptr || ((count == 0) && variant::do_check_any_of(bptr + 1, count - 1));
+      }
+    static constexpr bool do_check_fast_call(size_t rindex, const bool *bptr) noexcept
+      {
+        return variant::do_check_all_of(bptr) || (variant::do_check_any_of(bptr) && ROCKET_EXPECT(bptr[rindex]));
+      }
+
     static void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_copy_construct<alternativesT>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
@@ -231,7 +244,7 @@ template<typename ...alternativesT>
     static void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_move_construct<alternativesT>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
@@ -241,7 +254,7 @@ template<typename ...alternativesT>
     static void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_copy_assign<alternativesT>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
           return;
         }
@@ -251,7 +264,7 @@ template<typename ...alternativesT>
     static void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_move_assign<alternativesT>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
           return;
         }
@@ -261,7 +274,7 @@ template<typename ...alternativesT>
     static void do_dispatch_destroy(size_t rindex, void *tptr)
       {
         static constexpr bool s_fast_call[] = { is_trivially_destructible<alternativesT>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           // There is nothing to do.
           return;
         }
@@ -271,7 +284,7 @@ template<typename ...alternativesT>
     static void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
       {
         static constexpr bool s_fast_call[] = { conjunction<details_variant::trivial_move_construct<alternativesT>, is_trivially_destructible<alternativesT>>::value... };
-        if(ROCKET_EXPECT(s_fast_call[rindex])) {
+        if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
         }
