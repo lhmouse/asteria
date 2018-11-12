@@ -191,6 +191,8 @@ template<typename ...alternativesT>
     static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value, "No move constructors of alternative types are allowed to throw exceptions.");
 
   public:
+    enum : size_t { size = sizeof...(alternativesT) };
+
     template<typename targetT>
       struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
       {
@@ -218,11 +220,11 @@ template<typename ...alternativesT>
           }
       };
 
-    static constexpr bool do_check_all_of(const bool *bptr, size_t count = sizeof...(alternativesT)) noexcept
+    static constexpr bool do_check_all_of(const bool *bptr, size_t count = size) noexcept
       {
         return *bptr && ((count == 0) || variant::do_check_all_of(bptr + 1, count - 1));
       }
-    static constexpr bool do_check_any_of(const bool *bptr, size_t count = sizeof...(alternativesT)) noexcept
+    static constexpr bool do_check_any_of(const bool *bptr, size_t count = size) noexcept
       {
         return *bptr || ((count == 0) && variant::do_check_any_of(bptr + 1, count - 1));
       }
