@@ -7,7 +7,6 @@
 #include "fwd.hpp"
 #include "reference_root.hpp"
 #include "reference_modifier.hpp"
-#include <functional>
 
 namespace Asteria {
 
@@ -41,7 +40,11 @@ class Reference
     ROCKET_COPYABLE_DESTRUCTOR(Reference);
 
   private:
-    [[noreturn]] void do_throw_no_modifier() const;
+    [[noreturn]] void do_throw_unset_no_modifier() const;
+
+    Value do_read_with_modifiers() const;
+    Value & do_mutate_with_modifiers() const;
+    Value do_unset_with_modifiers() const;
 
   public:
     bool is_constant() const noexcept
@@ -51,52 +54,25 @@ class Reference
 
     Value read() const
       {
-        // Dereference the root.
-        auto cur = std::ref(this->m_root.dereference_const());
-        // Apply modifiers.
-        const auto end = this->m_mods.end();
-        for(auto it = this->m_mods.begin(); it != end; ++it) {
-          const auto qnext = it->apply_const_opt(cur);
-          if(!qnext) {
-            return { };
-          }
-          cur = std::ref(*qnext);
+        if(ROCKET_EXPECT(this->m_mods.empty())) {
+          return this->m_root.dereference_const();
         }
-        return cur;
+        return this->do_read_with_modifiers();
       }
     template<typename ValueT>
       Value & write(ValueT &&value) const
       {
-        // Dereference the root.
-        auto cur = std::ref(this->m_root.dereference_mutable());
-        // Apply modifiers.
-        const auto end = this->m_mods.end();
-        for(auto it = this->m_mods.begin(); it != end; ++it) {
-          const auto qnext = it->apply_mutable_opt(cur, true);
-          if(!qnext) {
-            ROCKET_ASSERT(false);
-          }
-          cur = std::ref(*qnext);
+        if(ROCKET_EXPECT(this->m_mods.empty())) {
+          return this->m_root.dereference_mutable() = std::forward<ValueT>(value);
         }
-        return cur.get() = std::forward<ValueT>(value);
+        return this->do_mutate_with_modifiers() = std::forward<ValueT>(value);
       }
     Value unset() const
       {
-        if(this->m_mods.empty()) {
-          this->do_throw_no_modifier();
+        if(ROCKET_UNEXPECT(this->m_mods.empty())) {
+          this->do_throw_unset_no_modifier();
         }
-        // Dereference the root.
-        auto cur = std::ref(this->m_root.dereference_mutable());
-        // Apply modifiers.
-        const auto end = this->m_mods.end() - 1;
-        for(auto it = this->m_mods.begin(); it != end; ++it) {
-          const auto qnext = it->apply_mutable_opt(cur, false);
-          if(!qnext) {
-            return { };
-          }
-          cur = std::ref(*qnext);
-        }
-        return end->apply_and_erase(cur);
+        return this->do_unset_with_modifiers();
       }
 
     template<typename XmodT>
