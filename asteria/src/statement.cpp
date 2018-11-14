@@ -223,7 +223,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_expr: {
         const auto &alt = this->m_stor.as<S_expr>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(global, ctx_io);
+        alt.expr.evaluate(ref_out, global, ctx_io);
         return Block::status_next;
       }
       case index_block: {
@@ -239,7 +239,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
-        ref_out = alt.init.evaluate(global, ctx_io);
+        alt.init.evaluate(ref_out, global, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Creating named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", value);
         var->reset(std::move(value), alt.immutable);
@@ -261,8 +261,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
-        ref_out = alt.cond.evaluate(global, ctx_io);
-        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const bool has_result = alt.cond.evaluate(ref_out, global, ctx_io);
+        const auto branch = (has_result && ref_out.read().test()) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = branch.get().execute(ref_out, global, ctx_io);
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
@@ -273,7 +273,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
         // Evaluate the control expression.
-        ref_out = alt.ctrl.evaluate(global, ctx_io);
+        alt.ctrl.evaluate(ref_out, global, ctx_io);
         const auto value_ctrl = ref_out.read();
         // Note that all `switch` clauses share the same context.
         // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
@@ -298,7 +298,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             ctx_test = std::ref(ctx_second);
           } else {
             // This is a `case` clause.
-            ref_out = it->first.evaluate(global, ctx_next);
+            it->first.evaluate(ref_out, global, ctx_next);
             const auto value_comp = ref_out.read();
             if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
@@ -340,8 +340,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           }
           // Check the loop condition.
           // This differs from a `while` loop where the context for the loop body is destroyed before this check.
-          ref_out = alt.cond.evaluate(global, ctx_next);
-          if(!ref_out.read().test()) {
+          const bool has_result = alt.cond.evaluate(ref_out, global, ctx_next);
+          if(!(has_result && ref_out.read().test())) {
             break;
           }
         }
@@ -351,8 +351,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_while>();
         for(;;) {
           // Check the loop condition.
-          ref_out = alt.cond.evaluate(global, ctx_io);
-          if(!ref_out.read().test()) {
+          const bool has_result = alt.cond.evaluate(ref_out, global, ctx_io);
+          if(!(has_result && ref_out.read().test())) {
             break;
           }
           // Execute the loop body.
@@ -379,8 +379,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         for(;;) {
           // Check the loop condition.
           if(!alt.cond.empty()) {
-            ref_out = alt.cond.evaluate(global, ctx_next);
-            if(!ref_out.read().test()) {
+            const bool has_result = alt.cond.evaluate(ref_out, global, ctx_next);
+            if(!(has_result && ref_out.read().test())) {
               break;
             }
           }
@@ -395,7 +395,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             return status;
           }
           // Evaluate the loop step expression.
-          alt.step.evaluate(global, ctx_next);
+          alt.step.evaluate(ref_out, global, ctx_next);
         }
         return Block::status_next;
       }
@@ -407,7 +407,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, { });
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
         // Calculate the range using the initializer.
-        auto mapped = alt.init.evaluate(global, ctx_for);
+        Reference mapped;
+        alt.init.evaluate(mapped, global, ctx_for);
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
           case Value::type_array: {
@@ -560,7 +561,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(global, ctx_io);
+        alt.expr.evaluate(ref_out, global, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing exception: ", value);
         throw Exception(alt.loc, std::move(value));
@@ -568,7 +569,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
         // Evaluate the expression.
-        ref_out = alt.expr.evaluate(global, ctx_io);
+        alt.expr.evaluate(ref_out, global, ctx_io);
         // If `by_ref` is `false`, replace it with a temporary value.
         if(!alt.by_ref) {
           ref_out.convert_to_temporary();

@@ -54,7 +54,8 @@ int main()
     }
     auto expr = Expression(std::move(nodes));
 
-    auto result = expr.evaluate(global, ctx);
+    Reference result;
+    expr.evaluate(result, global, ctx);
     auto value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival->get_value();
@@ -65,7 +66,7 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond->set_value(D_integer(42));
-    result = expr.evaluate(global, ctx);
+    expr.evaluate(result, global, ctx);
     value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival->get_value();
