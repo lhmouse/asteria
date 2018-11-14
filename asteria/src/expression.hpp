@@ -29,7 +29,7 @@ class Expression
     Expression bind(const Global_context &global, const Analytic_context &ctx) const;
     bool empty() const noexcept;
     bool evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const;
-    bool evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
+    void evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

@@ -46,17 +46,16 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     return true;
   }
 
-bool Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
+void Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
   {
     Reference_stack stack;
     if(!this->evaluate_partial(stack, global, ctx)) {
       Reference_root::S_constant ref_c = { D_null() };
       ref_out = std::move(ref_c);
-      return false;
+      return;
     }
     ROCKET_ASSERT(!stack.empty());
     ref_out = std::move(stack.top());
-    return true;
   }
 
 void Expression::enumerate_variables(const Abstract_variable_callback &callback) const

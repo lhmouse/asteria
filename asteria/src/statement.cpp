@@ -261,8 +261,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
-        const bool has_result = alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto branch = (has_result && ref_out.read().test()) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        alt.cond.evaluate(ref_out, global, ctx_io);
+        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = branch.get().execute(ref_out, global, ctx_io);
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
@@ -340,8 +340,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           }
           // Check the loop condition.
           // This differs from a `while` loop where the context for the loop body is destroyed before this check.
-          const bool has_result = alt.cond.evaluate(ref_out, global, ctx_next);
-          if(!(has_result && ref_out.read().test())) {
+          alt.cond.evaluate(ref_out, global, ctx_next);
+          if(!ref_out.read().test()) {
             break;
           }
         }
@@ -351,8 +351,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_while>();
         for(;;) {
           // Check the loop condition.
-          const bool has_result = alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!(has_result && ref_out.read().test())) {
+          alt.cond.evaluate(ref_out, global, ctx_io);
+          if(!ref_out.read().test()) {
             break;
           }
           // Execute the loop body.
@@ -379,8 +379,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         for(;;) {
           // Check the loop condition.
           if(!alt.cond.empty()) {
-            const bool has_result = alt.cond.evaluate(ref_out, global, ctx_next);
-            if(!(has_result && ref_out.read().test())) {
+            alt.cond.evaluate(ref_out, global, ctx_next);
+            if(!ref_out.read().test()) {
               break;
             }
           }
