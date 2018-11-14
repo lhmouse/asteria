@@ -246,37 +246,37 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
       }
 
-    D_boolean do_logical_not(D_boolean rhs)
+    bool do_logical_not(bool rhs)
       {
         return !rhs;
       }
 
-    D_boolean do_logical_and(D_boolean lhs, D_boolean rhs)
+    bool do_logical_and(bool lhs, bool rhs)
       {
         return lhs & rhs;
       }
 
-    D_boolean do_logical_or(D_boolean lhs, D_boolean rhs)
+    bool do_logical_or(bool lhs, bool rhs)
       {
         return lhs | rhs;
       }
 
-    D_boolean do_logical_xor(D_boolean lhs, D_boolean rhs)
+    bool do_logical_xor(bool lhs, bool rhs)
       {
         return lhs ^ rhs;
       }
 
-    D_integer do_negate(D_integer rhs, bool wrap)
+    std::int64_t do_negate(std::int64_t rhs, bool wrap)
       {
         if(!wrap && (rhs == INT64_MIN)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
         auto res = static_cast<std::uint64_t>(rhs);
         res = -res;
-        return static_cast<D_integer>(res);
+        return static_cast<std::int64_t>(res);
       }
 
-    D_integer do_add(D_integer lhs, D_integer rhs)
+    std::int64_t do_add(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -284,7 +284,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return lhs + rhs;
       }
 
-    D_integer do_subtract(D_integer lhs, D_integer rhs)
+    std::int64_t do_subtract(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -292,7 +292,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return lhs - rhs;
       }
 
-    D_integer do_multiply(D_integer lhs, D_integer rhs)
+    std::int64_t do_multiply(std::int64_t lhs, std::int64_t rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -314,7 +314,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return slhs * arhs;
       }
 
-    D_integer do_divide(D_integer lhs, D_integer rhs)
+    std::int64_t do_divide(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -325,7 +325,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return lhs / rhs;
       }
 
-    D_integer do_modulo(D_integer lhs, D_integer rhs)
+    std::int64_t do_modulo(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -336,7 +336,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return lhs % rhs;
       }
 
-    D_integer do_shift_left_logical(D_integer lhs, D_integer rhs)
+    std::int64_t do_shift_left_logical(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -346,10 +346,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         auto res = static_cast<std::uint64_t>(lhs);
         res <<= rhs;
-        return static_cast<D_integer>(res);
+        return static_cast<std::int64_t>(res);
       }
 
-    D_integer do_shift_right_logical(D_integer lhs, D_integer rhs)
+    std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -359,10 +359,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         auto res = static_cast<std::uint64_t>(lhs);
         res >>= rhs;
-        return static_cast<D_integer>(res);
+        return static_cast<std::int64_t>(res);
       }
 
-    D_integer do_shift_left_arithmetic(D_integer lhs, D_integer rhs)
+    std::int64_t do_shift_left_arithmetic(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -381,10 +381,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
         res <<= rhs;
-        return static_cast<D_integer>(res);
+        return static_cast<std::int64_t>(res);
       }
 
-    D_integer do_shift_right_arithmetic(D_integer lhs, D_integer rhs)
+    std::int64_t do_shift_right_arithmetic(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -400,74 +400,74 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto mask_in = -(res >> 63) << bits_rem;
         res >>= rhs;
         res |= mask_in;
-        return static_cast<D_integer>(res);
+        return static_cast<std::int64_t>(res);
       }
 
-    D_integer do_bitwise_not(D_integer rhs)
+    std::int64_t do_bitwise_not(std::int64_t rhs)
       {
         return ~rhs;
       }
 
-    D_integer do_bitwise_and(D_integer lhs, D_integer rhs)
+    std::int64_t do_bitwise_and(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs & rhs;
       }
 
-    D_integer do_bitwise_or(D_integer lhs, D_integer rhs)
+    std::int64_t do_bitwise_or(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs | rhs;
       }
 
-    D_integer do_bitwise_xor(D_integer lhs, D_integer rhs)
+    std::int64_t do_bitwise_xor(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs ^ rhs;
       }
 
-    D_real do_negate(D_real rhs)
+    double do_negate(double rhs)
       {
         return -rhs;
       }
 
-    D_real do_add(D_real lhs, D_real rhs)
+    double do_add(double lhs, double rhs)
       {
         return lhs + rhs;
       }
 
-    D_real do_subtract(D_real lhs, D_real rhs)
+    double do_subtract(double lhs, double rhs)
       {
         return lhs - rhs;
       }
 
-    D_real do_multiply(D_real lhs, D_real rhs)
+    double do_multiply(double lhs, double rhs)
       {
         return lhs * rhs;
       }
 
-    D_real do_divide(D_real lhs, D_real rhs)
+    double do_divide(double lhs, double rhs)
       {
         return lhs / rhs;
       }
 
-    D_real do_modulo(D_real lhs, D_real rhs)
+    double do_modulo(double lhs, double rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    D_string do_concatenate(const D_string &lhs, const D_string &rhs)
+    rocket::cow_string do_concatenate(const rocket::cow_string &lhs, const rocket::cow_string &rhs)
       {
-        D_string res;
+        rocket::cow_string res;
         res.reserve(lhs.size() + rhs.size());
         res.append(lhs);
         res.append(rhs);
         return res;
       }
 
-    D_string do_duplicate(const D_string &lhs, D_integer rhs)
+    rocket::cow_string do_duplicate(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        rocket::cow_string res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count != 0) {
           if(lhs.size() > res.max_size() / count) {
@@ -488,12 +488,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return res;
       }
 
-    D_string do_move_left(const D_string &lhs, D_integer rhs)
+    rocket::cow_string do_move_left(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        rocket::cow_string res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -504,12 +504,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return res;
       }
 
-    D_string do_move_right(const D_string &lhs, D_integer rhs)
+    rocket::cow_string do_move_right(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        rocket::cow_string res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -520,12 +520,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return res;
       }
 
-    D_string do_extend(const D_string &lhs, D_integer rhs)
+    rocket::cow_string do_extend(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        rocket::cow_string res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count > res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
@@ -536,12 +536,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return res;
       }
 
-    D_string do_truncate(const D_string &lhs, D_integer rhs)
+    rocket::cow_string do_truncate(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        rocket::cow_string res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
