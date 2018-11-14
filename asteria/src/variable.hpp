@@ -75,7 +75,10 @@ class Variable : public rocket::refcounted_base<Variable>
         this->m_gcref = gcref;
       }
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_variable_callback &callback) const
+      {
+        this->m_value.enumerate_variables(callback);
+      }
   };
 
 }

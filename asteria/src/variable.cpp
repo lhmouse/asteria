@@ -16,9 +16,4 @@ Variable::~Variable()
     ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", this->m_value, "` is immutable and cannot be modified.");
   }
 
-void Variable::enumerate_variables(const Abstract_variable_callback &callback) const
-  {
-    this->m_value.enumerate_variables(callback);
-  }
-
 }
