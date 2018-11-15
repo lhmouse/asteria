@@ -20,7 +20,8 @@ Statement::~Statement()
 
     namespace {
 
-    void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const rocket::prehashed_string &name, Reference ref)
+    template<typename XrefT>
+      void do_safe_set_named_reference(Abstract_context &ctx_io, const char *desc, const rocket::prehashed_string &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
@@ -28,7 +29,7 @@ Statement::~Statement()
         if(name.rdstr().starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
         }
-        ctx_io.set_named_reference(name, std::move(ref));
+        ctx_io.mutate_named_reference(name) = std::forward<XrefT>(xref);
       }
 
     }
@@ -43,13 +44,15 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, std::move(ref_c));
         return;
       }
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped function", alt.head.get_func(), { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_io, "skipped function", alt.head.get_func(), std::move(ref_c));
         return;
       }
       case index_if:
@@ -91,7 +94,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
         Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
@@ -100,7 +104,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), std::move(ref_c));
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.head);
@@ -165,8 +170,9 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         const auto &alt = this->m_stor.as<S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
         Analytic_context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, { });
-        do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, std::move(ref_c));
+        do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, std::move(ref_c));  // This use-after-move is safe.
         // Bind the range initializer and loop body recursively.
         auto init_bnd = alt.init.bind(global, ctx_next);
         auto body_bnd = alt.body.bind(global, ctx_next);
@@ -179,7 +185,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto body_try_bnd = alt.body_try.bind(global, ctx_io);
         // The exception variable shall not outlast the `catch` body.
         Analytic_context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "exception", alt.except_name, { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
         // Bind the `catch` branch recursively.
         auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next, global);
         Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
@@ -404,8 +411,9 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // The key and mapped variables shall not outlast the loop body.
         Executive_context ctx_for(&ctx_io);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, { });
-        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, { });
+        Reference_root::S_constant ref_c = { D_null() };
+        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
+        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, std::move(ref_c));  // This use-after-move is safe.
         // Calculate the range using the initializer.
         Reference mapped;
         alt.init.evaluate(mapped, global, ctx_for);
@@ -418,7 +426,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               // Initialize the per-loop key constant.
               auto key = D_integer(it - array.begin());
               ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_root::S_constant ref_c = { std::move(key) };
+              ref_c.src = std::move(key);
               do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_modifier::S_array_index refmod_c = { it - array.begin() };
@@ -446,7 +454,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
               // Initialize the per-loop key constant.
               auto key = D_string(it->first);
               ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_root::S_constant ref_c = { std::move(key) };
+              ref_c.src = std::move(key);
               do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_modifier::S_object_key refmod_c = { it->first };
@@ -518,7 +526,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.set_named_reference(rocket::cow_string::shallow("__backtrace"), std::move(ref_c));
+          ctx_next.mutate_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
           const auto status = alt.body_catch.execute(ref_out, global, ctx_next);
           if(status != Block::status_next) {

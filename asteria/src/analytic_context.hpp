@@ -30,7 +30,7 @@ class Analytic_context : public Abstract_context
     const Abstract_context * get_parent_opt() const noexcept override;
 
     const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const override;
-    void set_named_reference(const rocket::prehashed_string &name, Reference ref) override;
+    Reference & mutate_named_reference(const rocket::prehashed_string &name) override;
 
     void initialize_for_function(const Function_header &head);
   };

@@ -52,9 +52,9 @@ const Reference * Analytic_context::get_named_reference_opt(const rocket::prehas
     return nullptr;
   }
 
-void Analytic_context::set_named_reference(const rocket::prehashed_string &name, Reference /*ref*/)
+Reference & Analytic_context::mutate_named_reference(const rocket::prehashed_string &name)
   {
-    this->m_dict.set(name, this->m_dummy);
+    return this->m_dict.mut(name);
   }
 
 void Analytic_context::initialize_for_function(const Function_header &head)
@@ -67,7 +67,8 @@ void Analytic_context::initialize_for_function(const Function_header &head)
       if(name.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
       }
-      this->m_dict.set(name, this->m_dummy);
+      // Ensure the named reference exists, whose contents are out of interest.
+      this->m_dict.mut(name);
     }
   }
 

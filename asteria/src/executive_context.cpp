@@ -53,9 +53,9 @@ const Reference * Executive_context::get_named_reference_opt(const rocket::preha
     return nullptr;
   }
 
-void Executive_context::set_named_reference(const rocket::prehashed_string &name, Reference ref)
+Reference & Executive_context::mutate_named_reference(const rocket::prehashed_string &name)
   {
-    this->m_dict.set(name, std::move(ref));
+    return this->m_dict.mut(name);
   }
 
     namespace {
@@ -88,10 +88,11 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       }
       if(i < args.size()) {
         // There is a corresponding argument. Move it.
-        this->m_dict.set(name, std::move(args.mut(i).convert_to_variable(global, false)));
+        this->m_dict.mut(name) = std::move(args.mut(i).convert_to_variable(global, false));
       } else {
         // There is no corresponding argument. Default to `null`.
-        this->m_dict.set(name, Reference());
+        Reference_root::S_constant ref_c = { D_null() };
+        this->m_dict.mut(name) = std::move(ref_c);
       }
     }
     // Set the variadic argument getter.

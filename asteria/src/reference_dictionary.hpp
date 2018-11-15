@@ -100,12 +100,11 @@ class Reference_dictionary
         }
         this->do_rehash(res_arg);
       }
-    template<typename XrefT>
-      Reference & set(const rocket::prehashed_string &name, XrefT &&xref)
+    Reference & mut(const rocket::prehashed_string &name)
       {
         ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
-        return this->do_mutate_unchecked(name) = std::forward<XrefT>(xref);
+        return this->do_mutate_unchecked(name);
       }
     bool unset(const rocket::prehashed_string &name) noexcept
       {

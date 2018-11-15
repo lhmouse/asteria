@@ -50,9 +50,9 @@ const Reference * Global_context::get_named_reference_opt(const rocket::prehashe
     return nullptr;
   }
 
-void Global_context::set_named_reference(const rocket::prehashed_string &name, Reference ref)
+Reference & Global_context::mutate_named_reference(const rocket::prehashed_string &name)
   {
-    this->m_dict.set(name, std::move(ref));
+    return this->m_dict.mut(name);
   }
 
 rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable(const Reference *src_opt, bool immutable)

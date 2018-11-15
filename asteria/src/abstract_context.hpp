@@ -21,7 +21,7 @@ class Abstract_context
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
 
     virtual const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const = 0;
-    virtual void set_named_reference(const rocket::prehashed_string &name, Reference ref) = 0;
+    virtual Reference & mutate_named_reference(const rocket::prehashed_string &name) = 0;
   };
 
 }
