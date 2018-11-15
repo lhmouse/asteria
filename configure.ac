@@ -10,7 +10,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
-AC_ARG_ENABLE([werror], AS_HELP_STRING([--disable-werror], [disable -Werror]))
+AC_ARG_ENABLE([werror], AS_HELP_STRING([--disable-werror], [do not pass -Werror to the compiler]))
 AM_CONDITIONAL([enable_werror], [test "${enable_werror}" != "no"])
 
 AC_ARG_ENABLE([debug-logs], AS_HELP_STRING([--enable-debug-logs], [output debug logs to stderr]))
@@ -19,9 +19,9 @@ AM_COND_IF([enable_debug_logs], [
   AC_DEFINE([ASTERIA_ENABLE_DEBUG_LOGS], [1], [Define to 1 to enable debug logs.])
 ])
 
-AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [enable debug checks]))
-AM_CONDITIONAL([enable_debug], [test "${enable_debug}" == "yes"])
-AM_COND_IF([enable_debug], [
+AC_ARG_ENABLE([debug-checks], AS_HELP_STRING([--enable-debug-checks], [enable assertions]))
+AM_CONDITIONAL([enable_debug_checks], [test "${enable_debug_checks}" == "yes"])
+AM_COND_IF([enable_debug_checks], [
   AC_DEFINE([_GLIBCXX_DEBUG], [1], [Define to 1 to enable debug checks of libstdc++.])
   AC_DEFINE([_LIBCPP_DEBUG], [1], [Define to 1 to enable debug checks of libc++.])
   AC_DEFINE([_DEBUG], [1], [Define to 1 to enable debug checks of MSVC standard library.])
