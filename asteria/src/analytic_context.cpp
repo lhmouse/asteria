@@ -68,7 +68,7 @@ void Analytic_context::initialize_for_function(const Function_header &head)
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
       }
       // Ensure the named reference exists, whose contents are out of interest.
-      this->m_dict.mut(name);
+      this->m_dict.mut(name) /*= Reference_root::S_constant()*/;
     }
   }
 

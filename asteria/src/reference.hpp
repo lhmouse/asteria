@@ -86,9 +86,7 @@ class Reference
       {
         if(this->m_mods.empty()) {
           // If there is no modifier, set `*this` to a null reference.
-          Reference_root::S_constant ref_c = { D_null() };
-          *this = std::move(ref_c);
-          return *this;
+          return *this = Reference_root::S_constant();
         }
         // Drop the last modifier.
         this->m_mods.pop_back();

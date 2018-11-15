@@ -50,8 +50,7 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
   {
     Reference_stack stack;
     if(!this->evaluate_partial(stack, global, ctx)) {
-      Reference_root::S_constant ref_c = { D_null() };
-      ref_out = std::move(ref_c);
+      ref_out = Reference_root::S_constant();
       return;
     }
     ROCKET_ASSERT(!stack.empty());
