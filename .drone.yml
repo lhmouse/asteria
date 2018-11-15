@@ -4,7 +4,7 @@ matrix:
     - 32
   _options:
     - ""
-    - "--enable-debug-{logs,checks}"
+    - "--enable-debug-logs --enable-debug-checks"
 
 build:
   image: teaci/msys$${arch}

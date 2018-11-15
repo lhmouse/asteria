@@ -12,7 +12,7 @@ addons:
 
 env:
   - _options=""
-  - _options="--enable-debug-{logs,checks}"
+  - _options="--enable-debug-logs --enable-debug-checks"
 
 compiler:
   - gcc
