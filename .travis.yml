@@ -12,7 +12,7 @@ addons:
 
 env:
   - _options=""
-  - _options="--enable-debug-logs"
+  - _options="--enable-debug-{logs,checks}"
 
 compiler:
   - gcc
@@ -22,7 +22,7 @@ install:
   - mkdir -p m4
   - autoreconf -ifv
   - test "${CXX#*clang}" == "${CXX}" || _options+=" --disable-werror"
-  - ./configure --enable-debug --disable-silent-rules ${_options}
+  - ./configure --disable-silent-rules ${_options}
   - make -j$(nproc)
 
 script:

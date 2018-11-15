@@ -2,9 +2,9 @@ matrix:
   arch:
     - 64
     - 32
-  options:
+  _options:
     - ""
-    - "--enable-debug-logs"
+    - "--enable-debug-{logs,checks}"
 
 build:
   image: teaci/msys$${arch}
@@ -13,7 +13,7 @@ build:
   commands:
     - mkdir -p m4
     - autoreconf -ifv
-    - ./configure --enable-debug --disable-werror --disable-silent-rules $${options}
+    - ./configure --disable-werror --disable-silent-rules $${_options}
     - make -j$(nproc)
     - ./check_includes.sh
     - make -j$(nproc) check
