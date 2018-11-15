@@ -110,7 +110,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::prehashed_string &nam
     return toff;
   }
 
-bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::prehashed_string &name, Reference &&ref) noexcept
+Reference & Reference_dictionary::do_mutate_unchecked(const rocket::prehashed_string &name)
   {
     ROCKET_ASSERT(!name.empty());
     const auto data = this->m_data;
@@ -122,13 +122,12 @@ bool Reference_dictionary::do_insert_or_assign_unchecked(const rocket::prehashed
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.name == name; });
     if(!qbkt->refv.empty()) {
       // Already exists.
-      qbkt->refv.front() = std::move(ref);
-      return false;
+      return qbkt->refv.front();
     }
     qbkt->name = name;
-    qbkt->refv.emplace_back(std::move(ref));
+    qbkt->refv.emplace_back();
     this->m_size += 1;
-    return true;
+    return qbkt->refv.front();
   }
 
 void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept
