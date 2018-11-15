@@ -5,10 +5,8 @@
 #define ROCKET_REFCOUNTED_PTR_HPP_
 
 #include <memory> // std::default_delete<>
-#include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <utility> // std::move(), std::forward(), std::declval()
-#include <exception> // std::terminate()
 #include <iosfwd> // std::basic_ostream<>
 #include <cstddef> // std::nullptr_t
 #include <typeinfo>
@@ -17,11 +15,11 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include "reference_counter.hpp"
 
 namespace rocket {
 
 using ::std::default_delete;
-using ::std::atomic;
 using ::std::enable_if;
 using ::std::is_nothrow_constructible;
 using ::std::is_convertible;
@@ -38,65 +36,6 @@ template<typename elementT>
 
     namespace details_refcounted_ptr {
 
-    class refcount_base
-      {
-      private:
-        mutable atomic<long> m_nref;
-
-      public:
-        constexpr refcount_base() noexcept
-          : m_nref(1)
-          {
-          }
-        constexpr refcount_base(const refcount_base &) noexcept
-          : refcount_base()
-          {
-          }
-        refcount_base & operator=(const refcount_base &) noexcept
-          {
-            return *this;
-          }
-        ~refcount_base()
-          {
-            // The reference count shall be either zero or one here.
-            if(this->m_nref.load(::std::memory_order_relaxed) > 1) {
-              ::std::terminate();
-            }
-          }
-
-      public:
-        long reference_count() const noexcept
-          {
-            return this->m_nref.load(::std::memory_order_relaxed);
-          }
-        bool try_add_reference() const noexcept
-          {
-            auto nref_old = this->m_nref.load(::std::memory_order_relaxed);
-            do {
-              if(nref_old == 0) {
-                return false;
-              }
-              if(this->m_nref.compare_exchange_strong(nref_old, nref_old + 1, ::std::memory_order_relaxed)) {
-                return true;
-              }
-            } while(true);
-          }
-        void add_reference() const noexcept
-          {
-            auto nref_old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
-            ROCKET_ASSERT(nref_old >= 1);
-          }
-        bool drop_reference() const noexcept
-          {
-            auto nref_old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
-            if(nref_old > 1) {
-              return false;
-            }
-            ROCKET_ASSERT(nref_old == 1);
-            return true;
-          }
-      };
-
     template<typename resultT, typename sourceT, typename = void>
       struct static_cast_or_dynamic_cast_helper
       {
@@ -111,6 +50,34 @@ template<typename elementT>
         constexpr resultT operator()(sourceT &&src) const
           {
             return static_cast<resultT>(::std::forward<sourceT>(src));
+          }
+      };
+
+    template<typename elementT>
+      class stored_pointer;
+
+    class refcount_base
+      {
+      private:
+        mutable reference_counter<long> m_nref;
+
+      public:
+        bool unique() const noexcept
+          {
+            return this->m_nref.get() == 1;
+          }
+        long use_count() const noexcept
+          {
+            return this->m_nref.get();
+          }
+
+        void add_reference() const noexcept
+          {
+            return this->m_nref.increment();
+          }
+        bool drop_reference() const noexcept
+          {
+            return this->m_nref.decrement();
           }
       };
 
@@ -153,7 +120,7 @@ template<typename elementT>
             if(!ptr) {
               return 0;
             }
-            return ptr->refcount_base::reference_count();
+            return ptr->refcount_base::use_count();
           }
         constexpr pointer get() const noexcept
           {
@@ -263,11 +230,20 @@ template<typename elementT, typename deleterT>
 
     bool unique() const noexcept
       {
-        return this->refcount_base::reference_count() == 1;
+        return this->refcount_base::unique();
       }
     long use_count() const noexcept
       {
-        return this->refcount_base::reference_count();
+        return this->refcount_base::use_count();
+      }
+
+    void add_reference() const noexcept
+      {
+        return this->refcount_base::add_reference();
+      }
+    bool drop_reference() const noexcept
+      {
+        return this->refcount_base::drop_reference();
       }
 
     template<typename yelementT = elementT>
