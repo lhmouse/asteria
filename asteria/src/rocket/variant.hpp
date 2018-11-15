@@ -222,11 +222,11 @@ template<typename ...alternativesT>
 
     static constexpr bool do_check_all_of(const bool *bptr, size_t count = size) noexcept
       {
-        return *bptr && ((count == 0) || variant::do_check_all_of(bptr + 1, count - 1));
+        return (count == 0) || (bptr[0] && variant::do_check_all_of(bptr + 1, count - 1));
       }
     static constexpr bool do_check_any_of(const bool *bptr, size_t count = size) noexcept
       {
-        return *bptr || ((count == 0) && variant::do_check_any_of(bptr + 1, count - 1));
+        return (count != 0) && (bptr[0] || variant::do_check_all_of(bptr + 1, count - 1));
       }
     static constexpr bool do_check_fast_call(size_t rindex, const bool *bptr) noexcept
       {
