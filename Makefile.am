@@ -43,6 +43,7 @@ pkginclude_rocket_HEADERS = \
   asteria/src/rocket/fill_iterator.hpp  \
   asteria/src/rocket/transparent_comparators.hpp  \
   asteria/src/rocket/unique_handle.hpp  \
+  asteria/src/rocket/reference_counter.hpp  \
   asteria/src/rocket/cow_string.hpp  \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \

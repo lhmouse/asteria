@@ -5,7 +5,6 @@
 #define ROCKET_COW_VECTOR_HPP_
 
 #include <memory> // std::allocator<>, std::allocator_traits<>
-#include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
@@ -19,6 +18,7 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include "reference_counter.hpp"
 
 /* Differences from `std::vector`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -34,7 +34,6 @@ namespace rocket {
 
 using ::std::allocator;
 using ::std::allocator_traits;
-using ::std::atomic;
 using ::std::is_same;
 using ::std::decay;
 using ::std::is_array;
@@ -74,7 +73,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);
           }
 
-        atomic<long> nref;
+        mutable reference_counter<long> nref;
         allocator_type alloc;
         size_type nblk;
         size_type nelem;
@@ -84,7 +83,6 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           : alloc(xalloc), nblk(xnblk)
           {
             this->nelem = 0;
-            this->nref.store(1, ::std::memory_order_release);
           }
         ~basic_storage()
           {
@@ -251,15 +249,12 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           {
             if(to_add_ref) {
               // Increment the reference count.
-              const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-              ROCKET_ASSERT(nref_old >= 1);
+              ptr->nref.increment();
             } else {
               // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-              const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
-              if(nref_old > 1) {
+              if(!ptr->nref.decrement()) {
                 return;
               }
-              ROCKET_ASSERT(nref_old == 1);
               // If it has been decremented to zero, deallocate the block.
               auto st_alloc = storage_allocator(ptr->alloc);
               const auto nblk = ptr->nblk;
@@ -287,7 +282,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(!ptr) {
               return false;
             }
-            return ptr->nref.load(::std::memory_order_relaxed) == 1;
+            return ptr->nref.get() == 1;
           }
         size_type capacity() const noexcept
           {
@@ -356,7 +351,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
               try {
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
-                if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.load(::std::memory_order_relaxed) != 1)) {
+                if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.get() != 1)) {
                   copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
                   copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
                 } else {

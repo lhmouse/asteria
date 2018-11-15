@@ -9,7 +9,6 @@
 #include <istream> // std::streamsize, std::ios_base, std::basic_istream<>
 #include <locale> // std::isspace()
 #include <ostream> // std::basic_ostream<>
-#include <atomic> // std::atomic<>
 #include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
 #include <initializer_list> // std::initializer_list<>
@@ -22,6 +21,7 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include "reference_counter.hpp"
 
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -42,7 +42,6 @@ using ::std::streamsize;
 using ::std::ios_base;
 using ::std::basic_istream;
 using ::std::basic_ostream;
-using ::std::atomic;
 using ::std::is_same;
 using ::std::decay;
 using ::std::is_array;
@@ -78,15 +77,14 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;
           }
 
-          atomic<long> nref;
-          allocator_type alloc;
-          size_type nblk;
-          union { value_type data[0]; };
+        mutable reference_counter<long> nref;
+        allocator_type alloc;
+        size_type nblk;
+        union { value_type data[0]; };
 
         basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
           : alloc(xalloc), nblk(xnblk)
           {
-            this->nref.store(1, ::std::memory_order_release);
           }
         ~basic_storage()
           {
@@ -145,11 +143,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
               return;
             }
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            const auto nref_old = ptr->nref.fetch_sub(1, ::std::memory_order_acq_rel);
-            if(nref_old > 1) {
+            if(!ptr->nref.decrement()) {
               return;
             }
-            ROCKET_ASSERT(nref_old == 1);
             // If it has been decremented to zero, deallocate the block.
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;
@@ -176,7 +172,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             if(!ptr) {
               return false;
             }
-            return ptr->nref.load(::std::memory_order_relaxed) == 1;
+            return ptr->nref.get() == 1;
           }
         size_type capacity() const noexcept
           {
@@ -254,8 +250,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             const auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
-              const auto nref_old = ptr->nref.fetch_add(1, ::std::memory_order_relaxed);
-              ROCKET_ASSERT(nref_old >= 1);
+              ptr->nref.increment();
             }
             this->do_reset(ptr);
           }
