@@ -229,22 +229,14 @@ extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 // Miscellaneous
 ///////////////////////////////////////////////////////////////////////////////
 
-inline std::uint64_t wrap_index(std::uint64_t &bfill_out, std::uint64_t &efill_out, std::int64_t index, std::size_t size)
+struct Wrapped_index
   {
-    const auto rsize = static_cast<std::int64_t>(size);
-    auto rindex = index;
-    if(rindex < 0) {
-      rindex += rsize;
-    }
-    bfill_out = 0;
-    efill_out = 0;
-    if(rindex < 0) {
-      bfill_out = 0 - static_cast<std::uint64_t>(rindex);
-    } else if(rindex >= rsize) {
-      efill_out = static_cast<std::uint64_t>(rindex) - size + 1;
-    }
-    return static_cast<std::uint64_t>(rindex);
-  }
+    std::uint64_t index;
+    std::uint64_t front_fill;
+    std::uint64_t back_fill;
+  };
+
+extern Wrapped_index wrap_index(std::int64_t index, std::size_t size) noexcept;
 
 }
 

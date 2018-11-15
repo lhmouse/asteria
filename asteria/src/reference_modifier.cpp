@@ -23,13 +23,12 @@ const Value * Reference_modifier::apply_const_opt(const Value &parent) const
           }
           case Value::type_array: {
             const auto &arr = parent.check<D_array>();
-            std::uint64_t bfill, efill;
-            auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
-            if(rindex >= arr.size()) {
+            auto wrap = wrap_index(alt.index, arr.size());
+            if(wrap.index >= arr.size()) {
               ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return nullptr;
             }
-            return &(arr.at(static_cast<std::size_t>(rindex)));
+            return &(arr.at(static_cast<std::size_t>(wrap.index)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -76,26 +75,21 @@ Value * Reference_modifier::apply_mutable_opt(Value &parent, bool create_new) co
             // Fallthrough.
           case Value::type_array:
             auto &arr = parent.check<D_array>();
-            std::uint64_t bfill, efill;
-            auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
-            if(rindex >= arr.size()) {
+            auto wrap = wrap_index(alt.index, arr.size());
+            if(wrap.index >= arr.size()) {
               if(!create_new) {
                 ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
                 return nullptr;
               }
-              auto rsize_add = bfill | efill;
-              if(rsize_add >= arr.max_size() - arr.size()) {
-                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", rsize_add, "` would exceed system resource limits.");
+              const auto size_add = wrap.front_fill + wrap.back_fill;
+              if(size_add >= arr.max_size() - arr.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
               }
-              if(bfill != 0) {
-                arr.insert(arr.begin(), static_cast<std::size_t>(bfill));
-                rindex += bfill;
-              }
-              if(efill != 0) {
-                arr.append(static_cast<std::size_t>(efill));
-              }
+              arr.insert(arr.begin(), static_cast<std::size_t>(wrap.front_fill));
+              wrap.index += static_cast<std::size_t>(wrap.front_fill);
+              arr.insert(arr.end(), static_cast<std::size_t>(wrap.back_fill));
             }
-            return &(arr.mut(static_cast<std::size_t>(rindex)));
+            return &(arr.mut(static_cast<std::size_t>(wrap.index)));
           }
           default: {
             ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -142,14 +136,13 @@ Value Reference_modifier::apply_and_erase(Value &parent) const
           }
           case Value::type_array: {
             auto &arr = parent.check<D_array>();
-            std::uint64_t bfill, efill;
-            auto rindex = wrap_index(bfill, efill, alt.index, arr.size());
-            if(rindex >= arr.size()) {
+            auto wrap = wrap_index(alt.index, arr.size());
+            if(wrap.index >= arr.size()) {
               ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return D_null();
             }
-            auto erased = std::move(arr.mut(static_cast<std::size_t>(rindex)));
-            arr.erase(arr.begin() + static_cast<std::ptrdiff_t>(rindex));
+            auto erased = std::move(arr.mut(static_cast<std::size_t>(wrap.index)));
+            arr.erase(arr.begin() + static_cast<std::ptrdiff_t>(wrap.index));
             return erased;
           }
           default: {

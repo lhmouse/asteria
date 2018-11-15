@@ -288,4 +288,33 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
     return os;
   }
 
+///////////////////////////////////////////////////////////////////////////////
+// Miscellaneous
+///////////////////////////////////////////////////////////////////////////////
+
+Wrapped_index wrap_index(std::int64_t index, std::size_t size) noexcept
+  {
+    const auto rsize = static_cast<std::int64_t>(size);
+    // Wrap `index` if it is negative.
+    // N.B. The result may still be negative.
+    auto rindex = index;
+    if(rindex < 0) {
+      rindex += rsize;
+    }
+    Wrapped_index wrap = { static_cast<std::uint64_t>(rindex), 0, 0 };
+    // If `rindex` is still negative, we will have to insert elements in the front.
+    if(rindex < 0) {
+      // Calculate the number of elements to fill.
+      wrap.front_fill = 0 - static_cast<std::uint64_t>(rindex);
+      return wrap;
+    }
+    // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
+    if(rindex >= rsize) {
+      wrap.back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
+      return wrap;
+    }
+    // `rindex` firs in range.
+    return wrap;
+  }
+
 }

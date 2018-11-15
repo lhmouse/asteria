@@ -39,13 +39,12 @@ Reference Variadic_arguer::invoke(Global_context & /*global*/, Reference /*self*
           ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
         }
         // Return the argument at the given index.
-        std::uint64_t bfill, efill;
-        auto rindex = wrap_index(bfill, efill, *qindex, this->m_vargs.size());
-        if(rindex >= this->m_vargs.size()) {
+        auto wrap = wrap_index(*qindex, this->m_vargs.size());
+        if(wrap.index >= this->m_vargs.size()) {
           ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->m_vargs.size());
           return { };
         }
-        return this->m_vargs.at(static_cast<std::size_t>(rindex));
+        return this->m_vargs.at(static_cast<std::size_t>(wrap.index));
       }
       default: {
         ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
