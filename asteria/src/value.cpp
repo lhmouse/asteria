@@ -43,10 +43,6 @@ const char * Value::get_type_name(Value::Type type) noexcept
     }
   }
 
-Value::~Value()
-  {
-  }
-
 bool Value::test() const noexcept
   {
     switch(this->type()) {
