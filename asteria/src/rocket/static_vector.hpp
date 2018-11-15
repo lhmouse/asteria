@@ -10,7 +10,6 @@
 #include <initializer_list> // std::initializer_list<>
 #include <utility> // std::move(), std::forward(), std::declval()
 #include <cstddef> // std::size_t, std::ptrdiff_t
-#include <cstdint> // std::uintptr_t
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -50,7 +49,6 @@ using ::std::iterator_traits;
 using ::std::initializer_list;
 using ::std::size_t;
 using ::std::ptrdiff_t;
-using ::std::uintptr_t;
 
 template<typename valueT, size_t capacityT, typename allocatorT = allocator<valueT>>
   class static_vector;
