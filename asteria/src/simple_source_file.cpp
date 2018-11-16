@@ -48,7 +48,7 @@ Simple_source_file::~Simple_source_file()
 Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> &&args) const
   {
     Reference result;
-    Function_header head(this->m_file, 0, rocket::cow_string::shallow("<file scope>"), { });
+    Function_header head(this->m_file, 0, rocket::cow_string::shallow("<file scope>"));
     this->m_code.execute_as_function(result, global, std::move(head), nullptr, { }, std::move(args));
     return result;
   }

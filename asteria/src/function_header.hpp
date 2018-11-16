@@ -17,12 +17,14 @@ class Function_header
     rocket::cow_vector<rocket::prehashed_string> m_params;
 
   public:
-    Function_header(Source_location loc, rocket::prehashed_string func, rocket::cow_vector<rocket::prehashed_string> params)
-      : m_loc(std::move(loc)), m_func(std::move(func)), m_params(std::move(params))
+    template<typename ...XparamsT>
+      Function_header(Source_location loc, rocket::prehashed_string func, XparamsT &&...xparams)
+      : m_loc(std::move(loc)), m_func(std::move(func)), m_params(std::forward<XparamsT>(xparams)...)
       {
       }
-    Function_header(rocket::cow_string file, std::uint32_t line, rocket::prehashed_string func, rocket::cow_vector<rocket::prehashed_string> params)
-      : m_loc(std::move(file), line), m_func(std::move(func)), m_params(std::move(params))
+    template<typename ...XparamsT>
+      Function_header(rocket::cow_string file, std::uint32_t line, rocket::prehashed_string func, XparamsT &&...xparams)
+      : m_loc(std::move(file), line), m_func(std::move(func)), m_params(std::forward<XparamsT>(xparams)...)
       {
       }
 
