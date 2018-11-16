@@ -58,12 +58,12 @@ template<typename valueT>
     void increment() noexcept
       {
         auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
-        ROCKET_ASSERT(old - 1 > 0);
+        ROCKET_ASSERT(old - 1 >= 0);
       }
     bool decrement() noexcept
       {
         auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
-        ROCKET_ASSERT(old - 1 > 0);
+        ROCKET_ASSERT(old - 1 >= 0);
         return old == 1;
       }
   };
