@@ -543,23 +543,26 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             if(n1 != n2) {
               return 2;
             }
-            const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
-            return res;
+            return traits_type::compare(s1, s2, n1);
           }
 
         static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
           {
-            const int res = traits_type::compare(s1, s2, noadl::min(n1, n2));
-            if(res != 0) {
-              return res;
-            }
             if(n1 < n2) {
+              const int res = traits_type::compare(s1, s2, n1);
+              if(res != 0) {
+                return res;
+              }
               return -1;
             }
             if(n1 > n2) {
+              const int res = traits_type::compare(s1, s2, n2);
+              if(res != 0) {
+                return res;
+              }
               return +1;
             }
-            return 0;
+            return traits_type::compare(s1, s2, n1);
           }
       };
 

@@ -152,8 +152,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
           if(r != Value::compare_equal) {
             return r;
           }
-          ++pl;
-          ++pr;
+          ++pl, ++pr;
         }
         return do_three_way_compare(el - pl, er - pr);
       }
