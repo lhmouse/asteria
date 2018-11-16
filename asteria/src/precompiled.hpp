@@ -52,9 +52,6 @@
 #include "rocket/refcounted_ptr.hpp"
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
-
-namespace Asteria {
-
-}
+#include "rocket/integer_sequence.hpp"
 
 #endif
