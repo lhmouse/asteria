@@ -134,10 +134,10 @@ template<typename ...alternativesT>
         noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*static_cast<alternativeT *>(rptr)));
         noadl::destroy_at(static_cast<alternativeT *>(rptr));
       }
-    template<typename alternativeT, typename voidT, typename visitorT>
-      void wrapped_visit(voidT *tptr, visitorT &visitor)
+    template<typename resultT, typename alternativeT, typename voidT, typename visitorT>
+      resultT wrapped_visit(voidT *tptr, visitorT &visitor)
       {
-        ::std::forward<visitorT>(visitor)(*static_cast<alternativeT *>(tptr));
+        return ::std::forward<visitorT>(visitor)(*static_cast<alternativeT *>(tptr));
       }
     template<typename alternativeT>
       void wrapped_swap(void *tptr, void *rptr)
@@ -536,16 +536,18 @@ template<typename ...alternativesT>
       }
 
     template<typename visitorT>
-      void visit(visitorT &&visitor) const
+      typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
       {
-        static constexpr void (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, const void, visitorT>... };
+        using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
+        static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
         ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
     template<typename visitorT>
-      void visit(visitorT &&visitor)
+      typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
       {
-        static constexpr void (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<alternativesT, void, visitorT>... };
+        using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
+        static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
         ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
