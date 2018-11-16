@@ -39,6 +39,7 @@ int main()
 
     Reference res;
     Global_context global;
-    code.execute_as_function(res, global, Function_header(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"), { }), nullptr, { }, { });
+    Function_header head(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"));
+    code.execute_as_function(res, global, std::move(head), nullptr, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }
