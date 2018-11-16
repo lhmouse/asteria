@@ -14,7 +14,7 @@ LDADD = lib/libasteria.la
 %.hpp.gch: %.hpp
 	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
 	${AM_V_GEN}${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
-	test -z "${EXEEXT}" || rm -f $@${EXEEXT}
+	${AM_V_GEN}test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 BUILT_SOURCES =  \
   asteria/src/precompiled.hpp.gch
