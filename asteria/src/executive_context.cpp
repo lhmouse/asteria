@@ -95,16 +95,17 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       }
     }
     // Set the variadic argument getter.
-    if(head.get_param_count() < args.size()) {
-      // There are more arguments than parameters. Create an argument getter from those.
-      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(head.get_param_count()));
-      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
-    } else if(!zvarg_opt) {
-      // There is no variadic arg. Create a zeroary argument getter.
-      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), { })));
+    if(ROCKET_EXPECT(head.get_param_count() >= args.size())) {
+      args.clear();
     } else {
-      // There is no variadic arg. Copy the existent zeroary argument getter.
+      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(head.get_param_count()));
+    }
+    if(ROCKET_EXPECT(args.empty() && zvarg_opt)) {
+      // Copy the existent zeroary argument getter.
       do_set_constant(this->m_varg, D_function(*zvarg_opt));
+    } else {
+      // Create an argument getter from those.
+      do_set_constant(this->m_varg, D_function(Variadic_arguer(head.get_location(), std::move(args))));
     }
   }
 
