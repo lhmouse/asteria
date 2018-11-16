@@ -88,18 +88,18 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
     }
 
-Reference Block::execute_as_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args) const
+void Block::execute_as_function(Reference &result_out, Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const
   {
     Executive_context ctx_next(nullptr);
     const Variable_disposer disposer(global, ctx_next);
     ctx_next.initialize_for_function(global, head, zvarg_opt, std::move(self), std::move(args));
     // Execute the body.
-    Reference result;
-    const auto status = this->execute_in_place(result, ctx_next, global);
+    const auto status = this->execute_in_place(result_out, ctx_next, global);
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.
-        return { };
+        result_out = Reference_root::S_constant();
+        return;
       }
       case status_break_unspec:
       case status_break_switch:
@@ -114,7 +114,7 @@ Reference Block::execute_as_function(Global_context &global, const Function_head
       }
       case status_return: {
         // Forward the result reference.
-        return std::move(result);
+        return;
       }
       default: {
         ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");

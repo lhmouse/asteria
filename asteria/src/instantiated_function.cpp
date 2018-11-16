@@ -24,9 +24,9 @@ void Instantiated_function::enumerate_variables(const Abstract_variable_callback
     this->m_body_bnd.enumerate_variables(callback);
   }
 
-Reference Instantiated_function::invoke(Global_context &global, Reference self, rocket::cow_vector<Reference> args) const
+void Instantiated_function::invoke(Reference &result_out, Global_context &global, Reference &&self, rocket::cow_vector<Reference> &&args) const
   {
-    return this->m_body_bnd.execute_as_function(global, this->m_head, &(this->m_zvarg), std::move(self), std::move(args));
+    this->m_body_bnd.execute_as_function(result_out, global, this->m_head, &(this->m_zvarg), std::move(self), std::move(args));
   }
 
 }

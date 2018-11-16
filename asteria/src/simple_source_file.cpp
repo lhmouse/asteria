@@ -45,9 +45,12 @@ Simple_source_file::~Simple_source_file()
     ASTERIA_DEBUG_LOG("`Simple_source_file` destructor: ", static_cast<void *>(this));
   }
 
-Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> args) const
+Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> &&args) const
   {
-    return this->m_code.execute_as_function(global, Function_header(this->m_file, 0, rocket::cow_string::shallow("<file scope>"), { }), nullptr, { }, std::move(args));
+    Reference result;
+    Function_header head(this->m_file, 0, rocket::cow_string::shallow("<file scope>"), { });
+    this->m_code.execute_as_function(result, global, std::move(head), nullptr, { }, std::move(args));
+    return result;
   }
 
 }

@@ -29,7 +29,7 @@ class Variadic_arguer : public Abstract_function
     rocket::cow_string describe() const override;
     void enumerate_variables(const Abstract_variable_callback &callback) const override;
 
-    Reference invoke(Global_context &global, Reference self, rocket::cow_vector<Reference> args) const override;
+    void invoke(Reference &result_out, Global_context &global, Reference &&self, rocket::cow_vector<Reference> &&args) const override;
   };
 
 }

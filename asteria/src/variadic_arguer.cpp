@@ -23,13 +23,14 @@ void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &call
     }
   }
 
-Reference Variadic_arguer::invoke(Global_context & /*global*/, Reference /*self*/, rocket::cow_vector<Reference> args) const
+void Variadic_arguer::invoke(Reference &result_out, Global_context & /*global*/, Reference && /*self*/, rocket::cow_vector<Reference> &&args) const
   {
     switch(args.size()) {
       case 0: {
         // Return the number of variadic arguments.
         Reference_root::S_constant ref_c = { D_integer(this->m_vargs.size()) };
-        return std::move(ref_c);
+        result_out = std::move(ref_c);
+        return;
       }
       case 1: {
         // Return the argument at the index specified.
@@ -42,9 +43,11 @@ Reference Variadic_arguer::invoke(Global_context & /*global*/, Reference /*self*
         auto wrap = wrap_index(*qindex, this->m_vargs.size());
         if(wrap.index >= this->m_vargs.size()) {
           ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->m_vargs.size());
-          return { };
+          result_out = Reference_root::S_constant();
+          return;
         }
-        return this->m_vargs.at(static_cast<std::size_t>(wrap.index));
+        result_out = this->m_vargs.at(static_cast<std::size_t>(wrap.index));
+        return;
       }
       default: {
         ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");

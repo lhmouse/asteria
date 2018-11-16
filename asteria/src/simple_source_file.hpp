@@ -26,7 +26,7 @@ class Simple_source_file
         return this->m_file;
       }
 
-    Reference execute(Global_context &global, rocket::cow_vector<Reference> args) const;
+    Reference execute(Global_context &global, rocket::cow_vector<Reference> &&args) const;
   };
 
 }

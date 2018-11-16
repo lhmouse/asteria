@@ -69,7 +69,7 @@ Reference & Executive_context::mutate_named_reference(const rocket::prehashed_st
 
     }
 
-void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference self, rocket::cow_vector<Reference> args)
+void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set pre-defined variables.
     do_set_constant(this->m_file, D_string(head.get_file()));

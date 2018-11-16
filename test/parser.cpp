@@ -37,7 +37,8 @@ int main()
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
+    Reference res;
     Global_context global;
-    auto res = code.execute_as_function(global, Function_header(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"), { }), nullptr, { }, { });
+    code.execute_as_function(res, global, Function_header(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"), { }), nullptr, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }
