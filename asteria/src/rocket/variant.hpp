@@ -39,8 +39,8 @@ template<typename ...alternativesT>
         using first_type   = firstT;
         using second_type  = secondT;
 
-        firstT first;
-        secondT second;
+        first_type first;
+        second_type second;
 
         union_pair() noexcept
           {
