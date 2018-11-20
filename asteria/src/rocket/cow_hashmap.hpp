@@ -512,7 +512,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 #endif
             noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
             const auto ptr_old = this->m_ptr;
-            if(ptr_old) {
+            if(ROCKET_UNEXPECT(ptr_old)) {
               try {
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
