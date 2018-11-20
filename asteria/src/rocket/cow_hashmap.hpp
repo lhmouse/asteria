@@ -530,7 +530,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 throw;
               }
               // Dispose the old block.
-              (*(this->m_smf))(ptr_old, false);
+              storage_handle::do_manipulate_storage(ptr_old, false);
             }
             // Replace the current block.
             this->m_ptr = ptr;
