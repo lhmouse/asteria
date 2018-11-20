@@ -98,7 +98,7 @@ void Block::execute_as_function(Reference &result_out, Global_context &global, c
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.
-        result_out = Reference_root::S_constant();
+        result_out = Reference_root::S_null();
         return;
       }
       case status_break_unspec:

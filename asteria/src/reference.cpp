@@ -16,28 +16,6 @@ void Reference::do_throw_unset_no_modifier() const
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
   }
 
-    namespace {
-
-    union Constant_null
-      {
-        Value value;
-
-        Constant_null() noexcept
-          {
-          }
-        ~Constant_null()
-          {
-          }
-
-        operator const Value & () const noexcept
-          {
-            return this->value;
-          }
-      }
-    const s_null;  // Don't play with this at home.
-
-    }
-
 const Value & Reference::do_read_with_modifiers() const
   {
     // Dereference the root.
@@ -47,7 +25,7 @@ const Value & Reference::do_read_with_modifiers() const
     for(auto it = this->m_mods.begin(); it != end; ++it) {
       const auto qnext = it->apply_const_opt(cur);
       if(!qnext) {
-        return s_null;
+        return Value::get_null();
       }
       cur = std::ref(*qnext);
     }

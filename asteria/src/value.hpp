@@ -50,6 +50,7 @@ class Value
 
   public:
     static const char * get_type_name(Type type) noexcept;
+    static const Value & get_null() noexcept;
 
   private:
     Variant m_stor;

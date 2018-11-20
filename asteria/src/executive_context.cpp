@@ -91,7 +91,7 @@ void Executive_context::initialize_for_function(const Function_header &head, con
         this->m_dict.mut(name) = std::move(args.mut(i));
       } else {
         // There is no corresponding argument. Default to `null`.
-        this->m_dict.mut(name) = Reference_root::S_constant();
+        this->m_dict.mut(name) = Reference_root::S_null();
       }
     }
     // Set the variadic argument getter.

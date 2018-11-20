@@ -16,6 +16,9 @@ Reference_root::~Reference_root()
 const Value & Reference_root::dereference_const() const
   {
     switch(this->index()) {
+      case index_null: {
+        return Value::get_null();
+      }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
         return alt.src;
@@ -37,6 +40,9 @@ const Value & Reference_root::dereference_const() const
 Value & Reference_root::dereference_mutable() const
   {
     switch(this->index()) {
+      case index_null: {
+        ASTERIA_THROW_RUNTIME_ERROR("The null reference cannot be modified.");
+      }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
@@ -58,6 +64,9 @@ Value & Reference_root::dereference_mutable() const
 void Reference_root::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(this->index()) {
+      case index_null: {
+        return;
+      }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
         alt.src.enumerate_variables(callback);
@@ -85,6 +94,7 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
 void Reference_root::dispose_variable(Global_context &global) const noexcept
   {
     switch(this->index()) {
+      case index_null:
       case index_constant:
       case index_temporary: {
         return;

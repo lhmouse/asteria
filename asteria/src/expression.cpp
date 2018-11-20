@@ -50,7 +50,7 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
   {
     Reference_stack stack;
     if(!this->evaluate_partial(stack, global, ctx)) {
-      ref_out = Reference_root::S_constant();
+      ref_out = Reference_root::S_null();
       return;
     }
     ROCKET_ASSERT(!stack.empty());

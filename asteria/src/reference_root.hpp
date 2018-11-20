@@ -14,6 +14,9 @@ namespace Asteria {
 class Reference_root
   {
   public:
+    struct S_null
+      {
+      };
     struct S_constant
       {
         Value src;
@@ -29,15 +32,17 @@ class Reference_root
 
     enum Index : std::uint8_t
       {
-        index_constant   = 0,
-        index_temporary  = 1,
-        index_variable   = 2,
+        index_null       = 0,
+        index_constant   = 1,
+        index_temporary  = 2,
+        index_variable   = 3,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_constant   // 0,
-        , S_temporary  // 1,
-        , S_variable   // 2,
+        , S_null       // 0,
+        , S_constant   // 1,
+        , S_temporary  // 2,
+        , S_variable   // 3,
       )>;
 
   private:

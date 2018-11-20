@@ -43,6 +43,33 @@ const char * Value::get_type_name(Value::Type type) noexcept
     }
   }
 
+    namespace {
+
+    union Constant_null
+      {
+        Value value;
+
+        Constant_null() noexcept
+          {
+          }
+        ~Constant_null()
+          {
+          }
+
+        operator const Value & () const noexcept
+          {
+            return this->value;
+          }
+      }
+    const s_null;  // Don't play with this at home.
+
+    }
+
+const Value & Value::get_null() noexcept
+  {
+    return s_null;
+  }
+
 Value::~Value()
   {
   }

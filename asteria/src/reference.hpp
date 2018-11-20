@@ -49,7 +49,7 @@ class Reference
   public:
     bool is_constant() const noexcept
       {
-        return this->m_root.index() == Reference_root::index_constant;
+        return (this->m_root.index() == Reference_root::index_null) || (this->m_root.index() == Reference_root::index_constant);
       }
     bool is_temporary() const noexcept
       {
@@ -90,7 +90,7 @@ class Reference
       {
         if(this->m_mods.empty()) {
           // If there is no modifier, set `*this` to a null reference.
-          return *this = Reference_root::S_constant();
+          return *this = Reference_root::S_null();
         }
         // Drop the last modifier.
         this->m_mods.pop_back();

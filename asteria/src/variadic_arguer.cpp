@@ -43,7 +43,7 @@ void Variadic_arguer::invoke(Reference &result_out, Global_context & /*global*/,
         auto wrap = wrap_index(*qindex, this->m_vargs.size());
         if(wrap.index >= this->m_vargs.size()) {
           ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->m_vargs.size());
-          result_out = Reference_root::S_constant();
+          result_out = Reference_root::S_null();
           return;
         }
         result_out = this->m_vargs.at(static_cast<std::size_t>(wrap.index));

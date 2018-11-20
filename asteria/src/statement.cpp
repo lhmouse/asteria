@@ -44,13 +44,13 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, Reference_root::S_null());
         return;
       }
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped function", alt.head.get_func(), Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_io, "skipped function", alt.head.get_func(), Reference_root::S_null());
         return;
       }
       case index_if:
@@ -92,7 +92,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_var_def: {
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_io, "variable", alt.name, Reference_root::S_null());
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
         Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
@@ -101,7 +101,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_io, "function", alt.head.get_func(), Reference_root::S_null());
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.head);
@@ -166,8 +166,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         const auto &alt = this->m_stor.as<S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
         Analytic_context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, Reference_root::S_constant());
-        do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, Reference_root::S_null());
+        do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, Reference_root::S_null());
         // Bind the range initializer and loop body recursively.
         auto init_bnd = alt.init.bind(global, ctx_next);
         auto body_bnd = alt.body.bind(global, ctx_next);
@@ -180,7 +180,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto body_try_bnd = alt.body_try.bind(global, ctx_io);
         // The exception variable shall not outlast the `catch` body.
         Analytic_context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "exception", alt.except_name, Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_next, "exception", alt.except_name, Reference_root::S_null());
         // Bind the `catch` branch recursively.
         auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next, global);
         Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
@@ -405,8 +405,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // The key and mapped variables shall not outlast the loop body.
         Executive_context ctx_for(&ctx_io);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_root::S_constant());
-        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_root::S_constant());
+        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_root::S_null());
+        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_root::S_null());
         // Calculate the range using the initializer.
         Reference mapped;
         alt.init.evaluate(mapped, global, ctx_for);
