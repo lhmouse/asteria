@@ -51,6 +51,10 @@ class Reference
       {
         return this->m_root.index() == Reference_root::index_constant;
       }
+    bool is_temporary() const noexcept
+      {
+        return this->m_root.index() == Reference_root::index_temporary;
+      }
 
     Value read() const
       {
@@ -101,9 +105,6 @@ class Reference
       {
         this->m_root.dispose_variable(global);
       }
-
-    Reference & convert_to_temporary();
-    Reference & convert_to_variable(Global_context &global, bool immutable);
   };
 
 }

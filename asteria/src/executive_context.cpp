@@ -69,14 +69,14 @@ Reference & Executive_context::mutate_named_reference(const rocket::prehashed_st
 
     }
 
-void Executive_context::initialize_for_function(Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Executive_context::initialize_for_function(const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set pre-defined variables.
     do_set_constant(this->m_file, D_string(head.get_file()));
     do_set_constant(this->m_line, D_integer(head.get_line()));
     do_set_constant(this->m_func, D_string(head.get_func()));
     // Set the `this` parameter.
-    this->m_self = std::move(self.convert_to_variable(global, true));
+    this->m_self = std::move(self);
     // Set other parameters.
     for(std::size_t i = 0; i < head.get_param_count(); ++i) {
       const auto &name = head.get_param_name(i);
@@ -88,7 +88,7 @@ void Executive_context::initialize_for_function(Global_context &global, const Fu
       }
       if(i < args.size()) {
         // There is a corresponding argument. Move it.
-        this->m_dict.mut(name) = std::move(args.mut(i).convert_to_variable(global, false));
+        this->m_dict.mut(name) = std::move(args.mut(i));
       } else {
         // There is no corresponding argument. Default to `null`.
         this->m_dict.mut(name) = Reference_root::S_constant();

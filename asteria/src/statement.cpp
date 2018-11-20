@@ -571,9 +571,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_return>();
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
-        // If `by_ref` is `false`, replace it with a temporary value.
-        if(!alt.by_ref) {
-          ref_out.convert_to_temporary();
+        // If the result refers a variable and the statement should pass it by value, replace it with a temporary value.
+        if(!alt.by_ref && !ref_out.is_constant() && !ref_out.is_temporary()) {
+          Reference_root::S_temporary ref_c = { ref_out.read() };
+          ref_out = std::move(ref_c);
         }
         return Block::status_return;
       }

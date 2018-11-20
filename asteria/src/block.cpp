@@ -92,7 +92,7 @@ void Block::execute_as_function(Reference &result_out, Global_context &global, c
   {
     Executive_context ctx_next(nullptr);
     const Variable_disposer disposer(global, ctx_next);
-    ctx_next.initialize_for_function(global, head, zvarg_opt, std::move(self), std::move(args));
+    ctx_next.initialize_for_function(head, zvarg_opt, std::move(self), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(result_out, ctx_next, global);
     switch(status) {

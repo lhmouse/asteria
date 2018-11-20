@@ -13,7 +13,7 @@ int main()
   {
     std::istringstream iss(R"__(
       func fib(n) {
-        return n <= 1 ? 1 : fib(n-1) + fib(n-2);
+        return& n <= 1 ? 1 : fib(n-1) + fib(n-2);
       }
       return fib(30);
     )__");
