@@ -228,13 +228,17 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
             noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
-            // Copy characters into the new block, then add a null character.
-            ROCKET_ASSERT(len_one <= cap);
-            traits_type::copy(ptr->data, src, len_one);
-            auto len = len_one;
-            ROCKET_ASSERT(len_two <= cap - len);
-            traits_type::copy(ptr->data + len, src + off_two, len_two);
-            len += len_two;
+            auto len = size_type(0);
+            if(ROCKET_UNEXPECT(len_one + len_two != 0)) {
+              // Copy characters into the new block.
+              ROCKET_ASSERT(len_one <= cap - len);
+              traits_type::copy(ptr->data + len, src, len_one);
+              len += len_one;
+              ROCKET_ASSERT(len_two <= cap - len);
+              traits_type::copy(ptr->data + len, src + off_two, len_two);
+              len += len_two;
+            }
+            // Add a null character.
             traits_type::assign(ptr->data[len], value_type());
             // Replace the current block.
             this->do_reset(ptr);
