@@ -1198,7 +1198,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         D_object object;
         object.reserve(alt.keys.size());
         for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
-          object.try_emplace(*it, stack_io.top().read());
+          object.mut(*it) = stack_io.top().read();
           stack_io.pop();
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
