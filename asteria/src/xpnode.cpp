@@ -564,6 +564,9 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Look for the reference in the current context.
         auto pair = do_name_lookup(global, ctx, alt.name);
+#ifdef ROCKET_DEBUG
+        ROCKET_ASSERT(!pair.first.get().is_analytic());
+#endif
         // Push the reference found.
         stack_io.push(pair.second);
         return;
