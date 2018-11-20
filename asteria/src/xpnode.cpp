@@ -627,6 +627,9 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         const auto &func = tgt_value.check<D_function>();
         ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func->describe());
         try {
+          // Be safer.
+          stack_io.top() = Reference_root::S_null();
+          // Call the function now.
           func->invoke(stack_io.top(), global, std::move(self), std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
