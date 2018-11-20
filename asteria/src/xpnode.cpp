@@ -196,7 +196,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(global, ctx);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx);
-        Xpnode::S_branch alt_bnd = { alt.assign, std::move(branch_true_bnd), std::move(branch_false_bnd) };
+        Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd), alt.assign };
         return std::move(alt_bnd);
       }
       case index_function_call: {
@@ -233,7 +233,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto &alt = this->m_stor.as<S_coalescence>();
         // Bind the null branch recursively.
         auto branch_null_bnd = alt.branch_null.bind(global, ctx);
-        Xpnode::S_coalescence alt_bnd = { alt.assign, std::move(branch_null_bnd) };
+        Xpnode::S_coalescence alt_bnd = { std::move(branch_null_bnd), alt.assign };
         return std::move(alt_bnd);
       }
       default: {

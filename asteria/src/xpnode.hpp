@@ -75,9 +75,9 @@ class Xpnode
       };
     struct S_branch
       {
-        bool assign;
         Expression branch_true;
         Expression branch_false;
+        bool assign;
       };
     struct S_function_call
       {
@@ -103,8 +103,8 @@ class Xpnode
       };
     struct S_coalescence
       {
-        bool assign;
         Expression branch_null;
+        bool assign;
       };
 
     enum Index : std::uint8_t

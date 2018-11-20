@@ -762,11 +762,11 @@ Parser::~Parser()
         void extract(rocket::cow_vector<Xpnode> &nodes_out) override
           {
             if(this->m_sop == sop_coales) {
-              Xpnode::S_coalescence node_c = { this->m_assign, std::move(this->m_branch_false) };
+              Xpnode::S_coalescence node_c = { std::move(this->m_branch_false), this->m_assign };
               nodes_out.emplace_back(std::move(node_c));
               return;
             }
-            Xpnode::S_branch node_c = { this->m_assign, std::move(this->m_branch_true), std::move(this->m_branch_false) };
+            Xpnode::S_branch node_c = { std::move(this->m_branch_true), std::move(this->m_branch_false), this->m_assign };
             nodes_out.emplace_back(std::move(node_c));
           }
         void append(Infix_element_base &&elem) override
