@@ -1218,7 +1218,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         }
         const auto has_result = alt.branch_null.evaluate_partial(stack_io, global, ctx);
         if(!has_result) {
-          // If the branch is empty, leave the condition on the stack.
+          // If the branch is empty, push a hard `null` on the stack.
+          stack_io.top() = Reference_root::S_null();
           return;
         }
         // The result will have been pushed onto `stack_io`.
