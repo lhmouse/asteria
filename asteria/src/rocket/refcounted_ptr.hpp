@@ -435,7 +435,7 @@ template<typename xelementT, typename yelementT>
 template<typename elementT>
   inline bool operator==(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
   {
-    return !(lhs.get());
+    return +!(lhs.get());
   }
 template<typename elementT>
   inline bool operator!=(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
@@ -446,7 +446,7 @@ template<typename elementT>
 template<typename elementT>
   inline bool operator==(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
   {
-    return !(rhs.get());
+    return +!(rhs.get());
   }
 template<typename elementT>
   inline bool operator!=(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept

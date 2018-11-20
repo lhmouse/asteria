@@ -332,7 +332,7 @@ template<typename xelementT, typename xdeleterT, typename yelementT, typename yd
 template<typename elementT, typename deleterT>
   inline bool operator==(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
   {
-    return !(lhs.get());
+    return +!(lhs.get());
   }
 template<typename elementT, typename deleterT>
   inline bool operator!=(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
@@ -343,7 +343,7 @@ template<typename elementT, typename deleterT>
 template<typename elementT, typename deleterT>
   inline bool operator==(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
   {
-    return !(rhs.get());
+    return +!(rhs.get());
   }
 template<typename elementT, typename deleterT>
   inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
