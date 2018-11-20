@@ -491,8 +491,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             [&](const Source_location &loc)
               {
                 D_object elem;
-                elem.insert_or_assign(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
-                elem.insert_or_assign(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
+                elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
+                elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
                 backtrace.emplace_back(std::move(elem));
               };
           // The exception variable shall not outlast the `catch` body.
