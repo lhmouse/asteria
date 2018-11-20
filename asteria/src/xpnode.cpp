@@ -585,7 +585,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_branch: {
         const auto &alt = this->m_stor.as<S_branch>();
         // Pick a branch basing on the condition.
-        const auto branch = stack_io.top().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch = stack_io.top().read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto has_result = branch.get().evaluate_partial(stack_io, global, ctx);
         if(!has_result) {
           // If the branch is empty, leave the condition on the stack.
@@ -752,7 +752,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           case xop_prefix_notl: {
             // Perform logical NOT operation on the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
-            Reference_root::S_temporary ref_c = { do_logical_not(stack_io.top().test()) };
+            Reference_root::S_temporary ref_c = { stack_io.top().read() };
+            ref_c.value = do_logical_not(ref_c.value.test());
             do_set_temporary(std::move(ref_c));
             break;
           }

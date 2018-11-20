@@ -16,22 +16,6 @@ void Reference::do_throw_unset_no_modifier() const
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
   }
 
-bool Reference::do_test_with_modifiers() const noexcept
-  {
-    // Dereference the root.
-    auto cur = std::ref(this->m_root.dereference_const());
-    // Apply modifiers.
-    const auto end = this->m_mods.end();
-    for(auto it = this->m_mods.begin(); it != end; ++it) {
-      const auto qnext = it->apply_const_opt(cur);
-      if(!qnext) {
-        return false;
-      }
-      cur = std::ref(*qnext);
-    }
-    return cur.get().test();
-  }
-
 Value Reference::do_read_with_modifiers() const
   {
     // Dereference the root.
