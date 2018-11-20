@@ -42,7 +42,7 @@ class Reference
   private:
     [[noreturn]] void do_throw_unset_no_modifier() const;
 
-    Value do_read_with_modifiers() const;
+    const Value & do_read_with_modifiers() const;
     Value & do_mutate_with_modifiers() const;
     Value do_unset_with_modifiers() const;
 
@@ -56,7 +56,7 @@ class Reference
         return this->m_root.index() == Reference_root::index_temporary;
       }
 
-    Value read() const
+    const Value & read() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           return this->m_root.dereference_const();
