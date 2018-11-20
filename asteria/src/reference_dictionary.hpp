@@ -19,9 +19,9 @@ class Reference_dictionary
         rocket::static_vector<Reference, 1> refv;
       };
 
-      Bucket *m_data;
-      std::size_t m_nbkt;
-      std::size_t m_size;
+    Bucket *m_data;
+    std::size_t m_nbkt;
+    std::size_t m_size;
 
   public:
     Reference_dictionary() noexcept
