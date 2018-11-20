@@ -384,7 +384,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             (*smf)(ptr, false);
           }
 
-        static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref)
+        static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref) noexcept
           {
             if(to_add_ref) {
               // Increment the reference count.
@@ -529,9 +529,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
                 throw;
               }
+              // Dispose the old block.
+              (*(this->m_smf))(ptr_old, false);
             }
             // Replace the current block.
-            this->do_reset(ptr, &do_manipulate_storage);
+            this->m_ptr = ptr;
+            this->m_smf = &storage_handle::do_manipulate_storage;
             return ptr->data;
           }
         void deallocate() noexcept
