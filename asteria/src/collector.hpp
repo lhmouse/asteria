@@ -47,8 +47,6 @@ class Collector
 
     bool track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
-
-    bool auto_collect();
     void collect();
   };
 

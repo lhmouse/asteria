@@ -21,8 +21,9 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     if(!this->m_tracked.insert(var)) {
       return false;
     }
-    this->m_counter += 1;
-    this->auto_collect();
+    if(this->m_counter++ >= this->m_threshold) {
+      this->collect();
+    }
     return true;
   }
 
@@ -31,16 +32,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     if(!this->m_tracked.erase(var)) {
       return false;
     }
-    this->m_counter -= 1;
-    return true;
-  }
-
-bool Collector::auto_collect()
-  {
-    if(this->m_counter < this->m_threshold) {
-      return false;
-    }
-    this->collect();
+    this->m_counter--;
     return true;
   }
 
@@ -195,8 +187,8 @@ void Collector::collect()
     //   Wipe out variables whose `gcref` counters have excceeded their
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
-    bool collect_next = false;
     const auto tied = this->m_tied_opt;
+    bool collect_tied = false;
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
@@ -208,16 +200,18 @@ void Collector::collect()
           }
           if(tied) {
             ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
+            // Strong exception safety is paramount here.
             tied->m_tracked.insert(root);
-            ++(tied->m_counter);
-            collect_next |= tied->m_counter > tied->m_threshold;
             this->m_tracked.erase(root);
+            if(tied->m_counter++ >= tied->m_threshold) {
+              collect_tied = true;
+            }
             return;
           }
         }
       );
-    if(collect_next) {
-      tied->auto_collect();
+    if(collect_tied) {
+      tied->collect();
     }
     ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
     this->m_counter = 0;
