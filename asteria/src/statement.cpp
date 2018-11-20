@@ -263,7 +263,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_if>();
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch = ref_out.test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = branch.get().execute(ref_out, global, ctx_io);
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
@@ -342,7 +342,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // Check the loop condition.
           // This differs from a `while` loop where the context for the loop body is destroyed before this check.
           alt.cond.evaluate(ref_out, global, ctx_next);
-          if(!ref_out.read().test()) {
+          if(!ref_out.test()) {
             break;
           }
         }
@@ -353,7 +353,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         for(;;) {
           // Check the loop condition.
           alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!ref_out.read().test()) {
+          if(!ref_out.test()) {
             break;
           }
           // Execute the loop body.
@@ -381,7 +381,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
           // Check the loop condition.
           if(!alt.cond.empty()) {
             alt.cond.evaluate(ref_out, global, ctx_next);
-            if(!ref_out.read().test()) {
+            if(!ref_out.test()) {
               break;
             }
           }
