@@ -120,24 +120,31 @@ Xpnode::~Xpnode()
 
     namespace {
 
-    std::pair<std::reference_wrapper<const Abstract_context>,
-      std::reference_wrapper<const Reference>> do_name_lookup(const Global_context &global, const Abstract_context &ctx, const rocket::prehashed_string &name)
+    template<typename ContextT>
+      std::pair<std::reference_wrapper<const Abstract_context>,
+        std::reference_wrapper<const Reference>> do_name_lookup(const Global_context &global, const ContextT &ctx, const rocket::prehashed_string &name)
       {
-        auto spare = &global;
-        auto qctx = &ctx;
-        do {
-          const auto qref = qctx->get_named_reference_opt(name);
-          if(qref) {
+        auto qctx = static_cast<const Abstract_context *>(&ctx);
+        // De-virtualize the first call by hand.
+        auto qref = ctx.ContextT::get_named_reference_opt(name);
+        for(;;) {
+          if(ROCKET_EXPECT(qref)) {
             return std::make_pair(std::ref(*qctx), std::ref(*qref));
           }
+          // Search for the name in deeper contexts.
           qctx = qctx->get_parent_opt();
           if(!qctx) {
-            qctx = rocket::exchange(spare, nullptr);
-            if(!qctx) {
-              ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
-            }
+            break;
           }
-        } while(true);
+          qref = qctx->get_named_reference_opt(name);
+        }
+        // Search for the name in the global context.
+        qref = global.Global_context::get_named_reference_opt(name);
+        if(ROCKET_EXPECT(qref)) {
+          return std::make_pair(std::ref(*qctx), std::ref(*qref));
+        }
+        // Not found...
+        ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
       }
 
     }
@@ -557,9 +564,6 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Look for the reference in the current context.
         auto pair = do_name_lookup(global, ctx, alt.name);
-        if(pair.first.get().is_analytic()) {
-          ASTERIA_THROW_RUNTIME_ERROR("Expressions cannot be evaluated in analytic contexts.");
-        }
         // Push the reference found.
         stack_io.push(pair.second);
         return;
