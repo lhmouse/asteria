@@ -24,7 +24,7 @@ install:
   - autoreconf -ifv
   - test "${CXX#*clang}" == "${CXX}" || _options+=" --disable-werror"
   - ./configure
-  - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-silent-rules ${_options}"
+  - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-silent-rules ${_options}" distcheck
 
 script:
   - exit 0
