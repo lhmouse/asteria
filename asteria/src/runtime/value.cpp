@@ -47,7 +47,7 @@ const Value & Value::get_null() noexcept
   {
     alignas(Value) static constexpr char s_zeroes[sizeof(Value)] = { };
     // Don't play with this at home.
-    return reinterpret_cast<const Value &>(s_zeroes);
+    return *static_cast<const Value *>(static_cast<const void *>(s_zeroes));
   }
 
 Value::~Value()
