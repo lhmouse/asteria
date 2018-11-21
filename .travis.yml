@@ -23,8 +23,8 @@ install:
   - mkdir -p m4
   - autoreconf -ifv
   - test "${CXX#*clang}" == "${CXX}" || _options+=" --disable-werror"
-  - ./configure --disable-silent-rules ${_options}
-  - make -j$(nproc) distcheck
+  - ./configure
+  - make -j$(nproc) DISTCHECK_CONFIGUREFLAGS="--disable-silent-rules ${_options}"
 
 script:
   - exit 0
