@@ -2,11 +2,11 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/expression.hpp"
-#include "../asteria/src/xpnode.hpp"
-#include "../asteria/src/statement.hpp"
-#include "../asteria/src/global_context.hpp"
-#include "../asteria/src/executive_context.hpp"
+#include "../asteria/src/runtime/expression.hpp"
+#include "../asteria/src/runtime/xpnode.hpp"
+#include "../asteria/src/runtime/statement.hpp"
+#include "../asteria/src/runtime/global_context.hpp"
+#include "../asteria/src/runtime/executive_context.hpp"
 
 using namespace Asteria;
 

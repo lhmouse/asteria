@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/exception.hpp"
+#include "../asteria/src/runtime/exception.hpp"
 
 using namespace Asteria;
 

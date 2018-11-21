@@ -2,8 +2,8 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/executive_context.hpp"
-#include "../asteria/src/reference.hpp"
+#include "../asteria/src/runtime/executive_context.hpp"
+#include "../asteria/src/runtime/reference.hpp"
 
 using namespace Asteria;
 

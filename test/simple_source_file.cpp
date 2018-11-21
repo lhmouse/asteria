@@ -2,8 +2,8 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/simple_source_file.hpp"
-#include "../asteria/src/global_context.hpp"
+#include "../asteria/src/compiler/simple_source_file.hpp"
+#include "../asteria/src/runtime/global_context.hpp"
 #include <sstream>
 
 using namespace Asteria;

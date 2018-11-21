@@ -2,13 +2,13 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/parser.hpp"
-#include "../asteria/src/token_stream.hpp"
-#include "../asteria/src/global_context.hpp"
-#include "../asteria/src/executive_context.hpp"
-#include "../asteria/src/reference.hpp"
-#include "../asteria/src/exception.hpp"
-#include "../asteria/src/function_header.hpp"
+#include "../asteria/src/compiler/parser.hpp"
+#include "../asteria/src/compiler/token_stream.hpp"
+#include "../asteria/src/runtime/global_context.hpp"
+#include "../asteria/src/runtime/executive_context.hpp"
+#include "../asteria/src/runtime/reference.hpp"
+#include "../asteria/src/runtime/exception.hpp"
+#include "../asteria/src/runtime/function_header.hpp"
 #include <sstream>
 
 using namespace Asteria;

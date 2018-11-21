@@ -64,75 +64,82 @@ lib_librocket_la_SOURCES =  \
   asteria/src/rocket/cow_string.cpp
 
 pkginclude_HEADERS =  \
+  asteria/src/precompiled.hpp  \
   asteria/src/fwd.hpp  \
-  asteria/src/utilities.hpp  \
-  asteria/src/abstract_opaque.hpp  \
-  asteria/src/shared_opaque_wrapper.hpp  \
-  asteria/src/abstract_function.hpp  \
-  asteria/src/shared_function_wrapper.hpp  \
-  asteria/src/value.hpp  \
-  asteria/src/reference_root.hpp  \
-  asteria/src/reference_modifier.hpp  \
-  asteria/src/reference.hpp  \
-  asteria/src/variable.hpp  \
-  asteria/src/variable_hashset.hpp  \
-  asteria/src/abstract_variable_callback.hpp  \
-  asteria/src/collector.hpp  \
-  asteria/src/exception.hpp  \
-  asteria/src/source_location.hpp  \
-  asteria/src/function_header.hpp  \
-  asteria/src/abstract_context.hpp  \
-  asteria/src/analytic_context.hpp  \
-  asteria/src/executive_context.hpp  \
-  asteria/src/global_context.hpp  \
-  asteria/src/global_collector.hpp  \
-  asteria/src/variadic_arguer.hpp  \
-  asteria/src/reference_stack.hpp  \
-  asteria/src/reference_dictionary.hpp  \
-  asteria/src/xpnode.hpp  \
-  asteria/src/expression.hpp  \
-  asteria/src/statement.hpp  \
-  asteria/src/block.hpp  \
-  asteria/src/instantiated_function.hpp  \
-  asteria/src/parser_error.hpp  \
-  asteria/src/token.hpp  \
-  asteria/src/token_stream.hpp  \
-  asteria/src/parser.hpp  \
-  asteria/src/simple_source_file.hpp
+  asteria/src/utilities.hpp
+
+pkginclude_runtimedir = ${pkgincludedir}/runtime
+pkginclude_runtime_HEADERS = \
+  asteria/src/runtime/abstract_opaque.hpp  \
+  asteria/src/runtime/shared_opaque_wrapper.hpp  \
+  asteria/src/runtime/abstract_function.hpp  \
+  asteria/src/runtime/shared_function_wrapper.hpp  \
+  asteria/src/runtime/value.hpp  \
+  asteria/src/runtime/reference_root.hpp  \
+  asteria/src/runtime/reference_modifier.hpp  \
+  asteria/src/runtime/reference.hpp  \
+  asteria/src/runtime/variable.hpp  \
+  asteria/src/runtime/variable_hashset.hpp  \
+  asteria/src/runtime/abstract_variable_callback.hpp  \
+  asteria/src/runtime/collector.hpp  \
+  asteria/src/runtime/exception.hpp  \
+  asteria/src/runtime/source_location.hpp  \
+  asteria/src/runtime/function_header.hpp  \
+  asteria/src/runtime/abstract_context.hpp  \
+  asteria/src/runtime/analytic_context.hpp  \
+  asteria/src/runtime/executive_context.hpp  \
+  asteria/src/runtime/global_context.hpp  \
+  asteria/src/runtime/global_collector.hpp  \
+  asteria/src/runtime/variadic_arguer.hpp  \
+  asteria/src/runtime/reference_stack.hpp  \
+  asteria/src/runtime/reference_dictionary.hpp  \
+  asteria/src/runtime/xpnode.hpp  \
+  asteria/src/runtime/expression.hpp  \
+  asteria/src/runtime/statement.hpp  \
+  asteria/src/runtime/block.hpp  \
+  asteria/src/runtime/instantiated_function.hpp
+
+pkginclude_compilerdir = ${pkgincludedir}/compiler
+pkginclude_compiler_HEADERS = \
+  asteria/src/compiler/parser_error.hpp  \
+  asteria/src/compiler/token.hpp  \
+  asteria/src/compiler/token_stream.hpp  \
+  asteria/src/compiler/parser.hpp  \
+  asteria/src/compiler/simple_source_file.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
-  asteria/src/abstract_opaque.cpp  \
-  asteria/src/abstract_function.cpp  \
-  asteria/src/value.cpp  \
-  asteria/src/reference_root.cpp  \
-  asteria/src/reference_modifier.cpp  \
-  asteria/src/reference.cpp  \
-  asteria/src/variable.cpp  \
-  asteria/src/variable_hashset.cpp  \
-  asteria/src/abstract_variable_callback.cpp  \
-  asteria/src/collector.cpp  \
-  asteria/src/exception.cpp  \
-  asteria/src/source_location.cpp  \
-  asteria/src/function_header.cpp  \
-  asteria/src/abstract_context.cpp  \
-  asteria/src/analytic_context.cpp  \
-  asteria/src/executive_context.cpp  \
-  asteria/src/global_context.cpp  \
-  asteria/src/global_collector.cpp  \
-  asteria/src/variadic_arguer.cpp  \
-  asteria/src/reference_stack.cpp  \
-  asteria/src/reference_dictionary.cpp  \
-  asteria/src/xpnode.cpp  \
-  asteria/src/expression.cpp  \
-  asteria/src/statement.cpp  \
-  asteria/src/block.cpp  \
-  asteria/src/instantiated_function.cpp  \
-  asteria/src/parser_error.cpp  \
-  asteria/src/token.cpp  \
-  asteria/src/token_stream.cpp  \
-  asteria/src/parser.cpp  \
-  asteria/src/simple_source_file.cpp
+  asteria/src/runtime/abstract_opaque.cpp  \
+  asteria/src/runtime/abstract_function.cpp  \
+  asteria/src/runtime/value.cpp  \
+  asteria/src/runtime/reference_root.cpp  \
+  asteria/src/runtime/reference_modifier.cpp  \
+  asteria/src/runtime/reference.cpp  \
+  asteria/src/runtime/variable.cpp  \
+  asteria/src/runtime/variable_hashset.cpp  \
+  asteria/src/runtime/abstract_variable_callback.cpp  \
+  asteria/src/runtime/collector.cpp  \
+  asteria/src/runtime/exception.cpp  \
+  asteria/src/runtime/source_location.cpp  \
+  asteria/src/runtime/function_header.cpp  \
+  asteria/src/runtime/abstract_context.cpp  \
+  asteria/src/runtime/analytic_context.cpp  \
+  asteria/src/runtime/executive_context.cpp  \
+  asteria/src/runtime/global_context.cpp  \
+  asteria/src/runtime/global_collector.cpp  \
+  asteria/src/runtime/variadic_arguer.cpp  \
+  asteria/src/runtime/reference_stack.cpp  \
+  asteria/src/runtime/reference_dictionary.cpp  \
+  asteria/src/runtime/xpnode.cpp  \
+  asteria/src/runtime/expression.cpp  \
+  asteria/src/runtime/statement.cpp  \
+  asteria/src/runtime/block.cpp  \
+  asteria/src/runtime/instantiated_function.cpp  \
+  asteria/src/compiler/parser_error.cpp  \
+  asteria/src/compiler/token.cpp  \
+  asteria/src/compiler/token_stream.cpp  \
+  asteria/src/compiler/parser.cpp  \
+  asteria/src/compiler/simple_source_file.cpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
