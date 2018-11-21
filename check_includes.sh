@@ -1,8 +1,10 @@
 #!/bin/bash -e
 
+test -n "${CXX}" || CXX=g++
+
 function check_one()
   {
-    _cmd="gcc -std=c++11 -x c++ -c -o /dev/null"
+    _cmd="${CXX} -std=c++11 -x c++ -c -o /dev/null"
     echo "Checking \`#include\` directives:  ${_cmd}  \"$1\""
     ${_cmd}  "$1"
   }
