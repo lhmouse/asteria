@@ -498,7 +498,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           return res;
         }
         const auto bytes_rem = lhs.size() - static_cast<std::size_t>(count);
-        lhs.copy(res.mut_data(), bytes_rem, count);
+        lhs.copy(res.mut_data(), bytes_rem, static_cast<std::size_t>(count));
         return res;
       }
 
@@ -514,7 +514,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           return res;
         }
         const auto bytes_rem = lhs.size() - static_cast<std::size_t>(count);
-        lhs.copy(res.mut_data() + count, bytes_rem);
+        lhs.copy(res.mut_data() + static_cast<std::size_t>(count), bytes_rem);
         return res;
       }
 
