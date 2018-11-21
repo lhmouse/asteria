@@ -11,12 +11,11 @@ build:
   pull: true
   shell: mingw$${arch}
   commands:
+    - ./check_includes.sh
     - mkdir -p m4
     - autoreconf -ifv
     - ./configure --disable-werror --disable-silent-rules $${_options}
-    - make -j$(nproc)
-    - ./check_includes.sh
-    - make -j$(nproc) check
+    - make -j$(nproc) distcheck
 
 notify:
   irc:

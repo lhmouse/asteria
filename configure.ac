@@ -1,5 +1,5 @@
 AC_INIT([asteria], [0.1], [lh_mouse@126.com], [asteria], [https://github.com/lhmouse/asteria])
-AC_CONFIG_SRCDIR([src])
+AC_CONFIG_SRCDIR([asteria/src])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 

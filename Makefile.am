@@ -22,6 +22,9 @@ BUILT_SOURCES =  \
 CLEANFILES =  \
   asteria/src/precompiled.hpp.gch
 
+noinst_HEADERS =  \
+  test/_test_init.hpp
+
 noinst_LTLIBRARIES =  \
   lib/librocket.la
 

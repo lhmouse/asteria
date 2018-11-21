@@ -19,15 +19,15 @@ compiler:
   - clang
 
 install:
+  - ./check_includes.sh
   - mkdir -p m4
   - autoreconf -ifv
   - test "${CXX#*clang}" == "${CXX}" || _options+=" --disable-werror"
   - ./configure --disable-silent-rules ${_options}
-  - make -j$(nproc)
+  - make -j$(nproc) distcheck
 
 script:
-  - ./check_includes.sh
-  - make -j$(nproc) check
+  - exit 0
 
 notifications:
   irc:
