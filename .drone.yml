@@ -15,7 +15,7 @@ build:
     - mkdir -p m4
     - autoreconf -ifv
     - ./configure
-    - make -j$(nproc) DISTCHECK_CONFIGUREFLAGS="--disable-werror --disable-silent-rules $${_options}" distcheck
+    - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-werror --disable-silent-rules $${_options}" distcheck
 
 notify:
   irc:
