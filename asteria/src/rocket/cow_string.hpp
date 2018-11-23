@@ -1806,12 +1806,13 @@ template<typename charT, typename traitsT, typename allocatorT>
     result_type operator()(const argument_type &str) const noexcept
       {
         // This implements the 32-bit FNV-1a hash algorithm.
-        auto reg = ::std::uint_fast32_t(2166136261);
-        for(typename basic_cow_string::size_type i = 0; i < str.size(); ++i) {
-          reg ^= static_cast<::std::uint_fast32_t>(traits_type::to_int_type(str[i]));
-          reg *= 16777619;
+        char32_t reg = 0x811c9dc5;
+        for(auto rptr = str.data(), eptr = rptr + str.size(); rptr != eptr; ++rptr) {
+          // reg = (reg ^ CHAR) * 0x1000193;
+          const auto x = reg ^ static_cast<char32_t>(traits_type::to_int_type(*rptr));
+          reg = (x << 24) + (x << 8) + (x * 0x93);
         }
-        return static_cast<result_type>(reg);
+        return reg;
       }
   };
 
