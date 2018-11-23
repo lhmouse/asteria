@@ -392,7 +392,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           return 0;
         }
         if(rhs >= 64) {
-          return 0;
+          return static_cast<std::int64_t>(-(res >> 63));
         }
         const auto bits_rem = static_cast<unsigned char>(63 - rhs);
         const auto mask_in = -(res >> 63) << bits_rem;
