@@ -71,7 +71,7 @@ lib_librocket_la_SOURCES =  \
   asteria/src/rocket/cow_string.cpp
 
 lib_librocket_la_CXXFLAGS =  \
-  ${AM_CXXFLAGS} ${CXXFLAGS} -include __pch.hpp
+  ${AM_CXXFLAGS} -include __pch.hpp
 
 pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
@@ -152,7 +152,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/simple_source_file.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
-  ${AM_CXXFLAGS} ${CXXFLAGS} -include __pch.hpp
+  ${AM_CXXFLAGS} -include __pch.hpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
