@@ -144,7 +144,7 @@ template<typename ...unusedT>
   };
 
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type * = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<sizeof(__VA_ARGS__) | 1>::type * = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type * = nullptr
 
 template<typename ...typesT>
   struct conjunction : true_type
