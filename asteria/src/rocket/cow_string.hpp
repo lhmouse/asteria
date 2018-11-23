@@ -755,6 +755,8 @@ template<typename charT, typename traitsT, typename allocatorT>
         if(!this->unique()) {
           this->m_sth.deallocate();
           this->m_ptr = shallow().data();
+          this->m_len = 0;
+          return;
         }
         this->do_set_length(0);
       }
