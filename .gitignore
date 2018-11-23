@@ -9,6 +9,7 @@
 *.gch
 *.exe
 *.dll
+__pch.*
 
 .dirstamp
 .libs
