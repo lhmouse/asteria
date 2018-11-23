@@ -19,7 +19,6 @@
 namespace rocket {
 
 using ::std::default_delete;
-using ::std::enable_if;
 using ::std::is_nothrow_constructible;
 using ::std::is_convertible;
 using ::std::is_array;
@@ -33,11 +32,11 @@ template<typename elementT, typename deleterT = default_delete<const elementT>>
     namespace details_unique_ptr {
 
     template<typename elementT, typename deleterT, typename = void>
-      struct pointer_of : enable_if<true, elementT *>
+      struct pointer_of : type_identity<elementT *>
       {
       };
     template<typename elementT, typename deleterT>
-      struct pointer_of<elementT, deleterT, typename make_void<typename deleterT::pointer>::type> : enable_if<true, typename deleterT::pointer>
+      struct pointer_of<elementT, deleterT, typename make_void<typename deleterT::pointer>::type> : type_identity<typename deleterT::pointer>
       {
       };
 
@@ -219,10 +218,9 @@ template<typename elementT, typename deleterT>
       {
         this->reset(other.m_sth.release());
       }
-    template<typename yelementT, typename ydeleterT,
-      typename enable_if<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                         is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value>::type * = nullptr>
-        unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
+                                                                      is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value)>
+      unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       : unique_ptr(::std::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
@@ -234,10 +232,9 @@ template<typename elementT, typename deleterT>
         this->reset(other.m_sth.release());
         return *this;
       }
-    template<typename yelementT, typename ydeleterT,
-      typename enable_if<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
-                         is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value>::type * = nullptr>
-        unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>::value &&
+                                                                      is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>::value)>
+      unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       {
         allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());

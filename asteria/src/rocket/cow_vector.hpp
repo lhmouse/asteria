@@ -38,7 +38,6 @@ using ::std::is_same;
 using ::std::decay;
 using ::std::is_array;
 using ::std::is_trivial;
-using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::is_copy_constructible;
 using ::std::is_nothrow_constructible;
@@ -479,9 +478,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           : vector_iterator(nullptr, nullptr)
           {
           }
-        template<typename yvalueT,
-          typename enable_if<is_convertible<yvalueT *, valueT *>::value>::type * = nullptr>
-            constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT *, valueT *>::value)>
+          constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
           : vector_iterator(other.m_ref, other.m_ptr)
           {
           }

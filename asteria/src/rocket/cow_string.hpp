@@ -46,7 +46,6 @@ using ::std::is_same;
 using ::std::decay;
 using ::std::is_array;
 using ::std::is_trivial;
-using ::std::enable_if;
 using ::std::is_convertible;
 using ::std::is_nothrow_constructible;
 using ::std::conditional;
@@ -323,9 +322,8 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           : string_iterator(nullptr, nullptr)
           {
           }
-        template<typename ycharT,
-          typename enable_if<is_convertible<ycharT *, charT *>::value>::type * = nullptr>
-            constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
+        template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT *, charT *>::value)>
+          constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
           : string_iterator(other.m_ref, other.m_ptr)
           {
           }
@@ -1125,10 +1123,8 @@ template<typename charT, typename traitsT, typename allocatorT>
         ROCKET_ASSERT(first <= last);
         return this->append(first, static_cast<size_type>(last - first));
       }
-    template<typename inputT,
-      typename enable_if<!(is_convertible<inputT, const value_type *>::value),
-      typename iterator_traits<inputT>::iterator_category>::type * = nullptr>
-        basic_cow_string & append(inputT first, inputT last)
+    template<typename inputT, ROCKET_DISABLE_IF(is_convertible<inputT, const value_type *>::value), ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+      basic_cow_string & append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;

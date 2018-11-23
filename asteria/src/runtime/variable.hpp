@@ -22,9 +22,8 @@ class Variable : public rocket::refcounted_base<Variable>
       : m_value(), m_immutable(false)
       {
       }
-    template<typename XvalueT,
-      typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-        Variable(XvalueT &&value, bool immutable)
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
+      Variable(XvalueT &&value, bool immutable)
       : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
       {
       }
@@ -49,18 +48,16 @@ class Variable : public rocket::refcounted_base<Variable>
       {
         return this->m_immutable;
       }
-    template<typename XvalueT,
-      typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-        void set_value(XvalueT &&value)
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_assignable<Value, XvalueT &&>::value)>
+      void set_value(XvalueT &&value)
       {
         if(this->m_immutable) {
           this->do_throw_immutable();
         }
         this->m_value = std::forward<XvalueT>(value);
       }
-    template<typename XvalueT,
-      typename std::enable_if<std::is_constructible<Value, XvalueT &&>::value>::type * = nullptr>
-        void reset(XvalueT &&value, bool immutable)
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_assignable<Value, XvalueT &&>::value)>
+      void reset(XvalueT &&value, bool immutable)
       {
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;

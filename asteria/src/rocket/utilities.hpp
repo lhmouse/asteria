@@ -4,7 +4,7 @@
 #ifndef ROCKET_UTILITIES_HPP_
 #define ROCKET_UTILITIES_HPP_
 
-#include <type_traits> // std::common_type<>
+#include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>
 #include <utility> // std::swap(), std::move(), std::forward()
 #include <new> // placement new
@@ -52,6 +52,12 @@ using ::std::ptrdiff_t;
     c_(c_ &&)                   = delete;  \
     c_ & operator=(c_ &&)       = delete;  \
     __VA_ARGS__ ~c_()
+
+template<typename typeT>
+  struct type_identity
+  {
+    using type = typeT;
+  };
 
 template<typename typeT, typename withT>
   inline typeT exchange(typeT &ref, withT &&with)
@@ -128,11 +134,17 @@ template<typename iteratorT, typename functionT, typename ...paramsT>
     } while(++it != last);
   }
 
+#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
+#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type * = nullptr
+
 template<typename ...unusedT>
   struct make_void
   {
     using type = void;
   };
+
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type * = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<sizeof(__VA_ARGS__) | 1>::type * = nullptr
 
 template<typename ...typesT>
   struct conjunction : true_type
