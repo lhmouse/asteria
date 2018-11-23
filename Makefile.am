@@ -7,20 +7,24 @@ AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion  \
 if enable_werror
 AM_CPPFLAGS += -Werror
 endif
-AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
+AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor  ## -include __pch.hpp
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
-%.hpp.gch: %.hpp
-	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
+__pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
+	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
+__pch.hpp.gch: __pch.hpp
+	${AM_V_CXX}$$(echo "" ${LTCXXCOMPILE} | sed "s/-include __pch\\.hpp//") -x c++-header -Wno-error $< -o $@.o
 	${AM_V_GEN}${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
 	${AM_V_GEN}test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 BUILT_SOURCES =  \
-  asteria/src/precompiled.hpp.gch
+  __pch.hpp  \
+  __pch.hpp.gch
 
 CLEANFILES =  \
-  asteria/src/precompiled.hpp.gch
+  __pch.hpp  \
+  __pch.hpp.gch
 
 noinst_HEADERS =  \
   test/_test_init.hpp
@@ -143,6 +147,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/token_stream.cpp  \
   asteria/src/compiler/parser.cpp  \
   asteria/src/compiler/simple_source_file.cpp
+
+lib_libasteria_la_CXXFLAGS =  \
+  ${AM_CXXFLAGS} ${CXXFLAGS} -include __pch.hpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
