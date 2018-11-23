@@ -84,8 +84,8 @@ template<typename typeT, typename withT>
 
     }
 
-  using details_utilities::is_nothrow_swappable;
-  using details_utilities::adl_swap;
+using details_utilities::is_nothrow_swappable;
+using details_utilities::adl_swap;
 
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
