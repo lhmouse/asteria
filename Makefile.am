@@ -70,6 +70,9 @@ lib_librocket_la_SOURCES =  \
   asteria/src/rocket/insertable_stream.cpp  \
   asteria/src/rocket/cow_string.cpp
 
+lib_librocket_la_CXXFLAGS =  \
+  ${AM_CXXFLAGS} ${CXXFLAGS} -include __pch.hpp
+
 pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
   asteria/src/fwd.hpp  \
