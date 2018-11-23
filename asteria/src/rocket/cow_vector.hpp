@@ -776,10 +776,14 @@ template<typename valueT, typename allocatorT>
         ROCKET_ASSERT(this->m_sth.unique());
         return ptr;
       }
-    // Deallocate any dynamic storage.
-    void deallocate() noexcept
+    // Clear contents. Deallocate the storage if it is shared at all.
+    void do_clear() noexcept
       {
-        this->m_sth.deallocate();
+        if(!this->unique()) {
+          this->m_sth.deallocate();
+          return;
+        }
+        this->m_sth.pop_back_n_unchecked(this->m_sth.size());
       }
 
     // Reallocate more storage as needed, without shrinking.
@@ -941,11 +945,10 @@ template<typename valueT, typename allocatorT>
       }
     void clear() noexcept
       {
-        if(!this->unique()) {
-          this->deallocate();
+        if(this->empty()) {
           return;
         }
-        this->m_sth.pop_back_n_unchecked(this->size());
+        this->do_clear();
       }
     // N.B. This is a non-standard extension.
     bool unique() const noexcept

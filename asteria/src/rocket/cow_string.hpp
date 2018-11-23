@@ -749,12 +749,14 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
         this->m_len = len;
       }
-    // Deallocate any dynamic storage.
-    void deallocate() noexcept
+    // Clear contents. Deallocate the storage if it is shared at all.
+    void do_clear() noexcept
       {
-        this->m_sth.deallocate();
-        this->m_ptr = shallow().data();
-        this->m_len = 0;
+        if(!this->unique()) {
+          this->m_sth.deallocate();
+          this->m_ptr = shallow().data();
+        }
+        this->do_set_length(0);
       }
 
     // Reallocate more storage as needed, without shrinking.
@@ -980,11 +982,10 @@ template<typename charT, typename traitsT, typename allocatorT>
       }
     void clear() noexcept
       {
-        if(!this->unique()) {
-          this->deallocate();
+        if(this->empty()) {
           return;
         }
-        this->do_set_length(0);
+        this->do_clear();
       }
     // N.B. This is a non-standard extension.
     bool unique() const noexcept
