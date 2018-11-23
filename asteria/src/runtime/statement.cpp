@@ -20,8 +20,8 @@ Statement::~Statement()
 
     namespace {
 
-    template<typename XrefT>
-      void do_safe_set_named_reference(Abstract_context &ctx_io, Global_context *global_opt, const char *desc, const rocket::prehashed_string &name, XrefT &&xref)
+    template<typename XnameT, typename XrefT>
+      void do_safe_set_named_reference(Abstract_context &ctx_io, Global_context *global_opt, const char *desc, const XnameT &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
