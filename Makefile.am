@@ -7,7 +7,7 @@ AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion  \
 if enable_werror
 AM_CPPFLAGS += -Werror
 endif
-AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor  ## -include __pch.hpp
+AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
