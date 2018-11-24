@@ -597,7 +597,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         if(alt.assign) {
           auto value = stack_io.top().read();
           stack_io.pop();
-          stack_io.top().write(std::move(value));
+          stack_io.top().mutate() = std::move(value);
         } else {
           auto result = std::move(stack_io.top());
           stack_io.pop();
@@ -674,7 +674,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           [&](Reference_root::S_temporary &&ref_c)
             {
               if(alt.assign) {
-                stack_io.top().write(std::move(ref_c.value));
+                stack_io.top().mutate() = std::move(ref_c.value);
               } else {
                 stack_io.top() = std::move(ref_c);
               }
@@ -685,12 +685,12 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // `assign` is ignored.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if(ref_c.value.type() == Value::type_integer) {
-              stack_io.top().write(do_add(ref_c.value.check<D_integer>(), D_integer(1)));
+              stack_io.top().mutate() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
             if(ref_c.value.type() == Value::type_real) {
-              stack_io.top().write(do_add(ref_c.value.check<D_real>(), D_real(1)));
+              stack_io.top().mutate() = do_add(ref_c.value.check<D_real>(), D_real(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
@@ -701,12 +701,12 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // `assign` is ignored.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if(ref_c.value.type() == Value::type_integer) {
-              stack_io.top().write(do_subtract(ref_c.value.check<D_integer>(), D_integer(1)));
+              stack_io.top().mutate() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
             if(ref_c.value.type() == Value::type_real) {
-              stack_io.top().write(do_subtract(ref_c.value.check<D_real>(), D_real(1)));
+              stack_io.top().mutate() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
@@ -762,11 +762,11 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // `assign` is ignored.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if(ref_c.value.type() == Value::type_integer) {
-              stack_io.top().write(do_add(ref_c.value.check<D_integer>(), D_integer(1)));
+              stack_io.top().mutate() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
               break;
             }
             if(ref_c.value.type() == Value::type_real) {
-              stack_io.top().write(do_add(ref_c.value.check<D_real>(), D_real(1)));
+              stack_io.top().mutate() = do_add(ref_c.value.check<D_real>(), D_real(1));
               break;
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -776,12 +776,12 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // `assign` is ignored.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if(ref_c.value.type() == Value::type_integer) {
-              stack_io.top().write(do_subtract(ref_c.value.check<D_integer>(), D_integer(1)));
+              stack_io.top().mutate() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
             if(ref_c.value.type() == Value::type_real) {
-              stack_io.top().write(do_subtract(ref_c.value.check<D_real>(), D_real(1)));
+              stack_io.top().mutate() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
               stack_io.top() = std::move(ref_c);
               break;
             }
@@ -1174,7 +1174,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // `assign` is ignored.
             auto rhs = stack_io.top().read();
             stack_io.pop();
-            stack_io.top().write(std::move(rhs));
+            stack_io.top().mutate() = std::move(rhs);
             break;
           }
           default: {
@@ -1227,7 +1227,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         if(alt.assign) {
           auto value = stack_io.top().read();
           stack_io.pop();
-          stack_io.top().write(std::move(value));
+          stack_io.top().mutate() = std::move(value);
         } else {
           auto result = std::move(stack_io.top());
           stack_io.pop();

@@ -61,13 +61,12 @@ class Reference
         }
         return this->do_read_with_modifiers();
       }
-    template<typename ValueT>
-      Value & write(ValueT &&value) const
+    Value & mutate() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
-          return this->m_root.dereference_mutable() = std::forward<ValueT>(value);
+          return this->m_root.dereference_mutable();
         }
-        return this->do_mutate_with_modifiers() = std::forward<ValueT>(value);
+        return this->do_mutate_with_modifiers();
       }
     Value unset() const
       {
