@@ -15,14 +15,16 @@ class Variable : public rocket::refcounted_base<Variable>
   {
   private:
     Source_location m_loc;
+    long m_gcref;  // This is uninitialized by default.
+
     Value m_value;
     bool m_immutable;
-    long m_gcref;  // This is uninitialized by default.
 
   public:
     template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
       Variable(const Source_location &loc, XvalueT &&value, bool immutable)
-      : m_loc(loc), m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
+      : m_loc(loc),
+        m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -34,6 +36,15 @@ class Variable : public rocket::refcounted_base<Variable>
     const Source_location & get_location() const noexcept
       {
         return this->m_loc;
+      }
+
+    long get_gcref() const noexcept
+      {
+        return this->m_gcref;
+      }
+    void set_gcref(long gcref) noexcept
+      {
+        this->m_gcref = gcref;
       }
 
     const Value & get_value() const noexcept
@@ -64,15 +75,6 @@ class Variable : public rocket::refcounted_base<Variable>
       {
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;
-      }
-
-    long get_gcref() const noexcept
-      {
-        return this->m_gcref;
-      }
-    void set_gcref(long gcref) noexcept
-      {
-        this->m_gcref = gcref;
       }
 
     void enumerate_variables(const Abstract_variable_callback &callback) const
