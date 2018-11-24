@@ -39,6 +39,6 @@ int main()
 
     Reference res;
     Global_context global;
-    code.execute_as_function(res, global, Source_location(rocket::cow_string::shallow("file"), 42), rocket::cow_string::shallow("scope"), { }, nullptr, { }, { });
+    code.execute_as_function(res, global, Source_location(rocket::cow_string::shallow("file"), 42), rocket::cow_string::shallow("scope"), { }, nullptr, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

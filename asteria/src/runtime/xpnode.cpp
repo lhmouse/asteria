@@ -617,9 +617,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           stack_io.pop();
         }
         // Pop the target off the stack.
-        auto self = std::move(stack_io.top());
-        const auto tgt_value = self.read();
-        self.zoom_out();
+        const auto tgt_value = stack_io.top().read();
         // Make sure it is really a function.
         if(tgt_value.type() != Value::type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
@@ -627,10 +625,8 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
         const auto &func = tgt_value.check<D_function>();
         ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func->describe());
         try {
-          // Be safer.
-          stack_io.top() = Reference_root::S_null();
           // Call the function now.
-          func->invoke(stack_io.top(), global, std::move(self), std::move(args));
+          func->invoke(stack_io.top(), global, std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());

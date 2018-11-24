@@ -15,14 +15,14 @@ class Block
     enum Status : std::uint8_t
       {
         status_next             = 0,
-        status_break_unspec     = 1,
-        status_break_switch     = 2,
-        status_break_while      = 3,
-        status_break_for        = 4,
-        status_continue_unspec  = 5,
-        status_continue_while   = 6,
-        status_continue_for     = 7,
-        status_return           = 8,
+        status_return           = 1,
+        status_break_unspec     = 2,
+        status_break_switch     = 3,
+        status_break_while      = 4,
+        status_break_for        = 5,
+        status_continue_unspec  = 6,
+        status_continue_while   = 7,
+        status_continue_for     = 8,
       };
 
   private:
@@ -48,7 +48,7 @@ class Block
     Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
     Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
-    void execute_as_function(Reference &result_out, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const;
+    void execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

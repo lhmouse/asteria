@@ -88,17 +88,19 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
     }
 
-void Block::execute_as_function(Reference &result_out, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
   {
     Executive_context ctx_next(nullptr);
     const Variable_disposer disposer(global, ctx_next);
-    ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self), std::move(args));
+    ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(result_out, ctx_next, global);
+    const auto status = this->execute_in_place(self_io, ctx_next, global);
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.
-        result_out = Reference_root::S_null();
+        self_io = Reference_root::S_null();
+        // Fallthrough.
+      case status_return:
         return;
       }
       case status_break_unspec:
@@ -111,10 +113,6 @@ void Block::execute_as_function(Reference &result_out, Global_context &global, c
       case status_continue_while:
       case status_continue_for: {
         ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
-      }
-      case status_return: {
-        // Forward the result reference.
-        return;
       }
       default: {
         ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");
