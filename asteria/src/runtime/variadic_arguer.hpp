@@ -19,8 +19,9 @@ class Variadic_arguer : public Abstract_function
     rocket::cow_vector<Reference> m_vargs;
 
   public:
-    Variadic_arguer(const Source_location &loc, rocket::cow_vector<Reference> vargs)
-      : m_loc(loc), m_vargs(std::move(vargs))
+    template<typename ...XvargsT>
+      Variadic_arguer(const Source_location &loc, XvargsT &&...xvargs)
+      : m_loc(loc), m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);

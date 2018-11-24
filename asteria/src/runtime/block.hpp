@@ -47,8 +47,8 @@ class Block
     Block bind(const Global_context &global, const Analytic_context &ctx) const;
     Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
-    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Function_header &head) const;
-    void execute_as_function(Reference &result_out, Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const;
+    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
+    void execute_as_function(Reference &result_out, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

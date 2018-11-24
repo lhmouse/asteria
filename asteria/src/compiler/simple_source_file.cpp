@@ -5,8 +5,8 @@
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"
-#include "../runtime/function_header.hpp"
 #include "../runtime/reference.hpp"
+#include "../runtime/source_location.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -49,8 +49,7 @@ Simple_source_file::~Simple_source_file()
 Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> &&args) const
   {
     Reference result;
-    Function_header head(this->m_file, 0, rocket::cow_string::shallow("<file scope>"));
-    this->m_code.execute_as_function(result, global, std::move(head), nullptr, { }, std::move(args));
+    this->m_code.execute_as_function(result, global, Source_location(this->m_file, 0), rocket::cow_string::shallow("<file scope>"), { }, nullptr, { }, std::move(args));
     return result;
   }
 

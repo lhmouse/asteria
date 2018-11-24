@@ -418,7 +418,7 @@ Parser::~Parser()
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Xpnode::S_closure_function node_c = { Function_header(std::move(loc), rocket::cow_string::shallow("<closure function>"), std::move(params)), std::move(body) };
+        Xpnode::S_closure_function node_c = { std::move(loc), std::move(params), std::move(body) };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -1220,7 +1220,7 @@ Parser::~Parser()
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Statement::S_func_def stmt_c = { Function_header(std::move(loc), std::move(name), std::move(params)), std::move(body) };
+        Statement::S_func_def stmt_c = { std::move(loc), std::move(name), std::move(params), std::move(body) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }

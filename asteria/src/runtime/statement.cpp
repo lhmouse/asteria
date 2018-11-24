@@ -54,7 +54,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, nullptr, "skipped function", alt.head.get_func(), Reference_root::S_null());
+        do_safe_set_named_reference(ctx_io, nullptr, "skipped function", alt.name, Reference_root::S_null());
         return;
       }
       case index_if:
@@ -105,12 +105,12 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       case index_func_def: {
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, nullptr, "function", alt.head.get_func(), Reference_root::S_null());
+        do_safe_set_named_reference(ctx_io, nullptr, "function", alt.name, Reference_root::S_null());
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
-        ctx_next.initialize_for_function(alt.head);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Statement::S_func_def alt_bnd = { alt.head, std::move(body_bnd) };
+        Statement::S_func_def alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_if: {
@@ -246,7 +246,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // Create a variable using the initializer.
         alt.init.evaluate(ref_out, global, ctx_io);
         auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Creating named variable: name = ", alt.name, ", immutable = ", alt.immutable, ": ", value);
+        ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var"), alt.name, " = ", value);
         var->reset(std::move(value), alt.immutable);
         return Block::status_next;
       }
@@ -256,10 +256,10 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         // A function becomes visible before its definition, where it is initialized to `null`.
         const auto var = global.create_tracked_variable();
         Reference_root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, &global, "function", alt.head.get_func(), std::move(ref_c));
+        do_safe_set_named_reference(ctx_io, &global, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.head);
-        ASTERIA_DEBUG_LOG("Creating named function: prototype = ", alt.head, ", location = ", alt.head.get_location());
+        auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
+        ASTERIA_DEBUG_LOG("Creating named function: ", func.describe());
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
       }

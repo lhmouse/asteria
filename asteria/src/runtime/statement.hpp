@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "expression.hpp"
-#include "function_header.hpp"
+#include "source_location.hpp"
 #include "block.hpp"
 #include "../rocket/variant.hpp"
 #include "../rocket/refcounted_ptr.hpp"
@@ -40,7 +40,9 @@ class Statement
       };
     struct S_func_def
       {
-        Function_header head;
+        Source_location loc;
+        rocket::prehashed_string name;
+        rocket::cow_vector<rocket::prehashed_string> params;
         Block body;
       };
     struct S_if

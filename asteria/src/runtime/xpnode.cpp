@@ -186,9 +186,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
-        ctx_next.initialize_for_function(alt.head);
+        ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Xpnode::S_closure_function alt_bnd = { alt.head, std::move(body_bnd) };
+        Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_branch: {
@@ -580,7 +580,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_closure_function: {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Instantiate the closure function.
-        auto func = alt.body.instantiate_function(global, ctx, alt.head);
+        auto func = alt.body.instantiate_function(global, ctx, alt.loc, rocket::cow_string::shallow("<closure function>"), alt.params);
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.push(std::move(ref_c));
         return;

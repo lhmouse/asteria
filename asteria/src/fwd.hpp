@@ -32,7 +32,6 @@ class Expression;
 class Statement;
 class Block;
 class Source_location;
-class Function_header;
 
 // Parser Objects
 class Parser_error;

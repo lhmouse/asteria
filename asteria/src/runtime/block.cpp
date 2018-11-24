@@ -58,13 +58,13 @@ Block::Status Block::execute(Reference &ref_out, Global_context &global, const E
     return this->execute_in_place(ref_out, ctx_next, global);
   }
 
-Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, const Function_header &head) const
+Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const
   {
     Analytic_context ctx_next(&ctx);
-    ctx_next.initialize_for_function(head);
+    ctx_next.initialize_for_function(params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Instantiated_function(head, std::move(body_bnd));
+    return Instantiated_function(loc, name, params, std::move(body_bnd));
   }
 
     namespace {
@@ -88,11 +88,11 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
     }
 
-void Block::execute_as_function(Reference &result_out, Global_context &global, const Function_header &head, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &result_out, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args) const
   {
     Executive_context ctx_next(nullptr);
     const Variable_disposer disposer(global, ctx_next);
-    ctx_next.initialize_for_function(head, zvarg_opt, std::move(self), std::move(args));
+    ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(result_out, ctx_next, global);
     switch(status) {

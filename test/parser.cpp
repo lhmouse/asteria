@@ -6,9 +6,9 @@
 #include "../asteria/src/compiler/token_stream.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
+#include "../asteria/src/runtime/source_location.hpp"
 #include "../asteria/src/runtime/reference.hpp"
 #include "../asteria/src/runtime/exception.hpp"
-#include "../asteria/src/runtime/function_header.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -39,7 +39,6 @@ int main()
 
     Reference res;
     Global_context global;
-    Function_header head(rocket::cow_string::shallow("file again"), 42, rocket::cow_string::shallow("<top level>"));
-    code.execute_as_function(res, global, std::move(head), nullptr, { }, { });
+    code.execute_as_function(res, global, Source_location(rocket::cow_string::shallow("file"), 42), rocket::cow_string::shallow("scope"), { }, nullptr, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
   }

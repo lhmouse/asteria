@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "reference.hpp"
-#include "function_header.hpp"
+#include "source_location.hpp"
 #include "expression.hpp"
 #include "block.hpp"
 #include "../rocket/variant.hpp"
@@ -70,7 +70,8 @@ class Xpnode
       };
     struct S_closure_function
       {
-        Function_header head;
+        Source_location loc;
+        rocket::cow_vector<rocket::prehashed_string> params;
         Block body;
       };
     struct S_branch

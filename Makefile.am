@@ -94,7 +94,6 @@ pkginclude_runtime_HEADERS = \
   asteria/src/runtime/collector.hpp  \
   asteria/src/runtime/exception.hpp  \
   asteria/src/runtime/source_location.hpp  \
-  asteria/src/runtime/function_header.hpp  \
   asteria/src/runtime/abstract_context.hpp  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
@@ -131,7 +130,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/collector.cpp  \
   asteria/src/runtime/exception.cpp  \
   asteria/src/runtime/source_location.cpp  \
-  asteria/src/runtime/function_header.cpp  \
   asteria/src/runtime/abstract_context.cpp  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \

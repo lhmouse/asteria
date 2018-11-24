@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "analytic_context.hpp"
-#include "function_header.hpp"
 #include "reference.hpp"
 #include "../utilities.hpp"
 
@@ -57,18 +56,18 @@ Reference & Analytic_context::mutate_named_reference(const rocket::prehashed_str
     return this->m_dict.mut(name);
   }
 
-void Analytic_context::initialize_for_function(const Function_header &head)
+void Analytic_context::initialize_for_function(const rocket::cow_vector<rocket::prehashed_string> &params)
   {
-    for(std::size_t i = 0; i < head.get_param_count(); ++i) {
-      const auto &name = head.get_param_name(i);
-      if(name.empty()) {
+    for(std::size_t i = 0; i < params.size(); ++i) {
+      const auto &param = params.at(i);
+      if(param.empty()) {
         continue;
       }
-      if(name.rdstr().starts_with("__")) {
-        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", name, "` is reserved and cannot be used.");
+      if(param.rdstr().starts_with("__")) {
+        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Ensure the named reference exists, whose contents are out of interest.
-      this->m_dict.mut(name) /*= Reference_root::S_null()*/;
+      this->m_dict.mut(param) /*= Reference_root::S_null()*/;
     }
   }
 
