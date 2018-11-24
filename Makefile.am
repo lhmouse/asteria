@@ -14,7 +14,7 @@ LDADD = lib/libasteria.la
 __pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
 __pch.hpp.gch: __pch.hpp
-	${AM_V_CXX}$$(echo "" ${LTCXXCOMPILE} | sed "s/-include __pch\\.hpp//") -x c++-header -Wno-error $< -o $@.o
+	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
 	${AM_V_GEN}${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
 	${AM_V_GEN}test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
