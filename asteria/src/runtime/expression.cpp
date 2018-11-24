@@ -53,7 +53,7 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
       ref_out = Reference_root::S_null();
       return;
     }
-    ROCKET_ASSERT(!stack.empty());
+    ROCKET_ASSERT(stack.size() == 1);
     ref_out = std::move(stack.top());
   }
 
