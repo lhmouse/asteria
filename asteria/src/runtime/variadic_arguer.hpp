@@ -16,12 +16,13 @@ class Variadic_arguer : public Abstract_function
   {
   private:
     Source_location m_loc;
+    rocket::prehashed_string m_name;
     rocket::cow_vector<Reference> m_vargs;
 
   public:
     template<typename ...XvargsT>
-      Variadic_arguer(const Source_location &loc, XvargsT &&...xvargs)
-      : m_loc(loc), m_vargs(std::forward<XvargsT>(xvargs)...)
+      Variadic_arguer(const Source_location &loc, const rocket::prehashed_string &name, XvargsT &&...xvargs)
+      : m_loc(loc), m_name(name), m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);

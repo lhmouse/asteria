@@ -105,7 +105,7 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
       do_set_constant(this->m_varg, D_function(*zvarg_opt));
     } else {
       // Create an argument getter from those.
-      do_set_constant(this->m_varg, D_function(Variadic_arguer(loc, std::move(args))));
+      do_set_constant(this->m_varg, D_function(Variadic_arguer(loc, name, std::move(args))));
     }
   }
 

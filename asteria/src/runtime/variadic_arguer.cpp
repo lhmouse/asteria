@@ -13,7 +13,7 @@ Variadic_arguer::~Variadic_arguer()
 
 rocket::cow_string Variadic_arguer::describe() const
   {
-    return ASTERIA_FORMAT_STRING("variadic argument accessor at \'", this->m_loc, "\'");
+    return ASTERIA_FORMAT_STRING("variadic argument accessor for `", this->m_name, "()` at \'", this->m_loc, "\'");
   }
 
 void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const

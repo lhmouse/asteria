@@ -22,7 +22,7 @@ class Instantiated_function : public Abstract_function
 
   public:
     Instantiated_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, Block body_bnd)
-      : m_loc(loc), m_name(name), m_params(params), m_zvarg(Variadic_arguer(loc)), m_body_bnd(std::move(body_bnd))
+      : m_loc(loc), m_name(name), m_params(params), m_zvarg(Variadic_arguer(loc, name)), m_body_bnd(std::move(body_bnd))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Instantiated_function);
