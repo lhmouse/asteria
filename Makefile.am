@@ -36,7 +36,7 @@ lib_LTLIBRARIES =  \
   lib/libasteria.la
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
-pkginclude_rocket_HEADERS = \
+pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/compatibility.h  \
   asteria/src/rocket/preprocessor_utilities.h  \
   asteria/src/rocket/assert.hpp  \
@@ -79,7 +79,7 @@ pkginclude_HEADERS =  \
   asteria/src/utilities.hpp
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
-pkginclude_runtime_HEADERS = \
+pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/shared_opaque_wrapper.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
@@ -164,7 +164,7 @@ bin_PROGRAMS =  \
 bin_asteria_SOURCES =  \
   asteria/src/main.cpp
 
-check_PROGRAMS = \
+check_PROGRAMS =  \
   test/utilities.test  \
   test/value.test  \
   test/variable.test  \
