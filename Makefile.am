@@ -124,6 +124,10 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/parser.hpp  \
   asteria/src/compiler/simple_source_file.hpp
 
+pkginclude_librarydir = ${pkgincludedir}/library
+pkginclude_library_HEADERS =  \
+  asteria/src/library/argument_sentry.hpp
+
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/syntax/source_location.cpp  \
@@ -158,7 +162,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \
   asteria/src/compiler/parser.cpp  \
-  asteria/src/compiler/simple_source_file.cpp
+  asteria/src/compiler/simple_source_file.cpp  \
+  asteria/src/library/argument_sentry.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include __pch.hpp

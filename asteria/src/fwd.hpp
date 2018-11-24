@@ -62,6 +62,9 @@ class Token_stream;
 class Parser;
 class Single_source_file;
 
+// Library
+class Argument_sentry;
+
 // Fundamental Types
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
