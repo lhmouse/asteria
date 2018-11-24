@@ -15,10 +15,10 @@ int main()
     Global_context global;
     Executive_context ctx;
 
-    const auto cond = rocket::make_refcounted<Variable>();
-    const auto dval = rocket::make_refcounted<Variable>(D_real(1.5), false);
-    const auto ival = rocket::make_refcounted<Variable>(D_integer(3), false);
-    const auto aval = rocket::make_refcounted<Variable>(D_array(), false);
+    const auto cond = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 1), D_null(), false);
+    const auto dval = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 2), D_real(1.5), false);
+    const auto ival = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 3), D_integer(3), false);
+    const auto aval = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 4), D_array(), false);
 
     ctx.mutate_named_reference(rocket::cow_string::shallow("cond")) = Reference_root::S_variable { cond };
     ctx.mutate_named_reference(rocket::cow_string::shallow("dval")) = Reference_root::S_variable { dval };

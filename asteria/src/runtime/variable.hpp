@@ -5,6 +5,7 @@
 #define ASTERIA_RUNTIME_VARIABLE_HPP_
 
 #include "../fwd.hpp"
+#include "source_location.hpp"
 #include "value.hpp"
 #include "../rocket/refcounted_ptr.hpp"
 
@@ -13,18 +14,15 @@ namespace Asteria {
 class Variable : public rocket::refcounted_base<Variable>
   {
   private:
+    Source_location m_loc;
     Value m_value;
     bool m_immutable;
     long m_gcref;  // This is uninitialized by default.
 
   public:
-    Variable()
-      : m_value(), m_immutable(false)
-      {
-      }
     template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      Variable(XvalueT &&value, bool immutable)
-      : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
+      Variable(const Source_location &loc, XvalueT &&value, bool immutable)
+      : m_loc(loc), m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -33,6 +31,11 @@ class Variable : public rocket::refcounted_base<Variable>
     [[noreturn]] void do_throw_immutable() const;
 
   public:
+    const Source_location & get_location() const noexcept
+      {
+        return this->m_loc;
+      }
+
     const Value & get_value() const noexcept
       {
         return this->m_value;

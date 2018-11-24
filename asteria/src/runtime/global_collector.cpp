@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "global_collector.hpp"
-#include "variable.hpp"
 #include "reference.hpp"
 #include "../utilities.hpp"
 
@@ -13,16 +12,12 @@ Global_collector::~Global_collector()
   {
   }
 
-rocket::refcounted_ptr<Variable> Global_collector::create_tracked_variable(const Reference *src_opt, bool immutable)
+void Global_collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
-    rocket::refcounted_ptr<Variable> var;
-    if(src_opt) {
-      var = rocket::make_refcounted<Variable>(src_opt->read(), immutable);
-    } else {
-      var = rocket::make_refcounted<Variable>(D_null(), immutable);
+    ROCKET_ASSERT(var);
+    if(!this->m_gen_zero.track_variable(var)) {
+      ASTERIA_THROW_RUNTIME_ERROR("A variable can only be added at most once.");
     }
-    this->m_gen_zero.track_variable(var);
-    return var;
   }
 
 bool Global_collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept

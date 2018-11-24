@@ -55,9 +55,9 @@ Reference & Global_context::mutate_named_reference(const rocket::prehashed_strin
     return this->m_dict.mut(name);
   }
 
-rocket::refcounted_ptr<Variable> Global_context::create_tracked_variable(const Reference *src_opt, bool immutable)
+void Global_context::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
-    return this->m_gcoll->create_tracked_variable(src_opt, immutable);
+    return this->m_gcoll->track_variable(var);
   }
 
 bool Global_context::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept

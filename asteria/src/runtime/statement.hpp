@@ -34,6 +34,7 @@ class Statement
       };
     struct S_var_def
       {
+        Source_location loc;
         rocket::prehashed_string name;
         bool immutable;
         Expression init;

@@ -99,7 +99,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         do_safe_set_named_reference(ctx_io, nullptr, "variable", alt.name, Reference_root::S_null());
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
-        Statement::S_var_def alt_bnd = { alt.name, alt.immutable, std::move(init_bnd) };
+        Statement::S_var_def alt_bnd = { alt.loc, alt.name, alt.immutable, std::move(init_bnd) };
         return std::move(alt_bnd);
       }
       case index_func_def: {
@@ -240,13 +240,14 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_var_def>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = global.create_tracked_variable();
+        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+        global.track_variable(var);
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, &global, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
         alt.init.evaluate(ref_out, global, ctx_io);
         auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var"), alt.name, " = ", value);
+        ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
         var->reset(std::move(value), alt.immutable);
         return Block::status_next;
       }
@@ -254,7 +255,8 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_func_def>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = global.create_tracked_variable();
+        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+        global.track_variable(var);
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, &global, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.

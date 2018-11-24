@@ -1137,6 +1137,8 @@ Parser::~Parser()
 
     bool do_accept_variable_definition(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto loc = do_tell_source_location(tstrm_io);
         // variable-definition ::=
         //   "var" identifier equal-initailizer-opt ";"
         // equal-initializer-opt ::=
@@ -1160,13 +1162,15 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_var_def stmt_c = { std::move(name), false, std::move(init) };
+        Statement::S_var_def stmt_c = { std::move(loc), std::move(name), false, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
 
     bool do_accept_immutable_variable_definition(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto loc = do_tell_source_location(tstrm_io);
         // immutable-variable-definition ::=
         //   "const" identifier equal-initailizer ";"
         // equal-initializer ::=
@@ -1188,7 +1192,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_var_def stmt_c = { std::move(name), true, std::move(init) };
+        Statement::S_var_def stmt_c = { std::move(loc), std::move(name), true, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
