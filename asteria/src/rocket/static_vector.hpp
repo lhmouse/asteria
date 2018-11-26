@@ -63,7 +63,13 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           }
         ~storage_handle()
           {
-            this->pop_back_n_unchecked(this->size());
+            const auto ebase = this->m_ebase;
+            auto nrem = this->m_nelem;
+            ROCKET_ASSERT(nrem <= capacityT);
+            while(nrem != 0) {
+              --nrem;
+              allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nrem);
+            }
 #ifdef ROCKET_DEBUG
             this->m_nelem = 0xCD99;
             ::std::memset(this->m_ebase, '~', sizeof(this->m_ebase));
