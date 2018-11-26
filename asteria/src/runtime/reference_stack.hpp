@@ -95,7 +95,7 @@ class Reference_stack
         const auto off = (this->m_size - 1) % this->m_head.refs.capacity();
         // Do not destroy the element so it can be reused later.
         // Iterate to the previous block if the last block becomes empty.
-        if(off == 0) {
+        if(ROCKET_UNEXPECT(off == 0)) {
           auto prev = cur->prev;
           cur = prev;
         }
