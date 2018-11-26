@@ -443,6 +443,7 @@ template<typename ...alternativesT>
     // 23.7.3.5, value status
     size_t index() const noexcept
       {
+        ROCKET_ASSERT(this->m_index < size);
         return this->m_index;
       }
     const type_info & type() const noexcept
