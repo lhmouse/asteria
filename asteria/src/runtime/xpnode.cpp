@@ -608,8 +608,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_function_call: {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Allocate the argument vector.
-        rocket::cow_vector<Reference> args;
-        args.resize(alt.arg_cnt);
+        rocket::cow_vector<Reference> args(alt.arg_cnt);
         for(auto i = alt.arg_cnt - 1; i + 1 != 0; --i) {
           args.mut(i) = std::move(stack_io.top());
           stack_io.pop();
@@ -1186,8 +1185,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_unnamed_array: {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Pop references to create an array.
-        D_array array;
-        array.resize(alt.elem_cnt);
+        D_array array(alt.elem_cnt);
         for(auto i = alt.elem_cnt - 1; i + 1 != 0; --i) {
           array.mut(i) = stack_io.top().read();
           stack_io.pop();
@@ -1199,8 +1197,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
       case index_unnamed_object: {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Pop references to create an object.
-        D_object object;
-        object.reserve(alt.keys.size());
+        D_object object(alt.keys.size());
         for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
           object.mut(*it) = stack_io.top().read();
           stack_io.pop();
