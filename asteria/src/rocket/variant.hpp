@@ -464,7 +464,7 @@ template<typename ...alternativesT>
     const type_info & type() const noexcept
       {
         static constexpr const type_info *const s_table[] = { &typeid(alternativesT)... };
-        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
+        ROCKET_ASSERT(this->m_index < size);
         return *(s_table[this->m_index]);
       }
 
@@ -532,7 +532,7 @@ template<typename ...alternativesT>
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
-        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
+        ROCKET_ASSERT(this->m_index < size);
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
     template<typename visitorT>
@@ -540,7 +540,7 @@ template<typename ...alternativesT>
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
-        ROCKET_ASSERT(this->m_index < noadl::countof(s_table));
+        ROCKET_ASSERT(this->m_index < size);
         return (*(s_table[this->m_index]))(this->m_stor, visitor);
       }
 
