@@ -74,7 +74,7 @@ class Reference_stack
       {
         auto cur = this->m_scur;
         const auto off = this->m_size % this->m_head.refs.capacity();
-        if(off == 0) {
+        if(ROCKET_UNEXPECT(off == 0)) {
           cur = this->do_reserve_one_more();
         }
         // Create a new reference or reuse an existent one.
