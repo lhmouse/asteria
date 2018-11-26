@@ -16,7 +16,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : std::uint8_t
+    enum Target : std::size_t
       {
         target_unspec  = 0,
         target_switch  = 1,
@@ -106,7 +106,7 @@ class Statement
         Expression expr;
       };
 
-    enum Index : std::uint8_t
+    enum Index : std::size_t
       {
         index_expr      =  0,
         index_block     =  1,

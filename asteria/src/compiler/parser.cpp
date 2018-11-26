@@ -644,7 +644,7 @@ Parser::~Parser()
     class Infix_element_base
       {
       public:
-        enum Precedence : std::uint8_t
+        enum Precedence : std::size_t
           {
             precedence_multiplicative  =  1,
             precedence_additive        =  2,
@@ -715,7 +715,7 @@ Parser::~Parser()
     class Infix_selection : public Infix_element_base
       {
       public:
-        enum Sop
+        enum Sop : std::size_t
           {
             sop_quest   = 0,  // ? :
             sop_and     = 1,  // &&

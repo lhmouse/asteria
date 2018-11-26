@@ -12,7 +12,7 @@ namespace Asteria {
 class Block
   {
   public:
-    enum Status : std::uint8_t
+    enum Status : std::size_t
       {
         status_next             = 0,
         status_return           = 1,

@@ -15,7 +15,7 @@ namespace Asteria {
 class Value
   {
   public:
-    enum Compare : std::uint8_t
+    enum Compare : std::size_t
       {
         compare_unordered  = 0,
         compare_less       = 1,
@@ -23,7 +23,7 @@ class Value
         compare_greater    = 3,
       };
 
-    enum Type : std::uint8_t
+    enum Type : std::size_t
       {
         type_null      = 0,
         type_boolean   = 1,

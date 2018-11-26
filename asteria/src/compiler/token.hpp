@@ -13,7 +13,7 @@ namespace Asteria {
 class Token
   {
   public:
-    enum Keyword : std::uint8_t
+    enum Keyword : std::size_t
       {
         keyword_var       =  0,
         keyword_const     =  1,
@@ -43,7 +43,7 @@ class Token
         keyword_unset     = 25,
         keyword_lengthof  = 26,
       };
-    enum Punctuator : std::uint8_t
+    enum Punctuator : std::size_t
       {
         punctuator_add         =  0,  // +
         punctuator_add_eq      =  1,  // +=
@@ -127,7 +127,7 @@ class Token
         rocket::cow_string value;
       };
 
-    enum Index : std::uint8_t
+    enum Index : std::size_t
       {
         index_keyword          = 0,
         index_punctuator       = 1,
