@@ -54,7 +54,6 @@ using ::std::int64_t;
 using ::std::uint64_t;
 using ::std::initializer_list;
 using ::std::type_info;
-using ::std::max_align_t;
 using ::std::nothrow_t;
 
 using ::std::true_type;
