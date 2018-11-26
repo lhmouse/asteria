@@ -4,12 +4,6 @@
 #ifndef ROCKET_REFCOUNTED_PTR_HPP_
 #define ROCKET_REFCOUNTED_PTR_HPP_
 
-#include <memory> // std::default_delete<>
-#include <type_traits> // so many...
-#include <utility> // std::move(), std::forward(), std::declval()
-#include <iosfwd> // std::basic_ostream<>
-#include <cstddef> // std::nullptr_t
-#include <typeinfo>
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -18,14 +12,6 @@
 #include "reference_counter.hpp"
 
 namespace rocket {
-
-using ::std::default_delete;
-using ::std::is_nothrow_constructible;
-using ::std::is_convertible;
-using ::std::is_array;
-using ::std::add_lvalue_reference;
-using ::std::basic_ostream;
-using ::std::nullptr_t;
 
 template<typename elementT, typename deleterT = default_delete<const elementT>>
   class refcounted_base;

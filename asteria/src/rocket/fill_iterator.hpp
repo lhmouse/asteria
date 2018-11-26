@@ -5,14 +5,9 @@
 #define ROCKET_FILL_ITERATOR_HPP_
 
 #include <iterator> // std::random_access_iterator_tag
-#include <type_traits> // std::is_nothrow_constructible<>
-#include <utility> // std::forward()
-#include <cstddef> // std::ptrdiff_t
+#include "utilities.hpp"
 
 namespace rocket {
-
-using ::std::is_nothrow_constructible;
-using ::std::ptrdiff_t;
 
 template<typename elementT>
   class fill_iterator;

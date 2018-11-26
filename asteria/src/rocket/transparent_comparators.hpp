@@ -5,12 +5,9 @@
 #define ROCKET_TRANSPARENT_COMPARATORS_HPP_
 
 #include "compatibility.h"
-#include <type_traits>
-#include <utility>
+#include <utility> // std::declval(), std::forward()
 
 namespace rocket {
-
-using ::std::true_type;
 
 struct transparent_equal_to
   {
@@ -20,7 +17,7 @@ struct transparent_equal_to
         return ::std::forward<lhsT>(lhs) == ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 struct transparent_not_equal_to
@@ -31,7 +28,7 @@ struct transparent_not_equal_to
         return ::std::forward<lhsT>(lhs) != ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 struct transparent_less
@@ -42,7 +39,7 @@ struct transparent_less
         return ::std::forward<lhsT>(lhs) < ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 struct transparent_greater
@@ -53,7 +50,7 @@ struct transparent_greater
         return ::std::forward<lhsT>(lhs) > ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 struct transparent_less_equal
@@ -64,7 +61,7 @@ struct transparent_less_equal
         return ::std::forward<lhsT>(lhs) <= ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 struct transparent_greater_equal
@@ -75,7 +72,7 @@ struct transparent_greater_equal
         return ::std::forward<lhsT>(lhs) >= ::std::forward<rhsT>(rhs);
       }
 
-    using is_transparent = true_type;
+    using is_transparent = void;
   };
 
 }

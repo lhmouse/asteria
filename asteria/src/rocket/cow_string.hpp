@@ -5,16 +5,10 @@
 #define ROCKET_COW_STRING_HPP_
 
 #include <string> // std::char_traits<>
-#include <memory> // std::allocator<>, std::allocator_traits<>
 #include <istream> // std::streamsize, std::ios_base, std::basic_istream<>
 #include <locale> // std::isspace()
 #include <ostream> // std::basic_ostream<>
-#include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
-#include <initializer_list> // std::initializer_list<>
-#include <utility> // std::move(), std::forward(), std::declval()
-#include <cstddef> // std::size_t, std::ptrdiff_t
-#include <cstdint> // std::uintptr_t
+#include <iterator> // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -34,26 +28,6 @@
  */
 
 namespace rocket {
-
-using ::std::char_traits;
-using ::std::allocator;
-using ::std::allocator_traits;
-using ::std::streamsize;
-using ::std::ios_base;
-using ::std::basic_istream;
-using ::std::basic_ostream;
-using ::std::is_same;
-using ::std::decay;
-using ::std::is_array;
-using ::std::is_trivial;
-using ::std::is_convertible;
-using ::std::is_nothrow_constructible;
-using ::std::conditional;
-using ::std::iterator_traits;
-using ::std::initializer_list;
-using ::std::uintptr_t;
-using ::std::size_t;
-using ::std::ptrdiff_t;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
   class basic_cow_string;

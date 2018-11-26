@@ -4,15 +4,10 @@
 #ifndef ROCKET_INSERTABLE_STREAMBUF_HPP_
 #define ROCKET_INSERTABLE_STREAMBUF_HPP_
 
-#include <streambuf> // std::ios_base, std::basic_streambuf<>, std::streamsize
-#include <utility> // std::move()
 #include "cow_string.hpp"
+#include <streambuf> // std::ios_base, std::basic_streambuf<>, std::streamsize
 
 namespace rocket {
-
-using ::std::ios_base;
-using ::std::basic_streambuf;
-using ::std::streamsize;
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
   class basic_insertable_streambuf;

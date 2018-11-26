@@ -8,8 +8,6 @@
 
 namespace rocket {
 
-using ::std::size_t;
-
 template<typename integerT, integerT ...valuesT>
   struct integer_sequence
   {

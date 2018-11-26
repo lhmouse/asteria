@@ -4,27 +4,11 @@
 #ifndef ROCKET_PREHASHED_STRING_HPP_
 #define ROCKET_PREHASHED_STRING_HPP_
 
-#include <type_traits> // so many...
-#include <initializer_list> // std::initializer_list<>
-#include <functional> // std::hash<>
 #include <iosfwd> // std::basic_ostream<>
-#include <cstddef> // std::size_t
 #include "compatibility.h"
 #include "cow_string.hpp"
 
 namespace rocket {
-
-using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_copy_constructible;
-using ::std::is_nothrow_move_constructible;
-using ::std::is_nothrow_copy_assignable;
-using ::std::is_nothrow_move_assignable;
-using ::std::is_convertible;
-using ::std::remove_reference;
-using ::std::initializer_list;
-using ::std::hash;
-using ::std::basic_ostream;
-using ::std::size_t;
 
 template<typename stringT, typename hashT = hash<stringT>>
   class basic_prehashed_string;

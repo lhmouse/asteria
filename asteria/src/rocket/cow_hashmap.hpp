@@ -4,16 +4,8 @@
 #ifndef ROCKET_COW_HASHMAP_HPP_
 #define ROCKET_COW_HASHMAP_HPP_
 
-#include <memory> // std::allocator<>, std::allocator_traits<>
-#include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>, std::forward_iterator_tag
-#include <initializer_list> // std::initializer_list<>
-#include <utility> // std::move(), std::forward(), std::declval(), std::pair<>
-#include <typeinfo> // typeid()
-#include <functional> // std::hash<>, std::equal_to<>
-#include <cstddef> // std::size_t, std::ptrdiff_t
 #include <cstring> // std::memset()
-#include <cstdint> // std::uint32_t
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -32,31 +24,6 @@
  */
 
 namespace rocket {
-
-using ::std::allocator;
-using ::std::allocator_traits;
-using ::std::is_same;
-using ::std::decay;
-using ::std::remove_reference;
-using ::std::is_array;
-using ::std::is_trivial;
-using ::std::is_const;
-using ::std::is_convertible;
-using ::std::is_copy_constructible;
-using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_copy_constructible;
-using ::std::is_nothrow_move_constructible;
-using ::std::remove_const;
-using ::std::conditional;
-using ::std::integral_constant;
-using ::std::iterator_traits;
-using ::std::initializer_list;
-using ::std::pair;
-using ::std::hash;
-using ::std::equal_to;
-using ::std::size_t;
-using ::std::ptrdiff_t;
-using ::std::uint32_t;
 
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>, typename allocatorT = allocator<pair<const keyT, mappedT>>>
   class cow_hashmap;

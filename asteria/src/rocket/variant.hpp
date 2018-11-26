@@ -4,28 +4,12 @@
 #ifndef ROCKET_VARIANT_HPP_
 #define ROCKET_VARIANT_HPP_
 
-#include <type_traits> // so many...
-#include <utility> // std::move(), std::forward(), std::declval(), std::swap()
-#include <typeinfo> // std::type_info
 #include <cstring> // std::memset()
-#include <cstddef> // std::size_t
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
 
 namespace rocket {
-
-using ::std::common_type;
-using ::std::decay;
-using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_copy_constructible;
-using ::std::is_nothrow_move_constructible;
-using ::std::is_nothrow_copy_assignable;
-using ::std::is_nothrow_move_assignable;
-using ::std::is_trivially_destructible;
-using ::std::integral_constant;
-using ::std::type_info;
-using ::std::size_t;
 
 template<typename ...alternativesT>
   class variant;

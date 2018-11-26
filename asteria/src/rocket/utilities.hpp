@@ -7,30 +7,16 @@
 #include <type_traits> // so many...
 #include <iterator> // std::iterator_traits<>
 #include <utility> // std::swap(), std::move(), std::forward()
+#include <memory> // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new> // placement new
 #include <initializer_list> // std::initializer_list<>
 #include <ios> // std::ios_base, std::basic_ios<>
+#include <functional> // std::hash<>, std::equal_to<>
 #include <cstddef> // std::size_t, std::ptrdiff_t
 
 namespace rocket {
 
     namespace noadl = ::rocket;
-
-using ::std::common_type;
-using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_default_constructible;
-using ::std::is_nothrow_destructible;
-using ::std::underlying_type;
-using ::std::conditional;
-using ::std::false_type;
-using ::std::true_type;
-using ::std::integral_constant;
-using ::std::iterator_traits;
-using ::std::initializer_list;
-using ::std::ios_base;
-using ::std::basic_ios;
-using ::std::size_t;
-using ::std::ptrdiff_t;
 
 #define ROCKET_COPYABLE_DESTRUCTOR(c_, ...)  \
     c_(const c_ &)              = default;  \
@@ -52,6 +38,72 @@ using ::std::ptrdiff_t;
     c_(c_ &&)                   = delete;  \
     c_ & operator=(c_ &&)       = delete;  \
     __VA_ARGS__ ~c_()
+
+using ::std::nullptr_t;
+using ::std::ptrdiff_t;
+using ::std::size_t;
+using ::std::intptr_t;
+using ::std::uintptr_t;
+using ::std::int8_t;
+using ::std::uint8_t;
+using ::std::int16_t;
+using ::std::uint16_t;
+using ::std::int32_t;
+using ::std::uint32_t;
+using ::std::int64_t;
+using ::std::uint64_t;
+using ::std::initializer_list;
+using ::std::type_info;
+using ::std::max_align_t;
+using ::std::nothrow_t;
+
+using ::std::true_type;
+using ::std::false_type;
+using ::std::integral_constant;
+using ::std::conditional;
+using ::std::decay;
+using ::std::add_lvalue_reference;
+using ::std::common_type;
+using ::std::is_nothrow_constructible;
+using ::std::is_nothrow_default_constructible;
+using ::std::is_nothrow_copy_constructible;
+using ::std::is_nothrow_copy_assignable;
+using ::std::is_nothrow_move_constructible;
+using ::std::is_nothrow_move_assignable;
+using ::std::is_nothrow_destructible;
+using ::std::is_convertible;
+using ::std::is_copy_constructible;
+using ::std::is_copy_assignable;
+using ::std::is_move_constructible;
+using ::std::is_move_assignable;
+using ::std::is_const;
+using ::std::remove_const;
+using ::std::is_reference;
+using ::std::remove_reference;
+using ::std::is_same;
+using ::std::is_trivial;
+using ::std::is_trivially_destructible;
+using ::std::underlying_type;
+using ::std::is_array;
+
+using ::std::allocator;
+using ::std::allocator_traits;
+using ::std::default_delete;
+
+using ::std::iterator_traits;
+
+using ::std::char_traits;
+using ::std::basic_streambuf;
+using ::std::ios_base;
+using ::std::basic_ios;
+using ::std::basic_istream;
+using ::std::basic_ostream;
+using ::std::basic_iostream;
+using ::std::streamsize;
+
+using ::std::equal_to;
+using ::std::hash;
+using ::std::pair;
 
 template<typename typeT>
   struct type_identity

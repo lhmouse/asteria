@@ -4,19 +4,10 @@
 #ifndef ROCKET_ALLOCATOR_UTILITIES_HPP_
 #define ROCKET_ALLOCATOR_UTILITIES_HPP_
 
-#include <memory> // std::allocator<>, std::allocator_traits<>
 #include <type_traits> // std::conditional<>, std::false_type, std::true_type
-#include <utility> // std::move(), std::declval()
 #include "utilities.hpp"
 
 namespace rocket {
-
-using ::std::allocator_traits;
-using ::std::conditional;
-using ::std::false_type;
-using ::std::true_type;
-using ::std::remove_reference;
-using ::std::is_nothrow_constructible;
 
     namespace details_allocator_utilities {
 

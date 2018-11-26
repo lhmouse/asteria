@@ -4,14 +4,7 @@
 #ifndef ROCKET_COW_VECTOR_HPP_
 #define ROCKET_COW_VECTOR_HPP_
 
-#include <memory> // std::allocator<>, std::allocator_traits<>
-#include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>, std::reverse_iterator<>, std::random_access_iterator_tag
-#include <initializer_list> // std::initializer_list<>
-#include <utility> // std::move(), std::forward(), std::declval()
-#include <typeinfo> // typeid()
-#include <cstddef> // std::size_t, std::ptrdiff_t
-#include <cstdint> // std::uintptr_t
+#include <iterator> // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
@@ -31,25 +24,6 @@
  */
 
 namespace rocket {
-
-using ::std::allocator;
-using ::std::allocator_traits;
-using ::std::is_same;
-using ::std::decay;
-using ::std::is_array;
-using ::std::is_trivial;
-using ::std::is_convertible;
-using ::std::is_copy_constructible;
-using ::std::is_nothrow_constructible;
-using ::std::is_nothrow_copy_constructible;
-using ::std::is_nothrow_move_constructible;
-using ::std::conditional;
-using ::std::integral_constant;
-using ::std::iterator_traits;
-using ::std::initializer_list;
-using ::std::size_t;
-using ::std::ptrdiff_t;
-using ::std::uintptr_t;
 
 template<typename valueT, typename allocatorT = allocator<valueT>>
   class cow_vector;
