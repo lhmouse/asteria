@@ -526,9 +526,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(count > res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
         }
-        res.reserve(lhs.size() + static_cast<std::size_t>(count));
-        res.append(lhs);
-        res.append(static_cast<std::size_t>(count), ' ');
+        res.assign(lhs.size() + static_cast<std::size_t>(count), ' ');
+        std::char_traits<char>::copy(res.mut_data(), lhs.data(), lhs.size());
         return res;
       }
 
