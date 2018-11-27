@@ -216,6 +216,13 @@ template<typename ...alternativesT>
         return variant::do_check_all_of(bptr) || (variant::do_check_any_of(bptr) && ROCKET_EXPECT(bptr[rindex]));
       }
 
+    template<typename resultT>
+      static typename add_const<resultT>::type & do_lookup(resultT *const (&table)[size], size_t rindex) noexcept
+      {
+        ROCKET_ASSERT(rindex < size);
+        return *(table[rindex]);
+      }
+
     static void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_copy_construct<alternativesT>::value... };
@@ -224,7 +231,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_construct<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
+        return variant::do_lookup(s_table, rindex)(tptr, rptr);
       }
     static void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
@@ -234,7 +241,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
+        return variant::do_lookup(s_table, rindex)(tptr, rptr);
       }
     static void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
@@ -244,7 +251,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
+        return variant::do_lookup(s_table, rindex)(tptr, rptr);
       }
     static void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
@@ -254,7 +261,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
+        return variant::do_lookup(s_table, rindex)(tptr, rptr);
       }
     static void do_dispatch_destroy(size_t rindex, void *tptr)
       {
@@ -264,7 +271,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *) = { &details_variant::wrapped_destroy<alternativesT>... };
-        (*(s_table[rindex]))(tptr);
+        return variant::do_lookup(s_table, rindex)(tptr);
       }
     static void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
       {
@@ -274,7 +281,7 @@ template<typename ...alternativesT>
           return;
         }
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_construct_then_destroy<alternativesT>... };
-        (*(s_table[rindex]))(tptr, rptr);
+        return variant::do_lookup(s_table, rindex)(tptr, rptr);
       }
 
   private:
@@ -449,8 +456,7 @@ template<typename ...alternativesT>
     const type_info & type() const noexcept
       {
         static constexpr const type_info *const s_table[] = { &typeid(alternativesT)... };
-        ROCKET_ASSERT(this->m_index < size);
-        return *(s_table[this->m_index]);
+        return variant::do_lookup(s_table, this->m_index);
       }
 
     // accessors
@@ -517,16 +523,14 @@ template<typename ...alternativesT>
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
-        ROCKET_ASSERT(this->m_index < size);
-        return (*(s_table[this->m_index]))(this->m_stor, visitor);
+        return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
     template<typename visitorT>
       typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
-        ROCKET_ASSERT(this->m_index < size);
-        return (*(s_table[this->m_index]))(this->m_stor, visitor);
+        return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
 
     // 23.7.3.4, modifiers
@@ -574,8 +578,7 @@ template<typename ...alternativesT>
         if(index_old == index_new) {
           // Swap both alternatives in place.
           static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };
-          (*(s_table[index_old]))(this->m_stor, other.m_stor);
-          return;
+          return variant::do_lookup(s_table, index_old)(this->m_stor, other.m_stor);
         }
         // Swap active alternatives using an indeterminate buffer.
         storage backup;
