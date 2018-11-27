@@ -278,7 +278,7 @@ template<typename ...alternativesT>
       }
 
   private:
-    unsigned short m_index;
+    typename lowest_unsigned<size - 1>::type m_index;
     storage m_stor;
 
   public:

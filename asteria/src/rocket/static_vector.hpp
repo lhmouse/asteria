@@ -41,7 +41,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
         using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
 
       private:
-        size_type m_nelem;
+        typename lowest_unsigned<capacityT - 1>::type m_nelem;
         union { value_type m_ebase[capacityT]; };
 
       public:
@@ -136,9 +136,9 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           {
             ROCKET_ASSERT(this->size() < this->capacity());
             const auto ebase = this->m_ebase;
-            auto nelem = this->m_nelem;
+            size_t nelem = this->m_nelem;
             allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
-            this->m_nelem = (nelem += 1);
+            this->m_nelem = static_cast<decltype(this->m_nelem)>(nelem += 1);
             return ebase + nelem - 1;
           }
         void pop_back_n_unchecked(size_type n) noexcept
@@ -148,9 +148,9 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
               return;
             }
             const auto ebase = this->m_ebase;
-            auto nelem = this->m_nelem;
+            size_t nelem = this->m_nelem;
             for(auto i = n; i != 0; --i) {
-              this->m_nelem = (nelem -= 1);
+              this->m_nelem = static_cast<decltype(this->m_nelem)>(nelem -= 1);
               allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nelem);
             }
           }
@@ -380,6 +380,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
   class static_vector
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
+    static_assert(capacityT > 0, "`static_vector`s of zero elements are not allowed.");
     static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
 
   public:

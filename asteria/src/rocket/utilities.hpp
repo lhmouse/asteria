@@ -350,6 +350,32 @@ template<typename elementT, size_t countT>
     return countT;
   }
 
+    namespace details_utilities {
+
+    template<typename integerT, integerT valueT, typename ...candidatesT>
+      struct integer_selector  // Be SFINAE-friendly.
+      {
+      };
+    template<typename integerT, integerT valueT, typename firstT, typename ...remainingT>
+      struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<(static_cast<integerT>(static_cast<firstT>(valueT)) == valueT),
+                                                                                     firstT, integer_selector<integerT, valueT, remainingT...>>
+      {
+      };
+
+    }
+
+template<long long valueT>
+  struct lowest_signed : details_utilities::integer_selector<long long, valueT,
+                                                             signed char, short, int, long, long long>
+  {
+  };
+
+template<unsigned long long valueT>
+  struct lowest_unsigned : details_utilities::integer_selector<unsigned long long, valueT,
+                                                               unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
+  {
+  };
+
 }
 
 #endif
