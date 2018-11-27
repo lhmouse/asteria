@@ -358,7 +358,7 @@ template<typename elementT, size_t countT>
       };
     template<typename integerT, integerT valueT, typename firstT, typename ...remainingT>
       struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<(static_cast<integerT>(static_cast<firstT>(valueT)) == valueT),
-                                                                                     firstT, integer_selector<integerT, valueT, remainingT...>>
+                                                                                     type_identity<firstT>, integer_selector<integerT, valueT, remainingT...>>::type
       {
       };
 
