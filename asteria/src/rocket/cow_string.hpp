@@ -792,7 +792,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         return ptr + tpos;
       }
 
-    // These are generic implementations for `{find,rfind,find_{first,last}{,_not}_of}()` functions.
+    // These are generic implementations for `{{,r}find,find_{first,last}{,_not}_of}()` functions.
     template<typename predT>
       size_type do_xfind_if(size_type first, size_type last, difference_type step, predT pred) const
       {
