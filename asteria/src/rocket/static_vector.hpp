@@ -71,7 +71,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
               allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nrem);
             }
 #ifdef ROCKET_DEBUG
-            this->m_nelem = 0xCD99;
+            this->m_nelem = static_cast<decltype(this->m_nelem)>(0xBAD1BEEF);
             ::std::memset(this->m_ebase, '~', sizeof(this->m_ebase));
 #endif
           }
