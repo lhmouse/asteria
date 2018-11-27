@@ -50,7 +50,7 @@ class Reference_root
 
   public:
     Reference_root() noexcept
-      : m_stor()  // Initialize to a constant `null`.
+      : m_stor()  // Initialize to a null reference.
       {
       }
     // This constructor does not accept lvalues.
