@@ -5,7 +5,7 @@
 #include "instantiated_function.hpp"
 #include "reference.hpp"
 #include "executive_context.hpp"
-#include "statement.hpp"
+#include "../syntax/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

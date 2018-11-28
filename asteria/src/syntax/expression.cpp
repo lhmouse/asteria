@@ -5,7 +5,7 @@
 #include "expression.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
-#include "reference_stack.hpp"
+#include "../runtime/reference_stack.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

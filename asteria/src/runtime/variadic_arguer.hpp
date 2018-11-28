@@ -6,8 +6,8 @@
 
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
-#include "source_location.hpp"
 #include "reference.hpp"
+#include "../syntax/source_location.hpp"
 #include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {

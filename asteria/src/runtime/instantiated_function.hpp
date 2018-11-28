@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
-#include "block.hpp"
+#include "../syntax/block.hpp"
 
 namespace Asteria {
 

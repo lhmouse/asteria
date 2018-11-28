@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_EXCEPTION_HPP_
 
 #include "../fwd.hpp"
-#include "source_location.hpp"
 #include "value.hpp"
+#include "../syntax/source_location.hpp"
 #include <exception>
 
 namespace Asteria {

@@ -5,10 +5,10 @@
 #include "parser.hpp"
 #include "token_stream.hpp"
 #include "token.hpp"
-#include "../runtime/statement.hpp"
-#include "../runtime/block.hpp"
-#include "../runtime/xpnode.hpp"
-#include "../runtime/expression.hpp"
+#include "../syntax/statement.hpp"
+#include "../syntax/block.hpp"
+#include "../syntax/xpnode.hpp"
+#include "../syntax/expression.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

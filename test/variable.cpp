@@ -3,7 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../asteria/src/runtime/variable.hpp"
-#include "../asteria/src/runtime/source_location.hpp"
+#include "../asteria/src/syntax/source_location.hpp"
 
 using namespace Asteria;
 

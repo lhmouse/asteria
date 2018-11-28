@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_VARIABLE_HPP_
 
 #include "../fwd.hpp"
-#include "source_location.hpp"
 #include "value.hpp"
+#include "../syntax/source_location.hpp"
 #include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {

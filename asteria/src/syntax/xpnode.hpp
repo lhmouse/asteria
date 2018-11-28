@@ -1,15 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_XPNODE_HPP_
-#define ASTERIA_RUNTIME_XPNODE_HPP_
+#ifndef ASTERIA_SYNTAX_XPNODE_HPP_
+#define ASTERIA_SYNTAX_XPNODE_HPP_
 
 #include "../fwd.hpp"
-#include "value.hpp"
-#include "reference.hpp"
 #include "source_location.hpp"
 #include "expression.hpp"
 #include "block.hpp"
+#include "../runtime/value.hpp"
+#include "../runtime/reference.hpp"
 #include "../rocket/variant.hpp"
 #include "../rocket/refcounted_ptr.hpp"
 

@@ -21,26 +21,19 @@
 
 namespace Asteria {
 
-// General Utilities
+// Utilities
 class Formatter;
 class Runtime_error;
 class Exception;
 
-// Lexical Elements
+// SyntaxElements
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
 class Source_location;
 
-// Parser Objects
-class Parser_error;
-class Token;
-class Token_stream;
-class Parser;
-class Single_source_file;
-
-// Runtime Objects
+// RuntimeObjects
 class Value;
 class Abstract_opaque;
 class Shared_opaque_wrapper;
@@ -63,7 +56,14 @@ class Global_collector;
 class Variadic_arguer;
 class Instantiated_function;
 
-// Runtime Data Types
+// Compiler
+class Parser_error;
+class Token;
+class Token_stream;
+class Parser;
+class Single_source_file;
+
+// Fundamental Types
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;

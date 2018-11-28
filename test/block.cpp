@@ -2,9 +2,9 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/runtime/block.hpp"
-#include "../asteria/src/runtime/xpnode.hpp"
-#include "../asteria/src/runtime/statement.hpp"
+#include "../asteria/src/syntax/block.hpp"
+#include "../asteria/src/syntax/xpnode.hpp"
+#include "../asteria/src/syntax/statement.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 

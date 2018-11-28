@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_STATEMENT_HPP_
-#define ASTERIA_RUNTIME_STATEMENT_HPP_
+#ifndef ASTERIA_SYNTAX_STATEMENT_HPP_
+#define ASTERIA_SYNTAX_STATEMENT_HPP_
 
 #include "../fwd.hpp"
 #include "expression.hpp"

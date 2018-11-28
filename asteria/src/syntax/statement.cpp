@@ -4,12 +4,12 @@
 #include "../precompiled.hpp"
 #include "statement.hpp"
 #include "xpnode.hpp"
-#include "global_context.hpp"
-#include "analytic_context.hpp"
-#include "executive_context.hpp"
-#include "variable.hpp"
-#include "instantiated_function.hpp"
-#include "exception.hpp"
+#include "../runtime/global_context.hpp"
+#include "../runtime/analytic_context.hpp"
+#include "../runtime/executive_context.hpp"
+#include "../runtime/variable.hpp"
+#include "../runtime/instantiated_function.hpp"
+#include "../runtime/exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

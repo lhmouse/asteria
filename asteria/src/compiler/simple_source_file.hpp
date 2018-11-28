@@ -5,7 +5,7 @@
 #define ASTERIA_COMPILER_SIMPLE_SOURCE_FILE_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/block.hpp"
+#include "../syntax/block.hpp"
 
 namespace Asteria {
 

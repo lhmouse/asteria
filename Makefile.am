@@ -78,6 +78,14 @@ pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp
 
+pkginclude_syntaxdir = ${pkgincludedir}/syntax
+pkginclude_syntax_HEADERS =  \
+  asteria/src/syntax/source_location.hpp  \
+  asteria/src/syntax/xpnode.hpp  \
+  asteria/src/syntax/expression.hpp  \
+  asteria/src/syntax/statement.hpp  \
+  asteria/src/syntax/block.hpp
+
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/abstract_opaque.hpp  \
@@ -93,7 +101,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/abstract_variable_callback.hpp  \
   asteria/src/runtime/collector.hpp  \
   asteria/src/runtime/exception.hpp  \
-  asteria/src/runtime/source_location.hpp  \
   asteria/src/runtime/abstract_context.hpp  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
@@ -102,10 +109,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/variadic_arguer.hpp  \
   asteria/src/runtime/reference_stack.hpp  \
   asteria/src/runtime/reference_dictionary.hpp  \
-  asteria/src/runtime/xpnode.hpp  \
-  asteria/src/runtime/expression.hpp  \
-  asteria/src/runtime/statement.hpp  \
-  asteria/src/runtime/block.hpp  \
   asteria/src/runtime/instantiated_function.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
@@ -118,6 +121,11 @@ pkginclude_compiler_HEADERS =  \
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
+  asteria/src/syntax/source_location.cpp  \
+  asteria/src/syntax/xpnode.cpp  \
+  asteria/src/syntax/expression.cpp  \
+  asteria/src/syntax/statement.cpp  \
+  asteria/src/syntax/block.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/value.cpp  \
@@ -129,7 +137,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/abstract_variable_callback.cpp  \
   asteria/src/runtime/collector.cpp  \
   asteria/src/runtime/exception.cpp  \
-  asteria/src/runtime/source_location.cpp  \
   asteria/src/runtime/abstract_context.cpp  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \
@@ -138,10 +145,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/variadic_arguer.cpp  \
   asteria/src/runtime/reference_stack.cpp  \
   asteria/src/runtime/reference_dictionary.cpp  \
-  asteria/src/runtime/xpnode.cpp  \
-  asteria/src/runtime/expression.cpp  \
-  asteria/src/runtime/statement.cpp  \
-  asteria/src/runtime/block.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \

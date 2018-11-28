@@ -5,8 +5,8 @@
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"
+#include "../syntax/source_location.hpp"
 #include "../runtime/reference.hpp"
-#include "../runtime/source_location.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
