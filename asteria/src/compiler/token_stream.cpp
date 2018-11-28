@@ -714,14 +714,14 @@ Token_stream::~Token_stream()
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
-          std::uint64_t value = 0;
+          std::int64_t value = 0;
           for(auto i = int_begin; i != int_end; ++i) {
             const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
             if(!dptr) {
               continue;
             }
-            const auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
-            const auto bound = (std::numeric_limits<std::uint64_t>::max() - dvalue) / radix;
+            const auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
+            const auto bound = (std::numeric_limits<std::int64_t>::max() - dvalue) / radix;
             if(value > bound) {
               throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
             }
@@ -730,7 +730,7 @@ Token_stream::~Token_stream()
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              const auto bound = std::numeric_limits<std::uint64_t>::max() / exp_base;
+              const auto bound = std::numeric_limits<std::int64_t>::max() / exp_base;
               if(value > bound) {
                 throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
               }

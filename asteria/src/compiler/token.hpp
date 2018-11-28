@@ -116,7 +116,7 @@ class Token
       };
     struct S_integer_literal
       {
-        std::uint64_t value;
+        std::int64_t value;
       };
     struct S_real_literal
       {

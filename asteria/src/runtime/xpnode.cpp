@@ -264,9 +264,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return lhs ^ rhs;
       }
 
-    std::int64_t do_negate(std::int64_t rhs, bool wrap)
+    std::int64_t do_negate(std::int64_t rhs)
       {
-        if(!wrap && (rhs == INT64_MIN)) {
+        if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
         auto res = static_cast<std::uint64_t>(rhs);
@@ -721,7 +721,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             // Negate the operand to create a temporary value, then return it.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             if(ref_c.value.type() == Value::type_integer) {
-              ref_c.value = do_negate(ref_c.value.check<D_integer>(), stack_io.top().is_constant());
+              ref_c.value = do_negate(ref_c.value.check<D_integer>());
               do_set_temporary(std::move(ref_c));
               break;
             }
