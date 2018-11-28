@@ -72,7 +72,9 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return this->m_data[toff].refv.data();
+        const auto ptr = this->m_data[toff].refv.data();
+        ROCKET_ASSERT(ptr);
+        return ptr;
       }
     Reference * get_opt(const rocket::prehashed_string &name) noexcept
       {
@@ -80,7 +82,9 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        return this->m_data[toff].refv.data();
+        const auto ptr = this->m_data[toff].refv.data();
+        ROCKET_ASSERT(ptr);
+        return ptr;
       }
     std::size_t max_size() const noexcept
       {
