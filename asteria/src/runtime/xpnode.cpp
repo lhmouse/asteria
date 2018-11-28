@@ -794,6 +794,11 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
           case xop_prefix_lengthof: {
             // Return the number of elements in `rhs`.
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
+            if(ref_c.value.type() == Value::type_null) {
+              ref_c.value = D_integer(0);
+              do_set_temporary(std::move(ref_c));
+              break;
+            }
             if(ref_c.value.type() == Value::type_array) {
               ref_c.value = D_integer(ref_c.value.check<D_array>().size());
               do_set_temporary(std::move(ref_c));
