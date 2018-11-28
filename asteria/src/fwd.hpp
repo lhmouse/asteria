@@ -27,11 +27,11 @@ class Runtime_error;
 class Exception;
 
 // Syntax
+class Source_location;
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
-class Source_location;
 
 // Runtime
 class Value;
