@@ -217,9 +217,8 @@ template<typename ...alternativesT>
       }
 
     template<typename resultT>
-      static typename add_const<resultT>::type & do_lookup(resultT *const (&table)[size], size_t rindex) noexcept
+      static constexpr typename add_const<resultT>::type & do_lookup(resultT *const (&table)[size], size_t rindex) noexcept
       {
-        ROCKET_ASSERT(rindex < size);
         return *(table[rindex]);
       }
 
