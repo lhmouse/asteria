@@ -26,14 +26,14 @@ class Formatter;
 class Runtime_error;
 class Exception;
 
-// SyntaxElements
+// Syntax
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
 class Source_location;
 
-// RuntimeObjects
+// Runtime
 class Value;
 class Abstract_opaque;
 class Shared_opaque_wrapper;
