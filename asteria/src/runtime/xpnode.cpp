@@ -840,7 +840,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             const auto comp = ref_c.value.compare(rhs);
             if(comp == Value::compare_unordered) {
-              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are uncomparable.");
+              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are unordered.");
             }
             ref_c.value = comp == Value::compare_less;
             do_set_temporary(std::move(ref_c));
@@ -853,7 +853,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             const auto comp = ref_c.value.compare(rhs);
             if(comp == Value::compare_unordered) {
-              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are uncomparable.");
+              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are unordered.");
             }
             ref_c.value = comp == Value::compare_greater;
             do_set_temporary(std::move(ref_c));
@@ -866,7 +866,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             const auto comp = ref_c.value.compare(rhs);
             if(comp == Value::compare_unordered) {
-              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are uncomparable.");
+              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are unordered.");
             }
             ref_c.value = comp != Value::compare_greater;
             do_set_temporary(std::move(ref_c));
@@ -879,7 +879,7 @@ void Xpnode::evaluate(Reference_stack &stack_io, Global_context &global, const E
             Reference_root::S_temporary ref_c = { stack_io.top().read() };
             const auto comp = ref_c.value.compare(rhs);
             if(comp == Value::compare_unordered) {
-              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are uncomparable.");
+              ASTERIA_THROW_RUNTIME_ERROR("The operands `", ref_c.value, "` and `", rhs, "` are unordered.");
             }
             ref_c.value = comp != Value::compare_less;
             do_set_temporary(std::move(ref_c));
