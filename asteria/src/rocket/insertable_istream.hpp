@@ -30,7 +30,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     using size_type        = typename string_type::size_type;
     using difference_type  = typename string_type::difference_type;
 
-    enum : size_type { npos = string_type::npos };
+    static constexpr size_type npos = string_type::npos;
 
   private:
     mutable streambuf_type m_sb;
@@ -78,6 +78,11 @@ template<typename charT, typename traitsT, typename allocatorT>
         return this->rdbuf()->extract_string();
       }
   };
+
+#ifndef __cpp_inline_variables
+template<typename charT, typename traitsT, typename allocatorT>
+  constexpr typename basic_insertable_istream<charT, traitsT, allocatorT>::size_type basic_insertable_istream<charT, traitsT, allocatorT>::npos;
+#endif
 
 template<typename charT, typename traitsT, typename allocatorT>
   basic_insertable_istream<charT, traitsT, allocatorT>::~basic_insertable_istream()

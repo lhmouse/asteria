@@ -590,7 +590,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     using const_reverse_iterator  = ::std::reverse_iterator<const_iterator>;
     using reverse_iterator        = ::std::reverse_iterator<iterator>;
 
-    enum : size_type { npos = size_type(-1) };
+    static constexpr size_type npos = size_type(-1);
 
     // helpers
     using shallow     = details_cow_string::shallow<value_type, traits_type>;
@@ -1738,6 +1738,11 @@ template<typename charT, typename traitsT, typename allocatorT>
         return (1 <= this->size()) && traits_type::eq(this->back(), ch);
       }
   };
+
+#ifndef __cpp_inline_variables
+template<typename charT, typename traitsT, typename allocatorT>
+  constexpr typename basic_cow_string<charT, traitsT, allocatorT>::size_type basic_cow_string<charT, traitsT, allocatorT>::npos;
+#endif
 
 template<typename charT, typename traitsT, typename allocatorT>
   struct basic_cow_string<charT, traitsT, allocatorT>::equal_to

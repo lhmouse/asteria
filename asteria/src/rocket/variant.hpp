@@ -174,8 +174,6 @@ template<typename ...alternativesT>
     static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value, "No move constructors of alternative types are allowed to throw exceptions.");
 
   public:
-    enum : size_t { size = sizeof...(alternativesT) };
-
     template<typename targetT>
       struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
       {
@@ -185,6 +183,8 @@ template<typename ...alternativesT>
       struct type_at : details_variant::type_getter<indexT, alternativesT...>
       {
       };
+
+    static constexpr size_t type_size = sizeof...(alternativesT);
 
   private:
     struct storage
@@ -203,11 +203,11 @@ template<typename ...alternativesT>
           }
       };
 
-    static constexpr bool do_check_all_of(const bool *bptr, size_t count = size) noexcept
+    static constexpr bool do_check_all_of(const bool *bptr, size_t count = type_size) noexcept
       {
         return (count == 0) || (bptr[0] && variant::do_check_all_of(bptr + 1, count - 1));
       }
-    static constexpr bool do_check_any_of(const bool *bptr, size_t count = size) noexcept
+    static constexpr bool do_check_any_of(const bool *bptr, size_t count = type_size) noexcept
       {
         return (count != 0) && (bptr[0] || variant::do_check_all_of(bptr + 1, count - 1));
       }
@@ -217,7 +217,7 @@ template<typename ...alternativesT>
       }
 
     template<typename resultT>
-      static constexpr typename add_const<resultT>::type & do_lookup(resultT *const (&table)[size], size_t rindex) noexcept
+      static constexpr typename add_const<resultT>::type & do_lookup(resultT *const (&table)[type_size], size_t rindex) noexcept
       {
         return *(table[rindex]);
       }
@@ -284,7 +284,7 @@ template<typename ...alternativesT>
       }
 
   private:
-    typename lowest_unsigned<size - 1>::type m_index;
+    typename lowest_unsigned<type_size - 1>::type m_index;
     storage m_stor;
 
   public:
@@ -449,7 +449,7 @@ template<typename ...alternativesT>
     // 23.7.3.5, value status
     size_t index() const noexcept
       {
-        ROCKET_ASSERT(this->m_index < size);
+        ROCKET_ASSERT(this->m_index < type_size);
         return this->m_index;
       }
     const type_info & type() const noexcept
@@ -590,6 +590,11 @@ template<typename ...alternativesT>
         other.m_index = index_old;
       }
   };
+
+#ifndef __cpp_inline_variables
+template<typename ...alternativesT>
+  constexpr size_t variant<alternativesT...>::type_size;
+#endif
 
 template<typename ...alternativesT>
   void swap(variant<alternativesT...> &lhs, variant<alternativesT...> &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)

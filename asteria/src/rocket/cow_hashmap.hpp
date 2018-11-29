@@ -296,7 +296,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using size_type        = typename allocator_traits<allocator_type>::size_type;
         using difference_type  = typename allocator_traits<allocator_type>::difference_type;
 
-        enum : size_type { max_load_factor_reciprocal = 2 };
+        static constexpr size_type max_load_factor_reciprocal = 2;
 
       private:
         using allocator_base    = typename allocator_wrapper_base_for<allocator_type>::type;
@@ -645,6 +645,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               );
           }
       };
+
+#ifndef __cpp_inline_variables
+    template<typename allocatorT, typename hashT, typename eqT>
+      constexpr typename storage_handle<allocatorT, hashT, eqT>::size_type storage_handle<allocatorT, hashT, eqT>::max_load_factor_reciprocal;
+#endif
 
     // Informs the constructor of an iterator that the `bkt` parameter might point to an empty bucket.
     struct needs_adjust_tag
