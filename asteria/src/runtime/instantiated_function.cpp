@@ -18,11 +18,11 @@ rocket::cow_string Instantiated_function::describe() const
   {
     Formatter fmt;
     ASTERIA_FORMAT(fmt, "function `", this->m_name, "(");
-    auto param_it = this->m_params.begin();
-    if(param_it != this->m_params.end()) {
-      ASTERIA_FORMAT(fmt, *param_it);
-      while(++param_it != this->m_params.end()) {
-        ASTERIA_FORMAT(fmt, ", ", *param_it);
+    if(!this->m_params.empty()) {
+      auto it = this->m_params.begin();
+      ASTERIA_FORMAT(fmt, *it);
+      while(++it != this->m_params.end()) {
+        ASTERIA_FORMAT(fmt, ", ", *it);
       }
     }
     ASTERIA_FORMAT(fmt, ")` at \'", this->m_loc, "\'");
