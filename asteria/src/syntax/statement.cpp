@@ -335,8 +335,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         const auto &alt = this->m_stor.as<S_do_while>();
         for(;;) {
           // Execute the loop body.
-          Executive_context ctx_next(&ctx_io);
-          const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
+          const auto status = alt.body.execute(ref_out, global, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -346,8 +345,7 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
             return status;
           }
           // Check the loop condition.
-          // This differs from a `while` loop where the context for the loop body is destroyed before this check.
-          alt.cond.evaluate(ref_out, global, ctx_next);
+          alt.cond.evaluate(ref_out, global, ctx_io);
           if(!ref_out.read().test()) {
             break;
           }
