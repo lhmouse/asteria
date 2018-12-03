@@ -45,6 +45,8 @@ Reference_dictionary::~Reference_dictionary()
         const auto ep = rp + lhs.rdstr().size();
         auto rq = rhs.rdstr().data();
         while(rp != ep) {
+          // We only check for equality.
+          // If total ordering was requested, we would have to cast both operands to `unsigned char` for comparison.
           if(static_cast<const volatile char &>(*rp) != *rq) {
             return false;
           }
