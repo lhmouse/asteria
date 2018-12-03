@@ -33,8 +33,29 @@ Reference_dictionary::~Reference_dictionary()
         return pos;
       }
 
+    inline bool do_check_equal(const rocket::prehashed_string &lhs, const rocket::prehashed_string &rhs) noexcept
+      {
+        if(lhs.rdhash() != rhs.rdhash()) {
+          return false;
+        }
+        if(lhs.size() != rhs.size()) {
+          return false;
+        }
+        auto rp = lhs.rdstr().data();
+        const auto ep = rp + lhs.rdstr().size();
+        auto rq = rhs.rdstr().data();
+        while(rp != ep) {
+          if(static_cast<const volatile char &>(*rp) != *rq) {
+            return false;
+          }
+          ++rp;
+          ++rq;
+        }
+        return true;
+      }
+
     template<typename BucketT, typename PredT>
-      BucketT * do_linear_probe(BucketT * data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
+      BucketT * do_linear_probe(BucketT *data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
       {
         // Phase one: Probe from `first` to the end of the table.
         for(std::size_t i = first; i != nbkt; ++i) {
@@ -102,7 +123,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::prehashed_string &nam
     const auto nbkt = this->m_nbkt;
     // Looking for the variable using linear probing.
     const auto origin = do_get_origin(nbkt, name);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.name == name; });
+    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return do_check_equal(cand.name, name); });
     if(qbkt->refv.empty()) {
       // Not found.
       return -1;
@@ -121,7 +142,7 @@ Reference & Reference_dictionary::do_mutate_unchecked(const rocket::prehashed_st
     ROCKET_ASSERT(this->m_size < nbkt / 2);
     // Find a bucket for the new element.
     const auto origin = do_get_origin(nbkt, name);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.name == name; });
+    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return do_check_equal(cand.name, name); });
     if(!qbkt->refv.empty()) {
       // Already exists.
       return qbkt->refv.front();

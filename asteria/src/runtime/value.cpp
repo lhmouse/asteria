@@ -152,14 +152,17 @@ Value::Compare Value::compare(const Value &other) const noexcept
       case type_array: {
         const auto &alt_lhs = this->check<D_array>();
         const auto &alt_rhs = other.check<D_array>();
-        auto pl = alt_lhs.begin(), el = alt_lhs.end();
-        auto pr = alt_rhs.begin(), er = alt_rhs.end();
+        auto pl = alt_lhs.begin();
+        const auto el = alt_lhs.end();
+        auto pr = alt_rhs.begin();
+        const auto er = alt_rhs.end();
         while((pl != el) && (pr != er)) {
           const auto r = pl->compare(*pr);
           if(r != Value::compare_equal) {
             return r;
           }
-          ++pl, ++pr;
+          ++pl;
+          ++pr;
         }
         return do_three_way_compare(el - pl, er - pr);
       }

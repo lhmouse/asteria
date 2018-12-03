@@ -34,7 +34,7 @@ Variable_hashset::~Variable_hashset()
       }
 
     template<typename BucketT, typename PredT>
-      BucketT * do_linear_probe(BucketT * data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
+      BucketT * do_linear_probe(BucketT *data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
       {
         // Phase one: Probe from `first` to the end of the table.
         for(std::size_t i = first; i != nbkt; ++i) {
