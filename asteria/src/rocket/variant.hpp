@@ -538,13 +538,13 @@ template<typename ...alternativesT>
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = indexT;
-        if(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value) {
+        if(is_nothrow_constructible<typename type_at<index_new>::type, paramsT &&...>::value) {
           // Destroy the old alternative.
           variant::do_dispatch_destroy(index_old, this->m_stor);
           // Construct the alternative in place.
           noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor), ::std::forward<paramsT>(params)...);
           this->m_index = index_new;
-          return *this;
+          return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
         }
         // Make a backup.
         storage backup;
