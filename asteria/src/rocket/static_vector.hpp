@@ -597,7 +597,10 @@ template<typename valueT, size_t capacityT, typename allocatorT>
       }
     void clear() noexcept
       {
-        this->m_sth.pop_back_n_unchecked(this->size());
+        if(ROCKET_EXPECT(this->empty())) {
+          return;
+        }
+        this->m_sth.pop_back_n_unchecked(this->m_sth.size());
       }
 
     // element access
