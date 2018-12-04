@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "reference_dictionary.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

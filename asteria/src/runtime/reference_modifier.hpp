@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_REFERENCE_MODIFIER_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 

@@ -10,8 +10,6 @@
 #include "block.hpp"
 #include "../runtime/value.hpp"
 #include "../runtime/reference.hpp"
-#include "../rocket/variant.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
-#include "../rocket/refcounted_ptr.hpp"
-#include <functional>
 
 namespace Asteria {
 

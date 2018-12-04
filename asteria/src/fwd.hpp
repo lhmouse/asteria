@@ -9,6 +9,7 @@
 #endif
 
 #include <type_traits> // so many...
+#include <exception> // std::exception, std::terminate()
 #include <utility> // std::move(), std::forward()
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
@@ -17,7 +18,10 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
+#include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
+#include "rocket/variant.hpp"
+#include "rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

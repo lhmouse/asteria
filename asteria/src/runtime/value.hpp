@@ -7,8 +7,6 @@
 #include "../fwd.hpp"
 #include "shared_opaque_wrapper.hpp"
 #include "shared_function_wrapper.hpp"
-#include "../rocket/variant.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

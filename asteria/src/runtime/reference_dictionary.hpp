@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
-#include "../rocket/static_vector.hpp"
 
 namespace Asteria {
 

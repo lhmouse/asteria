@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_ABSTRACT_FUNCTION_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

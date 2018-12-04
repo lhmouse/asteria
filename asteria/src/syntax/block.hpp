@@ -5,7 +5,6 @@
 #define ASTERIA_SYNTAX_BLOCK_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 

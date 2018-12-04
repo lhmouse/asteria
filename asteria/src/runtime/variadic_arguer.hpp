@@ -8,7 +8,6 @@
 #include "abstract_function.hpp"
 #include "reference.hpp"
 #include "../syntax/source_location.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
