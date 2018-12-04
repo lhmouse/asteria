@@ -9,8 +9,9 @@
 #endif
 
 #include <type_traits> // so many...
+#include <functional> // std::reference_wrapper<>, std::ref()
 #include <exception> // std::exception, std::terminate()
-#include <utility> // std::move(), std::forward()
+#include <utility> // std::pair<>, std::move(), std::forward()
 #include <cstddef> // std::nullptr_t
 #include <cstdint> // std::int64_t, std::uint64_t
 #include "rocket/preprocessor_utilities.h"
