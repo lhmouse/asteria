@@ -77,7 +77,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
     if(ROCKET_UNEXPECT(data_old)) {
       const auto nbkt_old = this->m_nbkt;
       for(std::size_t i = 0; i != nbkt_old; ++i) {
-        if(data_old[i].var) {
+        if(ROCKET_UNEXPECT(data_old[i].var)) {
           // Find a bucket for it.
           const auto origin = do_get_origin(nbkt, data_old[i].var);
           const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });

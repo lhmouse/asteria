@@ -60,7 +60,7 @@ class Reference_dictionary
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          if(!data[i].refv.empty()) {
+          if(ROCKET_UNEXPECT(!data[i].refv.empty())) {
             std::forward<FuncT>(func)(data[i].name, data[i].refv.front());
           }
         }
