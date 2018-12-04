@@ -15,10 +15,10 @@ class Executive_context : public Abstract_context
   private:
     const Executive_context *const m_parent_opt;
     Reference_dictionary m_dict;
+    Reference m_self;
     Reference m_file;
     Reference m_line;
     Reference m_func;
-    Reference m_self;
     Reference m_varg;
 
   public:
@@ -27,6 +27,9 @@ class Executive_context : public Abstract_context
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Executive_context);
+
+  private:
+    const Reference * do_get_predefined_reference_opt(const rocket::prehashed_string &name) const;
 
   public:
     bool is_analytic() const noexcept override;

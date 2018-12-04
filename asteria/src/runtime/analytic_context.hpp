@@ -24,6 +24,9 @@ class Analytic_context : public Abstract_context
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Analytic_context);
 
+  private:
+    const Reference * do_get_predefined_reference_opt(const rocket::prehashed_string &name) const;
+
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;

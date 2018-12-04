@@ -24,33 +24,37 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Executive_context::get_named_reference_opt(const rocket::prehashed_string &name) const
+const Reference * Executive_context::do_get_predefined_reference_opt(const rocket::prehashed_string &name) const
   {
-    // Check for overriden references.
-    const auto qref = this->m_dict.get_opt(name);
-    if(qref) {
-      return qref;
+    if(!name.rdstr().starts_with("__")) {
+      return nullptr;
     }
-    // Deal with pre-defined variables.
-    if(name.rdstr().starts_with("__")) {
-      // If you add new entries or alter existent entries here, remember to update `Analytic_context` as well.
-      if(name == "__file") {
-        return &(this->m_file);
-      }
-      if(name == "__line") {
-        return &(this->m_line);
-      }
-      if(name == "__func") {
-        return &(this->m_func);
-      }
-      if(name == "__this") {
-        return &(this->m_self);
-      }
-      if(name == "__varg") {
-        return &(this->m_varg);
-      }
+    // If you add new entries or alter existent entries here, remember to update `Executive_context` as well.
+    if(name == "__this") {
+      return &(this->m_self);
+    }
+    if(name == "__file") {
+      return &(this->m_file);
+    }
+    if(name == "__line") {
+      return &(this->m_line);
+    }
+    if(name == "__func") {
+      return &(this->m_func);
+    }
+    if(name == "__varg") {
+      return &(this->m_varg);
     }
     return nullptr;
+  }
+
+const Reference * Executive_context::get_named_reference_opt(const rocket::prehashed_string &name) const
+  {
+    auto qref = this->m_dict.get_opt(name);
+    if(ROCKET_UNEXPECT(!qref)) {
+      qref = this->do_get_predefined_reference_opt(name);
+    }
+    return qref;
   }
 
 Reference & Executive_context::mutate_named_reference(const rocket::prehashed_string &name)
@@ -71,12 +75,12 @@ Reference & Executive_context::mutate_named_reference(const rocket::prehashed_st
 
 void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
+    // Set the `this` parameter.
+    this->m_self = std::move(self);
     // Set pre-defined variables.
     do_set_constant(this->m_file, D_string(loc.get_file()));
     do_set_constant(this->m_line, D_integer(loc.get_line()));
     do_set_constant(this->m_func, D_string(name));
-    // Set the `this` parameter.
-    this->m_self = std::move(self);
     // Set other parameters.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto &param = params.at(i);

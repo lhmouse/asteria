@@ -22,33 +22,37 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Analytic_context::get_named_reference_opt(const rocket::prehashed_string &name) const
+const Reference * Analytic_context::do_get_predefined_reference_opt(const rocket::prehashed_string &name) const
   {
-    // Check for overriden references.
-    const auto qref = this->m_dict.get_opt(name);
-    if(qref) {
-      return qref;
+    if(!name.rdstr().starts_with("__")) {
+      return nullptr;
     }
-    // Deal with pre-defined variables.
-    if(name.rdstr().starts_with("__")) {
-      // If you add new entries or alter existent entries here, remember to update `Executive_context` as well.
-      if(name == "__file") {
-        return &(this->m_dummy);
-      }
-      if(name == "__line") {
-        return &(this->m_dummy);
-      }
-      if(name == "__func") {
-        return &(this->m_dummy);
-      }
-      if(name == "__this") {
-        return &(this->m_dummy);
-      }
-      if(name == "__varg") {
-        return &(this->m_dummy);
-      }
+    // If you add new entries or alter existent entries here, remember to update `Executive_context` as well.
+    if(name == "__this") {
+      return &(this->m_dummy);
+    }
+    if(name == "__file") {
+      return &(this->m_dummy);
+    }
+    if(name == "__line") {
+      return &(this->m_dummy);
+    }
+    if(name == "__func") {
+      return &(this->m_dummy);
+    }
+    if(name == "__varg") {
+      return &(this->m_dummy);
     }
     return nullptr;
+  }
+
+const Reference * Analytic_context::get_named_reference_opt(const rocket::prehashed_string &name) const
+  {
+    auto qref = this->m_dict.get_opt(name);
+    if(ROCKET_UNEXPECT(!qref)) {
+      qref = this->do_get_predefined_reference_opt(name);
+    }
+    return qref;
   }
 
 Reference & Analytic_context::mutate_named_reference(const rocket::prehashed_string &name)
