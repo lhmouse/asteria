@@ -589,7 +589,15 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_break: {
         const auto &ralt = this->m_stor.as<S_break>();
-        switch(rocket::weaken_enum(ralt.target)) {
+        switch(ralt.target) {
+          case Statement::target_unspec: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
+                  return Block::status_break_unspec;
+                },
+              &ralt);
+          }
           case Statement::target_switch: {
             return rocket::bind_first(
               [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
@@ -614,17 +622,22 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 },
               &ralt);
           }
+          default: {
+            ASTERIA_TERMINATE("An unknown target scope type `", ralt.target, "` has been encountered.");
+          }
         }
-        return rocket::bind_first(
-          [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
-            {
-              return Block::status_break_unspec;
-            },
-          &ralt);
       }
       case index_continue: {
         const auto &ralt = this->m_stor.as<S_continue>();
-        switch(rocket::weaken_enum(ralt.target)) {
+        switch(ralt.target) {
+          case Statement::target_unspec: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
+                  return Block::status_continue_unspec;
+                },
+              &ralt);
+          }
           case Statement::target_switch: {
             ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
           }
@@ -644,13 +657,10 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 },
               &ralt);
           }
+          default: {
+            ASTERIA_TERMINATE("An unknown target scope type `", ralt.target, "` has been encountered.");
+          }
         }
-        return rocket::bind_first(
-          [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
-            {
-              return Block::status_continue_unspec;
-            },
-          &ralt);
       }
       case index_throw: {
         return rocket::bind_first(
