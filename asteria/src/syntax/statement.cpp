@@ -588,44 +588,69 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
           &(this->m_stor.as<S_try>()));
       }
       case index_break: {
-        return rocket::bind_first(
-          [](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
-            {
-              const auto &alt = *static_cast<const S_break *>(qalt);
-              switch(rocket::weaken_enum(alt.target)) {
-                case Statement::target_switch: {
+        const auto &alt = this->m_stor.as<S_break>();
+        switch(rocket::weaken_enum(alt.target)) {
+          case Statement::target_switch: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
                   return Block::status_break_switch;
-                }
-                case Statement::target_while: {
+                },
+              &alt);
+          }
+          case Statement::target_while: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
                   return Block::status_break_while;
-                }
-                case Statement::target_for: {
+                },
+              &alt);
+          }
+          case Statement::target_for: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
                   return Block::status_break_for;
-                }
-              }
+                },
+              &alt);
+          }
+        }
+        return rocket::bind_first(
+          [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+            {
               return Block::status_break_unspec;
             },
-          &(this->m_stor.as<S_break>()));
+          &alt);
       }
       case index_continue: {
-        return rocket::bind_first(
-          [](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
-            {
-              const auto &alt = *static_cast<const S_continue *>(qalt);
-              switch(rocket::weaken_enum(alt.target)) {
-                case Statement::target_switch: {
-                  ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
-                }
-                case Statement::target_while: {
+        const auto &alt = this->m_stor.as<S_continue>();
+        switch(rocket::weaken_enum(alt.target)) {
+          case Statement::target_switch: {
+            ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
+          }
+          case Statement::target_while: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
                   return Block::status_continue_while;
-                }
-                case Statement::target_for: {
+                },
+              &alt);
+          }
+          case Statement::target_for: {
+            return rocket::bind_first(
+              [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+                {
                   return Block::status_continue_for;
-                }
-              }
+                },
+              &alt);
+          }
+        }
+        return rocket::bind_first(
+          [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+            {
               return Block::status_continue_unspec;
             },
-          &(this->m_stor.as<S_continue>()));
+          &alt);
       }
       case index_throw: {
         return rocket::bind_first(
