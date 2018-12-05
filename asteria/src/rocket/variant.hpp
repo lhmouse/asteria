@@ -246,7 +246,10 @@ template<typename ...alternativesT>
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_copy_assign<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
-          ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
+          // They may overlap in case of self assignment.
+          if(ROCKET_EXPECT(tptr != rptr)) {
+            ::std::memcpy(tptr, rptr, sizeof(storage));
+          }
           return;
         }
         static constexpr void (*const s_table[])(void *, const void *) = { &details_variant::wrapped_copy_assign<alternativesT>... };
@@ -256,7 +259,10 @@ template<typename ...alternativesT>
       {
         static constexpr bool s_fast_call[] = { details_variant::trivial_move_assign<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
-          ::std::memmove(tptr, rptr, sizeof(storage));  // They may overlap in case of self assignment.
+          // They may overlap in case of self assignment.
+          if(ROCKET_EXPECT(tptr != rptr)) {
+            ::std::memcpy(tptr, rptr, sizeof(storage));
+          }
           return;
         }
         static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_move_assign<alternativesT>... };
