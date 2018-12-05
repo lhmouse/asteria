@@ -14,6 +14,15 @@ Expression::~Expression()
   {
   }
 
+void Expression::do_compile()
+  {
+    ROCKET_ASSERT(this->m_jinsts.empty());
+    this->m_jinsts.reserve(this->m_nodes.size());
+    for(const auto &node : this->m_nodes) {
+      this->m_jinsts.emplace_back(node.compile());
+    }
+  }
+
 Expression Expression::bind(const Global_context &global, const Analytic_context &ctx) const
   {
     rocket::cow_vector<Xpnode> nodes_bnd;
@@ -32,12 +41,12 @@ bool Expression::empty() const noexcept
 
 bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
-    if(this->m_nodes.empty()) {
+    if(this->m_jinsts.empty()) {
       return false;
     }
     const auto stack_size_old = stack_io.size();
-    for(const auto &node : this->m_nodes) {
-      node.evaluate(stack_io, global, ctx);
+    for(const auto &jinst : this->m_jinsts) {
+      jinst(stack_io, global, ctx);
       ROCKET_ASSERT(stack_io.size() >= stack_size_old);
     }
     if(stack_io.size() - stack_size_old != 1) {

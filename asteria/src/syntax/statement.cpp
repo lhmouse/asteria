@@ -491,14 +491,13 @@ Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context 
         } catch(std::exception &stdex) {
           // Prepare the backtrace as an `array` for processing by code inside `catch`.
           D_array backtrace;
-          const auto push_backtrace =
-            [&](const Source_location &loc)
-              {
-                D_object elem;
-                elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
-                elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
-                backtrace.emplace_back(std::move(elem));
-              };
+          const auto push_backtrace = [&](const Source_location &loc)
+            {
+              D_object elem;
+              elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
+              elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
+              backtrace.emplace_back(std::move(elem));
+            };
           // The exception variable shall not outlast the `catch` body.
           Executive_context ctx_next(&ctx_io);
           try {

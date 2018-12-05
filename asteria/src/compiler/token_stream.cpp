@@ -513,9 +513,10 @@ Token_stream::~Token_stream()
                 throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_utf_code_point_invalid);
               }
               // Encode it.
-              const auto encode_one =
-                [&](unsigned shift, unsigned mask)
-                  { value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask))); };
+              const auto encode_one = [&](unsigned shift, unsigned mask)
+                {
+                  value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask)));
+                };
               if(code_point < 0x80) {
                 encode_one( 0, 0xFF);
                 break;

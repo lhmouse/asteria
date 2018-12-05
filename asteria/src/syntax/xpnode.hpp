@@ -152,7 +152,7 @@ class Xpnode
 
   public:
     Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;
-    void evaluate(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const;
+    rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *> compile() const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

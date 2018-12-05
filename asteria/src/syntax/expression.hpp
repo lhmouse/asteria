@@ -12,17 +12,22 @@ class Expression
   {
   private:
     rocket::cow_vector<Xpnode> m_nodes;
+    rocket::cow_vector<rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *>> m_jinsts;
 
   public:
     Expression() noexcept
       : m_nodes()
       {
       }
-    Expression(rocket::cow_vector<Xpnode> &&nodes) noexcept
+    Expression(rocket::cow_vector<Xpnode> &&nodes)
       : m_nodes(std::move(nodes))
       {
+        this->do_compile();
       }
     ROCKET_COPYABLE_DESTRUCTOR(Expression);
+
+  private:
+    void do_compile();
 
   public:
     Expression bind(const Global_context &global, const Analytic_context &ctx) const;
