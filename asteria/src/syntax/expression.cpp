@@ -16,7 +16,7 @@ Expression::~Expression()
 
 void Expression::do_compile()
   {
-    ROCKET_ASSERT(this->m_jinsts.empty());
+    this->m_jinsts.clear();
     this->m_jinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
       this->m_jinsts.emplace_back(node.compile());

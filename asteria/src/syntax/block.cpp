@@ -19,7 +19,7 @@ Block::~Block()
 
 void Block::do_compile()
   {
-    ROCKET_ASSERT(this->m_jinsts.empty());
+    this->m_jinsts.clear();
     this->m_jinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
       this->m_jinsts.emplace_back(stmt.compile());
