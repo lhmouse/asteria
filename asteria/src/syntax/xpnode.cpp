@@ -559,7 +559,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               Reference_root::S_constant ref_c = { alt.value };
               stack_io.push(std::move(ref_c));
             },
-          static_cast<const void *>(&(this->m_stor.as<S_literal>())));
+          &(this->m_stor.as<S_literal>()));
       }
       case index_named_reference: {
         return rocket::bind_first(
@@ -574,7 +574,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               // Push the reference found.
               stack_io.push(pair.second);
             },
-          static_cast<const void *>(&(this->m_stor.as<S_named_reference>())));
+          &(this->m_stor.as<S_named_reference>()));
       }
       case index_bound_reference: {
         return rocket::bind_first(
@@ -584,7 +584,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               // Push the reference stored.
               stack_io.push(alt.ref);
             },
-          static_cast<const void *>(&(this->m_stor.as<S_bound_reference>())));
+          &(this->m_stor.as<S_bound_reference>()));
       }
       case index_closure_function: {
         return rocket::bind_first(
@@ -596,7 +596,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
               stack_io.push(std::move(ref_c));
             },
-          static_cast<const void *>(&(this->m_stor.as<S_closure_function>())));
+          &(this->m_stor.as<S_closure_function>()));
       }
       case index_branch: {
         return rocket::bind_first(
@@ -622,7 +622,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
                 stack_io.top() = std::move(result);
               }
             },
-          static_cast<const void *>(&(this->m_stor.as<S_branch>())));
+          &(this->m_stor.as<S_branch>()));
       }
       case index_function_call: {
         return rocket::bind_first(
@@ -660,7 +660,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
                 throw except;
               }
             },
-          static_cast<const void *>(&(this->m_stor.as<S_function_call>())));
+          &(this->m_stor.as<S_function_call>()));
       }
       case index_subscript: {
         return rocket::bind_first(
@@ -692,7 +692,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
                 }
               }
             },
-          static_cast<const void *>(&(this->m_stor.as<S_subscript>())));
+          &(this->m_stor.as<S_subscript>()));
       }
       case index_operator_rpn: {
         return rocket::bind_first(
@@ -1215,7 +1215,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
                 }
               }
             },
-          static_cast<const void *>(&(this->m_stor.as<S_operator_rpn>())));
+          &(this->m_stor.as<S_operator_rpn>()));
       }
       case index_unnamed_array: {
         return rocket::bind_first(
@@ -1231,7 +1231,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               Reference_root::S_temporary ref_c = { std::move(array) };
               stack_io.push(std::move(ref_c));
             },
-          static_cast<const void *>(&(this->m_stor.as<S_unnamed_array>())));
+          &(this->m_stor.as<S_unnamed_array>()));
       }
       case index_unnamed_object: {
         return rocket::bind_first(
@@ -1247,7 +1247,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
               Reference_root::S_temporary ref_c = { std::move(object) };
               stack_io.push(std::move(ref_c));
             },
-          static_cast<const void *>(&(this->m_stor.as<S_unnamed_object>())));
+          &(this->m_stor.as<S_unnamed_object>()));
       }
       case index_coalescence: {
         return rocket::bind_first(
@@ -1277,7 +1277,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
                 stack_io.top() = std::move(result);
               }
             },
-          static_cast<const void *>(&(this->m_stor.as<S_coalescence>())));
+          &(this->m_stor.as<S_coalescence>()));
       }
       default: {
         ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");

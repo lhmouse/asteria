@@ -234,7 +234,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               alt.expr.evaluate(ref_out, global, ctx_io);
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_expr>())));
+          &(this->m_stor.as<S_expr>()));
       }
       case index_block: {
         return rocket::bind_first(
@@ -244,7 +244,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               // Execute the body.
               return alt.body.execute(ref_out, global, ctx_io);
             },
-          static_cast<const void *>(&(this->m_stor.as<S_block>())));
+          &(this->m_stor.as<S_block>()));
       }
       case index_var_def: {
         return rocket::bind_first(
@@ -264,7 +264,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               var->reset(std::move(value), alt.immutable);
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_var_def>())));
+          &(this->m_stor.as<S_var_def>()));
       }
       case index_func_def: {
         return rocket::bind_first(
@@ -283,7 +283,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               var->reset(D_function(std::move(func)), true);
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_func_def>())));
+          &(this->m_stor.as<S_func_def>()));
       }
       case index_if: {
         return rocket::bind_first(
@@ -300,7 +300,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_if>())));
+          &(this->m_stor.as<S_if>()));
       }
       case index_switch: {
         return rocket::bind_first(
@@ -359,7 +359,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_switch>())));
+          &(this->m_stor.as<S_switch>()));
       }
       case index_do_while: {
         return rocket::bind_first(
@@ -385,7 +385,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_do_while>())));
+          &(this->m_stor.as<S_do_while>()));
       }
       case index_while: {
         return rocket::bind_first(
@@ -411,7 +411,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_while>())));
+          &(this->m_stor.as<S_while>()));
       }
       case index_for: {
         return rocket::bind_first(
@@ -447,7 +447,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_for>())));
+          &(this->m_stor.as<S_for>()));
       }
       case index_for_each: {
         return rocket::bind_first(
@@ -526,7 +526,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_for_each>())));
+          &(this->m_stor.as<S_for_each>()));
       }
       case index_try: {
         return rocket::bind_first(
@@ -585,7 +585,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_next;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_try>())));
+          &(this->m_stor.as<S_try>()));
       }
       case index_break: {
         return rocket::bind_first(
@@ -605,7 +605,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_break_unspec;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_break>())));
+          &(this->m_stor.as<S_break>()));
       }
       case index_continue: {
         return rocket::bind_first(
@@ -625,7 +625,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_continue_unspec;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_continue>())));
+          &(this->m_stor.as<S_continue>()));
       }
       case index_throw: {
         return rocket::bind_first(
@@ -638,7 +638,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               ASTERIA_DEBUG_LOG("Throwing exception: ", value);
               throw Exception(alt.loc, std::move(value));
             },
-          static_cast<const void *>(&(this->m_stor.as<S_throw>())));
+          &(this->m_stor.as<S_throw>()));
       }
       case index_return: {
         return rocket::bind_first(
@@ -654,7 +654,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
               }
               return Block::status_return;
             },
-          static_cast<const void *>(&(this->m_stor.as<S_return>())));
+          &(this->m_stor.as<S_return>()));
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
