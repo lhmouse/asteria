@@ -23,6 +23,7 @@
 #include "rocket/prehashed_string.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/refcounted_ptr.hpp"
+#include "rocket/bind_first.hpp"
 
 namespace Asteria {
 

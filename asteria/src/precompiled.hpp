@@ -53,5 +53,6 @@
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/integer_sequence.hpp"
+#include "rocket/bind_first.hpp"
 
 #endif

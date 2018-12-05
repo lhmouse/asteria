@@ -59,7 +59,8 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/refcounted_ptr.hpp  \
   asteria/src/rocket/static_vector.hpp  \
   asteria/src/rocket/prehashed_string.hpp  \
-  asteria/src/rocket/integer_sequence.hpp
+  asteria/src/rocket/integer_sequence.hpp  \
+  asteria/src/rocket/bind_first.hpp
 
 lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \
