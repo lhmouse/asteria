@@ -17,6 +17,15 @@ Block::~Block()
   {
   }
 
+void Block::do_compile()
+  {
+    ROCKET_ASSERT(this->m_jinsts.empty());
+    this->m_jinsts.reserve(this->m_stmts.size());
+    for(const auto &stmt : this->m_stmts) {
+      this->m_jinsts.emplace_back(stmt.compile());
+    }
+  }
+
 void Block::fly_over_in_place(Abstract_context &ctx_io) const
   {
     for(const auto &stmt : this->m_stmts) {
@@ -37,8 +46,8 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
   {
-    for(const auto &stmt : this->m_stmts) {
-      const auto status = stmt.execute_in_place(ref_out, ctx_io, global);
+    for(const auto &jinst : this->m_jinsts) {
+      const auto status = jinst(ref_out, ctx_io, global);
       if(status != status_next) {
         return status;
       }

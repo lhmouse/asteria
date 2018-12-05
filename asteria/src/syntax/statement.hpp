@@ -156,7 +156,7 @@ class Statement
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Statement bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
-    Block::Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;
+    rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> compile() const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

@@ -26,6 +26,7 @@ class Block
 
   private:
     rocket::cow_vector<Statement> m_stmts;
+    rocket::cow_vector<rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *>> m_jinsts;
 
   public:
     Block() noexcept
@@ -35,8 +36,12 @@ class Block
     Block(rocket::cow_vector<Statement> &&stmts) noexcept
       : m_stmts(std::move(stmts))
       {
+        this->do_compile();
       }
     ROCKET_COPYABLE_DESTRUCTOR(Block);
+
+  private:
+    void do_compile();
 
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;

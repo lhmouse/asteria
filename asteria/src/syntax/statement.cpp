@@ -222,364 +222,439 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
     }
   }
 
-Block::Status Statement::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
+rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> Statement::compile() const
   {
     switch(Index(this->m_stor.index())) {
       case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
-        // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_expr *>(qalt);
+              // Evaluate the expression.
+              alt.expr.evaluate(ref_out, global, ctx_io);
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_expr>())));
       }
       case index_block: {
-        const auto &alt = this->m_stor.as<S_block>();
-        // Execute the body.
-        return alt.body.execute(ref_out, global, ctx_io);
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_block *>(qalt);
+              // Execute the body.
+              return alt.body.execute(ref_out, global, ctx_io);
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_block>())));
       }
       case index_var_def: {
-        const auto &alt = this->m_stor.as<S_var_def>();
-        // Create a dummy reference for further name lookups.
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
-        global.track_variable(var);
-        Reference_root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, &global, "variable", alt.name, std::move(ref_c));
-        // Create a variable using the initializer.
-        alt.init.evaluate(ref_out, global, ctx_io);
-        auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
-        var->reset(std::move(value), alt.immutable);
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_var_def *>(qalt);
+              // Create a dummy reference for further name lookups.
+              // A variable becomes visible before its initializer, where it is initialized to `null`.
+              const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+              global.track_variable(var);
+              Reference_root::S_variable ref_c = { var };
+              do_safe_set_named_reference(ctx_io, &global, "variable", alt.name, std::move(ref_c));
+              // Create a variable using the initializer.
+              alt.init.evaluate(ref_out, global, ctx_io);
+              auto value = ref_out.read();
+              ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
+              var->reset(std::move(value), alt.immutable);
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_var_def>())));
       }
       case index_func_def: {
-        const auto &alt = this->m_stor.as<S_func_def>();
-        // Create a dummy reference for further name lookups.
-        // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
-        global.track_variable(var);
-        Reference_root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, &global, "function", alt.name, std::move(ref_c));
-        // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
-        ASTERIA_DEBUG_LOG("Creating named function: ", func.describe());
-        var->reset(D_function(std::move(func)), true);
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_func_def *>(qalt);
+              // Create a dummy reference for further name lookups.
+              // A function becomes visible before its definition, where it is initialized to `null`.
+              const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+              global.track_variable(var);
+              Reference_root::S_variable ref_c = { var };
+              do_safe_set_named_reference(ctx_io, &global, "function", alt.name, std::move(ref_c));
+              // Instantiate the function here.
+              auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
+              ASTERIA_DEBUG_LOG("Creating named function: ", func.describe());
+              var->reset(D_function(std::move(func)), true);
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_func_def>())));
       }
       case index_if: {
-        const auto &alt = this->m_stor.as<S_if>();
-        // Evaluate the condition and pick a branch.
-        alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        const auto status = branch.get().execute(ref_out, global, ctx_io);
-        if(status != Block::status_next) {
-          // Forward anything unexpected to the caller.
-          return status;
-        }
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_if *>(qalt);
+              // Evaluate the condition and pick a branch.
+              alt.cond.evaluate(ref_out, global, ctx_io);
+              const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+              const auto status = branch.get().execute(ref_out, global, ctx_io);
+              if(status != Block::status_next) {
+                // Forward anything unexpected to the caller.
+                return status;
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_if>())));
       }
       case index_switch: {
-        const auto &alt = this->m_stor.as<S_switch>();
-        // Evaluate the control expression.
-        alt.ctrl.evaluate(ref_out, global, ctx_io);
-        const auto value_ctrl = ref_out.read();
-        // Note that all `switch` clauses share the same context.
-        // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
-        // and there is no match `case` clause, we will have to jump back into half of the scope. To simplify design,
-        // a nested scope is created when a `default` clause is encountered. When jumping to the `default` scope, we
-        // simply discard the new scope.
-        Executive_context ctx_first(&ctx_io);
-        Executive_context ctx_second(&ctx_first);
-        auto ctx_next = std::ref(ctx_first);
-        // There is a 'match' at the end of the clause array initially.
-        auto match = alt.clauses.end();
-        // This is a pointer to where new references are created.
-        auto ctx_test = ctx_next;
-        for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
-          if(it->first.empty()) {
-            // This is a `default` clause.
-            if(match != alt.clauses.end()) {
-              ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses exist in the same `switch` statement.");
-            }
-            // From now on, all declarations go into the second context.
-            match = it;
-            ctx_test = std::ref(ctx_second);
-          } else {
-            // This is a `case` clause.
-            it->first.evaluate(ref_out, global, ctx_next);
-            const auto value_comp = ref_out.read();
-            if(value_ctrl.compare(value_comp) == Value::compare_equal) {
-              // If this is a match, we resume from wherever `ctx_test` is pointing.
-              match = it;
-              ctx_next = ctx_test;
-              break;
-            }
-          }
-          // Create null references for declarations in the clause skipped.
-          it->second.fly_over_in_place(ctx_test);
-        }
-        // Iterate from the match clause to the end of the body, falling through clause boundaries if any.
-        for(auto it = match; it != alt.clauses.end(); ++it) {
-          const auto status = it->second.execute_in_place(ref_out, ctx_next, global);
-          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_switch })) {
-            // Break out of the body as requested.
-            break;
-          }
-          if(status != Block::status_next) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-        }
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_switch *>(qalt);
+              // Evaluate the control expression.
+              alt.ctrl.evaluate(ref_out, global, ctx_io);
+              const auto value_ctrl = ref_out.read();
+              // Note that all `switch` clauses share the same context.
+              // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
+              // and there is no match `case` clause, we will have to jump back into half of the scope. To simplify design,
+              // a nested scope is created when a `default` clause is encountered. When jumping to the `default` scope, we
+              // simply discard the new scope.
+              Executive_context ctx_first(&ctx_io);
+              Executive_context ctx_second(&ctx_first);
+              auto ctx_next = std::ref(ctx_first);
+              // There is a 'match' at the end of the clause array initially.
+              auto match = alt.clauses.end();
+              // This is a pointer to where new references are created.
+              auto ctx_test = ctx_next;
+              for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
+                if(it->first.empty()) {
+                  // This is a `default` clause.
+                  if(match != alt.clauses.end()) {
+                    ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses exist in the same `switch` statement.");
+                  }
+                  // From now on, all declarations go into the second context.
+                  match = it;
+                  ctx_test = std::ref(ctx_second);
+                } else {
+                  // This is a `case` clause.
+                  it->first.evaluate(ref_out, global, ctx_next);
+                  const auto value_comp = ref_out.read();
+                  if(value_ctrl.compare(value_comp) == Value::compare_equal) {
+                    // If this is a match, we resume from wherever `ctx_test` is pointing.
+                    match = it;
+                    ctx_next = ctx_test;
+                    break;
+                  }
+                }
+                // Create null references for declarations in the clause skipped.
+                it->second.fly_over_in_place(ctx_test);
+              }
+              // Iterate from the match clause to the end of the body, falling through clause boundaries if any.
+              for(auto it = match; it != alt.clauses.end(); ++it) {
+                const auto status = it->second.execute_in_place(ref_out, ctx_next, global);
+                if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_switch })) {
+                  // Break out of the body as requested.
+                  break;
+                }
+                if(status != Block::status_next) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_switch>())));
       }
       case index_do_while: {
-        const auto &alt = this->m_stor.as<S_do_while>();
-        for(;;) {
-          // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_io);
-          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
-            // Break out of the body as requested.
-            break;
-          }
-          if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-          // Check the loop condition.
-          alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!ref_out.read().test()) {
-            break;
-          }
-        }
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_do_while *>(qalt);
+              for(;;) {
+                // Execute the loop body.
+                const auto status = alt.body.execute(ref_out, global, ctx_io);
+                if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
+                  // Break out of the body as requested.
+                  break;
+                }
+                if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+                // Check the loop condition.
+                alt.cond.evaluate(ref_out, global, ctx_io);
+                if(!ref_out.read().test()) {
+                  break;
+                }
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_do_while>())));
       }
       case index_while: {
-        const auto &alt = this->m_stor.as<S_while>();
-        for(;;) {
-          // Check the loop condition.
-          alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!ref_out.read().test()) {
-            break;
-          }
-          // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_io);
-          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
-            // Break out of the body as requested.
-            break;
-          }
-          if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-        }
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_while *>(qalt);
+              for(;;) {
+                // Check the loop condition.
+                alt.cond.evaluate(ref_out, global, ctx_io);
+                if(!ref_out.read().test()) {
+                  break;
+                }
+                // Execute the loop body.
+                const auto status = alt.body.execute(ref_out, global, ctx_io);
+                if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
+                  // Break out of the body as requested.
+                  break;
+                }
+                if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_while })) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_while>())));
       }
       case index_for: {
-        const auto &alt = this->m_stor.as<S_for>();
-        // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
-        Executive_context ctx_next(&ctx_io);
-        // Execute the initializer. The status is ignored.
-        ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
-        alt.init.execute_in_place(ref_out, ctx_next, global);
-        ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
-        for(;;) {
-          // Check the loop condition.
-          if(!alt.cond.empty()) {
-            alt.cond.evaluate(ref_out, global, ctx_next);
-            if(!ref_out.read().test()) {
-              break;
-            }
-          }
-          // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_next);
-          if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
-            // Break out of the body as requested.
-            break;
-          }
-          if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-          // Evaluate the loop step expression.
-          alt.step.evaluate(ref_out, global, ctx_next);
-        }
-        return Block::status_next;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_for *>(qalt);
+              // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
+              Executive_context ctx_next(&ctx_io);
+              // Execute the initializer. The status is ignored.
+              ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
+              alt.init.execute_in_place(ref_out, ctx_next, global);
+              ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
+              for(;;) {
+                // Check the loop condition.
+                if(!alt.cond.empty()) {
+                  alt.cond.evaluate(ref_out, global, ctx_next);
+                  if(!ref_out.read().test()) {
+                    break;
+                  }
+                }
+                // Execute the loop body.
+                const auto status = alt.body.execute(ref_out, global, ctx_next);
+                if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
+                  // Break out of the body as requested.
+                  break;
+                }
+                if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+                // Evaluate the loop step expression.
+                alt.step.evaluate(ref_out, global, ctx_next);
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_for>())));
       }
       case index_for_each: {
-        const auto &alt = this->m_stor.as<S_for_each>();
-        // The key and mapped variables shall not outlast the loop body.
-        Executive_context ctx_for(&ctx_io);
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, Reference_root::S_null());
-        do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, Reference_root::S_null());
-        // Calculate the range using the initializer.
-        Reference mapped;
-        alt.init.evaluate(mapped, global, ctx_for);
-        const auto range_value = mapped.read();
-        switch(rocket::weaken_enum(range_value.type())) {
-          case Value::type_array: {
-            const auto &array = range_value.check<D_array>();
-            for(auto it = array.begin(); it != array.end(); ++it) {
-              Executive_context ctx_next(&ctx_for);
-              // Initialize the per-loop key constant.
-              auto key = D_integer(it - array.begin());
-              ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_root::S_constant ref_c = { std::move(key) };
-              do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, std::move(ref_c));
-              // Initialize the per-loop value reference.
-              Reference_modifier::S_array_index refmod_c = { it - array.begin() };
-              mapped.zoom_in(std::move(refmod_c));
-              do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
-              mapped.zoom_out();
-              // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
-              if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
-                // Break out of the body as requested.
-                break;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_for_each *>(qalt);
+              // The key and mapped variables shall not outlast the loop body.
+              Executive_context ctx_for(&ctx_io);
+              // A variable becomes visible before its initializer, where it is initialized to `null`.
+              do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, Reference_root::S_null());
+              do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, Reference_root::S_null());
+              // Calculate the range using the initializer.
+              Reference mapped;
+              alt.init.evaluate(mapped, global, ctx_for);
+              const auto range_value = mapped.read();
+              switch(rocket::weaken_enum(range_value.type())) {
+                case Value::type_array: {
+                  const auto &array = range_value.check<D_array>();
+                  for(auto it = array.begin(); it != array.end(); ++it) {
+                    Executive_context ctx_next(&ctx_for);
+                    // Initialize the per-loop key constant.
+                    auto key = D_integer(it - array.begin());
+                    ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
+                    Reference_root::S_constant ref_c = { std::move(key) };
+                    do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, std::move(ref_c));
+                    // Initialize the per-loop value reference.
+                    Reference_modifier::S_array_index refmod_c = { it - array.begin() };
+                    mapped.zoom_in(std::move(refmod_c));
+                    do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, mapped);
+                    ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
+                    mapped.zoom_out();
+                    // Execute the loop body.
+                    const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
+                    if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
+                      // Break out of the body as requested.
+                      break;
+                    }
+                    if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
+                      // Forward anything unexpected to the caller.
+                      return status;
+                    }
+                  }
+                  break;
+                }
+                case Value::type_object: {
+                  const auto &object = range_value.check<D_object>();
+                  for(auto it = object.begin(); it != object.end(); ++it) {
+                    Executive_context ctx_next(&ctx_for);
+                    // Initialize the per-loop key constant.
+                    auto key = D_string(it->first);
+                    ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
+                    Reference_root::S_constant ref_c = { std::move(key) };
+                    do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, std::move(ref_c));
+                    // Initialize the per-loop value reference.
+                    Reference_modifier::S_object_key refmod_c = { it->first };
+                    mapped.zoom_in(std::move(refmod_c));
+                    do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, mapped);
+                    ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
+                    mapped.zoom_out();
+                    // Execute the loop body.
+                    const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
+                    if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
+                      // Break out of the body as requested.
+                      break;
+                    }
+                    if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
+                      // Forward anything unexpected to the caller.
+                      return status;
+                    }
+                  }
+                  break;
+                }
+                default: {
+                  ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
+                }
               }
-              if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
-                // Forward anything unexpected to the caller.
-                return status;
-              }
-            }
-            break;
-          }
-          case Value::type_object: {
-            const auto &object = range_value.check<D_object>();
-            for(auto it = object.begin(); it != object.end(); ++it) {
-              Executive_context ctx_next(&ctx_for);
-              // Initialize the per-loop key constant.
-              auto key = D_string(it->first);
-              ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_root::S_constant ref_c = { std::move(key) };
-              do_safe_set_named_reference(ctx_for, &global, "`for each` key", alt.key_name, std::move(ref_c));
-              // Initialize the per-loop value reference.
-              Reference_modifier::S_object_key refmod_c = { it->first };
-              mapped.zoom_in(std::move(refmod_c));
-              do_safe_set_named_reference(ctx_for, &global, "`for each` reference", alt.mapped_name, mapped);
-              ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
-              mapped.zoom_out();
-              // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
-              if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
-                // Break out of the body as requested.
-                break;
-              }
-              if(rocket::is_none_of(status, { Block::status_next, Block::status_continue_unspec, Block::status_continue_for })) {
-                // Forward anything unexpected to the caller.
-                return status;
-              }
-            }
-            break;
-          }
-          default: {
-            ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
-          }
-        }
-        return Block::status_next;
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_for_each>())));
       }
       case index_try: {
-        const auto &alt = this->m_stor.as<S_try>();
-        try {
-          // Execute the `try` body.
-          // This is straightforward and hopefully zero-cost if no exception is thrown.
-          const auto status = alt.body_try.execute(ref_out, global, ctx_io);
-          if(status != Block::status_next) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-        } catch(std::exception &stdex) {
-          // Prepare the backtrace as an `array` for processing by code inside `catch`.
-          D_array backtrace;
-          const auto push_backtrace = [&](const Source_location &loc)
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
-              D_object elem;
-              elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
-              elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
-              backtrace.emplace_back(std::move(elem));
-            };
-          // The exception variable shall not outlast the `catch` body.
-          Executive_context ctx_next(&ctx_io);
-          try {
-            // Translate the exception as needed.
-            throw;
-          } catch(Exception &except) {
-            // Handle an `Asteria::Exception`.
-            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
-            Reference_root::S_temporary ref_c = { except.get_value() };
-            do_safe_set_named_reference(ctx_next, &global, "exception", alt.except_name, std::move(ref_c));
-            // Unpack the backtrace array.
-            backtrace.reserve(1 + except.get_backtrace().size());
-            push_backtrace(except.get_location());
-            std::for_each(except.get_backtrace().begin(), except.get_backtrace().end(), push_backtrace);
-          } catch(...) {
-            // Handle an `std::exception`.
-            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", stdex.what());
-            Reference_root::S_temporary ref_c = { D_string(stdex.what()) };
-            do_safe_set_named_reference(ctx_next, &global, "exception", alt.except_name, std::move(ref_c));
-            // We say the exception was thrown from native code.
-            push_backtrace(Exception(stdex).get_location());
-          }
-          ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.mutate_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
-          // Execute the `catch` body.
-          const auto status = alt.body_catch.execute(ref_out, global, ctx_next);
-          if(status != Block::status_next) {
-            // Forward anything unexpected to the caller.
-            return status;
-          }
-        }
-        return Block::status_next;
+              const auto &alt = *static_cast<const S_try *>(qalt);
+              try {
+                // Execute the `try` body.
+                // This is straightforward and hopefully zero-cost if no exception is thrown.
+                const auto status = alt.body_try.execute(ref_out, global, ctx_io);
+                if(status != Block::status_next) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+              } catch(std::exception &stdex) {
+                // Prepare the backtrace as an `array` for processing by code inside `catch`.
+                D_array backtrace;
+                const auto push_backtrace = [&](const Source_location &loc)
+                  {
+                    D_object elem;
+                    elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
+                    elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
+                    backtrace.emplace_back(std::move(elem));
+                  };
+                // The exception variable shall not outlast the `catch` body.
+                Executive_context ctx_next(&ctx_io);
+                try {
+                  // Translate the exception as needed.
+                  throw;
+                } catch(Exception &except) {
+                  // Handle an `Asteria::Exception`.
+                  ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
+                  Reference_root::S_temporary ref_c = { except.get_value() };
+                  do_safe_set_named_reference(ctx_next, &global, "exception", alt.except_name, std::move(ref_c));
+                  // Unpack the backtrace array.
+                  backtrace.reserve(1 + except.get_backtrace().size());
+                  push_backtrace(except.get_location());
+                  std::for_each(except.get_backtrace().begin(), except.get_backtrace().end(), push_backtrace);
+                } catch(...) {
+                  // Handle an `std::exception`.
+                  ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", stdex.what());
+                  Reference_root::S_temporary ref_c = { D_string(stdex.what()) };
+                  do_safe_set_named_reference(ctx_next, &global, "exception", alt.except_name, std::move(ref_c));
+                  // We say the exception was thrown from native code.
+                  push_backtrace(Exception(stdex).get_location());
+                }
+                ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
+                Reference_root::S_temporary ref_c = { std::move(backtrace) };
+                ctx_next.mutate_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
+                // Execute the `catch` body.
+                const auto status = alt.body_catch.execute(ref_out, global, ctx_next);
+                if(status != Block::status_next) {
+                  // Forward anything unexpected to the caller.
+                  return status;
+                }
+              }
+              return Block::status_next;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_try>())));
       }
       case index_break: {
-        const auto &alt = this->m_stor.as<S_break>();
-        switch(rocket::weaken_enum(alt.target)) {
-          case Statement::target_switch: {
-            return Block::status_break_switch;
-          }
-          case Statement::target_while: {
-            return Block::status_break_while;
-          }
-          case Statement::target_for: {
-            return Block::status_break_for;
-          }
-        }
-        return Block::status_break_unspec;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+            {
+              const auto &alt = *static_cast<const S_break *>(qalt);
+              switch(rocket::weaken_enum(alt.target)) {
+                case Statement::target_switch: {
+                  return Block::status_break_switch;
+                }
+                case Statement::target_while: {
+                  return Block::status_break_while;
+                }
+                case Statement::target_for: {
+                  return Block::status_break_for;
+                }
+              }
+              return Block::status_break_unspec;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_break>())));
       }
       case index_continue: {
-        const auto &alt = this->m_stor.as<S_continue>();
-        switch(rocket::weaken_enum(alt.target)) {
-          case Statement::target_switch: {
-            ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
-          }
-          case Statement::target_while: {
-            return Block::status_continue_while;
-          }
-          case Statement::target_for: {
-            return Block::status_continue_for;
-          }
-        }
-        return Block::status_continue_unspec;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+            {
+              const auto &alt = *static_cast<const S_continue *>(qalt);
+              switch(rocket::weaken_enum(alt.target)) {
+                case Statement::target_switch: {
+                  ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
+                }
+                case Statement::target_while: {
+                  return Block::status_continue_while;
+                }
+                case Statement::target_for: {
+                  return Block::status_continue_for;
+                }
+              }
+              return Block::status_continue_unspec;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_continue>())));
       }
       case index_throw: {
-        const auto &alt = this->m_stor.as<S_throw>();
-        // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
-        auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Throwing exception: ", value);
-        throw Exception(alt.loc, std::move(value));
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global) -> Block::Status
+            {
+              const auto &alt = *static_cast<const S_throw *>(qalt);
+              // Evaluate the expression.
+              alt.expr.evaluate(ref_out, global, ctx_io);
+              auto value = ref_out.read();
+              ASTERIA_DEBUG_LOG("Throwing exception: ", value);
+              throw Exception(alt.loc, std::move(value));
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_throw>())));
       }
       case index_return: {
-        const auto &alt = this->m_stor.as<S_return>();
-        // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
-        // If the result refers a variable and the statement should pass it by value, replace it with a temporary value.
-        if(!alt.by_ref && !ref_out.is_constant() && !ref_out.is_temporary()) {
-          Reference_root::S_temporary ref_c = { ref_out.read() };
-          ref_out = std::move(ref_c);
-        }
-        return Block::status_return;
+        return rocket::bind_first(
+          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+            {
+              const auto &alt = *static_cast<const S_return *>(qalt);
+              // Evaluate the expression.
+              alt.expr.evaluate(ref_out, global, ctx_io);
+              // If the result refers a variable and the statement should pass it by value, replace it with a temporary value.
+              if(!alt.by_ref && !ref_out.is_constant() && !ref_out.is_temporary()) {
+                Reference_root::S_temporary ref_c = { ref_out.read() };
+                ref_out = std::move(ref_c);
+              }
+              return Block::status_return;
+            },
+          static_cast<const void *>(&(this->m_stor.as<S_return>())));
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
