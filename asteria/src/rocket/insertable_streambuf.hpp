@@ -5,7 +5,7 @@
 #define ROCKET_INSERTABLE_STREAMBUF_HPP_
 
 #include "cow_string.hpp"
-#include <streambuf> // std::ios_base, std::basic_streambuf<>, std::streamsize
+#include <streambuf>  // std::ios_base, std::basic_streambuf<>, std::streamsize
 
 namespace rocket {
 

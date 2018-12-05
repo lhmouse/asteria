@@ -5,7 +5,7 @@
 #define ROCKET_INSERTABLE_IOSTREAM_HPP_
 
 #include "insertable_streambuf.hpp"
-#include <istream> // std::basic_iostream<>
+#include <istream>  // std::basic_iostream<>
 
 namespace rocket {
 

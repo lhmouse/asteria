@@ -4,7 +4,7 @@
 #ifndef ROCKET_VARIANT_HPP_
 #define ROCKET_VARIANT_HPP_
 
-#include <cstring> // std::memset()
+#include <cstring>  // std::memset()
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"

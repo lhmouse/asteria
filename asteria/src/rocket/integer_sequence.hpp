@@ -4,7 +4,7 @@
 #ifndef ROCKET_INTEGER_SEQUENCE_HPP_
 #define ROCKET_INTEGER_SEQUENCE_HPP_
 
-#include <cstddef> // std::size_t
+#include <cstddef>  // std::size_t
 
 namespace rocket {
 

@@ -4,7 +4,7 @@
 #ifndef ROCKET_PREHASHED_STRING_HPP_
 #define ROCKET_PREHASHED_STRING_HPP_
 
-#include <iosfwd> // std::basic_ostream<>
+#include <iosfwd>  // std::basic_ostream<>
 #include "compatibility.h"
 #include "cow_string.hpp"
 

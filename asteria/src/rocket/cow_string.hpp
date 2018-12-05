@@ -4,12 +4,12 @@
 #ifndef ROCKET_COW_STRING_HPP_
 #define ROCKET_COW_STRING_HPP_
 
-#include <string> // std::char_traits<>
-#include <istream> // std::streamsize, std::ios_base, std::basic_istream<>
-#include <locale> // std::isspace()
-#include <ostream> // std::basic_ostream<>
-#include <iterator> // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring> // std::memset()
+#include <string>  // std::char_traits<>
+#include <istream>  // std::streamsize, std::ios_base, std::basic_istream<>
+#include <locale>  // std::isspace()
+#include <ostream>  // std::basic_ostream<>
+#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
+#include <cstring>  // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"

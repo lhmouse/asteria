@@ -4,15 +4,15 @@
 #ifndef ROCKET_UTILITIES_HPP_
 #define ROCKET_UTILITIES_HPP_
 
-#include <type_traits> // so many...
-#include <iterator> // std::iterator_traits<>
-#include <utility> // std::swap(), std::move(), std::forward()
-#include <memory> // std::allocator<>, std::addressof(), std::default_delete<>
-#include <new> // placement new
-#include <initializer_list> // std::initializer_list<>
-#include <ios> // std::ios_base, std::basic_ios<>
-#include <functional> // std::hash<>, std::equal_to<>
-#include <cstddef> // std::size_t, std::ptrdiff_t
+#include <type_traits>  // so many...
+#include <iterator>  // std::iterator_traits<>
+#include <utility>  // std::swap(), std::move(), std::forward()
+#include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
+#include <new>  // placement new
+#include <initializer_list>  // std::initializer_list<>
+#include <ios>  // std::ios_base, std::basic_ios<>
+#include <functional>  // std::hash<>, std::equal_to<>
+#include <cstddef>  // std::size_t, std::ptrdiff_t
 
 namespace rocket {
 

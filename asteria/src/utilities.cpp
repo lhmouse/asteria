@@ -3,13 +3,13 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#include <iostream> // std::cerr
-#include <cstdio> // std::snprintf()
+#include <iostream>  // std::cerr
+#include <cstdio>  // std::snprintf()
 
 #ifdef _WIN32
-#  include <windows.h> // ::SYSTEMTIME, ::GetSystemTime()
+#  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else
-#  include <time.h> // ::timespec, ::clock_gettime(), ::localtime()
+#  include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #endif
 
 namespace Asteria {

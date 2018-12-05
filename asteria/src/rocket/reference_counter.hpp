@@ -4,8 +4,8 @@
 #ifndef ROCKET_REFERENCE_COUNTER_HPP_
 #define ROCKET_REFERENCE_COUNTER_HPP_
 
-#include <atomic> // std::atomic<>
-#include <exception> // std::terminate()
+#include <atomic>  // std::atomic<>
+#include <exception>  // std::terminate()
 #include "compatibility.h"
 #include "assert.hpp"
 

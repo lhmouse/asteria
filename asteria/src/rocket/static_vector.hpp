@@ -4,8 +4,8 @@
 #ifndef ROCKET_STATIC_VECTOR_HPP_
 #define ROCKET_STATIC_VECTOR_HPP_
 
-#include <iterator> // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring> // std::memset()
+#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
+#include <cstring>  // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
 #include "throw.hpp"
