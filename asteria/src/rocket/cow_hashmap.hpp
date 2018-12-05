@@ -5,6 +5,7 @@
 #define ROCKET_COW_HASHMAP_HPP_
 
 #include <iterator> // std::iterator_traits<>, std::forward_iterator_tag
+#include <tuple> // std::forward_as_tuple()
 #include <cstring> // std::memset()
 #include "compatibility.h"
 #include "assert.hpp"
