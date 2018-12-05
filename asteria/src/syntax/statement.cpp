@@ -588,15 +588,15 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
           &(this->m_stor.as<S_try>()));
       }
       case index_break: {
-        const auto &alt = this->m_stor.as<S_break>();
-        switch(rocket::weaken_enum(alt.target)) {
+        const auto &ralt = this->m_stor.as<S_break>();
+        switch(rocket::weaken_enum(ralt.target)) {
           case Statement::target_switch: {
             return rocket::bind_first(
               [](const void * /*qalt*/, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
                 {
                   return Block::status_break_switch;
                 },
-              &alt);
+              &ralt);
           }
           case Statement::target_while: {
             return rocket::bind_first(
@@ -604,7 +604,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 {
                   return Block::status_break_while;
                 },
-              &alt);
+              &ralt);
           }
           case Statement::target_for: {
             return rocket::bind_first(
@@ -612,7 +612,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 {
                   return Block::status_break_for;
                 },
-              &alt);
+              &ralt);
           }
         }
         return rocket::bind_first(
@@ -620,11 +620,11 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
             {
               return Block::status_break_unspec;
             },
-          &alt);
+          &ralt);
       }
       case index_continue: {
-        const auto &alt = this->m_stor.as<S_continue>();
-        switch(rocket::weaken_enum(alt.target)) {
+        const auto &ralt = this->m_stor.as<S_continue>();
+        switch(rocket::weaken_enum(ralt.target)) {
           case Statement::target_switch: {
             ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
           }
@@ -634,7 +634,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 {
                   return Block::status_continue_while;
                 },
-              &alt);
+              &ralt);
           }
           case Statement::target_for: {
             return rocket::bind_first(
@@ -642,7 +642,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
                 {
                   return Block::status_continue_for;
                 },
-              &alt);
+              &ralt);
           }
         }
         return rocket::bind_first(
@@ -650,7 +650,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
             {
               return Block::status_continue_unspec;
             },
-          &alt);
+          &ralt);
       }
       case index_throw: {
         return rocket::bind_first(
