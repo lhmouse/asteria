@@ -476,21 +476,22 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         rocket::cow_string res;
         const auto count = static_cast<std::uint64_t>(rhs);
-        if(count != 0) {
-          if(lhs.size() > res.max_size() / count) {
-            ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
+        if(count == 0) {
+          return res;
+        }
+        if(lhs.size() > res.max_size() / count) {
+          ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
+        }
+        res.reserve(lhs.size() * static_cast<std::size_t>(count));
+        auto mask = std::numeric_limits<std::size_t>::max() / 2 + 1;
+        for(;;) {
+          if(count & mask) {
+            res.append(lhs);
           }
-          res.reserve(lhs.size() * static_cast<std::size_t>(count));
-          auto mask = std::numeric_limits<std::size_t>::max() / 2 + 1;
-          do {
-            if(count & mask) {
-              res.append(lhs);
-            }
-            if((mask >>= 1) == 0) {
-              break;
-            }
-            res.append(res);
-          } while(true);
+          if((mask >>= 1) == 0) {
+            break;
+          }
+          res.append(res);
         }
         return res;
       }
