@@ -552,7 +552,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
     switch(Index(this->m_stor.index())) {
       case index_literal: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context &/*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context &/*ctx*/)
             {
               const auto &alt = *static_cast<const S_literal *>(qalt);
               // Push the constant.
@@ -563,7 +563,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_named_reference: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
             {
               const auto &alt = *static_cast<const S_named_reference *>(qalt);
               // Look for the reference in the current context.
@@ -578,7 +578,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_bound_reference: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_bound_reference *>(qalt);
               // Push the reference stored.
@@ -588,7 +588,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_closure_function: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
             {
               const auto &alt = *static_cast<const S_closure_function *>(qalt);
               // Instantiate the closure function.
@@ -600,7 +600,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_branch: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
             {
               const auto &alt = *static_cast<const S_branch *>(qalt);
               // Pick a branch basing on the condition.
@@ -626,7 +626,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_function_call: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_function_call *>(qalt);
               // Allocate the argument vector.
@@ -664,7 +664,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_subscript: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_subscript *>(qalt);
               // Get the subscript.
@@ -696,7 +696,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_operator_rpn: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_operator_rpn *>(qalt);
               const auto do_set_temporary = [&](Reference_root::S_temporary &&ref_c)
@@ -1219,7 +1219,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_unnamed_array: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_unnamed_array *>(qalt);
               // Pop references to create an array.
@@ -1235,7 +1235,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_unnamed_object: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+          [](const void *qalt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
             {
               const auto &alt = *static_cast<const S_unnamed_object *>(qalt);
               // Pop references to create an object.
@@ -1251,7 +1251,7 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
       }
       case index_coalescence: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
             {
               const auto &alt = *static_cast<const S_coalescence *>(qalt);
               // Pick a branch basing on the condition.

@@ -12,6 +12,7 @@
 #include <initializer_list>  // std::initializer_list<>
 #include <ios>  // std::ios_base, std::basic_ios<>
 #include <functional>  // std::hash<>, std::equal_to<>
+#include <tuple>  // std::tuple<>
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 
 namespace rocket {
@@ -62,7 +63,10 @@ using ::std::integral_constant;
 using ::std::conditional;
 using ::std::decay;
 using ::std::common_type;
+using ::std::is_constructible;
+using ::std::is_assignable;
 using ::std::is_nothrow_constructible;
+using ::std::is_nothrow_assignable;
 using ::std::is_nothrow_default_constructible;
 using ::std::is_nothrow_copy_constructible;
 using ::std::is_nothrow_copy_assignable;
@@ -105,6 +109,7 @@ using ::std::streamsize;
 using ::std::equal_to;
 using ::std::hash;
 using ::std::pair;
+using ::std::tuple;
 
 template<typename typeT>
   struct type_identity

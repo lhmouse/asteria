@@ -227,7 +227,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
     switch(Index(this->m_stor.index())) {
       case index_expr: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_expr *>(qalt);
               // Evaluate the expression.
@@ -238,7 +238,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_block: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_block *>(qalt);
               // Execute the body.
@@ -248,7 +248,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_var_def: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_var_def *>(qalt);
               // Create a dummy reference for further name lookups.
@@ -268,7 +268,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_func_def: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_func_def *>(qalt);
               // Create a dummy reference for further name lookups.
@@ -287,7 +287,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_if: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_if *>(qalt);
               // Evaluate the condition and pick a branch.
@@ -304,7 +304,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_switch: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_switch *>(qalt);
               // Evaluate the control expression.
@@ -363,7 +363,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_do_while: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_do_while *>(qalt);
               for(;;) {
@@ -389,7 +389,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_while: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_while *>(qalt);
               for(;;) {
@@ -415,7 +415,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_for: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_for *>(qalt);
               // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
@@ -451,7 +451,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_for_each: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_for_each *>(qalt);
               // The key and mapped variables shall not outlast the loop body.
@@ -530,7 +530,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_try: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_try *>(qalt);
               try {
@@ -589,7 +589,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_break: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+          [](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
             {
               const auto &alt = *static_cast<const S_break *>(qalt);
               switch(rocket::weaken_enum(alt.target)) {
@@ -609,7 +609,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_continue: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
+          [](const void *qalt, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
             {
               const auto &alt = *static_cast<const S_continue *>(qalt);
               switch(rocket::weaken_enum(alt.target)) {
@@ -629,7 +629,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_throw: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global) -> Block::Status
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global) -> Block::Status
             {
               const auto &alt = *static_cast<const S_throw *>(qalt);
               // Evaluate the expression.
@@ -642,7 +642,7 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_return: {
         return rocket::bind_first(
-          +[](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+          [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
             {
               const auto &alt = *static_cast<const S_return *>(qalt);
               // Evaluate the expression.
