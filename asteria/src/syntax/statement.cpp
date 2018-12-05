@@ -224,21 +224,21 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     namespace {
 
-    Block::Status do_compile(const Statement::S_expression &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_expression &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_block &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_block &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Execute the body.
         const auto status = alt.body.execute(ref_out, global, ctx_io);
         return status;
       }
 
-    Block::Status do_compile(const Statement::S_variable &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_variable &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -254,7 +254,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
@@ -269,7 +269,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_if &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_if &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, global, ctx_io);
@@ -278,7 +278,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return status;
       }
 
-    Block::Status do_compile(const Statement::S_switch &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_switch &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the control expression.
         alt.ctrl.evaluate(ref_out, global, ctx_io);
@@ -333,7 +333,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_do_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_do_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         for(;;) {
           // Execute the loop body.
@@ -355,7 +355,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         for(;;) {
           // Check the loop condition.
@@ -377,7 +377,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_for &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_for &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Executive_context ctx_next(&ctx_io);
@@ -409,7 +409,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_for_each &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_for_each &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // The key and mapped variables shall not outlast the loop body.
         Executive_context ctx_for(&ctx_io);
@@ -484,7 +484,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_try &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_try &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         Block::Status status;
         try {
@@ -536,7 +536,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_throw &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_throw &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
@@ -545,7 +545,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         throw Exception(alt.loc, std::move(value));
       }
 
-    Block::Status do_compile(const Statement::S_return &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute(const Statement::S_return &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
@@ -559,7 +559,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_context &, Global_context &) = do_compile>
+    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_context &, Global_context &) = do_execute>
       rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> do_bind(const AltT &alt)
       {
         return rocket::bind_first(
