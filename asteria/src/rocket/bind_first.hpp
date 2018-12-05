@@ -29,8 +29,8 @@ template<typename funcT, typename ...firstT>
       }
 
   private:
-    template<size_t ...indicesT, typename ...restT>
-      constexpr result_type_for<restT...> do_unpack_and_invoke(index_sequence<indicesT...>, restT &&...rest) const
+    template<typename ...restT, size_t ...indicesT>
+      constexpr result_type_for<restT...> do_unpack_forward_then_invoke(index_sequence<indicesT...>, restT &...rest) const
       {
         return this->m_func(::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
       }
@@ -39,7 +39,7 @@ template<typename funcT, typename ...firstT>
     template<typename ...restT>
       constexpr result_type_for<restT...> operator()(restT &&...rest) const
       {
-        return this->do_unpack_and_invoke(index_sequence_for<restT...>(), ::std::forward<restT>(rest)...);
+        return this->do_unpack_forward_then_invoke<restT...>(index_sequence_for<firstT...>(), rest...);
       }
   };
 
