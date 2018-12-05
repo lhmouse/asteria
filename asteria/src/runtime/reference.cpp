@@ -64,4 +64,14 @@ Value Reference::do_unset_with_modifiers() const
     return this->m_mods.at(epos).apply_and_erase(cur);
   }
 
+void Reference::enumerate_variables(const Abstract_variable_callback &callback) const
+  {
+    this->m_root.enumerate_variables(callback);
+  }
+
+void Reference::dispose_variable(Global_context &global) const noexcept
+  {
+    this->m_root.dispose_variable(global);
+  }
+
 }

@@ -87,21 +87,16 @@ class Reference
       {
         if(this->m_mods.empty()) {
           // If there is no modifier, set `*this` to a null reference.
-          return *this = Reference_root::S_null();
+          this->m_root = Reference_root::S_null();
+          return *this;
         }
         // Drop the last modifier.
         this->m_mods.pop_back();
         return *this;
       }
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const
-      {
-        this->m_root.enumerate_variables(callback);
-      }
-    void dispose_variable(Global_context &global) const noexcept
-      {
-        this->m_root.dispose_variable(global);
-      }
+    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void dispose_variable(Global_context &global) const noexcept;
   };
 
 }
