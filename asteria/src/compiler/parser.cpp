@@ -1162,7 +1162,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_var_def stmt_c = { std::move(loc), std::move(name), false, std::move(init) };
+        Statement::S_variable stmt_c = { std::move(loc), std::move(name), false, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1192,7 +1192,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_var_def stmt_c = { std::move(loc), std::move(name), true, std::move(init) };
+        Statement::S_variable stmt_c = { std::move(loc), std::move(name), true, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1224,7 +1224,7 @@ Parser::~Parser()
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Statement::S_func_def stmt_c = { std::move(loc), std::move(name), std::move(params), std::move(body) };
+        Statement::S_function stmt_c = { std::move(loc), std::move(name), std::move(params), std::move(body) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1240,7 +1240,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_expr stmt_c = { std::move(expr) };
+        Statement::S_expression stmt_c = { std::move(expr) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }

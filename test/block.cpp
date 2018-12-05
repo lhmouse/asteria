@@ -16,7 +16,7 @@ int main()
     // var res = 0;
     rocket::cow_vector<Xpnode> expr;
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
-    text.emplace_back(Statement::S_var_def { Source_location(rocket::cow_string::shallow("nonexistent"), 1), rocket::cow_string::shallow("res"), false, std::move(expr) });
+    text.emplace_back(Statement::S_variable { Source_location(rocket::cow_string::shallow("nonexistent"), 1), rocket::cow_string::shallow("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(1) });
@@ -26,7 +26,7 @@ int main()
     expr.emplace_back(Xpnode::S_literal { D_integer(5) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
     expr.emplace_back(Xpnode::S_unnamed_array { 4 });
-    text.emplace_back(Statement::S_var_def { Source_location(rocket::cow_string::shallow("nonexistent"), 2), rocket::cow_string::shallow("data"), true, std::move(expr) });
+    text.emplace_back(Statement::S_variable { Source_location(rocket::cow_string::shallow("nonexistent"), 2), rocket::cow_string::shallow("data"), true, std::move(expr) });
     // for(each k, v in data) {
     //   res += k * v;
     // }
@@ -39,7 +39,7 @@ int main()
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     rocket::cow_vector<Statement> body;
-    body.emplace_back(Statement::S_expr { std::move(expr) });
+    body.emplace_back(Statement::S_expression { std::move(expr) });
     text.emplace_back(Statement::S_for_each { rocket::cow_string::shallow("k"), rocket::cow_string::shallow("v"), std::move(range), std::move(body) });
     // for(var j = 0; j <= 3; ++j) {
     //   res += data[j];
@@ -54,7 +54,7 @@ int main()
     expr.emplace_back(Xpnode::S_named_reference { rocket::cow_string::shallow("j") });
     expr.emplace_back(Xpnode::S_subscript { rocket::cow_string::shallow("") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
-    body.emplace_back(Statement::S_expr { std::move(expr) });
+    body.emplace_back(Statement::S_expression { std::move(expr) });
     expr.clear();
     expr.emplace_back(Xpnode::S_named_reference { rocket::cow_string::shallow("data") });
     expr.emplace_back(Xpnode::S_named_reference { rocket::cow_string::shallow("j") });
@@ -67,7 +67,7 @@ int main()
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     rocket::cow_vector<Statement> init;
-    init.emplace_back(Statement::S_var_def { Source_location(rocket::cow_string::shallow("nonexistent"), 3), rocket::cow_string::shallow("j"), false, std::move(expr) });
+    init.emplace_back(Statement::S_variable { Source_location(rocket::cow_string::shallow("nonexistent"), 3), rocket::cow_string::shallow("j"), false, std::move(expr) });
     rocket::cow_vector<Xpnode> cond;
     cond.emplace_back(Xpnode::S_named_reference { rocket::cow_string::shallow("j") });
     cond.emplace_back(Xpnode::S_literal { D_integer(3) });

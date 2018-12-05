@@ -41,18 +41,18 @@ Statement::~Statement()
 void Statement::fly_over_in_place(Abstract_context &ctx_io) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_expr:
+      case index_expression:
       case index_block: {
         return;
       }
-      case index_var_def: {
-        const auto &alt = this->m_stor.as<S_var_def>();
+      case index_variable: {
+        const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, nullptr, "skipped variable", alt.name, Reference_root::S_null());
         return;
       }
-      case index_func_def: {
-        const auto &alt = this->m_stor.as<S_func_def>();
+      case index_function: {
+        const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, nullptr, "skipped function", alt.name, Reference_root::S_null());
         return;
@@ -79,11 +79,11 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
 Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_context &global) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
+      case index_expression: {
+        const auto &alt = this->m_stor.as<S_expression>();
         // Bind the expression recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_expr alt_bnd = { std::move(expr_bnd) };
+        Statement::S_expression alt_bnd = { std::move(expr_bnd) };
         return std::move(alt_bnd);
       }
       case index_block: {
@@ -93,24 +93,24 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         Statement::S_block alt_bnd = { std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-      case index_var_def: {
-        const auto &alt = this->m_stor.as<S_var_def>();
+      case index_variable: {
+        const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, nullptr, "variable", alt.name, Reference_root::S_null());
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
-        Statement::S_var_def alt_bnd = { alt.loc, alt.name, alt.immutable, std::move(init_bnd) };
+        Statement::S_variable alt_bnd = { alt.loc, alt.name, alt.immutable, std::move(init_bnd) };
         return std::move(alt_bnd);
       }
-      case index_func_def: {
-        const auto &alt = this->m_stor.as<S_func_def>();
+      case index_function: {
+        const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, nullptr, "function", alt.name, Reference_root::S_null());
         // Bind the function body recursively.
         Analytic_context ctx_next(&ctx_io);
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Statement::S_func_def alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };
+        Statement::S_function alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_if: {
@@ -224,7 +224,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     namespace {
 
-    Block::Status do_compile(const Statement::S_expr &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_compile(const Statement::S_expression &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
@@ -238,7 +238,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return status;
       }
 
-    Block::Status do_compile(const Statement::S_var_def &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_compile(const Statement::S_variable &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -254,7 +254,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_compile(const Statement::S_func_def &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_compile(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
@@ -585,20 +585,20 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> Statement::compile() const
   {
     switch(Index(this->m_stor.index())) {
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
+      case index_expression: {
+        const auto &alt = this->m_stor.as<S_expression>();
         return do_bind(alt);
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
         return do_bind(alt);
       }
-      case index_var_def: {
-        const auto &alt = this->m_stor.as<S_var_def>();
+      case index_variable: {
+        const auto &alt = this->m_stor.as<S_variable>();
         return do_bind(alt);
       }
-      case index_func_def: {
-        const auto &alt = this->m_stor.as<S_func_def>();
+      case index_function: {
+        const auto &alt = this->m_stor.as<S_function>();
         return do_bind(alt);
       }
       case index_if: {
@@ -686,8 +686,8 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
 void Statement::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_expr: {
-        const auto &alt = this->m_stor.as<S_expr>();
+      case index_expression: {
+        const auto &alt = this->m_stor.as<S_expression>();
         alt.expr.enumerate_variables(callback);
         return;
       }
@@ -696,13 +696,13 @@ void Statement::enumerate_variables(const Abstract_variable_callback &callback) 
         alt.body.enumerate_variables(callback);
         return;
       }
-      case index_var_def: {
-        const auto &alt = this->m_stor.as<S_var_def>();
+      case index_variable: {
+        const auto &alt = this->m_stor.as<S_variable>();
         alt.init.enumerate_variables(callback);
         return;
       }
-      case index_func_def: {
-        const auto &alt = this->m_stor.as<S_func_def>();
+      case index_function: {
+        const auto &alt = this->m_stor.as<S_function>();
         alt.body.enumerate_variables(callback);
         return;
       }

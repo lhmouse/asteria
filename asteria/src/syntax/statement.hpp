@@ -22,7 +22,7 @@ class Statement
         target_for     = 3,
       };
 
-    struct S_expr
+    struct S_expression
       {
         Expression expr;
       };
@@ -30,14 +30,14 @@ class Statement
       {
         Block body;
       };
-    struct S_var_def
+    struct S_variable
       {
         Source_location loc;
         rocket::prehashed_string name;
         bool immutable;
         Expression init;
       };
-    struct S_func_def
+    struct S_function
       {
         Source_location loc;
         rocket::prehashed_string name;
@@ -106,39 +106,39 @@ class Statement
 
     enum Index : std::size_t
       {
-        index_expr      =  0,
-        index_block     =  1,
-        index_var_def   =  2,
-        index_func_def  =  3,
-        index_if        =  4,
-        index_switch    =  5,
-        index_do_while  =  6,
-        index_while     =  7,
-        index_for       =  8,
-        index_for_each  =  9,
-        index_try       = 10,
-        index_break     = 11,
-        index_continue  = 12,
-        index_throw     = 13,
-        index_return    = 14,
+        index_expression  =  0,
+        index_block       =  1,
+        index_variable    =  2,
+        index_function    =  3,
+        index_if          =  4,
+        index_switch      =  5,
+        index_do_while    =  6,
+        index_while       =  7,
+        index_for         =  8,
+        index_for_each    =  9,
+        index_try         = 10,
+        index_break       = 11,
+        index_continue    = 12,
+        index_throw       = 13,
+        index_return      = 14,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_expr      //  0,
-        , S_block     //  1,
-        , S_var_def   //  2,
-        , S_func_def  //  3,
-        , S_if        //  4,
-        , S_switch    //  5,
-        , S_do_while  //  6,
-        , S_while     //  7,
-        , S_for       //  8,
-        , S_for_each  //  9,
-        , S_try       // 10,
-        , S_break     // 11,
-        , S_continue  // 12,
-        , S_throw     // 13,
-        , S_return    // 14,
+        , S_expression  //  0,
+        , S_block       //  1,
+        , S_variable    //  2,
+        , S_function    //  3,
+        , S_if          //  4,
+        , S_switch      //  5,
+        , S_do_while    //  6,
+        , S_while       //  7,
+        , S_for         //  8,
+        , S_for_each    //  9,
+        , S_try         // 10,
+        , S_break       // 11,
+        , S_continue    // 12,
+        , S_throw       // 13,
+        , S_return      // 14,
       )>;
 
   private:
