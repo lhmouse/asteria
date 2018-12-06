@@ -48,40 +48,41 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     }
     const auto stack_size_old = stack_io.size();
     // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 8;
-    rptr += rem;
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr - 1) % 8;
+    rptr += rem + 1;
     switch(rem) {
       do {
-    default:
         rptr += 8;
+        // Fallthrough.
+    case 7:
         rptr[-8](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 7:
+    case 6:
         rptr[-7](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 6:
+    case 5:
         rptr[-6](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 5:
+    case 4:
         rptr[-5](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 4:
+    case 3:
         rptr[-4](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 3:
+    case 2:
         rptr[-3](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 2:
+    case 1:
         rptr[-2](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
-    case 1:
+    default:
         rptr[-1](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
       } while(rptr != eptr);

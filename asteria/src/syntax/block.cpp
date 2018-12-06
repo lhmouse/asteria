@@ -53,54 +53,55 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     }
     auto status = status_next;
     // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 8;
-    rptr += rem;
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr - 1) % 8;
+    rptr += rem + 1;
     switch(rem) {
       do {
-    default:
         rptr += 8;
+        // Fallthrough.
+    case 7:
         status = rptr[-8](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 7:
+    case 6:
         status = rptr[-7](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 6:
+    case 5:
         status = rptr[-6](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 5:
+    case 4:
         status = rptr[-5](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 4:
+    case 3:
         status = rptr[-4](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 3:
+    case 2:
         status = rptr[-3](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 2:
+    case 1:
         status = rptr[-2](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
         }
         // Fallthrough.
-    case 1:
+    default:
         status = rptr[-1](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;
