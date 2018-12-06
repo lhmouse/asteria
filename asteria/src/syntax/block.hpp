@@ -5,6 +5,7 @@
 #define ASTERIA_SYNTAX_BLOCK_HPP_
 
 #include "../fwd.hpp"
+#include "../rocket/bind_first.hpp"
 
 namespace Asteria {
 

@@ -5,6 +5,7 @@
 #define ASTERIA_SYNTAX_EXPRESSION_HPP_
 
 #include "../fwd.hpp"
+#include "../rocket/bind_first.hpp"
 
 namespace Asteria {
 
@@ -30,8 +31,12 @@ class Expression
     void do_compile();
 
   public:
+    bool empty() const noexcept
+      {
+        return this->m_jinsts.empty();
+      }
+
     Expression bind(const Global_context &global, const Analytic_context &ctx) const;
-    bool empty() const noexcept;
     bool evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const;
     void evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 

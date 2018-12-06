@@ -34,11 +34,6 @@ Expression Expression::bind(const Global_context &global, const Analytic_context
     return std::move(nodes_bnd);
   }
 
-bool Expression::empty() const noexcept
-  {
-    return this->m_nodes.empty();
-  }
-
 bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
     auto rptr = this->m_jinsts.data();

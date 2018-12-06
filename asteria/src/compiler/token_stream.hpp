@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "parser_error.hpp"
 #include "token.hpp"
+#include "../rocket/variant.hpp"
 
 namespace Asteria {
 

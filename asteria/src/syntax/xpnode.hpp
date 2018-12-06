@@ -10,6 +10,8 @@
 #include "block.hpp"
 #include "../runtime/value.hpp"
 #include "../runtime/reference.hpp"
+#include "../rocket/preprocessor_utilities.h"
+#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
