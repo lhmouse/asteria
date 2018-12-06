@@ -49,7 +49,7 @@ const char * Value::get_type_name(Value::Type type) noexcept
       {
         char bytes[sizeof(Value)];
       }
-    const s_null = { };  // Don't play with this at home.
+    const s_null = { 0 };  // Don't play with this at home.
 
     }
 
