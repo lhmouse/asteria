@@ -41,13 +41,34 @@ bool Expression::empty() const noexcept
 
 bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
-    if(this->m_jinsts.empty()) {
+    auto rptr = this->m_jinsts.data();
+    const auto eptr = rptr + this->m_jinsts.size();
+    if(rptr == eptr) {
       return false;
     }
     const auto stack_size_old = stack_io.size();
-    for(const auto &jinst : this->m_jinsts) {
-      jinst(stack_io, global, ctx);
-      ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+    // Unroll the loop using Duff's Device.
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 4;
+    rptr += rem;
+    switch(rem) {
+      do {
+    default:
+        rptr += 4;
+        rptr[-4](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 3:
+        rptr[-3](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 2:
+        rptr[-2](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 1:
+        rptr[-1](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+      } while(rptr != eptr);
     }
     if(stack_io.size() - stack_size_old != 1) {
       ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");

@@ -46,16 +46,44 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
   {
-    if(this->m_jinsts.empty()) {
+    auto rptr = this->m_jinsts.data();
+    const auto eptr = rptr + this->m_jinsts.size();
+    if(rptr == eptr) {
       return status_next;
     }
-    for(const auto &jinst : this->m_jinsts) {
-      const auto status = jinst(ref_out, ctx_io, global);
-      if(status != status_next) {
-        return status;
-      }
+    auto status = status_next;
+    // Unroll the loop using Duff's Device.
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 4;
+    rptr += rem;
+    switch(rem) {
+      do {
+    default:
+        rptr += 4;
+        status = rptr[-4](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 3:
+        status = rptr[-3](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 2:
+        status = rptr[-2](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 1:
+        status = rptr[-1](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+      } while(rptr != eptr);
     }
-    return status_next;
+    return status;
   }
 
 Block Block::bind(const Global_context &global, const Analytic_context &ctx) const
