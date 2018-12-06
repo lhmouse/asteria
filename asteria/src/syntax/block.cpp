@@ -53,12 +53,36 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     }
     auto status = status_next;
     // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 4;
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 8;
     rptr += rem;
     switch(rem) {
       do {
     default:
-        rptr += 4;
+        rptr += 8;
+        status = rptr[-8](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 7:
+        status = rptr[-7](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 6:
+        status = rptr[-6](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 5:
+        status = rptr[-5](ref_out, ctx_io, global);
+        if(ROCKET_UNEXPECT(status != status_next)) {
+          break;
+        }
+        // Fallthrough.
+    case 4:
         status = rptr[-4](ref_out, ctx_io, global);
         if(ROCKET_UNEXPECT(status != status_next)) {
           break;

@@ -48,12 +48,28 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     }
     const auto stack_size_old = stack_io.size();
     // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 4;
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr) % 8;
     rptr += rem;
     switch(rem) {
       do {
     default:
-        rptr += 4;
+        rptr += 8;
+        rptr[-8](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 7:
+        rptr[-7](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 6:
+        rptr[-6](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 5:
+        rptr[-5](stack_io, global, ctx);
+        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        // Fallthrough.
+    case 4:
         rptr[-4](stack_io, global, ctx);
         ROCKET_ASSERT(stack_io.size() >= stack_size_old);
         // Fallthrough.
