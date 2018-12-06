@@ -1,4 +1,3 @@
-
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
@@ -64,18 +63,7 @@ Reference & Executive_context::mutate_named_reference(const rocket::prehashed_st
 
 void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
-    // Set the `this` parameter.
-    this->m_self = std::move(self);
-    // Set `__file`.
-    Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
-    this->m_file = std::move(ref_c);
-    // Set `__line`.
-    ref_c.source = D_integer(loc.get_line());
-    this->m_line = std::move(ref_c);
-    // Set `__func`.
-    ref_c.source = D_string(name);
-    this->m_func = std::move(ref_c);
-    // Set user-defined parameters.
+    // Set parameters, which are local variables.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto &param = params.at(i);
       if(param.empty()) {
@@ -92,6 +80,17 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
         this->m_dict.mut(param) = Reference_root::S_null();
       }
     }
+    // Set `this`.
+    this->m_self = std::move(self);
+    // Set `__file`.
+    Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
+    this->m_file = std::move(ref_c);
+    // Set `__line`.
+    ref_c.source = D_integer(loc.get_line());
+    this->m_line = std::move(ref_c);
+    // Set `__func`.
+    ref_c.source = D_string(name);
+    this->m_func = std::move(ref_c);
     // Set `__varg`.
     if(ROCKET_EXPECT(params.size() >= args.size())) {
       args.clear();
@@ -108,7 +107,7 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     this->m_varg = std::move(ref_c);
   }
 
-void Executive_context::dispose_variables(Asteria::Global_context &global) noexcept
+void Executive_context::dispose(Asteria::Global_context &global) noexcept
   {
     // Wipe out local variables.
     this->m_dict.for_each([&](const rocket::prehashed_string /*name*/, const Reference &ref) { ref.dispose_variable(global); });
@@ -116,6 +115,12 @@ void Executive_context::dispose_variables(Asteria::Global_context &global) noexc
     // Wipe out `this`.
     this->m_self.dispose_variable(global);
     this->m_self = Reference_root::S_null();
+    // Wipe out `__file`.
+    this->m_file = Reference_root::S_null();
+    // Wipe out `__line`.
+    this->m_line = Reference_root::S_null();
+    // Wipe out `__func`.
+    this->m_func = Reference_root::S_null();
     // Wipe out `__varg`.
     this->m_varg.dispose_variable(global);
     this->m_varg = Reference_root::S_null();

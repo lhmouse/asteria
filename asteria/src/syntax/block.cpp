@@ -134,20 +134,20 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
     namespace {
 
-    class Variable_disposer
+    class Context_disposer
       {
       private:
         std::reference_wrapper<Global_context> m_global;
         std::reference_wrapper<Executive_context> m_ctx;
 
       public:
-        Variable_disposer(Global_context &global, Executive_context &ctx)
+        Context_disposer(Global_context &global, Executive_context &ctx) noexcept
           : m_global(global), m_ctx(ctx)
           {
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_disposer)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Context_disposer)
           {
-            m_ctx.get().dispose_variables(m_global);
+            m_ctx.get().dispose(m_global);
           }
       };
 
@@ -156,7 +156,7 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
   {
     Executive_context ctx_next(nullptr);
-    const Variable_disposer disposer(global, ctx_next);
+    const Context_disposer disposer(global, ctx_next);
     ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);

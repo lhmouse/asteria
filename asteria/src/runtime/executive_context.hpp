@@ -39,7 +39,7 @@ class Executive_context : public Abstract_context
     Reference & mutate_named_reference(const rocket::prehashed_string &name) override;
 
     void initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args);
-    void dispose_variables(Global_context &global) noexcept;
+    void dispose(Global_context &global) noexcept;
   };
 
 }
