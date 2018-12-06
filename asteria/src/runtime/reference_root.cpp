@@ -21,7 +21,7 @@ const Value & Reference_root::dereference_const() const
       }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
-        return alt.src;
+        return alt.source;
       }
       case index_temporary: {
         const auto &alt = this->check<S_temporary>();
@@ -45,7 +45,7 @@ Value & Reference_root::dereference_mutable() const
       }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.src, "` cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.source, "` cannot be modified.");
       }
       case index_temporary: {
         const auto &alt = this->check<S_temporary>();
@@ -69,7 +69,7 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
       }
       case index_constant: {
         const auto &alt = this->check<S_constant>();
-        alt.src.enumerate_variables(callback);
+        alt.source.enumerate_variables(callback);
         return;
       }
       case index_temporary: {

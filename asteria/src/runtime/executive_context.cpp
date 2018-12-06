@@ -62,26 +62,20 @@ Reference & Executive_context::mutate_named_reference(const rocket::prehashed_st
     return this->m_dict.mut(name);
   }
 
-    namespace {
-
-    template<typename XvalueT>
-      inline void do_set_constant(Reference &ref_out, XvalueT &&value)
-      {
-        Reference_root::S_constant ref_c = { std::forward<XvalueT>(value) };
-        ref_out = std::move(ref_c);
-      }
-
-    }
-
 void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set the `this` parameter.
     this->m_self = std::move(self);
-    // Set pre-defined variables.
-    do_set_constant(this->m_file, D_string(loc.get_file()));
-    do_set_constant(this->m_line, D_integer(loc.get_line()));
-    do_set_constant(this->m_func, D_string(name));
-    // Set other parameters.
+    // Set `__file`.
+    Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
+    this->m_file = std::move(ref_c);
+    // Set `__line`.
+    ref_c.source = D_integer(loc.get_line());
+    this->m_line = std::move(ref_c);
+    // Set `__func`.
+    ref_c.source = D_string(name);
+    this->m_func = std::move(ref_c);
+    // Set user-defined parameters.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto &param = params.at(i);
       if(param.empty()) {
@@ -98,7 +92,7 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
         this->m_dict.mut(param) = Reference_root::S_null();
       }
     }
-    // Set the variadic argument getter.
+    // Set `__varg`.
     if(ROCKET_EXPECT(params.size() >= args.size())) {
       args.clear();
     } else {
@@ -106,11 +100,12 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     }
     if(ROCKET_EXPECT(args.empty() && zvarg_opt)) {
       // Copy the existent zeroary argument getter.
-      do_set_constant(this->m_varg, D_function(*zvarg_opt));
+      ref_c.source = D_function(*zvarg_opt);
     } else {
       // Create an argument getter from those.
-      do_set_constant(this->m_varg, D_function(Variadic_arguer(loc, name, std::move(args))));
+      ref_c.source = D_function(Variadic_arguer(loc, name, std::move(args)));
     }
+    this->m_varg = std::move(ref_c);
   }
 
 void Executive_context::dispose_variables(Asteria::Global_context &global) noexcept
