@@ -55,7 +55,7 @@ const char * Value::get_type_name(Value::Type type) noexcept
 
 const Value & Value::get_null() noexcept
   {
-    return reinterpret_cast<const Value &>(s_null.bytes);
+    return *static_cast<const Value *>(static_cast<const void *>(s_null.bytes));
   }
 
 Value::~Value()
