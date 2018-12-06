@@ -46,6 +46,9 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
   {
+    if(this->m_jinsts.empty()) {
+      return status_next;
+    }
     for(const auto &jinst : this->m_jinsts) {
       const auto status = jinst(ref_out, ctx_io, global);
       if(status != status_next) {
