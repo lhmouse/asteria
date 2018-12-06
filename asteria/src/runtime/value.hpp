@@ -48,6 +48,8 @@ class Value
 
   public:
     static const char * get_type_name(Type type) noexcept;
+
+    // The object is allocated statically and exists throughout the program.
     static const Value & get_null() noexcept;
 
   private:

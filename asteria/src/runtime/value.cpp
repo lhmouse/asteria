@@ -43,11 +43,19 @@ const char * Value::get_type_name(Value::Type type) noexcept
     }
   }
 
+    namespace {
+
+    alignas(Value) struct
+      {
+        char bytes[sizeof(Value)];
+      }
+    const s_null = { };  // Don't play with this at home.
+
+    }
+
 const Value & Value::get_null() noexcept
   {
-    alignas(Value) static constexpr char s_zeroes[sizeof(Value)] = { };
-    // Don't play with this at home.
-    return *static_cast<const Value *>(static_cast<const void *>(s_zeroes));
+    return reinterpret_cast<const Value &>(s_null.bytes);
   }
 
 Value::~Value()
