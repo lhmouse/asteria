@@ -23,6 +23,7 @@
 #include <functional>
 #include <algorithm>
 #include <array>
+#include <tuple>
 
 #include <cstring>
 #include <cstddef>
