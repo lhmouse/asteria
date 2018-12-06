@@ -115,8 +115,15 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
 
 void Executive_context::dispose_variables(Asteria::Global_context &global) noexcept
   {
+    // Wipe out local variables.
     this->m_dict.for_each([&](const rocket::prehashed_string /*name*/, const Reference &ref) { ref.dispose_variable(global); });
     this->m_dict.clear();
+    // Wipe out `this`.
+    this->m_self.dispose_variable(global);
+    this->m_self = Reference_root::S_null();
+    // Wipe out `__varg`.
+    this->m_varg.dispose_variable(global);
+    this->m_varg = Reference_root::S_null();
   }
 
 }
