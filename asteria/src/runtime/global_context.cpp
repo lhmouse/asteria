@@ -5,6 +5,7 @@
 #include "global_context.hpp"
 #include "global_collector.hpp"
 #include "variable.hpp"
+#include "executive_context.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -51,6 +52,28 @@ bool Global_context::untrack_variable(const rocket::refcounted_ptr<Variable> &va
 void Global_context::perform_garbage_collection(unsigned gen_limit)
   {
     return this->m_gcoll->perform_garbage_collection(gen_limit);
+  }
+
+rocket::unique_ptr<Executive_context> Global_context::allocate_executive_context()
+  {
+    rocket::unique_ptr<Executive_context> ctx;
+    if(this->m_ectx_pool.empty()) {
+      ctx = rocket::make_unique<Executive_context>(nullptr);
+    } else {
+      ctx = std::move(this->m_ectx_pool.mut_back());
+      this->m_ectx_pool.pop_back();
+    }
+    return ctx;
+  }
+
+bool Global_context::return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept
+  try {
+    ROCKET_ASSERT(ctx);
+    this->m_ectx_pool.emplace_back(std::move(ctx));
+    return true;
+  } catch(std::exception &e) {
+    ASTERIA_DEBUG_LOG("Failed to return context: ", e.what());
+    return false;
   }
 
 }

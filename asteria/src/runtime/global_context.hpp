@@ -6,6 +6,8 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
+#include "../rocket/cow_vector.hpp"
+#include "../rocket/unique_ptr.hpp"
 
 namespace Asteria {
 
@@ -13,6 +15,7 @@ class Global_context : public Abstract_context
   {
   private:
     rocket::refcounted_ptr<Global_collector> m_gcoll;
+    rocket::cow_vector<rocket::unique_ptr<Executive_context>> m_ectx_pool;
 
   public:
     Global_context();
@@ -25,6 +28,9 @@ class Global_context : public Abstract_context
     void track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
     void perform_garbage_collection(unsigned gen_limit);
+
+    rocket::unique_ptr<Executive_context> allocate_executive_context();
+    bool return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept;
   };
 
 }
