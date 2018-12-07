@@ -31,9 +31,10 @@ class Reference_dictionary
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
 
   private:
+    [[noreturn]] void do_throw_open_empty_name();
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
-    Reference & do_open_unchecked(const rocket::prehashed_string &name);
+    Reference & do_open_unchecked(const rocket::prehashed_string &name) noexcept;
     void do_erase_unchecked(std::size_t tpos) noexcept;
 
   public:
@@ -106,7 +107,9 @@ class Reference_dictionary
       }
     Reference & open(const rocket::prehashed_string &name)
       {
-        ROCKET_ASSERT(!name.empty());
+        if(name.empty()) {
+          this->do_throw_open_empty_name();
+        }
         this->reserve(this->size() + 1);
         return this->do_open_unchecked(name);
       }

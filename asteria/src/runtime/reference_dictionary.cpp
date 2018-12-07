@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_dictionary.hpp"
+#include "../utilities.hpp"
 
 namespace Asteria {
 
@@ -14,6 +15,11 @@ Reference_dictionary::~Reference_dictionary()
       rocket::destroy_at(data + i);
     }
     ::operator delete(data);
+  }
+
+void Reference_dictionary::do_throw_open_empty_name()
+  {
+    ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_dictionary`.");
   }
 
     namespace {
@@ -124,9 +130,8 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::prehashed_string &nam
     return toff;
   }
 
-Reference & Reference_dictionary::do_open_unchecked(const rocket::prehashed_string &name)
+Reference & Reference_dictionary::do_open_unchecked(const rocket::prehashed_string &name) noexcept
   {
-    ROCKET_ASSERT(!name.empty());
     const auto data = this->m_data;
     ROCKET_ASSERT(data);
     const auto nbkt = this->m_nbkt;
