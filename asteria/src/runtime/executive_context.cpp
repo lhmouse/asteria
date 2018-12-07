@@ -36,8 +36,9 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
       }
       auto &arg = this->open_named_reference(param);
       if(ROCKET_EXPECT(i < args.size())) {
-        // There is a corresponding argument. Move it.
         arg = std::move(args.mut(i));
+      } else {
+        /*arg = Reference_root::S_null()*/;
       }
     }
     // Set `this`.
@@ -61,16 +62,12 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     }
     // Set `__varg`.
     {
-      if(ROCKET_EXPECT(params.size() >= args.size())) {
-        args.clear();
-      } else {
-        args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
-      }
       auto &varg = this->open_named_reference(rocket::cow_string::shallow("__varg"));
-      if(ROCKET_EXPECT(args.empty() && zvarg_opt)) {
+      if(ROCKET_EXPECT((args.size() <= params.size()) && zvarg_opt)) {
         Reference_root::S_constant ref_c = { D_function(*zvarg_opt) };
         varg = std::move(ref_c);
       } else {
+        args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
         Reference_root::S_constant ref_c = { D_function(Variadic_arguer(loc, name, std::move(args))) };
         varg = std::move(ref_c);
       }
