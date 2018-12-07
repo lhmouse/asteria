@@ -33,7 +33,7 @@ Reference_dictionary::~Reference_dictionary()
         return pos;
       }
 
-    bool do_check_equal(const rocket::prehashed_string &lhs, const rocket::prehashed_string &rhs) noexcept
+    inline bool do_check_equal(const rocket::prehashed_string &lhs, const rocket::prehashed_string &rhs) noexcept
       {
         // Apply fast comparison.
         if(lhs.rdhash() != rhs.rdhash()) {
