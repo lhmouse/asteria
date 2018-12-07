@@ -59,7 +59,7 @@ class Variable_hashset
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          if(ROCKET_UNEXPECT(data[i].var)) {
+          if(data[i].var) {
             std::forward<FuncT>(func)(data[i].var);
           }
         }
