@@ -41,7 +41,9 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
       }
     }
     // Set `this`.
-    this->open_named_reference(rocket::cow_string::shallow("__this")) = std::move(self);
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__this")) = std::move(self);
+    }
     // Set `__file`.
     {
       Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
