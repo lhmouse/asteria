@@ -1056,7 +1056,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     void clear() noexcept
       {
-        if(ROCKET_EXPECT(this->empty())) {
+        if(this->empty()) {
           return;
         }
         this->do_clear();

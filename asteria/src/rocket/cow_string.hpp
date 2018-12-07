@@ -958,7 +958,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       }
     void clear() noexcept
       {
-        if(ROCKET_EXPECT(this->empty())) {
+        if(this->empty()) {
           return;
         }
         this->do_clear();
