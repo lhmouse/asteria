@@ -29,7 +29,7 @@ Statement::~Statement()
         if(name.rdstr().starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
         }
-        auto &ref = ctx_io.mutate_named_reference(name);
+        auto &ref = ctx_io.open_named_reference(name);
         if(global_opt) {
           ref.dispose_variable(*global_opt);
         }
@@ -525,7 +525,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.mutate_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
+          ctx_next.open_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, global, ctx_next);
         }

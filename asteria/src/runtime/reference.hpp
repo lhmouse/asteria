@@ -41,7 +41,7 @@ class Reference
     [[noreturn]] void do_throw_unset_no_modifier() const;
 
     const Value & do_read_with_modifiers() const;
-    Value & do_mutate_with_modifiers() const;
+    Value & do_open_with_modifiers() const;
     Value do_unset_with_modifiers() const;
 
   public:
@@ -61,12 +61,12 @@ class Reference
         }
         return this->do_read_with_modifiers();
       }
-    Value & mutate() const
+    Value & open() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           return this->m_root.dereference_mutable();
         }
-        return this->do_mutate_with_modifiers();
+        return this->do_open_with_modifiers();
       }
     Value unset() const
       {

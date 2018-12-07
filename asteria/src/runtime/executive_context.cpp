@@ -56,7 +56,7 @@ const Reference * Executive_context::get_named_reference_opt(const rocket::preha
     return qref;
   }
 
-Reference & Executive_context::mutate_named_reference(const rocket::prehashed_string &name)
+Reference & Executive_context::open_named_reference(const rocket::prehashed_string &name)
   {
     return this->m_dict.mut(name);
   }

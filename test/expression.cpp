@@ -20,10 +20,10 @@ int main()
     const auto ival = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 3), D_integer(3), false);
     const auto aval = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 4), D_array(), false);
 
-    ctx.mutate_named_reference(rocket::cow_string::shallow("cond")) = Reference_root::S_variable { cond };
-    ctx.mutate_named_reference(rocket::cow_string::shallow("dval")) = Reference_root::S_variable { dval };
-    ctx.mutate_named_reference(rocket::cow_string::shallow("ival")) = Reference_root::S_variable { ival };
-    ctx.mutate_named_reference(rocket::cow_string::shallow("aval")) = Reference_root::S_variable { aval };
+    ctx.open_named_reference(rocket::cow_string::shallow("cond")) = Reference_root::S_variable { cond };
+    ctx.open_named_reference(rocket::cow_string::shallow("dval")) = Reference_root::S_variable { dval };
+    ctx.open_named_reference(rocket::cow_string::shallow("ival")) = Reference_root::S_variable { ival };
+    ctx.open_named_reference(rocket::cow_string::shallow("aval")) = Reference_root::S_variable { aval };
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr

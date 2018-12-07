@@ -25,7 +25,7 @@ class Global_context : public Abstract_context
     const Abstract_context * get_parent_opt() const noexcept override;
 
     const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const override;
-    Reference & mutate_named_reference(const rocket::prehashed_string &name) override;
+    Reference & open_named_reference(const rocket::prehashed_string &name) override;
 
     void track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;

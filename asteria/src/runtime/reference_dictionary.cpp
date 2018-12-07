@@ -135,7 +135,7 @@ std::ptrdiff_t Reference_dictionary::do_find(const rocket::prehashed_string &nam
     return toff;
   }
 
-Reference & Reference_dictionary::do_mutate_unchecked(const rocket::prehashed_string &name)
+Reference & Reference_dictionary::do_open_unchecked(const rocket::prehashed_string &name)
   {
     ROCKET_ASSERT(!name.empty());
     const auto data = this->m_data;

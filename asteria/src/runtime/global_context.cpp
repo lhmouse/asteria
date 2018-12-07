@@ -50,7 +50,7 @@ const Reference * Global_context::get_named_reference_opt(const rocket::prehashe
     return nullptr;
   }
 
-Reference & Global_context::mutate_named_reference(const rocket::prehashed_string &name)
+Reference & Global_context::open_named_reference(const rocket::prehashed_string &name)
   {
     return this->m_dict.mut(name);
   }

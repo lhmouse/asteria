@@ -33,7 +33,7 @@ class Reference_dictionary
   private:
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
-    Reference & do_mutate_unchecked(const rocket::prehashed_string &name);
+    Reference & do_open_unchecked(const rocket::prehashed_string &name);
     void do_erase_unchecked(std::size_t tpos) noexcept;
 
   public:
@@ -108,7 +108,7 @@ class Reference_dictionary
       {
         ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);
-        return this->do_mutate_unchecked(name);
+        return this->do_open_unchecked(name);
       }
     bool unset(const rocket::prehashed_string &name) noexcept
       {

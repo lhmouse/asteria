@@ -32,7 +32,7 @@ const Value & Reference::do_read_with_modifiers() const
     return cur;
   }
 
-Value & Reference::do_mutate_with_modifiers() const
+Value & Reference::do_open_with_modifiers() const
   {
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());
