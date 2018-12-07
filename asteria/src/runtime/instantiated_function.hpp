@@ -8,6 +8,7 @@
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
 #include "../syntax/block.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 

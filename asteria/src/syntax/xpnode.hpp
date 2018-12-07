@@ -12,6 +12,7 @@
 #include "../runtime/reference.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 

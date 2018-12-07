@@ -5,6 +5,7 @@
 #define ASTERIA_SYNTAX_EXPRESSION_HPP_
 
 #include "../fwd.hpp"
+#include "../rocket/cow_vector.hpp"
 #include "../rocket/bind_first.hpp"
 
 namespace Asteria {

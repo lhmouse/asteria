@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "reference_root.hpp"
 #include "reference_modifier.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 

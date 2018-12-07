@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../syntax/block.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 

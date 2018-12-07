@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../rocket/refcounted_ptr.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
