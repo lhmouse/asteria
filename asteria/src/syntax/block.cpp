@@ -141,25 +141,25 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
         rocket::unique_ptr<Executive_context> m_ctx;
 
       public:
-        template<typename ...ParamsT>
-          explicit Context_sentry(Global_context &global, ParamsT &&...params)
-          : m_global(global)
+        explicit Context_sentry(Global_context &global)
+          : m_global(global), m_ctx(this->m_global.get().allocate_executive_context())
           {
-            auto ctx = this->m_global.get().allocate_executive_context();
-            ctx->initialize_for_function(std::forward<ParamsT>(params)...);
-            this->m_ctx = std::move(ctx);
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Context_sentry)
           {
-            auto ctx = std::move(this->m_ctx);
-            ctx->dispose_named_references(this->m_global);
-            this->m_global.get().return_executive_context(std::move(ctx));
+            this->m_global.get().return_executive_context(std::move(this->m_ctx));
           }
 
       public:
-        operator Executive_context & () const noexcept
+        operator Executive_context & () noexcept
           {
             return *(this->m_ctx);
+          }
+
+        template<typename ...ParamsT>
+          void initialize(ParamsT &&...params)
+          {
+            return this->m_ctx->initialize_for_function(std::forward<ParamsT>(params)...);
           }
       };
 
@@ -167,7 +167,8 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
 void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
   {
-    const Context_sentry ctx_next(global, loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
+    Context_sentry ctx_next(global);
+    ctx_next.initialize(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
     switch(status) {

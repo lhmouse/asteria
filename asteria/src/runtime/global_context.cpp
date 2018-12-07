@@ -69,6 +69,7 @@ rocket::unique_ptr<Executive_context> Global_context::allocate_executive_context
 bool Global_context::return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept
   try {
     ROCKET_ASSERT(ctx);
+    ctx->dispose_named_references(*this);
     this->m_ectx_pool.emplace_back(std::move(ctx));
     return true;
   } catch(std::exception &e) {
