@@ -33,27 +33,16 @@ Reference_dictionary::~Reference_dictionary()
         return pos;
       }
 
-    inline bool do_check_equal(const rocket::prehashed_string &lhs, const rocket::prehashed_string &rhs) noexcept
+    bool do_check_equal(const rocket::prehashed_string &lhs, const rocket::prehashed_string &rhs) noexcept
       {
+        // Apply fast comparison.
         if(lhs.rdhash() != rhs.rdhash()) {
           return false;
         }
         if(lhs.size() != rhs.size()) {
           return false;
         }
-        auto rp = lhs.rdstr().data();
-        const auto ep = rp + lhs.rdstr().size();
-        auto rq = rhs.rdstr().data();
-        while(rp != ep) {
-          // We only check for equality.
-          // If total ordering was requested, we would have to cast both operands to `unsigned char` for comparison.
-          if(static_cast<const volatile char &>(*rp) != *rq) {
-            return false;
-          }
-          ++rp;
-          ++rq;
-        }
-        return true;
+        return std::char_traits<char>::compare(lhs.data(), rhs.data(), lhs.size()) == 0;
       }
 
     template<typename BucketT, typename PredT>
