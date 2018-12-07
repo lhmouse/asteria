@@ -97,7 +97,7 @@ class Reference
       }
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
-    void dispose_variable(Global_context &global) const noexcept;
+    void dispose_variable(Global_context &global) noexcept;
   };
 
 }

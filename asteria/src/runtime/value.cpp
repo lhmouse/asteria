@@ -69,23 +69,23 @@ bool Value::test() const noexcept
         return false;
       }
       case type_boolean: {
-        return this->check<D_boolean>();
+        return this->m_stor.as<D_boolean>();
       }
       case type_integer: {
-        return this->check<D_integer>() != 0;
+        return this->m_stor.as<D_integer>() != 0;
       }
       case type_real: {
-        return std::fpclassify(this->check<D_real>()) != FP_ZERO;
+        return std::fpclassify(this->m_stor.as<D_real>()) != FP_ZERO;
       }
       case type_string: {
-        return !(this->check<D_string>().empty());
+        return !(this->m_stor.as<D_string>().empty());
       }
       case type_opaque:
       case type_function: {
         return true;
       }
       case type_array: {
-        return !(this->check<D_array>().empty());
+        return !(this->m_stor.as<D_array>().empty());
       }
       case type_object: {
         return true;
@@ -131,17 +131,17 @@ Value::Compare Value::compare(const Value &other) const noexcept
         return Value::compare_equal;
       }
       case type_boolean: {
-        const auto &alt_lhs = this->check<D_boolean>();
+        const auto &alt_lhs = this->m_stor.as<D_boolean>();
         const auto &alt_rhs = other.check<D_boolean>();
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_integer: {
-        const auto &alt_lhs = this->check<D_integer>();
+        const auto &alt_lhs = this->m_stor.as<D_integer>();
         const auto &alt_rhs = other.check<D_integer>();
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_real: {
-        const auto &alt_lhs = this->check<D_real>();
+        const auto &alt_lhs = this->m_stor.as<D_real>();
         const auto &alt_rhs = other.check<D_real>();
         if(std::isunordered(alt_lhs, alt_rhs)) {
           return Value::compare_unordered;
@@ -149,7 +149,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
       case type_string: {
-        const auto &alt_lhs = this->check<D_string>();
+        const auto &alt_lhs = this->m_stor.as<D_string>();
         const auto &alt_rhs = other.check<D_string>();
         return do_three_way_compare(alt_lhs.compare(alt_rhs), 0);
       }
@@ -158,7 +158,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         return Value::compare_unordered;
       }
       case type_array: {
-        const auto &alt_lhs = this->check<D_array>();
+        const auto &alt_lhs = this->m_stor.as<D_array>();
         const auto &alt_rhs = other.check<D_array>();
         auto pl = alt_lhs.begin();
         const auto el = alt_lhs.end();
@@ -201,43 +201,43 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         return;
       }
       case type_boolean: {
-        const auto &alt = this->check<D_boolean>();
+        const auto &alt = this->m_stor.as<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
       case type_integer: {
-        const auto &alt = this->check<D_integer>();
+        const auto &alt = this->m_stor.as<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
       case type_real: {
-        const auto &alt = this->check<D_real>();
+        const auto &alt = this->m_stor.as<D_real>();
         // real 123.456
         os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_real>::max_digits10) <<alt;
         return;
       }
       case type_string: {
-        const auto &alt = this->check<D_string>();
+        const auto &alt = this->m_stor.as<D_string>();
         // string(5) "hello"
         os <<"string(" <<std::dec <<alt.size() <<") " <<quote(alt);
         return;
       }
       case type_opaque: {
-        const auto &alt = this->check<D_opaque>();
+        const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
         os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_function: {
-        const auto &alt = this->check<D_function>();
+        const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
         os <<"function(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
         return;
       }
       case type_array: {
-        const auto &alt = this->check<D_array>();
+        const auto &alt = this->m_stor.as<D_array>();
         // array(3) = [
         //   0 = integer 1;
         //   1 = integer 2;
@@ -253,7 +253,7 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         return;
       }
       case type_object: {
-        const auto &alt = this->check<D_object>();
+        const auto &alt = this->m_stor.as<D_object>();
         // object(3) = {
         //   "one" = integer 1;
         //   "two" = integer 2;
@@ -286,19 +286,19 @@ void Value::enumerate_variables(const Abstract_variable_callback &callback) cons
         return;
       }
       case type_function: {
-        const auto &alt = this->check<D_function>();
+        const auto &alt = this->m_stor.as<D_function>();
         alt->enumerate_variables(callback);
         return;
       }
       case type_array: {
-        const auto &alt = this->check<D_array>();
+        const auto &alt = this->m_stor.as<D_array>();
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           it->enumerate_variables(callback);
         }
         return;
       }
       case type_object: {
-        const auto &alt = this->check<D_object>();
+        const auto &alt = this->m_stor.as<D_object>();
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           it->second.enumerate_variables(callback);
         }
