@@ -147,7 +147,7 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Context_disposer)
           {
-            m_ctx.get().dispose(m_global);
+            m_ctx.get().dispose_named_references(m_global);
           }
       };
 

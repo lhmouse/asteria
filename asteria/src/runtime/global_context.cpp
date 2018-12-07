@@ -20,8 +20,8 @@ Global_context::~Global_context()
   {
     ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
     // Perform the final garbage collection.
+    this->dispose_named_references(*this);
     try {
-      this->m_dict.clear();
       this->m_gcoll->perform_garbage_collection(100);
     } catch(std::exception &e) {
       ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
@@ -36,23 +36,6 @@ bool Global_context::is_analytic() const noexcept
 const Abstract_context * Global_context::get_parent_opt() const noexcept
   {
     return nullptr;
-  }
-
-const Reference * Global_context::get_named_reference_opt(const rocket::prehashed_string &name) const
-  {
-    // Check for overriden references.
-    const auto qref = this->m_dict.get_opt(name);
-    if(qref) {
-      return qref;
-    }
-    // Check for references from the standard library.
-    // TODO std
-    return nullptr;
-  }
-
-Reference & Global_context::open_named_reference(const rocket::prehashed_string &name)
-  {
-    return this->m_dict.mut(name);
   }
 
 void Global_context::track_variable(const rocket::refcounted_ptr<Variable> &var)

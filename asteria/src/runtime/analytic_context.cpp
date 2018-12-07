@@ -22,44 +22,6 @@ const Abstract_context * Analytic_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-const Reference * Analytic_context::do_get_predefined_reference_opt(const rocket::prehashed_string &name) const
-  {
-    if(!name.rdstr().starts_with("__")) {
-      return nullptr;
-    }
-    // If you add new entries or alter existent entries here, remember to update `Executive_context` as well.
-    if(name == "__this") {
-      return &(this->m_dummy);
-    }
-    if(name == "__file") {
-      return &(this->m_dummy);
-    }
-    if(name == "__line") {
-      return &(this->m_dummy);
-    }
-    if(name == "__func") {
-      return &(this->m_dummy);
-    }
-    if(name == "__varg") {
-      return &(this->m_dummy);
-    }
-    return nullptr;
-  }
-
-const Reference * Analytic_context::get_named_reference_opt(const rocket::prehashed_string &name) const
-  {
-    auto qref = this->m_dict.get_opt(name);
-    if(ROCKET_UNEXPECT(!qref)) {
-      qref = this->do_get_predefined_reference_opt(name);
-    }
-    return qref;
-  }
-
-Reference & Analytic_context::open_named_reference(const rocket::prehashed_string &name)
-  {
-    return this->m_dict.mut(name);
-  }
-
 void Analytic_context::initialize_for_function(const rocket::cow_vector<rocket::prehashed_string> &params)
   {
     for(std::size_t i = 0; i < params.size(); ++i) {
@@ -71,7 +33,7 @@ void Analytic_context::initialize_for_function(const rocket::cow_vector<rocket::
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Ensure the named reference exists, whose contents are out of interest.
-      this->m_dict.mut(param) /*= Reference_root::S_null()*/;
+      this->open_named_reference(param) /*= Reference_root::S_null()*/;
     }
   }
 

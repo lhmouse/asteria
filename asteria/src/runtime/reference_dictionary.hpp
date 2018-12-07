@@ -104,7 +104,7 @@ class Reference_dictionary
         }
         this->do_rehash(res_arg);
       }
-    Reference & mut(const rocket::prehashed_string &name)
+    Reference & open(const rocket::prehashed_string &name)
       {
         ROCKET_ASSERT(!name.empty());
         this->reserve(this->size() + 1);

@@ -6,14 +6,12 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "reference_dictionary.hpp"
 
 namespace Asteria {
 
 class Global_context : public Abstract_context
   {
   private:
-    Reference_dictionary m_dict;
     rocket::refcounted_ptr<Global_collector> m_gcoll;
 
   public:
@@ -23,9 +21,6 @@ class Global_context : public Abstract_context
   public:
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
-
-    const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const override;
-    Reference & open_named_reference(const rocket::prehashed_string &name) override;
 
     void track_variable(const rocket::refcounted_ptr<Variable> &var);
     bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
