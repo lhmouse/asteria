@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "variable_hashset.hpp"
+#include "../utilities.hpp"
 
 namespace Asteria {
 
@@ -14,6 +15,11 @@ Variable_hashset::~Variable_hashset()
       rocket::destroy_at(data + i);
     }
     ::operator delete(data);
+  }
+
+void Variable_hashset::do_throw_insert_null_pointer()
+  {
+    ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_hashset`.");
   }
 
     namespace {

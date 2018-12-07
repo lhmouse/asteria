@@ -29,6 +29,7 @@ class Variable_hashset
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
 
   private:
+    [[noreturn]] void do_throw_insert_null_pointer();
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
     bool do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept;
@@ -92,7 +93,9 @@ class Variable_hashset
       }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
-        ROCKET_ASSERT(var);
+        if(!var) {
+          this->do_throw_insert_null_pointer();
+        }
         this->reserve(this->size() + 1);
         return this->do_insert_unchecked(var);
       }
