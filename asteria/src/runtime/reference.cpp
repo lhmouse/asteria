@@ -69,7 +69,7 @@ void Reference::enumerate_variables(const Abstract_variable_callback &callback) 
     this->m_root.enumerate_variables(callback);
   }
 
-void Reference::dispose_variable(Global_context &global) noexcept
+void Reference::dispose_variable(Global_context &global) const noexcept
   {
     this->m_root.dispose_variable(global);
   }

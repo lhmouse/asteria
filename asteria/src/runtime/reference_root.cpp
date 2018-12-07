@@ -91,15 +91,12 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
     }
   }
 
-void Reference_root::dispose_variable(Global_context &global) noexcept
+void Reference_root::dispose_variable(Global_context &global) const noexcept
   {
     switch(Index(this->m_stor.index())) {
-      case index_null: {
-        return;
-      }
+      case index_null:
       case index_constant:
       case index_temporary: {
-        this->m_stor = S_null();
         return;
       }
       case index_variable: {
@@ -109,7 +106,6 @@ void Reference_root::dispose_variable(Global_context &global) noexcept
           ASTERIA_DEBUG_LOG("Disposing variable: ", alt.var->get_value());
           alt.var->reset(D_null(), true);
         }
-        this->m_stor = S_null();
         return;
       }
       default: {
