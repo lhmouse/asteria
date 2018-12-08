@@ -1782,7 +1782,10 @@ template<typename charT, typename traitsT, typename allocatorT>
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
 
-    result_type operator()(const argument_type &str) const noexcept
+#ifdef __cpp_constexpr
+    constexpr
+#endif
+      result_type operator()(const argument_type &str) const noexcept
       {
         // This implements the 32-bit FNV-1a hash algorithm.
         char32_t reg = 0x811c9dc5;
