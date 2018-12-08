@@ -142,8 +142,9 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
       public:
         explicit Context_sentry(Global_context &global)
-          : m_global(global), m_ctx(this->m_global.get().allocate_executive_context())
+          : m_global(global)
           {
+            this->m_ctx = this->m_global.get().allocate_executive_context();
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Context_sentry)
           {
@@ -151,15 +152,13 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
           }
 
       public:
-        operator Executive_context & () noexcept
+        Executive_context & operator*() const noexcept
           {
             return *(this->m_ctx);
           }
-
-        template<typename ...ParamsT>
-          void initialize(ParamsT &&...params)
+        Executive_context * operator->() const noexcept
           {
-            return this->m_ctx->initialize_for_function(std::forward<ParamsT>(params)...);
+            return this->m_ctx.get();
           }
       };
 
@@ -167,10 +166,10 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
 void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
   {
-    Context_sentry ctx_next(global);
-    ctx_next.initialize(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
+    const Context_sentry ctx_next(global);
+    ctx_next->initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, ctx_next, global);
+    const auto status = this->execute_in_place(self_io, *ctx_next, global);
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.

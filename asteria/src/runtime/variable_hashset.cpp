@@ -80,7 +80,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
                                  static_cast<long long>(res_arg));
     }
     // Round up the capacity for efficiency.
-    const auto nbkt = res_arg * 2 | this->m_size * 3 | 127;
+    const auto nbkt = res_arg * 2 | this->m_size * 3 | 15;
     // Allocate the new table. This may throw `std::bad_alloc`.
     const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(Bucket)));
     // Initialize the table. This will not throw exceptions.

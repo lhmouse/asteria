@@ -60,17 +60,6 @@ class Reference_dictionary
         this->do_clear(global);
       }
 
-    template<typename FuncT>
-      void for_each(FuncT &&func) const
-      {
-        const auto data = this->m_data;
-        const auto nbkt = this->m_nbkt;
-        for(std::size_t i = 0; i != nbkt; ++i) {
-          if(data[i]) {
-            std::forward<FuncT>(func)(data[i].name, data[i].refv.front());
-          }
-        }
-      }
     const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
       {
         const auto toff = this->do_find(name);
