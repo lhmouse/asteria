@@ -30,7 +30,7 @@ class Abstract_context
       {
         return this->m_dict.open(name);
       }
-    void dispose_named_references(Global_context &global) noexcept
+    void clear(Global_context &global) noexcept
       {
         this->m_dict.clear(global);
       }

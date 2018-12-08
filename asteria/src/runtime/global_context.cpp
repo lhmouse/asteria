@@ -6,6 +6,7 @@
 #include "global_collector.hpp"
 #include "variable.hpp"
 #include "executive_context.hpp"
+#include "reference_stack.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -21,7 +22,7 @@ Global_context::~Global_context()
   {
     ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
     // Perform the final garbage collection.
-    this->dispose_named_references(*this);
+    this->clear(*this);
     try {
       this->m_gcoll->perform_garbage_collection(100);
     } catch(std::exception &e) {
@@ -69,11 +70,34 @@ rocket::unique_ptr<Executive_context> Global_context::allocate_executive_context
 bool Global_context::return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept
   try {
     ROCKET_ASSERT(ctx);
-    ctx->dispose_named_references(*this);
+    ctx->clear(*this);
     this->m_ectx_pool.emplace_back(std::move(ctx));
     return true;
   } catch(std::exception &e) {
     ASTERIA_DEBUG_LOG("Failed to return context: ", e.what());
+    return false;
+  }
+
+rocket::unique_ptr<Reference_stack> Global_context::allocate_reference_stack()
+  {
+    rocket::unique_ptr<Reference_stack> stack;
+    if(this->m_stack_pool.empty()) {
+      stack = rocket::make_unique<Reference_stack>();
+    } else {
+      stack = std::move(this->m_stack_pool.mut_back());
+      this->m_stack_pool.pop_back();
+    }
+    return stack;
+  }
+
+bool Global_context::return_reference_stack(rocket::unique_ptr<Reference_stack> &&stack) noexcept
+  try {
+    ROCKET_ASSERT(stack);
+    stack->clear(*this);
+    this->m_stack_pool.emplace_back(std::move(stack));
+    return true;
+  } catch(std::exception &e) {
+    ASTERIA_DEBUG_LOG("Failed to return stack: ", e.what());
     return false;
   }
 
