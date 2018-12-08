@@ -58,6 +58,24 @@ class Variable_hashset
         this->do_clear();
       }
 
+    std::size_t max_size() const noexcept
+      {
+        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
+        return max_nbkt / 2;
+      }
+    std::size_t capacity() const noexcept
+      {
+        const auto nbkt = this->m_nbkt;
+        return nbkt / 2;
+      }
+    void reserve(std::size_t res_arg)
+      {
+        if(res_arg <= this->capacity()) {
+          return;
+        }
+        this->do_rehash(res_arg);
+      }
+
     template<typename FuncT>
       void for_each(FuncT &&func) const
       {
@@ -77,24 +95,7 @@ class Variable_hashset
         }
         return true;
       }
-    std::size_t max_size() const noexcept
-      {
-        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
-        return max_nbkt / 2;
-      }
-    std::size_t capacity() const noexcept
-      {
-        const auto nbkt = this->m_nbkt;
-        return nbkt / 2;
-      }
 
-    void reserve(std::size_t res_arg)
-      {
-        if(res_arg <= this->capacity()) {
-          return;
-        }
-        this->do_rehash(res_arg);
-      }
     bool insert(const rocket::refcounted_ptr<Variable> &var)
       {
         if(!var) {

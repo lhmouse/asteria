@@ -60,6 +60,24 @@ class Reference_dictionary
         this->do_clear(global);
       }
 
+    std::size_t max_size() const noexcept
+      {
+        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
+        return max_nbkt / 2;
+      }
+    std::size_t capacity() const noexcept
+      {
+        const auto nbkt = this->m_nbkt;
+        return nbkt / 2;
+      }
+    void reserve(std::size_t res_arg)
+      {
+        if(res_arg <= this->capacity()) {
+          return;
+        }
+        this->do_rehash(res_arg);
+      }
+
     const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
       {
         const auto toff = this->do_find(name);
@@ -80,24 +98,7 @@ class Reference_dictionary
         ROCKET_ASSERT(ptr);
         return ptr;
       }
-    std::size_t max_size() const noexcept
-      {
-        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
-        return max_nbkt / 2;
-      }
-    std::size_t capacity() const noexcept
-      {
-        const auto nbkt = this->m_nbkt;
-        return nbkt / 2;
-      }
 
-    void reserve(std::size_t res_arg)
-      {
-        if(res_arg <= this->capacity()) {
-          return;
-        }
-        this->do_rehash(res_arg);
-      }
     Reference & open(const rocket::prehashed_string &name)
       {
         if(name.empty()) {
