@@ -1770,7 +1770,10 @@ template<typename charT, typename traitsT, typename allocatorT>
     using first_argument_type   = basic_cow_string;
     using second_argument_type  = basic_cow_string;
 
-    result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
+#ifdef __cpp_constexpr
+    constexpr
+#endif
+      result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
       {
         return lhs.compare(rhs) < 0;
       }
