@@ -10,15 +10,4 @@ Abstract_context::~Abstract_context()
   {
   }
 
-void Abstract_context::dispose_named_references(Global_context &global) noexcept
-  {
-    this->m_dict.for_each(
-      [&](const rocket::prehashed_string /*name*/, const Reference &ref)
-        {
-          ref.dispose_variable(global);
-        }
-      );
-    this->m_dict.clear();
-  }
-
 }

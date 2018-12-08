@@ -17,6 +17,16 @@ Variable_hashset::~Variable_hashset()
     ::operator delete(data);
   }
 
+void Variable_hashset::do_clear() noexcept
+  {
+    const auto data = this->m_data;
+    const auto nbkt = this->m_nbkt;
+    for(std::size_t i = 0; i != nbkt; ++i) {
+      data[i].var.reset();
+    }
+    this->m_size = 0;
+  }
+
 void Variable_hashset::do_throw_insert_null_pointer()
   {
     ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_hashset`.");
@@ -45,14 +55,14 @@ void Variable_hashset::do_throw_insert_null_pointer()
         // Phase one: Probe from `first` to the end of the table.
         for(std::size_t i = first; i != nbkt; ++i) {
           const auto qbkt = data + i;
-          if(!qbkt->var || std::forward<PredT>(pred)(*qbkt)) {
+          if(!*qbkt || std::forward<PredT>(pred)(*qbkt)) {
             return qbkt;
           }
         }
         // Phase two: Probe from the beginning of the table to `last`.
         for(std::size_t i = 0; i != last; ++i) {
           const auto qbkt = data + i;
-          if(!qbkt->var || std::forward<PredT>(pred)(*qbkt)) {
+          if(!*qbkt || std::forward<PredT>(pred)(*qbkt)) {
             return qbkt;
           }
         }
@@ -83,11 +93,11 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
     if(ROCKET_UNEXPECT(data_old)) {
       const auto nbkt_old = this->m_nbkt;
       for(std::size_t i = 0; i != nbkt_old; ++i) {
-        if(data_old[i].var) {
+        if(data_old[i]) {
           // Find a bucket for it.
           const auto origin = do_get_origin(nbkt, data_old[i].var);
           const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-          ROCKET_ASSERT(!qbkt->var);
+          ROCKET_ASSERT(!*qbkt);
           *qbkt = std::move(data_old[i]);
         }
         rocket::destroy_at(data_old + i);
@@ -109,7 +119,7 @@ std::ptrdiff_t Variable_hashset::do_find(const rocket::refcounted_ptr<Variable> 
     // Looking for the variable using linear probing.
     const auto origin = do_get_origin(nbkt, var);
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
-    if(!qbkt->var) {
+    if(!*qbkt) {
       // Not found.
       return -1;
     }
@@ -127,7 +137,7 @@ bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable
     // Find a bucket for the new element.
     const auto origin = do_get_origin(nbkt, var);
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
-    if(qbkt->var) {
+    if(*qbkt) {
       // Already exists.
       return false;
     }
@@ -143,7 +153,7 @@ void Variable_hashset::do_erase_unchecked(std::size_t tpos) noexcept
     const auto nbkt = this->m_nbkt;
     ROCKET_ASSERT(tpos < nbkt);
     // Nullify the bucket.
-    ROCKET_ASSERT(data[tpos].var);
+    ROCKET_ASSERT(data[tpos]);
     data[tpos].var.reset();
     this->m_size -= 1;
     // Relocate elements after the erasure point.
@@ -156,7 +166,7 @@ void Variable_hashset::do_erase_unchecked(std::size_t tpos) noexcept
           // Find a new bucket for it.
           const auto origin = do_get_origin(nbkt, old.var);
           const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-          ROCKET_ASSERT(!qbkt->var);
+          ROCKET_ASSERT(!*qbkt);
           // Insert it into the new bucket.
           *qbkt = std::move(old);
           return false;

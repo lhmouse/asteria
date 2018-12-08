@@ -17,6 +17,11 @@ class Reference_dictionary
       {
         rocket::prehashed_string name;
         rocket::static_vector<Reference, 1> refv;
+
+        explicit operator bool () const noexcept
+          {
+            return this->refv.size() != 0;
+          }
       };
 
     Bucket *m_data;
@@ -31,6 +36,7 @@ class Reference_dictionary
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
 
   private:
+    void do_clear(Global_context &global) noexcept;
     [[noreturn]] void do_throw_open_empty_name();
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
@@ -46,14 +52,12 @@ class Reference_dictionary
       {
         return this->m_size;
       }
-    void clear() noexcept
+    void clear(Global_context &global) noexcept
       {
-        const auto data = this->m_data;
-        const auto nbkt = this->m_nbkt;
-        for(std::size_t i = 0; i != nbkt; ++i) {
-          data[i].refv.clear();
+        if(this->empty()) {
+          return;
         }
-        this->m_size = 0;
+        this->do_clear(global);
       }
 
     template<typename FuncT>
@@ -62,7 +66,7 @@ class Reference_dictionary
         const auto data = this->m_data;
         const auto nbkt = this->m_nbkt;
         for(std::size_t i = 0; i != nbkt; ++i) {
-          if(!data[i].refv.empty()) {
+          if(data[i]) {
             std::forward<FuncT>(func)(data[i].name, data[i].refv.front());
           }
         }

@@ -15,6 +15,11 @@ class Variable_hashset
     struct Bucket
       {
         rocket::refcounted_ptr<Variable> var;
+
+        explicit operator bool () const noexcept
+          {
+            return this->var != nullptr;
+          }
       };
 
     Bucket *m_data;
@@ -29,6 +34,7 @@ class Variable_hashset
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
 
   private:
+    void do_clear() noexcept;
     [[noreturn]] void do_throw_insert_null_pointer();
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
@@ -46,12 +52,10 @@ class Variable_hashset
       }
     void clear() noexcept
       {
-        const auto data = this->m_data;
-        const auto nbkt = this->m_nbkt;
-        for(std::size_t i = 0; i != nbkt; ++i) {
-          data[i].var.reset();
+        if(this->empty()) {
+          return;
         }
-        this->m_size = 0;
+        this->do_clear();
       }
 
     template<typename FuncT>

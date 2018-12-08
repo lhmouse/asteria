@@ -30,7 +30,10 @@ class Abstract_context
       {
         return this->m_dict.open(name);
       }
-    void dispose_named_references(Global_context &global) noexcept;
+    void dispose_named_references(Global_context &global) noexcept
+      {
+        this->m_dict.clear(global);
+      }
 
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_context * get_parent_opt() const noexcept = 0;
