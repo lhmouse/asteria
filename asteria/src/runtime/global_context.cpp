@@ -58,7 +58,7 @@ void Global_context::perform_garbage_collection(unsigned gen_limit)
 rocket::unique_ptr<Executive_context> Global_context::allocate_executive_context()
   {
     rocket::unique_ptr<Executive_context> ctx;
-    if(this->m_ectx_pool.empty()) {
+    if(ROCKET_UNEXPECT(this->m_ectx_pool.empty())) {
       ctx = rocket::make_unique<Executive_context>(nullptr);
     } else {
       ctx = std::move(this->m_ectx_pool.mut_back());
@@ -81,7 +81,7 @@ bool Global_context::return_executive_context(rocket::unique_ptr<Executive_conte
 rocket::unique_ptr<Reference_stack> Global_context::allocate_reference_stack()
   {
     rocket::unique_ptr<Reference_stack> stack;
-    if(this->m_stack_pool.empty()) {
+    if(ROCKET_UNEXPECT(this->m_stack_pool.empty())) {
       stack = rocket::make_unique<Reference_stack>();
     } else {
       stack = std::move(this->m_stack_pool.mut_back());
