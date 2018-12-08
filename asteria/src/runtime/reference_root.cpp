@@ -53,7 +53,7 @@ Value & Reference_root::dereference_mutable() const
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        return alt.var->get_mutable_value();
+        return alt.var->open_value();
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");

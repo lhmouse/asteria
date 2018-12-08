@@ -40,6 +40,7 @@ test-driver
 *.tar.*
 *.deb
 description-pak
+callgrind.*
 
 lib
 bin

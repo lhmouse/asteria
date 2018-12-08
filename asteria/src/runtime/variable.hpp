@@ -50,7 +50,7 @@ class Variable : public rocket::refcounted_base<Variable>
       {
         return this->m_value;
       }
-    Value & get_mutable_value() noexcept
+    Value & open_value() noexcept
       {
         if(this->m_immutable) {
           this->do_throw_immutable();
