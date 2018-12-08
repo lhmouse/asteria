@@ -29,7 +29,10 @@ const Value & Reference_root::dereference_const() const
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        return alt.var->get_value();
+        if(!alt.var_opt) {
+          return Value::get_null();
+        }
+        return alt.var_opt->get_value();
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -53,7 +56,10 @@ Value & Reference_root::dereference_mutable() const
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        return alt.var->open_value();
+        if(!alt.var_opt) {
+          ASTERIA_THROW_RUNTIME_ERROR("The reference cannot be written after being moved. This is likely a bug. Please report.");
+        }
+        return alt.var_opt->open_value();
       }
       default: {
         ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -79,9 +85,9 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        if(callback.accept(alt.var)) {
+        if(alt.var_opt && callback.accept(alt.var_opt)) {
           // Descend into this variable recursively when the callback returns `true`.
-          alt.var->enumerate_variables(callback);
+          alt.var_opt->enumerate_variables(callback);
         }
         return;
       }
@@ -101,10 +107,10 @@ void Reference_root::dispose_variable(Global_context &global) const noexcept
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        if((alt.var->use_count() <= 2) && global.untrack_variable(alt.var)) {
+        if(alt.var_opt && (alt.var_opt->use_count() <= 2) && global.untrack_variable(alt.var_opt)) {
           // Wipe out its contents only if it has been detached successfully.
-          ASTERIA_DEBUG_LOG("Disposing variable: ", alt.var->get_value());
-          alt.var->reset(D_null(), true);
+          ASTERIA_DEBUG_LOG("Disposing variable: ", alt.var_opt->get_value());
+          alt.var_opt->reset(D_null(), true);
         }
         return;
       }
