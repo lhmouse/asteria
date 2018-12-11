@@ -132,44 +132,12 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
     return Instantiated_function(loc, name, params, std::move(body_bnd));
   }
 
-    namespace {
-
-    class Context_sentry
-      {
-      private:
-        std::reference_wrapper<Global_context> m_global;
-        rocket::unique_ptr<Executive_context> m_ctx;
-
-      public:
-        explicit Context_sentry(Global_context &global)
-          : m_global(global)
-          {
-            this->m_ctx = this->m_global.get().allocate_executive_context();
-          }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Context_sentry)
-          {
-            this->m_global.get().return_executive_context(std::move(this->m_ctx));
-          }
-
-      public:
-        Executive_context & operator*() const noexcept
-          {
-            return *(this->m_ctx);
-          }
-        Executive_context * operator->() const noexcept
-          {
-            return this->m_ctx.get();
-          }
-      };
-
-    }
-
 void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
   {
-    const Context_sentry ctx_next(global);
-    ctx_next->initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
+    Executive_context ctx_next(nullptr);
+    ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, *ctx_next, global);
+    const auto status = this->execute_in_place(self_io, ctx_next, global);
     switch(status) {
       case status_next: {
         // Return `null` if the control flow reached the end of the function.

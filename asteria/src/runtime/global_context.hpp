@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "../rocket/cow_vector.hpp"
 #include "../rocket/unique_ptr.hpp"
 
 namespace Asteria {
@@ -15,8 +14,6 @@ class Global_context : public Abstract_context
   {
   private:
     rocket::refcounted_ptr<Generational_collector> m_gen_coll;
-    rocket::cow_vector<rocket::unique_ptr<Executive_context>> m_ectx_pool;
-    rocket::cow_vector<rocket::unique_ptr<Reference_stack>> m_stack_pool;
 
   public:
     Global_context();
@@ -30,12 +27,6 @@ class Global_context : public Abstract_context
       {
         return *(this->m_gen_coll);
       }
-
-    rocket::unique_ptr<Executive_context> allocate_executive_context();
-    bool return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept;
-
-    rocket::unique_ptr<Reference_stack> allocate_reference_stack();
-    bool return_reference_stack(rocket::unique_ptr<Reference_stack> &&ctx) noexcept;
   };
 
 }

@@ -89,46 +89,15 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     return true;
   }
 
-    namespace {
-
-    class Stack_sentry
-      {
-      private:
-        std::reference_wrapper<Global_context> m_global;
-        rocket::unique_ptr<Reference_stack> m_stack;
-
-      public:
-        explicit Stack_sentry(Global_context &global)
-          : m_global(global)
-          {
-            this->m_stack = this->m_global.get().allocate_reference_stack();
-          }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Stack_sentry) {
-            this->m_global.get().return_reference_stack(std::move(this->m_stack));
-          }
-
-      public:
-        Reference_stack & operator*() const noexcept
-          {
-            return *(this->m_stack);
-          }
-        Reference_stack * operator->() const noexcept
-          {
-            return this->m_stack.get();
-          }
-      };
-
-    }
-
 void Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
   {
-    const Stack_sentry stack(global);
-    if(!this->evaluate_partial(*stack, global, ctx)) {
+    Reference_stack stack;
+    if(!this->evaluate_partial(stack, global, ctx)) {
       ref_out = Reference_root::S_null();
       return;
     }
-    ROCKET_ASSERT(stack->size() == 1);
-    ref_out = std::move(stack->top());
+    ROCKET_ASSERT(stack.size() == 1);
+    ref_out = std::move(stack.top());
   }
 
 void Expression::enumerate_variables(const Abstract_variable_callback &callback) const
