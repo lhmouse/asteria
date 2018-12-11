@@ -97,7 +97,6 @@ class Reference
       }
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
-    void dispose_variable(Generational_collector *coll_opt) const noexcept;
   };
 
 }

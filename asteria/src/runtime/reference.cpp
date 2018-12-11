@@ -69,9 +69,4 @@ void Reference::enumerate_variables(const Abstract_variable_callback &callback) 
     this->m_root.enumerate_variables(callback);
   }
 
-void Reference::dispose_variable(Generational_collector *coll_opt) const noexcept
-  {
-    this->m_root.dispose_variable(coll_opt);
-  }
-
 }

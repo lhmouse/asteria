@@ -36,7 +36,7 @@ class Reference_dictionary
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
 
   private:
-    void do_clear(Generational_collector *coll_opt) noexcept;
+    void do_clear() noexcept;
     [[noreturn]] void do_throw_open_empty_name();
     void do_rehash(std::size_t res_arg);
     std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
@@ -52,12 +52,12 @@ class Reference_dictionary
       {
         return this->m_size;
       }
-    void clear(Generational_collector *coll_opt) noexcept
+    void clear() noexcept
       {
         if(this->empty()) {
           return;
         }
-        this->do_clear(coll_opt);
+        this->do_clear();
       }
 
     std::size_t max_size() const noexcept

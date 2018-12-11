@@ -19,21 +19,6 @@ Reference_stack::~Reference_stack()
     }
   }
 
-void Reference_stack::do_clear(Generational_collector *coll_opt) noexcept
-  {
-    auto cur = this->m_scur;
-    while(cur) {
-      const auto prev = cur->prev;
-      while(!cur->refs.empty()) {
-        cur->refs.back().dispose_variable(coll_opt);
-        cur->refs.pop_back();
-      }
-      cur = prev;
-    }
-    this->m_scur = nullptr;
-    this->m_size = 0;
-  }
-
 Reference_stack::Chunk * Reference_stack::do_reserve_one_more()
   {
     auto cur = this->m_scur;

@@ -17,14 +17,11 @@ Reference_dictionary::~Reference_dictionary()
     ::operator delete(data);
   }
 
-void Reference_dictionary::do_clear(Generational_collector *coll_opt) noexcept
+void Reference_dictionary::do_clear() noexcept
   {
     const auto data = this->m_data;
     const auto nbkt = this->m_nbkt;
     for(std::size_t i = 0; i != nbkt; ++i) {
-      if(data[i]) {
-        data[i].refv.front().dispose_variable(coll_opt);
-      }
       data[i].refv.clear();
     }
     this->m_size = 0;

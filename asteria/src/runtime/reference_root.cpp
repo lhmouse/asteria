@@ -97,27 +97,4 @@ void Reference_root::enumerate_variables(const Abstract_variable_callback &callb
     }
   }
 
-void Reference_root::dispose_variable(Generational_collector *coll_opt) const noexcept
-  {
-    switch(Index(this->m_stor.index())) {
-      case index_null:
-      case index_constant:
-      case index_temporary: {
-        return;
-      }
-      case index_variable: {
-        const auto &alt = this->m_stor.as<S_variable>();
-        if(alt.var_opt && (alt.var_opt->use_count() <= 2) && coll_opt && coll_opt->untrack_variable(alt.var_opt)) {
-          // Wipe out its contents only if it has been detached successfully.
-          ASTERIA_DEBUG_LOG("Disposed variable: ", alt.var_opt->get_value());
-          alt.var_opt->reset(D_null(), true);
-        }
-        return;
-      }
-      default: {
-        ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
-      }
-    }
-  }
-
 }
