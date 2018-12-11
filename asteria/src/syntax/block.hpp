@@ -46,6 +46,11 @@ class Block
     void do_compile();
 
   public:
+    bool empty() const noexcept
+      {
+        return this->m_jinsts.empty();
+      }
+
     void fly_over_in_place(Abstract_context &ctx_io) const;
     Block bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
     Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;

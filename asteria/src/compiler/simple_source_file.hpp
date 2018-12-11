@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_SIMPLE_SOURCE_FILE_HPP_
 
 #include "../fwd.hpp"
+#include "parser_error.hpp"
 #include "../syntax/block.hpp"
 #include "../rocket/cow_vector.hpp"
 
@@ -13,18 +14,39 @@ namespace Asteria {
 class Simple_source_file
   {
   private:
-    rocket::cow_string m_file;
     Block m_code;
+    rocket::cow_string m_file;
 
   public:
-    Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &file);
+    Simple_source_file() noexcept
+      {
+      }
+    explicit Simple_source_file(const rocket::cow_string &filename)
+      {
+        const auto err = this->load_file(filename);
+        this->do_throw_on_error(err);
+      }
+    Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &filename)
+      {
+        const auto err = this->load_stream(cstrm_io, filename);
+        this->do_throw_on_error(err);
+      }
     ROCKET_COPYABLE_DESTRUCTOR(Simple_source_file);
 
-  public:
-    const rocket::cow_string & get_file() const noexcept
+  private:
+    void do_throw_on_error(const Parser_error &err)
       {
-        return this->m_file;
+        if(err == Parser_error::code_success) {
+          return;
+        }
+        this->do_throw_error(err);
       }
+    [[noreturn]] void do_throw_error(const Parser_error &err);
+
+  public:
+    Parser_error load_file(const rocket::cow_string &filename);
+    Parser_error load_stream(std::istream &cstrm_io, const rocket::cow_string &filename);
+    void clear() noexcept;
 
     Reference execute(Global_context &global, rocket::cow_vector<Reference> &&args) const;
   };
