@@ -31,7 +31,9 @@ Statement::~Statement()
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` of this ", desc, " is reserved and cannot be used.");
         }
         auto &ref = ctx_io.open_named_reference(name);
-        ref.dispose_variable(coll_opt);
+        if(coll_opt) {
+          ref.dispose_variable(coll_opt);
+        }
         ref = std::forward<XrefT>(xref);
       }
 
