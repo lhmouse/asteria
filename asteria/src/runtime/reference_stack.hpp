@@ -37,7 +37,7 @@ class Reference_stack
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_stack);
 
   private:
-    void do_clear(Global_context &global) noexcept;
+    void do_clear(Generational_collector *coll_opt) noexcept;
     Chunk * do_reserve_one_more();
 
   public:
@@ -49,12 +49,12 @@ class Reference_stack
       {
         return this->m_size;
       }
-    void clear(Global_context &global) noexcept
+    void clear(Generational_collector *coll_opt) noexcept
       {
         if(this->empty()) {
           return;
         }
-        this->do_clear(global);
+        this->do_clear(coll_opt);
       }
 
     const Reference & top() const noexcept

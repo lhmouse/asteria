@@ -14,7 +14,7 @@ namespace Asteria {
 class Global_context : public Abstract_context
   {
   private:
-    rocket::refcounted_ptr<Global_collector> m_gcoll;
+    rocket::refcounted_ptr<Generational_collector> m_gen_coll;
     rocket::cow_vector<rocket::unique_ptr<Executive_context>> m_ectx_pool;
     rocket::cow_vector<rocket::unique_ptr<Reference_stack>> m_stack_pool;
 
@@ -26,9 +26,10 @@ class Global_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
 
-    void track_variable(const rocket::refcounted_ptr<Variable> &var);
-    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    void perform_garbage_collection(unsigned gen_limit);
+    Generational_collector & get_generational_collector() const noexcept
+      {
+        return *(this->m_gen_coll);
+      }
 
     rocket::unique_ptr<Executive_context> allocate_executive_context();
     bool return_executive_context(rocket::unique_ptr<Executive_context> &&ctx) noexcept;

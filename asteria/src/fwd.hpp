@@ -49,7 +49,7 @@ class Abstract_context;
 class Analytic_context;
 class Executive_context;
 class Global_context;
-class Global_collector;
+class Generational_collector;
 class Variadic_arguer;
 class Instantiated_function;
 

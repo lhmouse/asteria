@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_stack.hpp"
+#include "../utilities.hpp"
 
 namespace Asteria {
 
@@ -18,13 +19,13 @@ Reference_stack::~Reference_stack()
     }
   }
 
-void Reference_stack::do_clear(Global_context &global) noexcept
+void Reference_stack::do_clear(Generational_collector *coll_opt) noexcept
   {
     auto cur = this->m_scur;
     while(cur) {
       const auto prev = cur->prev;
       for(auto it = cur->refs.rbegin(); it != cur->refs.rend(); ++it) {
-        it->dispose_variable(global);
+        it->dispose_variable(coll_opt);
       }
       cur = prev;
     }
