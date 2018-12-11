@@ -198,6 +198,7 @@ template<typename elementT, typename deleterT>
   public:
     using element_type  = elementT;
     using deleter_type  = deleterT;
+    using pointer       = elementT *;
 
   protected:
     using refcount_base  = details_refcounted_ptr::refcount_base;
@@ -265,7 +266,7 @@ template<typename elementT>
 
   public:
     using element_type  = elementT;
-    using pointer       = element_type *;
+    using pointer       = elementT *;
 
   private:
     details_refcounted_ptr::stored_pointer<element_type> m_sth;

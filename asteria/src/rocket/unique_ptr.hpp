@@ -168,8 +168,7 @@ template<typename elementT, typename deleterT>
   public:
     using element_type  = elementT;
     using deleter_type  = deleterT;
-
-    using pointer     = typename details_unique_ptr::pointer_of<element_type, deleter_type>::type;
+    using pointer       = typename details_unique_ptr::pointer_of<element_type, deleter_type>::type;
 
   private:
     details_unique_ptr::stored_pointer<pointer, deleter_type> m_sth;
