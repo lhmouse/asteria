@@ -11,23 +11,20 @@
 
 namespace Asteria {
 
-Global_context::Global_context()
-  {
-    ASTERIA_DEBUG_LOG("`Global_context` constructor: ", static_cast<void *>(this));
-    // Create the global garbage collector.
-    this->m_gen_coll = rocket::make_refcounted<Generational_collector>();
-  }
-
 Global_context::~Global_context()
   {
-    ASTERIA_DEBUG_LOG("`Global_context` destructor: ", static_cast<void *>(this));
     // Perform the final garbage collection.
     try {
-      this->clear_named_references(this->m_gen_coll.get());
-      this->m_gen_coll->perform_garbage_collection(100);
+      this->clear_named_references(&(this->m_gen_coll));
+      this->m_gen_coll.perform_garbage_collection(UINT_MAX);
     } catch(std::exception &e) {
       ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
     }
+  }
+
+void Global_context::do_initialize_library()
+  {
+    ASTERIA_DEBUG_LOG("TODO add std library");
   }
 
 bool Global_context::is_analytic() const noexcept
