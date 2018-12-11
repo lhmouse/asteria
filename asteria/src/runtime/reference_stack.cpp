@@ -24,8 +24,9 @@ void Reference_stack::do_clear(Generational_collector *coll_opt) noexcept
     auto cur = this->m_scur;
     while(cur) {
       const auto prev = cur->prev;
-      for(auto it = cur->refs.rbegin(); it != cur->refs.rend(); ++it) {
-        it->dispose_variable(coll_opt);
+      while(!cur->refs.empty()) {
+        cur->refs.back().dispose_variable(coll_opt);
+        cur->refs.pop_back();
       }
       cur = prev;
     }
