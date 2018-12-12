@@ -87,6 +87,24 @@ using ::std::add_rvalue_reference;
 using ::std::remove_reference;
 using ::std::is_same;
 using ::std::is_trivial;
+#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
+using ::std::is_trivially_default_constructible;
+using ::std::is_trivially_copy_constructible;
+using ::std::is_trivially_move_constructible;
+using ::std::is_trivially_copy_assignable;
+using ::std::is_trivially_move_assignable;
+#else
+template<typename typeT>
+  using is_trivially_default_constructible = ::std::has_trivial_default_constructor<typeT>;
+template<typename typeT>
+  using is_trivially_copy_constructible = has_trivial_copy_constructor<typeT>;
+template<typename typeT>
+  using is_trivially_move_constructible = has_trivial_copy_constructor<typeT>;
+template<typename typeT>
+  using is_trivially_copy_assignable = has_trivial_copy_assign<typeT>;
+template<typename typeT>
+  using is_trivially_move_assignable = has_trivial_copy_assign<typeT>;
+#endif
 using ::std::is_trivially_destructible;
 using ::std::underlying_type;
 using ::std::is_array;

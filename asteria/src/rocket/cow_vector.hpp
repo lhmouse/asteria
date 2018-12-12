@@ -75,12 +75,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           = delete;
       };
 
-    template<typename allocatorT>
-      struct copy_trivially : conjunction<is_trivial<typename allocatorT::value_type>, is_std_allocator<allocatorT>>
-      {
-      };
-
-    template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value, bool memcpyT = copy_trivially<allocatorT>::value>
+    template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
+                                  bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct copy_storage_helper
       {
         // This is the generic version.
@@ -123,12 +119,12 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             auto nelem = ptr->nelem;
             const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
+            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
 
-    template<typename allocatorT, bool memcpyT = copy_trivially<allocatorT>::value>
+    template<typename allocatorT, bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct move_storage_helper
       {
         // This is the generic version.

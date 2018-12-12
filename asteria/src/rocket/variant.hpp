@@ -128,43 +128,6 @@ template<typename ...alternativesT>
         noadl::adl_swap(*static_cast<alternativeT *>(tptr), *static_cast<alternativeT *>(rptr));
       }
 
-    template<typename typeT>
-      struct trivial_copy_construct :
-#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
-        ::std::is_trivially_copy_constructible<typeT>
-#else
-        ::std::has_trivial_copy_constructor<typeT>
-#endif
-      {
-      };
-    template<typename typeT>
-      struct trivial_move_construct :
-#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
-        ::std::is_trivially_move_constructible<typeT>
-#else
-        ::std::has_trivial_copy_constructor<typeT>
-#endif
-      {
-      };
-    template<typename typeT>
-      struct trivial_copy_assign :
-#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
-        ::std::is_trivially_copy_assignable<typeT>
-#else
-        ::std::has_trivial_copy_assign<typeT>
-#endif
-      {
-      };
-    template<typename typeT>
-      struct trivial_move_assign :
-#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
-        ::std::is_trivially_move_assignable<typeT>
-#else
-        ::std::has_trivial_copy_assign<typeT>
-#endif
-      {
-      };
-
     }
 
 template<typename ...alternativesT>
@@ -224,7 +187,7 @@ template<typename ...alternativesT>
 
     static void do_dispatch_copy_construct(size_t rindex, void *tptr, const void *rptr)
       {
-        static constexpr bool s_fast_call[] = { details_variant::trivial_copy_construct<alternativesT>::value... };
+        static constexpr bool s_fast_call[] = { is_trivially_copy_constructible<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
@@ -234,7 +197,7 @@ template<typename ...alternativesT>
       }
     static void do_dispatch_move_construct(size_t rindex, void *tptr, void *rptr)
       {
-        static constexpr bool s_fast_call[] = { details_variant::trivial_move_construct<alternativesT>::value... };
+        static constexpr bool s_fast_call[] = { is_trivially_move_constructible<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
@@ -244,7 +207,7 @@ template<typename ...alternativesT>
       }
     static void do_dispatch_copy_assign(size_t rindex, void *tptr, const void *rptr)
       {
-        static constexpr bool s_fast_call[] = { details_variant::trivial_copy_assign<alternativesT>::value... };
+        static constexpr bool s_fast_call[] = { is_trivially_copy_assignable<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
           // They may overlap in case of self assignment.
           if(ROCKET_EXPECT(tptr != rptr)) {
@@ -257,7 +220,7 @@ template<typename ...alternativesT>
       }
     static void do_dispatch_move_assign(size_t rindex, void *tptr, void *rptr)
       {
-        static constexpr bool s_fast_call[] = { details_variant::trivial_move_assign<alternativesT>::value... };
+        static constexpr bool s_fast_call[] = { is_trivially_move_assignable<alternativesT>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
           // They may overlap in case of self assignment.
           if(ROCKET_EXPECT(tptr != rptr)) {
@@ -280,7 +243,7 @@ template<typename ...alternativesT>
       }
     static void do_dispatch_move_construct_then_destroy(size_t rindex, void *tptr, void *rptr)
       {
-        static constexpr bool s_fast_call[] = { conjunction<details_variant::trivial_move_construct<alternativesT>, is_trivially_destructible<alternativesT>>::value... };
+        static constexpr bool s_fast_call[] = { conjunction<is_trivially_move_constructible<alternativesT>, is_trivially_destructible<alternativesT>>::value... };
         if(variant::do_check_fast_call(rindex, s_fast_call)) {
           ::std::memcpy(tptr, rptr, sizeof(storage));
           return;
