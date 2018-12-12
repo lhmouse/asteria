@@ -220,21 +220,21 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     namespace {
 
-    Block::Status do_execute(const Statement::S_expression &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_expression(const Statement::S_expression &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_block &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_block(const Statement::S_block &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Execute the body.
         const auto status = alt.body.execute(ref_out, global, ctx_io);
         return status;
       }
 
-    Block::Status do_execute(const Statement::S_variable &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_variable(const Statement::S_variable &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -250,7 +250,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_function(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_context &ctx_io, Global_context &global)
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
@@ -265,7 +265,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_if &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_if(const Statement::S_if &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, global, ctx_io);
@@ -274,7 +274,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return status;
       }
 
-    Block::Status do_execute(const Statement::S_switch &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_switch(const Statement::S_switch &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the control expression.
         alt.ctrl.evaluate(ref_out, global, ctx_io);
@@ -329,7 +329,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_do_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_do_while(const Statement::S_do_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         for(;;) {
           // Execute the loop body.
@@ -351,7 +351,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_while(const Statement::S_while &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         for(;;) {
           // Check the loop condition.
@@ -373,7 +373,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_for &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_for(const Statement::S_for &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Executive_context ctx_next(&ctx_io);
@@ -405,7 +405,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_for_each &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_for_each(const Statement::S_for_each &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // The key and mapped variables shall not outlast the loop body.
         Executive_context ctx_for(&ctx_io);
@@ -480,14 +480,14 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_try &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_try(const Statement::S_try &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         Block::Status status;
         try {
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
           status = alt.body_try.execute(ref_out, global, ctx_io);
-        } catch(std::exception &stdex) {
+        } catch(const std::exception &stdex) {
           // Prepare the backtrace as an `array` for processing by code inside `catch`.
           D_array backtrace;
           const auto push_backtrace = [&](const Source_location &loc)
@@ -502,7 +502,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           try {
             // Translate the exception as needed.
             throw;
-          } catch(Exception &except) {
+          } catch(const Exception &except) {
             // Handle an `Asteria::Exception`.
             ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
             Reference_root::S_temporary ref_c = { except.get_value() };
@@ -532,7 +532,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         return Block::status_next;
       }
 
-    Block::Status do_execute(const Statement::S_throw &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_throw(const Statement::S_throw &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
@@ -541,7 +541,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         throw Exception(alt.loc, std::move(value));
       }
 
-    Block::Status do_execute(const Statement::S_return &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
+    Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
@@ -555,7 +555,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_context &, Global_context &) = do_execute>
+    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_context &, Global_context &)>
       rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> do_bind(const AltT &alt)
       {
         return rocket::bind_first(
@@ -583,47 +583,47 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
     switch(Index(this->m_stor.index())) {
       case index_expression: {
         const auto &alt = this->m_stor.as<S_expression>();
-        return do_bind(alt);
+        return do_bind<S_expression, do_execute_expression>(alt);
       }
       case index_block: {
         const auto &alt = this->m_stor.as<S_block>();
-        return do_bind(alt);
+        return do_bind<S_block, do_execute_block>(alt);
       }
       case index_variable: {
         const auto &alt = this->m_stor.as<S_variable>();
-        return do_bind(alt);
+        return do_bind<S_variable, do_execute_variable>(alt);
       }
       case index_function: {
         const auto &alt = this->m_stor.as<S_function>();
-        return do_bind(alt);
+        return do_bind<S_function, do_execute_function>(alt);
       }
       case index_if: {
         const auto &alt = this->m_stor.as<S_if>();
-        return do_bind(alt);
+        return do_bind<S_if, do_execute_if>(alt);
       }
       case index_switch: {
         const auto &alt = this->m_stor.as<S_switch>();
-        return do_bind(alt);
+        return do_bind<S_switch, do_execute_switch>(alt);
       }
       case index_do_while: {
         const auto &alt = this->m_stor.as<S_do_while>();
-        return do_bind(alt);
+        return do_bind<S_do_while, do_execute_do_while>(alt);
       }
       case index_while: {
         const auto &alt = this->m_stor.as<S_while>();
-        return do_bind(alt);
+        return do_bind<S_while, do_execute_while>(alt);
       }
       case index_for: {
         const auto &alt = this->m_stor.as<S_for>();
-        return do_bind(alt);
+        return do_bind<S_for, do_execute_for>(alt);
       }
       case index_for_each: {
         const auto &alt = this->m_stor.as<S_for_each>();
-        return do_bind(alt);
+        return do_bind<S_for_each, do_execute_for_each>(alt);
       }
       case index_try: {
         const auto &alt = this->m_stor.as<S_try>();
-        return do_bind(alt);
+        return do_bind<S_try, do_execute_try>(alt);
       }
       case index_break: {
         const auto &alt = this->m_stor.as<S_break>();
@@ -667,11 +667,11 @@ rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_cont
       }
       case index_throw: {
         const auto &alt = this->m_stor.as<S_throw>();
-        return do_bind(alt);
+        return do_bind<S_throw, do_execute_throw>(alt);
       }
       case index_return: {
         const auto &alt = this->m_stor.as<S_return>();
-        return do_bind(alt);
+        return do_bind<S_return, do_execute_return>(alt);
       }
       default: {
         ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
