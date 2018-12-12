@@ -37,7 +37,7 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
       if(ROCKET_EXPECT(i < args.size())) {
         this->open_named_reference(param) = std::move(args.mut(i));
       } else {
-        this->open_named_reference(param) = Reference_root::S_null();
+        this->open_named_reference(param) /*= Reference_root::S_null()*/;
       }
     }
     // Set `this`.
