@@ -97,13 +97,13 @@ using ::std::is_trivially_move_assignable;
 template<typename typeT>
   using is_trivially_default_constructible = ::std::has_trivial_default_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_copy_constructible = has_trivial_copy_constructor<typeT>;
+  using is_trivially_copy_constructible = ::std::has_trivial_copy_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_move_constructible = has_trivial_copy_constructor<typeT>;
+  using is_trivially_move_constructible = ::std::has_trivial_copy_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_copy_assignable = has_trivial_copy_assign<typeT>;
+  using is_trivially_copy_assignable = ::std::has_trivial_copy_assign<typeT>;
 template<typename typeT>
-  using is_trivially_move_assignable = has_trivial_copy_assign<typeT>;
+  using is_trivially_move_assignable = ::std::has_trivial_copy_assign<typeT>;
 #endif
 using ::std::is_trivially_destructible;
 using ::std::underlying_type;
