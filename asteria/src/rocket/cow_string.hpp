@@ -1739,7 +1739,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       }
   };
 
-#ifndef __cpp_inline_variables
+#if defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606)
 template<typename charT, typename traitsT, typename allocatorT>
   constexpr typename basic_cow_string<charT, traitsT, allocatorT>::size_type basic_cow_string<charT, traitsT, allocatorT>::npos;
 #endif
@@ -1770,7 +1770,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     using first_argument_type   = basic_cow_string;
     using second_argument_type  = basic_cow_string;
 
-#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304l)
+#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304)
     constexpr
 #endif
       result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
@@ -1785,7 +1785,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
 
-#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304l)
+#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304)
     constexpr
 #endif
       result_type operator()(const argument_type &str) const noexcept

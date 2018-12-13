@@ -13,7 +13,7 @@ namespace rocket {
 
     template<typename typeT>
       using is_final =
-#ifdef __cpp_lib_is_final
+#if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
         ::std::is_final<typeT>
 #else
         ::std::false_type
@@ -116,7 +116,7 @@ template<typename valueT>
   };
 
 template<typename xpointerT>
-#ifdef __cpp_lib_addressof_constexpr
+#if defined(__cpp_lib_addressof_constexpr) && (__cpp_lib_addressof_constexpr >= 201603)
   constexpr
 #endif
     inline typename ::std::remove_reference<decltype(*(::std::declval<const xpointerT &>()))>::type * unfancy(const xpointerT &xptr) noexcept

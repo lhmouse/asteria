@@ -560,7 +560,7 @@ template<typename ...alternativesT>
       }
   };
 
-#ifndef __cpp_inline_variables
+#if defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606)
 template<typename ...alternativesT>
   constexpr size_t variant<alternativesT...>::type_size;
 #endif

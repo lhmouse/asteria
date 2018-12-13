@@ -65,7 +65,7 @@ template<typename funcT, typename ...firstT>
     template<typename ...restT, size_t ...indicesT>
       constexpr result_type_for<restT...> do_unpack_forward_then_invoke(index_sequence<indicesT...>, restT &...rest) const
       {
-#ifdef __cpp_lib_invoke
+#if defined(__cpp_lib_invoke) && (__cpp_lib_invoke >= 201411)
         return ::std::invoke(this->m_func, ::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
 #else
         return this->m_func(::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
