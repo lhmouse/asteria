@@ -1753,11 +1753,11 @@ template<typename charT, typename traitsT, typename allocatorT>
 
     result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
       {
-        if(lhs.data() == rhs.data()) {
-          return true;
-        }
         if(lhs.size() != rhs.size()) {
           return false;
+        }
+        if(lhs.data() == rhs.data()) {
+          return true;
         }
         return lhs.compare(rhs) == 0;
       }
