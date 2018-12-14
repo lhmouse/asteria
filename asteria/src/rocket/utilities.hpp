@@ -108,6 +108,7 @@ template<typename typeT>
 using ::std::is_trivially_destructible;
 using ::std::underlying_type;
 using ::std::is_array;
+using ::std::result_of;
 
 using ::std::allocator;
 using ::std::allocator_traits;
