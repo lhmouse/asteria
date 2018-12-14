@@ -115,7 +115,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         auto branch_true_bnd = alt.branch_true.bind(global, ctx_io);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx_io);
-        Statement::S_if alt_bnd = { std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
+        Statement::S_if alt_bnd = { alt.neg, std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
         return std::move(alt_bnd);
       }
       case index_switch: {
@@ -139,7 +139,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the loop body and condition recursively.
         auto body_bnd = alt.body.bind(global, ctx_io);
         auto cond_bnd = alt.cond.bind(global, ctx_io);
-        Statement::S_do_while alt_bnd = { std::move(body_bnd), std::move(cond_bnd) };
+        Statement::S_do_while alt_bnd = { std::move(body_bnd), alt.neg, std::move(cond_bnd) };
         return std::move(alt_bnd);
       }
       case index_while: {
@@ -147,7 +147,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the condition and loop body recursively.
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         auto body_bnd = alt.body.bind(global, ctx_io);
-        Statement::S_while alt_bnd = { std::move(cond_bnd), std::move(body_bnd) };
+        Statement::S_while alt_bnd = { alt.neg, std::move(cond_bnd), std::move(body_bnd) };
         return std::move(alt_bnd);
       }
       case index_for: {
@@ -269,7 +269,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
       {
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto branch = ref_out.read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
+        const auto branch = (ref_out.read().test() != alt.neg) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
         const auto status = branch.get().execute(ref_out, global, ctx_io);
         return status;
       }
@@ -344,7 +344,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           }
           // Check the loop condition.
           alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!ref_out.read().test()) {
+          if(ref_out.read().test() == alt.neg) {
             break;
           }
         }
@@ -356,7 +356,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         for(;;) {
           // Check the loop condition.
           alt.cond.evaluate(ref_out, global, ctx_io);
-          if(!ref_out.read().test()) {
+          if(ref_out.read().test() == alt.neg) {
             break;
           }
           // Execute the loop body.

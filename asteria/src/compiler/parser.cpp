@@ -418,7 +418,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
-        if(!do_accept_identifier_list(params, tstrm_io)) {
+        if(do_accept_identifier_list(params, tstrm_io)) {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
@@ -1224,7 +1224,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
-        if(!do_accept_identifier_list(params, tstrm_io)) {
+        if(do_accept_identifier_list(params, tstrm_io)) {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
@@ -1258,10 +1258,24 @@ Parser::~Parser()
     bool do_accept_if_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // if-statement ::=
-        //   "if" "(" expression ")" statement ( "else" statement | "" )
+        //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
+        // negation-opt ::=
+        //   negation | ""
+        // negation ::=
+        //   "!" | "not"
         if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
           return false;
         }
+        bool neg = false;
+        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
+          neg = true;
+          goto z;
+        }
+        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
+          neg = true;
+          goto z;
+        }
+      z:
         rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
@@ -1283,7 +1297,7 @@ Parser::~Parser()
             throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
           }
         }
-        Statement::S_if stmt_c = { std::move(cond), std::move(branch_true), std::move(branch_false) };
+        Statement::S_if stmt_c = { neg, std::move(cond), std::move(branch_true), std::move(branch_false) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1348,7 +1362,7 @@ Parser::~Parser()
     bool do_accept_do_while_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // do-while-statement ::=
-        //   "do" statement "while" "(" expression ")" ";"
+        //   "do" statement "while" negation-opt "(" expression ")" ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_do)) {
           return false;
         }
@@ -1359,6 +1373,16 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_keyword_while_expected);
         }
+        bool neg = false;
+        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
+          neg = true;
+          goto z;
+        }
+        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
+          neg = true;
+          goto z;
+        }
+      z:
         rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
@@ -1372,7 +1396,7 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
         }
-        Statement::S_do_while stmt_c = { std::move(body), std::move(cond) };
+        Statement::S_do_while stmt_c = { std::move(body), neg, std::move(cond) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1380,10 +1404,20 @@ Parser::~Parser()
     bool do_accept_while_statement(rocket::cow_vector<Statement> &stmts_out, Token_stream &tstrm_io)
       {
         // while-statement ::=
-        //   "while" "(" expression ")" statement
+        //   "while" negation-opt "(" expression ")" statement
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           return false;
         }
+        bool neg = false;
+        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
+          neg = true;
+          goto z;
+        }
+        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
+          neg = true;
+          goto z;
+        }
+      z:
         rocket::cow_vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
@@ -1398,7 +1432,7 @@ Parser::~Parser()
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
-        Statement::S_while stmt_c = { std::move(cond), std::move(body) };
+        Statement::S_while stmt_c = { neg, std::move(cond), std::move(body) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1446,13 +1480,13 @@ Parser::~Parser()
           if(!init_got) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_for_statement_initializer_expected);
           }
-          if(!do_accept_expression(cond, tstrm_io)) {
+          if(do_accept_expression(cond, tstrm_io)) {
             // This is optional.
           }
           if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_semicolon_expected);
           }
-          if(!do_accept_expression(step, tstrm_io)) {
+          if(do_accept_expression(step, tstrm_io)) {
             // This is optional.
           }
         }
@@ -1561,7 +1595,7 @@ Parser::~Parser()
           by_ref = true;
         }
         rocket::cow_vector<Xpnode> expr;
-        if(!do_accept_expression(expr, tstrm_io)) {
+        if(do_accept_expression(expr, tstrm_io)) {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {

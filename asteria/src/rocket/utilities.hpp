@@ -14,6 +14,7 @@
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <cstddef>  // std::size_t, std::ptrdiff_t
+#include "compatibility.h"
 
 namespace rocket {
 

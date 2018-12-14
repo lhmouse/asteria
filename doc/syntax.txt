@@ -74,7 +74,11 @@ expression-statement ::=
 	expression ";"
 
 if-statement ::=
-	"if" "(" expression ")" statement ( "else" statement | "" )
+	"if" negation-opt "(" expression ")" statement ( "else" statement | "" )
+negation-opt ::=
+	negation | ""
+negation ::=
+	"!" | "not"
 switch-statement ::=
 	"switch" "(" expression ")" switch-block
 switch-block ::=
@@ -85,9 +89,9 @@ switch-clause-list ::=
 	( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
 
 do-while-statement ::=
-	"do" statement "while" "(" expression ")" ";"
+	"do" statement "while" negation-opt "(" expression ")" ";"
 while-statement ::=
-	"while" "(" expression ")" statement
+	"while" negation-opt "(" expression ")" statement
 for-statement ::=
 	"for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
 for-statement-range ::=

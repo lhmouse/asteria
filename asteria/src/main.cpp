@@ -14,7 +14,7 @@ int main()
     std::istringstream iss(R"__(
       func fib(n) {
         var r = 1;
-        if(n > 1) {
+        if!(n <= 1) {
           r = fib(n-1) + fib(n-2);
         }
         return& r;

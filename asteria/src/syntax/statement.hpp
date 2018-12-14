@@ -49,6 +49,7 @@ class Statement
       };
     struct S_if
       {
+        bool neg;
         Expression cond;
         Block branch_true;
         Block branch_false;
@@ -61,10 +62,12 @@ class Statement
     struct S_do_while
       {
         Block body;
+        bool neg;
         Expression cond;
       };
     struct S_while
       {
+        bool neg;
         Expression cond;
         Block body;
       };
