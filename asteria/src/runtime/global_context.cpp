@@ -24,7 +24,10 @@ Global_context::~Global_context()
 
 void Global_context::do_initialize_library()
   {
+    D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
+    Reference_root::S_constant ref_c = { std::move(root) };
+    this->open_named_reference(rocket::cow_string::shallow("std")) = std::move(ref_c);
   }
 
 bool Global_context::is_analytic() const noexcept
