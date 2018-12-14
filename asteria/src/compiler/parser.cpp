@@ -554,7 +554,7 @@ Parser::~Parser()
           return false;
         }
         std::size_t arg_cnt = 0;
-        if(do_accept_expression(nodes_out, tstrm_io) != false) {
+        if(do_accept_expression(nodes_out, tstrm_io)) {
           for(;;) {
             ++arg_cnt;
             if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
@@ -1163,7 +1163,7 @@ Parser::~Parser()
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
         rocket::cow_vector<Xpnode> init;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_assign) != false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
           // The initializer is optional.
           if(!do_accept_expression(init, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_expression_expected);
@@ -1277,7 +1277,7 @@ Parser::~Parser()
           throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
         }
         rocket::cow_vector<Statement> branch_false;
-        if(do_match_keyword(tstrm_io, Token::keyword_else) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_else)) {
           // The `else` branch is optional.
           if(!do_accept_statement_as_block(branch_false, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
@@ -1423,11 +1423,11 @@ Parser::~Parser()
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_open_parenthesis_expected);
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_each) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_each)) {
           if(!do_accept_identifier(key_name, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
           }
-          if(do_match_punctuator(tstrm_io, Token::punctuator_comma) != false) {
+          if(do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
             // The mapped reference is optional.
             if(!do_accept_identifier(mapped_name, tstrm_io)) {
               throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
@@ -1481,15 +1481,15 @@ Parser::~Parser()
           return false;
         }
         Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm_io, Token::keyword_switch) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_switch)) {
           target = Statement::target_switch;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_while) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_while)) {
           target = Statement::target_while;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_for) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_for)) {
           target = Statement::target_for;
           goto z;
         }
@@ -1510,11 +1510,11 @@ Parser::~Parser()
           return false;
         }
         Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm_io, Token::keyword_while) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_while)) {
           target = Statement::target_while;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_for) != false) {
+        if(do_match_keyword(tstrm_io, Token::keyword_for)) {
           target = Statement::target_for;
           goto z;
         }
@@ -1556,7 +1556,7 @@ Parser::~Parser()
           return false;
         }
         bool by_ref = false;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_andb) != false) {
+        if(do_match_punctuator(tstrm_io, Token::punctuator_andb)) {
           // The reference specifier is optional.
           by_ref = true;
         }
