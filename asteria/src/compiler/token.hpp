@@ -43,6 +43,7 @@ class Token
         keyword_this      = 24,
         keyword_unset     = 25,
         keyword_lengthof  = 26,
+        keyword_typeof    = 27,
       };
     enum Punctuator : std::size_t
       {

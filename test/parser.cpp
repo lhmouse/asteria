@@ -28,7 +28,7 @@ int main()
       try {
         first();
       } catch(e) {
-        return e;
+        return typeof(e) + ":" + e;
       }
     )__");
     Token_stream tis;
@@ -40,5 +40,5 @@ int main()
     Reference res;
     Global_context global;
     code.execute_as_function(res, global, Source_location(rocket::cow_string::shallow("file"), 42), rocket::cow_string::shallow("scope"), { }, nullptr, { });
-    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "meow");
+    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }

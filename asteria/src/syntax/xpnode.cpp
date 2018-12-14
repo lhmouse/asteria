@@ -48,6 +48,9 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       case xop_prefix_lengthof: {
         return "prefix `lengthof`";
       }
+      case xop_prefix_typeof: {
+        return "prefix `typeof`";
+      }
       case xop_infix_cmp_eq: {
         return "equality comparison";
       }
@@ -811,7 +814,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     void do_evaluate_prefix_lengthof(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_lengthof);
-        // Return the number of elements in `rhs`.
+        // Return the number of elements in the operand.
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == Value::type_null) {
           ref_c.value = D_integer(0);
@@ -829,6 +832,16 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+      }
+
+    void do_evaluate_prefix_typeof(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+      {
+        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_typeof);
+        // Return the type name of the operand.
+        // N.B. This is one of the few operators that work on all types.
+        Reference_root::S_temporary ref_c = { stack_io.top().read() };
+        ref_c.value = D_string(rocket::cow_string::shallow(Value::get_type_name(ref_c.value.type())));
+        do_set_temporary(stack_io, alt, std::move(ref_c));
       }
 
     void do_evaluate_infix_cmp_eq(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
@@ -1377,6 +1390,9 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
           }
           case xop_prefix_lengthof: {
             return do_bind<S_operator_rpn, do_evaluate_prefix_lengthof>(alt);
+          }
+          case xop_prefix_typeof: {
+            return do_bind<S_operator_rpn, do_evaluate_prefix_typeof>(alt);
           }
           case xop_infix_cmp_eq: {
             return do_bind<S_operator_rpn, do_evaluate_infix_cmp_eq>(alt);

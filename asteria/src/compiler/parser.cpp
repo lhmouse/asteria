@@ -119,7 +119,7 @@ Parser::~Parser()
     bool do_accept_prefix_operator(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // prefix-operator ::=
-        //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof"
+        //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
@@ -136,6 +136,11 @@ Parser::~Parser()
               }
               case Token::keyword_lengthof: {
                 xop = Xpnode::xop_prefix_lengthof;
+                tstrm_io.shift();
+                break;
+              }
+              case Token::keyword_typeof: {
+                xop = Xpnode::xop_prefix_typeof;
                 tstrm_io.shift();
                 break;
               }

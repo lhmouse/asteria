@@ -91,6 +91,9 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       case keyword_lengthof: {
         return "lengthof";
       }
+      case keyword_typeof: {
+        return "typeof";
+      }
       default: {
         return "<unknown keyword>";
       }

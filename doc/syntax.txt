@@ -119,7 +119,7 @@ prefix-operator-list-opt ::=
 prefix-operator-list ::=
 	prefix-operator prefix-operator-list-opt
 prefix-operator ::=
-	"+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof"
+	"+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
 
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
