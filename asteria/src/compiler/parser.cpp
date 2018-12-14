@@ -144,6 +144,11 @@ Parser::~Parser()
                 tstrm_io.shift();
                 break;
               }
+              case Token::keyword_not: {
+                xop = Xpnode::xop_prefix_notl;
+                tstrm_io.shift();
+                break;
+              }
               default: {
                 return false;
               }
@@ -807,7 +812,7 @@ Parser::~Parser()
     bool do_accept_infix_selection_and(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_andl)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_andl) && !do_match_keyword(tstrm_io, Token::keyword_and)) {
           if(!do_match_punctuator(tstrm_io, Token::punctuator_andl_eq)) {
             return false;
           }
@@ -824,7 +829,7 @@ Parser::~Parser()
     bool do_accept_infix_selection_or(rocket::unique_ptr<Infix_element_base> &elem_out, Token_stream &tstrm_io)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_orl)) {
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_orl) && !do_match_keyword(tstrm_io, Token::keyword_or)) {
           if(!do_match_punctuator(tstrm_io, Token::punctuator_orl_eq)) {
             return false;
           }

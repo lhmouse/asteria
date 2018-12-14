@@ -254,6 +254,7 @@ Token_stream::~Token_stream()
           }
         static constexpr s_keywords[] =
           {
+            { "and",       Token::keyword_and       },
             { "break",     Token::keyword_break     },
             { "case",      Token::keyword_case      },
             { "catch",     Token::keyword_catch     },
@@ -271,7 +272,9 @@ Token_stream::~Token_stream()
             { "infinity",  Token::keyword_infinity  },
             { "lengthof",  Token::keyword_lengthof  },
             { "nan",       Token::keyword_nan       },
+            { "not",       Token::keyword_not       },
             { "null",      Token::keyword_null      },
+            { "or",        Token::keyword_or        },
             { "return",    Token::keyword_return    },
             { "switch",    Token::keyword_switch    },
             { "this",      Token::keyword_this      },

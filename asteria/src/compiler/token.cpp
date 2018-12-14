@@ -94,6 +94,15 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       case keyword_typeof: {
         return "typeof";
       }
+      case keyword_and: {
+        return "and";
+      }
+      case keyword_or: {
+        return "or";
+      }
+      case keyword_not: {
+        return "not";
+      }
       default: {
         return "<unknown keyword>";
       }
