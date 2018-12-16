@@ -29,7 +29,7 @@ class Global_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Abstract_context * get_parent_opt() const noexcept override;
 
-    Generational_collector & get_generational_collector() noexcept
+    Generational_collector & get_collector() noexcept
       {
         return this->m_gen_coll;
       }

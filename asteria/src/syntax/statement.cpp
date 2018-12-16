@@ -239,7 +239,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
         const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
-        global.get_generational_collector().track_variable(var);
+        global.get_collector().track_variable(var);
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
@@ -255,7 +255,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
         const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
-        global.get_generational_collector().track_variable(var);
+        global.get_collector().track_variable(var);
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
