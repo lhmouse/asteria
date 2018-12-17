@@ -38,7 +38,7 @@ class Shared_function_wrapper
       }
     const Abstract_function * operator->() const noexcept
       {
-        return &(this->m_ref.get());
+        return std::addressof(this->m_ref.get());
       }
   };
 

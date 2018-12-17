@@ -32,6 +32,14 @@ class Shared_opaque_wrapper
       {
         return this->m_ref;
       }
+    const Abstract_opaque & operator*() const noexcept
+      {
+        return this->m_ref;
+      }
+    const Abstract_opaque * operator->() const noexcept
+      {
+        return std::addressof(this->m_ref.get());
+      }
     Abstract_opaque & mut()
       {
         if(this->m_owns && !this->m_owns.unique()) {
@@ -40,17 +48,9 @@ class Shared_opaque_wrapper
           ROCKET_ASSERT(owns.unique());
           ROCKET_ASSERT(owns.get() == ptr);
           this->m_owns = std::move(owns);
-          this->m_ref = *ptr;
+          this->m_ref = std::ref(*ptr);
         }
         return this->m_ref;
-      }
-    const Abstract_opaque & operator*() const noexcept
-      {
-        return this->m_ref;
-      }
-    const Abstract_opaque * operator->() const noexcept
-      {
-        return &(this->m_ref.get());
       }
   };
 
