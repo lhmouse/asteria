@@ -34,8 +34,17 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
     namespace details_cow_string {
 
+    struct storage_header
+      {
+        mutable reference_counter<long> nref;
+
+        storage_header() noexcept
+          {
+          }
+      };
+
     template<typename allocatorT>
-      struct basic_storage
+      struct basic_storage : storage_header
       {
         using allocator_type   = allocatorT;
         using value_type       = typename allocator_type::value_type;
@@ -50,7 +59,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;
           }
 
-        mutable reference_counter<long> nref;
         allocator_type alloc;
         size_type nblk;
         union { value_type data[0]; };
