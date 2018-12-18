@@ -34,6 +34,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       {
         void (*dtor)(...);
         mutable reference_counter<long> nref;
+        size_t nelem;
 
         explicit storage_header(void (*xdtor)(...)) noexcept
           : dtor(xdtor)
@@ -59,7 +60,6 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
 
         allocator_type alloc;
         size_type nblk;
-        size_type nelem;
         union { value_type data[0]; };
 
         basic_storage(void (*xdtor)(...), const allocator_type &xalloc, size_type xnblk) noexcept
@@ -303,7 +303,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(!ptr) {
               return 0;
             }
-            return ptr->nelem;
+            return reinterpret_cast<const storage_header *>(ptr)->nelem;
           }
         value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {

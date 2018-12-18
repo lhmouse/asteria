@@ -35,6 +35,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       {
         void (*dtor)(...);
         mutable reference_counter<long> nref;
+        size_t nelem;
 
         explicit storage_header(void (*xdtor)(...)) noexcept
           : dtor(xdtor)
@@ -96,7 +97,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
         allocator_type alloc;
         size_type nblk;
-        size_type nelem;
         union { bucket_type data[0]; };
 
         pointer_storage(void (*xdtor)(...), const allocator_type &xalloc, size_type xnblk) noexcept
@@ -456,7 +456,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             if(!ptr) {
               return 0;
             }
-            return ptr->nelem;
+            return reinterpret_cast<const storage_header *>(ptr)->nelem;
           }
         bucket_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {
