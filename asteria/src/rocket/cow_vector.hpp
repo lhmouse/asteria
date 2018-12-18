@@ -226,12 +226,12 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(ROCKET_EXPECT(!hptr->nref.decrement())) {
               return;
             }
+            // If it has been decremented to zero, deallocate the block.
             (*reinterpret_cast<void (*)(storage_pointer)>(hptr->dtor))(ptr);
           }
 
         static void do_deallocate_storage(storage_pointer ptr) noexcept
           {
-            // If it has been decremented to zero, deallocate the block.
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
