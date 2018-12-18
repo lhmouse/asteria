@@ -31,6 +31,17 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
     namespace details_cow_hashmap {
 
+    struct storage_header
+      {
+        void (*dtor)(...);
+        mutable reference_counter<long> nref;
+
+        explicit storage_header(void (*xdtor)(...)) noexcept
+          : dtor(xdtor)
+          {
+          }
+      };
+
     template<typename allocatorT>
       class bucket
       {
@@ -68,7 +79,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       };
 
     template<typename allocatorT>
-      struct pointer_storage
+      struct pointer_storage : storage_header
       {
         using allocator_type   = allocatorT;
         using bucket_type      = bucket<allocator_type>;
@@ -83,14 +94,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             return (nblk - 1) * sizeof(pointer_storage) / sizeof(bucket_type);
           }
 
-        mutable reference_counter<long> nref;
         allocator_type alloc;
         size_type nblk;
         size_type nelem;
         union { bucket_type data[0]; };
 
-        pointer_storage(const allocator_type &xalloc, size_type xnblk) noexcept
-          : alloc(xalloc), nblk(xnblk)
+        pointer_storage(void (*xdtor)(...), const allocator_type &xalloc, size_type xnblk) noexcept
+          : storage_header(xdtor),
+            alloc(xalloc), nblk(xnblk)
           {
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             if(is_trivially_default_constructible<bucket_type>::value) {
@@ -299,7 +310,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
       private:
         storage_pointer m_ptr;
-        void (*m_smf)(storage_pointer, bool);
 
       public:
         constexpr storage_handle(const allocator_type &alloc, const hasher &hf, const key_equal &eq)
@@ -308,7 +318,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr(), m_smf()
+            m_ptr()
           {
           }
         constexpr storage_handle(allocator_type &&alloc, const hasher &hf, const key_equal &eq)
@@ -317,7 +327,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
-            m_ptr(), m_smf()
+            m_ptr()
           {
           }
         ~storage_handle()
@@ -331,35 +341,31 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           = delete;
 
       private:
-        void do_reset(storage_pointer ptr_new, void (*smf_new)(storage_pointer, bool)) noexcept
+        void do_reset(storage_pointer ptr_new) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-            const auto smf = noadl::exchange(this->m_smf, smf_new);
             if(!ptr) {
               return;
             }
-            (*smf)(ptr, false);
+            // This is needed for incompleteness support.
+            const auto hptr = reinterpret_cast<storage_header *>(noadl::unfancy(ptr));
+            // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
+            if(!hptr->nref.decrement()) {
+              return;
+            }
+            (*reinterpret_cast<void (*)(storage_pointer)>(hptr->dtor))(ptr);
           }
 
-        static void do_manipulate_storage(storage_pointer ptr, bool to_add_ref) noexcept
+        static void do_deallocate_storage(storage_pointer ptr) noexcept
           {
-            if(to_add_ref) {
-              // Increment the reference count.
-              ptr->nref.increment();
-            } else {
-              // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-              if(!ptr->nref.decrement()) {
-                return;
-              }
-              // If it has been decremented to zero, deallocate the block.
-              auto st_alloc = storage_allocator(ptr->alloc);
-              const auto nblk = ptr->nblk;
-              noadl::destroy_at(noadl::unfancy(ptr));
+            // If it has been decremented to zero, deallocate the block.
+            auto st_alloc = storage_allocator(ptr->alloc);
+            const auto nblk = ptr->nblk;
+            noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
-              ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
+            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
-              allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
-            }
+            allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
       public:
@@ -467,7 +473,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-            noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
+            noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_deallocate_storage), this->as_allocator(), nblk);
             const auto ptr_old = this->m_ptr;
             if(ROCKET_UNEXPECT(ptr_old)) {
               try {
@@ -486,17 +492,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
                 throw;
               }
-              // Dispose the old block.
-              storage_handle::do_manipulate_storage(ptr_old, false);
             }
             // Replace the current block.
-            this->m_ptr = ptr;
-            this->m_smf = &storage_handle::do_manipulate_storage;
+            this->do_reset(ptr);
             return ptr->data;
           }
         void deallocate() noexcept
           {
-            this->do_reset(storage_pointer(), nullptr);
+            this->do_reset(storage_pointer());
           }
 
         void share_with(const storage_handle &other) noexcept
@@ -504,9 +507,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             const auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
-              (*(other.m_smf))(ptr, true);
+              reinterpret_cast<storage_header *>(noadl::unfancy(ptr))->nref.increment();
             }
-            this->do_reset(ptr, other.m_smf);
+            this->do_reset(ptr);
           }
         void share_with(storage_handle &&other) noexcept
           {
@@ -515,12 +518,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               // Detach the block.
               other.m_ptr = storage_pointer();
             }
-            this->do_reset(ptr, other.m_smf);
+            this->do_reset(ptr);
           }
         void exchange_with(storage_handle &other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
-            ::std::swap(this->m_smf, other.m_smf);
           }
 
         constexpr operator const storage_handle * () const noexcept
