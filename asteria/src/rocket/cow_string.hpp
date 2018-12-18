@@ -112,11 +112,11 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         void do_reset(storage_pointer ptr_new) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-            if(!ptr) {
+            if(ROCKET_EXPECT(!ptr)) {
               return;
             }
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            if(!ptr->nref.decrement()) {
+            if(ROCKET_EXPECT(!ptr->nref.decrement())) {
               return;
             }
             // If it has been decremented to zero, deallocate the block.

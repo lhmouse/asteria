@@ -344,13 +344,13 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         void do_reset(storage_pointer ptr_new) noexcept
           {
             const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
-            if(!ptr) {
+            if(ROCKET_EXPECT(!ptr)) {
               return;
             }
             // This is needed for incompleteness support.
             const auto hptr = reinterpret_cast<storage_header *>(noadl::unfancy(ptr));
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            if(!hptr->nref.decrement()) {
+            if(ROCKET_EXPECT(!hptr->nref.decrement())) {
               return;
             }
             (*reinterpret_cast<void (*)(storage_pointer)>(hptr->dtor))(ptr);
