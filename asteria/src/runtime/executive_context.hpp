@@ -26,7 +26,7 @@ class Executive_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Executive_context * get_parent_opt() const noexcept override;
 
-    void initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args);
+    void initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
   };
 
 }

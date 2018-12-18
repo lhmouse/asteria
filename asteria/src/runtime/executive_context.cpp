@@ -23,7 +23,7 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(std::size_t i = 0; i < params.size(); ++i) {
@@ -61,14 +61,9 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     }
     // Set `__varg`.
     {
-      if(ROCKET_EXPECT((args.size() <= params.size()) && zvarg_opt)) {
-        Reference_root::S_constant ref_c = { D_function(*zvarg_opt) };
-        this->open_named_reference(rocket::cow_string::shallow("__varg")) = std::move(ref_c);
-      } else {
-        args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
-        Reference_root::S_constant ref_c = { D_function(Variadic_arguer(loc, name, std::move(args))) };
-        this->open_named_reference(rocket::cow_string::shallow("__varg")) = std::move(ref_c);
-      }
+      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
+      Reference_root::S_constant ref_c = { D_function(Variadic_arguer(loc, name, std::move(args))) };
+      this->open_named_reference(rocket::cow_string::shallow("__varg")) = std::move(ref_c);
     }
   }
 

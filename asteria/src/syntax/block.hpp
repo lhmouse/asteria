@@ -59,7 +59,7 @@ class Block
     Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
 
     Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
-    void execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const;
+    void execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

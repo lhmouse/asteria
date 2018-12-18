@@ -58,7 +58,7 @@ Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector
     const auto params = rocket::cow_vector<rocket::prehashed_string>();
     // Execute the code as a function.
     Reference self;
-    this->m_code.execute_as_function(self, global, loc, name, params, nullptr, std::move(args));
+    this->m_code.execute_as_function(self, global, loc, name, params, std::move(args));
     return self;
   }
 

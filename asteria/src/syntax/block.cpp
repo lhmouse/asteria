@@ -132,10 +132,10 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
     return Instantiated_function(loc, name, params, std::move(body_bnd));
   }
 
-void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, const Shared_function_wrapper *zvarg_opt, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, Global_context &global, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
   {
     Executive_context ctx_next(nullptr);
-    ctx_next.initialize_for_function(loc, name, params, zvarg_opt, std::move(self_io), std::move(args));
+    ctx_next.initialize_for_function(loc, name, params, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
     switch(status) {
