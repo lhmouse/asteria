@@ -22,7 +22,7 @@ Global_context::~Global_context()
     }
   }
 
-void Global_context::do_initialize_library()
+void Global_context::do_add_std_bindings()
   {
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");

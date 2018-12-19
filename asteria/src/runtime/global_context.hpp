@@ -18,12 +18,12 @@ class Global_context : public Abstract_context
   public:
     Global_context()
       {
-        this->do_initialize_library();
+        this->do_add_std_bindings();
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Global_context);
 
   private:
-    void do_initialize_library();
+    void do_add_std_bindings();
 
   public:
     bool is_analytic() const noexcept override;
