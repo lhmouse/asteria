@@ -35,6 +35,26 @@ void Analytic_context::initialize_for_function(const rocket::cow_vector<rocket::
       // Ensure the named reference exists, whose contents are out of interest.
       this->open_named_reference(param) /*= Reference_root::S_null()*/;
     }
+    // Set `this`.
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__this")) /*= Reference_root::S_null()*/;
+    }
+    // Set `__file`.
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__file")) /*= Reference_root::S_null()*/;
+    }
+    // Set `__line`.
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__line")) /*= Reference_root::S_null()*/;
+    }
+    // Set `__func`.
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__func")) /*= Reference_root::S_null()*/;
+    }
+    // Set `__varg`.
+    {
+      this->open_named_reference(rocket::cow_string::shallow("__varg")) /*= Reference_root::S_null()*/;
+    }
   }
 
 }
