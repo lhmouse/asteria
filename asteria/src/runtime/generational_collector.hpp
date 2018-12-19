@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Generational_collector : public rocket::refcounted_base<Generational_collector>
+class Generational_collector
   {
   private:
     Collector m_gen_two;
