@@ -1798,12 +1798,11 @@ template<typename charT, typename traitsT, typename allocatorT>
 #endif
       result_type operator()(const argument_type &str) const noexcept
       {
-        // This implements the 32-bit FNV-1a hash algorithm.
-        char32_t reg = 0x811c9dc5;
+        // This implements the DJBX33A hash algorithm.
+        char32_t reg = 5381;
         for(auto rptr = str.data(), eptr = rptr + str.size(); rptr != eptr; ++rptr) {
-          // reg = (reg ^ CHAR) * 0x1000193;
-          const auto x = reg ^ static_cast<char32_t>(traits_type::to_int_type(*rptr));
-          reg = (x << 24) + (x << 8) + (x * 0x93);
+          const auto ch = static_cast<char32_t>(traits_type::to_int_type(*rptr));
+          reg = reg * 33 + ch;
         }
         return reg;
       }
