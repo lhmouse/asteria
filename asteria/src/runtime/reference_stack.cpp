@@ -9,28 +9,6 @@ namespace Asteria {
 
 Reference_stack::~Reference_stack()
   {
-    auto cur = this->m_scur;
-    while(cur) {
-      const auto prev = cur->prev;
-      if(cur != &(this->m_head)) {
-        delete cur;
-      }
-      cur = prev;
-    }
-  }
-
-Reference_stack::Chunk * Reference_stack::do_reserve_one_more()
-  {
-    auto cur = this->m_scur;
-    if(ROCKET_EXPECT(!cur)) {
-      return &(this->m_head);
-    }
-    auto next = cur->next;
-    if(!next) {
-      next = new Chunk(cur);
-      cur->next = next;
-    }
-    return next;
   }
 
 }
