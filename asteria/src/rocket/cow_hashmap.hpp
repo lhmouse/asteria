@@ -106,7 +106,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             if(is_trivially_default_constructible<bucket_type>::value) {
               // Zero-initialize everything.
-              ::std::memset(this->data, 0, sizeof(bucket_type) * nbkt);
+              ::std::memset(static_cast<void *>(this->data), 0, sizeof(bucket_type) * nbkt);
             } else {
               // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
               for(size_type i = 0; i < nbkt; ++i) {

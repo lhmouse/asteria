@@ -28,20 +28,23 @@ template<typename funcT, typename ...firstT>
     template<typename xfuncT, typename ...xfirstT, ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, xfirstT &&...>::value)>
       constexpr binder_first(xfuncT &&xfunc, firstT &&...xfirst) noexcept(conjunction<is_nothrow_constructible<funcT, xfuncT &&>,
                                                                                       is_nothrow_constructible<tuple<firstT...>, xfirstT &&...>>::value)
-      : m_func(::std::forward<xfuncT>(xfunc)), m_first(::std::forward<firstT>(xfirst)...)
+      : m_func(::std::forward<xfuncT>(xfunc)),
+        m_first(::std::forward<firstT>(xfirst)...)
       {
       }
     // conversion
     template<typename yfuncT, typename ...yfirstT>
       constexpr binder_first(const binder_first<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_constructible<funcT, const yfuncT &>,
                                                                                                  is_nothrow_constructible<tuple<firstT...>, const tuple<yfirstT...> &>>::value)
-      : m_func(other.m_func), m_first(other.m_first)
+      : m_func(other.m_func),
+        m_first(other.m_first)
       {
       }
     template<typename yfuncT, typename ...yfirstT>
       constexpr binder_first(binder_first<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
                                                                                             is_nothrow_constructible<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
-      : m_func(::std::move(other.m_func)), m_first(::std::move(other.m_first))
+      : m_func(::std::move(other.m_func)),
+        m_first(::std::move(other.m_first))
       {
       }
     template<typename yfuncT, typename ...yfirstT>
@@ -66,10 +69,11 @@ template<typename funcT, typename ...firstT>
       constexpr result_type_for<restT...> do_unpack_forward_then_invoke(index_sequence<indicesT...>, restT &...rest) const
       {
 #if defined(__cpp_lib_invoke) && (__cpp_lib_invoke >= 201411)
-        return ::std::invoke(this->m_func, ::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
+        return ::std::invoke(this->m_func,
 #else
-        return this->m_func(::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
+        return this->m_func(
 #endif
+          ::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
       }
 
   public:
