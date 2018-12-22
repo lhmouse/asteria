@@ -295,9 +295,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           stack_io.pop();
           stack_io.top().open() = std::move(value);
         } else {
-          auto result = std::move(stack_io.top());
+          auto result = std::move(stack_io.mut_top());
           stack_io.pop();
-          stack_io.top() = std::move(result);
+          stack_io.mut_top() = std::move(result);
         }
       }
 
@@ -306,7 +306,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         // Allocate the argument vector.
         rocket::cow_vector<Reference> args(alt.arg_cnt);
         for(auto i = alt.arg_cnt - 1; i + 1 != 0; --i) {
-          args.mut(i) = std::move(stack_io.top());
+          args.mut(i) = std::move(stack_io.mut_top());
           stack_io.pop();
         }
         // Pop the target off the stack.
@@ -319,7 +319,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func->describe());
         try {
           // Call the function now.
-          func->invoke(stack_io.top(), global, std::move(args));
+          func->invoke(stack_io.mut_top(), global, std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
@@ -349,12 +349,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         switch(rocket::weaken_enum(subscript.type())) {
           case Value::type_integer: {
             Reference_modifier::S_array_index mod_c = { subscript.check<D_integer>() };
-            stack_io.top().zoom_in(std::move(mod_c));
+            stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
           case Value::type_string: {
             Reference_modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
-            stack_io.top().zoom_in(std::move(mod_c));
+            stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
           default: {
@@ -368,7 +368,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(alt.assign) {
           stack_io.top().open() = std::move(ref_c.value);
         } else {
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
         }
       }
 
@@ -682,12 +682,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == Value::type_integer) {
           stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         if(ref_c.value.type() == Value::type_real) {
           stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -701,12 +701,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == Value::type_integer) {
           stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         if(ref_c.value.type() == Value::type_real) {
           stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -792,12 +792,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == Value::type_integer) {
           stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         if(ref_c.value.type() == Value::type_real) {
           stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.top() = std::move(ref_c);
+          stack_io.mut_top() = std::move(ref_c);
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -1296,7 +1296,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto has_result = alt.branch_null.evaluate_partial(stack_io, global, ctx);
         if(!has_result) {
           // If the branch is empty, push a hard `null` on the stack.
-          stack_io.top() = Reference_root::S_null();
+          stack_io.mut_top() = Reference_root::S_null();
           return;
         }
         // The result will have been pushed onto `stack_io`.
@@ -1306,9 +1306,9 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           stack_io.pop();
           stack_io.top().open() = std::move(value);
         } else {
-          auto result = std::move(stack_io.top());
+          auto result = std::move(stack_io.mut_top());
           stack_io.pop();
-          stack_io.top() = std::move(result);
+          stack_io.mut_top() = std::move(result);
         }
       }
 

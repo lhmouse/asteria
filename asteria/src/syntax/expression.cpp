@@ -97,7 +97,7 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
       return;
     }
     ROCKET_ASSERT(stack.size() == 1);
-    ref_out = std::move(stack.top());
+    ref_out = std::move(stack.mut_top());
   }
 
 void Expression::enumerate_variables(const Abstract_variable_callback &callback) const
