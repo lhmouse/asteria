@@ -811,14 +811,14 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
   public:
     // 26.5.4.2, construct/copy/destroy
-    explicit cow_hashmap(const allocator_type &alloc) noexcept(is_nothrow_constructible<hasher>::value && is_nothrow_copy_constructible<hasher>::value &&
-                                                               is_nothrow_constructible<key_equal>::value && is_nothrow_copy_constructible<key_equal>::value)
+    explicit cow_hashmap(const allocator_type &alloc) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+                                                                           is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, hasher(), key_equal())
       {
       }
-    cow_hashmap() noexcept(is_nothrow_constructible<hasher>::value && is_nothrow_copy_constructible<hasher>::value &&
-                           is_nothrow_constructible<key_equal>::value && is_nothrow_copy_constructible<key_equal>::value &&
-                           is_nothrow_constructible<allocator_type>::value)
+    cow_hashmap() noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+                                       is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
+                                       is_nothrow_constructible<allocator_type>>::value)
       : cow_hashmap(allocator_type())
       {
       }
@@ -835,22 +835,26 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       : cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
       }
-    cow_hashmap(const cow_hashmap &other) noexcept(is_nothrow_copy_constructible<hasher>::value && is_nothrow_copy_constructible<key_equal>::value)
+    cow_hashmap(const cow_hashmap &other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+                                                               is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
-    cow_hashmap(const cow_hashmap &other, const allocator_type &alloc) noexcept(is_nothrow_copy_constructible<hasher>::value && is_nothrow_copy_constructible<key_equal>::value)
+    cow_hashmap(const cow_hashmap &other, const allocator_type &alloc) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+                                                                                            is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
       {
         this->assign(other);
       }
-    cow_hashmap(cow_hashmap &&other) noexcept(is_nothrow_copy_constructible<hasher>::value && is_nothrow_copy_constructible<key_equal>::value)
+    cow_hashmap(cow_hashmap &&other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+                                                          is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), ::std::move(other.m_sth.as_allocator()))
       {
         this->assign(::std::move(other));
       }
-    cow_hashmap(cow_hashmap &&other, const allocator_type &alloc) noexcept(is_nothrow_copy_constructible<hasher>::value && is_nothrow_copy_constructible<key_equal>::value)
+    cow_hashmap(cow_hashmap &&other, const allocator_type &alloc) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
+                                                                                       is_nothrow_copy_constructible<key_equal>>::value)
       : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
       {
         this->assign(::std::move(other));

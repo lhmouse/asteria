@@ -113,7 +113,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           {
             return this->m_ebase;
           }
-        value_type * data() noexcept
+        value_type * mut_data() noexcept
           {
             return this->m_ebase;
           }
@@ -452,13 +452,13 @@ template<typename valueT, size_t capacityT, typename allocatorT>
       {
         this->assign(init);
       }
-    static_vector & operator=(const static_vector &other) noexcept(is_nothrow_copy_assignable<value_type>::value && is_nothrow_copy_constructible<value_type>::value)
+    static_vector & operator=(const static_vector &other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>, is_nothrow_copy_constructible<value_type>>::value)
       {
         this->assign(other);
         allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return *this;
       }
-    static_vector & operator=(static_vector &&other) noexcept(is_nothrow_move_assignable<value_type>::value && is_nothrow_move_constructible<value_type>::value)
+    static_vector & operator=(static_vector &&other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
         this->assign(::std::move(other));
         allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
@@ -486,7 +486,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         ROCKET_ASSERT(tpos <= cnt_old);
         details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
         const auto cnt_add = this->size() - cnt_old;
-        const auto ptr = this->m_sth.data();
+        const auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
         return ptr + tpos;
       }
@@ -495,7 +495,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         const auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
         ROCKET_ASSERT(tn <= cnt_old - tpos);
-        const auto ptr = this->m_sth.data();
+        const auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, tpos + tn, cnt_old);
         this->m_sth.pop_back_n_unchecked(tn);
         return ptr + tpos;
@@ -520,23 +520,6 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return const_reverse_iterator(this->begin());
       }
 
-    iterator begin() noexcept
-      {
-        return iterator(this->m_sth, this->data());
-      }
-    iterator end() noexcept
-      {
-        return iterator(this->m_sth, this->data() + this->size());
-      }
-    reverse_iterator rbegin() noexcept
-      {
-        return reverse_iterator(this->end());
-      }
-    reverse_iterator rend() noexcept
-      {
-        return reverse_iterator(this->begin());
-      }
-
     const_iterator cbegin() const noexcept
       {
         return this->begin();
@@ -552,6 +535,27 @@ template<typename valueT, size_t capacityT, typename allocatorT>
     const_reverse_iterator crend() const noexcept
       {
         return this->rend();
+      }
+
+    // N.B. This is a non-standard extension.
+    iterator mut_begin()
+      {
+        return iterator(this->m_sth, this->mut_data());
+      }
+    // N.B. This is a non-standard extension.
+    iterator mut_end()
+      {
+        return iterator(this->m_sth, this->mut_data() + this->size());
+      }
+    // N.B. This is a non-standard extension.
+    reverse_iterator mut_rbegin()
+      {
+        return reverse_iterator(this->mut_end());
+      }
+    // N.B. This is a non-standard extension.
+    reverse_iterator mut_rend()
+      {
+        return reverse_iterator(this->mut_begin());
       }
 
     // 26.3.11.3, capacity
@@ -602,14 +606,13 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         }
         this->m_sth.pop_back_n_unchecked(this->m_sth.size());
       }
+    // N.B. This is a non-standard extension.
+    bool unique() const noexcept
+      {
+        return true;
+      }
 
     // element access
-    const_reference operator[](size_type pos) const noexcept
-      {
-        const auto cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
-        return this->data()[pos];
-      }
     const_reference at(size_type pos) const
       {
         const auto cnt = this->size();
@@ -617,6 +620,12 @@ template<typename valueT, size_t capacityT, typename allocatorT>
           noadl::throw_out_of_range("static_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
                                     static_cast<long long>(pos), static_cast<long long>(cnt));
         }
+        return this->data()[pos];
+      }
+    const_reference operator[](size_type pos) const noexcept
+      {
+        const auto cnt = this->size();
+        ROCKET_ASSERT(pos < cnt);
         return this->data()[pos];
       }
     const_reference front() const noexcept
@@ -632,32 +641,30 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return this->data()[cnt - 1];
       }
 
-    reference at(size_type pos)
+    // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
+    // N.B. This is a non-standard extension.
+    reference mut(size_type pos)
       {
         auto cnt = this->size();
         if(pos >= cnt) {
           noadl::throw_out_of_range("static_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
                                     static_cast<long long>(pos), static_cast<long long>(cnt));
         }
-        return this->data()[pos];
+        return this->mut_data()[pos];
       }
-    reference operator[](size_type pos) noexcept
+    // N.B. This is a non-standard extension.
+    reference mut_front()
       {
-        auto cnt = this->size();
-        ROCKET_ASSERT(pos < cnt);
-        return this->data()[pos];
-      }
-    reference front() noexcept
-      {
-        auto cnt = this->size();
+        const auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
-        return this->data()[0];
+        return this->mut_data()[0];
       }
-    reference back() noexcept
+    // N.B. This is a non-standard extension.
+    reference mut_back()
       {
-        auto cnt = this->size();
+        const auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
-        return this->data()[cnt - 1];
+        return this->mut_data()[cnt - 1];
       }
 
     // N.B. This is a non-standard extension.
@@ -703,7 +710,14 @@ template<typename valueT, size_t capacityT, typename allocatorT>
     // N.B. The return type is a non-standard extension.
     reference push_back(const value_type &value)
       {
+        const auto cnt_old = this->size();
+        // Check for overlapped elements before `do_reserve_more()`.
+        const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
         this->do_reserve_more(1);
+        if(srpos < cnt_old) {
+          const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data()[srpos]);
+          return *ptr;
+        }
         const auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }
@@ -775,40 +789,40 @@ template<typename valueT, size_t capacityT, typename allocatorT>
       }
 
     // N.B. The return type is a non-standard extension.
-    static_vector & assign(const static_vector &other) noexcept(is_nothrow_copy_assignable<value_type>::value && is_nothrow_copy_constructible<value_type>::value)
+    static_vector & assign(const static_vector &other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>, is_nothrow_copy_constructible<value_type>>::value)
       {
         const auto sl = this->size();
         const auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
-            this->m_sth.data()[i] = other.m_sth.data()[i];
+            this->m_sth.mut_data()[i] = other.m_sth.data()[i];
           }
           for(auto i = sl; i < sr; ++i) {
             this->m_sth.emplace_back_unchecked(other.m_sth.data()[i]);
           }
         } else {
           for(size_type i = 0; i < sr; ++i) {
-            this->m_sth.data()[i] = other.m_sth.data()[i];
+            this->m_sth.mut_data()[i] = other.m_sth.data()[i];
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    static_vector & assign(static_vector &&other) noexcept(is_nothrow_move_assignable<value_type>::value && is_nothrow_move_constructible<value_type>::value)
+    static_vector & assign(static_vector &&other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
         const auto sl = this->size();
         const auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
-            this->m_sth.data()[i] = ::std::move(other.m_sth.data()[i]);
+            this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
           }
           for(auto i = sl; i < sr; ++i) {
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.data()[i]));
+            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
           }
         } else {
           for(size_type i = 0; i < sr; ++i) {
-            this->m_sth.data()[i] = ::std::move(other.m_sth.data()[i]);
+            this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
@@ -839,24 +853,24 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return *this;
       }
 
-    void swap(static_vector &other) noexcept(is_nothrow_swappable<value_type>::value && is_nothrow_move_constructible<value_type>::value)
+    void swap(static_vector &other) noexcept(conjunction<is_nothrow_swappable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
         const auto sl = this->size();
         const auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
-            noadl::adl_swap(this->m_sth.data()[i], other.m_sth.data()[i]);
+            noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
           }
           for(auto i = sl; i < sr; ++i) {
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.data()[i]));
+            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
           }
           other.m_sth.pop_back_n_unchecked(sr - sl);
         } else {
           for(size_type i = 0; i < sr; ++i) {
-            noadl::adl_swap(this->m_sth.data()[i], other.m_sth.data()[i]);
+            noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
           }
           for(auto i = sr; i < sl; ++i) {
-            other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.data()[i]));
+            other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.mut_data()[i]));
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
@@ -869,9 +883,11 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return this->m_sth.data();
       }
 
-    value_type * data() noexcept
+    // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
+    // N.B. This is a non-standard extension.
+    value_type * mut_data()
       {
-        return this->m_sth.data();
+        return this->m_sth.mut_data();
       }
 
     // N.B. The return type differs from `std::vector`.

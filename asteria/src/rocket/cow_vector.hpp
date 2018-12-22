@@ -1159,6 +1159,7 @@ template<typename valueT, typename allocatorT>
       {
         return this->m_sth.data();
       }
+
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     value_type * mut_data()

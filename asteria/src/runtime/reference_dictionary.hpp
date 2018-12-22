@@ -94,7 +94,7 @@ class Reference_dictionary
         if(toff < 0) {
           return nullptr;
         }
-        const auto ptr = this->m_data[toff].refv.data();
+        const auto ptr = this->m_data[toff].refv.mut_data();
         ROCKET_ASSERT(ptr);
         return ptr;
       }

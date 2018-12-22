@@ -51,7 +51,7 @@ class Reference_stack
         off -= this->m_small.capacity();
         // Use the large buffer.
         ROCKET_ASSERT(off < this->m_large.size());
-        return this->m_large.at(off);
+        return this->m_large[off];
       }
     Reference & top() noexcept
       {
@@ -60,7 +60,7 @@ class Reference_stack
         if(ROCKET_EXPECT(off < this->m_small.capacity())) {
           // Use the small buffer.
           ROCKET_ASSERT(off < this->m_small.size());
-          return this->m_small[off];
+          return this->m_small.mut(off);
         }
         off -= this->m_small.capacity();
         // Use the large buffer.
@@ -76,7 +76,7 @@ class Reference_stack
           // Use the small buffer.
           ROCKET_ASSERT(off <= this->m_small.size());
           auto &ref = (off == this->m_small.size()) ? this->m_small.emplace_back(std::forward<ParamT>(param))
-                                                    : this->m_small.at(off) = std::forward<ParamT>(param);
+                                                    : this->m_small.mut(off) = std::forward<ParamT>(param);
           this->m_size += 1;
           return ref;
         }

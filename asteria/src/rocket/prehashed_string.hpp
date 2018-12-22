@@ -124,14 +124,14 @@ template<typename stringT, typename hashT>
     details_prehashed_string::string_storage<string_type, hasher> m_sth;
 
   public:
-    basic_prehashed_string() noexcept(is_nothrow_constructible<string_type>::value &&
-                                      is_nothrow_constructible<hasher>::value && is_nothrow_copy_constructible<hasher>::value)
+    basic_prehashed_string() noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                                  is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hasher())
       {
       }
     template<typename ...paramsT>
-      explicit basic_prehashed_string(const hasher &hf, paramsT &&...params) noexcept(is_nothrow_constructible<string_type, paramsT &&...>::value &&
-                                                                                      is_nothrow_copy_constructible<hasher>::value)
+      explicit basic_prehashed_string(const hasher &hf, paramsT &&...params) noexcept(conjunction<is_nothrow_constructible<string_type, paramsT &&...>,
+                                                                                                  is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, ::std::forward<paramsT>(params)...)
       {
       }
@@ -152,13 +152,13 @@ template<typename stringT, typename hashT>
       : m_sth(hf, init)
       {
       }
-    basic_prehashed_string(const basic_prehashed_string &other) noexcept(is_nothrow_copy_constructible<string_type>::value &&
-                                                                         is_nothrow_copy_constructible<hasher>::value)
+    basic_prehashed_string(const basic_prehashed_string &other) noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
+                                                                                     is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher(), other.m_sth.str())
       {
       }
-    basic_prehashed_string(basic_prehashed_string &&other) noexcept(is_nothrow_move_constructible<string_type>::value &&
-                                                                    is_nothrow_copy_constructible<hasher>::value)
+    basic_prehashed_string(basic_prehashed_string &&other) noexcept(conjunction<is_nothrow_move_constructible<string_type>,
+                                                                                is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher(), ::std::move(other.m_sth.str()))
       {
       }

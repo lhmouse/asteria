@@ -151,12 +151,12 @@ Reference & Reference_dictionary::do_open_unchecked(const rocket::prehashed_stri
     const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return do_check_equal(cand.name, name); });
     if(*qbkt) {
       // Already exists.
-      return qbkt->refv.front();
+      return qbkt->refv.mut_front();
     }
     qbkt->name = name;
     qbkt->refv.emplace_back();
     this->m_size += 1;
-    return qbkt->refv.front();
+    return qbkt->refv.mut_front();
   }
 
 void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept

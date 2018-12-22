@@ -301,7 +301,7 @@ template<typename ...alternativesT>
       }
     // 23.7.3.3, assignment
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
-      variant & operator=(const paramT &param) noexcept(is_nothrow_copy_assignable<paramT>::value && is_nothrow_copy_constructible<paramT>::value)
+      variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>, is_nothrow_copy_constructible<paramT>>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
