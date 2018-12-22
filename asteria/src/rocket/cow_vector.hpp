@@ -230,7 +230,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             (*reinterpret_cast<void (*)(storage_pointer)>(hptr->dtor))(ptr);
           }
 
-        static void do_deallocate_storage(storage_pointer ptr) noexcept
+        ROCKET_NOINLINE static void do_deallocate_storage(storage_pointer ptr) noexcept
           {
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;

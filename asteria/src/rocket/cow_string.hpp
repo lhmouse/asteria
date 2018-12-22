@@ -128,6 +128,11 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
               return;
             }
             // If it has been decremented to zero, deallocate the block.
+            storage_handle::do_deallocate_storage(ptr);
+          }
+
+        ROCKET_NOINLINE static void do_deallocate_storage(storage_pointer ptr) noexcept
+          {
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
