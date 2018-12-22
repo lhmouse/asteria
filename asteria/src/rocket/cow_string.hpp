@@ -704,7 +704,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 
   private:
     // Reallocate the storage to `res_arg` characters, not including the null terminator.
-    value_type * do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
+    ROCKET_NOINLINE value_type * do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
       {
         ROCKET_ASSERT(len_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_len);

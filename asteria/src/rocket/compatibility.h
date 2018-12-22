@@ -29,6 +29,7 @@
 #define ROCKET_EXPECT(...)                  __builtin_expect((__VA_ARGS__) ? 1 : 0, 1)
 #define ROCKET_UNEXPECT(...)                __builtin_expect((__VA_ARGS__) ? 1 : 0, 0)
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
+#define ROCKET_NOINLINE                     __attribute__((__noinline__))
 
 // Check for either libc++ or libstdc++.
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
@@ -55,6 +56,7 @@
 #define ROCKET_EXPECT(...)                  __builtin_expect((__VA_ARGS__) ? 1 : 0, 1)
 #define ROCKET_UNEXPECT(...)                __builtin_expect((__VA_ARGS__) ? 1 : 0, 0)
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
+#define ROCKET_NOINLINE                     __attribute__((__noinline__))
 
 // Check for libstdc++.
 #if defined(_GLIBCXX_DEBUG)
@@ -81,6 +83,7 @@
 #define ROCKET_EXPECT(...)                  (__VA_ARGS__)
 #define ROCKET_UNEXPECT(...)                (__VA_ARGS__)
 #define ROCKET_SECTION(...)                 __declspec(allocate(__VA_ARGS__))
+#define ROCKET_NOINLINE                     __declspec((noinline))
 
 // Check for project configuration.
 #if defined(_DEBUG)
