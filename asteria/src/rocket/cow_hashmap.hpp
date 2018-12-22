@@ -958,7 +958,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     details_cow_hashmap::bucket<allocator_type> * do_mut_table()
       {
         if(!this->unique()) {
-          return this->do_reallocate(0, 0, this->bucket_count(), this->size());
+          return this->do_reallocate(0, 0, this->bucket_count(), this->size() | 1);
         }
         return this->m_sth.mut_data_unchecked();
       }
