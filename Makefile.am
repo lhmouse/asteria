@@ -1,9 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -Wall -Wextra -Wconversion -Wsign-conversion  \
-  -Winvalid-pch -Wwrite-strings -Wswitch-enum -Wsuggest-attribute=noreturn -Wno-error={pragmas,invalid-pch}  \
-  -Wundef -Wshadow -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wmissing-field-initializers  \
+AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Wconversion -Wsign-conversion -Winvalid-pch  \
+  -Wwrite-strings -Wswitch-enum -Wsuggest-attribute=noreturn -Wundef -Wshadow  \
+  -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wmissing-field-initializers  \
   -Wno-error=unused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}  \
-  -pipe -pthread
+  -Wno-error={pragmas,invalid-pch,inline}
 if enable_werror
 AM_CPPFLAGS += -Werror
 endif

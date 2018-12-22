@@ -178,7 +178,7 @@ template<typename lhsT, typename rhsT>
   }
 
 template<typename charT, typename traitsT>
-  inline void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
+  void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
     // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.

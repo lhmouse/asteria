@@ -19,7 +19,7 @@ Parser::~Parser()
 
     namespace {
 
-    inline Parser_error do_make_parser_error(const Token_stream &tstrm_io, Parser_error::Code code)
+    Parser_error do_make_parser_error(const Token_stream &tstrm_io, Parser_error::Code code)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -28,7 +28,7 @@ Parser::~Parser()
         return Parser_error(qtok->get_line(), qtok->get_offset(), qtok->get_length(), code);
       }
 
-    inline Source_location do_tell_source_location(const Token_stream &tstrm_io)
+    Source_location do_tell_source_location(const Token_stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {

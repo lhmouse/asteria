@@ -363,7 +363,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
       }
 
-    inline void do_set_temporary(Reference_stack &stack_io, const Xpnode::S_operator_rpn &alt, Reference_root::S_temporary &&ref_c)
+    void do_set_temporary(Reference_stack &stack_io, const Xpnode::S_operator_rpn &alt, Reference_root::S_temporary &&ref_c)
       {
         if(alt.assign) {
           stack_io.top().open() = std::move(ref_c.value);
