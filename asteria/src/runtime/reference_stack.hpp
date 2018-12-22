@@ -34,12 +34,17 @@ class Reference_stack
     std::size_t size() const noexcept
       {
         auto tptr = this->m_tptr;
-        if((this->m_small.data() <= tptr) && (tptr <= this->m_small.data() + this->m_small.capacity())) {
+        auto ioff = static_cast<std::uintptr_t>(tptr - this->m_small.data());
+        if(ioff < this->m_small.capacity()) {
           // Use the small buffer.
-          return static_cast<std::size_t>(tptr - this->m_small.data());
+          return ioff;
         }
         // Use the large buffer.
-        return this->m_small.capacity() + static_cast<std::size_t>(tptr - this->m_large.data());
+        if(ioff == this->m_small.capacity()) {
+          return this->m_small.capacity();
+        }
+        ioff = static_cast<std::uintptr_t>(tptr - this->m_large.data());
+        return this->m_small.capacity() + ioff;
       }
     void clear() noexcept
       {
@@ -65,9 +70,10 @@ class Reference_stack
       Reference & push(ParamT &&param)
       {
         auto tptr = this->m_tptr;
-        if((this->m_small.data() <= tptr) && (tptr < this->m_small.data() + this->m_small.capacity())) {
+        auto ioff = static_cast<std::uintptr_t>(tptr - this->m_small.data());
+        if(ioff < this->m_small.capacity()) {
           // Use the small buffer.
-          if(tptr == this->m_small.data() + this->m_small.size()) {
+          if(ioff == this->m_small.size()) {
             tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
           } else {
             *tptr = std::forward<ParamT>(param);
@@ -77,10 +83,11 @@ class Reference_stack
           return tptr[-1];
         }
         // Use the large buffer.
-        if(tptr == this->m_small.data() + this->m_small.capacity()) {
+        if(ioff == this->m_small.capacity()) {
           tptr = this->m_large.mut_data();
         }
-        if(tptr == this->m_large.data() + this->m_large.size()) {
+        ioff = static_cast<std::uintptr_t>(tptr - this->m_large.data());
+        if(ioff == this->m_large.size()) {
           tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
         } else {
           *tptr = std::forward<ParamT>(param);
