@@ -21,7 +21,7 @@ template<typename elementT>
 
   public:
     template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
-      explicit refcounted_object(reference_wrapper<yelementT> ref) noexcept
+      constexpr refcounted_object(reference_wrapper<yelementT> ref) noexcept
       : m_owns(),
         m_rptr(::std::addressof(ref.get()))
       {
@@ -34,24 +34,24 @@ template<typename elementT>
       }
 
   public:
-    bool unique() const noexcept
+    constexpr bool unique() const noexcept
       {
         return this->m_owns.unique();
       }
-    long use_count() const noexcept
+    constexpr long use_count() const noexcept
       {
         return this->m_owns.use_count();
       }
 
-    const element_type & get() const noexcept
+    constexpr const element_type & get() const noexcept
       {
         return *(this->m_rptr);
       }
-    element_type & mut() noexcept
+    constexpr element_type & mut() noexcept
       {
         return *(this->m_rptr);
       }
-    pointer ptr() const noexcept
+    constexpr pointer ptr() const noexcept
       {
         return this->m_rptr;
       }
