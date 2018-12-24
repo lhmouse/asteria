@@ -93,7 +93,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       }
   };
 
-#if defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606)
+#if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
 template<typename charT, typename traitsT, typename allocatorT>
   constexpr typename basic_insertable_streambuf<charT, traitsT, allocatorT>::size_type basic_insertable_streambuf<charT, traitsT, allocatorT>::npos;
 #endif

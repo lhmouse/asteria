@@ -18,7 +18,7 @@ int main()
       }
       return fib(10) + one;
     )__");
-    Simple_source_file code(iss, rocket::cow_string::shallow("my_file"));
+    Simple_source_file code(iss, std::ref("my_file"));
     Global_context global;
     auto res = code.execute(global, { });
     ASTERIA_TEST_CHECK(res.read().check<D_integer>() == 90);

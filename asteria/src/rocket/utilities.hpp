@@ -11,7 +11,7 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <ios>  // std::ios_base, std::basic_ios<>
-#include <functional>  // std::hash<>, std::equal_to<>
+#include <functional>  // std::hash<>, std::equal_to<>, std::reference_wrapper<>, std::ref()
 #include <tuple>  // std::tuple<>
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 #include "compatibility.h"
@@ -128,6 +128,7 @@ using ::std::streamsize;
 
 using ::std::equal_to;
 using ::std::hash;
+using ::std::reference_wrapper;
 using ::std::pair;
 using ::std::tuple;
 

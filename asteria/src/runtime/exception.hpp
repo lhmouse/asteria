@@ -25,7 +25,7 @@ class Exception : public virtual std::exception
       {
       }
     explicit Exception(const std::exception &stdex)
-      : m_loc(rocket::cow_string::shallow("<native code>"), 0), m_value(D_string(stdex.what()))
+      : m_loc(std::ref("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Exception);

@@ -42,28 +42,28 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     }
     // Set `this`.
     {
-      this->open_named_reference(rocket::cow_string::shallow("__this")) = std::move(self);
+      this->open_named_reference(std::ref("__this")) = std::move(self);
     }
     // Set `__file`.
     {
       Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
-      this->open_named_reference(rocket::cow_string::shallow("__file")) = std::move(ref_c);
+      this->open_named_reference(std::ref("__file")) = std::move(ref_c);
     }
     // Set `__line`.
     {
       Reference_root::S_constant ref_c = { D_integer(loc.get_line()) };
-      this->open_named_reference(rocket::cow_string::shallow("__line")) = std::move(ref_c);
+      this->open_named_reference(std::ref("__line")) = std::move(ref_c);
     }
     // Set `__func`.
     {
       Reference_root::S_constant ref_c = { D_string(name) };
-      this->open_named_reference(rocket::cow_string::shallow("__func")) = std::move(ref_c);
+      this->open_named_reference(std::ref("__func")) = std::move(ref_c);
     }
     // Set `__varg`.
     {
       args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
       Reference_root::S_constant ref_c = { D_function(Variadic_arguer(loc, name, std::move(args))) };
-      this->open_named_reference(rocket::cow_string::shallow("__varg")) = std::move(ref_c);
+      this->open_named_reference(std::ref("__varg")) = std::move(ref_c);
     }
   }
 

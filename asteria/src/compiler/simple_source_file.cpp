@@ -47,14 +47,14 @@ Parser_error Simple_source_file::load_stream(std::istream &cstrm_io, const rocke
 void Simple_source_file::clear() noexcept
   {
     this->m_code = rocket::cow_vector<Statement>();
-    this->m_file = rocket::cow_string::shallow("");
+    this->m_file = std::ref("");
   }
 
 Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> &&args) const
   {
     // Initialize parameters.
     const auto loc = Source_location(this->m_file, 0);
-    const auto name = rocket::cow_string(rocket::cow_string::shallow("<file scope>"));
+    const auto name = rocket::cow_string(std::ref("<file scope>"));
     const auto params = rocket::cow_vector<rocket::prehashed_string>();
     // Execute the code as a function.
     Reference self;

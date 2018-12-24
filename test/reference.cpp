@@ -8,7 +8,7 @@ using namespace Asteria;
 
 int main()
   {
-    auto ref = Reference(Reference_root::S_constant { D_string(rocket::cow_string::shallow("meow")) });
+    auto ref = Reference(Reference_root::S_constant { D_string(std::ref("meow")) });
     auto val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_string);
     ASTERIA_TEST_CHECK(val.check<D_string>() == "meow");
@@ -29,7 +29,7 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(ref.open() = D_boolean(true));
 
-    ref = Reference_root::S_variable { rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 42), D_null(), false) };
+    ref = Reference_root::S_variable { rocket::make_refcounted<Variable>(Source_location(std::ref("nonexistent"), 42), D_null(), false) };
     ref.zoom_in(Reference_modifier::S_array_index { -3 });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);
@@ -42,7 +42,7 @@ int main()
     ref.zoom_out();
 
     ref.zoom_in(Reference_modifier::S_array_index { 2 });
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("my_key")) });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(std::ref("my_key")) });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);
     ref.open() = D_real(10.5);
@@ -52,11 +52,11 @@ int main()
     ref.zoom_out();
     ref.zoom_out();
     ref.zoom_in(Reference_modifier::S_array_index { -1 });
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("my_key")) });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(std::ref("my_key")) });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_real);
     ASTERIA_TEST_CHECK(val.check<D_real>() == 10.5);
-    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(rocket::cow_string::shallow("invalid_access")) });
+    ref.zoom_in(Reference_modifier::S_object_key { rocket::prehashed_string(std::ref("invalid_access")) });
     ASTERIA_TEST_CHECK_CATCH(val = ref.read());
     ref.zoom_out();
 

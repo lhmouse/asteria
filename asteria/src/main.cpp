@@ -21,7 +21,7 @@ int main()
       }
       return fib(30);
     )__");
-    Simple_source_file code(iss, rocket::cow_string::shallow("my_file"));
+    Simple_source_file code(iss, std::ref("my_file"));
     Global_context global;
     const auto t1 = std::chrono::high_resolution_clock::now();
     auto res = code.execute(global, { });

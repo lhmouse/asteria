@@ -493,8 +493,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           const auto push_backtrace = [&](const Source_location &loc)
             {
               D_object elem;
-              elem.try_emplace(rocket::cow_string::shallow("file"), D_string(loc.get_file()));
-              elem.try_emplace(rocket::cow_string::shallow("line"), D_integer(loc.get_line()));
+              elem.try_emplace(std::ref("file"), D_string(loc.get_file()));
+              elem.try_emplace(std::ref("line"), D_integer(loc.get_line()));
               backtrace.emplace_back(std::move(elem));
             };
           // The exception variable shall not outlast the `catch` body.
@@ -521,7 +521,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.open_named_reference(rocket::cow_string::shallow("__backtrace")) = std::move(ref_c);
+          ctx_next.open_named_reference(std::ref("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, global, ctx_next);
         }

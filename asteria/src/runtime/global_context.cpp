@@ -27,7 +27,7 @@ void Global_context::do_add_std_bindings()
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
     Reference_root::S_constant ref_c = { std::move(root) };
-    this->open_named_reference(rocket::cow_string::shallow("std")) = std::move(ref_c);
+    this->open_named_reference(std::ref("std")) = std::move(ref_c);
   }
 
 bool Global_context::is_analytic() const noexcept

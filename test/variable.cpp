@@ -9,9 +9,9 @@ using namespace Asteria;
 
 int main()
   {
-    const auto var = rocket::make_refcounted<Variable>(Source_location(rocket::cow_string::shallow("nonexistent"), 42), D_real(123.456), false);
+    const auto var = rocket::make_refcounted<Variable>(Source_location(std::ref("nonexistent"), 42), D_real(123.456), false);
     ASTERIA_TEST_CHECK(var->get_value().type() == Value::type_real);
-    var->set_value(D_string(rocket::cow_string::shallow("hello")));
+    var->set_value(D_string(std::ref("hello")));
     ASTERIA_TEST_CHECK(var->get_value().type() == Value::type_string);
     var->reset(D_integer(42), true);
     ASTERIA_TEST_CHECK_CATCH(var->set_value(D_null()));

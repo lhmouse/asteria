@@ -274,7 +274,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
       {
         // Instantiate the closure function.
-        auto func = alt.body.instantiate_function(global, ctx, alt.loc, rocket::cow_string::shallow("<closure function>"), alt.params);
+        auto func = alt.body.instantiate_function(global, ctx, alt.loc, std::ref("<closure function>"), alt.params);
         Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.push(std::move(ref_c));
       }
@@ -840,7 +840,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        ref_c.value = D_string(rocket::cow_string::shallow(Value::get_type_name(ref_c.value.type())));
+        ref_c.value = D_string(std::ref(reinterpret_cast<const char (&)[]>(*(Value::get_type_name(ref_c.value.type())))));
         do_set_temporary(stack_io, alt, std::move(ref_c));
       }
 
@@ -952,7 +952,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             break;
           }
           default: {
-            ref_c.value = D_string(D_string::shallow("unordered"));
+            ref_c.value = D_string(std::ref("unordered"));
             break;
           }
         }

@@ -639,7 +639,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-#if defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606)
+#if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
     template<typename allocatorT, typename hashT, typename eqT>
       constexpr typename storage_handle<allocatorT, hashT, eqT>::size_type storage_handle<allocatorT, hashT, eqT>::max_load_factor_reciprocal;
 #endif

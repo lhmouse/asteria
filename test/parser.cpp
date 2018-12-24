@@ -32,13 +32,13 @@ int main()
       }
     )__");
     Token_stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, rocket::cow_string::shallow("dummy file")));
+    ASTERIA_TEST_CHECK(tis.load(iss, std::ref("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
     Reference res;
     Global_context global;
-    code.execute_as_function(res, global, Source_location(rocket::cow_string::shallow("file"), 42), rocket::cow_string::shallow("scope"), { }, { });
+    code.execute_as_function(res, global, Source_location(std::ref("file"), 42), std::ref("scope"), { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }
