@@ -31,21 +31,6 @@ class Reference_stack
       {
         return this->m_tptr == this->m_small.data();
       }
-    std::size_t size() const noexcept
-      {
-        auto tptr = this->m_tptr;
-        auto ioff = static_cast<std::uintptr_t>(tptr - this->m_small.data());
-        if(ioff < this->m_small.capacity()) {
-          // Use the small buffer.
-          return ioff;
-        }
-        // Use the large buffer.
-        if(ioff == this->m_small.capacity()) {
-          return this->m_small.capacity();
-        }
-        ioff = static_cast<std::uintptr_t>(tptr - this->m_large.data());
-        return this->m_small.capacity() + ioff;
-      }
     void clear() noexcept
       {
         this->m_tptr = this->m_small.mut_data();

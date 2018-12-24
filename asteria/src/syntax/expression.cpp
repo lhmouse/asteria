@@ -42,49 +42,32 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     if(rptr == eptr) {
       return false;
     }
-    const auto stack_size_old = stack_io.size();
     // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr - 1) % 8;
+    const auto rem = static_cast<std::uintptr_t>(eptr - rptr - 1) % 4;
     rptr += rem + 1;
     switch(rem) {
+#define STEP(x_)  \
+        do {  \
+          rptr[x_](stack_io, global, ctx);  \
+        } while(false)
       do {
-        rptr += 8;
-        // Fallthrough.
-    case 7:
-        rptr[-8](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
-        // Fallthrough.
-    case 6:
-        rptr[-7](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
-        // Fallthrough.
-    case 5:
-        rptr[-6](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
-        // Fallthrough.
-    case 4:
-        rptr[-5](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        rptr += 4;
+//==========================================================
         // Fallthrough.
     case 3:
-        rptr[-4](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        STEP(-4);
         // Fallthrough.
     case 2:
-        rptr[-3](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        STEP(-3);
         // Fallthrough.
     case 1:
-        rptr[-2](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        STEP(-2);
         // Fallthrough.
     default:
-        rptr[-1](stack_io, global, ctx);
-        ROCKET_ASSERT(stack_io.size() >= stack_size_old);
+        STEP(-1);
+//==========================================================
       } while(rptr != eptr);
-    }
-    if(stack_io.size() - stack_size_old != 1) {
-      ASTERIA_THROW_RUNTIME_ERROR("The expression is unbalanced.");
+#undef STEP
     }
     return true;
   }
@@ -96,7 +79,6 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
       ref_out = Reference_root::S_null();
       return;
     }
-    ROCKET_ASSERT(stack.size() == 1);
     ref_out = std::move(stack.mut_top());
   }
 
