@@ -51,6 +51,7 @@
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/unique_ptr.hpp"
 #include "rocket/refcounted_ptr.hpp"
+#include "rocket/refcounted_object.hpp"
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/integer_sequence.hpp"

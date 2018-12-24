@@ -227,13 +227,13 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
       case type_opaque: {
         const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
+        os <<"opaque(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
         return;
       }
       case type_function: {
         const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(*alt).name() <<"\") " <<quote(alt->describe());
+        os <<"function(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
         return;
       }
       case type_array: {
@@ -287,20 +287,20 @@ void Value::enumerate_variables(const Abstract_variable_callback &callback) cons
       }
       case type_function: {
         const auto &alt = this->m_stor.as<D_function>();
-        alt->enumerate_variables(callback);
+        alt.get().enumerate_variables(callback);
         return;
       }
       case type_array: {
         const auto &alt = this->m_stor.as<D_array>();
-        for(auto it = alt.begin(); it != alt.end(); ++it) {
-          it->enumerate_variables(callback);
+        for(const auto &elem : alt) {
+          elem.enumerate_variables(callback);
         }
         return;
       }
       case type_object: {
         const auto &alt = this->m_stor.as<D_object>();
-        for(auto it = alt.begin(); it != alt.end(); ++it) {
-          it->second.enumerate_variables(callback);
+        for(const auto &pair : alt) {
+          pair.second.enumerate_variables(callback);
         }
         return;
       }

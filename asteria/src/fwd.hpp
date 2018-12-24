@@ -15,6 +15,7 @@
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/prehashed_string.hpp"
+#include "rocket/refcounted_object.hpp"
 
 namespace Asteria {
 
@@ -33,9 +34,7 @@ class Block;
 // Runtime
 class Value;
 class Abstract_opaque;
-class Shared_opaque_wrapper;
 class Abstract_function;
-class Shared_function_wrapper;
 class Reference_root;
 class Reference_modifier;
 class Reference;
@@ -66,8 +65,8 @@ using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_real      = double;
 using D_string    = rocket::cow_string;
-using D_opaque    = Shared_opaque_wrapper;
-using D_function  = Shared_function_wrapper;
+using D_opaque    = rocket::refcounted_object<Abstract_opaque>;
+using D_function  = rocket::refcounted_object<Abstract_function>;
 using D_array     = rocket::cow_vector<Value>;
 using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value, rocket::prehashed_string::hash, rocket::prehashed_string::equal_to>;
 

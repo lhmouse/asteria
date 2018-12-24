@@ -316,10 +316,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
         const auto &func = tgt_value.check<D_function>();
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func->describe());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func.get().describe());
         try {
           // Call the function now.
-          func->invoke(stack_io.mut_top(), global, std::move(args));
+          func.get().invoke(stack_io.mut_top(), global, std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
         } catch(Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());

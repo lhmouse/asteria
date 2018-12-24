@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_VALUE_HPP_
 
 #include "../fwd.hpp"
-#include "shared_opaque_wrapper.hpp"
-#include "shared_function_wrapper.hpp"
+#include "abstract_opaque.hpp"
+#include "abstract_function.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
 
