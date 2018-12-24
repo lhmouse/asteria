@@ -29,9 +29,8 @@ class Instantiated_function : public Abstract_function
 
   public:
     rocket::cow_string describe() const override;
-    void enumerate_variables(const Abstract_variable_callback &callback) const override;
-
     void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const override;
+    void enumerate_variables(const Abstract_variable_callback &callback) const override;
   };
 
 }

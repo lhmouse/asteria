@@ -16,13 +16,6 @@ rocket::cow_string Variadic_arguer::describe() const
     return ASTERIA_FORMAT_STRING("variadic argument accessor for `", this->m_name, "()` at \'", this->m_loc, "\'");
   }
 
-void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const
-  {
-    for(const auto &varg : this->m_vargs) {
-      varg.enumerate_variables(callback);
-    }
-  }
-
 void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, rocket::cow_vector<Reference> &&args) const
   {
     switch(args.size()) {
@@ -52,6 +45,13 @@ void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, ro
       default: {
         ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
       }
+    }
+  }
+
+void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const
+  {
+    for(const auto &varg : this->m_vargs) {
+      varg.enumerate_variables(callback);
     }
   }
 

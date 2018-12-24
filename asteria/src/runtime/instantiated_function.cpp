@@ -21,14 +21,14 @@ rocket::cow_string Instantiated_function::describe() const
     return fmt.extract_string();
   }
 
-void Instantiated_function::enumerate_variables(const Abstract_variable_callback &callback) const
-  {
-    this->m_body_bnd.enumerate_variables(callback);
-  }
-
 void Instantiated_function::invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const
   {
     this->m_body_bnd.execute_as_function(self_io, global, this->m_loc, this->m_name, this->m_params, std::move(args));
+  }
+
+void Instantiated_function::enumerate_variables(const Abstract_variable_callback &callback) const
+  {
+    this->m_body_bnd.enumerate_variables(callback);
   }
 
 }
