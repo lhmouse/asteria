@@ -935,7 +935,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         this->m_sth.erase_range_unchecked(0, this->m_sth.bucket_count());
       }
-
     // Reallocate more storage as needed, without shrinking.
     void do_reserve_more(size_type cap_add)
       {

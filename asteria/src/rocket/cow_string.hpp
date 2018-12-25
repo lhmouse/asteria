@@ -694,7 +694,6 @@ template<typename charT, typename traitsT, typename allocatorT>
         }
         this->do_set_length(0);
       }
-
     // Reallocate more storage as needed, without shrinking.
     void do_reserve_more(size_type cap_add)
       {
