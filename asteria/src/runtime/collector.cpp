@@ -159,7 +159,7 @@ void Collector::collect()
       );
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
-    //   Mark variables indirectly reachable from directly reachable ones.
+    //   Mark variables reachable indirectly from ones reachable directly.
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
