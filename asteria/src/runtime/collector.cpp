@@ -32,7 +32,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     if(!this->m_tracked.erase(var)) {
       return false;
     }
-    this->m_counter--;
+    --(this->m_counter);
     return true;
   }
 
