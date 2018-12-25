@@ -41,9 +41,9 @@ int main()
       std::istringstream iss(R"__(
         var g;
         func leak() {
-          var f = 1;
-          g = func() { return f; };
-          return g();
+          var f;
+          f = func() { return f; };
+          g = f;
         }
         for(var i = 0; i < 10000; ++i) {
           leak();
