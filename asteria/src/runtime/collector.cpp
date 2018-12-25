@@ -89,7 +89,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
 
     constexpr long do_lcast(double value) noexcept
       {
-        return static_cast<long>(value + 1e-9);
+        return static_cast<long>(value + 0.5);
       }
 
     }
