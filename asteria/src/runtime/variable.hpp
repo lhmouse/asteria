@@ -14,7 +14,7 @@ class Variable : public rocket::refcounted_base<Variable>
   {
   private:
     Source_location m_loc;
-    mutable long m_gcref;  // This is uninitialized by default.
+    mutable double m_gcref;  // This is uninitialized by default.
 
     Value m_value;
     bool m_immutable;
@@ -37,11 +37,11 @@ class Variable : public rocket::refcounted_base<Variable>
         return this->m_loc;
       }
 
-    long get_gcref() const noexcept
+    double get_gcref() const noexcept
       {
         return this->m_gcref;
       }
-    void set_gcref(long gcref) const noexcept
+    void set_gcref(double gcref) const noexcept
       {
         this->m_gcref = gcref;
       }

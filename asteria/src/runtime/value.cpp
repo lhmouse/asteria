@@ -274,6 +274,41 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
     }
   }
 
+long Value::use_count() const noexcept
+  {
+    switch(this->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real: {
+        return 0;
+      }
+      case type_string: {
+        const auto &alt = this->m_stor.as<D_string>();
+        return alt.use_count();
+      }
+      case type_opaque: {
+        const auto &alt = this->m_stor.as<D_opaque>();
+        return alt.use_count();
+      }
+      case type_function: {
+        const auto &alt = this->m_stor.as<D_function>();
+        return alt.use_count();
+      }
+      case type_array: {
+        const auto &alt = this->m_stor.as<D_array>();
+        return alt.use_count();
+      }
+      case type_object: {
+        const auto &alt = this->m_stor.as<D_object>();
+        return alt.use_count();
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      }
+    }
+  }
+
 void Value::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(this->type()) {
@@ -281,8 +316,12 @@ void Value::enumerate_variables(const Abstract_variable_callback &callback) cons
       case type_boolean:
       case type_integer:
       case type_real:
-      case type_string:
+      case type_string: {
+        return;
+      }
       case type_opaque: {
+        const auto &alt = this->m_stor.as<D_opaque>();
+        alt.get().enumerate_variables(callback);
         return;
       }
       case type_function: {

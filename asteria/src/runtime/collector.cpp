@@ -21,7 +21,7 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     if(!this->m_tracked.insert(var)) {
       return false;
     }
-    if(this->m_counter++ >= this->m_threshold) {
+    if(++(this->m_counter) > this->m_threshold) {
       this->collect();
     }
     return true;
@@ -87,6 +87,11 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
         ptr->enumerate_variables(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
+    constexpr long do_lcast(double value) noexcept
+      {
+        return static_cast<long>(value + 1e-9);
+      }
+
     }
 
 void Collector::collect()
@@ -111,7 +116,7 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Add a variable reachable directly. Do not include references from `m_tracked`.
-          root->set_gcref(1);
+          root->set_gcref(1.0);
           if(!this->m_staging.insert(root)) {
             return;
           }
@@ -122,7 +127,7 @@ void Collector::collect()
                 if(!this->m_staging.insert(var)) {
                   return false;
                 }
-                var->set_gcref(0);
+                var->set_gcref(0.0);
                 return true;
               }
             );
@@ -137,26 +142,21 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Drop a direct reference.
-          root->set_gcref(root->get_gcref() + 1);
-          // Drop indirect references. This is not going to be recursive.
+          root->set_gcref(root->get_gcref() + 1.0);
+          ROCKET_ASSERT(do_lcast(root->get_gcref()) <= root->use_count());
+          const auto weight = 1.0 / static_cast<double>(rocket::max(root->get_value().use_count(), 1));
+          // Drop indirect references.
           do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
-                var->set_gcref(var->get_gcref() + 1);
+                var->set_gcref(var->get_gcref() + weight);
+                ROCKET_ASSERT(do_lcast(var->get_gcref()) <= var->use_count());
+                // This is not going to be recursive.
                 return false;
               }
             );
         }
       );
-#ifdef ROCKET_DEBUG
-    this->m_staging.for_each(
-      [&](const rocket::refcounted_ptr<Variable> &root)
-        {
-          ROCKET_ASSERT(root->get_gcref() >= 0);
-          ROCKET_ASSERT(root->get_gcref() <= root->use_count());
-        }
-      );
-#endif
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
     //   Mark variables indirectly reachable from directly reachable ones.
@@ -164,19 +164,22 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(root->get_gcref() >= root->use_count()) {
+          if(do_lcast(root->get_gcref()) >= root->use_count()) {
+            // This variable is possibly unreachable.
             return;
           }
           // Mark a variable that is reachable and will not be collected.
-          root->set_gcref(-1);
+          root->set_gcref(-1.0);
           // Mark variables reachable indirectly.
           do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
                 if(var->get_gcref() < 0) {
+                  // This variable has already been marked.
                   return false;
                 }
-                var->set_gcref(-1);
+                var->set_gcref(-1.0);
+                // Mark all children recursively.
                 return true;
               }
             );
@@ -192,7 +195,7 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(root->get_gcref() >= root->use_count()) {
+          if(do_lcast(root->get_gcref()) >= root->use_count()) {
             ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
             root->reset(D_null(), true);
             this->m_tracked.erase(root);
@@ -203,7 +206,7 @@ void Collector::collect()
             // Strong exception safety is paramount here.
             tied->m_tracked.insert(root);
             this->m_tracked.erase(root);
-            if(tied->m_counter++ >= tied->m_threshold) {
+            if(++(tied->m_counter) > tied->m_threshold) {
               collect_tied = true;
             }
             return;
