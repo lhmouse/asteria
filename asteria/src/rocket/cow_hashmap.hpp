@@ -458,7 +458,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             return reinterpret_cast<const storage_header *>(ptr)->nelem;
           }
-        bucket_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+        ROCKET_NOINLINE bucket_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {
             if(res_arg == 0) {
               // Deallocate the block.
@@ -913,7 +913,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
   private:
     // Reallocate the storage to `res_arg` elements.
     // The storage is owned by the current hashmap exclusively after this function returns normally.
-    ROCKET_NOINLINE details_cow_hashmap::bucket<allocator_type> * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+    details_cow_hashmap::bucket<allocator_type> * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
       {
         ROCKET_ASSERT(cnt_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());

@@ -305,7 +305,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             }
             return reinterpret_cast<const storage_header *>(ptr)->nelem;
           }
-        value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+        ROCKET_NOINLINE value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {
             if(res_arg == 0) {
               // Deallocate the block.
@@ -735,7 +735,7 @@ template<typename valueT, typename allocatorT>
   private:
     // Reallocate the storage to `res_arg` elements.
     // The storage is owned by the current vector exclusively after this function returns normally.
-    ROCKET_NOINLINE value_type * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+    value_type * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
       {
         ROCKET_ASSERT(cnt_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_sth.size());

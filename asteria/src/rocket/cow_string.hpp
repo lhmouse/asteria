@@ -198,7 +198,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             }
             return ptr->data;
           }
-        value_type * reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
+        ROCKET_NOINLINE value_type * reallocate(const value_type *src, size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
           {
             if(res_arg == 0) {
               // Deallocate the block.
@@ -656,7 +656,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 
   private:
     // Reallocate the storage to `res_arg` characters, not including the null terminator.
-    ROCKET_NOINLINE value_type * do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
+    value_type * do_reallocate(size_type len_one, size_type off_two, size_type len_two, size_type res_arg)
       {
         ROCKET_ASSERT(len_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_len);
