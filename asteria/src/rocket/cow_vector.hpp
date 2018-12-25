@@ -257,7 +257,15 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(!ptr) {
               return false;
             }
-            return ptr->nref.get() == 1;
+            return ptr->nref.unique();
+          }
+        long use_count() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return 0;
+            }
+            return ptr->nref.get();
           }
         size_type capacity() const noexcept
           {
@@ -926,6 +934,11 @@ template<typename valueT, typename allocatorT>
     bool unique() const noexcept
       {
         return this->m_sth.unique();
+      }
+    // N.B. This is a non-standard extension.
+    long use_count() const noexcept
+      {
+        return this->m_sth.use_count();
       }
 
     // element access

@@ -606,11 +606,6 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         }
         this->m_sth.pop_back_n_unchecked(this->m_sth.size());
       }
-    // N.B. This is a non-standard extension.
-    bool unique() const noexcept
-      {
-        return true;
-      }
 
     // element access
     const_reference at(size_type pos) const

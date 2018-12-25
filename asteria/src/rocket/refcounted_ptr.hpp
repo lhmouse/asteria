@@ -49,7 +49,7 @@ template<typename elementT>
       public:
         bool unique() const noexcept
           {
-            return this->m_nref.get() == 1;
+            return this->m_nref.unique();
           }
         long use_count() const noexcept
           {
@@ -335,7 +335,7 @@ template<typename elementT>
     // 23.11.1.2.4, observers
     bool unique() const noexcept
       {
-        return this->m_sth.use_count() == 1;
+        return this->m_sth.unique();
       }
     long use_count() const noexcept
       {

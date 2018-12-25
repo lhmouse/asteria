@@ -402,7 +402,15 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             if(!ptr) {
               return false;
             }
-            return ptr->nref.get() == 1;
+            return ptr->nref.unique();
+          }
+        long use_count() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return 0;
+            }
+            return ptr->nref.get();
           }
         size_type bucket_count() const noexcept
           {
@@ -1060,6 +1068,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     bool unique() const noexcept
       {
         return this->m_sth.unique();
+      }
+    // N.B. This is a non-standard extension.
+    long use_count() const noexcept
+      {
+        return this->m_sth.use_count();
       }
 
     // hash policy
