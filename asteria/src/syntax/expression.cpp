@@ -42,32 +42,12 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     if(rptr == eptr) {
       return false;
     }
-    // Unroll the loop using Duff's Device.
-    const auto rem = static_cast<std::uintptr_t>(eptr - rptr - 1) % 4;
-    rptr += rem + 1;
-    switch(rem) {
-#define STEP(x_)  \
-        do {  \
-          rptr[x_](stack_io, global, ctx);  \
-        } while(false)
-      do {
-        rptr += 4;
-//==========================================================
-        // Fallthrough.
-    case 3:
-        STEP(-4);
-        // Fallthrough.
-    case 2:
-        STEP(-3);
-        // Fallthrough.
-    case 1:
-        STEP(-2);
-        // Fallthrough.
-    default:
-        STEP(-1);
-//==========================================================
-      } while(rptr != eptr);
-#undef STEP
+    for(;;) {
+      (*rptr)(stack_io, global, ctx);
+      ++rptr;
+      if(ROCKET_UNEXPECT(rptr == eptr)) {
+        break;
+      }
     }
     return true;
   }
