@@ -81,10 +81,10 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
           }
       };
 
-    template<typename FunctionT>
-      inline Variable_callback<FunctionT> do_make_variable_callback(FunctionT &&func)
+    template<typename PointerT, typename FunctionT>
+      void do_enumerate_variables(const PointerT &ptr, FunctionT &&func)
       {
-        return Variable_callback<FunctionT>(std::forward<FunctionT>(func));
+        ptr->enumerate_variables(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
     }
@@ -116,7 +116,7 @@ void Collector::collect()
             return;
           }
           // Add variables reachable indirectly.
-          root->enumerate_variables(do_make_variable_callback(
+          do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
                 if(!this->m_staging.insert(var)) {
@@ -125,7 +125,7 @@ void Collector::collect()
                 var->set_gcref(0);
                 return true;
               }
-            ));
+            );
         }
       );
     ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_staging.size());
@@ -139,13 +139,13 @@ void Collector::collect()
           // Drop a direct reference.
           root->set_gcref(root->get_gcref() + 1);
           // Drop indirect references. This is not going to be recursive.
-          root->enumerate_variables(do_make_variable_callback(
+          do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
                 var->set_gcref(var->get_gcref() + 1);
                 return false;
               }
-            ));
+            );
         }
       );
 #ifdef ROCKET_DEBUG
@@ -170,7 +170,7 @@ void Collector::collect()
           // Mark a variable that is reachable and will not be collected.
           root->set_gcref(-1);
           // Mark variables reachable indirectly.
-          root->enumerate_variables(do_make_variable_callback(
+          do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
                 if(var->get_gcref() < 0) {
@@ -179,7 +179,7 @@ void Collector::collect()
                 var->set_gcref(-1);
                 return true;
               }
-            ));
+            );
         }
       );
     ///////////////////////////////////////////////////////////////////////////
