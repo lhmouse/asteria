@@ -917,7 +917,9 @@ bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
       // A block comment may straddle multiple lines. We just mark the first line here.
       throw Parser_error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_error::code_block_comment_unclosed);
     }
-    // Accept the result.
+    ///////////////////////////////////////////////////////////////////////////
+    // Finish
+    ///////////////////////////////////////////////////////////////////////////
     std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor = std::move(seq);
     return true;

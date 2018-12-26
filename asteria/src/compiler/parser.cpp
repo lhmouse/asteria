@@ -1737,7 +1737,9 @@ bool Parser::load(Token_stream &tstrm_io)
         throw do_make_parser_error(tstrm_io, Parser_error::code_statement_expected);
       }
     }
-    // Accept the result.
+    ///////////////////////////////////////////////////////////////////////////
+    // Finish
+    ///////////////////////////////////////////////////////////////////////////
     this->m_stor = std::move(stmts);
     return true;
   } catch(Parser_error &err) {  // Don't play with this at home.

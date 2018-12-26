@@ -216,6 +216,9 @@ void Collector::collect()
     if(collect_tied) {
       tied->collect();
     }
+    ///////////////////////////////////////////////////////////////////////////
+    // Finish
+    ///////////////////////////////////////////////////////////////////////////
     ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
     this->m_counter = 0;
     this->m_staging.clear();
