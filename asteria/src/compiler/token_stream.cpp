@@ -702,7 +702,7 @@ Token_stream::~Token_stream()
             continue;
           }
           const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          const auto bound = (std::numeric_limits<int>::max() - dvalue) / 10;
+          const auto bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_exponent_overflow);
           }
@@ -726,7 +726,7 @@ Token_stream::~Token_stream()
               continue;
             }
             const auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
-            const auto bound = (std::numeric_limits<std::int64_t>::max() - dvalue) / radix;
+            const auto bound = (INT64_MAX - dvalue) / radix;
             if(value > bound) {
               throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
             }
@@ -735,7 +735,7 @@ Token_stream::~Token_stream()
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              const auto bound = std::numeric_limits<std::int64_t>::max() / exp_base;
+              const auto bound = INT64_MAX / exp_base;
               if(value > bound) {
                 throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
               }

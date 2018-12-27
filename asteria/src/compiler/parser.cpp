@@ -273,12 +273,12 @@ Parser::~Parser()
                 break;
               }
               case Token::keyword_nan: {
-                value_out = std::numeric_limits<D_real>::quiet_NaN();
+                value_out = D_real(NAN);
                 tstrm_io.shift();
                 break;
               }
               case Token::keyword_infinity: {
-                value_out = std::numeric_limits<D_real>::infinity();
+                value_out = D_real(INFINITY);
                 tstrm_io.shift();
                 break;
               }
@@ -654,7 +654,7 @@ Parser::~Parser()
     class Infix_element_base
       {
       public:
-        enum Precedence : std::size_t
+        enum Precedence : unsigned
           {
             precedence_multiplicative  =  1,
             precedence_additive        =  2,
@@ -668,6 +668,7 @@ Parser::~Parser()
             precedence_logical_or      = 10,
             precedence_coalescence     = 11,
             precedence_assignment      = 12,
+            precedence_max             = 99,
           };
 
       public:
@@ -700,7 +701,7 @@ Parser::~Parser()
       public:
         Precedence precedence() const noexcept override
           {
-            return std::numeric_limits<Precedence>::max();
+            return precedence_max;
           }
         void extract(rocket::cow_vector<Xpnode> &nodes_out) override
           {

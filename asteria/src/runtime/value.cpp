@@ -215,7 +215,7 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
       case type_real: {
         const auto &alt = this->m_stor.as<D_real>();
         // real 123.456
-        os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(std::numeric_limits<D_real>::max_digits10) <<alt;
+        os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(DECIMAL_DIG) <<alt;
         return;
       }
       case type_string: {

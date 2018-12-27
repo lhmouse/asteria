@@ -602,7 +602,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
         res.reserve(lhs.size() * static_cast<std::size_t>(count));
-        auto mask = std::numeric_limits<std::size_t>::max() / 2 + 1;
+        auto mask = size_t(-1) / 2 + 1;
         for(;;) {
           if(count & mask) {
             res.append(lhs);
