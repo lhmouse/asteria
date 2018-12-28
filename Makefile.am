@@ -1,5 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -pipe -pthread -Wall -Wextra -Wconversion -Wsign-conversion -Winvalid-pch  \
+AM_CPPFLAGS = -pipe -pthread -fno-math-errno  \
+  -Wall -Wextra -Wconversion -Wsign-conversion -Winvalid-pch  \
   -Wwrite-strings -Wswitch-enum -Wsuggest-attribute=noreturn -Wundef -Wshadow  \
   -Wstrict-aliasing=2 -Wstrict-overflow=2 -Wmissing-field-initializers  \
   -Wno-error=unused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}  \
