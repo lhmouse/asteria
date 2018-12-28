@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "../syntax/source_location.hpp"
+#include <cfloat>
 
 namespace Asteria {
 
@@ -14,7 +15,10 @@ class Variable : public rocket::refcounted_base<Variable>
   {
   private:
     Source_location m_loc;
-    mutable double m_gcref;  // This is uninitialized by default.
+
+    // These are only used during garbage collection and are uninitialized by default.
+    mutable long m_gcref_intg;
+    mutable double m_gcref_mant;
 
     Value m_value;
     bool m_immutable;
@@ -37,13 +41,25 @@ class Variable : public rocket::refcounted_base<Variable>
         return this->m_loc;
       }
 
-    double get_gcref() const noexcept
+    long get_gcref() const noexcept
       {
-        return this->m_gcref;
+        return this->m_gcref_intg;
       }
-    void set_gcref(double gcref) const noexcept
+    void init_gcref(long intg) const noexcept
       {
-        this->m_gcref = gcref;
+        this->m_gcref_intg = intg;
+        this->m_gcref_mant = DBL_EPSILON;
+      }
+    void add_gcref(long dintg) const noexcept
+      {
+        this->m_gcref_intg += dintg;
+      }
+    void add_gcref(double dmant) const noexcept
+      {
+        this->m_gcref_mant += dmant;
+        auto dintg = static_cast<long>(this->m_gcref_mant);
+        this->m_gcref_intg += dintg;
+        this->m_gcref_mant -= static_cast<double>(dintg);
       }
 
     const Value & get_value() const noexcept

@@ -87,11 +87,6 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
         ptr->enumerate_variables(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
-    constexpr long do_lcast(double value) noexcept
-      {
-        return static_cast<long>(value + 1e-9);
-      }
-
     }
 
 void Collector::collect()
@@ -116,7 +111,7 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Add a variable reachable directly. Do not include references from `m_tracked`.
-          root->set_gcref(1.0);
+          root->init_gcref(1);
           if(!this->m_staging.insert(root)) {
             return;
           }
@@ -127,7 +122,7 @@ void Collector::collect()
                 if(!this->m_staging.insert(var)) {
                   return false;
                 }
-                var->set_gcref(0.0);
+                var->init_gcref(0);
                 return true;
               }
             );
@@ -142,15 +137,15 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Drop a direct reference.
-          root->set_gcref(root->get_gcref() + 1.0);
-          ROCKET_ASSERT(do_lcast(root->get_gcref()) <= root->use_count());
-          const auto weight = 1.0 / static_cast<double>(rocket::max(root->get_value().use_count(), 1));
+          root->add_gcref(long(1));
+          ROCKET_ASSERT(root->get_gcref() <= root->use_count());
+          const auto weight = 1 / static_cast<double>(rocket::max(root->get_value().use_count(), 1));
           // Drop indirect references.
           do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
               {
-                var->set_gcref(var->get_gcref() + weight);
-                ROCKET_ASSERT(do_lcast(var->get_gcref()) <= var->use_count());
+                var->add_gcref(weight);
+                ROCKET_ASSERT(var->get_gcref() <= var->use_count());
                 // This is not going to be recursive.
                 return false;
               }
@@ -164,12 +159,12 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(do_lcast(root->get_gcref()) >= root->use_count()) {
+          if(root->get_gcref() >= root->use_count()) {
             // This variable is possibly unreachable.
             return;
           }
           // Mark a variable that is reachable and will not be collected.
-          root->set_gcref(-1.0);
+          root->init_gcref(-1);
           // Mark variables reachable indirectly.
           do_enumerate_variables(root,
             [&](const rocket::refcounted_ptr<Variable> &var)
@@ -178,7 +173,7 @@ void Collector::collect()
                   // This variable has already been marked.
                   return false;
                 }
-                var->set_gcref(-1.0);
+                var->init_gcref(-1);
                 // Mark all children recursively.
                 return true;
               }
@@ -195,7 +190,7 @@ void Collector::collect()
     this->m_staging.for_each(
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(do_lcast(root->get_gcref()) >= root->use_count()) {
+          if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
             root->reset(D_null(), true);
             this->m_tracked.erase(root);
