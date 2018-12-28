@@ -137,7 +137,7 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Drop a direct reference.
-          root->add_gcref(long(1));
+          root->add_gcref(1);
           ROCKET_ASSERT(root->get_gcref() <= root->use_count());
           const auto weight = 1 / static_cast<double>(rocket::max(root->get_value().use_count(), 1));
           // Drop indirect references.

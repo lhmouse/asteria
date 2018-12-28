@@ -50,7 +50,7 @@ class Variable : public rocket::refcounted_base<Variable>
         this->m_gcref_intg = intg;
         this->m_gcref_mant = DBL_EPSILON;
       }
-    void add_gcref(long dintg) const noexcept
+    void add_gcref(int dintg) const noexcept
       {
         this->m_gcref_intg += dintg;
       }
