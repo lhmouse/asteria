@@ -48,7 +48,7 @@ class Variable : public rocket::refcounted_base<Variable>
     void init_gcref(long intg) const noexcept
       {
         this->m_gcref_intg = intg;
-        this->m_gcref_mant = DBL_EPSILON;
+        this->m_gcref_mant = 1e-9;
       }
     void add_gcref(int dintg) const noexcept
       {
@@ -57,9 +57,10 @@ class Variable : public rocket::refcounted_base<Variable>
     void add_gcref(double dmant) const noexcept
       {
         this->m_gcref_mant += dmant;
-        auto dintg = static_cast<long>(this->m_gcref_mant);
-        this->m_gcref_intg += dintg;
-        this->m_gcref_mant -= static_cast<double>(dintg);
+        // Add with carry.
+        const auto carry = static_cast<long>(this->m_gcref_mant);
+        this->m_gcref_intg += carry;
+        this->m_gcref_mant -= static_cast<double>(carry);
       }
 
     const Value & get_value() const noexcept
