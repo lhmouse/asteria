@@ -139,17 +139,39 @@ void Collector::collect()
           // Drop a direct reference.
           root->add_gcref(1);
           ROCKET_ASSERT(root->get_gcref() <= root->use_count());
-          const auto weight = 1 / static_cast<double>(rocket::max(root->get_value().use_count(), 1));
           // Drop indirect references.
-          do_enumerate_variables(root,
-            [&](const rocket::refcounted_ptr<Variable> &var)
-              {
-                var->add_gcref(weight);
-                ROCKET_ASSERT(var->get_gcref() <= var->use_count());
-                // This is not going to be recursive.
-                return false;
-              }
-            );
+          const auto value_nref = root->get_value().use_count();
+          switch(value_nref) {
+            case 0: {
+              break;
+            }
+            case 1: {
+              // `root->get_value()` is unique.
+              do_enumerate_variables(root,
+                [&](const rocket::refcounted_ptr<Variable> &var)
+                  {
+                    var->add_gcref(1);
+                    ROCKET_ASSERT(var->get_gcref() <= var->use_count());
+                    // This is not going to be recursive.
+                    return false;
+                  }
+                );
+              break;
+            }
+            default: {
+              // `root->get_value()` is shared.
+              do_enumerate_variables(root,
+                [&](const rocket::refcounted_ptr<Variable> &var)
+                  {
+                    var->add_gcref(1 / static_cast<double>(value_nref));
+                    ROCKET_ASSERT(var->get_gcref() <= var->use_count());
+                    // This is not going to be recursive.
+                    return false;
+                  }
+                );
+              break;
+            }
+          }
         }
       );
     ///////////////////////////////////////////////////////////////////////////
@@ -163,7 +185,7 @@ void Collector::collect()
             // This variable is possibly unreachable.
             return;
           }
-          // Mark a variable that is reachable and will not be collected.
+          // Mark this variable reachable so it will not be collected.
           root->init_gcref(-1);
           // Mark variables reachable indirectly.
           do_enumerate_variables(root,
