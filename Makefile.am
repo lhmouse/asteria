@@ -38,6 +38,9 @@ lib_LTLIBRARIES =  \
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS =  \
+  asteria/src/rocket/compatibility_gcc.h  \
+  asteria/src/rocket/compatibility_clang.h  \
+  asteria/src/rocket/compatibility_msvc.h  \
   asteria/src/rocket/compatibility.h  \
   asteria/src/rocket/preprocessor_utilities.h  \
   asteria/src/rocket/assert.hpp  \
