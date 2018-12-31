@@ -38,7 +38,8 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       {
         mutable reference_counter<long> nref;
 
-        storage_header() noexcept
+        explicit storage_header() noexcept
+          : nref()
           {
           }
       };

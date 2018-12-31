@@ -37,7 +37,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
         size_t nelem;
 
         explicit storage_header(void (*xdtor)(...)) noexcept
-          : dtor(xdtor)
+          : dtor(xdtor), nref()
+            // `nelem` is uninitialized.
           {
           }
       };
