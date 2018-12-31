@@ -51,17 +51,15 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     if(rptr == eptr) {
       return status_next;
     }
-    for(;;) {
+    do {
       const auto status = (*rptr)(ref_out, ctx_io, global);
       if(ROCKET_UNEXPECT(status != status_next)) {
         return status;
       }
-      ++rptr;
-      if(ROCKET_UNEXPECT(rptr == eptr)) {
-        break;
+      if(ROCKET_UNEXPECT(++rptr == eptr)) {
+        return status_next;
       }
-    }
-    return status_next;
+    } while(true);
   }
 
 Block Block::bind(const Global_context &global, const Analytic_context &ctx) const

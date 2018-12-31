@@ -42,14 +42,12 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     if(rptr == eptr) {
       return false;
     }
-    for(;;) {
+    do {
       (*rptr)(stack_io, global, ctx);
-      ++rptr;
-      if(ROCKET_UNEXPECT(rptr == eptr)) {
-        break;
+      if(ROCKET_UNEXPECT(++rptr == eptr)) {
+        return true;
       }
-    }
-    return true;
+    } while(true);
   }
 
 void Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
