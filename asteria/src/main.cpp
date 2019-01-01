@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "compiler/simple_source_file.hpp"
 #include "runtime/global_context.hpp"

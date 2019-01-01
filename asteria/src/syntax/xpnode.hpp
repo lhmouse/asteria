@@ -1,5 +1,5 @@
 // This file is part of Asteria.
-// Copyleft 2018, LH_Mouse. All wrongs reserved.
+// Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #ifndef ASTERIA_SYNTAX_XPNODE_HPP_
 #define ASTERIA_SYNTAX_XPNODE_HPP_
