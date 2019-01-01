@@ -16,7 +16,10 @@ int main()
       func fib(n) {
         return n <= one ? one : fib(n - one) + fib(n - two);
       }
-      return fib(10) + one;
+      var con = { };
+      con["value"] = fib(10);
+      con["const"] = one;
+      return con.value + con.const;
     )__");
     Simple_source_file code(iss, std::ref("my_file"));
     Global_context global;

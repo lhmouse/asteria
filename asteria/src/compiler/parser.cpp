@@ -594,15 +594,18 @@ Parser::~Parser()
     bool do_accept_postfix_member_access(rocket::cow_vector<Xpnode> &nodes_out, Token_stream &tstrm_io)
       {
         // postfix-member-access ::=
-        //   "." identifier
+        //   "." ( string-literal | identifier )
         if(!do_match_punctuator(tstrm_io, Token::punctuator_dot)) {
           return false;
         }
-        rocket::cow_string name;
-        if(!do_accept_identifier(name, tstrm_io)) {
+        rocket::cow_string key;
+        bool key_got = do_accept_string_literal(key, tstrm_io) ||
+                       do_accept_identifier(key, tstrm_io) ||
+                       do_accept_keyword_as_identifier(key, tstrm_io);
+        if(!key_got) {
           throw do_make_parser_error(tstrm_io, Parser_error::code_identifier_expected);
         }
-        Xpnode::S_subscript node_c = { std::move(name) };
+        Xpnode::S_subscript node_c = { std::move(key) };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }

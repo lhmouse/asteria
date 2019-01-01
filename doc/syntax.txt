@@ -161,7 +161,7 @@ argument-list ::=
 postfix-subscript ::=
 	"[" expression "]"
 postfix-member-access ::=
-	"." identifier
+	"." ( string-literal | identifier )
 
 infix-carriage-list-opt ::=
 	infix-carriage-list | ""
