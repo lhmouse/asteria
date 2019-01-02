@@ -674,592 +674,463 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         return res;
       }
 
-    void do_evaluate_postfix_inc(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    template<Xpnode::Xop xopT>
+      void do_evaluate_operator_rpn(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
       {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_inc);
-        // Increment the operand and return the old value.
-        // `alt.assign` is ignored.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_integer) {
-          stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        if(ref_c.value.type() == Value::type_real) {
-          stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_postfix_dec(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_dec);
-        // Decrement the operand and return the old value.
-        // `alt.assign` is ignored.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_integer) {
-          stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        if(ref_c.value.type() == Value::type_real) {
-          stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_pos(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_pos);
-        // Copy the operand to create a temporary value, then return it.
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_prefix_neg(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_neg);
-        // Negate the operand to create a temporary value, then return it.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_integer) {
-          ref_c.value = do_negate(ref_c.value.check<D_integer>());
+        ROCKET_ASSERT(alt.xop == xopT);
+        // This is special.
+        if(xopT == Xpnode::xop_prefix_unset) {
+          // Unset the reference and return the value removed.
+          Reference_root::S_temporary ref_c = { stack_io.top().unset() };
           do_set_temporary(stack_io, alt, std::move(ref_c));
           return;
         }
-        if(ref_c.value.type() == Value::type_real) {
-          ref_c.value = do_negate(ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_notb(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_notb);
-        // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_boolean) {
-          ref_c.value = do_logical_not(ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if(ref_c.value.type() == Value::type_integer) {
-          ref_c.value = do_bitwise_not(ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_notl(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_notl);
-        // Perform logical NOT operation on the operand to create a temporary value, then return it.
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        ref_c.value = do_logical_not(ref_c.value.test());
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_prefix_inc(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_inc);
-        // Increment the operand and return it.
-        // `alt.assign` is ignored.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_integer) {
-          stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
-          return;
-        }
-        if(ref_c.value.type() == Value::type_real) {
-          stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_dec(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_dec);
-        // Decrement the operand and return it.
-        // `alt.assign` is ignored.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_integer) {
-          stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        if(ref_c.value.type() == Value::type_real) {
-          stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
-          stack_io.mut_top() = std::move(ref_c);
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_unset(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_unset);
-        // Unset the reference and return the value removed.
-        Reference_root::S_temporary ref_c = { stack_io.top().unset() };
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_prefix_lengthof(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_lengthof);
-        // Return the number of elements in the operand.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        if(ref_c.value.type() == Value::type_null) {
-          ref_c.value = D_integer(0);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if(ref_c.value.type() == Value::type_array) {
-          ref_c.value = D_integer(ref_c.value.check<D_array>().size());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if(ref_c.value.type() == Value::type_object) {
-          ref_c.value = D_integer(ref_c.value.check<D_object>().size());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_prefix_typeof(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_typeof);
-        // Return the type name of the operand.
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        ref_c.value = D_string(std::ref(reinterpret_cast<const char (&)[]>(*(Value::get_type_name(ref_c.value.type())))));
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_eq(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_eq);
-        // Report unordered operands as being unequal.
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        ref_c.value = comp == Value::compare_equal;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_ne(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_ne);
-        // Report unordered operands as being unequal.
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        ref_c.value = comp != Value::compare_equal;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_lt(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lt);
-        // Throw an exception in case of unordered operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        if(comp == Value::compare_unordered) {
-          ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
-        }
-        ref_c.value = comp == Value::compare_less;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_gt(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gt);
-        // Throw an exception in case of unordered operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        if(comp == Value::compare_unordered) {
-          ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
-        }
-        ref_c.value = comp == Value::compare_greater;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_lte(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lte);
-        // Throw an exception in case of unordered operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        if(comp == Value::compare_unordered) {
-          ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
-        }
-        ref_c.value = comp != Value::compare_greater;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_gte(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gte);
-        // Throw an exception in case of unordered operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        if(comp == Value::compare_unordered) {
-          ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
-        }
-        ref_c.value = comp != Value::compare_less;
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_cmp_3way(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_3way);
-        // N.B. This is one of the few operators that work on all types.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        const auto comp = lhs.compare(ref_c.value);
-        switch(rocket::weaken_enum(comp)) {
-          case Value::compare_less: {
-            ref_c.value = D_integer(-1);
-            break;
+        switch(rocket::weaken_enum(xopT)) {
+          case Xpnode::xop_postfix_inc: {
+            // Increment the operand and return the old value.
+            // `alt.assign` is ignored.
+            if(ref_c.value.type() == Value::type_integer) {
+              stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            if(ref_c.value.type() == Value::type_real) {
+              stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Value::compare_equal: {
-            ref_c.value = D_integer(0);
-            break;
+          case Xpnode::xop_postfix_dec: {
+            // Decrement the operand and return the old value.
+            // `alt.assign` is ignored.
+            if(ref_c.value.type() == Value::type_integer) {
+              stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            if(ref_c.value.type() == Value::type_real) {
+              stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Value::compare_greater: {
-            ref_c.value = D_integer(+1);
-            break;
+          case Xpnode::xop_prefix_pos: {
+            // Copy the operand to create a temporary value, then return it.
+            // N.B. This is one of the few operators that work on all types.
+            do_set_temporary(stack_io, alt, std::move(ref_c));
+            return;
+          }
+          case Xpnode::xop_prefix_neg: {
+            // Negate the operand to create a temporary value, then return it.
+            if(ref_c.value.type() == Value::type_integer) {
+              ref_c.value = do_negate(ref_c.value.check<D_integer>());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            if(ref_c.value.type() == Value::type_real) {
+              ref_c.value = do_negate(ref_c.value.check<D_real>());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+          }
+          case Xpnode::xop_prefix_notb: {
+            // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
+            if(ref_c.value.type() == Value::type_boolean) {
+              ref_c.value = do_logical_not(ref_c.value.check<D_boolean>());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            if(ref_c.value.type() == Value::type_integer) {
+              ref_c.value = do_bitwise_not(ref_c.value.check<D_integer>());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+          }
+          case Xpnode::xop_prefix_notl: {
+            // Perform logical NOT operation on the operand to create a temporary value, then return it.
+            // N.B. This is one of the few operators that work on all types.
+            ref_c.value = do_logical_not(ref_c.value.test());
+            do_set_temporary(stack_io, alt, std::move(ref_c));
+            return;
+          }
+          case Xpnode::xop_prefix_inc: {
+            // Increment the operand and return it.
+            // `alt.assign` is ignored.
+            if(ref_c.value.type() == Value::type_integer) {
+              stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
+              return;
+            }
+            if(ref_c.value.type() == Value::type_real) {
+              stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+          }
+          case Xpnode::xop_prefix_dec: {
+            // Decrement the operand and return it.
+            // `alt.assign` is ignored.
+            if(ref_c.value.type() == Value::type_integer) {
+              stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            if(ref_c.value.type() == Value::type_real) {
+              stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
+              stack_io.mut_top() = std::move(ref_c);
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+          }
+          case Xpnode::xop_prefix_unset: {
+            ROCKET_ASSERT(false);
+          }
+          case Xpnode::xop_prefix_lengthof: {
+            // Return the number of elements in the operand.
+            if(ref_c.value.type() == Value::type_null) {
+              ref_c.value = D_integer(0);
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            if(ref_c.value.type() == Value::type_array) {
+              ref_c.value = D_integer(ref_c.value.check<D_array>().size());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            if(ref_c.value.type() == Value::type_object) {
+              ref_c.value = D_integer(ref_c.value.check<D_object>().size());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
+          }
+          case Xpnode::xop_prefix_typeof: {
+            // Return the type name of the operand.
+            // N.B. This is one of the few operators that work on all types.
+            ref_c.value = D_string(std::ref(reinterpret_cast<const char (&)[]>(*(Value::get_type_name(ref_c.value.type())))));
+            do_set_temporary(stack_io, alt, std::move(ref_c));
+            return;
           }
           default: {
-            ref_c.value = D_string(std::ref("unordered"));
-            break;
+            // All others are infix operators.
+            stack_io.pop();
+            const auto &lhs = stack_io.top().read();
+            switch(rocket::weaken_enum(xopT)) {
+              case Xpnode::xop_infix_cmp_eq: {
+                // Report unordered operands as being unequal.
+                // N.B. This is one of the few operators that work on all types.
+                const auto comp = lhs.compare(ref_c.value);
+                ref_c.value = comp == Value::compare_equal;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_ne: {
+                // Report unordered operands as being unequal.
+                // N.B. This is one of the few operators that work on all types.
+                const auto comp = lhs.compare(ref_c.value);
+                ref_c.value = comp != Value::compare_equal;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_lt: {
+                // Throw an exception in case of unordered operands.
+                const auto comp = lhs.compare(ref_c.value);
+                if(comp == Value::compare_unordered) {
+                  ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
+                }
+                ref_c.value = comp == Value::compare_less;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_gt: {
+                // Throw an exception in case of unordered operands.
+                const auto comp = lhs.compare(ref_c.value);
+                if(comp == Value::compare_unordered) {
+                  ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
+                }
+                ref_c.value = comp == Value::compare_greater;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_lte: {
+                // Throw an exception in case of unordered operands.
+                const auto comp = lhs.compare(ref_c.value);
+                if(comp == Value::compare_unordered) {
+                  ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
+                }
+                ref_c.value = comp != Value::compare_greater;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_gte: {
+                // Throw an exception in case of unordered operands.
+                const auto comp = lhs.compare(ref_c.value);
+                if(comp == Value::compare_unordered) {
+                  ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
+                }
+                ref_c.value = comp != Value::compare_less;
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_cmp_3way: {
+                // N.B. This is one of the few operators that work on all types.
+                const auto comp = lhs.compare(ref_c.value);
+                switch(rocket::weaken_enum(comp)) {
+                  case Value::compare_less: {
+                    ref_c.value = D_integer(-1);
+                    break;
+                  }
+                  case Value::compare_equal: {
+                    ref_c.value = D_integer(0);
+                    break;
+                  }
+                  case Value::compare_greater: {
+                    ref_c.value = D_integer(+1);
+                    break;
+                  }
+                  default: {
+                    ref_c.value = D_string(std::ref("unordered"));
+                    break;
+                  }
+                }
+                do_set_temporary(stack_io, alt, std::move(ref_c));
+                return;
+              }
+              case Xpnode::xop_infix_add: {
+                // For the `boolean` type, return the logical OR'd result of both operands.
+                // For the `integer` and `real` types, return the sum of both operands.
+                // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_add(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                  ref_c.value = do_add(lhs.check<D_real>(), ref_c.value.check<D_real>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_string)) {
+                  ref_c.value = do_concatenate(lhs.check<D_string>(), ref_c.value.check<D_string>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_sub: {
+                // For the `boolean` type, return the logical XOR'd result of both operands.
+                // For the `integer` and `real` types, return the difference of both operands.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_subtract(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                  ref_c.value = do_subtract(lhs.check<D_real>(), ref_c.value.check<D_real>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_mul: {
+                // For type `boolean`, return the logical AND'd result of both operands.
+                // For types `integer` and `real`, return the product of both operands.
+                // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_multiply(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                  ref_c.value = do_multiply(lhs.check<D_real>(), ref_c.value.check<D_real>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_duplicate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_string)) {
+                  ref_c.value = do_duplicate(ref_c.value.check<D_string>(), lhs.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_div: {
+                // For types `integer` and `real`, return the quotient of both operands.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_divide(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                  ref_c.value = do_divide(lhs.check<D_real>(), ref_c.value.check<D_real>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_mod: {
+                // For types `integer` and `real`, return the reminder of both operands.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_modulo(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                  ref_c.value = do_modulo(lhs.check<D_real>(), ref_c.value.check<D_real>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_sll: {
+                // The second operand shall be an integer.
+                // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
+                // are discarded. Bits shifted in are filled with zeroes.
+                // If the first operand is of type `string`, fill space bytes in the right and discard charactrs from the left. The number of bytes in the first operand
+                // will not be changed.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_shift_left_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_move_left(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_srl: {
+                // The second operand shall be an integer.
+                // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
+                // are discarded. Bits shifted in are filled with zeroes.
+                // If the first operand is of type `string`, fill space bytes in the left and discard charactrs from the right. The number of bytes in the first operand
+                // will not be changed.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_shift_right_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_move_right(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_sla: {
+                // The second operand shall be an integer.
+                // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
+                // that are equal to the sign bit are discarded. Bits shifted out that are unequal to the sign bit lead to an exception being thrown. Bits shifted in are
+                // filled with zeroes.
+                // If the first operand is of type `string`, fill space bytes in the right.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_shift_left_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_extend(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_sra: {
+                // The second operand shall be an integer.
+                // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
+                // are discarded. Bits shifted in are filled with the sign bit.
+                // If the first operand is of type `string`, discard bytes from the right.
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_shift_right_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_truncate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_andb: {
+                // For the `boolean` type, return the logical AND'd result of both operands.
+                // For the `integer` type, return the bitwise AND'd result of both operands.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_bitwise_and(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_orb: {
+                // For the `boolean` type, return the logical OR'd result of both operands.
+                // For the `integer` type, return the bitwise OR'd result of both operands.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_bitwise_or(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_xorb: {
+                // For the `boolean` type, return the logical XOR'd result of both operands.
+                // For the `integer` type, return the bitwise XOR'd result of both operands.
+                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                  ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                  ref_c.value = do_bitwise_xor(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
+                  do_set_temporary(stack_io, alt, std::move(ref_c));
+                  return;
+                }
+                ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+              }
+              case Xpnode::xop_infix_assign: {
+                // Copy the operand.
+                // `alt.assign` is ignored.
+                stack_io.top().open() = std::move(ref_c.value);
+                return;
+              }
+            }
+            ROCKET_ASSERT(false);
           }
         }
-        do_set_temporary(stack_io, alt, std::move(ref_c));
-      }
-
-    void do_evaluate_infix_add(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_add);
-        // For the `boolean` type, return the logical OR'd result of both operands.
-        // For the `integer` and `real` types, return the sum of both operands.
-        // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_add(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
-          ref_c.value = do_add(lhs.check<D_real>(), ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_string)) {
-          ref_c.value = do_concatenate(lhs.check<D_string>(), ref_c.value.check<D_string>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_sub(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sub);
-        // For the `boolean` type, return the logical XOR'd result of both operands.
-        // For the `integer` and `real` types, return the difference of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_subtract(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
-          ref_c.value = do_subtract(lhs.check<D_real>(), ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_mul(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mul);
-        // For type `boolean`, return the logical AND'd result of both operands.
-        // For types `integer` and `real`, return the product of both operands.
-        // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_multiply(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
-          ref_c.value = do_multiply(lhs.check<D_real>(), ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_duplicate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_string)) {
-          ref_c.value = do_duplicate(ref_c.value.check<D_string>(), lhs.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_div(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_div);
-        // For types `integer` and `real`, return the quotient of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_divide(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
-          ref_c.value = do_divide(lhs.check<D_real>(), ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_mod(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mod);
-        // For types `integer` and `real`, return the reminder of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_modulo(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
-          ref_c.value = do_modulo(lhs.check<D_real>(), ref_c.value.check<D_real>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_sll(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sll);
-        // The second operand shall be an integer.
-        // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
-        // are discarded. Bits shifted in are filled with zeroes.
-        // If the first operand is of type `string`, fill space bytes in the right and discard charactrs from the left. The number of bytes in the first operand
-        // will not be changed.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_shift_left_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_move_left(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_srl(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_srl);
-        // The second operand shall be an integer.
-        // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
-        // are discarded. Bits shifted in are filled with zeroes.
-        // If the first operand is of type `string`, fill space bytes in the left and discard charactrs from the right. The number of bytes in the first operand
-        // will not be changed.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_shift_right_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_move_right(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_sla(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sla);
-        // The second operand shall be an integer.
-        // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
-        // that are equal to the sign bit are discarded. Bits shifted out that are unequal to the sign bit lead to an exception being thrown. Bits shifted in are
-        // filled with zeroes.
-        // If the first operand is of type `string`, fill space bytes in the right.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_shift_left_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_extend(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_sra(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sra);
-        // The second operand shall be an integer.
-        // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
-        // are discarded. Bits shifted in are filled with the sign bit.
-        // If the first operand is of type `string`, discard bytes from the right.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_shift_right_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_truncate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_andb(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_andb);
-        // For the `boolean` type, return the logical AND'd result of both operands.
-        // For the `integer` type, return the bitwise AND'd result of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_bitwise_and(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_orb(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_orb);
-        // For the `boolean` type, return the logical OR'd result of both operands.
-        // For the `integer` type, return the bitwise OR'd result of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_bitwise_or(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_xorb(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_xorb);
-        // For the `boolean` type, return the logical XOR'd result of both operands.
-        // For the `integer` type, return the bitwise XOR'd result of both operands.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        const auto &lhs = stack_io.top().read();
-        if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
-          ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
-          ref_c.value = do_bitwise_xor(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
-          return;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
-      }
-
-    void do_evaluate_infix_assign(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
-      {
-        ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_assign);
-        // Copy the operand.
-        // `alt.assign` is ignored.
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
-        stack_io.pop();
-        stack_io.top().open() = std::move(ref_c.value);
       }
 
     void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
@@ -1362,97 +1233,97 @@ rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &,
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         switch(alt.xop) {
           case xop_postfix_inc: {
-            return do_bind<S_operator_rpn, do_evaluate_postfix_inc>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_inc>>(alt);
           }
           case xop_postfix_dec: {
-            return do_bind<S_operator_rpn, do_evaluate_postfix_dec>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_dec>>(alt);
           }
           case xop_prefix_pos: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_pos>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_pos>>(alt);
           }
           case xop_prefix_neg: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_neg>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_neg>>(alt);
           }
           case xop_prefix_notb: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_notb>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notb>>(alt);
           }
           case xop_prefix_notl: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_notl>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notl>>(alt);
           }
           case xop_prefix_inc: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_inc>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_inc>>(alt);
           }
           case xop_prefix_dec: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_dec>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_dec>>(alt);
           }
           case xop_prefix_unset: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_unset>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_unset>>(alt);
           }
           case xop_prefix_lengthof: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_lengthof>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_lengthof>>(alt);
           }
           case xop_prefix_typeof: {
-            return do_bind<S_operator_rpn, do_evaluate_prefix_typeof>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_typeof>>(alt);
           }
           case xop_infix_cmp_eq: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_eq>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_eq>>(alt);
           }
           case xop_infix_cmp_ne: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_ne>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_ne>>(alt);
           }
           case xop_infix_cmp_lt: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_lt>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lt>>(alt);
           }
           case xop_infix_cmp_gt: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_gt>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gt>>(alt);
           }
           case xop_infix_cmp_lte: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_lte>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lte>>(alt);
           }
           case xop_infix_cmp_gte: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_gte>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gte>>(alt);
           }
           case xop_infix_cmp_3way: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_cmp_3way>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_3way>>(alt);
           }
           case xop_infix_add: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_add>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_add>>(alt);
           }
           case xop_infix_sub: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_sub>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sub>>(alt);
           }
           case xop_infix_mul: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_mul>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mul>>(alt);
           }
           case xop_infix_div: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_div>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_div>>(alt);
           }
           case xop_infix_mod: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_mod>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mod>>(alt);
           }
           case xop_infix_sll: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_sll>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sll>>(alt);
           }
           case xop_infix_srl: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_srl>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_srl>>(alt);
           }
           case xop_infix_sla: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_sla>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sla>>(alt);
           }
           case xop_infix_sra: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_sra>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sra>>(alt);
           }
           case xop_infix_andb: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_andb>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_andb>>(alt);
           }
           case xop_infix_orb: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_orb>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_orb>>(alt);
           }
           case xop_infix_xorb: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_xorb>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_xorb>>(alt);
           }
           case xop_infix_assign: {
-            return do_bind<S_operator_rpn, do_evaluate_infix_assign>(alt);
+            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_assign>>(alt);
           }
           default: {
             ASTERIA_TERMINATE("An unknown operator type enumeration `", alt.xop, "` has been encountered.");
