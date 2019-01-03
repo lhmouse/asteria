@@ -57,7 +57,6 @@ class Reference_stack
         }
         // Use `m_large`.
         this->m_tptr = m_large.mut_data();
-        return;
       }
 
     const Reference & top() const noexcept
