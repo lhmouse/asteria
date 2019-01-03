@@ -52,14 +52,15 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
       return status_next;
     }
     do {
+      // Execute statements one by one.
       const auto status = (*rptr)(ref_out, ctx_io, global);
       if(ROCKET_UNEXPECT(status != status_next)) {
+        // Forward anything unexpected recursively.
         return status;
       }
-      if(ROCKET_UNEXPECT(++rptr == eptr)) {
-        return status_next;
-      }
-    } while(true);
+    } while(ROCKET_EXPECT(++rptr != eptr));
+    // The current control flow has reached the end of this block.
+    return status_next;
   }
 
 Block Block::bind(const Global_context &global, const Analytic_context &ctx) const

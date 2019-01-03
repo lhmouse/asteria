@@ -44,12 +44,13 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     }
     const auto stack_size_old = stack_io.size();
     do {
+      // Evaluate nodes one by one.
       (*rptr)(stack_io, global, ctx);
       ROCKET_ASSERT(stack_io.size() >= stack_size_old);
-      if(ROCKET_UNEXPECT(++rptr == eptr)) {
-        return true;
-      }
-    } while(true);
+    } while(ROCKET_EXPECT(++rptr != eptr));
+    // The value of this expression shall be on the top of `stack_io`. There will be no more elements pushed after all.
+    ROCKET_ASSERT(stack_io.size() - stack_size_old == 1);
+    return true;
   }
 
 void Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
