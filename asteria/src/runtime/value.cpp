@@ -274,6 +274,41 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
     }
   }
 
+bool Value::unique() const noexcept
+  {
+    switch(this->type()) {
+      case type_null:
+      case type_boolean:
+      case type_integer:
+      case type_real: {
+        return true;
+      }
+      case type_string: {
+        const auto &alt = this->m_stor.as<D_string>();
+        return alt.unique();
+      }
+      case type_opaque: {
+        const auto &alt = this->m_stor.as<D_opaque>();
+        return alt.unique();
+      }
+      case type_function: {
+        const auto &alt = this->m_stor.as<D_function>();
+        return alt.unique();
+      }
+      case type_array: {
+        const auto &alt = this->m_stor.as<D_array>();
+        return alt.unique();
+      }
+      case type_object: {
+        const auto &alt = this->m_stor.as<D_object>();
+        return alt.unique();
+      }
+      default: {
+        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      }
+    }
+  }
+
 long Value::use_count() const noexcept
   {
     switch(this->type()) {
@@ -281,7 +316,7 @@ long Value::use_count() const noexcept
       case type_boolean:
       case type_integer:
       case type_real: {
-        return 0;
+        return 1;
       }
       case type_string: {
         const auto &alt = this->m_stor.as<D_string>();

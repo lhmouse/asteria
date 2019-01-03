@@ -34,11 +34,11 @@ template<typename elementT>
       }
 
   public:
-    constexpr bool unique() const noexcept
+    bool unique() const noexcept
       {
         return this->m_owns.unique();
       }
-    constexpr long use_count() const noexcept
+    long use_count() const noexcept
       {
         return this->m_owns.use_count();
       }

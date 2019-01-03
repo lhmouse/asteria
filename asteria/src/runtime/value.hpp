@@ -106,10 +106,7 @@ class Value
     Compare compare(const Value &other) const noexcept;
     void dump(std::ostream &os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
 
-    bool unique() const noexcept
-      {
-        return this->use_count() == 1;
-      }
+    bool unique() const noexcept;
     long use_count() const noexcept;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;

@@ -38,9 +38,6 @@ template<typename elementT>
           }
       };
 
-    template<typename elementT>
-      class stored_pointer;
-
     class refcount_base
       {
       private:
@@ -99,6 +96,14 @@ template<typename elementT>
           = delete;
 
       public:
+        bool unique() const noexcept
+          {
+            const auto ptr = this->m_ptr;
+            if(!ptr) {
+              return false;
+            }
+            return ptr->refcount_base::unique();
+          }
         long use_count() const noexcept
           {
             const auto ptr = this->m_ptr;
