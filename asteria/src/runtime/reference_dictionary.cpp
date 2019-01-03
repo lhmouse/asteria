@@ -87,7 +87,7 @@ void Reference_dictionary::do_throw_open_empty_name()
 
 void Reference_dictionary::do_rehash(std::size_t res_arg)
   {
-    if(res_arg > this->max_size()) {
+    if(res_arg > std::size_t(-1) / sizeof(Bucket) / 4) {
       rocket::throw_length_error("Reference_dictionary::do_reserve(): A table of `%lld` references is too large and cannot be allocated.",
                                  static_cast<long long>(res_arg));
     }

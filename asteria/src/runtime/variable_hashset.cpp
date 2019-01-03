@@ -75,7 +75,7 @@ void Variable_hashset::do_throw_insert_null_pointer()
 
 void Variable_hashset::do_rehash(std::size_t res_arg)
   {
-    if(res_arg > this->max_size()) {
+    if(res_arg > std::size_t(-1) / sizeof(Bucket) / 4) {
       rocket::throw_length_error("Variable_hashset::do_reserve(): A table of `%lld` variables is too large and cannot be allocated.",
                                  static_cast<long long>(res_arg));
     }

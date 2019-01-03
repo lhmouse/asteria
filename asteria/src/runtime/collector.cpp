@@ -15,9 +15,6 @@ Collector::~Collector()
 
 bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
-    if(this->m_tracked.empty()) {
-      this->m_tracked.reserve(static_cast<unsigned long>(this->m_threshold | 20));
-    }
     if(!this->m_tracked.insert(var)) {
       return false;
     }

@@ -60,24 +60,6 @@ class Reference_dictionary
         this->do_clear();
       }
 
-    std::size_t max_size() const noexcept
-      {
-        const auto max_nbkt = std::size_t(-1) / 2 / sizeof(*(this->m_data));
-        return max_nbkt / 2;
-      }
-    std::size_t capacity() const noexcept
-      {
-        const auto nbkt = this->m_nbkt;
-        return nbkt / 2;
-      }
-    void reserve(std::size_t res_arg)
-      {
-        if(res_arg <= this->capacity()) {
-          return;
-        }
-        this->do_rehash(res_arg);
-      }
-
     const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
       {
         const auto toff = this->do_find(name);
@@ -104,7 +86,9 @@ class Reference_dictionary
         if(name.empty()) {
           this->do_throw_open_empty_name();
         }
-        this->reserve(this->size() + 1);
+        if(this->m_size >= this->m_nbkt / 2) {
+          this->do_rehash(this->m_size + 1);
+        }
         return this->do_open_unchecked(name);
       }
     bool unset(const rocket::prehashed_string &name) noexcept
@@ -115,13 +99,6 @@ class Reference_dictionary
         }
         this->do_erase_unchecked(static_cast<std::size_t>(toff));
         return true;
-      }
-
-    void swap(Reference_dictionary &other) noexcept
-      {
-         std::swap(this->m_data, other.m_data);
-         std::swap(this->m_nbkt, other.m_nbkt);
-         std::swap(this->m_size, other.m_size);
       }
   };
 
