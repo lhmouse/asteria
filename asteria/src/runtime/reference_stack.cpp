@@ -19,9 +19,13 @@ void Reference_stack::do_switch_to_large()
     const auto nelem = this->m_small.size();
     // Note that this function has to provide strong exception safety guarantee.
     rocket::cow_vector<Reference> large;
-    large.append(tptr - nelem, tptr);
+    large.reserve(nelem / 2 | nelem);
+    large.append(std::make_move_iterator(tptr - nelem), std::make_move_iterator(tptr));
+    tptr = large.mut_data() + nelem;
+    // Set up the large buffer.
+    this->m_tptr = tptr;
     this->m_large.swap(large);
-    this->m_tptr = this->m_large.mut_data() + nelem;
+    this->m_small.clear();
   } catch(...) {
     // The capacity must be preserved.
     rocket::cow_vector<Reference> large;
