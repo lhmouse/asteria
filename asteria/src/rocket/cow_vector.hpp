@@ -1049,7 +1049,7 @@ template<typename valueT, typename allocatorT>
         const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
         this->do_reserve_more(1);
         if(srpos < cnt_old) {
-          const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data_unchecked()[srpos]);
+          const auto ptr = this->m_sth.emplace_back_unchecked(this->data()[srpos]);
           return *ptr;
         }
         const auto ptr = this->m_sth.emplace_back_unchecked(value);
