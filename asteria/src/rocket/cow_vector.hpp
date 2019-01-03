@@ -266,7 +266,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(!ptr) {
               return 0;
             }
-            return ptr->nref.get();
+            const auto nref = ptr->nref.get();
+            ROCKET_ASSERT(nref > 0);
+            return nref;
           }
         size_type capacity() const noexcept
           {
@@ -274,7 +276,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             if(!ptr) {
               return 0;
             }
-            return storage::max_nelem_for_nblk(ptr->nblk);
+            const auto cap = storage::max_nelem_for_nblk(ptr->nblk);
+            ROCKET_ASSERT(cap > 0);
+            return cap;
           }
         size_type max_size() const noexcept
           {

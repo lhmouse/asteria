@@ -411,7 +411,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             if(!ptr) {
               return 0;
             }
-            return ptr->nref.get();
+            const auto nref = ptr->nref.get();
+            ROCKET_ASSERT(nref > 0);
+            return nref;
           }
         size_type bucket_count() const noexcept
           {
@@ -427,7 +429,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             if(!ptr) {
               return 0;
             }
-            return storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
+            const auto cap = storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
+            ROCKET_ASSERT(cap > 0);
+            return cap;
           }
         size_type max_size() const noexcept
           {
