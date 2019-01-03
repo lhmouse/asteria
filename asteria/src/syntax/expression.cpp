@@ -42,9 +42,12 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     if(rptr == eptr) {
       return false;
     }
+    const auto stack_size_old = stack_io.size();
     do {
       (*rptr)(stack_io, global, ctx);
+      ROCKET_ASSERT(stack_io.size() >= stack_size_old);
       if(ROCKET_UNEXPECT(++rptr == eptr)) {
+        ROCKET_ASSERT(stack_io.size() - stack_size_old == 1);
         return true;
       }
     } while(true);
@@ -57,6 +60,7 @@ void Expression::evaluate(Reference &ref_out, Global_context &global, const Exec
       ref_out = Reference_root::S_null();
       return;
     }
+    ROCKET_ASSERT(stack.size() == 1);
     ref_out = std::move(stack.mut_top());
   }
 

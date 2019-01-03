@@ -16,7 +16,7 @@ class Reference_stack
   private:
     Reference *m_tptr;
     rocket::cow_vector<Reference> m_large;
-    rocket::static_vector<Reference, 4> m_small;
+    rocket::static_vector<Reference, 7> m_small;
 
   public:
     Reference_stack() noexcept
@@ -26,26 +26,50 @@ class Reference_stack
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_stack);
 
+  private:
+    void do_switch_to_large();
+
   public:
     bool empty() const noexcept
       {
-        return this->m_tptr == this->m_small.data();
+        if(this->m_large.capacity() == 0) {
+          // Use `m_small`.
+          return m_small.empty();
+        }
+        // Use `m_large`.
+        return m_large.empty();
+      }
+    std::size_t size() const noexcept
+      {
+        if(this->m_large.capacity() == 0) {
+          // Use `m_small`.
+          return m_small.size();
+        }
+        // Use `m_large`.
+        return m_large.size();
       }
     void clear() noexcept
       {
-        this->m_tptr = this->m_small.mut_data();
+        if(this->m_large.capacity() == 0) {
+          // Use `m_small`.
+          this->m_tptr = m_small.mut_data();
+          return;
+        }
+        // Use `m_large`.
+        this->m_tptr = m_large.mut_data();
+        return;
       }
 
     const Reference & top() const noexcept
       {
-        auto tptr = this->m_tptr;
+        const auto tptr = this->m_tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
         return tptr[-1];
       }
     Reference & mut_top() noexcept
       {
-        auto tptr = this->m_tptr;
+        const auto tptr = this->m_tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
         return tptr[-1];
@@ -55,28 +79,34 @@ class Reference_stack
       Reference & push(ParamT &&param)
       {
         auto tptr = this->m_tptr;
-        auto ioff = static_cast<std::uintptr_t>(tptr - this->m_small.data());
-        if(ioff < this->m_small.capacity()) {
-          // Use the small buffer.
-          if(ioff == this->m_small.size()) {
-            tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
-          } else {
+        if(this->m_large.capacity() == 0) {
+          // Use `m_small`.
+          if(tptr != this->m_small.data() + this->m_small.size()) {
+            // Write to the reserved area.
+      z:
             *tptr = std::forward<ParamT>(param);
+            ++tptr;
+            this->m_tptr = tptr;
+            return tptr[-1];
           }
-          ++tptr;
-          this->m_tptr = tptr;
-          return tptr[-1];
+          if(tptr != this->m_small.data() + this->m_small.capacity()) {
+            // Extend the small buffer.
+            tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
+            ++tptr;
+            this->m_tptr = tptr;
+            return tptr[-1];
+          }
+          // The small buffer is full.
+          this->do_switch_to_large();
+          tptr = this->m_tptr;
         }
-        // Use the large buffer.
-        if(ioff == this->m_small.capacity()) {
-          tptr = this->m_large.mut_data();
+        // Use `m_large`.
+        if(tptr != this->m_large.data() + this->m_large.size()) {
+          // Write to the reserved area.
+          goto z;
         }
-        ioff = static_cast<std::uintptr_t>(tptr - this->m_large.data());
-        if(ioff == this->m_large.size()) {
-          tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
-        } else {
-          *tptr = std::forward<ParamT>(param);
-        }
+        // Extend the large buffer.
+        tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
         ++tptr;
         this->m_tptr = tptr;
         return tptr[-1];
@@ -86,10 +116,8 @@ class Reference_stack
         auto tptr = this->m_tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
+        // Drop an element.
         --tptr;
-        if(tptr == this->m_large.data()) {
-          tptr = this->m_small.mut_data() + this->m_small.capacity();
-        }
         this->m_tptr = tptr;
       }
   };
