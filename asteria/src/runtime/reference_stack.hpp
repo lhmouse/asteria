@@ -43,10 +43,10 @@ class Reference_stack
       {
         if(this->m_large.capacity() == 0) {
           // Use `m_small`.
-          return m_small.size();
+          return static_cast<std::size_t>(this->m_tptr - this->m_small.data());
         }
         // Use `m_large`.
-        return m_large.size();
+        return static_cast<std::size_t>(this->m_tptr - this->m_large.data());
       }
     void clear() noexcept
       {

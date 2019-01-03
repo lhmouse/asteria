@@ -47,7 +47,6 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
       (*rptr)(stack_io, global, ctx);
       ROCKET_ASSERT(stack_io.size() >= stack_size_old);
       if(ROCKET_UNEXPECT(++rptr == eptr)) {
-        ROCKET_ASSERT(stack_io.size() - stack_size_old == 1);
         return true;
       }
     } while(true);
