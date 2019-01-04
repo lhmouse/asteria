@@ -61,7 +61,7 @@ template<typename valueT>
           if(old == 0) {
             return false;
           }
-          if(this->m_nref.compare_exchange_strong(old, old + 1, ::std::memory_order_relaxed)) {
+          if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed)) {
             return true;
           }
         } while(true);
