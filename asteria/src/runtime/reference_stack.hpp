@@ -22,6 +22,7 @@ class Reference_stack
     Reference_stack() noexcept
       : m_large(), m_small()
       {
+        // Do not call any member function of `m_small` before its initialization.
         this->m_tptr = this->m_small.mut_data();
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_stack);
