@@ -9,6 +9,7 @@
 |**GCC 7**     |Secondary |Faulty strict overflow warnings.                            |
 |**GCC 4.8**   |Primary   |                                                            |
 |**Clang 6.0** |Secondary |Unknown warning options. A number of meaningless warnings.  |
+|**MSVC 19**   |Obsolete  |Little build system support. Internal compiler errors.      |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
