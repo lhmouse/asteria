@@ -84,16 +84,16 @@ class Reference_stack
             // Write to the reserved area.
             goto r;
           }
-          if(tptr != this->m_small.data() + this->m_small.capacity()) {
-            // Extend the small buffer.
-            tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
-            ++tptr;
-            this->m_tptr = tptr;
-            return tptr[-1];
+          if(tptr == this->m_small.data() + this->m_small.capacity()) {
+            // The small buffer is full.
+            this->do_switch_to_large();
+            goto x;
           }
-          // The small buffer is full.
-          this->do_switch_to_large();
-          goto x;
+          // Extend the small buffer.
+          tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
+          ++tptr;
+          this->m_tptr = tptr;
+          return tptr[-1];
         }
         // Use `m_large`.
         if(tptr != this->m_large.data() + this->m_large.size()) {
