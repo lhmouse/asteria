@@ -13,6 +13,7 @@
 #define ROCKET_UNEXPECT(...)                __builtin_expect((__VA_ARGS__) ? 1 : 0, 0)
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
+#define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
 
 // Check for libstdc++.
 #if defined(_GLIBCXX_DEBUG)

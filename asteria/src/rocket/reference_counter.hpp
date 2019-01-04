@@ -39,11 +39,11 @@ template<typename valueT>
       }
 
   public:
-    bool unique() const noexcept
+    ROCKET_PURE_FUNCTION bool unique() const noexcept
       {
         return this->m_nref.load(::std::memory_order_relaxed) == 1;
       }
-    valueT get() const noexcept
+    ROCKET_PURE_FUNCTION valueT get() const noexcept
       {
         return this->m_nref.load(::std::memory_order_relaxed);
       }

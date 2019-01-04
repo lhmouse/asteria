@@ -13,6 +13,7 @@
 #define ROCKET_UNEXPECT(...)                (__VA_ARGS__)
 #define ROCKET_SECTION(...)                 __declspec(allocate(__VA_ARGS__))
 #define ROCKET_NOINLINE                     __declspec((noinline))
+#define ROCKET_PURE_FUNCTION                // not implemented
 
 // Check for project configuration.
 #if defined(_DEBUG)
