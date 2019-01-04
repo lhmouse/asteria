@@ -92,22 +92,19 @@ class Reference_stack
           }
           // Extend the small buffer.
           tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
-          ++tptr;
-          this->m_tptr = tptr;
-          return tptr[-1];
+          goto k;
         }
         // Use `m_large`.
         if(tptr != this->m_large.data() + this->m_large.size()) {
           // Write to the reserved area.
       r:
           *tptr = std::forward<ParamT>(param);
-          ++tptr;
-          this->m_tptr = tptr;
-          return tptr[-1];
+          goto k;
         }
         // Extend the large buffer.
       x:
         tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
+      k:
         ++tptr;
         this->m_tptr = tptr;
         return tptr[-1];
