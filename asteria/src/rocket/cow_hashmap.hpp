@@ -824,12 +824,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
   public:
     // 26.5.4.2, construct/copy/destroy
-    explicit cow_hashmap(const allocator_type &alloc) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+    explicit constexpr cow_hashmap(const allocator_type &alloc) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                                                                            is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, hasher(), key_equal())
       {
       }
-    cow_hashmap() noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+    constexpr cow_hashmap() noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                                        is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
                                        is_nothrow_constructible<allocator_type>>::value)
       : cow_hashmap(allocator_type())

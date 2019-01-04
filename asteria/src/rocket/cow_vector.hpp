@@ -678,11 +678,11 @@ template<typename valueT, typename allocatorT>
 
   public:
     // 26.3.11.2, construct/copy/destroy
-    explicit cow_vector(const allocator_type &alloc) noexcept
+    explicit constexpr cow_vector(const allocator_type &alloc) noexcept
       : m_sth(alloc)
       {
       }
-    cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       : cow_vector(allocator_type())
       {
       }
