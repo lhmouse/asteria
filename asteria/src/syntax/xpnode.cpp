@@ -304,9 +304,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_stack &stack_io, Global_context &global, const Executive_context & /*ctx*/)
       {
         // Allocate the argument vector.
-        rocket::cow_vector<Reference> args(alt.arg_cnt);
-        for(auto i = alt.arg_cnt - 1; i + 1 != 0; --i) {
-          args.mut(i) = std::move(stack_io.mut_top());
+        rocket::cow_vector<Reference> args;
+        args.resize(alt.arg_cnt);
+        for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
+          *it = std::move(stack_io.mut_top());
           stack_io.pop();
         }
         // Pop the target off the stack.
@@ -1136,9 +1137,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
       {
         // Pop references to create an array.
-        D_array array(alt.elem_cnt);
-        for(auto i = alt.elem_cnt - 1; i + 1 != 0; --i) {
-          array.mut(i) = stack_io.top().read();
+        D_array array;
+        array.resize(alt.elem_cnt);
+        for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
+          *it = stack_io.top().read();
           stack_io.pop();
         }
         Reference_root::S_temporary ref_c = { std::move(array) };
@@ -1148,9 +1150,10 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     void do_evaluate_unnamed_object(const Xpnode::S_unnamed_object &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
       {
         // Pop references to create an object.
-        D_object object(alt.keys.size());
+        D_object object;
+        object.reserve(alt.keys.size());
         for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
-          object.mut(*it) = stack_io.top().read();
+          object.try_emplace(*it, stack_io.top().read());
           stack_io.pop();
         }
         Reference_root::S_temporary ref_c = { std::move(object) };
