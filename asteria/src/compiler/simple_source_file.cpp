@@ -33,11 +33,11 @@ Parser_error Simple_source_file::load_stream(std::istream &cstrm_io, const rocke
   {
     Token_stream tstrm;
     if(!tstrm.load(cstrm_io, filename)) {
-      return std::move(tstrm.get_parser_error());
+      return tstrm.get_parser_error();
     }
     Parser parser;
     if(!parser.load(tstrm)) {
-      return std::move(parser.get_parser_error());
+      return parser.get_parser_error();
     }
     this->m_code = parser.extract_document();
     this->m_file = filename;

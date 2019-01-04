@@ -47,7 +47,7 @@ template<typename elementT>
       {
         return *(this->m_rptr);
       }
-    constexpr element_type & mut() noexcept
+    element_type & mut() noexcept
       {
         return *(this->m_rptr);
       }
