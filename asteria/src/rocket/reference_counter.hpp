@@ -32,10 +32,17 @@ template<typename valueT>
       }
     ~reference_counter()
       {
-        // The reference count shall be either zero or one here.
-        if(ROCKET_UNEXPECT(this->m_nref.load(::std::memory_order_relaxed) > 1)) {
-          ::std::terminate();
+        this->do_terminate_if_shared();
+      }
+
+  private:
+    void do_terminate_if_shared() const
+      {
+        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        if(old <= 1) {
+          return;
         }
+        ::std::terminate();
       }
 
   public:
@@ -43,7 +50,7 @@ template<typename valueT>
       {
         return this->m_nref.load(::std::memory_order_relaxed) == 1;
       }
-    ROCKET_PURE_FUNCTION valueT get() const noexcept
+    valueT get() const noexcept
       {
         return this->m_nref.load(::std::memory_order_relaxed);
       }
@@ -61,13 +68,13 @@ template<typename valueT>
       }
     void increment() noexcept
       {
-        auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
-        ROCKET_ASSERT(static_cast<volatile valueT &>(old) >= 1);
+        const auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
+        ROCKET_ASSERT(old >= 1);
       }
     bool decrement() noexcept
       {
-        auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
-        ROCKET_ASSERT(static_cast<volatile valueT &>(old) >= 1);
+        const auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
+        ROCKET_ASSERT(old >= 1);
         return old == 1;
       }
   };
