@@ -197,16 +197,16 @@ template<typename charT, typename traitsT>
     state &= ~ios_base::badbit;
   }
 
-template<typename iteratorT, typename functionT, typename ...paramsT>
-  inline void ranged_for(iteratorT first, iteratorT last, functionT &&func, const paramsT &...params)
+template<typename iteratorT, typename eiteratorT, typename functionT, typename ...paramsT>
+  inline void ranged_for(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
   {
     for(auto it = ::std::move(first); it != last; ++it) {
       ::std::forward<functionT>(func)(it, params...);
     }
   }
 
-template<typename iteratorT, typename functionT, typename ...paramsT>
-  inline void ranged_do_while(iteratorT first, iteratorT last, functionT &&func, const paramsT &...params)
+template<typename iteratorT, typename eiteratorT, typename functionT, typename ...paramsT>
+  inline void ranged_do_while(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
   {
     auto it = ::std::move(first);
     do {
