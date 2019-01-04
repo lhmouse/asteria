@@ -82,11 +82,7 @@ class Reference_stack
           // Use `m_small`.
           if(tptr != this->m_small.data() + this->m_small.size()) {
             // Write to the reserved area.
-      z:
-            *tptr = std::forward<ParamT>(param);
-            ++tptr;
-            this->m_tptr = tptr;
-            return tptr[-1];
+            goto r;
           }
           if(tptr != this->m_small.data() + this->m_small.capacity()) {
             // Extend the small buffer.
@@ -97,14 +93,19 @@ class Reference_stack
           }
           // The small buffer is full.
           this->do_switch_to_large();
-          tptr = this->m_tptr;
+          goto x;
         }
         // Use `m_large`.
         if(tptr != this->m_large.data() + this->m_large.size()) {
           // Write to the reserved area.
-          goto z;
+      r:
+          *tptr = std::forward<ParamT>(param);
+          ++tptr;
+          this->m_tptr = tptr;
+          return tptr[-1];
         }
         // Extend the large buffer.
+      x:
         tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
         ++tptr;
         this->m_tptr = tptr;
