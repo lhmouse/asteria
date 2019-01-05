@@ -22,7 +22,7 @@ void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, ro
     case 0:
       {
         // Return the number of variadic arguments.
-        Reference_root::S_constant ref_c = { D_integer(this->m_vargs.size()) };
+        Reference_root::S_constant ref_c = { D_integer(this->get_varg_size()) };
         self_io = std::move(ref_c);
         return;
       }
@@ -35,13 +35,13 @@ void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, ro
           ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
         }
         // Return the argument at the given index.
-        auto wrap = wrap_index(*qindex, this->m_vargs.size());
-        if(wrap.index >= this->m_vargs.size()) {
-          ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->m_vargs.size());
+        auto wrap = wrap_index(*qindex, this->get_varg_size());
+        if(wrap.index >= this->get_varg_size()) {
+          ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->get_varg_size());
           self_io = Reference_root::S_null();
           return;
         }
-        self_io = this->m_vargs.at(static_cast<std::size_t>(wrap.index));
+        self_io = this->get_varg(static_cast<std::size_t>(wrap.index));
         return;
       }
     default:

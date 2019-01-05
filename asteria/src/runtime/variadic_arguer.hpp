@@ -33,10 +33,6 @@ class Variadic_arguer : public Abstract_function
     ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);
 
   public:
-    rocket::cow_string describe() const override;
-    void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const override;
-    void enumerate_variables(const Abstract_variable_callback &callback) const override;
-
     const Source_location & get_location() const noexcept
       {
         return this->m_loc;
@@ -53,6 +49,10 @@ class Variadic_arguer : public Abstract_function
       {
         return this->m_vargs.at(index);
       }
+
+    rocket::cow_string describe() const override;
+    void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const override;
+    void enumerate_variables(const Abstract_variable_callback &callback) const override;
   };
 
 }
