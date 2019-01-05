@@ -16,9 +16,7 @@ Instantiated_function::~Instantiated_function()
 
 rocket::cow_string Instantiated_function::describe() const
   {
-    Formatter fmt;
-    ASTERIA_FORMAT(fmt, "function `", this->m_name, "()` defined at \'", this->m_loc, "\'");
-    return fmt.extract_string();
+    return ASTERIA_FORMAT_STRING("function `", this->m_name, "()` defined at \'", this->m_loc, "\'");
   }
 
 void Instantiated_function::invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const
