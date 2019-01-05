@@ -139,10 +139,12 @@ void Collector::collect()
           // Drop indirect references.
           const auto value_nref = root->get_value().use_count();
           switch(value_nref) {
-            case 0: {
+          case 0:
+            {
               break;
             }
-            case 1: {
+          case 1:
+            {
               // `root->get_value()` is unique.
               do_enumerate_variables(root,
                 [&](const rocket::refcounted_ptr<Variable> &var)
@@ -155,7 +157,8 @@ void Collector::collect()
                 );
               break;
             }
-            default: {
+          default:
+            {
               // `root->get_value()` is shared.
               do_enumerate_variables(root,
                 [&](const rocket::refcounted_ptr<Variable> &var)

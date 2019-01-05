@@ -199,76 +199,88 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
         }
         const int ch = *(q.data() + q.size() - rem);
         switch(ch) {
-          case '\a': {
+        case '\a':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'a';
             break;
           }
-          case '\b': {
+        case '\b':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'b';
             break;
           }
-          case '\f': {
+        case '\f':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'f';
             break;
           }
-          case '\n': {
+        case '\n':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'n';
             break;
           }
-          case '\r': {
+        case '\r':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'r';
             break;
           }
-          case '\t': {
+        case '\t':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 't';
             break;
           }
-          case '\v': {
+        case '\v':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'v';
             break;
           }
-          case '\0': {
+        case '\0':
+          {
             buf[nb++] = '\\';
             buf[nb++] = '0';
             break;
           }
-          case '\x1A': {
+        case '\x1A':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'Z';
             break;
           }
-          case '\x1B': {
+        case '\x1B':
+          {
             buf[nb++] = '\\';
             buf[nb++] = 'e';
             break;
           }
-          case '\"':  case '\'':  case '\\': {
+        case '\"':  case '\'':  case '\\':
+          {
             buf[nb++] = '\\';
-          }
-          // Fallthrough.
-          case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
-          case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
-          case 0x30:  case 0x31:  case 0x32:  case 0x33:  case 0x34:  case 0x35:  case 0x36:  case 0x37:
-          case 0x38:  case 0x39:  case 0x3a:  case 0x3b:  case 0x3c:  case 0x3d:  case 0x3e:  case 0x3f:
-          case 0x40:  case 0x41:  case 0x42:  case 0x43:  case 0x44:  case 0x45:  case 0x46:  case 0x47:
-          case 0x48:  case 0x49:  case 0x4a:  case 0x4b:  case 0x4c:  case 0x4d:  case 0x4e:  case 0x4f:
-          case 0x50:  case 0x51:  case 0x52:  case 0x53:  case 0x54:  case 0x55:  case 0x56:  case 0x57:
-          case 0x58:  case 0x59:  case 0x5a:  case 0x5b:  /*  \  */   case 0x5d:  case 0x5e:  case 0x5f:
-          case 0x60:  case 0x61:  case 0x62:  case 0x63:  case 0x64:  case 0x65:  case 0x66:  case 0x67:
-          case 0x68:  case 0x69:  case 0x6a:  case 0x6b:  case 0x6c:  case 0x6d:  case 0x6e:  case 0x6f:
-          case 0x70:  case 0x71:  case 0x72:  case 0x73:  case 0x74:  case 0x75:  case 0x76:  case 0x77:
-          case 0x78:  case 0x79:  case 0x7a:  case 0x7b:  case 0x7c:  case 0x7d:  case 0x7e: {
+            // Fallthrough.
+        case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
+        case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
+        case 0x30:  case 0x31:  case 0x32:  case 0x33:  case 0x34:  case 0x35:  case 0x36:  case 0x37:
+        case 0x38:  case 0x39:  case 0x3a:  case 0x3b:  case 0x3c:  case 0x3d:  case 0x3e:  case 0x3f:
+        case 0x40:  case 0x41:  case 0x42:  case 0x43:  case 0x44:  case 0x45:  case 0x46:  case 0x47:
+        case 0x48:  case 0x49:  case 0x4a:  case 0x4b:  case 0x4c:  case 0x4d:  case 0x4e:  case 0x4f:
+        case 0x50:  case 0x51:  case 0x52:  case 0x53:  case 0x54:  case 0x55:  case 0x56:  case 0x57:
+        case 0x58:  case 0x59:  case 0x5a:  case 0x5b:  /*  \  */   case 0x5d:  case 0x5e:  case 0x5f:
+        case 0x60:  case 0x61:  case 0x62:  case 0x63:  case 0x64:  case 0x65:  case 0x66:  case 0x67:
+        case 0x68:  case 0x69:  case 0x6a:  case 0x6b:  case 0x6c:  case 0x6d:  case 0x6e:  case 0x6f:
+        case 0x70:  case 0x71:  case 0x72:  case 0x73:  case 0x74:  case 0x75:  case 0x76:  case 0x77:
+        case 0x78:  case 0x79:  case 0x7a:  case 0x7b:  case 0x7c:  case 0x7d:  case 0x7e:
+            // Write the character as is.
             buf[nb++] = static_cast<char>(ch);
             break;
           }
-          default: {
+        default:
+          {
             static constexpr char s_digits[] = "0123456789ABCDEF";
             buf[nb++] = '\\';
             buf[nb++] = 'x';

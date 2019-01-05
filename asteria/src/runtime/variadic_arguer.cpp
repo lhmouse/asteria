@@ -19,13 +19,15 @@ rocket::cow_string Variadic_arguer::describe() const
 void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, rocket::cow_vector<Reference> &&args) const
   {
     switch(args.size()) {
-      case 0: {
+    case 0:
+      {
         // Return the number of variadic arguments.
         Reference_root::S_constant ref_c = { D_integer(this->m_vargs.size()) };
         self_io = std::move(ref_c);
         return;
       }
-      case 1: {
+    case 1:
+      {
         // Return the argument at the index specified.
         const auto ivalue = args.at(0).read();
         const auto qindex = ivalue.opt<D_integer>();
@@ -42,9 +44,8 @@ void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, ro
         self_io = this->m_vargs.at(static_cast<std::size_t>(wrap.index));
         return;
       }
-      default: {
-        ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
-      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
     }
   }
 

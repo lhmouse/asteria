@@ -18,102 +18,132 @@ namespace Asteria {
 const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
   {
     switch(xop) {
-      case xop_postfix_inc: {
+    case xop_postfix_inc:
+      {
         return "postfix increment";
       }
-      case xop_postfix_dec: {
+    case xop_postfix_dec:
+      {
         return "postfix decrement";
       }
-      case xop_prefix_pos: {
+    case xop_prefix_pos:
+      {
         return "unary plus";
       }
-      case xop_prefix_neg: {
+    case xop_prefix_neg:
+      {
         return "unary negation";
       }
-      case xop_prefix_notb: {
+    case xop_prefix_notb:
+      {
         return "bitwise not";
       }
-      case xop_prefix_notl: {
+    case xop_prefix_notl:
+      {
         return "logical not";
       }
-      case xop_prefix_inc: {
+    case xop_prefix_inc:
+      {
         return "prefix increment";
       }
-      case xop_prefix_dec: {
+    case xop_prefix_dec:
+      {
         return "prefix decrement";
       }
-      case xop_prefix_unset: {
+    case xop_prefix_unset:
+      {
         return "prefix `unset`";
       }
-      case xop_prefix_lengthof: {
+    case xop_prefix_lengthof:
+      {
         return "prefix `lengthof`";
       }
-      case xop_prefix_typeof: {
+    case xop_prefix_typeof:
+      {
         return "prefix `typeof`";
       }
-      case xop_infix_cmp_eq: {
+    case xop_infix_cmp_eq:
+      {
         return "equality comparison";
       }
-      case xop_infix_cmp_ne: {
+    case xop_infix_cmp_ne:
+      {
         return "inequality comparison";
       }
-      case xop_infix_cmp_lt: {
+    case xop_infix_cmp_lt:
+      {
         return "less-than comparison";
       }
-      case xop_infix_cmp_gt: {
+    case xop_infix_cmp_gt:
+      {
         return "greater-than comparison";
       }
-      case xop_infix_cmp_lte: {
+    case xop_infix_cmp_lte:
+      {
         return "less-than-or-equal comparison";
       }
-      case xop_infix_cmp_gte: {
+    case xop_infix_cmp_gte:
+      {
         return "greater-than-or-equal comparison";
       }
-      case xop_infix_cmp_3way: {
+    case xop_infix_cmp_3way:
+      {
         return "three-way comparison";
       }
-      case xop_infix_add: {
+    case xop_infix_add:
+      {
         return "addition";
       }
-      case xop_infix_sub: {
+    case xop_infix_sub:
+      {
         return "subtraction";
       }
-      case xop_infix_mul: {
+    case xop_infix_mul:
+      {
         return "multiplication";
       }
-      case xop_infix_div: {
+    case xop_infix_div:
+      {
         return "division";
       }
-      case xop_infix_mod: {
+    case xop_infix_mod:
+      {
         return "modulo";
       }
-      case xop_infix_sll: {
+    case xop_infix_sll:
+      {
         return "logical left shift";
       }
-      case xop_infix_srl: {
+    case xop_infix_srl:
+      {
         return "arithmetic left shift";
       }
-      case xop_infix_sla: {
+    case xop_infix_sla:
+      {
         return "logical right shift";
       }
-      case xop_infix_sra: {
+    case xop_infix_sra:
+      {
         return "arithmetic right shift";
       }
-      case xop_infix_andb: {
+    case xop_infix_andb:
+      {
         return "bitwise and";
       }
-      case xop_infix_orb: {
+    case xop_infix_orb:
+      {
         return "bitwise or";
       }
-      case xop_infix_xorb: {
+    case xop_infix_xorb:
+      {
         return "bitwise xor";
       }
-      case xop_infix_assign: {
+    case xop_infix_assign:
+      {
         return "assginment";
       }
-      default: {
-        return "<unknown operator>";
-      }
+    default:
+      return "<unknown operator>";
     }
   }
 
@@ -155,13 +185,15 @@ Xpnode::~Xpnode()
 Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_literal: {
+    case index_literal:
+      {
         const auto &alt = this->m_stor.as<S_literal>();
         // Copy it as-is.
         Xpnode::S_literal alt_bnd = { alt.value };
         return std::move(alt_bnd);
       }
-      case index_named_reference: {
+    case index_named_reference:
+      {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
         if(alt.name.rdstr().starts_with("__")) {
@@ -179,13 +211,15 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Xpnode::S_bound_reference alt_bnd = { pair.second };
         return std::move(alt_bnd);
       }
-      case index_bound_reference: {
+    case index_bound_reference:
+      {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
         return std::move(alt_bnd);
       }
-      case index_closure_function: {
+    case index_closure_function:
+      {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Analytic_context ctx_next(&ctx);
@@ -194,7 +228,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
         return std::move(alt_bnd);
       }
-      case index_branch: {
+    case index_branch:
+      {
         const auto &alt = this->m_stor.as<S_branch>();
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(global, ctx);
@@ -202,46 +237,51 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd), alt.assign };
         return std::move(alt_bnd);
       }
-      case index_function_call: {
+    case index_function_call:
+      {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.loc, alt.arg_cnt };
         return std::move(alt_bnd);
       }
-      case index_subscript: {
+    case index_subscript:
+      {
         const auto &alt = this->m_stor.as<S_subscript>();
         // Copy it as-is.
         Xpnode::S_subscript alt_bnd = { alt.name };
         return std::move(alt_bnd);
       }
-      case index_operator_rpn: {
+    case index_operator_rpn:
+      {
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.assign };
         return std::move(alt_bnd);
       }
-      case index_unnamed_array: {
+    case index_unnamed_array:
+      {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Copy it as-is.
         Xpnode::S_unnamed_array alt_bnd = { alt.elem_cnt };
         return std::move(alt_bnd);
       }
-      case index_unnamed_object: {
+    case index_unnamed_object:
+      {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Copy it as-is.
         Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         return std::move(alt_bnd);
       }
-      case index_coalescence: {
+    case index_coalescence:
+      {
         const auto &alt = this->m_stor.as<S_coalescence>();
         // Bind the null branch recursively.
         auto branch_null_bnd = alt.branch_null.bind(global, ctx);
         Xpnode::S_coalescence alt_bnd = { std::move(branch_null_bnd), alt.assign };
         return std::move(alt_bnd);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
@@ -348,19 +388,20 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         // The subscript shall have type `integer` or `string`.
         switch(rocket::weaken_enum(subscript.type())) {
-          case Value::type_integer: {
+        case Value::type_integer:
+          {
             Reference_modifier::S_array_index mod_c = { subscript.check<D_integer>() };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
-          case Value::type_string: {
+        case Value::type_string:
+          {
             Reference_modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
-          default: {
-            ASTERIA_THROW_RUNTIME_ERROR("The value `", subscript, "` cannot be used as a subscript.");
-          }
+        default:
+          ASTERIA_THROW_RUNTIME_ERROR("The value `", subscript, "` cannot be used as a subscript.");
         }
       }
 
@@ -688,7 +729,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         }
         Reference_root::S_temporary ref_c = { stack_io.top().read() };
         switch(rocket::weaken_enum(xopT)) {
-          case Xpnode::xop_postfix_inc: {
+        case Xpnode::xop_postfix_inc:
+          {
             // Increment the operand and return the old value.
             // `alt.assign` is ignored.
             if(ref_c.value.type() == Value::type_integer) {
@@ -703,7 +745,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_postfix_dec: {
+        case Xpnode::xop_postfix_dec:
+          {
             // Decrement the operand and return the old value.
             // `alt.assign` is ignored.
             if(ref_c.value.type() == Value::type_integer) {
@@ -718,13 +761,15 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_pos: {
+        case Xpnode::xop_prefix_pos:
+          {
             // Copy the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
             do_set_temporary(stack_io, alt, std::move(ref_c));
             return;
           }
-          case Xpnode::xop_prefix_neg: {
+        case Xpnode::xop_prefix_neg:
+          {
             // Negate the operand to create a temporary value, then return it.
             if(ref_c.value.type() == Value::type_integer) {
               ref_c.value = do_negate(ref_c.value.check<D_integer>());
@@ -738,7 +783,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_notb: {
+        case Xpnode::xop_prefix_notb:
+          {
             // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
             if(ref_c.value.type() == Value::type_boolean) {
               ref_c.value = do_logical_not(ref_c.value.check<D_boolean>());
@@ -752,14 +798,16 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_notl: {
+        case Xpnode::xop_prefix_notl:
+          {
             // Perform logical NOT operation on the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
             ref_c.value = do_logical_not(ref_c.value.test());
             do_set_temporary(stack_io, alt, std::move(ref_c));
             return;
           }
-          case Xpnode::xop_prefix_inc: {
+        case Xpnode::xop_prefix_inc:
+          {
             // Increment the operand and return it.
             // `alt.assign` is ignored.
             if(ref_c.value.type() == Value::type_integer) {
@@ -772,7 +820,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_dec: {
+        case Xpnode::xop_prefix_dec:
+          {
             // Decrement the operand and return it.
             // `alt.assign` is ignored.
             if(ref_c.value.type() == Value::type_integer) {
@@ -787,10 +836,12 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_unset: {
+        case Xpnode::xop_prefix_unset:
+          {
             ROCKET_ASSERT(false);
           }
-          case Xpnode::xop_prefix_lengthof: {
+        case Xpnode::xop_prefix_lengthof:
+          {
             // Return the number of elements in the operand.
             if(ref_c.value.type() == Value::type_null) {
               ref_c.value = D_integer(0);
@@ -809,19 +860,22 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
             }
             ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
           }
-          case Xpnode::xop_prefix_typeof: {
+        case Xpnode::xop_prefix_typeof:
+          {
             // Return the type name of the operand.
             // N.B. This is one of the few operators that work on all types.
             ref_c.value = D_string(std::ref(reinterpret_cast<const char (&)[]>(*(Value::get_type_name(ref_c.value.type())))));
             do_set_temporary(stack_io, alt, std::move(ref_c));
             return;
           }
-          default: {
+        default:
+          {
             // All others are infix operators.
             stack_io.pop();
             const auto &lhs = stack_io.top().read();
             switch(rocket::weaken_enum(xopT)) {
-              case Xpnode::xop_infix_cmp_eq: {
+            case Xpnode::xop_infix_cmp_eq:
+              {
                 // Report unordered operands as being unequal.
                 // N.B. This is one of the few operators that work on all types.
                 const auto comp = lhs.compare(ref_c.value);
@@ -829,7 +883,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_ne: {
+            case Xpnode::xop_infix_cmp_ne:
+              {
                 // Report unordered operands as being unequal.
                 // N.B. This is one of the few operators that work on all types.
                 const auto comp = lhs.compare(ref_c.value);
@@ -837,7 +892,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_lt: {
+            case Xpnode::xop_infix_cmp_lt:
+              {
                 // Throw an exception in case of unordered operands.
                 const auto comp = lhs.compare(ref_c.value);
                 if(comp == Value::compare_unordered) {
@@ -847,7 +903,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_gt: {
+            case Xpnode::xop_infix_cmp_gt:
+              {
                 // Throw an exception in case of unordered operands.
                 const auto comp = lhs.compare(ref_c.value);
                 if(comp == Value::compare_unordered) {
@@ -857,7 +914,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_lte: {
+            case Xpnode::xop_infix_cmp_lte:
+              {
                 // Throw an exception in case of unordered operands.
                 const auto comp = lhs.compare(ref_c.value);
                 if(comp == Value::compare_unordered) {
@@ -867,7 +925,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_gte: {
+            case Xpnode::xop_infix_cmp_gte:
+              {
                 // Throw an exception in case of unordered operands.
                 const auto comp = lhs.compare(ref_c.value);
                 if(comp == Value::compare_unordered) {
@@ -877,23 +936,28 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_cmp_3way: {
+            case Xpnode::xop_infix_cmp_3way:
+              {
                 // N.B. This is one of the few operators that work on all types.
                 const auto comp = lhs.compare(ref_c.value);
                 switch(rocket::weaken_enum(comp)) {
-                  case Value::compare_less: {
+                case Value::compare_less:
+                  {
                     ref_c.value = D_integer(-1);
                     break;
                   }
-                  case Value::compare_equal: {
+                case Value::compare_equal:
+                  {
                     ref_c.value = D_integer(0);
                     break;
                   }
-                  case Value::compare_greater: {
+                case Value::compare_greater:
+                  {
                     ref_c.value = D_integer(+1);
                     break;
                   }
-                  default: {
+                default:
+                  {
                     ref_c.value = D_string(std::ref("unordered"));
                     break;
                   }
@@ -901,7 +965,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 do_set_temporary(stack_io, alt, std::move(ref_c));
                 return;
               }
-              case Xpnode::xop_infix_add: {
+            case Xpnode::xop_infix_add:
+              {
                 // For the `boolean` type, return the logical OR'd result of both operands.
                 // For the `integer` and `real` types, return the sum of both operands.
                 // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
@@ -927,7 +992,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_sub: {
+            case Xpnode::xop_infix_sub:
+              {
                 // For the `boolean` type, return the logical XOR'd result of both operands.
                 // For the `integer` and `real` types, return the difference of both operands.
                 if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
@@ -947,7 +1013,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_mul: {
+            case Xpnode::xop_infix_mul:
+              {
                 // For type `boolean`, return the logical AND'd result of both operands.
                 // For types `integer` and `real`, return the product of both operands.
                 // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times.
@@ -978,7 +1045,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_div: {
+            case Xpnode::xop_infix_div:
+              {
                 // For types `integer` and `real`, return the quotient of both operands.
                 if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
                   ref_c.value = do_divide(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
@@ -992,7 +1060,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_mod: {
+            case Xpnode::xop_infix_mod:
+              {
                 // For types `integer` and `real`, return the reminder of both operands.
                 if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
                   ref_c.value = do_modulo(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
@@ -1006,7 +1075,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_sll: {
+            case Xpnode::xop_infix_sll:
+              {
                 // The second operand shall be an integer.
                 // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
                 // are discarded. Bits shifted in are filled with zeroes.
@@ -1024,7 +1094,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_srl: {
+            case Xpnode::xop_infix_srl:
+              {
                 // The second operand shall be an integer.
                 // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
                 // are discarded. Bits shifted in are filled with zeroes.
@@ -1042,7 +1113,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_sla: {
+            case Xpnode::xop_infix_sla:
+              {
                 // The second operand shall be an integer.
                 // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand. Bits shifted out
                 // that are equal to the sign bit are discarded. Bits shifted out that are unequal to the sign bit lead to an exception being thrown. Bits shifted in are
@@ -1060,7 +1132,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_sra: {
+            case Xpnode::xop_infix_sra:
+              {
                 // The second operand shall be an integer.
                 // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
                 // are discarded. Bits shifted in are filled with the sign bit.
@@ -1077,7 +1150,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_andb: {
+            case Xpnode::xop_infix_andb:
+              {
                 // For the `boolean` type, return the logical AND'd result of both operands.
                 // For the `integer` type, return the bitwise AND'd result of both operands.
                 if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
@@ -1092,7 +1166,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_orb: {
+            case Xpnode::xop_infix_orb:
+              {
                 // For the `boolean` type, return the logical OR'd result of both operands.
                 // For the `integer` type, return the bitwise OR'd result of both operands.
                 if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
@@ -1107,7 +1182,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_xorb: {
+            case Xpnode::xop_infix_xorb:
+              {
                 // For the `boolean` type, return the logical XOR'd result of both operands.
                 // For the `integer` type, return the bitwise XOR'd result of both operands.
                 if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
@@ -1122,7 +1198,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
                 }
                 ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
               }
-              case Xpnode::xop_infix_assign: {
+            case Xpnode::xop_infix_assign:
+              {
                 // Copy the operand.
                 // `alt.assign` is ignored.
                 stack_io.top().open() = std::move(ref_c.value);
@@ -1204,195 +1281,241 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *> Xpnode::compile() const
   {
     switch(Index(this->m_stor.index())) {
-      case index_literal: {
+    case index_literal:
+      {
         const auto &alt = this->m_stor.as<S_literal>();
         return do_bind<S_literal, do_evaluate_literal>(alt);
       }
-      case index_named_reference: {
+    case index_named_reference:
+      {
         const auto &alt = this->m_stor.as<S_named_reference>();
         return do_bind<S_named_reference, do_evaluate_named_reference>(alt);
       }
-      case index_bound_reference: {
+    case index_bound_reference:
+      {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         return do_bind<S_bound_reference, do_evaluate_bound_reference>(alt);
       }
-      case index_closure_function: {
+    case index_closure_function:
+      {
         const auto &alt = this->m_stor.as<S_closure_function>();
         return do_bind<S_closure_function, do_evaluate_closure_function>(alt);
       }
-      case index_branch: {
+    case index_branch:
+      {
         const auto &alt = this->m_stor.as<S_branch>();
         return do_bind<S_branch, do_evaluate_branch>(alt);
       }
-      case index_function_call: {
+    case index_function_call:
+      {
         const auto &alt = this->m_stor.as<S_function_call>();
         return do_bind<S_function_call, do_evaluate_function_call>(alt);
       }
-      case index_subscript: {
+    case index_subscript:
+      {
         const auto &alt = this->m_stor.as<S_subscript>();
         return do_bind<S_subscript, do_evaluate_subscript>(alt);
       }
-      case index_operator_rpn: {
+    case index_operator_rpn:
+      {
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         switch(alt.xop) {
-          case xop_postfix_inc: {
+        case xop_postfix_inc:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_inc>>(alt);
           }
-          case xop_postfix_dec: {
+        case xop_postfix_dec:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_dec>>(alt);
           }
-          case xop_prefix_pos: {
+        case xop_prefix_pos:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_pos>>(alt);
           }
-          case xop_prefix_neg: {
+        case xop_prefix_neg:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_neg>>(alt);
           }
-          case xop_prefix_notb: {
+        case xop_prefix_notb:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notb>>(alt);
           }
-          case xop_prefix_notl: {
+        case xop_prefix_notl:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notl>>(alt);
           }
-          case xop_prefix_inc: {
+        case xop_prefix_inc:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_inc>>(alt);
           }
-          case xop_prefix_dec: {
+        case xop_prefix_dec:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_dec>>(alt);
           }
-          case xop_prefix_unset: {
+        case xop_prefix_unset:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_unset>>(alt);
           }
-          case xop_prefix_lengthof: {
+        case xop_prefix_lengthof:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_lengthof>>(alt);
           }
-          case xop_prefix_typeof: {
+        case xop_prefix_typeof:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_typeof>>(alt);
           }
-          case xop_infix_cmp_eq: {
+        case xop_infix_cmp_eq:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_eq>>(alt);
           }
-          case xop_infix_cmp_ne: {
+        case xop_infix_cmp_ne:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_ne>>(alt);
           }
-          case xop_infix_cmp_lt: {
+        case xop_infix_cmp_lt:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lt>>(alt);
           }
-          case xop_infix_cmp_gt: {
+        case xop_infix_cmp_gt:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gt>>(alt);
           }
-          case xop_infix_cmp_lte: {
+        case xop_infix_cmp_lte:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lte>>(alt);
           }
-          case xop_infix_cmp_gte: {
+        case xop_infix_cmp_gte:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gte>>(alt);
           }
-          case xop_infix_cmp_3way: {
+        case xop_infix_cmp_3way:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_3way>>(alt);
           }
-          case xop_infix_add: {
+        case xop_infix_add:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_add>>(alt);
           }
-          case xop_infix_sub: {
+        case xop_infix_sub:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sub>>(alt);
           }
-          case xop_infix_mul: {
+        case xop_infix_mul:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mul>>(alt);
           }
-          case xop_infix_div: {
+        case xop_infix_div:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_div>>(alt);
           }
-          case xop_infix_mod: {
+        case xop_infix_mod:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mod>>(alt);
           }
-          case xop_infix_sll: {
+        case xop_infix_sll:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sll>>(alt);
           }
-          case xop_infix_srl: {
+        case xop_infix_srl:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_srl>>(alt);
           }
-          case xop_infix_sla: {
+        case xop_infix_sla:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sla>>(alt);
           }
-          case xop_infix_sra: {
+        case xop_infix_sra:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sra>>(alt);
           }
-          case xop_infix_andb: {
+        case xop_infix_andb:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_andb>>(alt);
           }
-          case xop_infix_orb: {
+        case xop_infix_orb:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_orb>>(alt);
           }
-          case xop_infix_xorb: {
+        case xop_infix_xorb:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_xorb>>(alt);
           }
-          case xop_infix_assign: {
+        case xop_infix_assign:
+          {
             return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_assign>>(alt);
           }
-          default: {
-            ASTERIA_TERMINATE("An unknown operator type enumeration `", alt.xop, "` has been encountered.");
-          }
+        default:
+          ASTERIA_TERMINATE("An unknown operator type enumeration `", alt.xop, "` has been encountered.");
         }
       }
-      case index_unnamed_array: {
+    case index_unnamed_array:
+      {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         return do_bind<S_unnamed_array, do_evaluate_unnamed_array>(alt);
       }
-      case index_unnamed_object: {
+    case index_unnamed_object:
+      {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         return do_bind<S_unnamed_object, do_evaluate_unnamed_object>(alt);
       }
-      case index_coalescence: {
+    case index_coalescence:
+      {
         const auto &alt = this->m_stor.as<S_coalescence>();
         return do_bind<S_coalescence, do_evaluate_coalescence>(alt);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
 void Xpnode::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
-      case index_literal: {
+    case index_literal:
+      {
         const auto &alt = this->m_stor.as<S_literal>();
         alt.value.enumerate_variables(callback);
         return;
       }
-      case index_named_reference: {
+    case index_named_reference:
+      {
         return;
       }
-      case index_bound_reference: {
+    case index_bound_reference:
+      {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         alt.ref.enumerate_variables(callback);
         return;
       }
-      case index_closure_function: {
+    case index_closure_function:
+      {
         const auto &alt = this->m_stor.as<S_closure_function>();
         alt.body.enumerate_variables(callback);
         return;
       }
-      case index_branch: {
+    case index_branch:
+      {
         const auto &alt = this->m_stor.as<S_branch>();
         alt.branch_true.enumerate_variables(callback);
         alt.branch_false.enumerate_variables(callback);
         return;
       }
-      case index_function_call:
-      case index_subscript:
-      case index_operator_rpn:
-      case index_unnamed_array:
-      case index_unnamed_object: {
+    case index_function_call:
+    case index_subscript:
+    case index_operator_rpn:
+    case index_unnamed_array:
+    case index_unnamed_object:
+      {
         return;
       }
-      case index_coalescence: {
+    case index_coalescence:
+      {
         const auto &alt = this->m_stor.as<S_coalescence>();
         alt.branch_null.enumerate_variables(callback);
         return;
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 

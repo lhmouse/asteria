@@ -10,36 +10,44 @@ namespace Asteria {
 const char * Value::get_type_name(Value::Type type) noexcept
   {
     switch(type) {
-      case type_null: {
+    case type_null:
+      {
         return "null";
       }
-      case type_boolean: {
+    case type_boolean:
+      {
         return "boolean";
       }
-      case type_integer: {
+    case type_integer:
+      {
         return "integer";
       }
-      case type_real: {
+    case type_real:
+      {
         return "real";
       }
-      case type_string: {
+    case type_string:
+      {
         return "string";
       }
-      case type_opaque: {
+    case type_opaque:
+      {
         return "opaque";
       }
-      case type_function: {
+    case type_function:
+      {
         return "function";
       }
-      case type_array: {
+    case type_array:
+      {
         return "array";
       }
-      case type_object: {
+    case type_object:
+      {
         return "object";
       }
-      default: {
-        return "<unknown type>";
-      }
+    default:
+      return "<unknown type>";
     }
   }
 
@@ -65,34 +73,41 @@ Value::~Value()
 bool Value::test() const noexcept
   {
     switch(this->type()) {
-      case type_null: {
+    case type_null:
+      {
         return false;
       }
-      case type_boolean: {
+    case type_boolean:
+      {
         return this->m_stor.as<D_boolean>();
       }
-      case type_integer: {
+    case type_integer:
+      {
         return this->m_stor.as<D_integer>() != 0;
       }
-      case type_real: {
+    case type_real:
+      {
         return std::fpclassify(this->m_stor.as<D_real>()) != FP_ZERO;
       }
-      case type_string: {
+    case type_string:
+      {
         return !(this->m_stor.as<D_string>().empty());
       }
-      case type_opaque:
-      case type_function: {
+    case type_opaque:
+    case type_function:
+      {
         return true;
       }
-      case type_array: {
+    case type_array:
+      {
         return !(this->m_stor.as<D_array>().empty());
       }
-      case type_object: {
+    case type_object:
+      {
         return true;
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
@@ -127,20 +142,24 @@ Value::Compare Value::compare(const Value &other) const noexcept
     }
     // If both values have the same type, perform normal comparison.
     switch(this->type()) {
-      case type_null: {
+    case type_null:
+      {
         return Value::compare_equal;
       }
-      case type_boolean: {
+    case type_boolean:
+      {
         const auto &alt_lhs = this->m_stor.as<D_boolean>();
         const auto &alt_rhs = other.check<D_boolean>();
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
-      case type_integer: {
+    case type_integer:
+      {
         const auto &alt_lhs = this->m_stor.as<D_integer>();
         const auto &alt_rhs = other.check<D_integer>();
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
-      case type_real: {
+    case type_real:
+      {
         const auto &alt_lhs = this->m_stor.as<D_real>();
         const auto &alt_rhs = other.check<D_real>();
         if(std::isunordered(alt_lhs, alt_rhs)) {
@@ -148,16 +167,19 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return do_three_way_compare(alt_lhs, alt_rhs);
       }
-      case type_string: {
+    case type_string:
+      {
         const auto &alt_lhs = this->m_stor.as<D_string>();
         const auto &alt_rhs = other.check<D_string>();
         return do_three_way_compare(alt_lhs.compare(alt_rhs), 0);
       }
-      case type_opaque:
-      case type_function: {
+    case type_opaque:
+    case type_function:
+      {
         return Value::compare_unordered;
       }
-      case type_array: {
+    case type_array:
+      {
         const auto &alt_lhs = this->m_stor.as<D_array>();
         const auto &alt_rhs = other.check<D_array>();
         auto pl = alt_lhs.begin();
@@ -174,12 +196,12 @@ Value::Compare Value::compare(const Value &other) const noexcept
         }
         return do_three_way_compare(el - pl, er - pr);
       }
-      case type_object: {
+    case type_object:
+      {
         return Value::compare_unordered;
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
@@ -195,48 +217,56 @@ Value::Compare Value::compare(const Value &other) const noexcept
 void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
-      case type_null: {
+    case type_null:
+      {
         // null
         os <<"null";
         return;
       }
-      case type_boolean: {
+    case type_boolean:
+      {
         const auto &alt = this->m_stor.as<D_boolean>();
         // boolean true
         os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
         return;
       }
-      case type_integer: {
+    case type_integer:
+      {
         const auto &alt = this->m_stor.as<D_integer>();
         // integer 42
         os <<"integer " <<std::dec <<alt;
         return;
       }
-      case type_real: {
+    case type_real:
+      {
         const auto &alt = this->m_stor.as<D_real>();
         // real 123.456
         os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(DECIMAL_DIG) <<alt;
         return;
       }
-      case type_string: {
+    case type_string:
+      {
         const auto &alt = this->m_stor.as<D_string>();
         // string(5) "hello"
         os <<"string(" <<std::dec <<alt.size() <<") " <<quote(alt);
         return;
       }
-      case type_opaque: {
+    case type_opaque:
+      {
         const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
         os <<"opaque(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
         return;
       }
-      case type_function: {
+    case type_function:
+      {
         const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
         os <<"function(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
         return;
       }
-      case type_array: {
+    case type_array:
+      {
         const auto &alt = this->m_stor.as<D_array>();
         // array(3) = [
         //   0 = integer 1;
@@ -252,7 +282,8 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         os <<do_indent_or_space(indent_increment, indent_next) <<']';
         return;
       }
-      case type_object: {
+    case type_object:
+      {
         const auto &alt = this->m_stor.as<D_object>();
         // object(3) = {
         //   "one" = integer 1;
@@ -268,119 +299,132 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         os <<do_indent_or_space(indent_increment, indent_next) <<'}';
         return;
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
 bool Value::unique() const noexcept
   {
     switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real: {
+    case type_null:
+    case type_boolean:
+    case type_integer:
+    case type_real:
+      {
         return true;
       }
-      case type_string: {
+    case type_string:
+      {
         const auto &alt = this->m_stor.as<D_string>();
         return alt.unique();
       }
-      case type_opaque: {
+    case type_opaque:
+      {
         const auto &alt = this->m_stor.as<D_opaque>();
         return alt.unique();
       }
-      case type_function: {
+    case type_function:
+      {
         const auto &alt = this->m_stor.as<D_function>();
         return alt.unique();
       }
-      case type_array: {
+    case type_array:
+      {
         const auto &alt = this->m_stor.as<D_array>();
         return alt.unique();
       }
-      case type_object: {
+    case type_object:
+      {
         const auto &alt = this->m_stor.as<D_object>();
         return alt.unique();
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
 long Value::use_count() const noexcept
   {
     switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real: {
+    case type_null:
+    case type_boolean:
+    case type_integer:
+    case type_real:
+      {
         return 1;
       }
-      case type_string: {
+    case type_string:
+      {
         const auto &alt = this->m_stor.as<D_string>();
         return alt.use_count();
       }
-      case type_opaque: {
+    case type_opaque:
+      {
         const auto &alt = this->m_stor.as<D_opaque>();
         return alt.use_count();
       }
-      case type_function: {
+    case type_function:
+      {
         const auto &alt = this->m_stor.as<D_function>();
         return alt.use_count();
       }
-      case type_array: {
+    case type_array:
+      {
         const auto &alt = this->m_stor.as<D_array>();
         return alt.use_count();
       }
-      case type_object: {
+    case type_object:
+      {
         const auto &alt = this->m_stor.as<D_object>();
         return alt.use_count();
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 
 void Value::enumerate_variables(const Abstract_variable_callback &callback) const
   {
     switch(this->type()) {
-      case type_null:
-      case type_boolean:
-      case type_integer:
-      case type_real:
-      case type_string: {
+    case type_null:
+    case type_boolean:
+    case type_integer:
+    case type_real:
+    case type_string:
+      {
         return;
       }
-      case type_opaque: {
+    case type_opaque:
+      {
         const auto &alt = this->m_stor.as<D_opaque>();
         alt.get().enumerate_variables(callback);
         return;
       }
-      case type_function: {
+    case type_function:
+      {
         const auto &alt = this->m_stor.as<D_function>();
         alt.get().enumerate_variables(callback);
         return;
       }
-      case type_array: {
+    case type_array:
+      {
         const auto &alt = this->m_stor.as<D_array>();
         for(const auto &elem : alt) {
           elem.enumerate_variables(callback);
         }
         return;
       }
-      case type_object: {
+    case type_object:
+      {
         const auto &alt = this->m_stor.as<D_object>();
         for(const auto &pair : alt) {
           pair.second.enumerate_variables(callback);
         }
         return;
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
     }
   }
 

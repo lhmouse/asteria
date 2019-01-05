@@ -1,4 +1,4 @@
-// This file is part of Asteria.
+u// This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
@@ -439,60 +439,72 @@ Token_stream::~Token_stream()
           ++tlen;
           unsigned xcnt = 0;
           switch(next) {
-            case '\'':
-            case '\"':
-            case '\\':
-            case '?': {
+          case '\'':
+          case '\"':
+          case '\\':
+          case '?':
+            {
               value.push_back(next);
               break;
             }
-            case 'a': {
+          case 'a':
+            {
               value.push_back('\a');
               break;
             }
-            case 'b': {
+          case 'b':
+            {
               value.push_back('\b');
               break;
             }
-            case 'f': {
+          case 'f':
+            {
               value.push_back('\f');
               break;
             }
-            case 'n': {
+          case 'n':
+            {
               value.push_back('\n');
               break;
             }
-            case 'r': {
+          case 'r':
+            {
               value.push_back('\r');
               break;
             }
-            case 't': {
+          case 't':
+            {
               value.push_back('\t');
               break;
             }
-            case 'v': {
+          case 'v':
+            {
               value.push_back('\v');
               break;
             }
-            case '0': {
+          case '0':
+            {
               value.push_back('\0');
               break;
             }
-            case 'Z': {
+          case 'Z':
+            {
               value.push_back('\x1A');
               break;
             }
-            case 'e': {
+          case 'e':
+            {
               value.push_back('\x1B');
               break;
             }
-            case 'U': {
+          case 'U':
+            {
               xcnt += 2;  // 6: "\U123456"
               // Fallthrough.
-            case 'u':
+          case 'u':
               xcnt += 2;  // 4: "\u1234"
               // Fallthrough.
-            case 'x':
+          case 'x':
               xcnt += 2;  // 2: "\x12"
               // Read hex digits.
               if(qavail < xcnt + 2) {
@@ -542,10 +554,8 @@ Token_stream::~Token_stream()
               encode_one( 0, 0x3F);
               break;
             }
-            default: {
-              // Fail if this escape sequence cannot be recognized.
-              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_unknown);
-            }
+          default:
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_unknown);
           }
           tlen += xcnt;
         }
@@ -616,14 +626,16 @@ Token_stream::~Token_stream()
         if(bptr[int_begin] == '0') {
           auto next = bptr[int_begin + 1];
           switch(next) {
-            case 'B':
-            case 'b': {
+          case 'B':
+          case 'b':
+            {
               radix = 2;
               int_begin += 2;
               break;
             }
-            case 'X':
-            case 'x': {
+          case 'X':
+          case 'x':
+            {
               radix = 16;
               int_begin += 2;
               break;
@@ -653,14 +665,16 @@ Token_stream::~Token_stream()
         exp_end = exp_begin;
         next = bptr[frac_end];
         switch(next) {
-          case 'E':
-          case 'e': {
+        case 'E':
+        case 'e':
+          {
             exp_base = 10;
             exp_begin += 1;
             break;
           }
-          case 'P':
-          case 'p': {
+        case 'P':
+        case 'p':
+          {
             exp_base = 2;
             exp_begin += 1;
             break;
@@ -669,12 +683,14 @@ Token_stream::~Token_stream()
         if(exp_base != 0) {
           next = bptr[exp_begin];
           switch(next) {
-            case '+': {
+          case '+':
+            {
               exp_sign = false;
               exp_begin += 1;
               break;
             }
-            case '-': {
+          case '-':
+            {
               exp_sign = true;
               exp_begin += 1;
               break;
@@ -800,36 +816,40 @@ Token_stream::~Token_stream()
 Parser_error Token_stream::get_parser_error() const noexcept
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         return Parser_error(0, 0, 0, Parser_error::code_no_data_loaded);
       }
-      case state_error: {
+    case state_error:
+      {
         return this->m_stor.as<Parser_error>();
       }
-      case state_success: {
+    case state_success:
+      {
         return Parser_error(0, 0, 0, Parser_error::code_success);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
 bool Token_stream::empty() const noexcept
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         return true;
       }
-      case state_error: {
+    case state_error:
+      {
         return true;
       }
-      case state_success: {
+    case state_success:
+      {
         return this->m_stor.as<rocket::cow_vector<Token>>().empty();
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
@@ -939,35 +959,40 @@ void Token_stream::clear() noexcept
 const Token * Token_stream::peek_opt() const noexcept
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
       }
-      case state_error: {
+    case state_error:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
-      case state_success: {
+    case state_success:
+      {
         const auto &alt = this->m_stor.as<rocket::cow_vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }
         return &(alt.back());
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
 Token Token_stream::shift()
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
       }
-      case state_error: {
+    case state_error:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
-      case state_success: {
+    case state_success:
+      {
         auto &alt = this->m_stor.as<rocket::cow_vector<Token>>();
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
@@ -976,9 +1001,8 @@ Token Token_stream::shift()
         alt.pop_back();
         return std::move(token);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 

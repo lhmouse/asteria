@@ -91,27 +91,29 @@ void Block::execute_as_function(Reference &self_io, Global_context &global, cons
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
     switch(status) {
-      case status_next: {
+    case status_next:
+      {
         // Return `null` if the control flow reached the end of the function.
         self_io = Reference_root::S_null();
         // Fallthrough.
-      case status_return:
+    case status_return:
         return;
       }
-      case status_break_unspec:
-      case status_break_switch:
-      case status_break_while:
-      case status_break_for: {
+    case status_break_unspec:
+    case status_break_switch:
+    case status_break_while:
+    case status_break_for:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
       }
-      case status_continue_unspec:
-      case status_continue_while:
-      case status_continue_for: {
+    case status_continue_unspec:
+    case status_continue_while:
+    case status_continue_for:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown execution result enumeration `", status, "` has been encountered.");
     }
   }
 

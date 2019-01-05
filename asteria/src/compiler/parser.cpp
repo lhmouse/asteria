@@ -126,77 +126,86 @@ Parser::~Parser()
         }
         Xpnode::Xop xop;
         switch(rocket::weaken_enum(qtok->index())) {
-          case Token::index_keyword: {
+        case Token::index_keyword:
+          {
             const auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
-              case Token::keyword_unset: {
+            case Token::keyword_unset:
+              {
                 xop = Xpnode::xop_prefix_unset;
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_lengthof: {
+            case Token::keyword_lengthof:
+              {
                 xop = Xpnode::xop_prefix_lengthof;
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_typeof: {
+            case Token::keyword_typeof:
+              {
                 xop = Xpnode::xop_prefix_typeof;
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_not: {
+            case Token::keyword_not:
+              {
                 xop = Xpnode::xop_prefix_notl;
                 tstrm_io.shift();
                 break;
               }
-              default: {
-                return false;
-              }
+            default:
+              return false;
             }
             break;
           }
-          case Token::index_punctuator: {
+        case Token::index_punctuator:
+          {
             const auto &alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
-              case Token::punctuator_add: {
+            case Token::punctuator_add:
+              {
                 xop = Xpnode::xop_prefix_pos;
                 tstrm_io.shift();
                 break;
               }
-              case Token::punctuator_sub: {
+            case Token::punctuator_sub:
+              {
                 xop = Xpnode::xop_prefix_neg;
                 tstrm_io.shift();
                 break;
               }
-              case Token::punctuator_notb: {
+            case Token::punctuator_notb:
+              {
                 xop = Xpnode::xop_prefix_notb;
                 tstrm_io.shift();
                 break;
               }
-              case Token::punctuator_notl: {
+            case Token::punctuator_notl:
+              {
                 xop = Xpnode::xop_prefix_notl;
                 tstrm_io.shift();
                 break;
               }
-              case Token::punctuator_inc: {
+            case Token::punctuator_inc:
+              {
                 xop = Xpnode::xop_prefix_inc;
                 tstrm_io.shift();
                 break;
               }
-              case Token::punctuator_dec: {
+            case Token::punctuator_dec:
+              {
                 xop = Xpnode::xop_prefix_dec;
                 tstrm_io.shift();
                 break;
               }
-              default: {
-                return false;
-              }
+            default:
+              return false;
             }
             break;
           }
-          default: {
-            return false;
-          }
+        default:
+          return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
         nodes_out.emplace_back(std::move(node_c));
@@ -217,19 +226,20 @@ Parser::~Parser()
         }
         Xpnode::Xop xop;
         switch(rocket::weaken_enum(qalt->punct)) {
-          case Token::punctuator_inc: {
+        case Token::punctuator_inc:
+          {
             xop = Xpnode::xop_postfix_inc;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_dec: {
+        case Token::punctuator_dec:
+          {
             xop = Xpnode::xop_postfix_dec;
             tstrm_io.shift();
             break;
           }
-          default: {
-            return false;
-          }
+        default:
+          return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
         nodes_out.emplace_back(std::move(node_c));
@@ -254,61 +264,68 @@ Parser::~Parser()
           return false;
         }
         switch(rocket::weaken_enum(qtok->index())) {
-          case Token::index_keyword: {
+        case Token::index_keyword:
+          {
             const auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
-              case Token::keyword_null: {
+            case Token::keyword_null:
+              {
                 value_out = D_null();
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_false: {
+            case Token::keyword_false:
+              {
                 value_out = D_boolean(false);
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_true: {
+            case Token::keyword_true:
+              {
                 value_out = D_boolean(true);
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_nan: {
+            case Token::keyword_nan:
+              {
                 value_out = D_real(NAN);
                 tstrm_io.shift();
                 break;
               }
-              case Token::keyword_infinity: {
+            case Token::keyword_infinity:
+              {
                 value_out = D_real(INFINITY);
                 tstrm_io.shift();
                 break;
               }
-              default: {
-                return false;
-              }
+            default:
+              return false;
             }
             break;
           }
-          case Token::index_integer_literal: {
+        case Token::index_integer_literal:
+          {
             const auto &alt = qtok->check<Token::S_integer_literal>();
             value_out = D_integer(alt.value);
             tstrm_io.shift();
             break;
           }
-          case Token::index_real_literal: {
+        case Token::index_real_literal:
+          {
             const auto &alt = qtok->check<Token::S_real_literal>();
             value_out = D_real(alt.value);
             tstrm_io.shift();
             break;
           }
-          case Token::index_string_literal: {
+        case Token::index_string_literal:
+          {
             const auto &alt = qtok->check<Token::S_string_literal>();
             value_out = D_string(alt.value);
             tstrm_io.shift();
             break;
           }
-          default: {
-            return false;
-          }
+        default:
+          return false;
         }
         return true;
       }
@@ -756,21 +773,24 @@ Parser::~Parser()
               return precedence_assignment;
             }
             switch(this->m_sop) {
-              case sop_quest: {
+            case sop_quest:
+              {
                 return precedence_assignment;
               }
-              case sop_and: {
+            case sop_and:
+              {
                 return precedence_logical_and;
               }
-              case sop_or: {
+            case sop_or:
+              {
                 return precedence_logical_or;
               }
-              case sop_coales: {
+            case sop_coales:
+              {
                 return precedence_coalescence;
               }
-              default: {
-                ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
-              }
+            default:
+              ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
         void extract(rocket::cow_vector<Xpnode> &nodes_out) override
@@ -884,47 +904,55 @@ Parser::~Parser()
               return precedence_assignment;
             }
             switch(rocket::weaken_enum(this->m_xop)) {
-              case Xpnode::xop_infix_mul:
-              case Xpnode::xop_infix_div:
-              case Xpnode::xop_infix_mod: {
+            case Xpnode::xop_infix_mul:
+            case Xpnode::xop_infix_div:
+            case Xpnode::xop_infix_mod:
+              {
                 return precedence_multiplicative;
               }
-              case Xpnode::xop_infix_add:
-              case Xpnode::xop_infix_sub: {
+            case Xpnode::xop_infix_add:
+            case Xpnode::xop_infix_sub:
+              {
                 return precedence_additive;
               }
-              case Xpnode::xop_infix_sla:
-              case Xpnode::xop_infix_sra:
-              case Xpnode::xop_infix_sll:
-              case Xpnode::xop_infix_srl: {
+            case Xpnode::xop_infix_sla:
+            case Xpnode::xop_infix_sra:
+            case Xpnode::xop_infix_sll:
+            case Xpnode::xop_infix_srl:
+              {
                 return precedence_shift;
               }
-              case Xpnode::xop_infix_cmp_lt:
-              case Xpnode::xop_infix_cmp_lte:
-              case Xpnode::xop_infix_cmp_gt:
-              case Xpnode::xop_infix_cmp_gte: {
+            case Xpnode::xop_infix_cmp_lt:
+            case Xpnode::xop_infix_cmp_lte:
+            case Xpnode::xop_infix_cmp_gt:
+            case Xpnode::xop_infix_cmp_gte:
+              {
                 return precedence_relational;
               }
-              case Xpnode::xop_infix_cmp_eq:
-              case Xpnode::xop_infix_cmp_ne:
-              case Xpnode::xop_infix_cmp_3way: {
+            case Xpnode::xop_infix_cmp_eq:
+            case Xpnode::xop_infix_cmp_ne:
+            case Xpnode::xop_infix_cmp_3way:
+              {
                 return precedence_equality;
               }
-              case Xpnode::xop_infix_andb: {
+            case Xpnode::xop_infix_andb:
+              {
                 return precedence_bitwise_and;
               }
-              case Xpnode::xop_infix_xorb: {
+            case Xpnode::xop_infix_xorb:
+              {
                 return precedence_bitwise_xor;
               }
-              case Xpnode::xop_infix_orb: {
+            case Xpnode::xop_infix_orb:
+              {
                 return precedence_bitwise_or;
               }
-              case Xpnode::xop_infix_assign: {
+            case Xpnode::xop_infix_assign:
+              {
                 return precedence_assignment;
               }
-              default: {
-                ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
-              }
+            default:
+              ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
         void extract(rocket::cow_vector<Xpnode> &nodes_out) override
@@ -957,145 +985,164 @@ Parser::~Parser()
         bool assign = false;
         Xpnode::Xop xop;
         switch(rocket::weaken_enum(qalt->punct)) {
-          case Token::punctuator_add_eq: {
+        case Token::punctuator_add_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_add:
+        case Token::punctuator_add:
             xop = Xpnode::xop_infix_add;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_sub_eq: {
+        case Token::punctuator_sub_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_sub:
+        case Token::punctuator_sub:
             xop = Xpnode::xop_infix_sub;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_mul_eq: {
+        case Token::punctuator_mul_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_mul:
+        case Token::punctuator_mul:
             xop = Xpnode::xop_infix_mul;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_div_eq: {
+        case Token::punctuator_div_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_div:
+        case Token::punctuator_div:
             xop = Xpnode::xop_infix_div;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_mod_eq: {
+        case Token::punctuator_mod_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_mod:
+        case Token::punctuator_mod:
             xop = Xpnode::xop_infix_mod;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_sla_eq: {
+        case Token::punctuator_sla_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_sla:
+        case Token::punctuator_sla:
             xop = Xpnode::xop_infix_sla;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_sra_eq: {
+        case Token::punctuator_sra_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_sra:
+        case Token::punctuator_sra:
             xop = Xpnode::xop_infix_sra;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_sll_eq: {
+        case Token::punctuator_sll_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_sll:
+        case Token::punctuator_sll:
             xop = Xpnode::xop_infix_sll;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_srl_eq: {
+        case Token::punctuator_srl_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_srl:
+        case Token::punctuator_srl:
             xop = Xpnode::xop_infix_srl;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_andb_eq: {
+        case Token::punctuator_andb_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_andb:
+        case Token::punctuator_andb:
             xop = Xpnode::xop_infix_andb;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_orb_eq: {
+        case Token::punctuator_orb_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_orb:
+        case Token::punctuator_orb:
             xop = Xpnode::xop_infix_orb;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_xorb_eq: {
+        case Token::punctuator_xorb_eq:
+          {
             assign = true;
             // Fallthrough.
-          case Token::punctuator_xorb:
+        case Token::punctuator_xorb:
             xop = Xpnode::xop_infix_xorb;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_assign: {
+        case Token::punctuator_assign:
+          {
             xop = Xpnode::xop_infix_assign;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_eq: {
+        case Token::punctuator_cmp_eq:
+          {
             xop = Xpnode::xop_infix_cmp_eq;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_ne: {
+        case Token::punctuator_cmp_ne:
+          {
             xop = Xpnode::xop_infix_cmp_ne;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_lt: {
+        case Token::punctuator_cmp_lt:
+          {
             xop = Xpnode::xop_infix_cmp_lt;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_gt: {
+        case Token::punctuator_cmp_gt:
+          {
             xop = Xpnode::xop_infix_cmp_gt;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_lte: {
+        case Token::punctuator_cmp_lte:
+          {
             xop = Xpnode::xop_infix_cmp_lte;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_cmp_gte: {
+        case Token::punctuator_cmp_gte:
+          {
             xop = Xpnode::xop_infix_cmp_gte;
             tstrm_io.shift();
             break;
           }
-          case Token::punctuator_spaceship: {
+        case Token::punctuator_spaceship:
+          {
             xop = Xpnode::xop_infix_cmp_3way;
             tstrm_io.shift();
             break;
           }
-          default: {
-            return false;
-          }
+        default:
+          return false;
         }
         rocket::cow_vector<Xpnode> rhs;
         if(!do_accept_infix_element(rhs, tstrm_io)) {
@@ -1692,36 +1739,40 @@ Parser::~Parser()
 Parser_error Parser::get_parser_error() const noexcept
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         return Parser_error(0, 0, 0, Parser_error::code_no_data_loaded);
       }
-      case state_error: {
+    case state_error:
+      {
         return this->m_stor.as<Parser_error>();
       }
-      case state_success: {
+    case state_success:
+      {
         return Parser_error(0, 0, 0, Parser_error::code_success);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
 bool Parser::empty() const noexcept
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         return true;
       }
-      case state_error: {
+    case state_error:
+      {
         return true;
       }
-      case state_success: {
+    case state_success:
+      {
         return this->m_stor.as<rocket::cow_vector<Statement>>().empty();
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
@@ -1762,20 +1813,22 @@ void Parser::clear() noexcept
 Block Parser::extract_document()
   {
     switch(this->state()) {
-      case state_empty: {
+    case state_empty:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
       }
-      case state_error: {
+    case state_error:
+      {
         ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
       }
-      case state_success: {
+    case state_success:
+      {
         auto stmts = std::move(this->m_stor.as<rocket::cow_vector<Statement>>());
         this->m_stor = nullptr;
         return std::move(stmts);
       }
-      default: {
-        ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
