@@ -23,7 +23,7 @@ const Executive_context * Executive_context::get_parent_opt() const noexcept
     return this->m_parent_opt;
   }
 
-void Executive_context::initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Executive_context::initialize_for_function(const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(std::size_t i = 0; i < params.size(); ++i) {
@@ -46,23 +46,30 @@ void Executive_context::initialize_for_function(const Source_location &loc, cons
     }
     // Set `__file`.
     {
-      Reference_root::S_constant ref_c = { D_string(loc.get_file()) };
+      Reference_root::S_constant ref_c = { D_string(zvarg.get().get_location().get_file()) };
       this->open_named_reference(std::ref("__file")) = std::move(ref_c);
     }
     // Set `__line`.
     {
-      Reference_root::S_constant ref_c = { D_integer(loc.get_line()) };
+      Reference_root::S_constant ref_c = { D_integer(zvarg.get().get_location().get_line()) };
       this->open_named_reference(std::ref("__line")) = std::move(ref_c);
     }
     // Set `__func`.
     {
-      Reference_root::S_constant ref_c = { D_string(name) };
+      Reference_root::S_constant ref_c = { D_string(zvarg.get().get_name()) };
       this->open_named_reference(std::ref("__func")) = std::move(ref_c);
     }
     // Set `__varg`.
     {
-      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
-      Reference_root::S_constant ref_c = { D_function(Variadic_arguer(loc, name, std::move(args))) };
+      const auto do_make_varg = [&]
+        {
+          if(params.size() >= args.size()) {
+            return zvarg;
+          }
+          args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
+          return rocket::refcounted_object<Variadic_arguer>(zvarg.get(), std::move(args));
+        };
+      Reference_root::S_constant ref_c = { D_function(do_make_varg()) };
       this->open_named_reference(std::ref("__varg")) = std::move(ref_c);
     }
   }

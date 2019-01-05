@@ -25,12 +25,34 @@ class Variadic_arguer : public Abstract_function
       : m_loc(loc), m_name(name), m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
+    template<typename XfirstT, typename ...XvargsT>
+      Variadic_arguer(const Variadic_arguer &other, XfirstT &&xfirst, XvargsT &&...xvargs)
+      : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::forward<XfirstT>(xfirst), std::forward<XvargsT>(xvargs)...)
+      {
+      }
     ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);
 
   public:
     rocket::cow_string describe() const override;
     void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_variable_callback &callback) const override;
+
+    const Source_location & get_location() const noexcept
+      {
+        return this->m_loc;
+      }
+    const rocket::prehashed_string & get_name() const noexcept
+      {
+        return this->m_name;
+      }
+    std::size_t get_varg_size() const noexcept
+      {
+        return this->m_vargs.size();
+      }
+    const Reference & get_varg(std::size_t index) const
+      {
+        return this->m_vargs.at(index);
+      }
   };
 
 }

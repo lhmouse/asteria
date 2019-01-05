@@ -8,6 +8,7 @@
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/reference.hpp"
 #include "../asteria/src/runtime/exception.hpp"
+#include "../asteria/src/runtime/variadic_arguer.hpp"
 #include "../asteria/src/syntax/source_location.hpp"
 #include <sstream>
 
@@ -39,6 +40,7 @@ int main()
 
     Reference res;
     Global_context global;
-    code.execute_as_function(res, global, Source_location(std::ref("file"), 42), std::ref("scope"), { }, { });
+    rocket::refcounted_object<Variadic_arguer> zvarg(Source_location(std::ref("file"), 42), std::ref("scope"));
+    code.execute_as_function(res, global, zvarg, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }

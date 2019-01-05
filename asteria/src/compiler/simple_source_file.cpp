@@ -7,6 +7,7 @@
 #include "parser.hpp"
 #include "../syntax/source_location.hpp"
 #include "../runtime/reference.hpp"
+#include "../runtime/variadic_arguer.hpp"
 #include "../utilities.hpp"
 #include <fstream>
 
@@ -55,10 +56,11 @@ Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector
     // Initialize parameters.
     const auto loc = Source_location(this->m_file, 0);
     const auto name = rocket::cow_string(std::ref("<file scope>"));
+    const auto zvarg = rocket::refcounted_object<Variadic_arguer>(loc, name);
     const auto params = rocket::cow_vector<rocket::prehashed_string>();
     // Execute the code as a function.
     Reference self;
-    this->m_code.execute_as_function(self, global, loc, name, params, std::move(args));
+    this->m_code.execute_as_function(self, global, zvarg, params, std::move(args));
     return self;
   }
 

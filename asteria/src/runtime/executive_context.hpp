@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
 #include "../rocket/cow_vector.hpp"
+#include "../rocket/refcounted_object.hpp"
 
 namespace Asteria {
 
@@ -26,7 +27,7 @@ class Executive_context : public Abstract_context
     bool is_analytic() const noexcept override;
     const Executive_context * get_parent_opt() const noexcept override;
 
-    void initialize_for_function(const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
+    void initialize_for_function(const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
   };
 
 }
