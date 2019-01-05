@@ -339,7 +339,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
               try {
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
-                if((ptr_old->alloc != ptr->alloc) || (ptr_old->nref.get() != 1)) {
+                if(!((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique())) {
                   copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
                   copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
                 } else {
