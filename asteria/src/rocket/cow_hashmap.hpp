@@ -492,12 +492,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               try {
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
-                if(!((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique())) {
-                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
-                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
-                } else {
+                if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
                   move_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
                   move_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+                } else {
+                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
+                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
                 }
               } catch(...) {
                 // If an exception is thrown, deallocate the new block, then rethrow the exception.
