@@ -11,6 +11,9 @@ namespace rocket {
 template<typename elementT>
   class refcounted_object
   {
+    template<typename>
+      friend class refcounted_object;
+
   public:
     using element_type  = elementT;
     using pointer       = elementT *;
@@ -30,6 +33,24 @@ template<typename elementT>
       explicit refcounted_object(yelementT &&yelem)
       : m_owns(noadl::make_refcounted<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem))),
         m_rptr(this->m_owns.get())
+      {
+      }
+    template<typename firstT, typename secondT, typename ...paramsT>
+      refcounted_object(firstT &&first, secondT &&second, paramsT &&...params)
+      : m_owns(noadl::make_refcounted<element_type>(::std::forward<firstT>(first), ::std::forward<secondT>(second), ::std::forward<paramsT>(params)...)),
+        m_rptr(this->m_owns.get())
+      {
+      }
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
+      refcounted_object(const refcounted_object<yelementT> &other) noexcept
+      : m_owns(other.m_owns),
+        m_rptr(other.m_rptr)
+      {
+      }
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
+      refcounted_object(refcounted_object<yelementT> &&other) noexcept
+      : m_owns(::std::move(other.m_owns)),
+        m_rptr(::std::move(other.m_rptr))
       {
       }
 
