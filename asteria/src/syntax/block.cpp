@@ -19,11 +19,12 @@ Block::~Block()
 
 void Block::do_compile()
   {
-    this->m_jinsts.clear();
-    this->m_jinsts.reserve(this->m_stmts.size());
+    decltype(m_jinsts) jinsts;
+    jinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      this->m_jinsts.emplace_back(stmt.compile());
+      jinsts.emplace_back(stmt.compile());
     }
+    this->m_jinsts = std::move(jinsts);
   }
 
 void Block::fly_over_in_place(Abstract_context &ctx_io) const
@@ -95,8 +96,11 @@ void Block::execute_as_function(Reference &self_io, Global_context &global, cons
       {
         // Return `null` if the control flow reached the end of the function.
         self_io = Reference_root::S_null();
-        // Fallthrough.
+        return;
+      }
     case status_return:
+      {
+        // Return the reference in `self_io`.
         return;
       }
     case status_break_unspec:

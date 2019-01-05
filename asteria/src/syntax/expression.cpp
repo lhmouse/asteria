@@ -17,11 +17,12 @@ Expression::~Expression()
 
 void Expression::do_compile()
   {
-    this->m_jinsts.clear();
-    this->m_jinsts.reserve(this->m_nodes.size());
+    decltype(m_jinsts) jinsts;
+    jinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
-      this->m_jinsts.emplace_back(node.compile());
+      jinsts.emplace_back(node.compile());
     }
+    this->m_jinsts = std::move(jinsts);
   }
 
 Expression Expression::bind(const Global_context &global, const Analytic_context &ctx) const
