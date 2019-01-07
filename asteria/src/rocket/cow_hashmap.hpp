@@ -142,12 +142,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           = delete;
       };
 
-    // Copies the `const` qualifier from `otherT`, which may be a reference type, to `typeT`.
-    template<typename typeT, typename otherT>
-      struct copy_const_from : conditional<is_const<typename remove_reference<otherT>::type>::value, const typeT, typeT>
-      {
-      };
-
     template<typename allocatorT>
       struct linear_prober
       {
@@ -155,6 +149,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using bucket_type      = bucket<allocator_type>;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
         using difference_type  = typename allocator_traits<allocator_type>::difference_type;
+
+        static constexpr auto npos = size_type(-1);
 
         template<typename xpointerT>
           static size_type origin(xpointerT ptr, size_t hval)
@@ -175,7 +171,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
 
         template<typename xpointerT, typename predT>
-          static typename copy_const_from<bucket_type, decltype(*(::std::declval<xpointerT>()))>::type * probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
+          static size_type probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
           {
             static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
             const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
@@ -183,18 +179,20 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             for(size_type i = first; i != nbkt; ++i) {
               const auto bkt = ptr->data + i;
               if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
-                return bkt;
+                ROCKET_ASSERT(i != npos);
+                return i;
               }
             }
             // Phase two: Probe from the beginning of the table to `last`.
             for(size_type i = 0; i != last; ++i) {
               const auto bkt = ptr->data + i;
               if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
-                return bkt;
+                ROCKET_ASSERT(i != npos);
+                return i;
               }
             }
             // The table is full and no desired element has been found so far.
-            return nullptr;
+            return npos;
           }
       };
 
@@ -214,8 +212,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               }
               // Find a bucket for the new element.
               const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
-              const auto bkt = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
-              ROCKET_ASSERT(bkt);
+              const auto toff = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
+              ROCKET_ASSERT(toff != linear_prober<allocatorT>::npos);
+              const auto bkt = ptr->data + toff;
               // Allocate a new element by copy-constructing from the old one.
               auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
               try {
@@ -260,8 +259,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               }
               // Find a bucket for the new element.
               const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
-              const auto bkt = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
-              ROCKET_ASSERT(bkt);
+              const auto toff = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
+              ROCKET_ASSERT(toff != linear_prober<allocatorT>::npos);
+              const auto bkt = ptr->data + toff;
               // Detach the old element.
               auto eptr = ptr_old->data[i].set(nullptr);
               ptr_old->nelem -= 1;
@@ -555,19 +555,19 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               return -1;
             }
             const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-            const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
+            const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin,
               [&](const bucket<allocatorT> *tbkt)
                 { return this->as_key_equal()(tbkt->get()->first, ykey); }
               );
-            if((max_load_factor_reciprocal == 1) && !bkt) {
+            if((max_load_factor_reciprocal == 1) && (toff == linear_prober<allocator_type>::npos)) {
               return -1;
             }
+            ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
+            const auto bkt = ptr->data + toff;
             if(!bkt->get()) {
               return -1;
             }
-            const auto toff = bkt - ptr->data;
-            ROCKET_ASSERT(toff >= 0);
-            return toff;
+            return static_cast<difference_type>(toff);
           }
         bucket_type * mut_data_unchecked() noexcept
           {
@@ -587,11 +587,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(ptr);
             // Find a bucket for the new element.
             const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-            const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin,
+            const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin,
               [&](const bucket<allocatorT> *tbkt)
                 { return this->as_key_equal()(tbkt->get()->first, ykey); }
               );
-            ROCKET_ASSERT(bkt);
+            ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
+            const auto bkt = ptr->data + toff;
             if(bkt->get()) {
               // A duplicate key has been found.
               return ::std::make_pair(bkt, false);
@@ -641,9 +642,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                   auto eptr = tbkt->set(nullptr);
                   // Find a new bucket for it.
                   const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
-                  const auto bkt = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
-                  ROCKET_ASSERT(bkt);
+                  const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
+                  ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
                   // Insert it into the new bucket.
+                  const auto bkt = ptr->data + toff;
                   eptr = bkt->set(eptr);
                   ROCKET_ASSERT(!eptr);
                   return false;
@@ -678,7 +680,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using difference_type    = ptrdiff_t;
 
         using parent_type   = storage_handle<typename hashmapT::allocator_type, typename hashmapT::hasher, typename hashmapT::key_equal>;
-        using bucket_type   = typename copy_const_from<typename parent_type::bucket_type, value_type>::type;
+        using bucket_type   = typename conditional<is_const<valueT>::value, const typename parent_type::bucket_type, typename parent_type::bucket_type>::type;
 
       private:
         const parent_type *m_ref;
