@@ -48,11 +48,13 @@ template<typename valueT>
   public:
     ROCKET_PURE_FUNCTION bool unique() const noexcept
       {
-        return this->m_nref.load(::std::memory_order_relaxed) == 1;
+        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        return ROCKET_EXPECT(old == 1);
       }
     valueT get() const noexcept
       {
-        return this->m_nref.load(::std::memory_order_relaxed);
+        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        return old;
       }
     bool try_increment() noexcept
       {
