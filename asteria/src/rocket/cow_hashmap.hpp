@@ -369,6 +369,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
+        ROCKET_NOINLINE [[noreturn]] void do_throw_size_overflow(size_type base, size_type add) const
+          {
+            noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
+                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+          }
+
       public:
         const hasher & as_hasher() const noexcept
           {
@@ -444,8 +450,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             const auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              noadl::throw_length_error("cow_hashmap: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                        static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
+              this->do_throw_size_overflow(base, add);
             }
             return base + add;
           }
@@ -965,6 +970,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
+    ROCKET_NOINLINE [[noreturn]] void do_throw_key_not_found() const
+      {
+        noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+      }
+
     const details_cow_hashmap::bucket<allocator_type> * do_get_table() const noexcept
       {
         return this->m_sth.data();
@@ -1285,7 +1295,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         const auto ptr = this->do_get_table();
         const auto toff = this->m_sth.index_of(key);
         if(toff < 0) {
-          noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+          this->do_throw_key_not_found();
         }
         return ptr[toff].get()->second;
       }
@@ -1297,7 +1307,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         const auto ptr = this->do_mut_table();
         const auto toff = this->m_sth.index_of(key);
         if(toff < 0) {
-          noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+          this->do_throw_key_not_found();
         }
         return ptr[toff].get()->second;
       }

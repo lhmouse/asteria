@@ -242,6 +242,12 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
+        ROCKET_NOINLINE [[noreturn]] void do_throw_size_overflow(size_type base, size_type add) const
+          {
+            noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
+                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+          }
+
       public:
         const allocator_type & as_allocator() const noexcept
           {
@@ -291,8 +297,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             const auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                        static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
+              this->do_throw_size_overflow(base, add);
             }
             return base + add;
           }
@@ -786,6 +791,12 @@ template<typename valueT, typename allocatorT>
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
+    ROCKET_NOINLINE [[noreturn]] void do_throw_subscript_out_of_range(size_type pos) const
+      {
+        noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
+                                  static_cast<long long>(pos), static_cast<long long>(this->size()));
+      }
+
     template<typename ...paramsT>
       value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
       {
@@ -951,8 +962,7 @@ template<typename valueT, typename allocatorT>
       {
         const auto cnt = this->size();
         if(pos >= cnt) {
-          noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
-                                    static_cast<long long>(pos), static_cast<long long>(cnt));
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -981,8 +991,7 @@ template<typename valueT, typename allocatorT>
       {
         const auto cnt = this->size();
         if(pos >= cnt) {
-          noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a writable position within a vector of size `%lld`.",
-                                    static_cast<long long>(pos), static_cast<long long>(cnt));
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->mut_data()[pos];
       }

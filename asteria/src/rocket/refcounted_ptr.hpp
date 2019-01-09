@@ -209,6 +209,13 @@ template<typename elementT, typename deleterT>
     using refcount_base  = details_refcounted_ptr::refcount_base;
     using deleter_base   = typename allocator_wrapper_base_for<deleter_type>::type;
 
+  private:
+    ROCKET_NOINLINE [[noreturn]] void do_throw_bad_cast(const type_info &ytype) const
+      {
+        noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+                                  ytype.name(), typeid(*this).name());
+      }
+
   public:
     const deleter_type & as_deleter() const noexcept
       {
@@ -242,8 +249,7 @@ template<typename elementT, typename deleterT>
       {
         const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcounted_base *>(this);
         if(!ptr) {
-          noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                    typeid(yelementT).name(), typeid(*this).name());
+          this->do_throw_bad_cast(typeid(yelementT));
         }
         this->refcount_base::add_reference();
         return refcounted_ptr<const yelementT>(ptr);
@@ -253,8 +259,7 @@ template<typename elementT, typename deleterT>
       {
         const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcounted_base *>(this);
         if(!ptr) {
-          noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                    typeid(yelementT).name(), typeid(*this).name());
+          this->do_throw_bad_cast(typeid(yelementT));
         }
         this->refcount_base::add_reference();
         return refcounted_ptr<yelementT>(ptr);

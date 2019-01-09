@@ -143,6 +143,12 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
+        ROCKET_NOINLINE [[noreturn]] void do_throw_size_overflow(size_type base, size_type add) const
+          {
+            noadl::throw_length_error("basic_cow_string: Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
+                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+          }
+
       public:
         const allocator_type & as_allocator() const noexcept
           {
@@ -192,8 +198,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             const auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              noadl::throw_length_error("basic_cow_string: Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
-                                        static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(cap_max));
+              this->do_throw_size_overflow(base, add);
             }
             return base + add;
           }
@@ -722,14 +727,19 @@ template<typename charT, typename traitsT, typename allocatorT>
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
+    ROCKET_NOINLINE [[noreturn]] void do_throw_subscript_out_of_range(size_type pos) const
+      {
+        noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is out of range for a string of length `%lld`.",
+                                  static_cast<long long>(pos), static_cast<long long>(this->size()));
+      }
+
     // This function works the same way as `substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(n, size() - tpos)`.
     size_type do_clamp_substr(size_type tpos, size_type n) const
       {
         const auto tlen = this->size();
         if(tpos > tlen) {
-            noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is out of range for a string of length `%lld`.",
-                                      static_cast<long long>(tpos), static_cast<long long>(tlen));
+          this->do_throw_subscript_out_of_range(tpos);
         }
         return noadl::min(tlen - tpos, n);
       }
@@ -951,8 +961,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       {
         const auto len = this->size();
         if(pos >= len) {
-          noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
-                                    static_cast<long long>(pos), static_cast<long long>(len));
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -982,8 +991,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       {
         const auto len = this->size();
         if(pos >= len) {
-          noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a writable position within a string of length `%lld`.",
-                                    static_cast<long long>(pos), static_cast<long long>(len));
+          this->do_throw_subscript_out_of_range(pos);
         }
         return this->mut_data()[pos];
       }

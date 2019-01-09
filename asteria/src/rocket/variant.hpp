@@ -414,6 +414,13 @@ template<typename ...alternativesT>
 #endif
       }
 
+  private:
+    ROCKET_NOINLINE [[noreturn]] void do_throw_index_mismatch(size_t yindex, const type_info &ytype) const
+      {
+        noadl::throw_invalid_argument("variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
+                                      static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());
+      }
+
   public:
     // 23.7.3.5, value status
     size_t index() const noexcept
@@ -460,8 +467,7 @@ template<typename ...alternativesT>
       {
         const auto ptr = this->get<indexT>();
         if(!ptr) {
-          noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                        static_cast<int>(indexT), typeid(typename type_at<indexT>::type).name(), static_cast<int>(this->index()), this->type().name());
+          this->do_throw_index_mismatch(indexT, typeid(typename type_at<indexT>::type));
         }
         return *ptr;
       }
@@ -475,8 +481,7 @@ template<typename ...alternativesT>
       {
         const auto ptr = this->get<indexT>();
         if(!ptr) {
-          noadl::throw_invalid_argument("variant: The index requested is `%d` (`%s`), but the index currently active is `%d` (`%s`).",
-                                        static_cast<int>(indexT), typeid(typename type_at<indexT>::type).name(), static_cast<int>(this->index()), this->type().name());
+          this->do_throw_index_mismatch(indexT, typeid(typename type_at<indexT>::type));
         }
         return *ptr;
       }
