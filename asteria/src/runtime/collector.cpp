@@ -72,7 +72,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
           }
 
       public:
-        bool accept(const rocket::refcounted_ptr<Variable> &var) const override
+        bool operator()(const rocket::refcounted_ptr<Variable> &var) const override
           {
             return this->m_func(var);
           }

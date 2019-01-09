@@ -18,7 +18,7 @@ class Abstract_variable_callback
     ROCKET_COPYABLE_DESTRUCTOR(Abstract_variable_callback, virtual);
 
   public:
-    virtual bool accept(const rocket::refcounted_ptr<Variable> &var) const = 0;
+    virtual bool operator()(const rocket::refcounted_ptr<Variable> &var) const = 0;
   };
 
 }
