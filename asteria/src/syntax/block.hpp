@@ -27,9 +27,12 @@ class Block
         status_continue_for     = 8,
       };
 
+    // TODO: In the future we will add JIT support.
+    using Compiled_instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *>;
+
   private:
     rocket::cow_vector<Statement> m_stmts;
-    rocket::cow_vector<rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *>> m_jinsts;
+    rocket::cow_vector<Compiled_instruction> m_cinsts;
 
   public:
     Block() noexcept
@@ -49,7 +52,7 @@ class Block
   public:
     bool empty() const noexcept
       {
-        return this->m_jinsts.empty();
+        return this->m_stmts.empty();
       }
 
     void fly_over_in_place(Abstract_context &ctx_io) const;

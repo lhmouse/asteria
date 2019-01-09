@@ -1266,7 +1266,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
     template<typename AltT, void (&funcT)(const AltT &, Reference_stack &, Global_context &, const Executive_context &)>
-      rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *> do_bind(const AltT &alt)
+      Expression::Compiled_instruction do_bind(const AltT &alt)
       {
         return rocket::bind_first(
           [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
@@ -1278,7 +1278,7 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     }
 
-rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *> Xpnode::compile() const
+Expression::Compiled_instruction Xpnode::compile() const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:

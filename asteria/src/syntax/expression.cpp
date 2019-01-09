@@ -17,12 +17,12 @@ Expression::~Expression()
 
 void Expression::do_compile()
   {
-    decltype(m_jinsts) jinsts;
-    jinsts.reserve(this->m_nodes.size());
+    rocket::cow_vector<Compiled_instruction> cinsts;
+    cinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
-      jinsts.emplace_back(node.compile());
+      cinsts.emplace_back(node.compile());
     }
-    this->m_jinsts = std::move(jinsts);
+    this->m_cinsts = std::move(cinsts);
   }
 
 Expression Expression::bind(const Global_context &global, const Analytic_context &ctx) const
@@ -38,8 +38,8 @@ Expression Expression::bind(const Global_context &global, const Analytic_context
 
 bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
   {
-    auto rptr = this->m_jinsts.data();
-    const auto eptr = rptr + this->m_jinsts.size();
+    auto rptr = this->m_cinsts.data();
+    const auto eptr = rptr + this->m_cinsts.size();
     if(rptr == eptr) {
       return false;
     }

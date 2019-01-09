@@ -19,12 +19,12 @@ Block::~Block()
 
 void Block::do_compile()
   {
-    decltype(m_jinsts) jinsts;
-    jinsts.reserve(this->m_stmts.size());
+    rocket::cow_vector<Compiled_instruction> cinsts;
+    cinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      jinsts.emplace_back(stmt.compile());
+      cinsts.emplace_back(stmt.compile());
     }
-    this->m_jinsts = std::move(jinsts);
+    this->m_cinsts = std::move(cinsts);
   }
 
 void Block::fly_over_in_place(Abstract_context &ctx_io) const
@@ -47,8 +47,8 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
   {
-    auto rptr = this->m_jinsts.data();
-    const auto eptr = rptr + this->m_jinsts.size();
+    auto rptr = this->m_cinsts.data();
+    const auto eptr = rptr + this->m_cinsts.size();
     if(rptr == eptr) {
       return status_next;
     }

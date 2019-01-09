@@ -574,7 +574,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
     template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_context &, Global_context &)>
-      rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> do_bind(const AltT &alt)
+      Block::Compiled_instruction do_bind(const AltT &alt)
       {
         return rocket::bind_first(
           [](const void *qalt, Reference &ref_out, Executive_context &ctx_io, Global_context &global)
@@ -584,7 +584,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           std::addressof(alt));
       }
 
-    rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> do_bind_constant(Block::Status status)
+    Block::Compiled_instruction do_bind_constant(Block::Status status)
       {
         return rocket::bind_first(
           [](const void *value, Reference & /*ref_out*/, Executive_context & /*ctx_io*/, Global_context & /*global*/)
@@ -596,7 +596,7 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     }
 
-rocket::binder_first<Block::Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *> Statement::compile() const
+Block::Compiled_instruction Statement::compile() const
   {
     switch(Index(this->m_stor.index())) {
     case index_expression:

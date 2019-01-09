@@ -12,9 +12,13 @@ namespace Asteria {
 
 class Expression
   {
+  public:
+    // TODO: In the future we will add JIT support.
+    using Compiled_instruction = rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *>;
+
   private:
     rocket::cow_vector<Xpnode> m_nodes;
-    rocket::cow_vector<rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *>> m_jinsts;
+    rocket::cow_vector<Compiled_instruction> m_cinsts;
 
   public:
     Expression() noexcept
@@ -34,7 +38,7 @@ class Expression
   public:
     bool empty() const noexcept
       {
-        return this->m_jinsts.empty();
+        return this->m_nodes.empty();
       }
 
     Expression bind(const Global_context &global, const Analytic_context &ctx) const;
