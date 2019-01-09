@@ -26,8 +26,7 @@ class Generational_collector
     ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_collector);
 
   public:
-    void track_variable(const rocket::refcounted_ptr<Variable> &var);
-    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
+    bool track_variable(const rocket::refcounted_ptr<Variable> &var);
     void perform_garbage_collection(unsigned gen_limit);
   };
 

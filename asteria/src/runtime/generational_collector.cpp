@@ -12,25 +12,9 @@ Generational_collector::~Generational_collector()
   {
   }
 
-void Generational_collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
+bool Generational_collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
   {
-    if(!this->m_gen_zero.track_variable(var)) {
-      ASTERIA_THROW_RUNTIME_ERROR("A variable can only be added at most once.");
-    }
-  }
-
-bool Generational_collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
-  {
-    auto qcoll = &(this->m_gen_zero);
-    do {
-      if(qcoll->untrack_variable(var)) {
-        return true;
-      }
-      qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        return false;
-      }
-    } while(true);
+    return this->m_gen_zero.track_variable(var);
   }
 
 void Generational_collector::perform_garbage_collection(unsigned gen_limit)
