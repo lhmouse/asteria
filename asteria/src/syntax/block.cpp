@@ -22,7 +22,7 @@ void Block::do_compile()
     rocket::cow_vector<Compiled_instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      cinsts.emplace_back(stmt.compile());
+      stmt.compile(cinsts);
     }
     this->m_cinsts = std::move(cinsts);
   }
@@ -39,8 +39,7 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
     rocket::cow_vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
-      auto alt_bnd = stmt.bind_in_place(ctx_io, global);
-      stmts_bnd.emplace_back(std::move(alt_bnd));
+      stmt.bind_in_place(stmts_bnd, ctx_io, global);
     }
     return std::move(stmts_bnd);
   }

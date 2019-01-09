@@ -20,7 +20,7 @@ void Expression::do_compile()
     rocket::cow_vector<Compiled_instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
-      cinsts.emplace_back(node.compile());
+      node.compile(cinsts);
     }
     this->m_cinsts = std::move(cinsts);
   }
@@ -30,8 +30,7 @@ Expression Expression::bind(const Global_context &global, const Analytic_context
     rocket::cow_vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
-      auto node_bnd = node.bind(global, ctx);
-      nodes_bnd.emplace_back(std::move(node_bnd));
+      node.bind(nodes_bnd, global, ctx);
     }
     return std::move(nodes_bnd);
   }

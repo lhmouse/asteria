@@ -75,7 +75,7 @@ void Statement::fly_over_in_place(Abstract_context &ctx_io) const
     }
   }
 
-Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_context &global) const
+void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_context &ctx_io, const Global_context &global) const
   {
     switch(Index(this->m_stor.index())) {
     case index_expression:
@@ -84,7 +84,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the expression recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_expression alt_bnd = { std::move(expr_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_block:
       {
@@ -92,7 +93,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the body recursively.
         auto body_bnd = alt.body.bind(global, ctx_io);
         Statement::S_block alt_bnd = { std::move(body_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_variable:
       {
@@ -102,7 +104,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
         Statement::S_variable alt_bnd = { alt.loc, alt.name, alt.immutable, std::move(init_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_function:
       {
@@ -114,7 +117,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Statement::S_function alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_if:
       {
@@ -124,7 +128,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto branch_true_bnd = alt.branch_true.bind(global, ctx_io);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx_io);
         Statement::S_if alt_bnd = { alt.neg, std::move(cond_bnd), std::move(branch_true_bnd), std::move(branch_false_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_switch:
       {
@@ -141,7 +146,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
           clauses_bnd.emplace_back(std::move(first_bnd), std::move(second_bnd));
         }
         Statement::S_switch alt_bnd = { std::move(ctrl_bnd), std::move(clauses_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_do_while:
       {
@@ -150,7 +156,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto body_bnd = alt.body.bind(global, ctx_io);
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         Statement::S_do_while alt_bnd = { std::move(body_bnd), alt.neg, std::move(cond_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_while:
       {
@@ -159,7 +166,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         auto body_bnd = alt.body.bind(global, ctx_io);
         Statement::S_while alt_bnd = { alt.neg, std::move(cond_bnd), std::move(body_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_for:
       {
@@ -172,7 +180,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto step_bnd = alt.step.bind(global, ctx_next);
         auto body_bnd = alt.body.bind(global, ctx_next);
         Statement::S_for alt_bnd = { std::move(init_bnd), std::move(cond_bnd), std::move(step_bnd), std::move(body_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_for_each:
       {
@@ -185,7 +194,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         auto init_bnd = alt.init.bind(global, ctx_next);
         auto body_bnd = alt.body.bind(global, ctx_next);
         Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, std::move(init_bnd), std::move(body_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_try:
       {
@@ -198,21 +208,24 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the `catch` branch recursively.
         auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next, global);
         Statement::S_try alt_bnd = { std::move(body_try_bnd), alt.except_name, std::move(body_catch_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_break:
       {
         const auto &alt = this->m_stor.as<S_break>();
         // Copy it as-is.
         Statement::S_break alt_bnd = { alt.target };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_continue:
       {
         const auto &alt = this->m_stor.as<S_continue>();
         // Copy it as-is.
         Statement::S_continue alt_bnd = { alt.target };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_throw:
       {
@@ -220,7 +233,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_throw alt_bnd = { alt.loc, std::move(expr_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_return:
       {
@@ -228,7 +242,8 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_return alt_bnd = { alt.by_ref, std::move(expr_bnd) };
-        return std::move(alt_bnd);
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -596,63 +611,74 @@ Statement Statement::bind_in_place(Analytic_context &ctx_io, const Global_contex
 
     }
 
-Block::Compiled_instruction Statement::compile() const
+void Statement::compile(rocket::cow_vector<Block::Compiled_instruction> &cinsts_out) const
   {
     switch(Index(this->m_stor.index())) {
     case index_expression:
       {
         const auto &alt = this->m_stor.as<S_expression>();
-        return do_bind<S_expression, do_execute_expression>(alt);
+        cinsts_out.emplace_back(do_bind<S_expression, do_execute_expression>(alt));
+        return;
       }
     case index_block:
       {
         const auto &alt = this->m_stor.as<S_block>();
-        return do_bind<S_block, do_execute_block>(alt);
+        cinsts_out.emplace_back(do_bind<S_block, do_execute_block>(alt));
+        return;
       }
     case index_variable:
       {
         const auto &alt = this->m_stor.as<S_variable>();
-        return do_bind<S_variable, do_execute_variable>(alt);
+        cinsts_out.emplace_back(do_bind<S_variable, do_execute_variable>(alt));
+        return;
       }
     case index_function:
       {
         const auto &alt = this->m_stor.as<S_function>();
-        return do_bind<S_function, do_execute_function>(alt);
+        cinsts_out.emplace_back(do_bind<S_function, do_execute_function>(alt));
+        return;
       }
     case index_if:
       {
         const auto &alt = this->m_stor.as<S_if>();
-        return do_bind<S_if, do_execute_if>(alt);
+        cinsts_out.emplace_back(do_bind<S_if, do_execute_if>(alt));
+        return;
       }
     case index_switch:
       {
         const auto &alt = this->m_stor.as<S_switch>();
-        return do_bind<S_switch, do_execute_switch>(alt);
+        cinsts_out.emplace_back(do_bind<S_switch, do_execute_switch>(alt));
+        return;
       }
     case index_do_while:
       {
         const auto &alt = this->m_stor.as<S_do_while>();
-        return do_bind<S_do_while, do_execute_do_while>(alt);
+        cinsts_out.emplace_back(do_bind<S_do_while, do_execute_do_while>(alt));
+        return;
       }
     case index_while:
       {
         const auto &alt = this->m_stor.as<S_while>();
-        return do_bind<S_while, do_execute_while>(alt);
+        cinsts_out.emplace_back(do_bind<S_while, do_execute_while>(alt));
+        return;
       }
     case index_for:
       {
         const auto &alt = this->m_stor.as<S_for>();
-        return do_bind<S_for, do_execute_for>(alt);
+        cinsts_out.emplace_back(do_bind<S_for, do_execute_for>(alt));
+        return;
       }
     case index_for_each:
       {
         const auto &alt = this->m_stor.as<S_for_each>();
-        return do_bind<S_for_each, do_execute_for_each>(alt);
+        cinsts_out.emplace_back(do_bind<S_for_each, do_execute_for_each>(alt));
+        return;
       }
     case index_try:
       {
         const auto &alt = this->m_stor.as<S_try>();
-        return do_bind<S_try, do_execute_try>(alt);
+        cinsts_out.emplace_back(do_bind<S_try, do_execute_try>(alt));
+        return;
       }
     case index_break:
       {
@@ -660,19 +686,23 @@ Block::Compiled_instruction Statement::compile() const
         switch(alt.target) {
         case Statement::target_unspec:
           {
-            return do_bind_constant(Block::status_break_unspec);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_break_unspec));
+            return;
           }
         case Statement::target_switch:
           {
-            return do_bind_constant(Block::status_break_switch);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_break_switch));
+            return;
           }
         case Statement::target_while:
           {
-            return do_bind_constant(Block::status_break_while);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_break_while));
+            return;
           }
         case Statement::target_for:
           {
-            return do_bind_constant(Block::status_break_for);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_break_for));
+            return;
           }
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
@@ -684,7 +714,8 @@ Block::Compiled_instruction Statement::compile() const
         switch(alt.target) {
         case Statement::target_unspec:
           {
-            return do_bind_constant(Block::status_continue_unspec);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_continue_unspec));
+            return;
           }
         case Statement::target_switch:
           {
@@ -692,11 +723,13 @@ Block::Compiled_instruction Statement::compile() const
           }
         case Statement::target_while:
           {
-            return do_bind_constant(Block::status_continue_while);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_continue_while));
+            return;
           }
         case Statement::target_for:
           {
-            return do_bind_constant(Block::status_continue_for);
+            cinsts_out.emplace_back(do_bind_constant(Block::status_continue_for));
+            return;
           }
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
@@ -705,12 +738,14 @@ Block::Compiled_instruction Statement::compile() const
     case index_throw:
       {
         const auto &alt = this->m_stor.as<S_throw>();
-        return do_bind<S_throw, do_execute_throw>(alt);
+        cinsts_out.emplace_back(do_bind<S_throw, do_execute_throw>(alt));
+        return;
       }
     case index_return:
       {
         const auto &alt = this->m_stor.as<S_return>();
-        return do_bind<S_return, do_execute_return>(alt);
+        cinsts_out.emplace_back(do_bind<S_return, do_execute_return>(alt));
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");

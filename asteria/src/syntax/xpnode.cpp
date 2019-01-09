@@ -182,7 +182,7 @@ Xpnode::~Xpnode()
 
     }
 
-Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) const
+void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &global, const Analytic_context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
@@ -190,7 +190,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         const auto &alt = this->m_stor.as<S_literal>();
         // Copy it as-is.
         Xpnode::S_literal alt_bnd = { alt.value };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_named_reference:
       {
@@ -199,24 +200,28 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         if(alt.name.rdstr().starts_with("__")) {
           // Copy it as-is.
           Xpnode::S_named_reference alt_bnd = { alt.name };
-          return std::move(alt_bnd);
+          nodes_out.emplace_back(std::move(alt_bnd));
+          return;
         }
         // Look for the reference in the current context.
         auto pair = do_name_lookup(global, ctx, alt.name);
         if(pair.first.get().is_analytic()) {
           // Don't bind it onto something in a analytic context which will soon get destroyed.
           Xpnode::S_named_reference alt_bnd = { alt.name };
-          return std::move(alt_bnd);
+          nodes_out.emplace_back(std::move(alt_bnd));
+          return;
         }
         Xpnode::S_bound_reference alt_bnd = { pair.second };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_bound_reference:
       {
         const auto &alt = this->m_stor.as<S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_closure_function:
       {
@@ -226,7 +231,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         ctx_next.initialize_for_function(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_branch:
       {
@@ -235,42 +241,48 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         auto branch_true_bnd = alt.branch_true.bind(global, ctx);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx);
         Xpnode::S_branch alt_bnd = { std::move(branch_true_bnd), std::move(branch_false_bnd), alt.assign };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_function_call:
       {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.loc, alt.arg_cnt };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_subscript:
       {
         const auto &alt = this->m_stor.as<S_subscript>();
         // Copy it as-is.
         Xpnode::S_subscript alt_bnd = { alt.name };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_operator_rpn:
       {
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.assign };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_unnamed_array:
       {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Copy it as-is.
         Xpnode::S_unnamed_array alt_bnd = { alt.elem_cnt };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_unnamed_object:
       {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Copy it as-is.
         Xpnode::S_unnamed_object alt_bnd = { alt.keys };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     case index_coalescence:
       {
@@ -278,7 +290,8 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
         // Bind the null branch recursively.
         auto branch_null_bnd = alt.branch_null.bind(global, ctx);
         Xpnode::S_coalescence alt_bnd = { std::move(branch_null_bnd), alt.assign };
-        return std::move(alt_bnd);
+        nodes_out.emplace_back(std::move(alt_bnd));
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -1278,43 +1291,50 @@ Xpnode Xpnode::bind(const Global_context &global, const Analytic_context &ctx) c
 
     }
 
-Expression::Compiled_instruction Xpnode::compile() const
+void Xpnode::compile(rocket::cow_vector<Expression::Compiled_instruction> &cinsts_out) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
       {
         const auto &alt = this->m_stor.as<S_literal>();
-        return do_bind<S_literal, do_evaluate_literal>(alt);
+        cinsts_out.emplace_back(do_bind<S_literal, do_evaluate_literal>(alt));
+        return;
       }
     case index_named_reference:
       {
         const auto &alt = this->m_stor.as<S_named_reference>();
-        return do_bind<S_named_reference, do_evaluate_named_reference>(alt);
+        cinsts_out.emplace_back(do_bind<S_named_reference, do_evaluate_named_reference>(alt));
+        return;
       }
     case index_bound_reference:
       {
         const auto &alt = this->m_stor.as<S_bound_reference>();
-        return do_bind<S_bound_reference, do_evaluate_bound_reference>(alt);
+        cinsts_out.emplace_back(do_bind<S_bound_reference, do_evaluate_bound_reference>(alt));
+        return;
       }
     case index_closure_function:
       {
         const auto &alt = this->m_stor.as<S_closure_function>();
-        return do_bind<S_closure_function, do_evaluate_closure_function>(alt);
+        cinsts_out.emplace_back(do_bind<S_closure_function, do_evaluate_closure_function>(alt));
+        return;
       }
     case index_branch:
       {
         const auto &alt = this->m_stor.as<S_branch>();
-        return do_bind<S_branch, do_evaluate_branch>(alt);
+        cinsts_out.emplace_back(do_bind<S_branch, do_evaluate_branch>(alt));
+        return;
       }
     case index_function_call:
       {
         const auto &alt = this->m_stor.as<S_function_call>();
-        return do_bind<S_function_call, do_evaluate_function_call>(alt);
+        cinsts_out.emplace_back(do_bind<S_function_call, do_evaluate_function_call>(alt));
+        return;
       }
     case index_subscript:
       {
         const auto &alt = this->m_stor.as<S_subscript>();
-        return do_bind<S_subscript, do_evaluate_subscript>(alt);
+        cinsts_out.emplace_back(do_bind<S_subscript, do_evaluate_subscript>(alt));
+        return;
       }
     case index_operator_rpn:
       {
@@ -1322,127 +1342,158 @@ Expression::Compiled_instruction Xpnode::compile() const
         switch(alt.xop) {
         case xop_postfix_inc:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_inc>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_inc>>(alt));
+            return;
           }
         case xop_postfix_dec:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_dec>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_postfix_dec>>(alt));
+            return;
           }
         case xop_prefix_pos:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_pos>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_pos>>(alt));
+            return;
           }
         case xop_prefix_neg:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_neg>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_neg>>(alt));
+            return;
           }
         case xop_prefix_notb:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notb>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notb>>(alt));
+            return;
           }
         case xop_prefix_notl:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notl>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_notl>>(alt));
+            return;
           }
         case xop_prefix_inc:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_inc>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_inc>>(alt));
+            return;
           }
         case xop_prefix_dec:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_dec>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_dec>>(alt));
+            return;
           }
         case xop_prefix_unset:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_unset>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_unset>>(alt));
+            return;
           }
         case xop_prefix_lengthof:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_lengthof>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_lengthof>>(alt));
+            return;
           }
         case xop_prefix_typeof:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_typeof>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_prefix_typeof>>(alt));
+            return;
           }
         case xop_infix_cmp_eq:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_eq>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_eq>>(alt));
+            return;
           }
         case xop_infix_cmp_ne:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_ne>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_ne>>(alt));
+            return;
           }
         case xop_infix_cmp_lt:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lt>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lt>>(alt));
+            return;
           }
         case xop_infix_cmp_gt:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gt>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gt>>(alt));
+            return;
           }
         case xop_infix_cmp_lte:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lte>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_lte>>(alt));
+            return;
           }
         case xop_infix_cmp_gte:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gte>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_gte>>(alt));
+            return;
           }
         case xop_infix_cmp_3way:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_3way>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_cmp_3way>>(alt));
+            return;
           }
         case xop_infix_add:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_add>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_add>>(alt));
+            return;
           }
         case xop_infix_sub:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sub>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sub>>(alt));
+            return;
           }
         case xop_infix_mul:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mul>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mul>>(alt));
+            return;
           }
         case xop_infix_div:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_div>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_div>>(alt));
+            return;
           }
         case xop_infix_mod:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mod>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_mod>>(alt));
+            return;
           }
         case xop_infix_sll:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sll>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sll>>(alt));
+            return;
           }
         case xop_infix_srl:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_srl>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_srl>>(alt));
+            return;
           }
         case xop_infix_sla:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sla>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sla>>(alt));
+            return;
           }
         case xop_infix_sra:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sra>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_sra>>(alt));
+            return;
           }
         case xop_infix_andb:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_andb>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_andb>>(alt));
+            return;
           }
         case xop_infix_orb:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_orb>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_orb>>(alt));
+            return;
           }
         case xop_infix_xorb:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_xorb>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_xorb>>(alt));
+            return;
           }
         case xop_infix_assign:
           {
-            return do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_assign>>(alt);
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_rpn<xop_infix_assign>>(alt));
+            return;
           }
         default:
           ASTERIA_TERMINATE("An unknown operator type enumeration `", alt.xop, "` has been encountered.");
@@ -1451,17 +1502,20 @@ Expression::Compiled_instruction Xpnode::compile() const
     case index_unnamed_array:
       {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
-        return do_bind<S_unnamed_array, do_evaluate_unnamed_array>(alt);
+        cinsts_out.emplace_back(do_bind<S_unnamed_array, do_evaluate_unnamed_array>(alt));
+        return;
       }
     case index_unnamed_object:
       {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
-        return do_bind<S_unnamed_object, do_evaluate_unnamed_object>(alt);
+        cinsts_out.emplace_back(do_bind<S_unnamed_object, do_evaluate_unnamed_object>(alt));
+        return;
       }
     case index_coalescence:
       {
         const auto &alt = this->m_stor.as<S_coalescence>();
-        return do_bind<S_coalescence, do_evaluate_coalescence>(alt);
+        cinsts_out.emplace_back(do_bind<S_coalescence, do_evaluate_coalescence>(alt));
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");

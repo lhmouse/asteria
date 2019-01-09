@@ -161,8 +161,8 @@ class Statement
 
   public:
     void fly_over_in_place(Abstract_context &ctx_io) const;
-    Statement bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
-    Block::Compiled_instruction compile() const;
+    void bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_context &ctx_io, const Global_context &global) const;
+    void compile(rocket::cow_vector<Block::Compiled_instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };

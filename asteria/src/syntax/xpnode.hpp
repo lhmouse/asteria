@@ -155,8 +155,8 @@ class Xpnode
     ROCKET_COPYABLE_DESTRUCTOR(Xpnode);
 
   public:
-    Xpnode bind(const Global_context &global, const Analytic_context &ctx) const;
-    Expression::Compiled_instruction compile() const;
+    void bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &global, const Analytic_context &ctx) const;
+    void compile(rocket::cow_vector<Expression::Compiled_instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_variable_callback &callback) const;
   };
