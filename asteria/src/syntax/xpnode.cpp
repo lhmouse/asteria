@@ -427,27 +427,27 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         }
       }
 
-    bool do_logical_not(bool rhs)
+    ROCKET_PURE_FUNCTION inline bool do_logical_not(bool rhs)
       {
         return !rhs;
       }
 
-    bool do_logical_and(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION inline bool do_logical_and(bool lhs, bool rhs)
       {
         return lhs & rhs;
       }
 
-    bool do_logical_or(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION inline bool do_logical_or(bool lhs, bool rhs)
       {
         return lhs | rhs;
       }
 
-    bool do_logical_xor(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION inline bool do_logical_xor(bool lhs, bool rhs)
       {
         return lhs ^ rhs;
       }
 
-    std::int64_t do_negate(std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_negate(std::int64_t rhs)
       {
         if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
@@ -457,7 +457,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return static_cast<std::int64_t>(res);
       }
 
-    std::int64_t do_add(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_add(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -465,7 +465,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return lhs + rhs;
       }
 
-    std::int64_t do_subtract(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_subtract(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -473,7 +473,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return lhs - rhs;
       }
 
-    std::int64_t do_multiply(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_multiply(std::int64_t lhs, std::int64_t rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -495,7 +495,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return slhs * arhs;
       }
 
-    std::int64_t do_divide(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_divide(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -506,7 +506,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return lhs / rhs;
       }
 
-    std::int64_t do_modulo(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_modulo(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -517,7 +517,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return lhs % rhs;
       }
 
-    std::int64_t do_shift_left_logical(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_left_logical(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -530,7 +530,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return static_cast<std::int64_t>(res);
       }
 
-    std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -543,7 +543,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return static_cast<std::int64_t>(res);
       }
 
-    std::int64_t do_shift_left_arithmetic(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_left_arithmetic(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -565,7 +565,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return static_cast<std::int64_t>(res);
       }
 
-    std::int64_t do_shift_right_arithmetic(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_right_arithmetic(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -584,57 +584,57 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return static_cast<std::int64_t>(res);
       }
 
-    std::int64_t do_bitwise_not(std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_not(std::int64_t rhs)
       {
         return ~rhs;
       }
 
-    std::int64_t do_bitwise_and(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_and(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs & rhs;
       }
 
-    std::int64_t do_bitwise_or(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_or(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs | rhs;
       }
 
-    std::int64_t do_bitwise_xor(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_xor(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs ^ rhs;
       }
 
-    double do_negate(double rhs)
+    ROCKET_PURE_FUNCTION inline double do_negate(double rhs)
       {
         return -rhs;
       }
 
-    double do_add(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION inline double do_add(double lhs, double rhs)
       {
         return lhs + rhs;
       }
 
-    double do_subtract(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION inline double do_subtract(double lhs, double rhs)
       {
         return lhs - rhs;
       }
 
-    double do_multiply(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION inline double do_multiply(double lhs, double rhs)
       {
         return lhs * rhs;
       }
 
-    double do_divide(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION inline double do_divide(double lhs, double rhs)
       {
         return lhs / rhs;
       }
 
-    double do_modulo(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION inline double do_modulo(double lhs, double rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    rocket::cow_string do_concatenate(const rocket::cow_string &lhs, const rocket::cow_string &rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_concatenate(const rocket::cow_string &lhs, const rocket::cow_string &rhs)
       {
         rocket::cow_string res;
         res.reserve(lhs.size() + rhs.size());
@@ -643,7 +643,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return res;
       }
 
-    rocket::cow_string do_duplicate(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_duplicate(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
@@ -670,7 +670,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return res;
       }
 
-    rocket::cow_string do_move_left(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_move_left(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -685,7 +685,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return res;
       }
 
-    rocket::cow_string do_move_right(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_move_right(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -700,7 +700,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return res;
       }
 
-    rocket::cow_string do_extend(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_extend(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -715,7 +715,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         return res;
       }
 
-    rocket::cow_string do_truncate(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline rocket::cow_string do_truncate(const rocket::cow_string &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
