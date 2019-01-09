@@ -415,7 +415,7 @@ template<typename ...alternativesT>
       }
 
   private:
-    ROCKET_NOINLINE [[noreturn]] void do_throw_index_mismatch(size_t yindex, const type_info &ytype) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_index_mismatch(size_t yindex, const type_info &ytype) const
       {
         noadl::throw_invalid_argument("variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
                                       static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());

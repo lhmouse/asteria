@@ -82,7 +82,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           = delete;
 
       private:
-        ROCKET_NOINLINE [[noreturn]] void do_throw_size_overflow(size_type base, size_type add) const
+        [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
           {
             noadl::throw_length_error("static_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
                                       static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
@@ -485,7 +485,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
-    ROCKET_NOINLINE [[noreturn]] void do_throw_subscript_out_of_range(size_type pos) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
         noadl::throw_out_of_range("static_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
                                   static_cast<long long>(pos), static_cast<long long>(this->size()));

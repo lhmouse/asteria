@@ -210,7 +210,7 @@ template<typename elementT, typename deleterT>
     using deleter_base   = typename allocator_wrapper_base_for<deleter_type>::type;
 
   private:
-    ROCKET_NOINLINE [[noreturn]] void do_throw_bad_cast(const type_info &ytype) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info &ytype) const
       {
         noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
                                   ytype.name(), typeid(*this).name());
