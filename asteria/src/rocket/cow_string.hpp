@@ -729,7 +729,7 @@ template<typename charT, typename traitsT, typename allocatorT>
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
-        noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is out of range for a string of length `%lld`.",
+        noadl::throw_out_of_range("basic_cow_string: The subscript `%lld` is not a valid position within this string of length `%lld`.",
                                   static_cast<long long>(pos), static_cast<long long>(this->size()));
       }
 
