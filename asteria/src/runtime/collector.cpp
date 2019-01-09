@@ -84,6 +84,12 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
         ptr->enumerate_variables(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
+    template<typename FunctionT>
+      void do_enumerate_variables(const Variable_hashset &set, FunctionT &&func)
+      {
+        set.for_each(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
+      }
+
     }
 
 void Collector::collect()
@@ -93,6 +99,8 @@ void Collector::collect()
     if(!sentry) {
       return;
     }
+    const auto tied = this->m_tied_opt;
+    bool collect_tied = false;
     // The algorithm here is basically described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     // However, we initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
@@ -104,13 +112,13 @@ void Collector::collect()
     //   Add variables that are either tracked or reachable from tracked ones
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
-    this->m_tracked.for_each(
+    do_enumerate_variables(this->m_tracked,
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Add a variable reachable directly. Do not include references from `m_tracked`.
           root->init_gcref(1);
           if(!this->m_staging.insert(root)) {
-            return;
+            return false;
           }
           // Add variables reachable indirectly.
           do_enumerate_variables(root,
@@ -123,6 +131,7 @@ void Collector::collect()
                 return true;
               }
             );
+          return false;
         }
       );
     ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_staging.size());
@@ -130,7 +139,7 @@ void Collector::collect()
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
-    this->m_staging.for_each(
+    do_enumerate_variables(this->m_staging,
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           // Drop a direct reference.
@@ -172,18 +181,19 @@ void Collector::collect()
               break;
             }
           }
+          return false;
         }
       );
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
     //   Mark variables reachable indirectly from ones reachable directly.
     ///////////////////////////////////////////////////////////////////////////
-    this->m_staging.for_each(
+    do_enumerate_variables(this->m_staging,
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             // This variable is possibly unreachable.
-            return;
+            return false;
           }
           // Mark this variable reachable so it will not be collected.
           root->init_gcref(-1);
@@ -200,6 +210,7 @@ void Collector::collect()
                 return true;
               }
             );
+          return false;
         }
       );
     ///////////////////////////////////////////////////////////////////////////
@@ -207,38 +218,37 @@ void Collector::collect()
     //   Wipe out variables whose `gcref` counters have excceeded their
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
-    const auto tied = this->m_tied_opt;
-    bool collect_tied = false;
-    this->m_staging.for_each(
+    do_enumerate_variables(this->m_staging,
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
             root->reset(D_null(), true);
             this->m_tracked.erase(root);
-            return;
+            return false;
           }
           if(tied) {
             ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
             // Strong exception safety is paramount here.
             tied->m_tracked.insert(root);
+            collect_tied |= tied->m_counter++ >= tied->m_threshold;
             this->m_tracked.erase(root);
-            if(tied->m_counter++ >= tied->m_threshold) {
-              collect_tied = true;
-            }
-            return;
+            return false;
           }
+          ASTERIA_DEBUG_LOG("  Keeping reachable variable: ", root->get_value());
+          return false;
         }
       );
-    if(collect_tied) {
-      tied->collect();
-    }
     ///////////////////////////////////////////////////////////////////////////
     // Finish
     ///////////////////////////////////////////////////////////////////////////
-    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
-    this->m_counter = 0;
     this->m_staging.clear();
+    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
+    if(collect_tied) {
+      // N.B. This is subject to exceptions.
+      tied->collect();
+    }
+    this->m_counter = 0;
   }
 
 }

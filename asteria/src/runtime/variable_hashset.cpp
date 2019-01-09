@@ -3,175 +3,190 @@
 
 #include "../precompiled.hpp"
 #include "variable_hashset.hpp"
+#include "abstract_variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
 Variable_hashset::~Variable_hashset()
   {
-    const auto data = this->m_data;
-    const auto nbkt = this->m_nbkt;
-    for(std::size_t i = 0; i != nbkt; ++i) {
-      rocket::destroy_at(data + i);
-    }
-    ::operator delete(data);
   }
 
 void Variable_hashset::do_clear() noexcept
   {
-    const auto data = this->m_data;
-    const auto nbkt = this->m_nbkt;
-    for(std::size_t i = 0; i != nbkt; ++i) {
-      data[i].var.reset();
+    ROCKET_ASSERT(this->m_stor.size() >= 2);
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Clear all buckets.
+    for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
+      ptr->var.reset();
     }
-    this->m_size = 0;
+    // Clear the table.
+    pre->next = end;
+    end->prev = pre;
+    // Update the number of elements.
+    pre->size = 0;
+    end->resv = 0;
   }
-
-void Variable_hashset::do_throw_insert_null_pointer()
-  {
-    ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_hashset`.");
-  }
-
-    namespace {
-
-    std::size_t do_get_origin(std::size_t nbkt, const rocket::refcounted_ptr<Variable> &var) noexcept
-      {
-        // Conversion between an unsigned integer type and a floating point type results in performance penalty.
-        // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
-        const auto fcast = [](std::size_t x) { return static_cast<double>(static_cast<std::ptrdiff_t>(x)); };
-        const auto ucast = [](double y) { return static_cast<std::size_t>(static_cast<std::ptrdiff_t>(y)); };
-        // Multiplication is faster than division.
-        const auto seed = static_cast<std::uint32_t>(reinterpret_cast<std::uintptr_t>(var.get()) * 0x9E3779B9);
-        const auto ratio = fcast(seed >> 1) / double(0x80000000);
-        ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-        const auto pos = ucast(fcast(nbkt) * ratio);
-        ROCKET_ASSERT(pos < nbkt);
-        return pos;
-      }
-
-    template<typename BucketT, typename PredT>
-      BucketT * do_linear_probe(BucketT *data, std::size_t nbkt, std::size_t first, std::size_t last, PredT &&pred)
-      {
-        // Phase one: Probe from `first` to the end of the table.
-        for(std::size_t i = first; i != nbkt; ++i) {
-          const auto qbkt = data + i;
-          if(!*qbkt || std::forward<PredT>(pred)(*qbkt)) {
-            return qbkt;
-          }
-        }
-        // Phase two: Probe from the beginning of the table to `last`.
-        for(std::size_t i = 0; i != last; ++i) {
-          const auto qbkt = data + i;
-          if(!*qbkt || std::forward<PredT>(pred)(*qbkt)) {
-            return qbkt;
-          }
-        }
-        // The table is full.
-        // This is not possible as there shall always be empty slots in the table.
-        ROCKET_ASSERT(false);
-      }
-
-    }
 
 void Variable_hashset::do_rehash(std::size_t res_arg)
   {
-    if(res_arg > std::size_t(-1) / sizeof(Bucket) / 4) {
-      rocket::throw_length_error("Variable_hashset::do_reserve(): A table of `%lld` variables is too large and cannot be allocated.",
-                                 static_cast<long long>(res_arg));
-    }
-    // Round up the capacity for efficiency.
-    const auto nbkt = res_arg * 2 | this->m_size * 3 | 15;
-    // Allocate the new table. This may throw `std::bad_alloc`.
-    const auto data = static_cast<Bucket *>(::operator new(nbkt * sizeof(Bucket)));
-    // Initialize the table. This will not throw exceptions.
-    for(std::size_t i = 0; i != nbkt; ++i) {
-      static_assert(std::is_nothrow_default_constructible<Bucket>::value, "??");
-      rocket::default_construct_at(data + i);
-    }
-    // Rehash elements and move them into the new table. This will not throw exceptions, either.
-    const auto data_old = this->m_data;
-    if(ROCKET_UNEXPECT(data_old)) {
-      const auto nbkt_old = this->m_nbkt;
-      for(std::size_t i = 0; i != nbkt_old; ++i) {
-        if(data_old[i]) {
-          // Find a bucket for it.
-          const auto origin = do_get_origin(nbkt, data_old[i].var);
-          const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-          ROCKET_ASSERT(!*qbkt);
-          *qbkt = std::move(data_old[i]);
-        }
-        rocket::destroy_at(data_old + i);
+    ROCKET_ASSERT(res_arg >= 2);
+    ROCKET_ASSERT(res_arg >= this->m_stor.size());
+    // Allocate a new vector.
+    rocket::cow_vector<Bucket> stor;
+    stor.reserve(res_arg);
+    stor.append(stor.capacity());
+    // Get new table bounds.
+    const auto pre = stor.mut_data();
+    const auto end = pre + (stor.size() - 1);
+    // Clear the new table.
+    pre->next = end;
+    end->prev = pre;
+    // Move elements into the new table.
+    while(!this->m_stor.empty()) {
+      auto &rbkt = this->m_stor.mut_back();
+      if(rbkt) {
+        // Find a bucket for the new element.
+        const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.var.get()));
+        const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
+        ROCKET_ASSERT(bkt);
+        // Insert it into the new bucket.
+        ROCKET_ASSERT(!*bkt);
+        bkt->var = std::move(rbkt.var);
+        bkt->prev = end->prev;
+        bkt->next = end;
+        end->prev->next = bkt;
+        end->prev = bkt;
+        // Update the number of elements.
+        pre->size++;
       }
-      ::operator delete(data_old);
+      this->m_stor.pop_back();
     }
     // Set up the new table.
-    this->m_data = data;
-    this->m_nbkt = nbkt;
+    this->m_stor = std::move(stor);
   }
 
-std::ptrdiff_t Variable_hashset::do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept
+void Variable_hashset::do_check_relocation(Bucket *from, Bucket *to)
   {
-    const auto data = this->m_data;
-    if(!data) {
-      return -1;
-    }
-    const auto nbkt = this->m_nbkt;
-    // Looking for the variable using linear probing.
-    const auto origin = do_get_origin(nbkt, var);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
-    if(!*qbkt) {
-      // Not found.
-      return -1;
-    }
-    const auto toff = qbkt - data;
-    ROCKET_ASSERT(toff >= 0);
-    return toff;
-  }
-
-bool Variable_hashset::do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept
-  {
-    const auto data = this->m_data;
-    ROCKET_ASSERT(data);
-    const auto nbkt = this->m_nbkt;
-    ROCKET_ASSERT(this->m_size < nbkt / 2);
-    // Find a bucket for the new element.
-    const auto origin = do_get_origin(nbkt, var);
-    const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &cand) { return cand.var == var; });
-    if(*qbkt) {
-      // Already exists.
-      return false;
-    }
-    qbkt->var = var;
-    this->m_size += 1;
-    return true;
-  }
-
-void Variable_hashset::do_erase_unchecked(std::size_t tpos) noexcept
-  {
-    const auto data = this->m_data;
-    ROCKET_ASSERT(data);
-    const auto nbkt = this->m_nbkt;
-    ROCKET_ASSERT(tpos < nbkt);
-    // Nullify the bucket.
-    ROCKET_ASSERT(data[tpos]);
-    data[tpos].var.reset();
-    this->m_size -= 1;
-    // Relocate elements after the erasure point.
-    do_linear_probe(data, nbkt, tpos + 1, tpos,
-      [&](Bucket &cand)
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Check them.
+    rocket::linear_probe(
+      // Only probe non-erased buckets.
+      pre + 1, from, to, end,
+      // Relocate every bucket found.
+      [&](Bucket &rbkt)
         {
-          // Remove the element from the old bucket.
-          auto old = std::move(cand);
-          cand.var.reset();
-          // Find a new bucket for it.
-          const auto origin = do_get_origin(nbkt, old.var);
-          const auto qbkt = do_linear_probe(data, nbkt, origin, origin, [&](const Bucket &) { return false; });
-          ROCKET_ASSERT(!*qbkt);
+          // Release the old element.
+          rbkt.prev->next = rbkt.next;
+          rbkt.next->prev = rbkt.prev;
+          auto var = rocket::exchange(rbkt.var, nullptr);
+          // Find a new bucket for it using linear probing.
+          const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+          const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
+          ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
-          *qbkt = std::move(old);
+          ROCKET_ASSERT(!*bkt);
+          bkt->var = std::move(var);
+          bkt->prev = end->prev;
+          bkt->next = end;
+          end->prev->next = bkt;
+          end->prev = bkt;
           return false;
         }
       );
+  }
+
+bool Variable_hashset::has(const rocket::refcounted_ptr<Variable> &var) const noexcept
+  {
+    if(this->m_stor.empty()) {
+      return false;
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Find the element using linear probing.
+    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(!*bkt) {
+      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
+      return false;
+    }
+    return true;
+  }
+
+void Variable_hashset::for_each(const Abstract_variable_callback &callback) const
+  {
+    if(this->m_stor.empty()) {
+      return;
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Enumerate all buckets. The return value of `callback(ptr->var)` is ignored.
+    for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
+      callback(ptr->var);
+    }
+  }
+
+bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
+  {
+    if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
+      this->do_rehash(this->m_stor.size() * 2 | 127);
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Find a bucket for the new element.
+    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(*bkt) {
+      // A duplicate key has been found.
+      return false;
+    }
+    // Insert it into the new bucket.
+    bkt->var = var;
+    bkt->prev = end->prev;
+    bkt->next = end;
+    end->prev->next = bkt;
+    end->prev = bkt;
+    // Update the number of elements.
+    pre->size++;
+    return true;
+  }
+
+bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexcept
+  {
+    if(this->m_stor.empty()) {
+      return false;
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Find the element using linear probing.
+    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(!*bkt) {
+      return false;
+    }
+    // Update the number of elements.
+    pre->size--;
+    // Empty the bucket.
+    bkt->prev->next = bkt->next;
+    bkt->next->prev = bkt->prev;
+    bkt->var.reset();
+    // Relocate elements that are not placed in their immediate locations.
+    this->do_check_relocation(bkt, bkt + 1);
+    return true;
   }
 
 }

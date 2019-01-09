@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "variable.hpp"
+#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -14,89 +15,65 @@ class Variable_hashset
   private:
     struct Bucket
       {
+        union {
+          std::size_t size;  // of the first bucket
+          Bucket *prev;      // of the rest
+        };
+        union {
+          std::size_t resv;  // of the last bucket
+          Bucket *next;      // of the rest
+        };
         rocket::refcounted_ptr<Variable> var;
 
         explicit operator bool () const noexcept
           {
-            return this->var != nullptr;
+            return bool(this->var);
           }
       };
 
-    Bucket *m_data;
-    std::size_t m_nbkt;
-    std::size_t m_size;
+    // The first and last buckets are permanently reserved.
+    rocket::cow_vector<Bucket> m_stor;
 
   public:
     Variable_hashset() noexcept
-      : m_data(nullptr), m_nbkt(0), m_size(0)
+      : m_stor()
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
 
   private:
     void do_clear() noexcept;
-    [[noreturn]] void do_throw_insert_null_pointer();
     void do_rehash(std::size_t res_arg);
-    std::ptrdiff_t do_find(const rocket::refcounted_ptr<Variable> &var) const noexcept;
-    bool do_insert_unchecked(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    void do_erase_unchecked(std::size_t tpos) noexcept;
+    void do_check_relocation(Bucket *from, Bucket *to);
 
   public:
     bool empty() const noexcept
       {
-        return this->m_size == 0;
+        if(this->m_stor.empty()) {
+          return true;
+        }
+        return this->m_stor.front().size == 0;
       }
     std::size_t size() const noexcept
       {
-        return this->m_size;
+        if(this->m_stor.empty()) {
+          return 0;
+        }
+        return this->m_stor.front().size;
       }
     void clear() noexcept
       {
-        if(this->empty()) {
+        if(this->m_stor.empty()) {
           return;
         }
         this->do_clear();
       }
 
-    template<typename FuncT>
-      void for_each(FuncT &&func) const
-      {
-        const auto data = this->m_data;
-        const auto nbkt = this->m_nbkt;
-        for(std::size_t i = 0; i != nbkt; ++i) {
-          if(data[i].var) {
-            std::forward<FuncT>(func)(data[i].var);
-          }
-        }
-      }
-    bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept
-      {
-        const auto toff = this->do_find(var);
-        if(toff < 0) {
-          return false;
-        }
-        return true;
-      }
+    bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept;
+    void for_each(const Abstract_variable_callback &callback) const;
 
-    bool insert(const rocket::refcounted_ptr<Variable> &var)
-      {
-        if(!var) {
-          this->do_throw_insert_null_pointer();
-        }
-        if(this->m_size >= this->m_nbkt / 2) {
-          this->do_rehash(this->m_size + 1);
-        }
-        return this->do_insert_unchecked(var);
-      }
-    bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept
-      {
-        const auto toff = this->do_find(var);
-        if(toff < 0) {
-          return false;
-        }
-        this->do_erase_unchecked(static_cast<std::size_t>(toff));
-        return true;
-      }
+    bool insert(const rocket::refcounted_ptr<Variable> &var);
+    bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept;
   };
 
 }
