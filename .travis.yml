@@ -22,7 +22,7 @@ install:
   - ./check_includes.sh
   - mkdir -p m4
   - autoreconf -ifv
-  - test "${CXX#gcc}" == "${CXX}" || _options+=" CPPFLAGS=\"-Werror\" LDFLAGS=\"-Werror\""
+  - test "${CXX#g++}" == "${CXX}" || _options+=" CPPFLAGS=\"-Werror\""
   - ./configure
   - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-silent-rules ${_options}" distcheck
 
