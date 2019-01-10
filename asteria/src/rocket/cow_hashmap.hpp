@@ -50,6 +50,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       public:
         using allocator_type   = allocatorT;
         using value_type       = typename allocatorT::value_type;
+        using const_reference  = const value_type &;
+        using reference        = value_type &;
         using const_pointer    = typename allocator_traits<allocator_type>::const_pointer;
         using pointer          = typename allocator_traits<allocator_type>::pointer;
 
@@ -74,9 +76,30 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
             return this->m_ptr;
           }
-        pointer set(pointer ptr) noexcept
+        pointer reset(pointer ptr = pointer()) noexcept
           {
             return noadl::exchange(this->m_ptr, ptr);
+          }
+
+        explicit operator bool () const noexcept
+          {
+            return bool(this->get());
+          }
+        const_reference operator*() const noexcept
+          {
+            return *(this->get());
+          }
+        reference operator*() noexcept
+          {
+            return *(this->get());
+          }
+        const_pointer operator->() const noexcept
+          {
+            return this->m_ptr;
+          }
+        pointer operator->() noexcept
+          {
+            return this->m_ptr;
           }
       };
 
@@ -120,7 +143,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
             const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             for(size_type i = 0; i < nbkt; ++i) {
-              const auto eptr = this->data[i].set(nullptr);
+              const auto eptr = this->data[i].reset();
               if(!eptr) {
                   continue;
               }
@@ -224,7 +247,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 throw;
               }
               // Insert it into the new bucket.
-              eptr = bkt->set(eptr);
+              eptr = bkt->reset(eptr);
               ROCKET_ASSERT(!eptr);
               ptr->nelem += 1;
             }
@@ -263,10 +286,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               ROCKET_ASSERT(toff != linear_prober<allocatorT>::npos);
               const auto bkt = ptr->data + toff;
               // Detach the old element.
-              auto eptr = ptr_old->data[i].set(nullptr);
+              auto eptr = ptr_old->data[i].reset();
               ptr_old->nelem -= 1;
               // Insert it into the new bucket.
-              eptr = bkt->set(eptr);
+              eptr = bkt->reset(eptr);
               ROCKET_ASSERT(!eptr);
               ptr->nelem += 1;
             }
@@ -611,7 +634,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               throw;
             }
             // Insert it into the new bucket.
-            eptr = bkt->set(eptr);
+            eptr = bkt->reset(eptr);
             ROCKET_ASSERT(!eptr);
             ptr->nelem += 1;
             return ::std::make_pair(bkt, true);
@@ -630,7 +653,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(nbkt != 0);
             // Erase all elements in [tpos,tpos+tn).
             for(auto i = tpos; i != tpos + tn; ++i) {
-              const auto eptr = ptr->data[i].set(nullptr);
+              const auto eptr = ptr->data[i].reset();
               if(!eptr) {
                 continue;
               }
@@ -644,14 +667,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               [&](bucket<allocator_type> *tbkt)
                 {
                   // Remove the element from the old bucket.
-                  auto eptr = tbkt->set(nullptr);
+                  auto eptr = tbkt->reset();
                   // Find a new bucket for it.
                   const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
                   const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
                   ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
                   // Insert it into the new bucket.
                   const auto bkt = ptr->data + toff;
-                  eptr = bkt->set(eptr);
+                  eptr = bkt->reset(eptr);
                   ROCKET_ASSERT(!eptr);
                   return false;
                 }
@@ -719,7 +742,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
             const auto dist = static_cast<size_t>(bkt - ref->data());
             ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
-            ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && (bkt->get() == nullptr)), "The element referenced by this iterator no longer exists.");
+            ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt), "The element referenced by this iterator no longer exists.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
             return bkt;
           }
@@ -732,7 +755,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
             const auto end = ref->data() + ref->bucket_count();
             auto bkt = hint;
-            while((bkt != end) && (bkt->get() == nullptr)) {
+            while((bkt != end) && !*bkt) {
               ++bkt;
             }
             return bkt;
@@ -746,7 +769,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
         bucket_type * tell() const noexcept
           {
-            return this->do_assert_valid_bucket(this->m_bkt, false);
+            const auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
+            return bkt;
           }
         bucket_type * tell_owned_by(const parent_type *ref) const noexcept
           {
@@ -765,12 +789,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         reference operator*() const noexcept
           {
             const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-            return *(bkt->get());
+            return **bkt;
           }
         pointer operator->() const noexcept
           {
             const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-            return noadl::unfancy(bkt->get());
+            return noadl::unfancy(*bkt);
           }
       };
 
@@ -1184,7 +1208,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
-          result.first->get()->second = ::std::forward<yvalueT>(yvalue);
+          result.first->second = ::std::forward<yvalueT>(yvalue);
         }
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
@@ -1297,7 +1321,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         if(toff < 0) {
           this->do_throw_key_not_found();
         }
-        return ptr[toff].get()->second;
+        return ptr[toff]->second;
       }
 
     // N.B. This is a non-standard extension.
@@ -1309,7 +1333,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         if(toff < 0) {
           this->do_throw_key_not_found();
         }
-        return ptr[toff].get()->second;
+        return ptr[toff]->second;
       }
     template<typename ykeyT>
       mapped_type & operator[](ykeyT &&key)
@@ -1317,7 +1341,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
                                                                 ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
-        return result.first->get()->second;
+        return result.first->second;
       }
 
     // N.B. This function is a non-standard extension.
