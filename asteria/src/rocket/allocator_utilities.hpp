@@ -119,7 +119,7 @@ template<typename xpointerT>
 #if defined(__cpp_lib_addressof_constexpr) && (__cpp_lib_addressof_constexpr >= 201603)
   constexpr
 #endif
-    inline typename ::std::remove_reference<decltype(*(::std::declval<const xpointerT &>()))>::type * unfancy(const xpointerT &xptr) noexcept
+    inline typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type * unfancy(xpointerT &&xptr) noexcept
   {
     return ::std::addressof(*xptr);
   }
