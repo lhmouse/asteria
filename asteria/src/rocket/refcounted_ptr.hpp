@@ -369,7 +369,7 @@ template<typename elementT>
       }
     explicit constexpr operator bool () const noexcept
       {
-        return !!(this->get());
+        return bool(this->get());
       }
     constexpr operator pointer () const noexcept
       {
@@ -432,7 +432,7 @@ template<typename elementT>
 template<typename elementT>
   inline bool operator!=(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
   {
-    return !!(lhs.get());
+    return bool(lhs.get());
   }
 
 template<typename elementT>
@@ -443,7 +443,7 @@ template<typename elementT>
 template<typename elementT>
   inline bool operator!=(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
   {
-    return !!(rhs.get());
+    return bool(rhs.get());
   }
 
 template<typename elementT>

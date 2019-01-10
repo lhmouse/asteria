@@ -246,7 +246,7 @@ template<typename elementT, typename deleterT>
       }
     explicit constexpr operator bool () const noexcept
       {
-        return !!(this->get());
+        return bool(this->get());
       }
     constexpr operator pointer () const noexcept
       {
@@ -319,7 +319,7 @@ template<typename elementT, typename deleterT>
 template<typename elementT, typename deleterT>
   inline bool operator!=(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
   {
-    return !!(lhs.get());
+    return bool(lhs.get());
   }
 
 template<typename elementT, typename deleterT>
@@ -330,7 +330,7 @@ template<typename elementT, typename deleterT>
 template<typename elementT, typename deleterT>
   inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
   {
-    return !!(rhs.get());
+    return bool(rhs.get());
   }
 
 template<typename elementT, typename deleterT>
