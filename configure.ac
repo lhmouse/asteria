@@ -10,9 +10,6 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_SILENT_RULES([yes])
 LT_INIT([disable-static])
 
-AC_ARG_ENABLE([werror], AS_HELP_STRING([--disable-werror], [do not pass -Werror to the compiler]))
-AM_CONDITIONAL([enable_werror], [test "${enable_werror}" != "no"])
-
 AC_ARG_ENABLE([debug-logs], AS_HELP_STRING([--enable-debug-logs], [output debug logs to stderr]))
 AM_CONDITIONAL([enable_debug_logs], [test "${enable_debug_logs}" == "yes"])
 AM_COND_IF([enable_debug_logs], [
