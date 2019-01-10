@@ -495,7 +495,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             }
             return traits_type::compare(s1, s2, n1);
           }
-
         static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
           {
             if(n1 < n2) {
