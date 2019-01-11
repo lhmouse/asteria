@@ -219,15 +219,13 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocatorT, typename hashT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
+    template<typename pointerT, typename hashT, typename allocatorT,
+             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
       struct copy_storage_helper
       {
-        // This is the generic version.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, pointer_storage<allocatorT>>::value, "???");
+            // Copy elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
               const auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
@@ -253,12 +251,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
           }
       };
-    template<typename allocatorT, typename hashT>
-      struct copy_storage_helper<allocatorT, hashT, false>
+    template<typename pointerT, typename hashT, typename allocatorT>
+      struct copy_storage_helper<pointerT, hashT, allocatorT,
+                                 false>     // copyable
       {
-        // This specialization is used when `allocatorT::value_type` is not copy-constructible.
-        template<typename xpointerT, typename ypointerT>
-          [[noreturn]] void operator()(xpointerT /*ptr*/, const hashT & /*hf*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+        [[noreturn]] void operator()(pointerT /*ptr*/, const hashT & /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // `allocatorT::value_type` is not copy-constructible.
             // Throw an exception unconditionally, even when there is nothing to copy.
@@ -266,12 +263,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocatorT, typename hashT>
+    template<typename pointerT, typename hashT, typename allocatorT>
       struct move_storage_helper
       {
-        // This is the generic version.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, const hashT &hf, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
             static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
             static_assert(is_same<typename decay<decltype(*ptr_old)>::type, pointer_storage<allocatorT>>::value, "???");
@@ -521,11 +516,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
                 if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
-                  move_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
-                  move_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+                  move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
+                  move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
                 } else {
-                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
-                  copy_storage_helper<allocator_type, hasher>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
+                  copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
+                  copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
                 }
               } catch(...) {
                 // If an exception is thrown, deallocate the new block, then rethrow the exception.
