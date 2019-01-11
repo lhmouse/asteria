@@ -87,16 +87,13 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           = delete;
       };
 
-    template<typename allocatorT, bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
-                                  bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
+    template<typename pointerT, typename allocatorT,
+             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
+             bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct copy_storage_helper
       {
-        // This is the generic version.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
             // Copy elements one by one.
             auto nelem = ptr->nelem;
             const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
@@ -107,44 +104,39 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             }
           }
       };
-    template<typename allocatorT, bool memcpyT>
-      struct copy_storage_helper<allocatorT, false, memcpyT>
+    template<typename pointerT, typename allocatorT, bool memcpyT>
+      struct copy_storage_helper<pointerT, allocatorT,
+                                 false,     // copyable
+                                 memcpyT>   // trivial && std::allocator
       {
-        // This specialization is used when `allocatorT::value_type` is not copy-constructible.
-        template<typename xpointerT, typename ypointerT>
-          [[noreturn]] void operator()(xpointerT /*ptr*/, ypointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+        [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // Throw an exception unconditionally, even when there is nothing to copy.
             noadl::throw_domain_error("cow_vector: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
           }
       };
-    template<typename allocatorT>
-      struct copy_storage_helper<allocatorT, true, true>
+    template<typename pointerT, typename allocatorT>
+      struct copy_storage_helper<pointerT, allocatorT,
+                                 true,      // copyable
+                                 true>      // trivial && std::allocator
       {
-        // This specialization is used when `std::allocator` is to be used to copy a trivial type.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
             // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
             auto nelem = ptr->nelem;
             const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
+            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
 
-    template<typename allocatorT, bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
+    template<typename pointerT, typename allocatorT,
+             bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct move_storage_helper
       {
-        // This is the generic version.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
             // Move elements one by one.
             auto nelem = ptr->nelem;
             const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
@@ -155,23 +147,17 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             }
           }
       };
-    template<typename allocatorT>
-      struct move_storage_helper<allocatorT, true>
+    template<typename pointerT, typename allocatorT>
+      struct move_storage_helper<pointerT, allocatorT,
+                                 true>      // trivial && std::allocator
       {
-        // This specialization is used when `std::allocator` is to be used to move a trivial type.
-        template<typename xpointerT, typename ypointerT>
-          void operator()(xpointerT ptr, ypointerT ptr_old, size_t off, size_t cnt) const
+        void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, basic_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, basic_storage<allocatorT>>::value, "???");
             // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
             auto nelem = ptr->nelem;
             const auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(ptr->data + nelem, ptr_old->data + off, sizeof(ptr->data[0]) * cnt);
-#ifdef ROCKET_DEBUG
-            ::std::memset(ptr_old->data + off, '/', sizeof(ptr->data[0]) * cnt);
-#endif
+            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
@@ -345,11 +331,11 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
                 // Copy or move elements into the new block.
                 // Moving is only viable if the old and new allocators compare equal and the old block is owned exclusively.
                 if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
-                  move_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
-                  move_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+                  move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
+                  move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
                 } else {
-                  copy_storage_helper<allocator_type>()(ptr, ptr_old,       0, cnt_one);
-                  copy_storage_helper<allocator_type>()(ptr, ptr_old, off_two, cnt_two);
+                  copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
+                  copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
                 }
               } catch(...) {
                 // If an exception is thrown, deallocate the new block, then rethrow the exception.
