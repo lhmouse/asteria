@@ -369,16 +369,19 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         reference operator*() const noexcept
           {
             const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            ROCKET_ASSERT(ptr);
             return *ptr;
           }
         pointer operator->() const noexcept
           {
             const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            ROCKET_ASSERT(ptr);
             return ptr;
           }
         reference operator[](difference_type off) const noexcept
           {
             const auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
+            ROCKET_ASSERT(ptr);
             return *ptr;
           }
       };

@@ -784,12 +784,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         reference operator*() const noexcept
           {
             const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
+            ROCKET_ASSERT(*bkt);
             return **bkt;
           }
         pointer operator->() const noexcept
           {
             const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
-            return noadl::unfancy(*bkt);
+            ROCKET_ASSERT(*bkt);
+            return ::std::addressof(**bkt);
           }
       };
 
