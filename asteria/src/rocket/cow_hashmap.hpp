@@ -621,8 +621,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                   const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false; });
                   ROCKET_ASSERT(bkt);
                   // Insert it into the new bucket.
-                  eptr = bkt->reset(eptr);
-                  ROCKET_ASSERT(!eptr);
+                  ROCKET_ASSERT(!*bkt);
+                  bkt->reset(eptr);
                   return false;
                 }
               );
