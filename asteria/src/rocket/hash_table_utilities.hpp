@@ -34,7 +34,7 @@ template<typename bucketT, typename predT>
       }
     }
     // Phase 2: Probe from `begin` to `to`.
-    for(auto bkt = from; bkt != end; ++bkt) {
+    for(auto bkt = begin; bkt != to; ++bkt) {
       if(!*bkt || pred(*bkt)) {
         return bkt;
       }
