@@ -426,7 +426,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
             return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
           }
-        const bucket_type * data() const noexcept
+        const bucket_type * buckets() const noexcept
           {
             const auto ptr = this->m_ptr;
             if(!ptr) {
@@ -542,7 +542,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             return bkt - data;
           }
-        bucket_type * mut_data_unchecked() noexcept
+        bucket_type * mut_buckets_unchecked() noexcept
           {
             const auto ptr = this->m_ptr;
             if(!ptr) {
@@ -687,7 +687,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
             const auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto dist = static_cast<size_t>(bkt - ref->data());
+            const auto dist = static_cast<size_t>(bkt - ref->buckets());
             ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
             ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt), "The element referenced by this iterator no longer exists.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
@@ -700,7 +700,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             const auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto end = ref->data() + ref->bucket_count();
+            const auto end = ref->buckets() + ref->bucket_count();
             auto bkt = hint;
             while((bkt != end) && !*bkt) {
               ++bkt;
@@ -727,7 +727,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         hashmap_iterator & seek_next() noexcept
           {
             auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
-            ROCKET_ASSERT_MSG(bkt != this->m_ref->data() + this->m_ref->bucket_count(), "The past-the-end iterator cannot be incremented.");
+            ROCKET_ASSERT_MSG(bkt != this->m_ref->buckets() + this->m_ref->bucket_count(), "The past-the-end iterator cannot be incremented.");
             bkt = this->do_adjust_forwards(bkt + 1);
             this->m_bkt = this->do_assert_valid_bucket(bkt, false);
             return *this;
@@ -950,14 +950,14 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     const details_cow_hashmap::bucket<allocator_type> * do_get_table() const noexcept
       {
-        return this->m_sth.data();
+        return this->m_sth.buckets();
       }
     details_cow_hashmap::bucket<allocator_type> * do_mut_table()
       {
         if(!this->unique()) {
           this->do_reallocate(0, 0, this->bucket_count(), this->size() | 1);
         }
-        return this->m_sth.mut_data_unchecked();
+        return this->m_sth.mut_buckets_unchecked();
       }
 
     details_cow_hashmap::bucket<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
@@ -970,7 +970,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
           return ptr;
         }
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        const auto ptr = this->m_sth.mut_buckets_unchecked();
         this->m_sth.erase_range_unchecked(tpos, tn);
         return ptr + tn;
       }
