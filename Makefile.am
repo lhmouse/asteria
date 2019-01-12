@@ -44,6 +44,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/throw.hpp  \
   asteria/src/rocket/utilities.hpp  \
   asteria/src/rocket/allocator_utilities.hpp  \
+  asteria/src/rocket/hash_table_utilities.hpp  \
   asteria/src/rocket/insertable_streambuf.hpp  \
   asteria/src/rocket/insertable_istream.hpp  \
   asteria/src/rocket/insertable_ostream.hpp  \
