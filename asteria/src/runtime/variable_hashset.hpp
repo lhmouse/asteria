@@ -15,16 +15,8 @@ class Variable_hashset
   private:
     struct Bucket
       {
-        union
-          {
-            std::size_t size;  // of the first bucket
-            Bucket *prev;      // of the rest
-          };
-        union
-          {
-            std::size_t resv;  // of the last bucket
-            Bucket *next;      // of the rest
-          };
+        union { std::size_t size /* of the first bucket */; Bucket *prev /* of the rest */; };
+        union { std::size_t reserved /* of the last bucket */; Bucket *next /* of the rest */; };
         rocket::refcounted_ptr<Variable> var;
 
         constexpr Bucket() noexcept

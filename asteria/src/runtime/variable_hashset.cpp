@@ -27,7 +27,6 @@ void Variable_hashset::do_clear() noexcept
     end->prev = pre;
     // Update the number of elements.
     pre->size = 0;
-    end->resv = 0;
   }
 
 void Variable_hashset::do_rehash(std::size_t res_arg)
