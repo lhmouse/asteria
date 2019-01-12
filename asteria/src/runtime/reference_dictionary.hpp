@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "reference.hpp"
 #include "../rocket/cow_vector.hpp"
-#include "../rocket/static_vector.hpp"
 
 namespace Asteria {
 
@@ -19,15 +18,22 @@ class Reference_dictionary
         union { std::size_t size /* of the first bucket */; Bucket *prev /* of the rest */; };
         union { std::size_t reserved /* of the last bucket */; Bucket *next /* of the rest */; };
         rocket::prehashed_string name;
-        rocket::static_vector<Reference, 1> refv;
+        union { Reference refv[1] /* uninitialized if `name.empty()` */; };
 
         Bucket() noexcept
           : prev(nullptr), next(nullptr),
-            name(), refv()
+            name()
           {
+#ifdef ROCKET_DEBUG
+            std::memset(static_cast<void *>(this->refv), 0xEC, sizeof(Reference));
+#endif
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Bucket)
           {
+            // Be careful, VERY careful.
+            if(ROCKET_UNEXPECT(*this)) {
+              rocket::destroy_at(this->refv);
+            }
           }
 
         explicit operator bool () const noexcept

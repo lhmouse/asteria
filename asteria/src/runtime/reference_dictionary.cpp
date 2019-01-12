@@ -18,8 +18,9 @@ void Reference_dictionary::do_clear() noexcept
     const auto pre = this->m_stor.mut_data();
     const auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
-    for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
-      ptr->name.clear();
+    for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
+      bkt->name.clear();
+      rocket::destroy_at(bkt->refv);
     }
     // Clear the table.
     pre->next = end;
@@ -58,8 +59,9 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
-        bkt->name = std::move(rbkt.name);
-        bkt->refv = std::move(rbkt.refv);
+        bkt->name = rocket::exchange(rbkt.name, std::ref(""));
+        rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
+        rocket::destroy_at(rbkt.refv);
         bkt->prev = end->prev;
         bkt->next = end;
         end->prev->next = bkt;
@@ -93,8 +95,11 @@ void Reference_dictionary::do_check_relocation(Bucket *from, Bucket *to)
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
-          bkt->name = std::move(rbkt.name);
-          bkt->refv = std::move(rbkt.refv);
+          bkt->name = std::move(name);
+          if(bkt != &rbkt) {
+            rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
+            rocket::destroy_at(rbkt.refv);
+          }
           bkt->prev = end->prev;
           bkt->next = end;
           end->prev->next = bkt;
@@ -121,8 +126,7 @@ const Reference * Reference_dictionary::get_opt(const rocket::prehashed_string &
       // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
       return nullptr;
     }
-    ROCKET_ASSERT(!bkt->refv.empty());
-    return bkt->refv.data();
+    return bkt->refv;
   }
 
 Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
@@ -143,18 +147,18 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
     ROCKET_ASSERT(bkt);
     if(*bkt) {
       // A duplicate key has been found.
-      return bkt->refv.mut_front();
+      return bkt->refv[0];
     }
     // Insert it into the new bucket.
     bkt->name = name;
-    bkt->refv.assign(1);
+    rocket::construct_at(bkt->refv);
     bkt->prev = end->prev;
     bkt->next = end;
     end->prev->next = bkt;
     end->prev = bkt;
     // Update the number of elements.
     pre->size++;
-    return bkt->refv.mut_front();
+    return bkt->refv[0];
   }
 
 bool Reference_dictionary::unset(const rocket::prehashed_string &name) noexcept
@@ -179,6 +183,7 @@ bool Reference_dictionary::unset(const rocket::prehashed_string &name) noexcept
     bkt->prev->next = bkt->next;
     bkt->next->prev = bkt->prev;
     bkt->name.clear();
+    rocket::destroy_at(bkt->refv);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
     return true;
