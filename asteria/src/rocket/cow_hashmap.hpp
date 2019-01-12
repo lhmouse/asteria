@@ -184,8 +184,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               // Find a bucket for the new element.
               const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
               const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
+              ROCKET_ASSERT(bkt);
               // Allocate a new element by copy-constructing from the old one.
-              auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
+              const auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
               try {
                 allocator_traits<allocatorT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
               } catch(...) {
@@ -193,8 +194,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 throw;
               }
               // Insert it into the new bucket.
-              eptr = bkt->reset(eptr);
-              ROCKET_ASSERT(!eptr);
+              ROCKET_ASSERT(*bkt);
+              bkt->reset(eptr);
               ptr->nelem += 1;
             }
           }
@@ -228,12 +229,13 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               // Find a bucket for the new element.
               const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
               const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
+              ROCKET_ASSERT(bkt);
               // Detach the old element.
-              auto eptr = ptr_old->data[i].reset();
+              const auto eptr = ptr_old->data[i].reset();
               ptr_old->nelem -= 1;
               // Insert it into the new bucket.
-              eptr = bkt->reset(eptr);
-              ROCKET_ASSERT(!eptr);
+              ROCKET_ASSERT(*bkt);
+              bkt->reset(eptr);
               ptr->nelem += 1;
             }
           }
