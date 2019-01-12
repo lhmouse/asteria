@@ -26,7 +26,7 @@ class Reference_dictionary
             name(), refv()
           {
           }
-        ROCKET_MOVABLE_DESTRUCTOR(Bucket)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Bucket)
           {
           }
 

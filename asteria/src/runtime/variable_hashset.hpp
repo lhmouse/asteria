@@ -24,7 +24,7 @@ class Variable_hashset
             var()
           {
           }
-        ROCKET_MOVABLE_DESTRUCTOR(Bucket)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Bucket)
           {
           }
 

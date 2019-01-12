@@ -132,6 +132,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename pointerT, typename allocatorT,
+             bool movableT = is_move_constructible<typename allocatorT::value_type>::value,
              bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct move_storage_helper
       {
@@ -147,8 +148,20 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             }
           }
       };
+    template<typename pointerT, typename allocatorT, bool memcpyT>
+      struct move_storage_helper<pointerT, allocatorT,
+                                 false,     // movable
+                                 memcpyT>   // trivial && std::allocator
+      {
+        [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+          {
+            // Throw an exception unconditionally, even when there is nothing to move.
+            noadl::throw_domain_error("cow_vector: `%s` is not move-constructible.", typeid(typename allocatorT::value_type).name());
+          }
+      };
     template<typename pointerT, typename allocatorT>
       struct move_storage_helper<pointerT, allocatorT,
+                                 true,      // movable
                                  true>      // trivial && std::allocator
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
