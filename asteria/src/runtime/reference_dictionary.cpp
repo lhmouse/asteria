@@ -73,7 +73,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     }
   }
 
-void Reference_dictionary::do_check_relocation(Bucket *from, Bucket *to)
+void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
@@ -81,7 +81,7 @@ void Reference_dictionary::do_check_relocation(Bucket *from, Bucket *to)
     // Check them.
     rocket::linear_probe(
       // Only probe non-erased buckets.
-      pre + 1, from, to, end,
+      pre + 1, to, from, end,
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {

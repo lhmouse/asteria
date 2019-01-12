@@ -47,7 +47,7 @@ class Variable_hashset
   private:
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
-    void do_check_relocation(Bucket *from, Bucket *to);
+    void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
     bool empty() const noexcept
