@@ -20,7 +20,6 @@ void Reference_dictionary::do_clear() noexcept
     // Clear all buckets.
     for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
       ptr->name.clear();
-      ptr->refv.clear();
     }
     // Clear the table.
     pre->next = end;
@@ -132,7 +131,7 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
       ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_dictionary`.");
     }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
-      this->do_rehash(this->m_stor.size() * 2 | 31);
+      this->do_rehash(this->m_stor.size() * 2 | 19);
     }
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
@@ -144,7 +143,6 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
     ROCKET_ASSERT(bkt);
     if(*bkt) {
       // A duplicate key has been found.
-      ROCKET_ASSERT(!bkt->refv.empty());
       return bkt->refv.mut_front();
     }
     // Insert it into the new bucket.
