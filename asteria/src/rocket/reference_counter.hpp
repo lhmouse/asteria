@@ -22,6 +22,10 @@ template<typename valueT>
       : m_nref(1)
       {
       }
+    explicit constexpr reference_counter(valueT nref) noexcept
+      : m_nref(nref)
+      {
+      }
     constexpr reference_counter(const reference_counter &) noexcept
       : reference_counter()
       {
