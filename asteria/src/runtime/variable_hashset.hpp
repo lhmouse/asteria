@@ -27,7 +27,7 @@ class Variable_hashset
           };
         rocket::refcounted_ptr<Variable> var;
 
-        Bucket() noexcept
+        constexpr Bucket() noexcept
           : prev(nullptr), next(nullptr),
             var()
           {
