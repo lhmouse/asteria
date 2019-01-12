@@ -170,13 +170,23 @@ using details_utilities::adl_swap;
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
   {
-    return !bool(rhs < lhs) ? ::std::forward<lhsT>(lhs) : ::std::forward<rhsT>(rhs);
+    return !bool(rhs < lhs) ? ::std::forward<lhsT>(lhs)
+                            : ::std::forward<rhsT>(rhs);
   }
 
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
   {
-    return !bool(lhs < rhs) ? ::std::forward<lhsT>(lhs) : ::std::forward<rhsT>(rhs);
+    return !bool(lhs < rhs) ? ::std::forward<lhsT>(lhs)
+                            : ::std::forward<rhsT>(rhs);
+  }
+
+template<typename lowerT, typename testT, typename upperT>
+  constexpr typename common_type<lowerT &&, testT &&, upperT &&>::type clamp(lowerT &&lower, testT &&test, upperT &&upper)
+  {
+    return (test < lower) ? ::std::forward<lowerT>(lower)
+                          : (upper < test) ? ::std::forward<upperT>(upper)
+                                           : ::std::forward<testT>(test);
   }
 
 template<typename charT, typename traitsT>
