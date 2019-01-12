@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
+#include "../rocket/cow_vector.hpp"
 #include "../rocket/static_vector.hpp"
 
 namespace Asteria {
@@ -15,91 +16,68 @@ class Reference_dictionary
   private:
     struct Bucket
       {
+        union { std::size_t size /* of the first bucket */; Bucket *prev /* of the rest */; };
+        union { std::size_t reserved /* of the last bucket */; Bucket *next /* of the rest */; };
         rocket::prehashed_string name;
         rocket::static_vector<Reference, 1> refv;
+        std::uintptr_t padding[3];
+
+        Bucket() noexcept
+          : prev(nullptr), next(nullptr),
+            name(), refv()
+          {
+          }
+        ROCKET_MOVABLE_DESTRUCTOR(Bucket)
+          {
+          }
 
         explicit operator bool () const noexcept
           {
-            return this->refv.size() != 0;
+            return !this->name.empty();
           }
       };
 
-    Bucket *m_data;
-    std::size_t m_nbkt;
-    std::size_t m_size;
+    // The first and last buckets are permanently reserved.
+    rocket::cow_vector<Bucket> m_stor;
 
   public:
     Reference_dictionary() noexcept
-      : m_data(nullptr), m_nbkt(0), m_size(0)
+      : m_stor()
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
 
   private:
     void do_clear() noexcept;
-    [[noreturn]] void do_throw_open_empty_name();
     void do_rehash(std::size_t res_arg);
-    std::ptrdiff_t do_find(const rocket::prehashed_string &name) const noexcept;
-    Reference & do_open_unchecked(const rocket::prehashed_string &name) noexcept;
-    void do_erase_unchecked(std::size_t tpos) noexcept;
+    void do_check_relocation(Bucket *from, Bucket *to);
 
   public:
     bool empty() const noexcept
       {
-        return this->m_size == 0;
+        if(this->m_stor.empty()) {
+          return true;
+        }
+        return this->m_stor.front().size == 0;
       }
     std::size_t size() const noexcept
       {
-        return this->m_size;
+        if(this->m_stor.empty()) {
+          return 0;
+        }
+        return this->m_stor.front().size;
       }
     void clear() noexcept
       {
-        if(this->empty()) {
+        if(this->m_stor.empty()) {
           return;
         }
         this->do_clear();
       }
 
-    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
-      {
-        const auto toff = this->do_find(name);
-        if(toff < 0) {
-          return nullptr;
-        }
-        const auto ptr = this->m_data[toff].refv.data();
-        ROCKET_ASSERT(ptr);
-        return ptr;
-      }
-    Reference * get_opt(const rocket::prehashed_string &name) noexcept
-      {
-        const auto toff = this->do_find(name);
-        if(toff < 0) {
-          return nullptr;
-        }
-        const auto ptr = this->m_data[toff].refv.mut_data();
-        ROCKET_ASSERT(ptr);
-        return ptr;
-      }
-
-    Reference & open(const rocket::prehashed_string &name)
-      {
-        if(name.empty()) {
-          this->do_throw_open_empty_name();
-        }
-        if(this->m_size >= this->m_nbkt / 2) {
-          this->do_rehash(this->m_size + 1);
-        }
-        return this->do_open_unchecked(name);
-      }
-    bool unset(const rocket::prehashed_string &name) noexcept
-      {
-        const auto toff = this->do_find(name);
-        if(toff < 0) {
-          return false;
-        }
-        this->do_erase_unchecked(static_cast<std::size_t>(toff));
-        return true;
-      }
+    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept;
+    Reference & open(const rocket::prehashed_string &name);
+    bool unset(const rocket::prehashed_string &name) noexcept;
   };
 
 }
