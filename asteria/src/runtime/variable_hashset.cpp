@@ -32,12 +32,10 @@ void Variable_hashset::do_clear() noexcept
 
 void Variable_hashset::do_rehash(std::size_t res_arg)
   {
-    ROCKET_ASSERT(res_arg >= 2);
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
     rocket::cow_vector<Bucket> stor;
-    stor.reserve(res_arg);
-    stor.append(stor.capacity());
+    stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
