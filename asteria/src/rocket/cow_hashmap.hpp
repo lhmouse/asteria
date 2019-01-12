@@ -12,6 +12,7 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include "hash_table_utilities.hpp"
 #include "reference_counter.hpp"
 
 /* Differences from `std::unordered_map`:
@@ -165,66 +166,15 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           = delete;
       };
 
-    template<typename allocatorT>
-      struct linear_prober
-      {
-        using allocator_type   = allocatorT;
-        using bucket_type      = bucket<allocator_type>;
-        using size_type        = typename allocator_traits<allocator_type>::size_type;
-        using difference_type  = typename allocator_traits<allocator_type>::difference_type;
-
-        static constexpr auto npos = size_type(-1);
-
-        template<typename xpointerT>
-          static size_type origin(xpointerT ptr, size_t hval)
-          {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
-            const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
-            // Conversion between an unsigned integer type and a floating point type results in performance penalty.
-            // For a value known to be non-negative, an intermediate cast to some signed integer type will mitigate this.
-            const auto fcast = [](size_t x) { return static_cast<double>(static_cast<ptrdiff_t>(x)); };
-            const auto ucast = [](double y) { return static_cast<size_t>(static_cast<ptrdiff_t>(y)); };
-            // Multiplication is faster than division.
-            const auto seed = static_cast<uint32_t>(hval * 0x9E3779B9);
-            const auto ratio = fcast(seed >> 1) / double(0x80000000);
-            ROCKET_ASSERT((0.0 <= ratio) && (ratio < 1.0));
-            const auto pos = ucast(fcast(nbkt) * ratio);
-            ROCKET_ASSERT(pos < nbkt);
-            return pos;
-          }
-
-        template<typename xpointerT, typename predT>
-          static size_type probe(xpointerT ptr, size_type first, size_type last, predT &&pred)
-          {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
-            const auto nbkt = pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
-            // Phase one: Probe from `first` to the end of the table.
-            for(size_type i = first; i != nbkt; ++i) {
-              const auto bkt = ptr->data + i;
-              if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
-                ROCKET_ASSERT(i != npos);
-                return i;
-              }
-            }
-            // Phase two: Probe from the beginning of the table to `last`.
-            for(size_type i = 0; i != last; ++i) {
-              const auto bkt = ptr->data + i;
-              if(!bkt->get() || ::std::forward<predT>(pred)(bkt)) {
-                ROCKET_ASSERT(i != npos);
-                return i;
-              }
-            }
-            // The table is full and no desired element has been found so far.
-            return npos;
-          }
-      };
-
     template<typename pointerT, typename hashT, typename allocatorT,
              bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
       struct copy_storage_helper
       {
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
+            // Get table bounds.
+            const auto data = ptr->data;
+            const auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
             // Copy elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
               const auto eptr_old = ptr_old->data[i].get();
@@ -232,10 +182,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 continue;
               }
               // Find a bucket for the new element.
-              const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
-              const auto toff = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
-              ROCKET_ASSERT(toff != linear_prober<allocatorT>::npos);
-              const auto bkt = ptr->data + toff;
+              const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
               // Allocate a new element by copy-constructing from the old one.
               auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
               try {
@@ -268,18 +216,18 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       {
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
-            static_assert(is_same<typename decay<decltype(*ptr)>::type, pointer_storage<allocatorT>>::value, "???");
-            static_assert(is_same<typename decay<decltype(*ptr_old)>::type, pointer_storage<allocatorT>>::value, "???");
+            // Get table bounds.
+            const auto data = ptr->data;
+            const auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+            // Move elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
               const auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
                 continue;
               }
               // Find a bucket for the new element.
-              const auto origin = linear_prober<allocatorT>::origin(ptr, hf(eptr_old->first));
-              const auto toff = linear_prober<allocatorT>::probe(ptr, origin, origin, [](const void *) { return false; });
-              ROCKET_ASSERT(toff != linear_prober<allocatorT>::npos);
-              const auto bkt = ptr->data + toff;
+              const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
               // Detach the old element.
               auto eptr = ptr_old->data[i].reset();
               ptr_old->nelem -= 1;
@@ -577,20 +525,22 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             if(!ptr) {
               return -1;
             }
-            const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-            const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin,
-              [&](const bucket<allocatorT> *tbkt)
-                { return this->as_key_equal()(tbkt->get()->first, ykey); }
-              );
-            if((max_load_factor_reciprocal == 1) && (toff == linear_prober<allocator_type>::npos)) {
+            // Get table bounds.
+            const auto data = ptr->data;
+            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+            // Find the desired element using linear probing.
+            const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
+            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey); });
+            if(!bkt) {
+              // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
+              ROCKET_ASSERT(max_load_factor_reciprocal == 1);
               return -1;
             }
-            ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
-            const auto bkt = ptr->data + toff;
-            if(!bkt->get()) {
+            if(!*bkt) {
+              // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
               return -1;
             }
-            return static_cast<difference_type>(toff);
+            return bkt - data;
           }
         bucket_type * mut_data_unchecked() noexcept
           {
@@ -608,15 +558,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(this->element_count() < this->capacity());
             const auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
-            // Find a bucket for the new element.
-            const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(ykey));
-            const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin,
-              [&](const bucket<allocatorT> *tbkt)
-                { return this->as_key_equal()(tbkt->get()->first, ykey); }
-              );
-            ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
-            const auto bkt = ptr->data + toff;
-            if(bkt->get()) {
+            // Get table bounds.
+            const auto data = ptr->data;
+            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+            // Find an empty bucket using linear probing.
+            const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
+            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey); });
+            ROCKET_ASSERT(bkt);
+            if(*bkt) {
               // A duplicate key has been found.
               return ::std::make_pair(bkt, false);
             }
@@ -644,8 +593,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             const auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
-            const auto nbkt = storage::max_nbkt_for_nblk(ptr->nblk);
-            ROCKET_ASSERT(nbkt != 0);
             // Erase all elements in [tpos,tpos+tn).
             for(auto i = tpos; i != tpos + tn; ++i) {
               const auto eptr = ptr->data[i].reset();
@@ -657,18 +604,23 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
               allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_t(1));
             }
+            // Get table bounds.
+            const auto data = ptr->data;
+            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Relocate elements that are not placed in their immediate locations.
-            linear_prober<allocator_type>::probe(ptr, tpos + tn, tpos,
-              [&](bucket<allocator_type> *tbkt)
+            noadl::linear_probe(
+              // Only probe non-erased buckets.
+              data, data + tpos, data + tpos + tn, end,
+              // Relocate every bucket found.
+              [&](bucket_type &rbkt)
                 {
-                  // Remove the element from the old bucket.
-                  auto eptr = tbkt->reset();
-                  // Find a new bucket for it.
-                  const auto origin = linear_prober<allocator_type>::origin(ptr, this->as_hasher()(eptr->first));
-                  const auto toff = linear_prober<allocator_type>::probe(ptr, origin, origin, [&](const void *) { return false; });
-                  ROCKET_ASSERT(toff != linear_prober<allocator_type>::npos);
+                  // Release the old element.
+                  auto eptr = rbkt.reset();
+                  // Find a new bucket for it using linear probing.
+                  const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
+                  const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false; });
+                  ROCKET_ASSERT(bkt);
                   // Insert it into the new bucket.
-                  const auto bkt = ptr->data + toff;
                   eptr = bkt->reset(eptr);
                   ROCKET_ASSERT(!eptr);
                   return false;
