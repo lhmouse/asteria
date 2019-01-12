@@ -189,7 +189,7 @@ bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     // Empty the bucket.
     bkt->prev->next = bkt->next;
     bkt->next->prev = bkt->prev;
-    bkt->var = nullptr;
+    bkt->var.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
     return true;
