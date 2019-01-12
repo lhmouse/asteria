@@ -13,6 +13,7 @@
 #include <ios>  // std::ios_base, std::basic_ios<>
 #include <functional>  // std::hash<>, std::equal_to<>, std::reference_wrapper<>, std::ref()
 #include <tuple>  // std::tuple<>
+#include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 #include "compatibility.h"
 
@@ -299,7 +300,10 @@ template<typename elementT>
 template<typename elementT>
   void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
-    return ptr->~elementT();
+    ptr->~elementT();
+#ifdef ROCKET_DEBUG
+    is_trivially_destructible<elementT>::value || ::std::memset(static_cast<void *>(ptr), ptr, sizeof(elementT));
+#endif
   }
 
 template<typename elementT>
