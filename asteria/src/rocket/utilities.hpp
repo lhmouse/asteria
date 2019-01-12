@@ -302,7 +302,7 @@ template<typename elementT>
   {
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
-    is_trivially_destructible<elementT>::value || ::std::memset(static_cast<void *>(ptr), ptr, sizeof(elementT));
+    static_cast<void>(is_trivially_destructible<elementT>::value || ::std::memset(static_cast<void *>(ptr), 0xD4, sizeof(elementT)));
 #endif
   }
 
