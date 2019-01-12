@@ -170,15 +170,15 @@ using details_utilities::adl_swap;
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
   {
-    return !bool(rhs < lhs) ? ::std::forward<lhsT>(lhs)
-                            : ::std::forward<rhsT>(rhs);
+    return bool(rhs < lhs) ? ::std::forward<rhsT>(rhs)
+                           : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
   {
-    return !bool(lhs < rhs) ? ::std::forward<lhsT>(lhs)
-                            : ::std::forward<rhsT>(rhs);
+    return bool(lhs < rhs) ? ::std::forward<rhsT>(rhs)
+                           : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lowerT, typename testT, typename upperT>
