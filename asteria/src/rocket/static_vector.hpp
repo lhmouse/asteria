@@ -71,7 +71,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
               allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nrem);
             }
 #ifdef ROCKET_DEBUG
-            this->m_nelem = static_cast<decltype(this->m_nelem)>(0xBAD1BEEF);
+            this->m_nelem = static_cast<decltype(m_nelem)>(0xBAD1BEEF);
             ::std::memset(this->m_ebase, '~', sizeof(this->m_ebase));
 #endif
           }
@@ -144,7 +144,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
             const auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
             allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
-            this->m_nelem = ++nelem;
+            this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
             return ebase + nelem - 1;
           }
         void pop_back_n_unchecked(size_type n) noexcept
@@ -156,7 +156,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
             const auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
             for(auto i = n; i != 0; --i) {
-              this->m_nelem = --nelem;
+              this->m_nelem = static_cast<decltype(m_nelem)>(--nelem);
               allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nelem);
             }
           }
