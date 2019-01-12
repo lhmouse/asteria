@@ -26,7 +26,8 @@ class Variable_hashset
         rocket::refcounted_ptr<Variable> var;
 
         Bucket() noexcept
-          : prev(nullptr), next(nullptr), var()
+          : prev(nullptr), next(nullptr),
+            var()
           {
           }
         ROCKET_MOVABLE_DESTRUCTOR(Bucket)
