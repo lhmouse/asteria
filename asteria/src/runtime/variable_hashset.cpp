@@ -20,7 +20,7 @@ void Variable_hashset::do_clear() noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
     for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
-      ptr->var.reset();
+      ptr->var = nullptr;
     }
     // Clear the table.
     pre->next = end;
