@@ -100,7 +100,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             ROCKET_ASSERT(cnt <= cap - nelem);
             for(auto i = off; i != off + cnt; ++i) {
               allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
-              ptr->nelem = (nelem += 1);
+              ptr->nelem = ++nelem;
             }
           }
       };
@@ -143,7 +143,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             ROCKET_ASSERT(cnt <= cap - nelem);
             for(auto i = off; i != off + cnt; ++i) {
               allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ::std::move(ptr_old->data[i]));
-              ptr->nelem = (nelem += 1);
+              ptr->nelem = ++nelem;
             }
           }
       };
@@ -403,7 +403,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             ROCKET_ASSERT(ptr);
             auto nelem = ptr->nelem;
             allocator_traits<allocator_type>::construct(ptr->alloc, ptr->data + nelem, ::std::forward<paramsT>(params)...);
-            ptr->nelem = (nelem += 1);
+            ptr->nelem = ++nelem;
             return ptr->data + nelem - 1;
           }
         void pop_back_n_unchecked(size_type n) noexcept
@@ -417,7 +417,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             ROCKET_ASSERT(ptr);
             auto nelem = ptr->nelem;
             for(auto i = n; i != 0; --i) {
-              ptr->nelem = (nelem -= 1);
+              ptr->nelem = --nelem;
               allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
             }
           }

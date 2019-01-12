@@ -18,7 +18,7 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     if(!this->m_tracked.insert(var)) {
       return false;
     }
-    if(++(this->m_counter) > this->m_threshold) {
+    if(this->m_counter++ >= this->m_threshold) {
       this->collect();
     }
     return true;
@@ -29,7 +29,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     if(!this->m_tracked.erase(var)) {
       return false;
     }
-    --(this->m_counter);
+    this->m_counter--;
     return true;
   }
 
@@ -45,11 +45,11 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
         explicit Recursion_sentry(long &ref) noexcept
           : m_old(ref), m_ref(ref)
           {
-            this->m_ref += 1;
+            this->m_ref++;
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Recursion_sentry)
           {
-            this->m_ref -= 1;
+            this->m_ref--;
           }
 
       public:
@@ -223,7 +223,7 @@ void Collector::collect()
             // Strong exception safety is paramount here.
             tied->m_tracked.insert(root);
             this->m_tracked.erase(root);
-            if(++(tied->m_counter) > tied->m_threshold) {
+            if(tied->m_counter++ >= tied->m_threshold) {
               collect_tied = true;
             }
             return;

@@ -196,7 +196,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               // Insert it into the new bucket.
               ROCKET_ASSERT(*bkt);
               bkt->reset(eptr);
-              ptr->nelem += 1;
+              ptr->nelem++;
             }
           }
       };
@@ -232,11 +232,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               ROCKET_ASSERT(bkt);
               // Detach the old element.
               const auto eptr = ptr_old->data[i].reset();
-              ptr_old->nelem -= 1;
+              ptr_old->nelem--;
               // Insert it into the new bucket.
               ROCKET_ASSERT(*bkt);
               bkt->reset(eptr);
-              ptr->nelem += 1;
+              ptr->nelem++;
             }
           }
       };
@@ -582,7 +582,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             // Insert it into the new bucket.
             eptr = bkt->reset(eptr);
             ROCKET_ASSERT(!eptr);
-            ptr->nelem += 1;
+            ptr->nelem++;
             return ::std::make_pair(bkt, true);
           }
         void erase_range_unchecked(size_type tpos, size_type tn) noexcept
@@ -601,7 +601,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               if(!eptr) {
                 continue;
               }
-              ptr->nelem -= 1;
+              ptr->nelem--;
               // Destroy the element and deallocate its storage.
               allocator_traits<allocator_type>::destroy(ptr->alloc, noadl::unfancy(eptr));
               allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_t(1));

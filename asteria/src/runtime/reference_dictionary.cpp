@@ -155,7 +155,7 @@ Reference & Reference_dictionary::do_open_unchecked(const rocket::prehashed_stri
     }
     qbkt->name = name;
     qbkt->refv.emplace_back();
-    this->m_size += 1;
+    this->m_size++;
     return qbkt->refv.mut_front();
   }
 
@@ -168,7 +168,7 @@ void Reference_dictionary::do_erase_unchecked(std::size_t tpos) noexcept
     // Nullify the bucket.
     ROCKET_ASSERT(data[tpos]);
     data[tpos].refv.clear();
-    this->m_size -= 1;
+    this->m_size--;
     // Relocate elements after the erasure point.
     do_linear_probe(data, nbkt, tpos + 1, tpos,
       [&](Bucket &cand)

@@ -218,7 +218,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       } else {
         // Insert the character provided at the specified position of the internal buffer.
         this->m_str.insert(this->m_caret, static_cast<size_type>(1), traits_type::to_char_type(c));
-        this->m_caret += 1;
+        this->m_caret++;
       }
       return c;
     } else {

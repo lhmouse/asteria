@@ -289,7 +289,7 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
             break;
           }
         }
-        rem -= 1;
+        --rem;
       }
     } catch(...) {
       rocket::handle_ios_exception(os, state);

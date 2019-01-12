@@ -66,7 +66,7 @@ Token_stream::~Token_stream()
               return false;
             }
             // A line has been read successfully.
-            ++(this->m_line);
+            this->m_line++;
             this->m_offset = 0;
             ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
             return true;
@@ -304,7 +304,7 @@ Token_stream::~Token_stream()
             do_push_token(seq_out, reader_io, tlen, std::move(token_c));
             return true;
           }
-          ++(range.first);
+          range.first++;
         }
       }
 
@@ -400,7 +400,7 @@ Token_stream::~Token_stream()
             do_push_token(seq_out, reader_io, tlen, std::move(token_c));
             return true;
           }
-          --(range.second);
+          range.second--;
         }
       }
 
@@ -580,7 +580,7 @@ Token_stream::~Token_stream()
           if(!tptr) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_string_literal_unclosed);
           }
-          tptr += 1;
+          ++tptr;
           value.append(bptr + 1, tptr - 1);
           tlen = static_cast<std::size_t>(tptr - bptr);
         }
@@ -653,7 +653,7 @@ Token_stream::~Token_stream()
         frac_end = frac_begin;
         auto next = bptr[int_end];
         if(next == '.') {
-          frac_begin += 1;
+          ++frac_begin;
           tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
@@ -669,14 +669,14 @@ Token_stream::~Token_stream()
         case 'e':
           {
             exp_base = 10;
-            exp_begin += 1;
+            ++exp_begin;
             break;
           }
         case 'P':
         case 'p':
           {
             exp_base = 2;
-            exp_begin += 1;
+            ++exp_begin;
             break;
           }
         }
@@ -686,13 +686,13 @@ Token_stream::~Token_stream()
           case '+':
             {
               exp_sign = false;
-              exp_begin += 1;
+              ++exp_begin;
               break;
             }
           case '-':
             {
               exp_sign = true;
-              exp_begin += 1;
+              ++exp_begin;
               break;
             }
           }
