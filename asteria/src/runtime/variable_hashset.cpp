@@ -19,8 +19,8 @@ void Variable_hashset::do_clear() noexcept
     const auto pre = this->m_stor.mut_data();
     const auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
-    for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
-      ptr->var.reset();
+    for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
+      bkt->var.reset();
     }
     // Clear the table.
     pre->next = end;
@@ -131,9 +131,9 @@ void Variable_hashset::for_each(const Abstract_variable_callback &callback) cons
     // Get table bounds.
     const auto pre = this->m_stor.data();
     const auto end = pre + (this->m_stor.size() - 1);
-    // Enumerate all buckets. The return value of `callback(ptr->var)` is ignored.
-    for(auto ptr = pre->next; ptr != end; ptr = ptr->next) {
-      callback(ptr->var);
+    // Enumerate all buckets. The return value of `callback(bkt->var)` is ignored.
+    for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
+      callback(bkt->var);
     }
   }
 
