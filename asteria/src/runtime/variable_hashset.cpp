@@ -142,6 +142,9 @@ void Variable_hashset::for_each(const Abstract_variable_callback &callback) cons
 
 bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
   {
+    if(var) {
+      ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_hashset`.");
+    }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 127);
     }
