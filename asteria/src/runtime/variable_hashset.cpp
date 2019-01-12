@@ -83,10 +83,11 @@ void Variable_hashset::do_check_relocation(Bucket *from, Bucket *to)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
+          rocket::refcounted_ptr<Variable> var;
           // Release the old element.
           rbkt.prev->next = rbkt.next;
           rbkt.next->prev = rbkt.prev;
-          auto var = rocket::exchange(rbkt.var, nullptr);
+          var.swap(rbkt.var);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
           const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });

@@ -59,7 +59,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
-        bkt->name = rocket::exchange(rbkt.name, std::ref(""));
+        bkt->name.swap(rbkt.name);
         rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
         rocket::destroy_at(rbkt.refv);
         bkt->prev = end->prev;
@@ -85,10 +85,11 @@ void Reference_dictionary::do_check_relocation(Bucket *from, Bucket *to)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
+          rocket::prehashed_string name;
           // Release the old element.
           rbkt.prev->next = rbkt.next;
           rbkt.next->prev = rbkt.prev;
-          auto name = rocket::exchange(rbkt.name, std::ref(""));
+          name.swap(rbkt.name);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
           const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
