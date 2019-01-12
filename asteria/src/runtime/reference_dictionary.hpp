@@ -20,7 +20,6 @@ class Reference_dictionary
         union { std::size_t reserved /* of the last bucket */; Bucket *next /* of the rest */; };
         rocket::prehashed_string name;
         rocket::static_vector<Reference, 1> refv;
-        std::uintptr_t padding[3];
 
         Bucket() noexcept
           : prev(nullptr), next(nullptr),
