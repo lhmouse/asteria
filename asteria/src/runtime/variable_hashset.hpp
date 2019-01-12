@@ -71,7 +71,6 @@ class Variable_hashset
 
     bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept;
     void for_each(const Abstract_variable_callback &callback) const;
-
     bool insert(const rocket::refcounted_ptr<Variable> &var);
     bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept;
   };
