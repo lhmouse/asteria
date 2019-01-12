@@ -38,16 +38,24 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
     rocket::cow_vector<Bucket> stor;
     stor.reserve(res_arg);
     stor.append(stor.capacity());
-    // Get new table bounds.
-    const auto pre = stor.mut_data();
-    const auto end = pre + (stor.size() - 1);
+    this->m_stor.swap(stor);
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
     // Clear the new table.
     pre->next = end;
     end->prev = pre;
     // Move elements into the new table.
-    while(!this->m_stor.empty()) {
-      auto &rbkt = this->m_stor.mut_back();
-      if(rbkt) {
+    if(ROCKET_EXPECT(stor.empty())) {
+      return;
+    }
+    // Drop the last reserved bucket.
+    stor.pop_back();
+    // In reality the first reserved bucket need not be moved, either.
+    // But `.empty()` is faster than `.size()`...
+    while(!stor.empty()) {
+      auto &rbkt = stor.mut_back();
+      if(ROCKET_UNEXPECT(rbkt)) {
         // Find a bucket for the new element.
         const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.var.get()));
         const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
@@ -62,10 +70,8 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
         // Update the number of elements.
         pre->size++;
       }
-      this->m_stor.pop_back();
+      stor.pop_back();
     }
-    // Set up the new table.
-    this->m_stor = std::move(stor);
   }
 
 void Variable_hashset::do_check_relocation(Bucket *from, Bucket *to)
