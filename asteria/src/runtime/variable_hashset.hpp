@@ -34,6 +34,7 @@ class Variable_hashset
           }
       };
 
+  private:
     // The first and last buckets are permanently reserved.
     rocket::cow_vector<Bucket> m_stor;
 
