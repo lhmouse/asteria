@@ -15,12 +15,10 @@ namespace Asteria {
 class Function_context : public Executive_context
   {
   private:
-    const Function_context *const m_parent_opt;
     rocket::static_vector<Reference_dictionary::Template, 7> m_predef_refs;
 
   public:
-    explicit Function_context(const Function_context *parent_opt = nullptr) noexcept
-      : m_parent_opt(parent_opt)
+    Function_context() noexcept
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Function_context);
