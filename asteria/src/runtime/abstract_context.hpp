@@ -22,9 +22,9 @@ class Abstract_context
     ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_context, virtual);
 
   protected:
-    void do_set_named_reference_templates(const Reference_dictionary::Template *data, std::size_t size) noexcept
+    void do_set_named_reference_templates(const Reference_dictionary::Template *tdata_opt, std::size_t tsize) noexcept
       {
-        this->m_dict.set_templates(data, size);
+        this->m_dict.set_templates(tdata_opt, tsize);
       }
 
   public:

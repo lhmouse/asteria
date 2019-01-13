@@ -79,16 +79,16 @@ class Reference_dictionary
     void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
-    void set_templates(const Template *data, std::size_t size) noexcept
+    void set_templates(const Template *tdata_opt, std::size_t tsize) noexcept
       {
         // Elements in [begin, end) must have been sorted.
 #ifdef ROCKET_DEBUG
-        if(size != 0) {
-          rocket::ranged_for(data, data + size - 1, [&](const Template *q) { ROCKET_ASSERT(q[0].name < q[1].name); });
+        if(tsize != 0) {
+          rocket::ranged_for(tdata, tdata + tsize - 1, [&](const Template *t) { ROCKET_ASSERT(t[0].name < t[1].name); });
         }
 #endif
-        this->m_templ_data = data;
-        this->m_templ_size = size;
+        this->m_templ_data = tdata_opt;
+        this->m_templ_size = tsize;
       }
 
     bool empty() const noexcept

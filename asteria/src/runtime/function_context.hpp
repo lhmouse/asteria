@@ -19,6 +19,7 @@ class Function_context : public Executive_context
 
   public:
     Function_context() noexcept
+      : m_predef_refs()
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Function_context);
