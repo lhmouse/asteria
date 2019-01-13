@@ -87,6 +87,8 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     // Clear the new table.
     pre->next = end;
     end->prev = pre;
+    // Update the number of elements.
+    pre->size = 0;
     // Move elements into the new table.
     if(ROCKET_EXPECT(stor.empty())) {
       return;

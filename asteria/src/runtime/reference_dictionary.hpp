@@ -29,14 +29,19 @@ class Reference_dictionary
   private:
     struct Bucket
       {
-        union { std::size_t size /* of the first bucket */; Bucket *prev /* of the rest */; };
-        union { std::size_t reserved /* of the last bucket */; Bucket *next /* of the rest */; };
+        // An empty name indicates an empty bucket.
+        // `refv[0]` is initialized if and only if `name` is non-empty.
         rocket::prehashed_string name;
-        union { Reference refv[1] /* uninitialized if `name.empty()` */; };
+        union { Reference refv[1]; };
+        // For the first bucket:  `size` is the number of non-empty buckets in this container.
+        // For each other bucket: `prev` points to the previous non-empty bucket.
+        union { std::size_t size; Bucket *prev; };
+        // For the last bucket:   `reserved` is reserved for future use.
+        // For each other bucket: `next` points to the next non-empty bucket.
+        union { std::size_t reserved; Bucket *next; };
 
         Bucket() noexcept
-          : prev(nullptr), next(nullptr),
-            name()
+          : name()
           {
 #ifdef ROCKET_DEBUG
             std::memset(static_cast<void *>(this->refv), 0xEC, sizeof(Reference));
