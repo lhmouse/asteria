@@ -2,13 +2,13 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "function_analytic_context.hpp"
+#include "analytic_function_context.hpp"
 #include "variadic_arguer.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Function_analytic_context::~Function_analytic_context()
+Analytic_function_context::~Analytic_function_context()
   {
   }
 
@@ -22,7 +22,7 @@ Function_analytic_context::~Function_analytic_context()
 
     }
 
-void Function_analytic_context::initialize(const rocket::cow_vector<rocket::prehashed_string> &params)
+void Analytic_function_context::initialize(const rocket::cow_vector<rocket::prehashed_string> &params)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {
@@ -37,7 +37,7 @@ void Function_analytic_context::initialize(const rocket::cow_vector<rocket::preh
     }
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
-    // N.B. If you have ever changed these, remember to update 'function_executive_context.cpp' as well.
+    // N.B. If you have ever changed these, remember to update 'executive_function_context.cpp' as well.
     do_predefine(this->m_predef_refs,
                  std::ref("__file"));
     do_predefine(this->m_predef_refs,

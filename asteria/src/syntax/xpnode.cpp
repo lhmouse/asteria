@@ -7,7 +7,7 @@
 #include "../runtime/reference_stack.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
-#include "../runtime/function_analytic_context.hpp"
+#include "../runtime/analytic_function_context.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/abstract_function.hpp"
 #include "../runtime/instantiated_function.hpp"
@@ -228,7 +228,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
       {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
-        Function_analytic_context ctx_next(&ctx);
+        Analytic_function_context ctx_next(&ctx);
         ctx_next.initialize(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
