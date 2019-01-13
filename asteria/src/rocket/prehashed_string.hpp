@@ -143,7 +143,8 @@ template<typename stringT, typename hashT>
       : m_sth(hf, ::std::move(str))
       {
       }
-    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<typename remove_reference<paramT>::type &&, string_type>::value)>
+    template<typename paramT,
+             ROCKET_ENABLE_IF(is_convertible<typename remove_reference<paramT>::type &&, string_type>::value)>
       basic_prehashed_string(paramT &&param, const hasher &hf = hasher())
       : m_sth(hf, ::std::forward<paramT>(param))
       {

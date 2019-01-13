@@ -18,8 +18,8 @@ namespace rocket {
       "  Line:       %lu\n"
       "  Message:    %s\n"
       "========================================\n",
-      expr, file, line, msg
-      );
+      expr, file, line, msg);
+    // Prefer `std::terminate()` to `std::abort()`.
     ::std::terminate();
   }
 
