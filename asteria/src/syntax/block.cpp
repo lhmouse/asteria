@@ -8,6 +8,7 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
+#include "../runtime/function_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
 
@@ -86,7 +87,7 @@ Instantiated_function Block::instantiate_function(Global_context &global, const 
 
 void Block::execute_as_function(Reference &self_io, Global_context &global, const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
   {
-    Executive_context ctx_next(nullptr);
+    Function_context ctx_next;
     ctx_next.initialize_for_function(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
