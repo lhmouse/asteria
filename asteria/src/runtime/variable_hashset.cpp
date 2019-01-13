@@ -20,7 +20,7 @@ void Variable_hashset::do_clear() noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
-      ROCKET_ASSERT(!*bkt);
+      ROCKET_ASSERT(*bkt);
       bkt->var.reset();
     }
     // Clear the table.
@@ -141,7 +141,7 @@ void Variable_hashset::for_each(const Abstract_variable_callback &callback) cons
     const auto end = pre + (this->m_stor.size() - 1);
     // Enumerate all buckets. The return value of `callback(bkt->var)` is ignored.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
-      ROCKET_ASSERT(!*bkt);
+      ROCKET_ASSERT(*bkt);
       callback(bkt->var);
     }
   }

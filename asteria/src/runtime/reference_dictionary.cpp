@@ -63,7 +63,7 @@ void Reference_dictionary::do_clear() noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
-      ROCKET_ASSERT(!*bkt);
+      ROCKET_ASSERT(*bkt);
       bkt->name.clear();
       rocket::destroy_at(bkt->refv);
     }
