@@ -166,7 +166,7 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
       ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_dictionary`.");
     }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
-      this->do_rehash(this->m_stor.size() * 2 | 19);
+      this->do_rehash(this->m_stor.size() * 2 | 11);
     }
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
