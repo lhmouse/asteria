@@ -12,6 +12,13 @@ namespace Asteria {
 
 class Reference_dictionary
   {
+  public:
+    struct Template
+      {
+        rocket::cow_string name;
+        Reference ref;
+      };
+
   private:
     struct Bucket
       {
@@ -42,22 +49,41 @@ class Reference_dictionary
           }
       };
 
+  private:
+    const Template *m_templ_data;
+    std::size_t m_templ_size;
     // The first and last buckets are permanently reserved.
     rocket::cow_vector<Bucket> m_stor;
 
   public:
     Reference_dictionary() noexcept
-      : m_stor()
+      : m_templ_data(nullptr), m_templ_size(0),
+        m_stor()
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
 
   private:
+    const Reference * do_get_template_opt(const rocket::prehashed_string &name) const noexcept;
+    const Reference * do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept;
+
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
     void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
+    void set_templates(const Template *data, std::size_t size) noexcept
+      {
+        // Elements in [begin, end) must have been sorted.
+#ifdef ROCKET_DEBUG
+        if(size != 0) {
+          rocket::ranged_for(data, data + size - 1, [&](const Template *q) { ROCKET_ASSERT(q[0].name < q[1].name); });
+        }
+#endif
+        this->m_templ_data = data;
+        this->m_templ_size = size;
+      }
+
     bool empty() const noexcept
       {
         if(this->m_stor.empty()) {
@@ -80,7 +106,19 @@ class Reference_dictionary
         this->do_clear();
       }
 
-    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept;
+    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
+      {
+        auto qref = this->do_get_dynamic_opt(name);
+        if(ROCKET_EXPECT(qref)) {
+          return qref;
+        }
+        qref = this->do_get_template_opt(name);
+        if(ROCKET_EXPECT(qref)) {
+          return qref;
+        }
+        return nullptr;
+      }
+
     Reference & open(const rocket::prehashed_string &name);
     bool unset(const rocket::prehashed_string &name) noexcept;
   };

@@ -11,6 +11,50 @@ Reference_dictionary::~Reference_dictionary()
   {
   }
 
+const Reference * Reference_dictionary::do_get_template_opt(const rocket::prehashed_string &name) const noexcept
+  {
+    // Get template table range.
+    auto bptr = this->m_templ_data;
+    auto eptr = bptr + this->m_templ_size;
+    while(bptr != eptr) {
+      // This is a handwritten binary search, utilizing 3-way comparison result of strings.
+      const auto mptr = bptr + (eptr - bptr) / 2;
+      const auto cmp = name.rdstr().compare(mptr->name);
+      if(cmp < 0) {
+        eptr = mptr;
+        continue;
+      }
+      if(cmp > 0) {
+        bptr = mptr + 1;
+        continue;
+      }
+      // Found.
+      return &(mptr->ref);
+    }
+    // Not found.
+    return nullptr;
+  }
+
+const Reference * Reference_dictionary::do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept
+  {
+    if(this->m_stor.empty()) {
+      return nullptr;
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Find the element using linear probing.
+    const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.name == name; });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(!*bkt) {
+      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
+      return nullptr;
+    }
+    return bkt->refv;
+  }
+
 void Reference_dictionary::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
@@ -116,26 +160,6 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-const Reference * Reference_dictionary::get_opt(const rocket::prehashed_string &name) const noexcept
-  {
-    if(this->m_stor.empty()) {
-      return nullptr;
-    }
-    // Get table bounds.
-    const auto pre = this->m_stor.data();
-    const auto end = pre + (this->m_stor.size() - 1);
-    // Find the element using linear probing.
-    const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.name == name; });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(!*bkt) {
-      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
-      return nullptr;
-    }
-    return bkt->refv;
-  }
-
 Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
   {
     if(name.empty()) {
@@ -158,7 +182,13 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
     }
     // Insert it into the new bucket.
     bkt->name = name;
-    rocket::construct_at(bkt->refv);
+    const auto templ = this->do_get_template_opt(name);
+    if(ROCKET_UNEXPECT(templ)) {
+      static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
+      rocket::construct_at(bkt->refv, *templ);
+    } else {
+      rocket::construct_at(bkt->refv);
+    }
     auto prev = end->prev;
     auto next = end;
     bkt->prev = prev;
