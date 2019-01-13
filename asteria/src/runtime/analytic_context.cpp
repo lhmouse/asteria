@@ -35,26 +35,14 @@ void Analytic_context::initialize_for_function(const rocket::cow_vector<rocket::
       // Ensure the named reference exists, whose contents are out of interest.
       this->open_named_reference(param) /*= Reference_root::S_null()*/;
     }
-    // Set `this`.
-    {
-      this->open_named_reference(std::ref("__this")) /*= Reference_root::S_null()*/;
-    }
-    // Set `__file`.
-    {
-      this->open_named_reference(std::ref("__file")) /*= Reference_root::S_null()*/;
-    }
-    // Set `__line`.
-    {
-      this->open_named_reference(std::ref("__line")) /*= Reference_root::S_null()*/;
-    }
-    // Set `__func`.
-    {
-      this->open_named_reference(std::ref("__func")) /*= Reference_root::S_null()*/;
-    }
-    // Set `__varg`.
-    {
-      this->open_named_reference(std::ref("__varg")) /*= Reference_root::S_null()*/;
-    }
+    // Set pre-defined variables.
+    // N.B. You must keep these elements sorted.
+    // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
+    this->open_named_reference(std::ref("__file")) /*= Reference_root::S_null()*/;
+    this->open_named_reference(std::ref("__func")) /*= Reference_root::S_null()*/;
+    this->open_named_reference(std::ref("__line")) /*= Reference_root::S_null()*/;
+    this->open_named_reference(std::ref("__this")) /*= Reference_root::S_null()*/;
+    this->open_named_reference(std::ref("__varg")) /*= Reference_root::S_null()*/;
   }
 
 }

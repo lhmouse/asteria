@@ -17,6 +17,13 @@ class Reference_dictionary
       {
         rocket::cow_string name;
         Reference ref;
+
+        template<typename XnameT, typename XrefT,
+                 ROCKET_ENABLE_IF(std::is_constructible<rocket::cow_string, XnameT &&>::value && std::is_constructible<Reference, XrefT &&>::value)>
+          Template(XnameT &&xname, XrefT &&xref)
+          : name(std::forward<XnameT>(xname)), ref(std::forward<XrefT>(xref))
+          {
+          }
       };
 
   private:

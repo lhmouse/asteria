@@ -187,6 +187,7 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
       static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
       rocket::construct_at(bkt->refv, *templ);
     } else {
+      // Default-construct a null reference.
       rocket::construct_at(bkt->refv);
     }
     auto prev = end->prev;

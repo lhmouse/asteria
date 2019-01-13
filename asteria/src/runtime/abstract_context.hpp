@@ -21,6 +21,12 @@ class Abstract_context
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_context, virtual);
 
+  protected:
+    void do_set_named_reference_templates(const Reference_dictionary::Template *data, std::size_t size) noexcept
+      {
+        this->m_dict.set_templates(data, size);
+      }
+
   public:
     const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const
       {

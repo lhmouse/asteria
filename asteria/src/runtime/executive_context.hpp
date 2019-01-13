@@ -15,6 +15,7 @@ class Executive_context : public Abstract_context
   {
   private:
     const Executive_context *const m_parent_opt;
+    rocket::cow_vector<Reference_dictionary::Template> m_predef_refs;
 
   public:
     explicit Executive_context(const Executive_context *parent_opt = nullptr) noexcept
