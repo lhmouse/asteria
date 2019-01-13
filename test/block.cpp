@@ -79,7 +79,7 @@ int main()
     auto block = Block(std::move(text));
 
     Global_context global;
-    Executive_context ctx;
+    Executive_context ctx(nullptr);
     Reference ref;
     auto status = block.execute_in_place(ref, ctx, global);
     ASTERIA_TEST_CHECK(status == Block::status_next);

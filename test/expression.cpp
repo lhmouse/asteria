@@ -13,7 +13,7 @@ using namespace Asteria;
 int main()
   {
     Global_context global;
-    Executive_context ctx;
+    Executive_context ctx(nullptr);
 
     const auto cond = rocket::make_refcounted<Variable>(Source_location(std::ref("nonexistent"), 1), D_null(), false);
     const auto dval = rocket::make_refcounted<Variable>(Source_location(std::ref("nonexistent"), 2), D_real(1.5), false);

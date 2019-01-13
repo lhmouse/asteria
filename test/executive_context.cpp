@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    Executive_context ctx;
+    Executive_context ctx(nullptr);
     ctx.open_named_reference(std::ref("test")) = Reference_root::S_constant{ D_integer(42) };
     auto qref = ctx.get_named_reference_opt(std::ref("test"));
     ASTERIA_TEST_CHECK(qref != nullptr);
