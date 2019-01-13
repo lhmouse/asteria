@@ -62,10 +62,12 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
         bkt->name.swap(rbkt.name);
         rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
         rocket::destroy_at(rbkt.refv);
-        bkt->prev = end->prev;
-        bkt->next = end;
-        end->prev->next = bkt;
-        end->prev = bkt;
+        auto prev = end->prev;
+        auto next = end;
+        bkt->prev = prev;
+        prev->next = bkt;
+        bkt->next = next;
+        next->prev = bkt;
         // Update the number of elements.
         pre->size++;
       }
@@ -87,8 +89,10 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
         {
           rocket::prehashed_string name;
           // Release the old element.
-          rbkt.prev->next = rbkt.next;
-          rbkt.next->prev = rbkt.prev;
+          auto prev = rbkt.prev;
+          auto next = rbkt.next;
+          prev->next = next;
+          next->prev = prev;
           name.swap(rbkt.name);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
@@ -101,10 +105,12 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
             rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
             rocket::destroy_at(rbkt.refv);
           }
-          bkt->prev = end->prev;
-          bkt->next = end;
-          end->prev->next = bkt;
-          end->prev = bkt;
+          prev = end->prev;
+          next = end;
+          bkt->prev = prev;
+          prev->next = bkt;
+          bkt->next = next;
+          next->prev = bkt;
           return false;
         }
       );
@@ -153,10 +159,12 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
     // Insert it into the new bucket.
     bkt->name = name;
     rocket::construct_at(bkt->refv);
-    bkt->prev = end->prev;
-    bkt->next = end;
-    end->prev->next = bkt;
-    end->prev = bkt;
+    auto prev = end->prev;
+    auto next = end;
+    bkt->prev = prev;
+    prev->next = bkt;
+    bkt->next = next;
+    next->prev = bkt;
     // Update the number of elements.
     pre->size++;
     return bkt->refv[0];
@@ -181,8 +189,10 @@ bool Reference_dictionary::unset(const rocket::prehashed_string &name) noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    bkt->prev->next = bkt->next;
-    bkt->next->prev = bkt->prev;
+    auto prev = bkt->prev;
+    auto next = bkt->next;
+    prev->next = next;
+    next->prev = prev;
     bkt->name.clear();
     rocket::destroy_at(bkt->refv);
     // Relocate elements that are not placed in their immediate locations.
