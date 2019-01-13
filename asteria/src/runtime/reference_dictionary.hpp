@@ -84,7 +84,10 @@ class Reference_dictionary
         // Elements in [begin, end) must have been sorted.
 #ifdef ROCKET_DEBUG
         if(tsize != 0) {
-          rocket::ranged_for(tdata, tdata + tsize - 1, [&](const Template *t) { ROCKET_ASSERT(t[0].name < t[1].name); });
+          ROCKET_ASSERT(tdata_opt);
+          for(auto ptr = tdata_opt + 1; ptr != tdata_opt + tsize; ++ptr) {
+            ROCKET_ASSERT(ptr[-1].name < ptr[0].name);
+          }
         }
 #endif
         this->m_templ_data = tdata_opt;
