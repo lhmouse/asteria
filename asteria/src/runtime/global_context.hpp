@@ -17,6 +17,7 @@ class Global_context : public Abstract_context
 
   public:
     Global_context()
+      : Abstract_context()
       {
         this->do_add_std_bindings();
       }
@@ -26,8 +27,14 @@ class Global_context : public Abstract_context
     void do_add_std_bindings();
 
   public:
-    bool is_analytic() const noexcept override;
-    const Abstract_context * get_parent_opt() const noexcept override;
+    bool is_analytic() const noexcept override
+      {
+        return false;
+      }
+    const Abstract_context * get_parent_opt() const noexcept override
+      {
+        return nullptr;
+      }
 
     Generational_collector & get_collector() noexcept
       {

@@ -19,14 +19,17 @@ class Simple_source_file
 
   public:
     Simple_source_file() noexcept
+      : m_code(), m_file()
       {
       }
     explicit Simple_source_file(const rocket::cow_string &filename)
+      : Simple_source_file()
       {
         const auto err = this->load_file(filename);
         this->do_throw_on_error(err);
       }
     Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &filename)
+      : Simple_source_file()
       {
         const auto err = this->load_stream(cstrm_io, filename);
         this->do_throw_on_error(err);

@@ -30,14 +30,4 @@ void Global_context::do_add_std_bindings()
     this->open_named_reference(std::ref("std")) = std::move(ref_c);
   }
 
-bool Global_context::is_analytic() const noexcept
-  {
-    return false;
-  }
-
-const Abstract_context * Global_context::get_parent_opt() const noexcept
-  {
-    return nullptr;
-  }
-
 }

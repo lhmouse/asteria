@@ -15,15 +15,22 @@ class Executive_context : public Abstract_context
     const Executive_context *const m_parent_opt;
 
   public:
-    explicit Executive_context(const Executive_context *parent_opt = nullptr) noexcept
-      : m_parent_opt(parent_opt)
+    explicit Executive_context(const Executive_context *parent_opt) noexcept
+      : Abstract_context(),
+        m_parent_opt(parent_opt)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Executive_context);
 
   public:
-    bool is_analytic() const noexcept override;
-    const Executive_context * get_parent_opt() const noexcept override;
+    bool is_analytic() const noexcept override
+      {
+        return false;
+      }
+    const Executive_context * get_parent_opt() const noexcept override
+      {
+        return this->m_parent_opt;
+      }
   };
 
 }

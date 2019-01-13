@@ -2,13 +2,13 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "function_context.hpp"
+#include "function_executive_context.hpp"
 #include "variadic_arguer.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Function_context::~Function_context()
+Function_executive_context::~Function_executive_context()
   {
   }
 
@@ -30,26 +30,27 @@ Function_context::~Function_context()
 
     }
 
-void Function_context::initialize_for_function(const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Function_executive_context::initialize(const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
-    for(std::size_t i = 0; i < params.size(); ++i) {
-      const auto &param = params.at(i);
+    for(const auto &param : params) {
       if(param.empty()) {
         continue;
       }
       if(param.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
-      if(ROCKET_EXPECT(i < args.size())) {
-        this->open_named_reference(param) = std::move(args.mut(i));
-      } else {
-        this->open_named_reference(param) /*= Reference_root::S_null()*/;
+      const auto index = static_cast<std::size_t>(&param - params.data());
+      if(ROCKET_EXPECT(index >= args.size())) {
+        // There is no argument for this parameter.
+        this->open_named_reference(param) = Reference_root::S_null();
+        continue;
       }
+      this->open_named_reference(param) = std::move(args.mut(index));
     }
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
-    // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
+    // N.B. If you have ever changed these, remember to update 'analytic_executive_context.cpp' as well.
     do_predefine(this->m_predef_refs,
                  std::ref("__file"), D_string(zvarg.get().get_location().get_file()));
     do_predefine(this->m_predef_refs,
