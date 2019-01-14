@@ -222,23 +222,23 @@ void Collector::collect()
     do_enumerate_variables(this->m_staging,
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
-          if(root->get_gcref() < root->use_count()) {
-            if(!tied) {
-              ASTERIA_DEBUG_LOG("  Keeping reachable variable: ", root->get_value());
-              return false;
+          if(root->get_gcref() >= root->use_count()) {
+            ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
+            root->reset(D_null(), true);
+            if(output) {
+              output->insert(root);
             }
-            ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
-            // Strong exception safety is paramount here.
-            tied->m_tracked.insert(root);
-            collect_tied |= tied->m_counter++ >= tied->m_threshold;
             this->m_tracked.erase(root);
             return false;
           }
-          ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
-          root->reset(D_null(), true);
-          if(output) {
-            output->insert(root);
+          if(!tied) {
+            ASTERIA_DEBUG_LOG("  Keeping reachable variable: ", root->get_value());
+            return false;
           }
+          ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
+          // Strong exception safety is paramount here.
+          tied->m_tracked.insert(root);
+          collect_tied |= tied->m_counter++ >= tied->m_threshold;
           this->m_tracked.erase(root);
           return false;
         }
