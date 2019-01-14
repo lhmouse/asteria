@@ -28,7 +28,8 @@ class Block
       };
 
     // TODO: In the future we will add JIT support.
-    using Compiled_instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &), const void *>;
+    using Compiled_instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &),
+                                                      const void *>;
 
   private:
     rocket::cow_vector<Statement> m_stmts;

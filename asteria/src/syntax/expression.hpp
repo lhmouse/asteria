@@ -14,7 +14,8 @@ class Expression
   {
   public:
     // TODO: In the future we will add JIT support.
-    using Compiled_instruction = rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &), const void *>;
+    using Compiled_instruction = rocket::binder_first<void (*)(const void *, Reference_stack &, Global_context &, const Executive_context &),
+                                                      const void *>;
 
   private:
     rocket::cow_vector<Xpnode> m_nodes;
