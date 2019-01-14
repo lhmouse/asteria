@@ -5,11 +5,12 @@
 #define ASTERIA_RUNTIME_ABSTRACT_OPAQUE_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/refcounted_ptr.hpp"
+#include "refcounted_base.hpp"
+#include "../rocket/cow_string.hpp"
 
 namespace Asteria {
 
-class Abstract_opaque : public rocket::refcounted_base<Abstract_opaque>
+class Abstract_opaque : public Refcounted_base
   {
   public:
     Abstract_opaque() noexcept

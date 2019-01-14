@@ -6,14 +6,14 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "abstract_opaque.hpp"
+#include "refcounted_base.hpp"
 
 namespace Asteria {
 
 class Global_context : public Abstract_context
   {
   private:
-    rocket::refcounted_ptr<Abstract_opaque> m_impl;
+    rocket::refcounted_ptr<Refcounted_base> m_impl;
 
   public:
     Global_context()

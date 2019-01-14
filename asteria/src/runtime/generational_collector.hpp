@@ -5,13 +5,13 @@
 #define ASTERIA_RUNTIME_GENERATIONAL_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
+#include "refcounted_base.hpp"
 #include "variable_hashset.hpp"
 #include "collector.hpp"
-#include "../rocket/refcounted_ptr.hpp"
 
 namespace Asteria {
 
-class Generational_collector : public rocket::refcounted_base<Generational_collector>
+class Generational_collector : public Refcounted_base
   {
   private:
     Variable_hashset m_pool;

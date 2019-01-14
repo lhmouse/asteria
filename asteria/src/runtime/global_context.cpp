@@ -11,7 +11,7 @@ namespace Asteria {
 
     namespace {
 
-    class Components : public Abstract_opaque
+    class Components : public Refcounted_base
       {
       private:
         rocket::refcounted_ptr<Generational_collector> m_coll;
@@ -27,19 +27,6 @@ namespace Asteria {
           }
 
       public:
-        // Define overriden functions.
-        rocket::cow_string describe() const override
-          {
-            return std::ref("global components");
-          }
-        [[noreturn]] Abstract_opaque * clone(rocket::refcounted_ptr<Abstract_opaque> & /*value_out*/) const override
-          {
-            std::terminate();
-          }
-        void enumerate_variables(const Abstract_variable_callback & /*callback*/) const override
-          {
-          }
-
         // Implement the global garbage collector.
         rocket::refcounted_ptr<Variable> create_variable()
           {
