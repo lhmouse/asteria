@@ -63,12 +63,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
         bkt->var = std::move(rbkt.var);
-        auto prev = end->prev;
-        auto next = end;
-        bkt->prev = prev;
-        prev->next = bkt;
-        bkt->next = next;
-        next->prev = bkt;
+        list_attach(*end, *bkt);
         // Update the number of elements.
         pre->size++;
       }
@@ -90,10 +85,7 @@ void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
         {
           rocket::refcounted_ptr<Variable> var;
           // Release the old element.
-          auto prev = rbkt.prev;
-          auto next = rbkt.next;
-          prev->next = next;
-          next->prev = prev;
+          list_detach(rbkt);
           var.swap(rbkt.var);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
@@ -102,12 +94,7 @@ void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
           bkt->var = std::move(var);
-          prev = end->prev;
-          next = end;
-          bkt->prev = prev;
-          prev->next = bkt;
-          bkt->next = next;
-          next->prev = bkt;
+          list_attach(*end, *bkt);
           return false;
         }
       );
@@ -170,12 +157,7 @@ bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
     }
     // Insert it into the new bucket.
     bkt->var = var;
-    auto prev = end->prev;
-    auto next = end;
-    bkt->prev = prev;
-    prev->next = bkt;
-    bkt->next = next;
-    next->prev = bkt;
+    list_attach(*end, *bkt);
     // Update the number of elements.
     pre->size++;
     return true;
@@ -200,10 +182,7 @@ bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    auto prev = bkt->prev;
-    auto next = bkt->next;
-    prev->next = next;
-    next->prev = prev;
+    list_detach(*bkt);
     bkt->var.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);

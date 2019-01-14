@@ -229,6 +229,28 @@ extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 // Miscellaneous
 ///////////////////////////////////////////////////////////////////////////////
 
+template<typename NodeT>
+  inline void list_attach(NodeT &pos, NodeT &node) noexcept
+  {
+    NodeT *const prev = pos.prev;
+    NodeT *const next = std::addressof(pos);
+    // Set pointers.
+    node.prev = prev;
+    prev->next = std::addressof(node);
+    node.next = next;
+    next->prev = std::addressof(node);
+  }
+
+template<typename NodeT>
+  inline void list_detach(NodeT &node) noexcept
+  {
+    NodeT *const prev = node.prev;
+    NodeT *const next = node.next;
+    // Set pointers.
+    prev->next = next;
+    next->prev = prev;
+  }
+
 struct Wrapped_index
   {
     std::uint64_t index;
