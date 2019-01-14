@@ -81,11 +81,11 @@ class Reference_stack
         auto tptr = this->m_tptr;
         if(this->m_large.capacity() == 0) {
           // Use `m_small`.
-          if(tptr != this->m_small.data() + this->m_small.size()) {
+          if(ROCKET_EXPECT(tptr != this->m_small.data() + this->m_small.size())) {
             // Write to the reserved area.
             goto r;
           }
-          if(tptr == this->m_small.data() + this->m_small.capacity()) {
+          if(ROCKET_UNEXPECT(tptr == this->m_small.data() + this->m_small.capacity())) {
             // The small buffer is full.
             this->do_switch_to_large();
             goto x;
@@ -95,7 +95,7 @@ class Reference_stack
           goto k;
         }
         // Use `m_large`.
-        if(tptr != this->m_large.data() + this->m_large.size()) {
+        if(ROCKET_EXPECT(tptr != this->m_large.data() + this->m_large.size())) {
           // Write to the reserved area.
       r:
           *tptr = std::forward<ParamT>(param);
