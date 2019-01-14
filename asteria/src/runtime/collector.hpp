@@ -13,15 +13,17 @@ class Collector
   {
   private:
     Collector *m_tied_opt;
-    long m_threshold;
-    long m_counter;
+    unsigned m_threshold;
+
+    unsigned m_counter;
     long m_recur;
     Variable_hashset m_tracked;
     Variable_hashset m_staging;
 
   public:
-    Collector(Collector *tied_opt, long threshold) noexcept
-      : m_tied_opt(tied_opt), m_threshold(threshold), m_counter(0), m_recur(0)
+    Collector(Collector *tied_opt, unsigned threshold) noexcept
+      : m_tied_opt(tied_opt), m_threshold(threshold),
+        m_counter(0), m_recur(0)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Collector);
@@ -36,11 +38,11 @@ class Collector
         this->m_tied_opt = tied_opt;
       }
 
-    long get_threshold() const noexcept
+    unsigned get_threshold() const noexcept
       {
         return this->m_threshold;
       }
-    void set_threshold(long threshold) noexcept
+    void set_threshold(unsigned threshold) noexcept
       {
         this->m_threshold = threshold;
       }
