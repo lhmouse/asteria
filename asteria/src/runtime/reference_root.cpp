@@ -4,7 +4,6 @@
 #include "../precompiled.hpp"
 #include "reference_root.hpp"
 #include "abstract_variable_callback.hpp"
-#include "generational_collector.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
