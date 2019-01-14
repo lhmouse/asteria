@@ -92,6 +92,7 @@ pkginclude_syntax_HEADERS =  \
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
+  asteria/src/runtime/refcounted_base.hpp  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
   asteria/src/runtime/value.hpp  \
@@ -130,6 +131,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/syntax/expression.cpp  \
   asteria/src/syntax/statement.cpp  \
   asteria/src/syntax/block.cpp  \
+  asteria/src/runtime/refcounted_base.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/value.cpp  \

@@ -32,6 +32,7 @@ class Statement;
 class Block;
 
 // Runtime
+class Refcounted_base;
 class Value;
 class Abstract_opaque;
 class Abstract_function;
