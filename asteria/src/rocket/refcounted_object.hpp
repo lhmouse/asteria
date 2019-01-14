@@ -37,9 +37,10 @@ template<typename elementT>
         m_rptr(this->m_owns.get())
       {
       }
-    template<typename firstT, typename secondT, typename ...paramsT>
-      refcounted_object(firstT &&first, secondT &&second, paramsT &&...params)
-      : m_owns(noadl::make_refcounted<element_type>(::std::forward<firstT>(first), ::std::forward<secondT>(second), ::std::forward<paramsT>(params)...)),
+    template<typename firstT, typename ...restT,
+             ROCKET_ENABLE_IF(is_constructible<element_type, firstT &&, restT &&...>::value)>
+      refcounted_object(firstT &&first, restT &&...rest)
+      : m_owns(noadl::make_refcounted<element_type>(::std::forward<firstT>(first), ::std::forward<restT>(rest)...)),
         m_rptr(this->m_owns.get())
       {
       }
