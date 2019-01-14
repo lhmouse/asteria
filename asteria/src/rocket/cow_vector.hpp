@@ -784,7 +784,7 @@ template<typename valueT, typename allocatorT>
       {
         const auto cnt = this->size();
         auto cap = this->m_sth.check_size_add(cnt, cap_add);
-        if(!this->unique() || (this->capacity() < cap)) {
+        if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
           // Reserve more space for non-debug builds.
           cap = noadl::max(cap, cnt + cnt / 2 + 7);
