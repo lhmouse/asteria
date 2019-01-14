@@ -22,9 +22,9 @@ class Generational_collector : public rocket::refcounted_base<Generational_colle
   public:
     Generational_collector() noexcept
       : m_pool(),
-        m_gen_two(&(this->m_pool), nullptr, 20),
-        m_gen_one(&(this->m_pool), &(this->m_gen_two), 100),
-        m_gen_zero(&(this->m_pool), &(this->m_gen_one), 500)
+        m_gen_two(&(this->m_pool), nullptr, 10),
+        m_gen_one(&(this->m_pool), &(this->m_gen_two), 50),
+        m_gen_zero(&(this->m_pool), &(this->m_gen_one), 100)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_collector);
