@@ -39,7 +39,7 @@ class Simple_source_file
   private:
     void do_throw_on_error(const Parser_error &err)
       {
-        if(err == Parser_error::code_success) {
+        if(ROCKET_EXPECT(err == Parser_error::code_success)) {
           return;
         }
         this->do_throw_error(err);
