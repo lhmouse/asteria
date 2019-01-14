@@ -271,7 +271,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = global.get_collector().create_variable();
+        const auto var = global.create_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
@@ -286,7 +286,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = global.get_collector().create_variable();
+        const auto var = global.create_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.

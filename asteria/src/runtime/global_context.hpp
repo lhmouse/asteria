@@ -6,25 +6,26 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "generational_collector.hpp"
+#include "abstract_opaque.hpp"
 
 namespace Asteria {
 
 class Global_context : public Abstract_context
   {
   private:
-    Generational_collector m_gen_coll;
+    rocket::refcounted_ptr<Abstract_opaque> m_impl;
 
   public:
     Global_context()
-      : Abstract_context()
+      : Abstract_context(),
+        m_impl()
       {
-        this->do_add_std_bindings();
+        this->do_initialize();
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Global_context);
 
   private:
-    void do_add_std_bindings();
+    void do_initialize();
 
   public:
     bool is_analytic() const noexcept override
@@ -36,10 +37,7 @@ class Global_context : public Abstract_context
         return nullptr;
       }
 
-    Generational_collector & get_collector() noexcept
-      {
-        return this->m_gen_coll;
-      }
+    rocket::refcounted_ptr<Variable> create_variable();
   };
 
 }

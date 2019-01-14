@@ -5,29 +5,82 @@
 #include "global_context.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
-#include "executive_context.hpp"
-#include "reference_stack.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
+    namespace {
+
+    class Components : public Abstract_opaque
+      {
+      private:
+        rocket::refcounted_ptr<Generational_collector> m_coll;
+
+      public:
+        Components()
+          {
+            // Create the global garbage collector.
+            this->m_coll = rocket::make_refcounted<Generational_collector>();
+          }
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Components)
+          {
+          }
+
+      public:
+        // Define overriden functions.
+        rocket::cow_string describe() const override
+          {
+            return std::ref("global components");
+          }
+        [[noreturn]] Abstract_opaque * clone(rocket::refcounted_ptr<Abstract_opaque> & /*value_out*/) const override
+          {
+            std::terminate();
+          }
+        void enumerate_variables(const Abstract_variable_callback & /*callback*/) const override
+          {
+          }
+
+        // Implement the global garbage collector.
+        rocket::refcounted_ptr<Variable> create_variable()
+          {
+            return this->m_coll->create_variable();
+          }
+        void perform_final_garbage_collection() noexcept
+          try {
+            this->m_coll->perform_garbage_collection(UINT_MAX);
+          } catch(std::exception &e) {
+            ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection and some resources might have leaked: ", e.what());
+          }
+      };
+
+    }
+
 Global_context::~Global_context()
   {
-    // Perform the final garbage collection.
-    try {
-      this->clear_named_references();
-      this->m_gen_coll.perform_garbage_collection(UINT_MAX);
-    } catch(std::exception &e) {
-      ASTERIA_DEBUG_LOG("An exception was thrown during final garbage collection and some resources might have leaked: ", e.what());
+    const auto impl = static_cast<Components *>(this->m_impl.get());
+    if(ROCKET_UNEXPECT(!impl)) {
+      return;
     }
+    // Perform the final garbage collection.
+    this->clear_named_references();
+    impl->perform_final_garbage_collection();
   }
 
-void Global_context::do_add_std_bindings()
+void Global_context::do_initialize()
   {
+    // Create the object containing all components.
+    const auto impl = rocket::make_refcounted<Components>();
+    this->m_impl = impl;
+    // Add standard library interfaces.
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
     Reference_root::S_constant ref_c = { std::move(root) };
-    this->open_named_reference(std::ref("std")) = std::move(ref_c);
+  }
+
+rocket::refcounted_ptr<Variable> Global_context::create_variable()
+  {
+    ROCKET_ASSERT(this->m_impl);
+    return static_cast<Components *>(this->m_impl.get())->create_variable();
   }
 
 }
