@@ -12,6 +12,7 @@ namespace Asteria {
 class Collector
   {
   private:
+    Variable_hashset *m_output_opt;
     Collector *m_tied_opt;
     unsigned m_threshold;
 
@@ -21,14 +22,23 @@ class Collector
     Variable_hashset m_staging;
 
   public:
-    Collector(Collector *tied_opt, unsigned threshold) noexcept
-      : m_tied_opt(tied_opt), m_threshold(threshold),
+    Collector(Variable_hashset *output_opt, Collector *tied_opt, unsigned threshold) noexcept
+      : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Collector);
 
   public:
+    Variable_hashset * get_output_pool_opt() const noexcept
+      {
+        return this->m_output_opt;
+      }
+    void set_output_pool(Variable_hashset *output_opt) noexcept
+      {
+        this->m_output_opt = output_opt;
+      }
+
     Collector * get_tied_collector_opt() const noexcept
       {
         return this->m_tied_opt;

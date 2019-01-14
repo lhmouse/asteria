@@ -6,15 +6,12 @@
 
 #include "../fwd.hpp"
 #include "value.hpp"
-#include "../syntax/source_location.hpp"
 
 namespace Asteria {
 
 class Variable : public rocket::refcounted_base<Variable>
   {
   private:
-    Source_location m_loc;
-
     // These are only used during garbage collection and are uninitialized by default.
     mutable long m_gcref_intg;
     mutable double m_gcref_mant;
@@ -25,9 +22,8 @@ class Variable : public rocket::refcounted_base<Variable>
   public:
     template<typename XvalueT,
              ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      Variable(const Source_location &loc, XvalueT &&value, bool immutable)
-      : m_loc(loc),
-        m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
+      Variable(XvalueT &&value, bool immutable)
+      : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -36,11 +32,6 @@ class Variable : public rocket::refcounted_base<Variable>
     [[noreturn]] void do_throw_immutable() const;
 
   public:
-    const Source_location & get_location() const noexcept
-      {
-        return this->m_loc;
-      }
-
     long get_gcref() const noexcept
       {
         return this->m_gcref_intg;

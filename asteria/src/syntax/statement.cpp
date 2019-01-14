@@ -271,14 +271,13 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+        const auto var = global.get_collector().create_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
         alt.init.evaluate(ref_out, global, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
-        global.get_collector().track_variable(var);
         var->reset(std::move(value), alt.immutable);
         return Block::status_next;
       }
@@ -287,13 +286,12 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
-        const auto var = rocket::make_refcounted<Variable>(alt.loc, D_null(), true);
+        const auto var = global.get_collector().create_variable();
         Reference_root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
         auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
         ASTERIA_DEBUG_LOG("Creating named function: ", func.describe());
-        global.get_collector().track_variable(var);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
       }

@@ -99,6 +99,7 @@ void Collector::collect()
     if(!sentry) {
       return;
     }
+    const auto output = this->m_output_opt;
     const auto tied = this->m_tied_opt;
     bool collect_tied = false;
     // The algorithm here is basically described at
@@ -235,6 +236,9 @@ void Collector::collect()
           }
           ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
           root->reset(D_null(), true);
+          if(output) {
+            output->insert(root);
+          }
           this->m_tracked.erase(root);
           return false;
         }

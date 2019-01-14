@@ -29,7 +29,7 @@ int main()
     ASTERIA_TEST_CHECK(val.check<D_string>() == "meow");
     ASTERIA_TEST_CHECK_CATCH(ref.open() = D_boolean(true));
 
-    ref = Reference_root::S_variable { rocket::make_refcounted<Variable>(Source_location(std::ref("nonexistent"), 42), D_null(), false) };
+    ref = Reference_root::S_variable { rocket::make_refcounted<Variable>(D_null(), false) };
     ref.zoom_in(Reference_modifier::S_array_index { -3 });
     val = ref.read();
     ASTERIA_TEST_CHECK(val.type() == Value::type_null);
