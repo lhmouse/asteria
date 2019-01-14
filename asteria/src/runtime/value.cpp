@@ -220,49 +220,49 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
     case type_null:
       {
         // null
-        os <<"null";
+        os << "null";
         return;
       }
     case type_boolean:
       {
         const auto &alt = this->m_stor.as<D_boolean>();
         // boolean true
-        os <<"boolean " <<std::boolalpha <<std::nouppercase <<alt;
+        os << "boolean " << std::boolalpha << std::nouppercase << alt;
         return;
       }
     case type_integer:
       {
         const auto &alt = this->m_stor.as<D_integer>();
         // integer 42
-        os <<"integer " <<std::dec <<alt;
+        os << "integer " << std::dec << alt;
         return;
       }
     case type_real:
       {
         const auto &alt = this->m_stor.as<D_real>();
         // real 123.456
-        os <<"real " <<std::dec <<std::nouppercase <<std::setprecision(DECIMAL_DIG) <<alt;
+        os << "real " << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
     case type_string:
       {
         const auto &alt = this->m_stor.as<D_string>();
         // string(5) "hello"
-        os <<"string(" <<std::dec <<alt.size() <<") " <<quote(alt);
+        os << "string(" << std::dec << alt.size() << ") " << quote(alt);
         return;
       }
     case type_opaque:
       {
         const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        os <<"opaque(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
+        os << "opaque(\"" << typeid(alt.get()).name() << "\") " << quote(alt.get().describe());
         return;
       }
     case type_function:
       {
         const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
-        os <<"function(\"" <<typeid(alt.get()).name() <<"\") " <<quote(alt.get().describe());
+        os << "function(\"" << typeid(alt.get()).name() << "\") " << quote(alt.get().describe());
         return;
       }
     case type_array:
@@ -273,13 +273,13 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         //   1 = integer 2;
         //   2 = integer 3;
         // ]
-        os <<"array(" <<std::dec <<alt.size() <<") [";
+        os << "array(" << std::dec << alt.size() << ") [";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<std::dec <<(it - alt.begin()) <<" = ";
+          os << do_indent_or_space(indent_increment, indent_next + indent_increment) << std::dec << (it - alt.begin()) << " = ";
           it->dump(os, indent_increment, indent_next + indent_increment);
-          os <<';';
+          os << ';';
         }
-        os <<do_indent_or_space(indent_increment, indent_next) <<']';
+        os << do_indent_or_space(indent_increment, indent_next) << ']';
         return;
       }
     case type_object:
@@ -290,13 +290,13 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
         //   "two" = integer 2;
         //   "three" = integer 3;
         // }
-        os <<"object(" <<std::dec <<alt.size() <<") {";
+        os << "object(" << std::dec << alt.size() << ") {";
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os <<do_indent_or_space(indent_increment, indent_next + indent_increment) <<quote(it->first) <<" = ";
+          os << do_indent_or_space(indent_increment, indent_next + indent_increment) << quote(it->first) << " = ";
           it->second.dump(os, indent_increment, indent_next + indent_increment);
-          os <<';';
+          os << ';';
         }
-        os <<do_indent_or_space(indent_increment, indent_next) <<'}';
+        os << do_indent_or_space(indent_increment, indent_next) << '}';
         return;
       }
     default:

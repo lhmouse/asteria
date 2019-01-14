@@ -60,18 +60,15 @@ rocket::cow_string Formatter::do_extract_string() noexcept
         return len;
       }
 
+    void do_replace_all(rocket::cow_string &str, char ch, const char *reps, std::size_t repn)
+      {
+        for(auto pos = str.find(ch); pos != rocket::cow_string::npos; pos = str.find(ch, pos + repn)) {
+          str.replace(pos, 1, reps, repn);
+        }
+      }
     void do_replace_all(rocket::cow_string &str, char ch, const char *reps)
       {
-        const auto repn = std::char_traits<char>::length(reps);
-        auto pos = static_cast<rocket::cow_string::size_type>(0);
-        do {
-          pos = str.find(ch, pos);
-          if(pos == str.npos) {
-            break;
-          }
-          str.replace(pos, 1, reps, repn);
-          pos += repn;
-        } while(true);
+        do_replace_all(str, ch, reps, std::strlen(reps));
       }
 
     }
@@ -99,7 +96,7 @@ bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) 
     do_replace_all(str, '\n', "\n\t");
     do_replace_all(str, '\0', "[NUL]");
     str.push_back('\n');
-    std::cerr <<str <<std::flush;
+    std::cerr << str << std::flush;
     return true;
   } catch(...) {
     return false;
