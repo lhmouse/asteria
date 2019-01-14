@@ -189,4 +189,29 @@ bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     return true;
   }
 
+rocket::refcounted_ptr<Variable> Variable_hashset::erase_random_opt() noexcept
+  {
+    if(this->m_stor.empty()) {
+      return nullptr;
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Get the first non-empty bucket.
+    const auto bkt = pre->next;
+    if(bkt == end) {
+      return nullptr;
+    }
+    ROCKET_ASSERT(*bkt);
+    rocket::refcounted_ptr<Variable> var;
+    // Update the number of elements.
+    pre->size--;
+    // Empty the bucket.
+    list_detach(*bkt);
+    bkt->var.reset();
+    // Relocate elements that are not placed in their immediate locations.
+    this->do_check_relocation(bkt, bkt + 1);
+    return std::move(var);
+  }
+
 }

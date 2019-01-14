@@ -81,6 +81,7 @@ class Variable_hashset
     void for_each(const Abstract_variable_callback &callback) const;
     bool insert(const rocket::refcounted_ptr<Variable> &var);
     bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept;
+    rocket::refcounted_ptr<Variable> erase_random_opt() noexcept;
   };
 
 }
