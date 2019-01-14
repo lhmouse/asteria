@@ -31,7 +31,7 @@ class Generational_collector : public rocket::refcounted_base<Generational_colle
 
   public:
     rocket::refcounted_ptr<Variable> create_variable();
-    void perform_garbage_collection(unsigned gen_limit);
+    bool perform_garbage_collection(unsigned gen_limit);
   };
 
 }
