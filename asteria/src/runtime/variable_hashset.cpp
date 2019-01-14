@@ -208,7 +208,7 @@ rocket::refcounted_ptr<Variable> Variable_hashset::erase_random_opt() noexcept
     pre->size--;
     // Empty the bucket.
     list_detach(*bkt);
-    bkt->var.reset();
+    var.swap(bkt->var);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
     return std::move(var);
