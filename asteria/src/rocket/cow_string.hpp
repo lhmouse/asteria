@@ -190,8 +190,8 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         size_type max_size() const noexcept
           {
             auto st_alloc = storage_allocator(this->as_allocator());
-            const auto max_bblk = allocator_traits<storage_allocator>::max_size(st_alloc);
-            return storage::max_nchar_for_nblk(max_bblk / 2);
+            const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
+            return storage::max_nchar_for_nblk(max_nblk / 2);
           }
         size_type check_size_add(size_type base, size_type add) const
           {
