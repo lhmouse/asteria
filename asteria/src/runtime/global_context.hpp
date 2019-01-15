@@ -13,12 +13,11 @@ namespace Asteria {
 class Global_context : public Abstract_context
   {
   private:
-    rocket::refcounted_ptr<Refcounted_base> m_impl;
+    rocket::refcounted_ptr<Refcounted_base> m_coll;
 
   public:
     Global_context()
-      : Abstract_context(),
-        m_impl()
+      : Abstract_context()
       {
         this->do_initialize();
       }
