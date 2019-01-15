@@ -226,31 +226,6 @@ inline Quote quote(const rocket::cow_string &str) noexcept
 extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Doubly Linked List
-///////////////////////////////////////////////////////////////////////////////
-
-template<typename NodeT>
-  inline void list_attach(NodeT &next, NodeT &node) noexcept
-  {
-    NodeT &prev = *(next.prev);
-    // Set pointers.
-    node.prev = std::addressof(prev);
-    prev.next = std::addressof(node);
-    node.next = std::addressof(next);
-    next.prev = std::addressof(node);
-  }
-
-template<typename NodeT>
-  inline void list_detach(NodeT &node) noexcept
-  {
-    NodeT &prev = *(node.prev);
-    NodeT &next = *(node.next);
-    // Set pointers.
-    prev.next = std::addressof(next);
-    next.prev = std::addressof(prev);
-  }
-
-///////////////////////////////////////////////////////////////////////////////
 // Wrappable Index
 ///////////////////////////////////////////////////////////////////////////////
 

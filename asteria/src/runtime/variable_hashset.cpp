@@ -63,7 +63,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
         bkt->var = std::move(rbkt.var);
-        list_attach(*end, *bkt);
+        bkt->attach(*end);
         // Update the number of elements.
         pre->size++;
       }
@@ -85,7 +85,7 @@ void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
         {
           rocket::refcounted_ptr<Variable> var;
           // Release the old element.
-          list_detach(rbkt);
+          rbkt.detach();
           var.swap(rbkt.var);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
@@ -94,7 +94,7 @@ void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
           bkt->var = std::move(var);
-          list_attach(*end, *bkt);
+          bkt->attach(*end);
           return false;
         }
       );
@@ -157,7 +157,7 @@ bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
     }
     // Insert it into the new bucket.
     bkt->var = var;
-    list_attach(*end, *bkt);
+    bkt->attach(*end);
     // Update the number of elements.
     pre->size++;
     return true;
@@ -182,7 +182,7 @@ bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    list_detach(*bkt);
+    bkt->detach();
     bkt->var.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
@@ -207,7 +207,7 @@ rocket::refcounted_ptr<Variable> Variable_hashset::erase_random_opt() noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    list_detach(*bkt);
+    bkt->detach();
     var.swap(bkt->var);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);

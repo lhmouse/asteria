@@ -109,7 +109,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
         bkt->name.swap(rbkt.name);
         rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
         rocket::destroy_at(rbkt.refv);
-        list_attach(*end, *bkt);
+        bkt->attach(*end);
         // Update the number of elements.
         pre->size++;
       }
@@ -131,7 +131,7 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
         {
           rocket::prehashed_string name;
           // Release the old element.
-          list_detach(rbkt);
+          rbkt.detach();
           name.swap(rbkt.name);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
@@ -144,7 +144,7 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
             rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
             rocket::destroy_at(rbkt.refv);
           }
-          list_attach(*end, *bkt);
+          bkt->attach(*end);
           return false;
         }
       );
@@ -180,7 +180,7 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
       // Default-construct a null reference.
       rocket::construct_at(bkt->refv);
     }
-    list_attach(*end, *bkt);
+    bkt->attach(*end);
     // Update the number of elements.
     pre->size++;
     return bkt->refv[0];
@@ -205,7 +205,7 @@ bool Reference_dictionary::unset(const rocket::prehashed_string &name) noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    list_detach(*bkt);
+    bkt->detach();
     bkt->name.clear();
     rocket::destroy_at(bkt->refv);
     // Relocate elements that are not placed in their immediate locations.
