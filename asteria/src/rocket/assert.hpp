@@ -11,7 +11,7 @@ namespace rocket {
 [[noreturn]] extern void report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept;
 
 template<typename ...paramsT>
-  [[noreturn]] inline bool assertion_failure_handler(paramsT &&...params) noexcept
+  [[noreturn]] ROCKET_ARTIFICIAL_FUNCTION inline bool assertion_failure_handler(paramsT &&...params) noexcept
   {
 #ifdef ROCKET_DEBUG
     // Disallow ADL.
@@ -25,7 +25,7 @@ template<typename ...paramsT>
 
 // This function template exists to prevent the argument expression of `ROCKET_ASSERT()` from being evaluated more than once.
 template<typename valueT, typename ...paramsT>
-  constexpr valueT && asserted_value_wrapper(valueT &&value, paramsT &&...params) noexcept
+  ROCKET_ARTIFICIAL_FUNCTION constexpr valueT && asserted_value_wrapper(valueT &&value, paramsT &&...params) noexcept
   {
     return (value ? true : (assertion_failure_handler)(static_cast<paramsT &&>(params)...)),
            static_cast<valueT &&>(value);
