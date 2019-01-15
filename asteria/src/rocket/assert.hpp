@@ -8,12 +8,12 @@
 
 namespace rocket {
 
-[[noreturn]] extern void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
+[[noreturn]] extern void report_assertion_failure(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
 
 }
 
 #ifdef ROCKET_DEBUG
-#  define ROCKET_DETAILS_ASSERT(expr_, str_, m_)    ((expr_) ? (void)0 : ::rocket::on_assert_fail(str_, __FILE__, __LINE__, m_))
+#  define ROCKET_DETAILS_ASSERT(expr_, str_, m_)    ((expr_) ? (void)0 : ::rocket::report_assertion_failure(str_, __FILE__, __LINE__, m_))
 #else
 #  define ROCKET_DETAILS_ASSERT(expr_, str_, m_)    ((expr_) ? (void)0 : ROCKET_UNREACHABLE())
 #endif

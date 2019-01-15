@@ -7,8 +7,9 @@
 
 namespace rocket {
 
-[[noreturn]] void on_assert_fail(const char *expr, const char *file, unsigned long line, const char *msg) noexcept
+[[noreturn]] void report_assertion_failure(const char *expr, const char *file, unsigned long line, const char *msg) noexcept
   {
+    // Write a message to the standard error stream.
     ::std::fprintf(
       stderr,
       "========================================\n"
