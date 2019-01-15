@@ -113,8 +113,8 @@ template<typename XvalueT>
       if(!qvalue) {
         do_fail(*this, this->m_state,
           [&]{
-            ASTERIA_THROW_RUNTIME_ERROR("The optional argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                        "but `", Value::get_type_name(Value::Type(Value::Variant::index_of<XvalueT>::value)), "` was expected.");
+            ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                        "but `", Value::get_type_name(Value::Type(Value::Variant::index_of<XvalueT>::value)), "` or `null` was expected.");
           });
         return *this;
       }
@@ -138,7 +138,7 @@ template<typename XvalueT>
     if(!qvalue) {
       do_fail(*this, this->m_state,
         [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("The required argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+          ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
                                       "but `", Value::get_type_name(Value::Type(Value::Variant::index_of<XvalueT>::value)), "` was expected.");
         });
       return *this;
