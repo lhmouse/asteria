@@ -576,14 +576,14 @@ template<typename charT, typename traitsT, typename allocatorT>
     struct hash;
 
   private:
-    details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
     const value_type *m_ptr;
     size_type m_len;
+    details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
 
   public:
     // 24.3.2.2, construct/copy/destroy
     explicit constexpr basic_cow_string(const allocator_type &alloc) noexcept
-      : m_sth(alloc), m_ptr(::std::addressof(null_char)), m_len(0)
+      : m_ptr(::std::addressof(null_char)), m_len(0), m_sth(alloc)
       {
       }
     constexpr basic_cow_string() noexcept(is_nothrow_constructible<allocator_type>::value)
@@ -593,7 +593,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     template<typename refT,
              ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
       constexpr basic_cow_string(reference_wrapper<refT> ref, const allocator_type &alloc) noexcept
-      : m_sth(alloc), m_ptr(ref.get()), m_len(traits_type::length(ref.get()))
+      : m_ptr(ref.get()), m_len(traits_type::length(ref.get())), m_sth(alloc)
       {
       }
     template<typename refT,
