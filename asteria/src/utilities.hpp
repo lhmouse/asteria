@@ -230,25 +230,24 @@ extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 ///////////////////////////////////////////////////////////////////////////////
 
 template<typename NodeT>
-  inline void list_attach(NodeT &pos, NodeT &node) noexcept
+  inline void list_attach(NodeT &next, NodeT &node) noexcept
   {
-    NodeT *const prev = pos.prev;
-    NodeT *const next = std::addressof(pos);
+    NodeT &prev = *(next.prev);
     // Set pointers.
-    node.prev = prev;
-    prev->next = std::addressof(node);
-    node.next = next;
-    next->prev = std::addressof(node);
+    node.prev = std::addressof(prev);
+    prev.next = std::addressof(node);
+    node.next = std::addressof(next);
+    next.prev = std::addressof(node);
   }
 
 template<typename NodeT>
   inline void list_detach(NodeT &node) noexcept
   {
-    NodeT *const prev = node.prev;
-    NodeT *const next = node.next;
+    NodeT &prev = *(node.prev);
+    NodeT &next = *(node.next);
     // Set pointers.
-    prev->next = next;
-    next->prev = prev;
+    prev.next = std::addressof(next);
+    next.prev = std::addressof(prev);
   }
 
 ///////////////////////////////////////////////////////////////////////////////
