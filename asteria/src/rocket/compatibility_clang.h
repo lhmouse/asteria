@@ -14,6 +14,7 @@
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
 #define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
+#define ROCKET_CONSTANT_P(...)              __builtin_constant_p(__VA_ARGS__)
 
 // Check for either libc++ or libstdc++.
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
