@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "variadic_arguer.hpp"
+#include "../library/argument_sentry.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -18,35 +19,31 @@ rocket::cow_string Variadic_arguer::describe() const
 
 void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, rocket::cow_vector<Reference> &&args) const
   {
-    switch(args.size()) {
-    case 0:
-      {
-        // Return the number of variadic arguments.
-        Reference_root::S_constant ref_c = { D_integer(this->get_varg_size()) };
-        self_io = std::move(ref_c);
-        return;
-      }
-    case 1:
-      {
-        // Return the argument at the index specified.
-        const auto ivalue = args.at(0).read();
-        const auto qindex = ivalue.opt<D_integer>();
-        if(!qindex) {
-          ASTERIA_THROW_RUNTIME_ERROR("The argument passed to a variadic argument accessor must be of type `integer`.");
-        }
-        // Return the argument at the given index.
-        auto wrap = wrap_index(*qindex, this->get_varg_size());
-        if(wrap.index >= this->get_varg_size()) {
-          ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", this->get_varg_size());
-          self_io = Reference_root::S_null();
-          return;
-        }
-        self_io = this->get_varg(static_cast<std::size_t>(wrap.index));
-        return;
-      }
-    default:
-      ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
+    Argument_sentry sentry(std::ref("<builtin>.__varg"));
+    // `__varg()`:
+    //   Return the number of variadic arguments.
+    sentry.reset(args);
+    if(sentry.cut()) {
+      Reference_root::S_constant ref_c = { D_integer(this->get_varg_size()) };
+      self_io = std::move(ref_c);
+      return;
     }
+    // `__varg(number)`:
+    //   Return the argument at the index specified.
+    sentry.reset(args);
+    D_integer index;
+    if(sentry.req(index).cut()) {
+      auto wrap = wrap_index(index, this->get_varg_size());
+      if(wrap.index >= this->get_varg_size()) {
+        ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", this->get_varg_size());
+        self_io = Reference_root::S_null();
+        return;
+      }
+      self_io = this->get_varg(static_cast<std::size_t>(wrap.index));
+      return;
+    }
+    // Fail.
+    ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
   }
 
 void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const
