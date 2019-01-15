@@ -543,7 +543,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               return -1;
             }
             const auto dist = bkt - data;
-            ROCKET_ASSERT(dist > 0);
+            ROCKET_ASSERT(dist >= 0);
             return dist;
           }
         bucket_type * mut_buckets_unchecked() noexcept

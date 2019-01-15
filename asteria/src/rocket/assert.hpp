@@ -8,7 +8,7 @@
 
 namespace rocket {
 
-[[noreturn]] extern void report_assertion_failure(const char *expr, const char *file, unsigned long line, const char *msg) noexcept;
+[[noreturn]] extern void report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept;
 
 template<typename valueT, typename ...paramsT>
   [[noreturn]] inline valueT && assertion_failure_handler(paramsT &&...params) noexcept
@@ -38,7 +38,7 @@ template<typename valueT, typename ...paramsT>
                                            : ::rocket::assertion_failure_handler<decltype((value_))>(__VA_ARGS__))  \
                                : ::rocket::asserted_value_wrapper((value_), __VA_ARGS__))
 
-#define ROCKET_ASSERT(expr_)              ROCKET_ASSERT_IMPLEMENTATION_(expr_, #expr_, __FILE__, __LINE__, (""))
-#define ROCKET_ASSERT_MSG(expr_, m_)      ROCKET_ASSERT_IMPLEMENTATION_(expr_, #expr_, __FILE__, __LINE__, (m_))
+#define ROCKET_ASSERT(expr_)              ROCKET_ASSERT_IMPLEMENTATION_((expr_), #expr_, __FILE__, __LINE__, (""))
+#define ROCKET_ASSERT_MSG(expr_, m_)      ROCKET_ASSERT_IMPLEMENTATION_((expr_), #expr_, __FILE__, __LINE__, (m_))
 
 #endif
