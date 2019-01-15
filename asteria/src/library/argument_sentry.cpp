@@ -31,10 +31,10 @@ Argument_sentry::~Argument_sentry()
         std::reference_wrapper<Argument_sentry::State> m_state;
 
         bool m_committable;
-        const Reference *m_ref_opt;
+        const Reference *m_ref;
 
       public:
-        Reference_sentry(const Argument_sentry &parent, Argument_sentry::State &state, bool cut) noexcept
+        Reference_sentry(const Argument_sentry &parent, Argument_sentry::State &state) noexcept
           : m_parent(std::ref(parent)), m_state(std::ref(state)),
             m_committable(false)
           {
@@ -53,29 +53,16 @@ Argument_sentry::~Argument_sentry()
                 });
               return;
             }
-            if(cut) {
-              // The argument list should stop here.
-              if(state.offset != state.args->size()) {
-                do_fail(parent, state,
-                  [&]{
-                    ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting ", state.args->size(), ").");
-                  });
-                return;
-              }
-              // Succeed.
-              this->m_ref_opt = nullptr;
-            } else {
-              // Get an argument.
-              if(state.offset >= state.args->size()) {
-                do_fail(parent, state,
-                  [&]{
-                    ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", state.args->size(), ").");
-                  });
-                return;
-              }
-              // Succeed.
-              this->m_ref_opt = state.args->data() + state.offset;
+            // Get an argument.
+            if(state.offset >= state.args->size()) {
+              do_fail(parent, state,
+                [&]{
+                  ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", state.args->size(), ").");
+                });
+              return;
             }
+            // Succeed.
+            this->m_ref = state.args->data() + state.offset;
             this->m_committable = true;
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_sentry)
@@ -86,7 +73,7 @@ Argument_sentry::~Argument_sentry()
               return;
             }
             // If an argument has been read consumed, bump up the index.
-            state.offset += (!this->m_committable && this->m_ref_opt);
+            state.offset += !this->m_committable;
           }
 
       public:
@@ -99,9 +86,10 @@ Argument_sentry::~Argument_sentry()
             ROCKET_ASSERT(this->m_committable);
             this->m_committable = false;
           }
-        const Reference * ref_opt() const noexcept
+        const Reference & ref() const noexcept
           {
-            return this->m_ref_opt;
+            ROCKET_ASSERT(this->m_committable);
+            return *(this->m_ref);
           }
       };
 
@@ -110,18 +98,17 @@ Argument_sentry::~Argument_sentry()
 template<typename XvalueT>
   Argument_sentry & Argument_sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
-    Reference_sentry sentry(*this, this->m_state, false);
+    Reference_sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
-    const auto ref = sentry.ref_opt();
-    ROCKET_ASSERT(ref);
-    const auto &value = ref->read();
+    // Check whether the value has the desired type.
+    const auto &value = sentry.ref().read();
     if(value.type() == Value::type_null) {
       // If the value is `null`, set the default value.
       value_out = default_value;
     } else {
-      // Check whether the value has the desired type.
+      // Not null...
       const auto qvalue = value.opt<XvalueT>();
       if(!qvalue) {
         do_fail(*this, this->m_state,
@@ -141,14 +128,12 @@ template<typename XvalueT>
 template<typename XvalueT>
   Argument_sentry & Argument_sentry::do_get_required_value(XvalueT &value_out)
   {
-    Reference_sentry sentry(*this, this->m_state, false);
+    Reference_sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
-    const auto ref = sentry.ref_opt();
-    ROCKET_ASSERT(ref);
-    const auto &value = ref->read();
     // Check whether the value has the desired type.
+    const auto &value = sentry.ref().read();
     const auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
       do_fail(*this, this->m_state,
@@ -166,14 +151,12 @@ template<typename XvalueT>
 
 Argument_sentry & Argument_sentry::opt(Reference &ref_out)
   {
-    Reference_sentry sentry(*this, this->m_state, false);
+    Reference_sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
-    const auto ref = sentry.ref_opt();
-    ROCKET_ASSERT(ref);
     // Copy the reference as is.
-    ref_out = *ref;
+    ref_out = sentry.ref();
     // Succeed.
     sentry.commit();
     return *this;
@@ -181,14 +164,12 @@ Argument_sentry & Argument_sentry::opt(Reference &ref_out)
 
 Argument_sentry & Argument_sentry::opt(Value &value_out)
   {
-    Reference_sentry sentry(*this, this->m_state, false);
+    Reference_sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
-    const auto ref = sentry.ref_opt();
-    ROCKET_ASSERT(ref);
-    const auto &value = ref->read();
     // Copy the value as is.
+    const auto &value = sentry.ref().read();
     value_out = value;
     // Succeed.
     sentry.commit();
@@ -282,12 +263,32 @@ Argument_sentry & Argument_sentry::req(D_object &value_out)
 
 Argument_sentry & Argument_sentry::cut()
   {
-    Reference_sentry sentry(*this, this->m_state, true);
-    if(!sentry) {
+    auto &state = this->m_state;
+    // Check for general conditions.
+    if(!state.succeeded) {
+      do_fail(*this, state,
+        [&]{
+          ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
+        });
+      return *this;
+    }
+    if(state.finished) {
+      do_fail(*this, state,
+        [&]{
+          ASTERIA_THROW_RUNTIME_ERROR("This `Argument_sentry` had been finished hence no argument could be extracted any further.");
+        });
+      return *this;
+    }
+    // Get an argument.
+    if(state.offset != state.args->size()) {
+      do_fail(*this, state,
+        [&]{
+           ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", state.args->size(), ").");
+        });
       return *this;
     }
     // Succeed.
-    sentry.commit();
+    state.finished = true;
     return *this;
   }
 
