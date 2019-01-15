@@ -862,6 +862,11 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
+            if(ref_c.value.type() == Value::type_string) {
+              ref_c.value = D_integer(ref_c.value.check<D_string>().size());
+              do_set_temporary(stack_io, alt, std::move(ref_c));
+              return;
+            }
             if(ref_c.value.type() == Value::type_array) {
               ref_c.value = D_integer(ref_c.value.check<D_array>().size());
               do_set_temporary(stack_io, alt, std::move(ref_c));
