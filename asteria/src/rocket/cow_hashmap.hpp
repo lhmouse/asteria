@@ -542,7 +542,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
               return -1;
             }
-            return bkt - data;
+            const auto dist = bkt - data;
+            ROCKET_ASSERT(dist > 0);
+            return dist;
           }
         bucket_type * mut_buckets_unchecked() noexcept
           {
