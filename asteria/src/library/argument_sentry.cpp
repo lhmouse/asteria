@@ -122,8 +122,8 @@ template<typename XvalueT>
       value_out = default_value;
     } else {
       // Check whether the value has the desired type.
-      const auto opt = value.opt<XvalueT>();
-      if(!opt) {
+      const auto qvalue = value.opt<XvalueT>();
+      if(!qvalue) {
         do_fail(*this, this->m_state,
           [&]{
             ASTERIA_THROW_RUNTIME_ERROR("The optional argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
@@ -131,7 +131,7 @@ template<typename XvalueT>
           });
         return *this;
       }
-      value_out = *opt;
+      value_out = *qvalue;
     }
     // Succeed.
     sentry.commit();
@@ -149,8 +149,8 @@ template<typename XvalueT>
     ROCKET_ASSERT(ref);
     const auto &value = ref->read();
     // Check whether the value has the desired type.
-    const auto opt = value.opt<XvalueT>();
-    if(!opt) {
+    const auto qvalue = value.opt<XvalueT>();
+    if(!qvalue) {
       do_fail(*this, this->m_state,
         [&]{
           ASTERIA_THROW_RUNTIME_ERROR("The required argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
@@ -158,7 +158,7 @@ template<typename XvalueT>
         });
       return *this;
     }
-    value_out = *opt;
+    value_out = *qvalue;
     // Succeed.
     sentry.commit();
     return *this;
