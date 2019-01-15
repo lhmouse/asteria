@@ -280,7 +280,6 @@ Argument_sentry & Argument_sentry::req(D_object &value_out)
     return this->do_get_required_value(value_out);
   }
 
-
 Argument_sentry & Argument_sentry::cut()
   {
     Reference_sentry sentry(*this, this->m_state, true);
@@ -290,6 +289,35 @@ Argument_sentry & Argument_sentry::cut()
     // Succeed.
     sentry.commit();
     return *this;
+  }
+
+[[noreturn]] void Argument_sentry::throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const
+  {
+    const auto args = this->m_state.args;
+    if(!args) {
+      // Hmmm you have to call `.reset()` first.
+      ASTERIA_THROW_RUNTIME_ERROR("This `Argument_sentry` had not been initialized yet.");
+    }
+    // Create a message containing arguments.
+    Formatter msg;
+    ASTERIA_FORMAT(msg, "There was no matching overload for `", this->m_name, "(");
+    for(auto it = args->begin(); it != args->end(); ++it) {
+      if(it != args->begin()) {
+        ASTERIA_FORMAT(msg, ", ");
+      }
+      // Append the type of this argument.
+      ASTERIA_FORMAT(msg, Value::get_type_name(it->read().type()));
+    }
+    ASTERIA_FORMAT(msg, ")`.");
+    // If an overload list is provided, append it.
+    for(auto it = overload_list.begin(); it != overload_list.end(); ++it) {
+      if(it != overload_list.begin()) {
+        ASTERIA_FORMAT(msg, "\nNote: Possible overloads are:");
+      }
+      // Append this overload.
+      ASTERIA_FORMAT(msg, "\n  `", *it, "`");
+    }
+    throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }
 
 }

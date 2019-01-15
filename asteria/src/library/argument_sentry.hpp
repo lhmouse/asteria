@@ -98,6 +98,7 @@ class Argument_sentry
     Argument_sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
     Argument_sentry & opt(D_array &value_out, const D_array &default_value = D_array());
     Argument_sentry & opt(D_object &value_out, const D_object &default_value = D_object());
+
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
@@ -110,10 +111,15 @@ class Argument_sentry
     Argument_sentry & req(D_function &value_out);
     Argument_sentry & req(D_array &value_out);
     Argument_sentry & req(D_object &value_out);
+
     // Terminate the argument list.
     // There will be no more argument; otherwise this operation fails.
     // N.B. This function provides STRONG exception safety guarantee.
     Argument_sentry & cut();
+
+    // Throw an exception saying there are no viable overloads.
+    // The overload list parameter is informative.
+    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const;
   };
 
 }

@@ -19,6 +19,11 @@ rocket::cow_string Variadic_arguer::describe() const
 
 void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, rocket::cow_vector<Reference> &&args) const
   {
+    static constexpr std::initializer_list<const char *> overload_list =
+      {
+        "__varg()",
+        "__varg(integer)",
+      };
     Argument_sentry sentry(std::ref("<builtin>.__varg"));
     // `__varg()`:
     //   Return the number of variadic arguments.
@@ -43,7 +48,7 @@ void Variadic_arguer::invoke(Reference &self_io, Global_context & /*global*/, ro
       return;
     }
     // Fail.
-    ASTERIA_THROW_RUNTIME_ERROR("A variadic argument accessor takes no more than one argument.");
+    sentry.throw_no_matching_function_call(overload_list);
   }
 
 void Variadic_arguer::enumerate_variables(const Abstract_variable_callback &callback) const
