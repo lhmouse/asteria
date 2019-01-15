@@ -5,7 +5,7 @@
 #define ASTERIA_TEST_INIT_HPP_
 
 #include "../asteria/src/fwd.hpp"
-#include <iostream>  // std::cerr, operator<<()
+#include <iostream>  // std::cerr, operator<< ()
 #include <exception>  // std::terminate(), std::exception
 
 #ifndef ENABLE_DEBUG_LOGS
@@ -18,10 +18,10 @@
       if(expr_) {  \
         break;  \
       }  \
-      ::std::cerr <<"ASTERIA_TEST_CHECK() failed: " <<#expr_ <<'\n'  \
-                  <<"  File: " <<__FILE__ <<'\n'  \
-                  <<"  Line: " <<__LINE__ <<'\n'  \
-                  <<::std::flush;  \
+      ::std::cerr << "ASTERIA_TEST_CHECK() failed: " << #expr_ << '\n'  \
+                  << "  File: " << __FILE__ << '\n'  \
+                  << "  Line: " << __LINE__ << '\n'  \
+                  << ::std::flush;  \
       ::std::terminate();  \
     } while(false)
 
@@ -29,13 +29,14 @@
     do {  \
       try {  \
         static_cast<void>(expr_);  \
-      } catch(::std::exception &) {  \
+      } catch(::std::exception &e) {  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught: " << e.what() << ::std::endl;  \
         break;  \
       }  \
-      ::std::cerr <<"ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " <<#expr_ <<'\n'  \
-                  <<"  File: " <<__FILE__ <<'\n'  \
-                  <<"  Line: " <<__LINE__ <<'\n'  \
-                  <<::std::flush;  \
+      ::std::cerr << "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " << #expr_ << '\n'  \
+                  << "  File: " << __FILE__ << '\n'  \
+                  << "  Line: " << __LINE__ << '\n'  \
+                  << ::std::flush;  \
       ::std::terminate();  \
     } while(false)
 

@@ -39,4 +39,9 @@ int main()
     ASTERIA_TEST_CHECK(array.at(3).check<D_array>().at(1).check<D_integer>() == 4);
     ASTERIA_TEST_CHECK(array.at(4).check<D_array>().at(0).check<D_integer>() == 3);
     ASTERIA_TEST_CHECK(array.at(4).check<D_array>().at(1).check<D_integer>() == 4);
+
+    iss.clear();
+    iss.str("return __varg('meow');");
+    code.load_stream(iss, std::ref("erroneous_file"));
+    ASTERIA_TEST_CHECK_CATCH(code.execute(global, { }));
   }
