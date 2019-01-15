@@ -279,7 +279,7 @@ Argument_sentry & Argument_sentry::cut()
         });
       return *this;
     }
-    // Get an argument.
+    // Check for the end of the argument list.
     if(state.offset != state.args->size()) {
       do_fail(*this, state,
         [&]{
