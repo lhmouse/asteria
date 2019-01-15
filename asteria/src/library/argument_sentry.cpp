@@ -300,7 +300,7 @@ Argument_sentry & Argument_sentry::cut()
     }
     // Create a message containing arguments.
     Formatter msg;
-    ASTERIA_FORMAT(msg, "There was no matching overload for `", this->m_name, "(");
+    ASTERIA_FORMAT(msg, "There was no matching function call for `", this->m_name, "(");
     for(auto it = args->begin(); it != args->end(); ++it) {
       if(it != args->begin()) {
         ASTERIA_FORMAT(msg, ", ");
@@ -311,7 +311,7 @@ Argument_sentry & Argument_sentry::cut()
     ASTERIA_FORMAT(msg, ")`.");
     // If an overload list is provided, append it.
     for(auto it = overload_list.begin(); it != overload_list.end(); ++it) {
-      if(it != overload_list.begin()) {
+      if(it == overload_list.begin()) {
         ASTERIA_FORMAT(msg, "\nNote: Possible overloads are:");
       }
       // Append this overload.
