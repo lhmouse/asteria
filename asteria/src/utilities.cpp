@@ -38,6 +38,15 @@ rocket::cow_string Formatter::do_extract_string() noexcept
     return this->m_strm->extract_string();
   }
 
+bool are_debug_logs_enabled() noexcept
+  {
+#ifdef ASTERIA_ENABLE_DEBUG_LOGS
+    return true;
+#else
+    return false;
+#endif
+  }
+
     namespace {
 
     int do_print_time(char *str, std::size_t cap)
@@ -72,15 +81,6 @@ rocket::cow_string Formatter::do_extract_string() noexcept
       }
 
     }
-
-bool are_debug_logs_enabled() noexcept
-  {
-#ifdef ASTERIA_ENABLE_DEBUG_LOGS
-    return true;
-#else
-    return false;
-#endif
-  }
 
 bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept
   try {
