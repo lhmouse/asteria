@@ -18,7 +18,7 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     if(!this->m_tracked.insert(var)) {
       return false;
     }
-    if(this->m_counter++ >= this->m_threshold) {
+    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
       this->collect();
     }
     return true;
@@ -248,8 +248,8 @@ void Collector::collect()
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.clear();
     ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
-    if(collect_tied) {
-      // N.B. This is subject to exceptions.
+    // N.B. This is subject to exceptions.
+    if(ROCKET_UNEXPECT(collect_tied)) {
       tied->collect();
     }
     this->m_counter = 0;

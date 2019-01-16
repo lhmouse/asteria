@@ -24,7 +24,7 @@ class Generational_Collector : public Refcounted_Base
       : m_pool(),
         m_gen_two(&(this->m_pool), nullptr, 10),
         m_gen_one(&(this->m_pool), &(this->m_gen_two), 50),
-        m_gen_zero(&(this->m_pool), &(this->m_gen_one), 100)
+        m_gen_zero(&(this->m_pool), &(this->m_gen_one), 500)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_Collector);
