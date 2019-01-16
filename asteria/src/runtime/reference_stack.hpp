@@ -74,7 +74,6 @@ class Reference_Stack
         ROCKET_ASSERT(tptr != this->m_large.data());
         return tptr[-1];
       }
-
     template<typename ParamT>
       Reference & push(ParamT &&param)
       {

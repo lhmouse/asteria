@@ -28,6 +28,14 @@ Function_Executive_Context::~Function_Executive_Context()
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }
 
+    inline rocket::refcounted_object<Abstract_Function> do_make_varg(const rocket::refcounted_object<Variadic_Arguer> &zvarg, rocket::cow_vector<Reference> &&args)
+      {
+        if(ROCKET_EXPECT(args.empty())) {
+          return zvarg;
+        }
+        return rocket::refcounted_object<Variadic_Arguer>(zvarg.get(), std::move(args));
+      }
+
     }
 
 void Function_Executive_Context::initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
@@ -48,6 +56,11 @@ void Function_Executive_Context::initialize(const rocket::refcounted_object<Vari
       }
       this->open_named_reference(param) = std::move(args.mut(index));
     }
+    if(params.size() < args.size()) {
+      args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
+    } else {
+      args.clear();
+    }
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'analytic_executive_context.cpp' as well.
@@ -60,10 +73,7 @@ void Function_Executive_Context::initialize(const rocket::refcounted_object<Vari
     do_predefine(this->m_predef_refs,
                  std::ref("__this"), std::move(self));
     do_predefine(this->m_predef_refs,
-                 std::ref("__varg"), D_function((params.size() < args.size())
-                                                ? args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size())),
-                                                  rocket::refcounted_object<Variadic_Arguer>(zvarg.get(), std::move(args))
-                                                : zvarg));
+                 std::ref("__varg"), D_function(do_make_varg(zvarg, std::move(args))));
     // Set up them.
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }
