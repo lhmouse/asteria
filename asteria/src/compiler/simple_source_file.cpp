@@ -53,14 +53,9 @@ void Simple_Source_File::clear() noexcept
 
 Reference Simple_Source_File::execute(Global_Context &global, rocket::cow_vector<Reference> &&args) const
   {
-    // Initialize parameters.
-    const auto loc = Source_Location(this->m_file, 0);
-    const auto name = rocket::cow_string(std::ref("<file scope>"));
-    const auto zvarg = rocket::refcounted_object<Variadic_Arguer>(loc, name);
-    const auto params = rocket::cow_vector<rocket::prehashed_string>();
-    // Execute the code as a function.
     Reference self;
-    this->m_code.execute_as_function(self, global, zvarg, params, std::move(args));
+    Variadic_Arguer zvarg(Source_Location(this->m_file, 0), std::ref("<file scope>"));
+    this->m_code.execute_as_function(self, global, std::ref(zvarg), { }, std::move(args));
     return self;
   }
 
