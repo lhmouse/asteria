@@ -49,7 +49,7 @@ Argument_sentry::~Argument_sentry()
             if(state.finished) {
               do_fail(parent, state,
                 [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("This `Argument_sentry` had been finished hence no argument could be extracted any further.");
+                  ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had been finished hence no argument could be extracted any further.");
                 });
               return;
             }
@@ -275,7 +275,7 @@ Argument_sentry & Argument_sentry::cut()
     if(state.finished) {
       do_fail(*this, state,
         [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("This `Argument_sentry` had been finished hence no argument could be extracted any further.");
+          ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had been finished hence no argument could be extracted any further.");
         });
       return *this;
     }
@@ -297,7 +297,7 @@ Argument_sentry & Argument_sentry::cut()
     const auto args = this->m_state.args;
     if(!args) {
       // Hmmm you have to call `.reset()` first.
-      ASTERIA_THROW_RUNTIME_ERROR("This `Argument_sentry` had not been initialized yet.");
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had not been initialized yet.");
     }
     // Create a message containing arguments.
     Formatter msg;
