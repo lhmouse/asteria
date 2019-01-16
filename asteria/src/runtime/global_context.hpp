@@ -10,18 +10,18 @@
 
 namespace Asteria {
 
-class Global_context : public Abstract_context
+class Global_Context : public Abstract_Context
   {
   private:
-    rocket::refcounted_ptr<Refcounted_base> m_coll;
+    rocket::refcounted_ptr<Refcounted_Base> m_coll;
 
   public:
-    Global_context()
-      : Abstract_context()
+    Global_Context()
+      : Abstract_Context()
       {
         this->do_initialize();
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Global_context);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Global_Context);
 
   private:
     void do_initialize();
@@ -31,7 +31,7 @@ class Global_context : public Abstract_context
       {
         return false;
       }
-    const Abstract_context * get_parent_opt() const noexcept override
+    const Abstract_Context * get_parent_opt() const noexcept override
       {
         return nullptr;
       }

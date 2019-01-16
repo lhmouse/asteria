@@ -23,7 +23,7 @@ class Parser
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_error, rocket::cow_vector<Statement>> m_stor;
+    rocket::variant<std::nullptr_t, Parser_Error, rocket::cow_vector<Statement>> m_stor;
 
   public:
     Parser() noexcept
@@ -42,10 +42,10 @@ class Parser
         return this->state() == state_success;
       }
 
-    Parser_error get_parser_error() const noexcept;
+    Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(Token_stream &tstrm_io);
+    bool load(Token_Stream &tstrm_io);
     void clear() noexcept;
     Block extract_document();
   };

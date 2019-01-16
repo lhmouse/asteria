@@ -49,8 +49,8 @@ int main()
           leak();
         }
       )__");
-      Simple_source_file code(iss, std::ref("my_file"));
-      Global_context global;
+      Simple_Source_File code(iss, std::ref("my_file"));
+      Global_Context global;
       code.execute(global, { });
     }
     ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);

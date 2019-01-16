@@ -12,18 +12,18 @@ using namespace Asteria;
 
 int main()
   {
-    Global_context global;
-    Executive_context ctx(nullptr);
+    Global_Context global;
+    Executive_Context ctx(nullptr);
 
     const auto cond = rocket::make_refcounted<Variable>(D_null(), false);
     const auto dval = rocket::make_refcounted<Variable>(D_real(1.5), false);
     const auto ival = rocket::make_refcounted<Variable>(D_integer(3), false);
     const auto aval = rocket::make_refcounted<Variable>(D_array(), false);
 
-    ctx.open_named_reference(std::ref("cond")) = Reference_root::S_variable { cond };
-    ctx.open_named_reference(std::ref("dval")) = Reference_root::S_variable { dval };
-    ctx.open_named_reference(std::ref("ival")) = Reference_root::S_variable { ival };
-    ctx.open_named_reference(std::ref("aval")) = Reference_root::S_variable { aval };
+    ctx.open_named_reference(std::ref("cond")) = Reference_Root::S_variable { cond };
+    ctx.open_named_reference(std::ref("dval")) = Reference_Root::S_variable { dval };
+    ctx.open_named_reference(std::ref("ival")) = Reference_Root::S_variable { ival };
+    ctx.open_named_reference(std::ref("aval")) = Reference_Root::S_variable { aval };
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr

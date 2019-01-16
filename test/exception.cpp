@@ -9,7 +9,7 @@ using namespace Asteria;
 int main()
   {
     try {
-      throw Exception(Source_location(std::ref("myfile"), 123), D_integer(42));
+      throw Exception(Source_Location(std::ref("myfile"), 123), D_integer(42));
     } catch(Exception &e) {
       ASTERIA_TEST_CHECK(e.get_location().get_file() == "myfile");
       ASTERIA_TEST_CHECK(e.get_location().get_line() == 123);

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Reference_modifier
+class Reference_Modifier
   {
   public:
     struct S_array_index
@@ -40,19 +40,19 @@ class Reference_modifier
     // This constructor does not accept lvalues.
     template<typename AltT,
              ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_modifier(AltT &&alt)
+      Reference_Modifier(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename AltT,
              ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_modifier & operator=(AltT &&alt)
+      Reference_Modifier & operator=(AltT &&alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Reference_modifier);
+    ROCKET_COPYABLE_DESTRUCTOR(Reference_Modifier);
 
   public:
     const Value * apply_const_opt(const Value &parent) const;

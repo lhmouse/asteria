@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-Analytic_context::~Analytic_context()
+Analytic_Context::~Analytic_Context()
   {
   }
 

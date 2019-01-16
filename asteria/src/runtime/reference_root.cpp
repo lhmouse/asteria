@@ -8,11 +8,11 @@
 
 namespace Asteria {
 
-Reference_root::~Reference_root()
+Reference_Root::~Reference_Root()
   {
   }
 
-const Value & Reference_root::dereference_const() const
+const Value & Reference_Root::dereference_const() const
   {
     switch(Index(this->m_stor.index())) {
     case index_null:
@@ -42,7 +42,7 @@ const Value & Reference_root::dereference_const() const
     }
   }
 
-Value & Reference_root::dereference_mutable() const
+Value & Reference_Root::dereference_mutable() const
   {
     switch(Index(this->m_stor.index())) {
     case index_null:
@@ -72,7 +72,7 @@ Value & Reference_root::dereference_mutable() const
     }
   }
 
-void Reference_root::enumerate_variables(const Abstract_variable_callback &callback) const
+void Reference_Root::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
     case index_null:

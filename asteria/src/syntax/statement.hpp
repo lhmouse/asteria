@@ -35,14 +35,14 @@ class Statement
       };
     struct S_variable
       {
-        Source_location loc;
+        Source_Location loc;
         rocket::prehashed_string name;
         bool immutable;
         Expression init;
       };
     struct S_function
       {
-        Source_location loc;
+        Source_Location loc;
         rocket::prehashed_string name;
         rocket::cow_vector<rocket::prehashed_string> params;
         Block body;
@@ -101,7 +101,7 @@ class Statement
       };
     struct S_throw
       {
-        Source_location loc;
+        Source_Location loc;
         Expression expr;
       };
     struct S_return
@@ -161,11 +161,11 @@ class Statement
     ROCKET_COPYABLE_DESTRUCTOR(Statement);
 
   public:
-    void fly_over_in_place(Abstract_context &ctx_io) const;
-    void bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_context &ctx_io, const Global_context &global) const;
-    void compile(rocket::cow_vector<Block::Compiled_instruction> &cinsts_out) const;
+    void fly_over_in_place(Abstract_Context &ctx_io) const;
+    void bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
+    void compile(rocket::cow_vector<Block::Compiled_Instruction> &cinsts_out) const;
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 }

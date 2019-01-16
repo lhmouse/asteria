@@ -10,18 +10,18 @@
 
 namespace Asteria {
 
-class Abstract_opaque : public Refcounted_base
+class Abstract_Opaque : public Refcounted_Base
   {
   public:
-    Abstract_opaque() noexcept
+    Abstract_Opaque() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_opaque, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Opaque, virtual);
 
   public:
     virtual rocket::cow_string describe() const = 0;
-    virtual Abstract_opaque * clone(rocket::refcounted_ptr<Abstract_opaque> &value_out) const = 0;
-    virtual void enumerate_variables(const Abstract_variable_callback &callback) const = 0;
+    virtual Abstract_Opaque * clone(rocket::refcounted_ptr<Abstract_Opaque> &value_out) const = 0;
+    virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
   };
 
 }

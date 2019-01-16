@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Parser_error
+class Parser_Error
   {
   public:
     enum Code : std::uint32_t
@@ -76,7 +76,7 @@ class Parser_error
     Code m_code;
 
   public:
-    constexpr Parser_error(std::uint32_t line, std::size_t offset, std::size_t xlength, Code code) noexcept
+    constexpr Parser_Error(std::uint32_t line, std::size_t offset, std::size_t xlength, Code code) noexcept
       : m_line(line), m_offset(offset), m_length(xlength), m_code(code)
       {
       }
@@ -100,20 +100,20 @@ class Parser_error
       }
   };
 
-constexpr bool operator==(const Parser_error &lhs, Parser_error::Code rhs) noexcept
+constexpr bool operator==(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
   {
     return lhs.get_code() == rhs;
   }
-constexpr bool operator!=(const Parser_error &lhs, Parser_error::Code rhs) noexcept
+constexpr bool operator!=(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
   {
     return lhs.get_code() != rhs;
   }
 
-constexpr bool operator==(Parser_error::Code lhs, const Parser_error &rhs) noexcept
+constexpr bool operator==(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
   {
     return lhs == rhs.get_code();
   }
-constexpr bool operator!=(Parser_error::Code lhs, const Parser_error &rhs) noexcept
+constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
   {
     return lhs != rhs.get_code();
   }

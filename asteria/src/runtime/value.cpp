@@ -384,7 +384,7 @@ long Value::use_count() const noexcept
     }
   }
 
-void Value::enumerate_variables(const Abstract_variable_callback &callback) const
+void Value::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     switch(this->type()) {
     case type_null:

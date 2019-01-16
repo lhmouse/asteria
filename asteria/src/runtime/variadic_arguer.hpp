@@ -12,28 +12,28 @@
 
 namespace Asteria {
 
-class Variadic_arguer : public Abstract_function
+class Variadic_Arguer : public Abstract_Function
   {
   private:
-    Source_location m_loc;
+    Source_Location m_loc;
     rocket::prehashed_string m_name;
     rocket::cow_vector<Reference> m_vargs;
 
   public:
     template<typename ...XvargsT>
-      Variadic_arguer(const Source_location &loc, const rocket::prehashed_string &name, XvargsT &&...xvargs)
+      Variadic_Arguer(const Source_Location &loc, const rocket::prehashed_string &name, XvargsT &&...xvargs)
       : m_loc(loc), m_name(name), m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
     template<typename XfirstT, typename ...XvargsT>
-      Variadic_arguer(const Variadic_arguer &other, XfirstT &&xfirst, XvargsT &&...xvargs)
+      Variadic_Arguer(const Variadic_Arguer &other, XfirstT &&xfirst, XvargsT &&...xvargs)
       : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::forward<XfirstT>(xfirst), std::forward<XvargsT>(xvargs)...)
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Variadic_arguer);
+    ROCKET_COPYABLE_DESTRUCTOR(Variadic_Arguer);
 
   public:
-    const Source_location & get_location() const noexcept
+    const Source_Location & get_location() const noexcept
       {
         return this->m_loc;
       }
@@ -51,8 +51,8 @@ class Variadic_arguer : public Abstract_function
       }
 
     rocket::cow_string describe() const override;
-    void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const override;
-    void enumerate_variables(const Abstract_variable_callback &callback) const override;
+    void invoke(Reference &self_io, Global_Context &global, rocket::cow_vector<Reference> &&args) const override;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 
 }

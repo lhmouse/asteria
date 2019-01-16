@@ -11,23 +11,23 @@
 
 namespace Asteria {
 
-class Generational_collector : public Refcounted_base
+class Generational_Collector : public Refcounted_Base
   {
   private:
-    Variable_hashset m_pool;
+    Variable_Hashset m_pool;
     Collector m_gen_two;
     Collector m_gen_one;
     Collector m_gen_zero;
 
   public:
-    Generational_collector() noexcept
+    Generational_Collector() noexcept
       : m_pool(),
         m_gen_two(&(this->m_pool), nullptr, 10),
         m_gen_one(&(this->m_pool), &(this->m_gen_two), 50),
         m_gen_zero(&(this->m_pool), &(this->m_gen_one), 100)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_collector);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_Collector);
 
   public:
     rocket::refcounted_ptr<Variable> create_variable();

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Variable : public Refcounted_base
+class Variable : public Refcounted_Base
   {
   private:
     // These are only used during garbage collection and are uninitialized by default.
@@ -87,7 +87,7 @@ class Variable : public Refcounted_base
         this->m_immutable = immutable;
       }
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const
       {
         this->m_value.enumerate_variables(callback);
       }

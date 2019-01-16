@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-Abstract_variable_callback::~Abstract_variable_callback()
+Abstract_Variable_Callback::~Abstract_Variable_Callback()
   {
   }
 

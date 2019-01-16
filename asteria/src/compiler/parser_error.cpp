@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char * Parser_error::get_code_description(Parser_error::Code xcode) noexcept
+const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexcept
   {
     switch(xcode) {
       // Special

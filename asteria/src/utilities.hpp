@@ -129,17 +129,17 @@ extern bool write_log_to_stderr(const char *file, unsigned long line, Formatter 
 #define ASTERIA_DEBUG_LOG(...)           (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
 #define ASTERIA_TERMINATE(...)           (::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER("FATAL ERROR: ", __VA_ARGS__)), ::std::terminate())
 
-class Runtime_error : public virtual std::exception
+class Runtime_Error : public virtual std::exception
   {
   private:
     rocket::cow_string m_msg;
 
   public:
-    explicit Runtime_error(rocket::cow_string msg) noexcept
+    explicit Runtime_Error(rocket::cow_string msg) noexcept
       : m_msg(std::move(msg))
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Runtime_error);
+    ROCKET_COPYABLE_DESTRUCTOR(Runtime_Error);
 
   public:
     const char * what() const noexcept override;
@@ -229,14 +229,14 @@ extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 // Wrappable Index
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Wrapped_index
+struct Wrapped_Index
   {
     std::uint64_t index;
     std::uint64_t front_fill;
     std::uint64_t back_fill;
   };
 
-extern Wrapped_index wrap_index(std::int64_t index, std::size_t size) noexcept;
+extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;
 
 }
 

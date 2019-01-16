@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-Refcounted_base::~Refcounted_base()
+Refcounted_Base::~Refcounted_Base()
   {
   }
 

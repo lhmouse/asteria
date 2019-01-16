@@ -21,7 +21,7 @@ Block::~Block()
 
 void Block::do_compile()
   {
-    rocket::cow_vector<Compiled_instruction> cinsts;
+    rocket::cow_vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
       stmt.compile(cinsts);
@@ -29,14 +29,14 @@ void Block::do_compile()
     this->m_cinsts = std::move(cinsts);
   }
 
-void Block::fly_over_in_place(Abstract_context &ctx_io) const
+void Block::fly_over_in_place(Abstract_Context &ctx_io) const
   {
     for(const auto &stmt : this->m_stmts) {
       stmt.fly_over_in_place(ctx_io);
     }
   }
 
-Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &global) const
+Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const
   {
     rocket::cow_vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
@@ -46,7 +46,7 @@ Block Block::bind_in_place(Analytic_context &ctx_io, const Global_context &globa
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global) const
   {
     auto rptr = this->m_cinsts.data();
     const auto eptr = rptr + this->m_cinsts.size();
@@ -65,30 +65,30 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_context &ctx
     return status_next;
   }
 
-Block Block::bind(const Global_context &global, const Analytic_context &ctx) const
+Block Block::bind(const Global_Context &global, const Analytic_Context &ctx) const
   {
-    Analytic_context ctx_next(&ctx);
+    Analytic_Context ctx_next(&ctx);
     return this->bind_in_place(ctx_next, global);
   }
 
-Block::Status Block::execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
+Block::Status Block::execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const
   {
-    Executive_context ctx_next(&ctx);
+    Executive_Context ctx_next(&ctx);
     return this->execute_in_place(ref_out, ctx_next, global);
   }
 
-Instantiated_function Block::instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const
+Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const
   {
-    Analytic_function_context ctx_next(&ctx);
+    Analytic_Function_Context ctx_next(&ctx);
     ctx_next.initialize(params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Instantiated_function(loc, name, params, std::move(body_bnd));
+    return Instantiated_Function(loc, name, params, std::move(body_bnd));
   }
 
-void Block::execute_as_function(Reference &self_io, Global_context &global, const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
   {
-    Executive_function_context ctx_next(nullptr);
+    Executive_Function_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
@@ -96,7 +96,7 @@ void Block::execute_as_function(Reference &self_io, Global_context &global, cons
     case status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        self_io = Reference_root::S_null();
+        self_io = Reference_Root::S_null();
         return;
       }
     case status_return:
@@ -122,7 +122,7 @@ void Block::execute_as_function(Reference &self_io, Global_context &global, cons
     }
   }
 
-void Block::enumerate_variables(const Abstract_variable_callback &callback) const
+void Block::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     for(const auto &stmt : this->m_stmts) {
       stmt.enumerate_variables(callback);

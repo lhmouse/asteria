@@ -9,10 +9,10 @@
 
 namespace Asteria {
 
-Global_context::~Global_context()
+Global_Context::~Global_Context()
   {
     // Perform the final garbage collection.
-    const auto coll = static_cast<Generational_collector *>(this->m_coll.get());
+    const auto coll = static_cast<Generational_Collector *>(this->m_coll.get());
     if(coll) {
       try {
         this->clear_named_references();
@@ -23,20 +23,20 @@ Global_context::~Global_context()
     }
   }
 
-void Global_context::do_initialize()
+void Global_Context::do_initialize()
   {
     // Initialize all components.
-    const auto coll = rocket::make_refcounted<Generational_collector>();
+    const auto coll = rocket::make_refcounted<Generational_Collector>();
     this->m_coll = coll;
     // Add standard library interfaces.
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
-    Reference_root::S_constant ref_c = { std::move(root) };
+    Reference_Root::S_constant ref_c = { std::move(root) };
   }
 
-rocket::refcounted_ptr<Variable> Global_context::create_variable()
+rocket::refcounted_ptr<Variable> Global_Context::create_variable()
   {
-    const auto coll = static_cast<Generational_collector *>(this->m_coll.get());
+    const auto coll = static_cast<Generational_Collector *>(this->m_coll.get());
     ROCKET_ASSERT(coll);
     return coll->create_variable();
   }

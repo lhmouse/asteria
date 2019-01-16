@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Argument_sentry
+class Argument_Sentry
   {
   public:
     struct State
@@ -31,18 +31,18 @@ class Argument_sentry
     State m_state;
 
   public:
-    explicit Argument_sentry(rocket::cow_string name) noexcept
+    explicit Argument_Sentry(rocket::cow_string name) noexcept
       : m_name(std::move(name)), m_throw_on_failure(false),
         m_state()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Argument_sentry);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Argument_Sentry);
 
   private:
     template<typename XvalueT>
-      Argument_sentry & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
+      Argument_Sentry & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
     template<typename XvalueT>
-      Argument_sentry & do_get_required_value(XvalueT &value_out);
+      Argument_Sentry & do_get_required_value(XvalueT &value_out);
 
   public:
     const rocket::cow_string & get_name() const noexcept
@@ -88,34 +88,34 @@ class Argument_sentry
     // Get an OPTIONAL argument.
     // The argument must exist (and must be of the desired type or `null` for the overloads taking two parameters); otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
-    Argument_sentry & opt(Reference &ref_out);
-    Argument_sentry & opt(Value &value_out);
-    Argument_sentry & opt(D_boolean &value_out, D_boolean default_value = false);
-    Argument_sentry & opt(D_integer &value_out, D_integer default_value = 0);
-    Argument_sentry & opt(D_real &value_out, D_real default_value = 0);
-    Argument_sentry & opt(D_string &value_out, const D_string &default_value = std::ref(""));
-    Argument_sentry & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
-    Argument_sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
-    Argument_sentry & opt(D_array &value_out, const D_array &default_value = D_array());
-    Argument_sentry & opt(D_object &value_out, const D_object &default_value = D_object());
+    Argument_Sentry & opt(Reference &ref_out);
+    Argument_Sentry & opt(Value &value_out);
+    Argument_Sentry & opt(D_boolean &value_out, D_boolean default_value = false);
+    Argument_Sentry & opt(D_integer &value_out, D_integer default_value = 0);
+    Argument_Sentry & opt(D_real &value_out, D_real default_value = 0);
+    Argument_Sentry & opt(D_string &value_out, const D_string &default_value = std::ref(""));
+    Argument_Sentry & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
+    Argument_Sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
+    Argument_Sentry & opt(D_array &value_out, const D_array &default_value = D_array());
+    Argument_Sentry & opt(D_object &value_out, const D_object &default_value = D_object());
 
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
-    Argument_sentry & req(D_null &value_out);
-    Argument_sentry & req(D_boolean &value_out);
-    Argument_sentry & req(D_integer &value_out);
-    Argument_sentry & req(D_real &value_out);
-    Argument_sentry & req(D_string &value_out);
-    Argument_sentry & req(D_opaque &value_out);
-    Argument_sentry & req(D_function &value_out);
-    Argument_sentry & req(D_array &value_out);
-    Argument_sentry & req(D_object &value_out);
+    Argument_Sentry & req(D_null &value_out);
+    Argument_Sentry & req(D_boolean &value_out);
+    Argument_Sentry & req(D_integer &value_out);
+    Argument_Sentry & req(D_real &value_out);
+    Argument_Sentry & req(D_string &value_out);
+    Argument_Sentry & req(D_opaque &value_out);
+    Argument_Sentry & req(D_function &value_out);
+    Argument_Sentry & req(D_array &value_out);
+    Argument_Sentry & req(D_object &value_out);
 
     // Terminate the argument list.
     // There will be no more argument; otherwise this operation fails.
     // N.B. This function provides STRONG exception safety guarantee.
-    Argument_sentry & cut();
+    Argument_Sentry & cut();
 
     // Throw an exception saying there are no viable overloads.
     // The overload list parameter is informative.

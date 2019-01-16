@@ -10,25 +10,25 @@
 
 namespace Asteria {
 
-class Analytic_context : public Abstract_context
+class Analytic_Context : public Abstract_Context
   {
   private:
-    const Abstract_context *const m_parent_opt;
+    const Abstract_Context *const m_parent_opt;
 
   public:
-    explicit Analytic_context(const Abstract_context *parent_opt) noexcept
-      : Abstract_context(),
+    explicit Analytic_Context(const Abstract_Context *parent_opt) noexcept
+      : Abstract_Context(),
         m_parent_opt(parent_opt)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Analytic_context);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Analytic_Context);
 
   public:
     bool is_analytic() const noexcept override
       {
         return true;
       }
-    const Abstract_context * get_parent_opt() const noexcept override
+    const Abstract_Context * get_parent_opt() const noexcept override
       {
         return this->m_parent_opt;
       }

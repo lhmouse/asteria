@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Reference_dictionary
+class Reference_Dictionary
   {
   public:
     struct Template
@@ -87,12 +87,12 @@ class Reference_dictionary
     rocket::cow_vector<Bucket> m_stor;
 
   public:
-    Reference_dictionary() noexcept
+    Reference_Dictionary() noexcept
       : m_templ_data(nullptr), m_templ_size(0),
         m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_dictionary);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Dictionary);
 
   private:
     const Reference * do_get_template_opt(const rocket::prehashed_string &name) const noexcept;

@@ -7,11 +7,11 @@
 
 namespace Asteria {
 
-Reference_stack::~Reference_stack()
+Reference_Stack::~Reference_Stack()
   {
   }
 
-void Reference_stack::do_switch_to_large()
+void Reference_Stack::do_switch_to_large()
   {
     ROCKET_ASSERT(this->m_small.size() == this->m_small.capacity());
     ROCKET_ASSERT(this->m_large.capacity() == 0);

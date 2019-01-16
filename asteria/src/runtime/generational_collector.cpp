@@ -9,11 +9,11 @@
 
 namespace Asteria {
 
-Generational_collector::~Generational_collector()
+Generational_Collector::~Generational_Collector()
   {
   }
 
-rocket::refcounted_ptr<Variable> Generational_collector::create_variable()
+rocket::refcounted_ptr<Variable> Generational_Collector::create_variable()
   {
     // Get one from the pool.
     auto var = this->m_pool.erase_random_opt();
@@ -26,7 +26,7 @@ rocket::refcounted_ptr<Variable> Generational_collector::create_variable()
     return var;
   }
 
-bool Generational_collector::perform_garbage_collection(unsigned gen_limit)
+bool Generational_Collector::perform_garbage_collection(unsigned gen_limit)
   {
     // Force collection from the newest generation to the oldest.
     auto gen_cur = unsigned(0);

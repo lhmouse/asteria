@@ -9,20 +9,20 @@
 
 namespace Asteria {
 
-class Abstract_context
+class Abstract_Context
   {
   private:
-    Reference_dictionary m_dict;
+    Reference_Dictionary m_dict;
 
   public:
-    Abstract_context() noexcept
+    Abstract_Context() noexcept
       : m_dict()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_context, virtual);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_Context, virtual);
 
   protected:
-    void do_set_named_reference_templates(const Reference_dictionary::Template *tdata_opt, std::size_t tsize) noexcept
+    void do_set_named_reference_templates(const Reference_Dictionary::Template *tdata_opt, std::size_t tsize) noexcept
       {
         this->m_dict.set_templates(tdata_opt, tsize);
       }
@@ -42,7 +42,7 @@ class Abstract_context
       }
 
     virtual bool is_analytic() const noexcept = 0;
-    virtual const Abstract_context * get_parent_opt() const noexcept = 0;
+    virtual const Abstract_Context * get_parent_opt() const noexcept = 0;
   };
 
 }

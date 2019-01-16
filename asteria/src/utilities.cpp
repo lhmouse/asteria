@@ -102,11 +102,11 @@ bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) 
     return false;
   }
 
-Runtime_error::~Runtime_error()
+Runtime_Error::~Runtime_Error()
   {
   }
 
-const char * Runtime_error::what() const noexcept
+const char * Runtime_Error::what() const noexcept
   {
     return this->m_msg.c_str();
   }
@@ -116,7 +116,7 @@ const char * Runtime_error::what() const noexcept
     auto str = fmt.extract_string();
     str.insert(0, ": ");
     str.insert(0, funcsig);
-    throw Runtime_error(std::move(str));
+    throw Runtime_Error(std::move(str));
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -301,7 +301,7 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
 // Wrappable Index
 ///////////////////////////////////////////////////////////////////////////////
 
-Wrapped_index wrap_index(std::int64_t index, std::size_t size) noexcept
+Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
   {
     const auto rsize = static_cast<std::int64_t>(size);
     // Wrap `index` if it is negative.
@@ -310,7 +310,7 @@ Wrapped_index wrap_index(std::int64_t index, std::size_t size) noexcept
     if(rindex < 0) {
       rindex += rsize;
     }
-    Wrapped_index wrap = { static_cast<std::uint64_t>(rindex), 0, 0 };
+    Wrapped_Index wrap = { static_cast<std::uint64_t>(rindex), 0, 0 };
     // If `rindex` is still negative, we will have to insert elements in the front.
     if(rindex < 0) {
       // Calculate the number of elements to fill.

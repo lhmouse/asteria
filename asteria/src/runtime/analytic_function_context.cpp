@@ -8,21 +8,21 @@
 
 namespace Asteria {
 
-Analytic_function_context::~Analytic_function_context()
+Analytic_Function_Context::~Analytic_Function_Context()
   {
   }
 
     namespace {
 
     template<std::size_t capacityT, typename XnameT>
-      void do_predefine(rocket::static_vector<Reference_dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
+      void do_predefine(rocket::static_vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
       {
-        predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_root::S_null());
+        predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_null());
       }
 
     }
 
-void Analytic_function_context::initialize(const rocket::cow_vector<rocket::prehashed_string> &params)
+void Analytic_Function_Context::initialize(const rocket::cow_vector<rocket::prehashed_string> &params)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {
@@ -33,7 +33,7 @@ void Analytic_function_context::initialize(const rocket::cow_vector<rocket::preh
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Its contents are out of interest.
-      this->open_named_reference(param) = Reference_root::S_null();
+      this->open_named_reference(param) = Reference_Root::S_null();
     }
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.

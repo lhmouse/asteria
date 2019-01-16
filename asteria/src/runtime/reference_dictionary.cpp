@@ -7,11 +7,11 @@
 
 namespace Asteria {
 
-Reference_dictionary::~Reference_dictionary()
+Reference_Dictionary::~Reference_Dictionary()
   {
   }
 
-const Reference * Reference_dictionary::do_get_template_opt(const rocket::prehashed_string &name) const noexcept
+const Reference * Reference_Dictionary::do_get_template_opt(const rocket::prehashed_string &name) const noexcept
   {
     // Get template table range.
     auto bptr = this->m_templ_data;
@@ -35,7 +35,7 @@ const Reference * Reference_dictionary::do_get_template_opt(const rocket::prehas
     return nullptr;
   }
 
-const Reference * Reference_dictionary::do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept
+const Reference * Reference_Dictionary::do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -55,7 +55,7 @@ const Reference * Reference_dictionary::do_get_dynamic_opt(const rocket::prehash
     return bkt->refv;
   }
 
-void Reference_dictionary::do_clear() noexcept
+void Reference_Dictionary::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
     // Get table bounds.
@@ -74,7 +74,7 @@ void Reference_dictionary::do_clear() noexcept
     pre->size = 0;
   }
 
-void Reference_dictionary::do_rehash(std::size_t res_arg)
+void Reference_Dictionary::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
@@ -117,7 +117,7 @@ void Reference_dictionary::do_rehash(std::size_t res_arg)
     }
   }
 
-void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
+void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
@@ -150,10 +150,10 @@ void Reference_dictionary::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
+Reference & Reference_Dictionary::open(const rocket::prehashed_string &name)
   {
     if(name.empty()) {
-      ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_dictionary`.");
+      ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
     }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 11);
@@ -186,7 +186,7 @@ Reference & Reference_dictionary::open(const rocket::prehashed_string &name)
     return bkt->refv[0];
   }
 
-bool Reference_dictionary::unset(const rocket::prehashed_string &name) noexcept
+bool Reference_Dictionary::unset(const rocket::prehashed_string &name) noexcept
   {
     if(this->m_stor.empty()) {
       return false;

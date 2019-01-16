@@ -28,12 +28,12 @@ class Block
       };
 
     // TODO: In the future we will add JIT support.
-    using Compiled_instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_context &, Global_context &),
+    using Compiled_Instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_Context &, Global_Context &),
                                                       const void *>;
 
   private:
     rocket::cow_vector<Statement> m_stmts;
-    rocket::cow_vector<Compiled_instruction> m_cinsts;
+    rocket::cow_vector<Compiled_Instruction> m_cinsts;
 
   public:
     Block() noexcept
@@ -56,17 +56,17 @@ class Block
         return this->m_stmts.empty();
       }
 
-    void fly_over_in_place(Abstract_context &ctx_io) const;
-    Block bind_in_place(Analytic_context &ctx_io, const Global_context &global) const;
-    Status execute_in_place(Reference &ref_out, Executive_context &ctx_io, Global_context &global) const;
+    void fly_over_in_place(Abstract_Context &ctx_io) const;
+    Block bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const;
+    Status execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global) const;
 
-    Block bind(const Global_context &global, const Analytic_context &ctx) const;
-    Status execute(Reference &ref_out, Global_context &global, const Executive_context &ctx) const;
+    Block bind(const Global_Context &global, const Analytic_Context &ctx) const;
+    Status execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const;
 
-    Instantiated_function instantiate_function(Global_context &global, const Executive_context &ctx, const Source_location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
-    void execute_as_function(Reference &self_io, Global_context &global, const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
+    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
+    void execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 }

@@ -10,7 +10,7 @@ using namespace Asteria;
 
 int main()
   {
-    Token_stream ts;
+    Token_Stream ts;
     std::istringstream iss("#!meow \n"
                            "hh+++ \n"
                            " if <<<->>>>>\"\\u55b5b喵\"/\n"

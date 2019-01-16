@@ -14,8 +14,8 @@ namespace Asteria {
 class Reference
   {
   private:
-    Reference_root m_root;
-    rocket::cow_vector<Reference_modifier> m_mods;
+    Reference_Root m_root;
+    rocket::cow_vector<Reference_Modifier> m_mods;
 
   public:
     Reference() noexcept
@@ -24,14 +24,14 @@ class Reference
       }
     // This constructor does not accept lvalues.
     template<typename XrootT,
-             ROCKET_ENABLE_IF_HAS_VALUE(Reference_root::Variant::index_of<XrootT>::value)>
+             ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)>
       Reference(XrootT &&xroot)
       : m_root(std::forward<XrootT>(xroot)), m_mods()
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename XrootT,
-             ROCKET_ENABLE_IF_HAS_VALUE(Reference_root::Variant::index_of<XrootT>::value)>
+             ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)>
       Reference & operator=(XrootT &&xroot)
       {
         this->m_root = std::forward<XrootT>(xroot);
@@ -50,11 +50,11 @@ class Reference
   public:
     bool is_constant() const noexcept
       {
-        return (this->m_root.index() == Reference_root::index_null) || (this->m_root.index() == Reference_root::index_constant);
+        return (this->m_root.index() == Reference_Root::index_null) || (this->m_root.index() == Reference_Root::index_constant);
       }
     bool is_temporary() const noexcept
       {
-        return this->m_root.index() == Reference_root::index_temporary;
+        return this->m_root.index() == Reference_Root::index_temporary;
       }
 
     const Value & read() const
@@ -90,7 +90,7 @@ class Reference
       {
         if(this->m_mods.empty()) {
           // If there is no modifier, set `*this` to a null reference.
-          this->m_root = Reference_root::S_null();
+          this->m_root = Reference_Root::S_null();
           return *this;
         }
         // Drop the last modifier.
@@ -98,7 +98,7 @@ class Reference
         return *this;
       }
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 }

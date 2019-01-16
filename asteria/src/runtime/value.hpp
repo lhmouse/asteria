@@ -111,7 +111,7 @@ class Value
     bool unique() const noexcept;
     long use_count() const noexcept;
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)

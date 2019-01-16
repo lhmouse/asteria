@@ -11,47 +11,47 @@
 
 namespace Asteria {
 
-class Simple_source_file
+class Simple_Source_File
   {
   private:
     Block m_code;
     rocket::cow_string m_file;
 
   public:
-    Simple_source_file() noexcept
+    Simple_Source_File() noexcept
       : m_code(), m_file()
       {
       }
-    explicit Simple_source_file(const rocket::cow_string &filename)
-      : Simple_source_file()
+    explicit Simple_Source_File(const rocket::cow_string &filename)
+      : Simple_Source_File()
       {
         const auto err = this->load_file(filename);
         this->do_throw_on_error(err);
       }
-    Simple_source_file(std::istream &cstrm_io, const rocket::cow_string &filename)
-      : Simple_source_file()
+    Simple_Source_File(std::istream &cstrm_io, const rocket::cow_string &filename)
+      : Simple_Source_File()
       {
         const auto err = this->load_stream(cstrm_io, filename);
         this->do_throw_on_error(err);
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Simple_source_file);
+    ROCKET_COPYABLE_DESTRUCTOR(Simple_Source_File);
 
   private:
-    void do_throw_on_error(const Parser_error &err)
+    void do_throw_on_error(const Parser_Error &err)
       {
-        if(ROCKET_EXPECT(err == Parser_error::code_success)) {
+        if(ROCKET_EXPECT(err == Parser_Error::code_success)) {
           return;
         }
         this->do_throw_error(err);
       }
-    [[noreturn]] void do_throw_error(const Parser_error &err);
+    [[noreturn]] void do_throw_error(const Parser_Error &err);
 
   public:
-    Parser_error load_file(const rocket::cow_string &filename);
-    Parser_error load_stream(std::istream &cstrm_io, const rocket::cow_string &filename);
+    Parser_Error load_file(const rocket::cow_string &filename);
+    Parser_Error load_stream(std::istream &cstrm_io, const rocket::cow_string &filename);
     void clear() noexcept;
 
-    Reference execute(Global_context &global, rocket::cow_vector<Reference> &&args) const;
+    Reference execute(Global_Context &global, rocket::cow_vector<Reference> &&args) const;
   };
 
 }

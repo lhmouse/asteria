@@ -24,8 +24,8 @@ int main()
         binary(1,2,3,4,5),   // [ 3, 4 ]
       ];
     )__");
-    Simple_source_file code(iss, std::ref("my_file"));
-    Global_context global;
+    Simple_Source_File code(iss, std::ref("my_file"));
+    Global_Context global;
     auto res = code.execute(global, { });
     const auto &array = res.read().check<D_array>();
     ASTERIA_TEST_CHECK(array.size() == 5);

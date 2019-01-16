@@ -12,7 +12,7 @@
 
 namespace Asteria {
 
-class Reference_root
+class Reference_Root
   {
   public:
     struct S_null
@@ -50,26 +50,26 @@ class Reference_root
     Variant m_stor;
 
   public:
-    Reference_root() noexcept
+    Reference_Root() noexcept
       : m_stor()  // Initialize to a null reference.
       {
       }
     // This constructor does not accept lvalues.
     template<typename AltT,
              ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_root(AltT &&alt)
+      Reference_Root(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename AltT,
              ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_root & operator=(AltT &&alt)
+      Reference_Root & operator=(AltT &&alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Reference_root);
+    ROCKET_COPYABLE_DESTRUCTOR(Reference_Root);
 
   public:
     Index index() const noexcept
@@ -90,8 +90,8 @@ class Reference_root
     const Value & dereference_const() const;
     Value & dereference_mutable() const;
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
-    void dispose_variable(Generational_collector *coll_opt) const noexcept;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    void dispose_variable(Generational_Collector *coll_opt) const noexcept;
   };
 
 }

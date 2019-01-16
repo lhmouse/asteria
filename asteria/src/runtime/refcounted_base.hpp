@@ -9,13 +9,13 @@
 
 namespace Asteria {
 
-class Refcounted_base : public rocket::refcounted_base<Refcounted_base>
+class Refcounted_Base : public rocket::refcounted_base<Refcounted_Base>
   {
   public:
-    Refcounted_base() noexcept
+    Refcounted_Base() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Refcounted_base, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Refcounted_Base, virtual);
 
   public:
     // No public member functions.

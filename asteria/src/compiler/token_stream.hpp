@@ -12,7 +12,7 @@
 
 namespace Asteria {
 
-class Token_stream
+class Token_Stream
   {
   public:
     enum State : std::size_t
@@ -23,14 +23,14 @@ class Token_stream
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_error, rocket::cow_vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    rocket::variant<std::nullptr_t, Parser_Error, rocket::cow_vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
-    Token_stream() noexcept
+    Token_Stream() noexcept
       : m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Token_stream);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Token_Stream);
 
   public:
     State state() const noexcept
@@ -42,7 +42,7 @@ class Token_stream
         return this->state() == state_success;
       }
 
-    Parser_error get_parser_error() const noexcept;
+    Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
     bool load(std::istream &cstrm_io, const rocket::cow_string &file);

@@ -35,19 +35,19 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
 
     namespace {
 
-    class Recursion_sentry
+    class Recursion_Sentry
       {
       private:
         long m_old;
         std::reference_wrapper<long> m_ref;
 
       public:
-        explicit Recursion_sentry(long &ref) noexcept
+        explicit Recursion_Sentry(long &ref) noexcept
           : m_old(ref), m_ref(ref)
           {
             this->m_ref++;
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Recursion_sentry)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Recursion_Sentry)
           {
             this->m_ref--;
           }
@@ -60,13 +60,13 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
       };
 
     template<typename FunctionT>
-      class Variable_callback : public Abstract_variable_callback
+      class Variable_Callback : public Abstract_Variable_Callback
       {
       private:
         FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
 
       public:
-        explicit Variable_callback(FunctionT &&func)
+        explicit Variable_Callback(FunctionT &&func)
           : m_func(std::forward<FunctionT>(func))
           {
           }
@@ -81,13 +81,13 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
     template<typename PointerT, typename FunctionT>
       void do_enumerate_variables(const PointerT &ptr, FunctionT &&func)
       {
-        ptr->enumerate_variables(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
+        ptr->enumerate_variables(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
     template<typename FunctionT>
-      void do_enumerate_variables(const Variable_hashset &set, FunctionT &&func)
+      void do_enumerate_variables(const Variable_Hashset &set, FunctionT &&func)
       {
-        set.for_each(Variable_callback<FunctionT>(std::forward<FunctionT>(func)));
+        set.for_each(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
     }
@@ -95,7 +95,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
 void Collector::collect()
   {
     // Ignore recursive requests.
-    const Recursion_sentry sentry(this->m_recur);
+    const Recursion_Sentry sentry(this->m_recur);
     if(!sentry) {
       return;
     }

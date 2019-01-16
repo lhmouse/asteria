@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Variable_hashset
+class Variable_Hashset
   {
   private:
     struct Bucket
@@ -62,11 +62,11 @@ class Variable_hashset
     rocket::cow_vector<Bucket> m_stor;
 
   public:
-    Variable_hashset() noexcept
+    Variable_Hashset() noexcept
       : m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_hashset);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_Hashset);
 
   private:
     void do_clear() noexcept;
@@ -97,7 +97,7 @@ class Variable_hashset
       }
 
     bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept;
-    void for_each(const Abstract_variable_callback &callback) const;
+    void for_each(const Abstract_Variable_Callback &callback) const;
     bool insert(const rocket::refcounted_ptr<Variable> &var);
     bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept;
     rocket::refcounted_ptr<Variable> erase_random_opt() noexcept;

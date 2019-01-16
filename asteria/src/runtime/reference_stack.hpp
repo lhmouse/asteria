@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Reference_stack
+class Reference_Stack
   {
   private:
     Reference *m_tptr;
@@ -19,13 +19,13 @@ class Reference_stack
     rocket::static_vector<Reference, 7> m_small;
 
   public:
-    Reference_stack() noexcept
+    Reference_Stack() noexcept
       : m_large(), m_small()
       {
         // Do not call any member function of `m_small` before its initialization.
         this->m_tptr = this->m_small.mut_data();
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_stack);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Stack);
 
   private:
     void do_switch_to_large();

@@ -21,8 +21,8 @@ int main()
       con["const"] = one;
       return con.value + con.const;
     )__");
-    Simple_source_file code(iss, std::ref("my_file"));
-    Global_context global;
+    Simple_Source_File code(iss, std::ref("my_file"));
+    Global_Context global;
     auto res = code.execute(global, { });
     ASTERIA_TEST_CHECK(res.read().check<D_integer>() == 90);
   }

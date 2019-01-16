@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-Executive_context::~Executive_context()
+Executive_Context::~Executive_Context()
   {
   }
 

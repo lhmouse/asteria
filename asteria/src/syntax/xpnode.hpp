@@ -72,7 +72,7 @@ class Xpnode
       };
     struct S_closure_function
       {
-        Source_location loc;
+        Source_Location loc;
         rocket::cow_vector<rocket::prehashed_string> params;
         Block body;
       };
@@ -84,7 +84,7 @@ class Xpnode
       };
     struct S_function_call
       {
-        Source_location loc;
+        Source_Location loc;
         std::size_t arg_cnt;
       };
     struct S_subscript
@@ -156,10 +156,10 @@ class Xpnode
     ROCKET_COPYABLE_DESTRUCTOR(Xpnode);
 
   public:
-    void bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &global, const Analytic_context &ctx) const;
-    void compile(rocket::cow_vector<Expression::Compiled_instruction> &cinsts_out) const;
+    void bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
+    void compile(rocket::cow_vector<Expression::Compiled_Instruction> &cinsts_out) const;
 
-    void enumerate_variables(const Abstract_variable_callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 }

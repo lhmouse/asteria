@@ -17,7 +17,7 @@ Expression::~Expression()
 
 void Expression::do_compile()
   {
-    rocket::cow_vector<Compiled_instruction> cinsts;
+    rocket::cow_vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
       node.compile(cinsts);
@@ -25,7 +25,7 @@ void Expression::do_compile()
     this->m_cinsts = std::move(cinsts);
   }
 
-Expression Expression::bind(const Global_context &global, const Analytic_context &ctx) const
+Expression Expression::bind(const Global_Context &global, const Analytic_Context &ctx) const
   {
     rocket::cow_vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
@@ -35,7 +35,7 @@ Expression Expression::bind(const Global_context &global, const Analytic_context
     return std::move(nodes_bnd);
   }
 
-bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &global, const Executive_context &ctx) const
+bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx) const
   {
     auto rptr = this->m_cinsts.data();
     const auto eptr = rptr + this->m_cinsts.size();
@@ -53,18 +53,18 @@ bool Expression::evaluate_partial(Reference_stack &stack_io, Global_context &glo
     return true;
   }
 
-void Expression::evaluate(Reference &ref_out, Global_context &global, const Executive_context &ctx) const
+void Expression::evaluate(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const
   {
-    Reference_stack stack;
+    Reference_Stack stack;
     if(!this->evaluate_partial(stack, global, ctx)) {
-      ref_out = Reference_root::S_null();
+      ref_out = Reference_Root::S_null();
       return;
     }
     ROCKET_ASSERT(stack.size() == 1);
     ref_out = std::move(stack.mut_top());
   }
 
-void Expression::enumerate_variables(const Abstract_variable_callback &callback) const
+void Expression::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     for(const auto &node : this->m_nodes) {
       node.enumerate_variables(callback);

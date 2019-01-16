@@ -8,14 +8,14 @@
 
 namespace Asteria {
 
-class Source_location
+class Source_Location
   {
   private:
     rocket::cow_string m_file;
     std::uint32_t m_line;
 
   public:
-    Source_location(rocket::cow_string file, std::uint32_t line) noexcept
+    Source_Location(rocket::cow_string file, std::uint32_t line) noexcept
       : m_file(std::move(file)), m_line(line)
       {
       }
@@ -31,7 +31,7 @@ class Source_location
       }
   };
 
-extern std::ostream & operator<<(std::ostream &os, const Source_location &loc);
+extern std::ostream & operator<<(std::ostream &os, const Source_Location &loc);
 
 }
 

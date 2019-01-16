@@ -9,13 +9,13 @@
 
 namespace Asteria {
 
-class Abstract_variable_callback
+class Abstract_Variable_Callback
   {
   public:
-    Abstract_variable_callback() noexcept
+    Abstract_Variable_Callback() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_variable_callback, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Variable_Callback, virtual);
 
   public:
     virtual bool operator()(const rocket::refcounted_ptr<Variable> &var) const = 0;

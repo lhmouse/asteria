@@ -21,49 +21,49 @@ namespace Asteria {
 
 // Utilities
 class Formatter;
-class Runtime_error;
+class Runtime_Error;
 class Exception;
 
 // Syntax
-class Source_location;
+class Source_Location;
 class Xpnode;
 class Expression;
 class Statement;
 class Block;
 
 // Runtime
-class Refcounted_base;
+class Refcounted_Base;
 class Value;
-class Abstract_opaque;
-class Abstract_function;
-class Reference_root;
-class Reference_modifier;
+class Abstract_Opaque;
+class Abstract_Function;
+class Reference_Root;
+class Reference_Modifier;
 class Reference;
-class Reference_stack;
-class Reference_dictionary;
+class Reference_Stack;
+class Reference_Dictionary;
 class Variable;
-class Variable_hashset;
-class Abstract_variable_callback;
+class Variable_Hashset;
+class Abstract_Variable_Callback;
 class Collector;
-class Abstract_context;
-class Analytic_context;
-class Executive_context;
-class Analytic_function_context;
-class Executive_function_context;
-class Global_context;
-class Generational_collector;
-class Variadic_arguer;
-class Instantiated_function;
+class Abstract_Context;
+class Analytic_Context;
+class Executive_Context;
+class Analytic_Function_Context;
+class Executive_Function_Context;
+class Global_Context;
+class Generational_Collector;
+class Variadic_Arguer;
+class Instantiated_Function;
 
 // Compiler
-class Parser_error;
+class Parser_Error;
 class Token;
-class Token_stream;
+class Token_Stream;
 class Parser;
-class Single_source_file;
+class Single_Source_File;
 
 // Library
-class Argument_sentry;
+class Argument_Sentry;
 
 // Fundamental Types
 using D_null      = std::nullptr_t;
@@ -71,8 +71,8 @@ using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_real      = double;
 using D_string    = rocket::cow_string;
-using D_opaque    = rocket::refcounted_object<Abstract_opaque>;
-using D_function  = rocket::refcounted_object<Abstract_function>;
+using D_opaque    = rocket::refcounted_object<Abstract_Opaque>;
+using D_function  = rocket::refcounted_object<Abstract_Function>;
 using D_array     = rocket::cow_vector<Value>;
 using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value, rocket::prehashed_string::hash, rocket::prehashed_string::equal_to>;
 

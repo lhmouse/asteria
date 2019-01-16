@@ -13,26 +13,26 @@
 
 namespace Asteria {
 
-Simple_source_file::~Simple_source_file()
+Simple_Source_File::~Simple_Source_File()
   {
   }
 
-void Simple_source_file::do_throw_error(const Parser_error &err)
+void Simple_Source_File::do_throw_error(const Parser_Error &err)
   {
     ASTERIA_THROW_RUNTIME_ERROR("An error was encountered while parsing source data:\n",
                                 "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
-                                "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
+                                "code = ", err.get_code(), ": ", Parser_Error::get_code_description(err.get_code()));
   }
 
-Parser_error Simple_source_file::load_file(const rocket::cow_string &filename)
+Parser_Error Simple_Source_File::load_file(const rocket::cow_string &filename)
   {
     std::ifstream ifs(filename.c_str());
     return this->load_stream(ifs, filename);
   }
 
-Parser_error Simple_source_file::load_stream(std::istream &cstrm_io, const rocket::cow_string &filename)
+Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const rocket::cow_string &filename)
   {
-    Token_stream tstrm;
+    Token_Stream tstrm;
     if(!tstrm.load(cstrm_io, filename)) {
       return tstrm.get_parser_error();
     }
@@ -42,21 +42,21 @@ Parser_error Simple_source_file::load_stream(std::istream &cstrm_io, const rocke
     }
     this->m_code = parser.extract_document();
     this->m_file = filename;
-    return Parser_error(0, 0, 0, Parser_error::code_success);
+    return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 
-void Simple_source_file::clear() noexcept
+void Simple_Source_File::clear() noexcept
   {
     this->m_code = rocket::cow_vector<Statement>();
     this->m_file = std::ref("");
   }
 
-Reference Simple_source_file::execute(Global_context &global, rocket::cow_vector<Reference> &&args) const
+Reference Simple_Source_File::execute(Global_Context &global, rocket::cow_vector<Reference> &&args) const
   {
     // Initialize parameters.
-    const auto loc = Source_location(this->m_file, 0);
+    const auto loc = Source_Location(this->m_file, 0);
     const auto name = rocket::cow_string(std::ref("<file scope>"));
-    const auto zvarg = rocket::refcounted_object<Variadic_arguer>(loc, name);
+    const auto zvarg = rocket::refcounted_object<Variadic_Arguer>(loc, name);
     const auto params = rocket::cow_vector<rocket::prehashed_string>();
     // Execute the code as a function.
     Reference self;

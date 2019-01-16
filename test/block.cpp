@@ -16,7 +16,7 @@ int main()
     // var res = 0;
     rocket::cow_vector<Xpnode> expr;
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
-    text.emplace_back(Statement::S_variable { Source_location(std::ref("nonexistent"), 1), std::ref("res"), false, std::move(expr) });
+    text.emplace_back(Statement::S_variable { Source_Location(std::ref("nonexistent"), 1), std::ref("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(1) });
@@ -26,7 +26,7 @@ int main()
     expr.emplace_back(Xpnode::S_literal { D_integer(5) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
     expr.emplace_back(Xpnode::S_unnamed_array { 4 });
-    text.emplace_back(Statement::S_variable { Source_location(std::ref("nonexistent"), 2), std::ref("data"), true, std::move(expr) });
+    text.emplace_back(Statement::S_variable { Source_Location(std::ref("nonexistent"), 2), std::ref("data"), true, std::move(expr) });
     // for(each k, v in data) {
     //   res += k * v;
     // }
@@ -67,7 +67,7 @@ int main()
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     rocket::cow_vector<Statement> init;
-    init.emplace_back(Statement::S_variable { Source_location(std::ref("nonexistent"), 3), std::ref("j"), false, std::move(expr) });
+    init.emplace_back(Statement::S_variable { Source_Location(std::ref("nonexistent"), 3), std::ref("j"), false, std::move(expr) });
     rocket::cow_vector<Xpnode> cond;
     cond.emplace_back(Xpnode::S_named_reference { std::ref("j") });
     cond.emplace_back(Xpnode::S_literal { D_integer(3) });
@@ -78,8 +78,8 @@ int main()
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     auto block = Block(std::move(text));
 
-    Global_context global;
-    Executive_context ctx(nullptr);
+    Global_Context global;
+    Executive_Context ctx(nullptr);
     Reference ref;
     auto status = block.execute_in_place(ref, ctx, global);
     ASTERIA_TEST_CHECK(status == Block::status_next);

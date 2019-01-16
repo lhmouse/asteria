@@ -7,14 +7,14 @@
 
 namespace Asteria {
 
-Argument_sentry::~Argument_sentry()
+Argument_Sentry::~Argument_Sentry()
   {
   }
 
     namespace {
 
     template<typename ThrowerT>
-      void do_fail(const Argument_sentry &parent, Argument_sentry::State &state, ThrowerT &&thrower)
+      void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
       {
         // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
         if(parent.does_throw_on_failure()) {
@@ -24,17 +24,17 @@ Argument_sentry::~Argument_sentry()
         state.succeeded = false;
       }
 
-    class Reference_sentry
+    class Reference_Sentry
       {
       private:
-        std::reference_wrapper<const Argument_sentry> m_parent;
-        std::reference_wrapper<Argument_sentry::State> m_state;
+        std::reference_wrapper<const Argument_Sentry> m_parent;
+        std::reference_wrapper<Argument_Sentry::State> m_state;
 
         bool m_committable;
         const Reference *m_ref;
 
       public:
-        Reference_sentry(const Argument_sentry &parent, Argument_sentry::State &state) noexcept
+        Reference_Sentry(const Argument_Sentry &parent, Argument_Sentry::State &state) noexcept
           : m_parent(std::ref(parent)), m_state(std::ref(state)),
             m_committable(false)
           {
@@ -65,9 +65,9 @@ Argument_sentry::~Argument_sentry()
             this->m_ref = state.args->data() + state.offset;
             this->m_committable = true;
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_sentry)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Sentry)
           {
-            Argument_sentry::State &state = this->m_state;
+            Argument_Sentry::State &state = this->m_state;
             // If anything went wrong, don't do anything.
             if(!state.succeeded) {
               return;
@@ -96,9 +96,9 @@ Argument_sentry::~Argument_sentry()
     }
 
 template<typename XvalueT>
-  Argument_sentry & Argument_sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
+  Argument_Sentry & Argument_Sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
-    Reference_sentry sentry(*this, this->m_state);
+    Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -126,9 +126,9 @@ template<typename XvalueT>
   }
 
 template<typename XvalueT>
-  Argument_sentry & Argument_sentry::do_get_required_value(XvalueT &value_out)
+  Argument_Sentry & Argument_Sentry::do_get_required_value(XvalueT &value_out)
   {
-    Reference_sentry sentry(*this, this->m_state);
+    Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -149,9 +149,9 @@ template<typename XvalueT>
     return *this;
   }
 
-Argument_sentry & Argument_sentry::opt(Reference &ref_out)
+Argument_Sentry & Argument_Sentry::opt(Reference &ref_out)
   {
-    Reference_sentry sentry(*this, this->m_state);
+    Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -162,9 +162,9 @@ Argument_sentry & Argument_sentry::opt(Reference &ref_out)
     return *this;
   }
 
-Argument_sentry & Argument_sentry::opt(Value &value_out)
+Argument_Sentry & Argument_Sentry::opt(Value &value_out)
   {
-    Reference_sentry sentry(*this, this->m_state);
+    Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -176,92 +176,92 @@ Argument_sentry & Argument_sentry::opt(Value &value_out)
     return *this;
   }
 
-Argument_sentry & Argument_sentry::opt(D_boolean &value_out, D_boolean default_value)
+Argument_Sentry & Argument_Sentry::opt(D_boolean &value_out, D_boolean default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_integer &value_out, D_integer default_value)
+Argument_Sentry & Argument_Sentry::opt(D_integer &value_out, D_integer default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_real &value_out, D_real default_value)
+Argument_Sentry & Argument_Sentry::opt(D_real &value_out, D_real default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_string &value_out, const D_string &default_value)
+Argument_Sentry & Argument_Sentry::opt(D_string &value_out, const D_string &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_opaque &value_out, const D_opaque &default_value)
+Argument_Sentry & Argument_Sentry::opt(D_opaque &value_out, const D_opaque &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_function &value_out, const D_function &default_value)
+Argument_Sentry & Argument_Sentry::opt(D_function &value_out, const D_function &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_array &value_out, const D_array &default_value)
+Argument_Sentry & Argument_Sentry::opt(D_array &value_out, const D_array &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::opt(D_object &value_out, const D_object &default_value)
+Argument_Sentry & Argument_Sentry::opt(D_object &value_out, const D_object &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_sentry & Argument_sentry::req(D_null &value_out)
+Argument_Sentry & Argument_Sentry::req(D_null &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_boolean &value_out)
+Argument_Sentry & Argument_Sentry::req(D_boolean &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_integer &value_out)
+Argument_Sentry & Argument_Sentry::req(D_integer &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_real &value_out)
+Argument_Sentry & Argument_Sentry::req(D_real &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_string &value_out)
+Argument_Sentry & Argument_Sentry::req(D_string &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_opaque &value_out)
+Argument_Sentry & Argument_Sentry::req(D_opaque &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_function &value_out)
+Argument_Sentry & Argument_Sentry::req(D_function &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_array &value_out)
+Argument_Sentry & Argument_Sentry::req(D_array &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::req(D_object &value_out)
+Argument_Sentry & Argument_Sentry::req(D_object &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_sentry & Argument_sentry::cut()
+Argument_Sentry & Argument_Sentry::cut()
   {
     auto &state = this->m_state;
     // Check for general conditions.
@@ -292,7 +292,7 @@ Argument_sentry & Argument_sentry::cut()
     return *this;
   }
 
-[[noreturn]] void Argument_sentry::throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const
+[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const
   {
     const auto args = this->m_state.args;
     if(!args) {

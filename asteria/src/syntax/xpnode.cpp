@@ -155,10 +155,10 @@ Xpnode::~Xpnode()
     namespace {
 
     template<typename ContextT>
-      std::pair<std::reference_wrapper<const Abstract_context>,
-        std::reference_wrapper<const Reference>> do_name_lookup(const Global_context &global, const ContextT &ctx, const rocket::prehashed_string &name)
+      std::pair<std::reference_wrapper<const Abstract_Context>,
+        std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const ContextT &ctx, const rocket::prehashed_string &name)
       {
-        auto qctx = static_cast<const Abstract_context *>(&ctx);
+        auto qctx = static_cast<const Abstract_Context *>(&ctx);
         // De-virtualize the first call by hand.
         auto qref = ctx.ContextT::get_named_reference_opt(name);
         for(;;) {
@@ -173,7 +173,7 @@ Xpnode::~Xpnode()
           qref = qctx->get_named_reference_opt(name);
         }
         // Search for the name in the global context.
-        qref = global.Global_context::get_named_reference_opt(name);
+        qref = global.Global_Context::get_named_reference_opt(name);
         if(ROCKET_EXPECT(qref)) {
           return std::make_pair(std::ref(*qctx), std::ref(*qref));
         }
@@ -183,7 +183,7 @@ Xpnode::~Xpnode()
 
     }
 
-void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &global, const Analytic_context &ctx) const
+void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
@@ -228,7 +228,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
       {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
-        Analytic_function_context ctx_next(&ctx);
+        Analytic_Function_Context ctx_next(&ctx);
         ctx_next.initialize(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
@@ -301,14 +301,14 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
 
     namespace {
 
-    void do_evaluate_literal(const Xpnode::S_literal &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    void do_evaluate_literal(const Xpnode::S_literal &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Push the constant.
-        Reference_root::S_constant ref_c = { alt.value };
+        Reference_Root::S_constant ref_c = { alt.value };
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_named_reference(const Xpnode::S_named_reference &alt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+    void do_evaluate_named_reference(const Xpnode::S_named_reference &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Look for the reference in the current context.
         auto pair = do_name_lookup(global, ctx, alt.name);
@@ -319,21 +319,21 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         stack_io.push(pair.second);
       }
 
-    void do_evaluate_bound_reference(const Xpnode::S_bound_reference &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    void do_evaluate_bound_reference(const Xpnode::S_bound_reference &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Push the reference stored.
         stack_io.push(alt.ref);
       }
 
-    void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+    void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Instantiate the closure function.
         auto func = alt.body.instantiate_function(global, ctx, alt.loc, std::ref("<closure function>"), alt.params);
-        Reference_root::S_temporary ref_c = { D_function(std::move(func)) };
+        Reference_Root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_branch(const Xpnode::S_branch &alt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+    void do_evaluate_branch(const Xpnode::S_branch &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
         const auto branch = stack_io.top().read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
@@ -355,7 +355,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         }
       }
 
-    void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_stack &stack_io, Global_context &global, const Executive_context & /*ctx*/)
+    void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context & /*ctx*/)
       {
         // Allocate the argument vector.
         rocket::cow_vector<Reference> args;
@@ -390,7 +390,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         }
       }
 
-    void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Get the subscript.
         Value subscript;
@@ -404,13 +404,13 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         switch(rocket::weaken_enum(subscript.type())) {
         case Value::type_integer:
           {
-            Reference_modifier::S_array_index mod_c = { subscript.check<D_integer>() };
+            Reference_Modifier::S_array_index mod_c = { subscript.check<D_integer>() };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
         case Value::type_string:
           {
-            Reference_modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
+            Reference_Modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
@@ -419,7 +419,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         }
       }
 
-    void do_set_temporary(Reference_stack &stack_io, const Xpnode::S_operator_rpn &alt, Reference_root::S_temporary &&ref_c)
+    void do_set_temporary(Reference_Stack &stack_io, const Xpnode::S_operator_rpn &alt, Reference_Root::S_temporary &&ref_c)
       {
         if(alt.assign) {
           stack_io.top().open() = std::move(ref_c.value);
@@ -731,17 +731,17 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
       }
 
     template<Xpnode::Xop xopT>
-      void do_evaluate_operator_rpn(const Xpnode::S_operator_rpn &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+      void do_evaluate_operator_rpn(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == xopT);
         // This is special.
         if(xopT == Xpnode::xop_prefix_unset) {
           // Unset the reference and return the value removed.
-          Reference_root::S_temporary ref_c = { stack_io.top().unset() };
+          Reference_Root::S_temporary ref_c = { stack_io.top().unset() };
           do_set_temporary(stack_io, alt, std::move(ref_c));
           return;
         }
-        Reference_root::S_temporary ref_c = { stack_io.top().read() };
+        Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         switch(rocket::weaken_enum(xopT)) {
         case Xpnode::xop_postfix_inc:
           {
@@ -1230,7 +1230,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         }
       }
 
-    void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Pop references to create an array.
         D_array array;
@@ -1239,11 +1239,11 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
           *it = stack_io.top().read();
           stack_io.pop();
         }
-        Reference_root::S_temporary ref_c = { std::move(array) };
+        Reference_Root::S_temporary ref_c = { std::move(array) };
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_unnamed_object(const Xpnode::S_unnamed_object &alt, Reference_stack &stack_io, Global_context & /*global*/, const Executive_context & /*ctx*/)
+    void do_evaluate_unnamed_object(const Xpnode::S_unnamed_object &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Pop references to create an object.
         D_object object;
@@ -1252,11 +1252,11 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
           object.try_emplace(*it, stack_io.top().read());
           stack_io.pop();
         }
-        Reference_root::S_temporary ref_c = { std::move(object) };
+        Reference_Root::S_temporary ref_c = { std::move(object) };
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_coalescence(const Xpnode::S_coalescence &alt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+    void do_evaluate_coalescence(const Xpnode::S_coalescence &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
         if(stack_io.top().read().type() != Value::type_null) {
@@ -1266,7 +1266,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
         const auto has_result = alt.branch_null.evaluate_partial(stack_io, global, ctx);
         if(!has_result) {
           // If the branch is empty, push a hard `null` on the stack.
-          stack_io.mut_top() = Reference_root::S_null();
+          stack_io.mut_top() = Reference_Root::S_null();
           return;
         }
         // The result will have been pushed onto `stack_io`.
@@ -1284,11 +1284,11 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, void (&funcT)(const AltT &, Reference_stack &, Global_context &, const Executive_context &)>
-      Expression::Compiled_instruction do_bind(const AltT &alt)
+    template<typename AltT, void (&funcT)(const AltT &, Reference_Stack &, Global_Context &, const Executive_Context &)>
+      Expression::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_first(
-          [](const void *qalt, Reference_stack &stack_io, Global_context &global, const Executive_context &ctx)
+          [](const void *qalt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
             {
               return funcT(*static_cast<const AltT *>(qalt), stack_io, global, ctx);
             },
@@ -1297,7 +1297,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_context &g
 
     }
 
-void Xpnode::compile(rocket::cow_vector<Expression::Compiled_instruction> &cinsts_out) const
+void Xpnode::compile(rocket::cow_vector<Expression::Compiled_Instruction> &cinsts_out) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
@@ -1528,7 +1528,7 @@ void Xpnode::compile(rocket::cow_vector<Expression::Compiled_instruction> &cinst
     }
   }
 
-void Xpnode::enumerate_variables(const Abstract_variable_callback &callback) const
+void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:

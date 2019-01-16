@@ -9,13 +9,13 @@
 
 namespace Asteria {
 
-Token_stream::~Token_stream()
+Token_Stream::~Token_Stream()
   {
   }
 
     namespace {
 
-    class Source_reader
+    class Source_Reader
       {
       private:
         std::reference_wrapper<std::istream> m_strm;
@@ -26,17 +26,17 @@ Token_stream::~Token_stream()
         std::size_t m_offset;
 
       public:
-        Source_reader(std::istream &xstrm, const rocket::cow_string &xfile)
+        Source_Reader(std::istream &xstrm, const rocket::cow_string &xfile)
           : m_strm(xstrm), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
             // Check whether the stream can be read from.
             // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
             if(this->m_strm.get().fail()) {
-              throw Parser_error(0, 0, 0, Parser_error::code_istream_open_failure);
+              throw Parser_Error(0, 0, 0, Parser_Error::code_istream_open_failure);
             }
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Source_reader)
+        ROCKET_NONCOPYABLE_DESTRUCTOR(Source_Reader)
           {
           }
 
@@ -60,7 +60,7 @@ Token_stream::~Token_stream()
             getline(this->m_strm.get(), this->m_str);
             // Check `bad()` before `fail()` because the latter checks for both `badbit` and `failbit`.
             if(this->m_strm.get().bad()) {
-              throw Parser_error(this->m_line, this->m_offset, 0, Parser_error::code_istream_badbit_set);
+              throw Parser_Error(this->m_line, this->m_offset, 0, Parser_Error::code_istream_badbit_set);
             }
             if(this->m_strm.get().fail()) {
               return false;
@@ -103,9 +103,9 @@ Token_stream::~Token_stream()
           }
       };
 
-    inline Parser_error do_make_parser_error(const Source_reader &reader, std::size_t length, Parser_error::Code code)
+    inline Parser_Error do_make_parser_error(const Source_Reader &reader, std::size_t length, Parser_Error::Code code)
       {
-        return Parser_error(reader.line(), reader.offset(), length, code);
+        return Parser_Error(reader.line(), reader.offset(), length, code);
       }
 
     class Tack
@@ -138,7 +138,7 @@ Token_stream::~Token_stream()
           {
             return this->m_line != 0;
           }
-        Tack & set(const Source_reader &reader, std::size_t xlength) noexcept
+        Tack & set(const Source_Reader &reader, std::size_t xlength) noexcept
           {
             this->m_line = reader.line();
             this->m_offset = reader.offset();
@@ -152,7 +152,7 @@ Token_stream::~Token_stream()
           }
       };
 
-    char32_t do_get_utf8_code_point(Source_reader &reader)
+    char32_t do_get_utf8_code_point(Source_Reader &reader)
       {
         // Read the first byte.
         char32_t code_point = reader.peek() & 0xFF;
@@ -163,11 +163,11 @@ Token_stream::~Token_stream()
         }
         if(code_point < 0xC0) {
           // This is not a leading character.
-          throw do_make_parser_error(reader, 1, Parser_error::code_utf8_sequence_invalid);
+          throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         if(code_point >= 0xF8) {
           // If this leading character were valid, it would start a sequence of five bytes or more.
-          throw do_make_parser_error(reader, 1, Parser_error::code_utf8_sequence_invalid);
+          throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
         const auto u8len = static_cast<unsigned>(2 + (code_point >= 0xE0) + (code_point >= 0xF0));
@@ -178,42 +178,42 @@ Token_stream::~Token_stream()
         // Accumulate trailing code units.
         if(u8len > reader.size_avail()) {
           // No enough characters have been provided.
-          throw do_make_parser_error(reader, reader.size_avail(), Parser_error::code_utf8_sequence_incomplete);
+          throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_utf8_sequence_incomplete);
         }
         for(unsigned i = 1; i < u8len; ++i) {
           char32_t next = reader.peek(i) & 0xFF;
           if((next < 0x80) || (0xC0 <= next)) {
             // This trailing character is not valid.
-            throw do_make_parser_error(reader, i + 1, Parser_error::code_utf8_sequence_invalid);
+            throw do_make_parser_error(reader, i + 1, Parser_Error::code_utf8_sequence_invalid);
           }
           code_point = (code_point << 6) | (next & 0x3F);
         }
         if((0xD800 <= code_point) && (code_point < 0xE000)) {
           // Surrogates are not allowed.
-          throw do_make_parser_error(reader, u8len, Parser_error::code_utf_code_point_invalid);
+          throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
         }
         if(code_point >= 0x110000) {
           // Code point value is too large.
-          throw do_make_parser_error(reader, u8len, Parser_error::code_utf_code_point_invalid);
+          throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
         }
         // Re-encode it and check for overlong sequences.
         const auto minlen = static_cast<unsigned>(1 + (code_point >= 0x80) + (code_point >= 0x800) + (code_point >= 0x10000));
         if(minlen != u8len) {
           // Overlong sequences are not allowed.
-          throw do_make_parser_error(reader, u8len, Parser_error::code_utf8_sequence_invalid);
+          throw do_make_parser_error(reader, u8len, Parser_Error::code_utf8_sequence_invalid);
         }
         reader.consume(u8len);
         return code_point;
       }
 
     template<typename TokenT>
-      void do_push_token(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io, std::size_t length, TokenT &&token_c)
+      void do_push_token(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
       {
         seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
         reader_io.consume(length);
       }
 
-    struct Prefix_comparator
+    struct Prefix_Comparator
       {
         template<typename ElementT>
           bool operator()(const ElementT &lhs, const ElementT &rhs) const noexcept
@@ -232,7 +232,7 @@ Token_stream::~Token_stream()
           }
       };
 
-    bool do_accept_identifier_or_keyword(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_identifier_or_keyword(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -246,7 +246,7 @@ Token_stream::~Token_stream()
         auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch); });
         const auto tlen = static_cast<std::size_t>(tptr - bptr);
         // Check whether this identifier matches a keyword.
-        struct Keyword_element
+        struct Keyword_Element
           {
             char first[12];
             Token::Keyword second;
@@ -287,9 +287,9 @@ Token_stream::~Token_stream()
             { "while",     Token::keyword_while     },
           };
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_comparator()));
+        ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_Comparator()));
 #endif
-        auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), bptr[0], Prefix_comparator());
+        auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), bptr[0], Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
@@ -308,7 +308,7 @@ Token_stream::~Token_stream()
         }
       }
 
-    bool do_accept_punctuator(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_punctuator(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         const auto bptr = reader_io.data_avail();
@@ -316,7 +316,7 @@ Token_stream::~Token_stream()
           return false;
         }
         // Get a punctuator.
-        struct Punctuator_element
+        struct Punctuator_Element
           {
             char first[6];
             Token::Punctuator second;
@@ -381,11 +381,11 @@ Token_stream::~Token_stream()
             { "~",     Token::punctuator_notb        },
           };
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_comparator()));
+        ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_Comparator()));
 #endif
         // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
         // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-        auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_comparator());
+        auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
             // No matching punctuator has been found so far.
@@ -404,7 +404,7 @@ Token_stream::~Token_stream()
         }
       }
 
-    bool do_accept_string_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_string_literal(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -418,7 +418,7 @@ Token_stream::~Token_stream()
         for(;;) {
           const auto qavail = reader_io.size_avail() - tlen;
           if(qavail == 0) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_string_literal_unclosed);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
           }
           auto next = bptr[tlen];
           ++tlen;
@@ -433,7 +433,7 @@ Token_stream::~Token_stream()
           }
           // Translate this escape sequence.
           if(qavail < 2) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_incomplete);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
           }
           next = bptr[tlen];
           ++tlen;
@@ -508,25 +508,25 @@ Token_stream::~Token_stream()
               xcnt += 2;  // 2: "\x12"
               // Read hex digits.
               if(qavail < xcnt + 2) {
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_incomplete);
+                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
               }
               char32_t code_point = 0;
               for(auto i = tlen; i < tlen + xcnt; ++i) {
                 static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
                 const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
                 if(!dptr) {
-                  throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_invalid_hex);
+                  throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_invalid_hex);
                 }
                 const auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
                 code_point = code_point * 16 + dvalue;
               }
               if((0xD800 <= code_point) && (code_point < 0xE000)) {
                 // Surrogates are not allowed.
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_utf_code_point_invalid);
+                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_utf_code_point_invalid);
               }
               if(code_point >= 0x110000) {
                 // Code point value is too large.
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_utf_code_point_invalid);
+                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_utf_code_point_invalid);
               }
               // Encode it.
               const auto encode_one = [&](unsigned shift, unsigned mask)
@@ -555,7 +555,7 @@ Token_stream::~Token_stream()
               break;
             }
           default:
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_escape_sequence_unknown);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_unknown);
           }
           tlen += xcnt;
         }
@@ -564,7 +564,7 @@ Token_stream::~Token_stream()
         return true;
       }
 
-    bool do_accept_noescape_string_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_noescape_string_literal(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
@@ -578,7 +578,7 @@ Token_stream::~Token_stream()
         {
           auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, '\'');
           if(!tptr) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_string_literal_unclosed);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
           }
           ++tptr;
           value.append(bptr + 1, tptr - 1);
@@ -589,7 +589,7 @@ Token_stream::~Token_stream()
         return true;
       }
 
-    bool do_accept_numeric_literal(rocket::cow_vector<Token> &seq_out, Source_reader &reader_io)
+    bool do_accept_numeric_literal(rocket::cow_vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -646,7 +646,7 @@ Token_stream::~Token_stream()
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
         int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
+          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
         }
         // Look for the fractional part.
         frac_begin = int_end;
@@ -657,7 +657,7 @@ Token_stream::~Token_stream()
           tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Look for the exponent.
@@ -699,7 +699,7 @@ Token_stream::~Token_stream()
           tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch); });
           exp_end = static_cast<std::size_t>(tptr - bptr);
           if(exp_end == exp_begin) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
@@ -707,7 +707,7 @@ Token_stream::~Token_stream()
         static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
         tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch); });
         if(tptr != bptr + exp_end) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_suffix_disallowed);
+          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_suffix_disallowed);
         }
         const auto tlen = exp_end;
         // Parse the exponent.
@@ -720,7 +720,7 @@ Token_stream::~Token_stream()
           const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
           const auto bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_numeric_literal_exponent_overflow);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_exponent_overflow);
           }
           exp = exp * 10 + dvalue;
         }
@@ -732,7 +732,7 @@ Token_stream::~Token_stream()
           // Parse the literal as an integer.
           // Negative exponents are not allowed, even when the significant part is zero.
           if(exp < 0) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_exponent_negative);
+            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
           std::int64_t value = 0;
@@ -744,7 +744,7 @@ Token_stream::~Token_stream()
             const auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
             const auto bound = (INT64_MAX - dvalue) / radix;
             if(value > bound) {
-              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
+              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_overflow);
             }
             value = value * radix + dvalue;
           }
@@ -753,7 +753,7 @@ Token_stream::~Token_stream()
             for(int i = 0; i < exp; ++i) {
               const auto bound = INT64_MAX / exp_base;
               if(value > bound) {
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_integer_literal_overflow);
+                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_overflow);
               }
               value *= exp_base;
             }
@@ -778,7 +778,7 @@ Token_stream::~Token_stream()
         }
         int vclass = std::fpclassify(value);
         if(vclass == FP_INFINITE) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_real_literal_overflow);
+          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_overflow);
         }
         // Parse the fractional part.
         double frac = 0;
@@ -800,10 +800,10 @@ Token_stream::~Token_stream()
         }
         vclass = std::fpclassify(value);
         if(vclass == FP_INFINITE) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_real_literal_overflow);
+          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_overflow);
         }
         if((vclass == FP_ZERO) && !zero) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_error::code_real_literal_underflow);
+          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_underflow);
         }
         // Push a floating-point literal.
         Token::S_real_literal token_c = { value };
@@ -813,27 +813,27 @@ Token_stream::~Token_stream()
 
     }
 
-Parser_error Token_stream::get_parser_error() const noexcept
+Parser_Error Token_Stream::get_parser_error() const noexcept
   {
     switch(this->state()) {
     case state_empty:
       {
-        return Parser_error(0, 0, 0, Parser_error::code_no_data_loaded);
+        return Parser_Error(0, 0, 0, Parser_Error::code_no_data_loaded);
       }
     case state_error:
       {
-        return this->m_stor.as<Parser_error>();
+        return this->m_stor.as<Parser_Error>();
       }
     case state_success:
       {
-        return Parser_error(0, 0, 0, Parser_error::code_success);
+        return Parser_Error(0, 0, 0, Parser_Error::code_success);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
-bool Token_stream::empty() const noexcept
+bool Token_Stream::empty() const noexcept
   {
     switch(this->state()) {
     case state_empty:
@@ -853,7 +853,7 @@ bool Token_stream::empty() const noexcept
     }
   }
 
-bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
+bool Token_Stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -863,7 +863,7 @@ bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Source_reader reader(cstrm_io, file);
+    Source_Reader reader(cstrm_io, file);
     while(reader.advance_line()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
@@ -928,14 +928,14 @@ bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
                          do_accept_numeric_literal(seq, reader);
         if(!token_got) {
           ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
-          throw do_make_parser_error(reader, 1, Parser_error::code_token_character_unrecognized);
+          throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);
         }
       }
       reader.rewind();
     }
     if(bcomm) {
       // A block comment may straddle multiple lines. We just mark the first line here.
-      throw Parser_error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_error::code_block_comment_unclosed);
+      throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
     }
     ///////////////////////////////////////////////////////////////////////////
     // Finish
@@ -943,20 +943,20 @@ bool Token_stream::load(std::istream &cstrm_io, const rocket::cow_string &file)
     std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor = std::move(seq);
     return true;
-  } catch(Parser_error &err) {  // Don't play with this at home.
-    ASTERIA_DEBUG_LOG("Caught `Parser_error`:\n",
+  } catch(Parser_Error &err) {  // Don't play with this at home.
+    ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
                       "line = ", err.get_line(), ", offset = ", err.get_offset(), ", length = ", err.get_length(), "\n",
-                      "code = ", err.get_code(), ": ", Parser_error::get_code_description(err.get_code()));
+                      "code = ", err.get_code(), ": ", Parser_Error::get_code_description(err.get_code()));
     this->m_stor = std::move(err);
     return false;
   }
 
-void Token_stream::clear() noexcept
+void Token_Stream::clear() noexcept
   {
     this->m_stor = nullptr;
   }
 
-const Token * Token_stream::peek_opt() const noexcept
+const Token * Token_Stream::peek_opt() const noexcept
   {
     switch(this->state()) {
     case state_empty:
@@ -980,7 +980,7 @@ const Token * Token_stream::peek_opt() const noexcept
     }
   }
 
-Token Token_stream::shift()
+Token Token_Stream::shift()
   {
     switch(this->state()) {
     case state_empty:

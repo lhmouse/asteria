@@ -32,15 +32,15 @@ int main()
         return typeof(e) + ":" + e;
       }
     )__");
-    Token_stream tis;
+    Token_Stream tis;
     ASTERIA_TEST_CHECK(tis.load(iss, std::ref("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
     Reference res;
-    Global_context global;
-    rocket::refcounted_object<Variadic_arguer> zvarg(Source_location(std::ref("file"), 42), std::ref("scope"));
+    Global_Context global;
+    rocket::refcounted_object<Variadic_Arguer> zvarg(Source_Location(std::ref("file"), 42), std::ref("scope"));
     code.execute_as_function(res, global, zvarg, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }

@@ -11,18 +11,18 @@
 
 namespace Asteria {
 
-class Abstract_function : public Refcounted_base
+class Abstract_Function : public Refcounted_Base
   {
   public:
-    Abstract_function() noexcept
+    Abstract_Function() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_function, virtual);
+    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Function, virtual);
 
   public:
     virtual rocket::cow_string describe() const = 0;
-    virtual void invoke(Reference &self_io, Global_context &global, rocket::cow_vector<Reference> &&args) const = 0;
-    virtual void enumerate_variables(const Abstract_variable_callback &callback) const = 0;
+    virtual void invoke(Reference &self_io, Global_Context &global, rocket::cow_vector<Reference> &&args) const = 0;
+    virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
   };
 
 }

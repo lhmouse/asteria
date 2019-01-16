@@ -12,22 +12,22 @@
 
 namespace Asteria {
 
-class Executive_function_context : public Executive_context
+class Executive_Function_Context : public Executive_Context
   {
   private:
     // N.B. If you have ever changed the capacity, remember to update 'analytic_function_context.hpp' as well.
-    rocket::static_vector<Reference_dictionary::Template, 7> m_predef_refs;
+    rocket::static_vector<Reference_Dictionary::Template, 7> m_predef_refs;
 
   public:
-    explicit Executive_function_context(std::nullptr_t) noexcept  // The argument is reserved.
-      : Executive_context(nullptr),
+    explicit Executive_Function_Context(std::nullptr_t) noexcept  // The argument is reserved.
+      : Executive_Context(nullptr),
         m_predef_refs()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Executive_function_context);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Executive_Function_Context);
 
   public:
-    void initialize(const rocket::refcounted_object<Variadic_arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
+    void initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
   };
 
 }

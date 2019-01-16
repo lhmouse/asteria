@@ -8,11 +8,11 @@
 
 namespace Asteria {
 
-Variable_hashset::~Variable_hashset()
+Variable_Hashset::~Variable_Hashset()
   {
   }
 
-void Variable_hashset::do_clear() noexcept
+void Variable_Hashset::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
     // Get table bounds.
@@ -30,7 +30,7 @@ void Variable_hashset::do_clear() noexcept
     pre->size = 0;
   }
 
-void Variable_hashset::do_rehash(std::size_t res_arg)
+void Variable_Hashset::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
@@ -71,7 +71,7 @@ void Variable_hashset::do_rehash(std::size_t res_arg)
     }
   }
 
-void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
+void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
@@ -100,7 +100,7 @@ void Variable_hashset::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_hashset::has(const rocket::refcounted_ptr<Variable> &var) const noexcept
+bool Variable_Hashset::has(const rocket::refcounted_ptr<Variable> &var) const noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -120,7 +120,7 @@ bool Variable_hashset::has(const rocket::refcounted_ptr<Variable> &var) const no
     return true;
   }
 
-void Variable_hashset::for_each(const Abstract_variable_callback &callback) const
+void Variable_Hashset::for_each(const Abstract_Variable_Callback &callback) const
   {
     if(this->m_stor.empty()) {
       return;
@@ -135,10 +135,10 @@ void Variable_hashset::for_each(const Abstract_variable_callback &callback) cons
     }
   }
 
-bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
+bool Variable_Hashset::insert(const rocket::refcounted_ptr<Variable> &var)
   {
     if(!var) {
-      ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_hashset`.");
+      ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_Hashset`.");
     }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 97);
@@ -163,7 +163,7 @@ bool Variable_hashset::insert(const rocket::refcounted_ptr<Variable> &var)
     return true;
   }
 
-bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexcept
+bool Variable_Hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -189,7 +189,7 @@ bool Variable_hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     return true;
   }
 
-rocket::refcounted_ptr<Variable> Variable_hashset::erase_random_opt() noexcept
+rocket::refcounted_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
