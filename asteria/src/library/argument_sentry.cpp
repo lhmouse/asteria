@@ -292,7 +292,7 @@ Argument_Sentry & Argument_Sentry::cut()
     return *this;
   }
 
-[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const
+[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(std::initializer_list<const char *> overloads) const
   {
     const auto args = this->m_state.args;
     if(!args) {
@@ -303,29 +303,22 @@ Argument_Sentry & Argument_Sentry::cut()
     Formatter msg;
     ASTERIA_FORMAT(msg, "There was no matching overload for function call `", this->m_name, "(");
     // Append the types of all arguments.
-    switch(args->size()) {
-    default:
-      for(auto it = args->begin(); it != args->end() - 1; ++it) {
-        ASTERIA_FORMAT(msg, Value::get_type_name(it->read().type()), ", ");
+    if(args->size() != 0) {
+      auto it = args->begin();
+      while(++it != args->end()) {
+        ASTERIA_FORMAT(msg, Value::get_type_name(it[-1].read().type()), ", ");
       }
-      // Fallthrough.
-    case 1:
-      ASTERIA_FORMAT(msg, Value::get_type_name(args->back().read().type()));
-      // Fallthrough.
-    case 0:
-      break;
+      ASTERIA_FORMAT(msg, Value::get_type_name(it[-1].read().type()));
     }
     ASTERIA_FORMAT(msg, ")`.");
     // If an overload list is provided, append it.
-    if(overload_list.size() != 0) {
-      // Append the header.
-      ASTERIA_FORMAT(msg, "\n(possible overloads:");
-      // Append all overloads.
-      for(auto it = overload_list.begin(); it != overload_list.end(); ++it) {
-        ASTERIA_FORMAT(msg, "\n\t", *it);
+    if(overloads.size() != 0) {
+      ASTERIA_FORMAT(msg, "\n(possible ", (overloads.size() == 1) ? "overload" : "overloads", ": ");
+      auto it = overloads.begin();
+      while(++it != overloads.end()) {
+        ASTERIA_FORMAT(msg, "`", it[-1], "`, ");
       }
-      // Append the footer.
-      ASTERIA_FORMAT(msg, "\n -- end of possible overloads)");
+      ASTERIA_FORMAT(msg, "`", it[-1], "`)");
     }
     throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }

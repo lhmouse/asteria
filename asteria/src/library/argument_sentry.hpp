@@ -119,7 +119,7 @@ class Argument_Sentry
 
     // Throw an exception saying there are no viable overloads.
     // The overload list parameter is informative.
-    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<const char *> overload_list) const;
+    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<const char *> overloads) const;
   };
 
 }
