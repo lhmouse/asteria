@@ -13,6 +13,17 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
+Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexcept
+  {
+    auto qcoll = &(this->m_gen_zero);
+    // Find the collector with the given generation from the newest generation to the oldest.
+    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
+      // Go to the next generation.
+      qcoll = qcoll->get_tied_collector_opt();
+    }
+    return qcoll;
+  }
+
 rocket::refcounted_ptr<Variable> Generational_Collector::create_variable()
   {
     // Get one from the pool.
@@ -26,26 +37,19 @@ rocket::refcounted_ptr<Variable> Generational_Collector::create_variable()
     return var;
   }
 
-bool Generational_Collector::perform_garbage_collection(unsigned gen_limit)
+bool Generational_Collector::collect(unsigned gen_limit)
   {
-    // Force collection from the newest generation to the oldest.
-    auto gen_cur = unsigned(0);
     auto qcoll = &(this->m_gen_zero);
-    do {
-      ASTERIA_DEBUG_LOG("Generation ", gen_cur, " garbage collection begins.");
+    // Force collection from the newest generation to the oldest.
+    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
+      // Collect this generation.
+      ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection begins.");
       qcoll->collect();
-      ASTERIA_DEBUG_LOG("Generation ", gen_cur, " garbage collection ends.");
-      // Stop at `gen_limit + 1`.
-      gen_cur++;
-      if(gen_cur > gen_limit) {
-        return true;
-      }
-      // Collect the next generation.
+      ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection ends.");
+      // Go to the next generation.
       qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        return false;
-      }
-    } while(true);
+    }
+    return qcoll != nullptr;
   }
 
 }

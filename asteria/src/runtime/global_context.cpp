@@ -16,7 +16,7 @@ Global_Context::~Global_Context()
     if(coll) {
       try {
         this->clear_named_references();
-        coll->perform_garbage_collection(UINT_MAX);
+        coll->collect(UINT_MAX);
       } catch(std::exception &e) {
         ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection and some resources might have leaked: ", e.what());
       }

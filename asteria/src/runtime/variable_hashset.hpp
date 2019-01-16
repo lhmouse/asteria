@@ -34,7 +34,7 @@ class Variable_Hashset
 
         explicit operator bool () const noexcept
           {
-            return bool(this->var);
+            return this->var != nullptr;
           }
 
         void attach(Bucket &xpos) noexcept

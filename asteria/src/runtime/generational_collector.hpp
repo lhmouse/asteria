@@ -30,8 +30,9 @@ class Generational_Collector : public Refcounted_Base
     ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_Collector);
 
   public:
+    Collector * get_collector_opt(unsigned gen_limit) noexcept;
     rocket::refcounted_ptr<Variable> create_variable();
-    bool perform_garbage_collection(unsigned gen_limit);
+    bool collect(unsigned gen_limit);
   };
 
 }
