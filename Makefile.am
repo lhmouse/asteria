@@ -107,8 +107,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/abstract_context.hpp  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
-  asteria/src/runtime/analytic_function_context.hpp  \
-  asteria/src/runtime/executive_function_context.hpp  \
+  asteria/src/runtime/function_analytic_context.hpp  \
+  asteria/src/runtime/function_executive_context.hpp  \
   asteria/src/runtime/global_context.hpp  \
   asteria/src/runtime/generational_collector.hpp  \
   asteria/src/runtime/variadic_arguer.hpp  \
@@ -150,8 +150,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/abstract_context.cpp  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \
-  asteria/src/runtime/analytic_function_context.cpp  \
-  asteria/src/runtime/executive_function_context.cpp  \
+  asteria/src/runtime/function_analytic_context.cpp  \
+  asteria/src/runtime/function_executive_context.cpp  \
   asteria/src/runtime/global_context.cpp  \
   asteria/src/runtime/generational_collector.cpp  \
   asteria/src/runtime/variadic_arguer.cpp  \

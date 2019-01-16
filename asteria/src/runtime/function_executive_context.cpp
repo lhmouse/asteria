@@ -2,13 +2,13 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "executive_function_context.hpp"
+#include "function_executive_context.hpp"
 #include "variadic_arguer.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Executive_Function_Context::~Executive_Function_Context()
+Function_Executive_Context::~Function_Executive_Context()
   {
   }
 
@@ -30,7 +30,7 @@ Executive_Function_Context::~Executive_Function_Context()
 
     }
 
-void Executive_Function_Context::initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Function_Executive_Context::initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

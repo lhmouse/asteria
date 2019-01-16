@@ -7,7 +7,7 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
-#include "../runtime/analytic_function_context.hpp"
+#include "../runtime/function_analytic_context.hpp"
 #include "../runtime/variable.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../runtime/exception.hpp"
@@ -114,7 +114,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "function", alt.name, Reference_Root::S_null());
         // Bind the function body recursively.
-        Analytic_Function_Context ctx_next(&ctx_io);
+        Function_Analytic_Context ctx_next(&ctx_io);
         ctx_next.initialize(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Statement::S_function alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };

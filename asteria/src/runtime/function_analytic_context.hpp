@@ -12,19 +12,19 @@
 
 namespace Asteria {
 
-class Analytic_Function_Context : public Analytic_Context
+class Function_Analytic_Context : public Analytic_Context
   {
   private:
-    // N.B. If you have ever changed the capacity, remember to update 'executive_function_context.hpp' as well.
+    // N.B. If you have ever changed the capacity, remember to update 'function_executive_context.hpp' as well.
     rocket::static_vector<Reference_Dictionary::Template, 7> m_predef_refs;
 
   public:
-    explicit Analytic_Function_Context(const Abstract_Context *parent_opt) noexcept
+    explicit Function_Analytic_Context(const Abstract_Context *parent_opt) noexcept
       : Analytic_Context(parent_opt),
         m_predef_refs()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Analytic_Function_Context);
+    ROCKET_NONCOPYABLE_DESTRUCTOR(Function_Analytic_Context);
 
   public:
     void initialize(const rocket::cow_vector<rocket::prehashed_string> &params);

@@ -8,8 +8,8 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
-#include "../runtime/analytic_function_context.hpp"
-#include "../runtime/executive_function_context.hpp"
+#include "../runtime/function_analytic_context.hpp"
+#include "../runtime/function_executive_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
 
@@ -79,7 +79,7 @@ Block::Status Block::execute(Reference &ref_out, Global_Context &global, const E
 
 Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const
   {
-    Analytic_Function_Context ctx_next(&ctx);
+    Function_Analytic_Context ctx_next(&ctx);
     ctx_next.initialize(params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
@@ -88,7 +88,7 @@ Instantiated_Function Block::instantiate_function(Global_Context &global, const 
 
 void Block::execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
   {
-    Executive_Function_Context ctx_next(nullptr);
+    Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, global);
