@@ -10,16 +10,15 @@ namespace rocket {
 [[noreturn]] bool report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept
   {
     // Write a message to the standard error stream.
-    ::std::fprintf(
-      stderr,
-      "========================================\n"
-      "ASSERTION FAILED !!\n"
-      "  Expression: %s\n"
-      "  File:       %s\n"
-      "  Line:       %ld\n"
-      "  Message:    %s\n"
-      "========================================\n",
-      expr, file, line, msg);
+    ::std::fprintf(stderr,
+                   "===========================\n"
+                   "*** ASSERTION FAILED !! ***\n"
+                   "\tExpression: %s\n"
+                   "\tFile:       %s\n"
+                   "\tLine:       %ld\n"
+                   "\tMessage:    %s\n"
+                   "===========================\n",
+                   expr, file, line, msg);
     // Prefer `std::terminate()` to `std::abort()`.
     ::std::terminate();
   }

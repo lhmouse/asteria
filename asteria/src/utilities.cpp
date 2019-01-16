@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include <iostream>  // std::cerr
-#include <cstdio>  // std::snprintf()
 
 #ifdef _WIN32
 #  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
@@ -47,60 +46,81 @@ bool are_debug_logs_enabled() noexcept
 #endif
   }
 
-    namespace {
-
-    int do_print_time(char *str, std::size_t cap)
-      {
-        int len;
-#ifdef _WIN32
-        ::SYSTEMTIME s;
-        ::GetSystemTime(&s);
-        len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                            s.wYear, s.wMonth, s.wDay, s.wHour, s.wMinute, s.wSecond, s.wMilliseconds);
-#else
-        ::timespec t;
-        int err = ::clock_gettime(CLOCK_REALTIME, &t);
-        ROCKET_ASSERT(err == 0);
-        ::tm s;
-        ::localtime_r(&(t.tv_sec), &s);
-        len = std::snprintf(str, cap, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-                            s.tm_year + 1900, s.tm_mon, s.tm_mday, s.tm_hour, s.tm_min, s.tm_sec, static_cast<int>(t.tv_nsec / 1000000));
-#endif
-        return len;
-      }
-
-    void do_replace_all(rocket::cow_string &str, char ch, const char *reps, std::size_t repn)
-      {
-        for(auto pos = str.find(ch); pos != rocket::cow_string::npos; pos = str.find(ch, pos + repn)) {
-          str.replace(pos, 1, reps, repn);
-        }
-      }
-    void do_replace_all(rocket::cow_string &str, char ch, const char *reps)
-      {
-        do_replace_all(str, ch, reps, std::strlen(reps));
-      }
-
-    }
-
-bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept
+bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept
   try {
     auto str = fmt.extract_string();
-    char temp[64];
-    do_print_time(temp, sizeof(temp));
-    str.insert(0, " $$ ");
-    str.insert(0, temp);
-    str.append(" @@ ");
-    str.append(file);
-    std::sprintf(temp, ":%lu", line);
-    str.append(temp);
-    do_replace_all(str, '\n', "\n\t");
-    do_replace_all(str, '\0', "[NUL]");
+    // Decorate the message.
+    rocket::insertable_ostream mos;
+    mos.set_string(std::move(str), 0);
+    // Prepend the timestamp.
+#ifdef _WIN32
+    ::SYSTEMTIME st;
+    ::GetSystemTime(&st);
+    mos << std::setfill('0')
+        << std::setw(4) << st.wYear << '-' << std::setw(2) << st.wMonth << '-' << std::setw(2) << st.wDay
+        <<' ' << std::setw(2) << st.wHour << ':' << std::setw(2) << st.wMinute << ':' << std::setw(2) << st.wSecond
+        <<'.' << std::setw(3) << st.wMilliseconds;
+#else
+    ::timespec ts;
+    ::clock_gettime(CLOCK_REALTIME, &ts);
+    ::tm tr;
+    ::localtime_r(&(ts.tv_sec), &tr);
+    mos << std::setfill('0')
+        << std::setw(4) << tr.tm_year + 1900 << '-' << std::setw(2) << tr.tm_mon + 1 << '-' << std::setw(2) << tr.tm_mday
+        <<' ' << std::setw(2) << tr.tm_hour << ':' << std::setw(2) << tr.tm_min << ':' << std::setw(2) << tr.tm_sec
+        <<'.' << std::setw(3) << ts.tv_nsec / 1000000;
+#endif
+    // Insert the file name and line number.
+    mos << " @@ " << file << ':' << line;
+    // Start a new line for the user-defined message.
+    mos << '\n';
+    str = mos.extract_string();
+    // Neutralize control characters and indent paragraphs.
+    for(std::size_t i = 0; i < str.size(); ++i) {
+      // Control characters are ['\x00','\x20') and '\x7F'.
+      static constexpr char s_lower_table[][16] =
+        {
+          "[NUL""\\x00]",  "[SOH""\\x01]",  "[STX""\\x02]",  "[ETX""\\x03]",
+          "[EOT""\\x04]",  "[ENQ""\\x05]",  "[ACK""\\x06]",  "[BEL""\\x07]",
+          "[BS" "\\x08]",  /*TAB*/   "\t",  /*LF*/  "\n\t",  "[VT" "\\x0B]",
+          "[FF" "\\x0C]",  /*CR*/    "\r",  "[SO" "\\x0E]",  "[SI" "\\x0F]",
+          "[DLE""\\x10]",  "[DC1""\\x11]",  "[DC2""\\x12]",  "[DC3""\\x13]",
+          "[DC4""\\x14]",  "[NAK""\\x15]",  "[SYN""\\x16]",  "[ETB""\\x17]",
+          "[CAN""\\x18]",  "[EM" "\\x19]",  "[SUB""\\x1A]",  "[ESC""\\x1B]",
+          "[FS" "\\x1C]",  "[GS" "\\x1D]",  "[RS" "\\x1E]",  "[US" "\\x1F]",
+        };
+      // Replace this character with a string.
+      const auto replace_one = [&](const char *reps)
+        {
+          const auto repn = std::strlen(reps);
+          str.replace(i, 1, reps, repn);
+          i += repn - 1;
+        };
+      // Check one character.
+      const long ch = str[i] & 0xFF;
+      if(ch == 0x7F) {
+        replace_one("[DEL\\x7F]");
+        continue;
+      }
+      if(ch < 0x20) {
+        replace_one(s_lower_table[ch]);
+        continue;
+      }
+    }
+    // Append the final line feed.
+    // We will not involve `std::endl` here which breaks the atomicity.
     str.push_back('\n');
-    std::cerr << str << std::flush;
+    // Write it.
+    std::cerr.write(str.data(), static_cast<std::streamsize>(str.size())).flush();
     return true;
   } catch(...) {
+    // Any exception thrown above is ignored.
     return false;
   }
+
+///////////////////////////////////////////////////////////////////////////////
+// Runtime_Error
+///////////////////////////////////////////////////////////////////////////////
 
 Runtime_Error::~Runtime_Error()
   {
@@ -114,8 +134,11 @@ const char * Runtime_Error::what() const noexcept
 [[noreturn]] void throw_runtime_error(const char *funcsig, Formatter &&fmt)
   {
     auto str = fmt.extract_string();
-    str.insert(0, ": ");
-    str.insert(0, funcsig);
+    // Append the function signature.
+    str += "\n\t(thrown from `";
+    str += funcsig;
+    str += "`)";
+    // Throw it.
     throw Runtime_Error(std::move(str));
   }
 

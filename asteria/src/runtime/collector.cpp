@@ -135,7 +135,7 @@ void Collector::collect()
           return false;
         }
       );
-    ASTERIA_DEBUG_LOG("  Number of variables gathered in total: ", this->m_staging.size());
+    ASTERIA_DEBUG_LOG("\tNumber of variables gathered in total: ", this->m_staging.size());
     ///////////////////////////////////////////////////////////////////////////
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
@@ -223,7 +223,7 @@ void Collector::collect()
       [&](const rocket::refcounted_ptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
-            ASTERIA_DEBUG_LOG("  Collecting unreachable variable: ", root->get_value());
+            ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             root->reset(D_null(), true);
             if(output) {
               output->insert(root);
@@ -232,10 +232,10 @@ void Collector::collect()
             return false;
           }
           if(!tied) {
-            ASTERIA_DEBUG_LOG("  Keeping reachable variable: ", root->get_value());
+            ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
             return false;
           }
-          ASTERIA_DEBUG_LOG("  Transferring variable to the next generation: ", root->get_value());
+          ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
           // Strong exception safety is paramount here.
           tied->m_tracked.insert(root);
           collect_tied |= tied->m_counter++ >= tied->m_threshold;

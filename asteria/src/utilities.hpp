@@ -124,10 +124,14 @@ class Formatter
 #define ASTERIA_FORMAT_STRING(...)       (ASTERIA_CREATE_FORMATTER(__VA_ARGS__).extract_string())
 
 ROCKET_PURE_FUNCTION extern bool are_debug_logs_enabled() noexcept;
-extern bool write_log_to_stderr(const char *file, unsigned long line, Formatter &&fmt) noexcept;
+extern bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept;
 
-#define ASTERIA_DEBUG_LOG(...)           (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
-#define ASTERIA_TERMINATE(...)           (::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER("FATAL ERROR: ", __VA_ARGS__)), ::std::terminate())
+#define ASTERIA_DEBUG_LOG(...)     (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) && ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER(__VA_ARGS__)))
+#define ASTERIA_TERMINATE(...)     (static_cast<void>(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_CREATE_FORMATTER("FATAL ERROR: ", __VA_ARGS__))), ::std::terminate())
+
+///////////////////////////////////////////////////////////////////////////////
+// Runtime_Error
+///////////////////////////////////////////////////////////////////////////////
 
 class Runtime_Error : public virtual std::exception
   {
