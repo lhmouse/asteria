@@ -302,21 +302,30 @@ Argument_Sentry & Argument_Sentry::cut()
     // Create a message containing arguments.
     Formatter msg;
     ASTERIA_FORMAT(msg, "There was no matching overload for function call `", this->m_name, "(");
-    for(auto it = args->begin(); it != args->end(); ++it) {
-      if(it != args->begin()) {
-        ASTERIA_FORMAT(msg, ", ");
+    // Append the types of all arguments.
+    switch(args->size()) {
+    default:
+      for(auto it = args->begin(); it != args->end() - 1; ++it) {
+        ASTERIA_FORMAT(msg, Value::get_type_name(it->read().type()), ", ");
       }
-      // Append the type of this argument.
-      ASTERIA_FORMAT(msg, Value::get_type_name(it->read().type()));
+      // Fallthrough.
+    case 1:
+      ASTERIA_FORMAT(msg, Value::get_type_name(args->back().read().type()));
+      // Fallthrough.
+    case 0:
+      break;
     }
     ASTERIA_FORMAT(msg, ")`.");
     // If an overload list is provided, append it.
-    for(auto it = overload_list.begin(); it != overload_list.end(); ++it) {
-      if(it == overload_list.begin()) {
-        ASTERIA_FORMAT(msg, "\nNote: Possible overloads are:");
+    if(overload_list.size() != 0) {
+      // Append the header.
+      ASTERIA_FORMAT(msg, "\n(possible overloads:");
+      // Append all overloads.
+      for(auto it = overload_list.begin(); it != overload_list.end(); ++it) {
+        ASTERIA_FORMAT(msg, "\n\t", *it);
       }
-      // Append this overload.
-      ASTERIA_FORMAT(msg, "\n  `", *it, "`");
+      // Append the footer.
+      ASTERIA_FORMAT(msg, "\n -- end of possible overloads)");
     }
     throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }

@@ -135,7 +135,7 @@ const char * Runtime_Error::what() const noexcept
   {
     auto str = fmt.extract_string();
     // Append the function signature.
-    str += "\n\t(thrown from `";
+    str += "\n(thrown from `";
     str += funcsig;
     str += "`)";
     // Throw it.
