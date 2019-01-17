@@ -19,11 +19,6 @@ rocket::cow_string Variadic_Arguer::describe() const
 
 void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, rocket::cow_vector<Reference> &&args) const
   {
-    static constexpr const char *s_overloads[] =
-      {
-        "__varg()",
-        "__varg(integer)",
-      };
     Argument_Sentry sentry(std::ref("<builtin>.__varg"));
     // `__varg()`:
     //   Return the number of variadic arguments.
@@ -48,7 +43,12 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, ro
       return;
     }
     // Fail.
-    sentry.throw_no_matching_function_call(s_overloads, rocket::countof(s_overloads));
+    sentry.throw_no_matching_function_call(
+      {
+        // Remember to keep this list up-to-date.
+        0,
+        1, Value::type_integer,
+      });
   }
 
 void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &callback) const

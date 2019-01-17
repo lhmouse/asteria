@@ -5,6 +5,7 @@
 #define ASTERIA_TEST_INIT_HPP_
 
 #include "../asteria/src/fwd.hpp"
+#include "../asteria/src/runtime/exception.hpp"
 #include <iostream>  // std::cerr, operator<< ()
 #include <exception>  // std::terminate(), std::exception
 
@@ -29,8 +30,13 @@
     do {  \
       try {  \
         static_cast<void>(expr_);  \
+      } catch(::Asteria::Exception &e) {  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Exception`:\n\t"  \
+                    << e.get_value() << ::std::endl;  \
+        break;  \
       } catch(::std::exception &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught: " << e.what() << ::std::endl;  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `std::exception`:\n\t"  \
+                    << e.what() << ::std::endl;  \
         break;  \
       }  \
       ::std::cerr << "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " << #expr_ << '\n'  \

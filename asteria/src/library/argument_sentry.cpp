@@ -292,7 +292,7 @@ Argument_Sentry & Argument_Sentry::cut()
     return *this;
   }
 
-[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(const char *const *overload_list, std::size_t overload_size) const
+[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
   {
     const auto args = this->m_state.args;
     if(!args) {
@@ -303,30 +303,53 @@ Argument_Sentry & Argument_Sentry::cut()
     Formatter msg;
     ASTERIA_FORMAT(msg, "There was no matching overload for function call `", this->m_name, "(");
     // Append the types of all arguments.
-    auto count = args->size();
-    if(count != 0) {
-      // ... commas?
+    auto size = args->size();
+    if(size != 0) {
+      // Deal with the nasty commas.
       auto ptr = args->data();
-      while(--count != 0) {
-        ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()), ", ");
+      do {
+        ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()));
         ++ptr;
-      }
-      ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()));
+        if(--size == 0) {
+          break;
+        }
+        ASTERIA_FORMAT(msg, ", ");
+      } while(true);
     }
     ASTERIA_FORMAT(msg, ")`.");
     // If an overload list is provided, append it.
-    count = overload_size;
-    if(count != 0) {
-      // ... stupid English.
-      const auto overloads_are = (count == 1) ? "overload is" : "overloads are";
-      ASTERIA_FORMAT(msg, "\n(possible ", overloads_are, ": ");
-      // ... commas?
-      auto ptr = overload_list;
-      while(--count != 0) {
-        ASTERIA_FORMAT(msg, "`", *ptr, "`, ");
+    size = overload_size;
+    if(size != 0) {
+      ASTERIA_FORMAT(msg, "\n(possible overload(s): ");
+      // Collect all overloads.
+      auto ptr = overload_data;
+      for(;;) {
+        auto nparams = static_cast<std::size_t>(ptr->nparams);
         ++ptr;
+        --size;
+        ROCKET_ASSERT_MSG(nparams <= size, "Overload list data were malformed.");
+        // Assemble the function prototype.
+        ASTERIA_FORMAT(msg, "`", this->m_name, "(");
+        if(nparams != 0) {
+          // Yay, nasty commas again.
+          size -= nparams;
+          do {
+            ASTERIA_FORMAT(msg, Value::get_type_name(ptr->param));
+            ++ptr;
+            if(--nparams == 0) {
+              break;
+            }
+            ASTERIA_FORMAT(msg, ", ");
+          } while(true);
+        }
+        ASTERIA_FORMAT(msg, ")`");
+        // Finish the parameter list of this overload.
+        if(size == 0) {
+          break;
+        }
+        ASTERIA_FORMAT(msg, ", ");
       }
-      ASTERIA_FORMAT(msg, "`", *ptr, "`)");
+      ASTERIA_FORMAT(msg, ")");
     }
     throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }

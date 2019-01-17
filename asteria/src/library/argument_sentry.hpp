@@ -22,6 +22,25 @@ class Argument_Sentry
         bool finished;
       };
 
+    // This union is purely invented for `throw_no_matching_function_call()`.
+    // Each overload is represented as follows:
+    //   `number-of-parameters  parameter-one parameter-two`
+    // The number of parameters is of type `int`. All parameters have type `Value::Type`.
+    union Overload_Parameter
+      {
+        unsigned char nparams;
+        Value::Type param;
+
+        constexpr Overload_Parameter(int xnparams) noexcept
+          : nparams(static_cast<unsigned char>(xnparams))
+          {
+          }
+        constexpr Overload_Parameter(Value::Type xparam) noexcept
+          : param(xparam)
+          {
+          }
+      };
+
   private:
     rocket::cow_string m_name;
     bool m_throw_on_failure;
@@ -123,11 +142,11 @@ class Argument_Sentry
       {
         this->throw_no_matching_function_call(nullptr, 0);
       }
-    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<const char *> init) const
+    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<Overload_Parameter> init) const
       {
         this->throw_no_matching_function_call(init.begin(), init.size());
       }
-    [[noreturn]] void throw_no_matching_function_call(const char *const *overload_list, std::size_t overload_size) const;
+    [[noreturn]] void throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const;
   };
 
 }
