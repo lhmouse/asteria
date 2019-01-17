@@ -292,7 +292,7 @@ Argument_Sentry & Argument_Sentry::cut()
     return *this;
   }
 
-[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(std::initializer_list<const char *> overloads) const
+[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(const char *const *overload_list, std::size_t overload_size) const
   {
     const auto args = this->m_state.args;
     if(!args) {
@@ -303,22 +303,30 @@ Argument_Sentry & Argument_Sentry::cut()
     Formatter msg;
     ASTERIA_FORMAT(msg, "There was no matching overload for function call `", this->m_name, "(");
     // Append the types of all arguments.
-    if(args->size() != 0) {
-      auto it = args->begin();
-      while(++it != args->end()) {
-        ASTERIA_FORMAT(msg, Value::get_type_name(it[-1].read().type()), ", ");
+    auto count = args->size();
+    if(count != 0) {
+      // ... commas?
+      auto ptr = args->data();
+      while(--count != 0) {
+        ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()), ", ");
+        ++ptr;
       }
-      ASTERIA_FORMAT(msg, Value::get_type_name(it[-1].read().type()));
+      ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()));
     }
     ASTERIA_FORMAT(msg, ")`.");
     // If an overload list is provided, append it.
-    if(overloads.size() != 0) {
-      ASTERIA_FORMAT(msg, "\n(possible ", (overloads.size() == 1) ? "overload" : "overloads", ": ");
-      auto it = overloads.begin();
-      while(++it != overloads.end()) {
-        ASTERIA_FORMAT(msg, "`", it[-1], "`, ");
+    count = overload_size;
+    if(count != 0) {
+      // ... stupid English.
+      const auto overloads_are = (count == 1) ? "overload is" : "overloads are";
+      ASTERIA_FORMAT(msg, "\n(possible ", overloads_are, ": ");
+      // ... commas?
+      auto ptr = overload_list;
+      while(--count != 0) {
+        ASTERIA_FORMAT(msg, "`", *ptr, "`, ");
+        ++ptr;
       }
-      ASTERIA_FORMAT(msg, "`", it[-1], "`)");
+      ASTERIA_FORMAT(msg, "`", *ptr, "`)");
     }
     throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }
