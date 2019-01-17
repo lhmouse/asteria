@@ -28,17 +28,17 @@ Function_Executive_Context::~Function_Executive_Context()
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }
 
-    inline rocket::refcounted_object<Abstract_Function> do_make_varg(const rocket::refcounted_object<Variadic_Arguer> &zvarg, rocket::cow_vector<Reference> &&args)
+    inline rocket::refcnt_object<Abstract_Function> do_make_varg(const rocket::refcnt_object<Variadic_Arguer> &zvarg, rocket::cow_vector<Reference> &&args)
       {
         if(ROCKET_EXPECT(args.empty())) {
           return zvarg;
         }
-        return rocket::refcounted_object<Variadic_Arguer>(zvarg.get(), std::move(args));
+        return rocket::refcnt_object<Variadic_Arguer>(zvarg.get(), std::move(args));
       }
 
     }
 
-void Function_Executive_Context::initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Function_Executive_Context::initialize(const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

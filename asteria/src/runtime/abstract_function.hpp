@@ -5,13 +5,13 @@
 #define ASTERIA_RUNTIME_ABSTRACT_FUNCTION_HPP_
 
 #include "../fwd.hpp"
-#include "refcounted_base.hpp"
+#include "refcnt_base.hpp"
 #include "../rocket/cow_string.hpp"
 #include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
-class Abstract_Function : public Refcounted_Base
+class Abstract_Function : public RefCnt_Base
   {
   public:
     Abstract_Function() noexcept

@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_REFCOUNTED_PTR_HPP_
-#define ROCKET_REFCOUNTED_PTR_HPP_
+#ifndef ROCKET_REFCNT_PTR_HPP_
+#define ROCKET_REFCNT_PTR_HPP_
 
 #include "compatibility.h"
 #include "assert.hpp"
@@ -14,12 +14,12 @@
 namespace rocket {
 
 template<typename elementT, typename deleterT = default_delete<const elementT>>
-  class refcounted_base;
+  class refcnt_base;
 
 template<typename elementT>
-  class refcounted_ptr;
+  class refcnt_ptr;
 
-    namespace details_refcounted_ptr {
+    namespace details_refcnt_ptr {
 
     template<typename resultT, typename sourceT, typename = void>
       struct static_cast_or_dynamic_cast_helper
@@ -38,7 +38,7 @@ template<typename elementT>
           }
       };
 
-    class refcount_base
+    class reference_counter_base
       {
       private:
         mutable reference_counter<long> m_nref;
@@ -72,7 +72,7 @@ template<typename elementT>
 
       private:
         template<typename yelementT, typename deleterT>
-          static constexpr const deleterT & do_locate_deleter(const refcounted_base<yelementT, deleterT> &base) noexcept
+          static constexpr const deleterT & do_locate_deleter(const refcnt_base<yelementT, deleterT> &base) noexcept
           {
             return base.as_deleter();
           }
@@ -102,7 +102,7 @@ template<typename elementT>
             if(!ptr) {
               return false;
             }
-            return ptr->refcount_base::unique();
+            return ptr->reference_counter_base::unique();
           }
         long use_count() const noexcept
           {
@@ -110,7 +110,7 @@ template<typename elementT>
             if(!ptr) {
               return 0;
             }
-            return ptr->refcount_base::use_count();
+            return ptr->reference_counter_base::use_count();
           }
         constexpr pointer get() const noexcept
           {
@@ -120,7 +120,7 @@ template<typename elementT>
           {
             const auto ptr = this->m_ptr;
             if(ptr) {
-              ptr->refcount_base::add_reference();
+              ptr->reference_counter_base::add_reference();
             }
             return ptr;
           }
@@ -138,7 +138,7 @@ template<typename elementT>
             if(!ptr) {
               return;
             }
-            if(!ptr->refcount_base::drop_reference()) {
+            if(!ptr->reference_counter_base::drop_reference()) {
               return;
             }
             // Copy-construct a deleter from the object, which is used to delete the object thereafter.
@@ -195,10 +195,10 @@ template<typename elementT>
     }
 
 template<typename elementT, typename deleterT>
-  class refcounted_base : protected virtual details_refcounted_ptr::refcount_base, private virtual allocator_wrapper_base_for<deleterT>::type
+  class refcnt_base : protected virtual details_refcnt_ptr::reference_counter_base, private virtual allocator_wrapper_base_for<deleterT>::type
   {
     template<typename>
-      friend class details_refcounted_ptr::stored_pointer;
+      friend class details_refcnt_ptr::stored_pointer;
 
   public:
     using element_type  = elementT;
@@ -206,13 +206,12 @@ template<typename elementT, typename deleterT>
     using pointer       = elementT *;
 
   protected:
-    using refcount_base  = details_refcounted_ptr::refcount_base;
-    using deleter_base   = typename allocator_wrapper_base_for<deleter_type>::type;
+    using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
 
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info &ytype) const
       {
-        noadl::throw_domain_error("refcounted_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+        noadl::throw_domain_error("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
                                   ytype.name(), typeid(*this).name());
       }
 
@@ -228,118 +227,118 @@ template<typename elementT, typename deleterT>
 
     bool unique() const noexcept
       {
-        return this->refcount_base::unique();
+        return this->details_refcnt_ptr::reference_counter_base::unique();
       }
     long use_count() const noexcept
       {
-        return this->refcount_base::use_count();
+        return this->details_refcnt_ptr::reference_counter_base::use_count();
       }
 
     void add_reference() const noexcept
       {
-        return this->refcount_base::add_reference();
+        return this->details_refcnt_ptr::reference_counter_base::add_reference();
       }
     bool drop_reference() const noexcept
       {
-        return this->refcount_base::drop_reference();
+        return this->details_refcnt_ptr::reference_counter_base::drop_reference();
       }
 
     template<typename yelementT = elementT>
-      refcounted_ptr<const yelementT> share_this() const
+      refcnt_ptr<const yelementT> share_this() const
       {
-        const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcounted_base *>(this);
+        const auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcnt_base *>(this);
         if(!ptr) {
           this->do_throw_bad_cast(typeid(yelementT));
         }
-        this->refcount_base::add_reference();
-        return refcounted_ptr<const yelementT>(ptr);
+        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        return refcnt_ptr<const yelementT>(ptr);
       }
     template<typename yelementT = elementT>
-      refcounted_ptr<yelementT> share_this()
+      refcnt_ptr<yelementT> share_this()
       {
-        const auto ptr = details_refcounted_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcounted_base *>(this);
+        const auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcnt_base *>(this);
         if(!ptr) {
           this->do_throw_bad_cast(typeid(yelementT));
         }
-        this->refcount_base::add_reference();
-        return refcounted_ptr<yelementT>(ptr);
+        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        return refcnt_ptr<yelementT>(ptr);
       }
   };
 
 template<typename elementT>
-  class refcounted_ptr
+  class refcnt_ptr
   {
     static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
 
     template<typename>
-      friend class refcounted_ptr;
+      friend class refcnt_ptr;
 
   public:
     using element_type  = elementT;
     using pointer       = elementT *;
 
   private:
-    details_refcounted_ptr::stored_pointer<element_type> m_sth;
+    details_refcnt_ptr::stored_pointer<element_type> m_sth;
 
   public:
-    constexpr refcounted_ptr(nullptr_t = nullptr) noexcept
+    constexpr refcnt_ptr(nullptr_t = nullptr) noexcept
       : m_sth()
       {
       }
-    explicit refcounted_ptr(pointer ptr) noexcept
-      : refcounted_ptr()
+    explicit refcnt_ptr(pointer ptr) noexcept
+      : refcnt_ptr()
       {
         this->reset(ptr);
       }
-    refcounted_ptr(const refcounted_ptr &other) noexcept
-      : refcounted_ptr()
+    refcnt_ptr(const refcnt_ptr &other) noexcept
+      : refcnt_ptr()
       {
         this->reset(other.m_sth.copy_release());
       }
-    refcounted_ptr(refcounted_ptr &&other) noexcept
-      : refcounted_ptr()
+    refcnt_ptr(refcnt_ptr &&other) noexcept
+      : refcnt_ptr()
       {
         this->reset(other.m_sth.release());
       }
     template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value)>
-      refcounted_ptr(const refcounted_ptr<yelementT> &other) noexcept
-      : refcounted_ptr()
+             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+      refcnt_ptr(const refcnt_ptr<yelementT> &other) noexcept
+      : refcnt_ptr()
       {
         this->reset(other.m_sth.copy_release());
       }
     template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value)>
-      refcounted_ptr(refcounted_ptr<yelementT> &&other) noexcept
-      : refcounted_ptr()
+             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+      refcnt_ptr(refcnt_ptr<yelementT> &&other) noexcept
+      : refcnt_ptr()
       {
         this->reset(other.m_sth.release());
       }
-    refcounted_ptr & operator=(nullptr_t) noexcept
+    refcnt_ptr & operator=(nullptr_t) noexcept
       {
         this->reset();
         return *this;
       }
-    refcounted_ptr & operator=(const refcounted_ptr &other) noexcept
+    refcnt_ptr & operator=(const refcnt_ptr &other) noexcept
       {
         this->reset(other.m_sth.copy_release());
         return *this;
       }
-    refcounted_ptr & operator=(refcounted_ptr &&other) noexcept
+    refcnt_ptr & operator=(refcnt_ptr &&other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
       }
     template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value)>
-      refcounted_ptr & operator=(const refcounted_ptr<yelementT> &other) noexcept
+             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+      refcnt_ptr & operator=(const refcnt_ptr<yelementT> &other) noexcept
       {
         this->reset(other.m_sth.copy_release());
         return *this;
       }
     template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcounted_ptr<yelementT>::pointer, pointer>::value)>
-      refcounted_ptr & operator=(refcounted_ptr<yelementT> &&other) noexcept
+             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+      refcnt_ptr & operator=(refcnt_ptr<yelementT> &&other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
@@ -391,113 +390,113 @@ template<typename elementT>
         this->m_sth.reset(ptr);
       }
 
-    void swap(refcounted_ptr &other) noexcept
+    void swap(refcnt_ptr &other) noexcept
       {
         this->m_sth.exchange(other.m_sth);
       }
   };
 
 template<typename xelementT, typename yelementT>
-  inline bool operator==(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs) noexcept
+  inline bool operator==(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
 template<typename xelementT, typename yelementT>
-  inline bool operator!=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs) noexcept
+  inline bool operator!=(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
 template<typename xelementT, typename yelementT>
-  inline bool operator<(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
+  inline bool operator<(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs)
   {
     return lhs.get() < rhs.get();
   }
 template<typename xelementT, typename yelementT>
-  inline bool operator>(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
+  inline bool operator>(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs)
   {
     return lhs.get() > rhs.get();
   }
 template<typename xelementT, typename yelementT>
-  inline bool operator<=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
+  inline bool operator<=(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs)
   {
     return lhs.get() <= rhs.get();
   }
 template<typename xelementT, typename yelementT>
-  inline bool operator>=(const refcounted_ptr<xelementT> &lhs, const refcounted_ptr<yelementT> &rhs)
+  inline bool operator>=(const refcnt_ptr<xelementT> &lhs, const refcnt_ptr<yelementT> &rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
 template<typename elementT>
-  inline bool operator==(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
+  inline bool operator==(const refcnt_ptr<elementT> &lhs, nullptr_t) noexcept
   {
     return +!(lhs.get());
   }
 template<typename elementT>
-  inline bool operator!=(const refcounted_ptr<elementT> &lhs, nullptr_t) noexcept
+  inline bool operator!=(const refcnt_ptr<elementT> &lhs, nullptr_t) noexcept
   {
     return bool(lhs.get());
   }
 
 template<typename elementT>
-  inline bool operator==(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
+  inline bool operator==(nullptr_t, const refcnt_ptr<elementT> &rhs) noexcept
   {
     return +!(rhs.get());
   }
 template<typename elementT>
-  inline bool operator!=(nullptr_t, const refcounted_ptr<elementT> &rhs) noexcept
+  inline bool operator!=(nullptr_t, const refcnt_ptr<elementT> &rhs) noexcept
   {
     return bool(rhs.get());
   }
 
 template<typename elementT>
-  inline void swap(refcounted_ptr<elementT> &lhs, refcounted_ptr<elementT> &rhs) noexcept
+  inline void swap(refcnt_ptr<elementT> &lhs, refcnt_ptr<elementT> &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT>
-  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const refcounted_ptr<elementT> &rhs)
+  inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const refcnt_ptr<elementT> &rhs)
   {
     return os << rhs.get();
   }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
+  inline refcnt_ptr<resultT> static_pointer_cast(const refcnt_ptr<sourceT> &sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(sptr);
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
+  inline refcnt_ptr<resultT> dynamic_pointer_cast(const refcnt_ptr<sourceT> &sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(sptr);
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(sptr);
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(const refcounted_ptr<sourceT> &sptr) noexcept
+  inline refcnt_ptr<resultT> const_pointer_cast(const refcnt_ptr<sourceT> &sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(sptr);
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(sptr);
   }
 
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> static_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  inline refcnt_ptr<resultT> static_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::static_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(::std::move(sptr));
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> dynamic_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  inline refcnt_ptr<resultT> dynamic_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::dynamic_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(::std::move(sptr));
   }
 template<typename resultT, typename sourceT>
-  inline refcounted_ptr<resultT> const_pointer_cast(refcounted_ptr<sourceT> &&sptr) noexcept
+  inline refcnt_ptr<resultT> const_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcounted_ptr::pointer_cast_helper<refcounted_ptr<resultT>, details_refcounted_ptr::const_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(::std::move(sptr));
   }
 
 template<typename elementT, typename ...paramsT>
-  inline refcounted_ptr<elementT> make_refcounted(paramsT &&...params)
+  inline refcnt_ptr<elementT> make_refcnt(paramsT &&...params)
   {
-    return refcounted_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+    return refcnt_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }
 
 }

@@ -6,14 +6,14 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "refcounted_base.hpp"
+#include "refcnt_base.hpp"
 
 namespace Asteria {
 
 class Global_Context : public Abstract_Context
   {
   private:
-    rocket::refcounted_ptr<Refcounted_Base> m_coll;
+    rocket::refcnt_ptr<RefCnt_Base> m_coll;
 
   public:
     Global_Context()
@@ -36,7 +36,7 @@ class Global_Context : public Abstract_Context
         return nullptr;
       }
 
-    rocket::refcounted_ptr<Variable> create_variable();
+    rocket::refcnt_ptr<Variable> create_variable();
   };
 
 }

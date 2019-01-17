@@ -58,8 +58,8 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \
   asteria/src/rocket/unique_ptr.hpp  \
-  asteria/src/rocket/refcounted_ptr.hpp  \
-  asteria/src/rocket/refcounted_object.hpp  \
+  asteria/src/rocket/refcnt_ptr.hpp  \
+  asteria/src/rocket/refcnt_object.hpp  \
   asteria/src/rocket/static_vector.hpp  \
   asteria/src/rocket/prehashed_string.hpp  \
   asteria/src/rocket/integer_sequence.hpp  \
@@ -92,7 +92,7 @@ pkginclude_syntax_HEADERS =  \
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
-  asteria/src/runtime/refcounted_base.hpp  \
+  asteria/src/runtime/refcnt_base.hpp  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
   asteria/src/runtime/value.hpp  \
@@ -135,7 +135,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/syntax/expression.cpp  \
   asteria/src/syntax/statement.cpp  \
   asteria/src/syntax/block.cpp  \
-  asteria/src/runtime/refcounted_base.cpp  \
+  asteria/src/runtime/refcnt_base.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/value.cpp  \

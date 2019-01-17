@@ -8,7 +8,7 @@
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
 #include "../syntax/block.hpp"
-#include "../rocket/refcounted_object.hpp"
+#include "../rocket/refcnt_object.hpp"
 #include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
@@ -16,7 +16,7 @@ namespace Asteria {
 class Instantiated_Function : public Abstract_Function
   {
   private:
-    rocket::refcounted_object<Variadic_Arguer> m_zvarg;
+    rocket::refcnt_object<Variadic_Arguer> m_zvarg;
     rocket::cow_vector<rocket::prehashed_string> m_params;
     Block m_body_bnd;
 

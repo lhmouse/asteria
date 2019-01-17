@@ -16,7 +16,7 @@ class Variable_Hashset
     struct Bucket
       {
         // A null pointer indicates an empty bucket.
-        rocket::refcounted_ptr<Variable> var;
+        rocket::refcnt_ptr<Variable> var;
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For each other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size; Bucket *prev; };
@@ -96,11 +96,11 @@ class Variable_Hashset
         this->do_clear();
       }
 
-    bool has(const rocket::refcounted_ptr<Variable> &var) const noexcept;
+    bool has(const rocket::refcnt_ptr<Variable> &var) const noexcept;
     void for_each(const Abstract_Variable_Callback &callback) const;
-    bool insert(const rocket::refcounted_ptr<Variable> &var);
-    bool erase(const rocket::refcounted_ptr<Variable> &var) noexcept;
-    rocket::refcounted_ptr<Variable> erase_random_opt() noexcept;
+    bool insert(const rocket::refcnt_ptr<Variable> &var);
+    bool erase(const rocket::refcnt_ptr<Variable> &var) noexcept;
+    rocket::refcnt_ptr<Variable> erase_random_opt() noexcept;
   };
 
 }

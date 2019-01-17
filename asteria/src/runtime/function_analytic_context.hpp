@@ -8,7 +8,7 @@
 #include "analytic_context.hpp"
 #include "../rocket/static_vector.hpp"
 #include "../rocket/cow_vector.hpp"
-#include "../rocket/refcounted_object.hpp"
+#include "../rocket/refcnt_object.hpp"
 
 namespace Asteria {
 

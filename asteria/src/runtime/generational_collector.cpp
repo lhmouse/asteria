@@ -24,13 +24,13 @@ Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexce
     return qcoll;
   }
 
-rocket::refcounted_ptr<Variable> Generational_Collector::create_variable()
+rocket::refcnt_ptr<Variable> Generational_Collector::create_variable()
   {
     // Get one from the pool.
     auto var = this->m_pool.erase_random_opt();
     if(ROCKET_UNEXPECT(!var)) {
       // The pool has been exhausted. Create a new variable.
-      var = rocket::make_refcounted<Variable>(D_null(), true);
+      var = rocket::make_refcnt<Variable>(D_null(), true);
     }
     // The variable is alive now.
     this->m_gen_zero.track_variable(var);

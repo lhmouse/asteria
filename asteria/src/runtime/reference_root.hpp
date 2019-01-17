@@ -28,7 +28,7 @@ class Reference_Root
       };
     struct S_variable
       {
-        rocket::refcounted_ptr<Variable> var_opt;
+        rocket::refcnt_ptr<Variable> var_opt;
       };
 
     enum Index : std::uint8_t

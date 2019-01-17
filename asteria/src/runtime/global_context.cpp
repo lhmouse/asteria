@@ -26,7 +26,7 @@ Global_Context::~Global_Context()
 void Global_Context::do_initialize()
   {
     // Initialize all components.
-    const auto coll = rocket::make_refcounted<Generational_Collector>();
+    const auto coll = rocket::make_refcnt<Generational_Collector>();
     this->m_coll = coll;
     // Add standard library interfaces.
     D_object root;
@@ -34,7 +34,7 @@ void Global_Context::do_initialize()
     Reference_Root::S_constant ref_c = { std::move(root) };
   }
 
-rocket::refcounted_ptr<Variable> Global_Context::create_variable()
+rocket::refcnt_ptr<Variable> Global_Context::create_variable()
   {
     const auto coll = static_cast<Generational_Collector *>(this->m_coll.get());
     ROCKET_ASSERT(coll);

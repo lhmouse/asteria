@@ -57,8 +57,8 @@ class Collector
         this->m_threshold = threshold;
       }
 
-    bool track_variable(const rocket::refcounted_ptr<Variable> &var);
-    bool untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept;
+    bool track_variable(const rocket::refcnt_ptr<Variable> &var);
+    bool untrack_variable(const rocket::refcnt_ptr<Variable> &var) noexcept;
     void collect();
   };
 

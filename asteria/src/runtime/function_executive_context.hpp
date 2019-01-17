@@ -8,7 +8,7 @@
 #include "executive_context.hpp"
 #include "../rocket/static_vector.hpp"
 #include "../rocket/cow_vector.hpp"
-#include "../rocket/refcounted_object.hpp"
+#include "../rocket/refcnt_object.hpp"
 
 namespace Asteria {
 
@@ -27,7 +27,7 @@ class Function_Executive_Context : public Executive_Context
     ROCKET_NONCOPYABLE_DESTRUCTOR(Function_Executive_Context);
 
   public:
-    void initialize(const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
+    void initialize(const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args);
   };
 
 }

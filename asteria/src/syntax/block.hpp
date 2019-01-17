@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "../rocket/cow_vector.hpp"
 #include "../rocket/bind_first.hpp"
-#include "../rocket/refcounted_object.hpp"
+#include "../rocket/refcnt_object.hpp"
 
 namespace Asteria {
 
@@ -64,7 +64,7 @@ class Block
     Status execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const;
 
     Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
-    void execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
+    void execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

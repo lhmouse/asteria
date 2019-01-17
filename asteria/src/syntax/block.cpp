@@ -86,7 +86,7 @@ Instantiated_Function Block::instantiate_function(Global_Context &global, const 
     return Instantiated_Function(loc, name, params, std::move(body_bnd));
   }
 
-void Block::execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcounted_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
   {
     Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));

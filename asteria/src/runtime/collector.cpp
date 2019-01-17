@@ -13,7 +13,7 @@ Collector::~Collector()
   {
   }
 
-bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
+bool Collector::track_variable(const rocket::refcnt_ptr<Variable> &var)
   {
     if(!this->m_tracked.insert(var)) {
       return false;
@@ -24,7 +24,7 @@ bool Collector::track_variable(const rocket::refcounted_ptr<Variable> &var)
     return true;
   }
 
-bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) noexcept
+bool Collector::untrack_variable(const rocket::refcnt_ptr<Variable> &var) noexcept
   {
     if(!this->m_tracked.erase(var)) {
       return false;
@@ -72,7 +72,7 @@ bool Collector::untrack_variable(const rocket::refcounted_ptr<Variable> &var) no
           }
 
       public:
-        bool operator()(const rocket::refcounted_ptr<Variable> &var) const override
+        bool operator()(const rocket::refcnt_ptr<Variable> &var) const override
           {
             return this->m_func(var);
           }
@@ -114,7 +114,7 @@ void Collector::collect()
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_tracked,
-      [&](const rocket::refcounted_ptr<Variable> &root)
+      [&](const rocket::refcnt_ptr<Variable> &root)
         {
           // Add a variable reachable directly. Do not include references from `m_tracked`.
           root->init_gcref(1);
@@ -123,7 +123,7 @@ void Collector::collect()
           }
           // Add variables reachable indirectly.
           do_enumerate_variables(root,
-            [&](const rocket::refcounted_ptr<Variable> &var)
+            [&](const rocket::refcnt_ptr<Variable> &var)
               {
                 if(!this->m_staging.insert(var)) {
                   return false;
@@ -141,7 +141,7 @@ void Collector::collect()
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const rocket::refcounted_ptr<Variable> &root)
+      [&](const rocket::refcnt_ptr<Variable> &root)
         {
           // Drop a direct reference.
           root->add_gcref(1);
@@ -157,7 +157,7 @@ void Collector::collect()
             {
               // `root->get_value()` is unique.
               do_enumerate_variables(root,
-                [&](const rocket::refcounted_ptr<Variable> &var)
+                [&](const rocket::refcnt_ptr<Variable> &var)
                   {
                     var->add_gcref(1);
                     ROCKET_ASSERT(var->get_gcref() <= var->use_count());
@@ -171,7 +171,7 @@ void Collector::collect()
             {
               // `root->get_value()` is shared.
               do_enumerate_variables(root,
-                [&](const rocket::refcounted_ptr<Variable> &var)
+                [&](const rocket::refcnt_ptr<Variable> &var)
                   {
                     var->add_gcref(1 / static_cast<double>(value_nref));
                     ROCKET_ASSERT(var->get_gcref() <= var->use_count());
@@ -190,7 +190,7 @@ void Collector::collect()
     //   Mark variables reachable indirectly from ones reachable directly.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const rocket::refcounted_ptr<Variable> &root)
+      [&](const rocket::refcnt_ptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             // This variable is possibly unreachable.
@@ -200,7 +200,7 @@ void Collector::collect()
           root->init_gcref(-1);
           // Mark variables reachable indirectly.
           do_enumerate_variables(root,
-            [&](const rocket::refcounted_ptr<Variable> &var)
+            [&](const rocket::refcnt_ptr<Variable> &var)
               {
                 if(var->get_gcref() < 0) {
                   // This variable has already been marked.
@@ -220,7 +220,7 @@ void Collector::collect()
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const rocket::refcounted_ptr<Variable> &root)
+      [&](const rocket::refcnt_ptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());

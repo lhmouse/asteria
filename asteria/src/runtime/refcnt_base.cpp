@@ -2,11 +2,11 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "refcounted_base.hpp"
+#include "refcnt_base.hpp"
 
 namespace Asteria {
 
-Refcounted_Base::~Refcounted_Base()
+RefCnt_Base::~RefCnt_Base()
   {
   }
 

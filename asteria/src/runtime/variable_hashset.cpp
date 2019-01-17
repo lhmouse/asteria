@@ -83,7 +83,7 @@ void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
-          rocket::refcounted_ptr<Variable> var;
+          rocket::refcnt_ptr<Variable> var;
           // Release the old element.
           rbkt.detach();
           var.swap(rbkt.var);
@@ -100,7 +100,7 @@ void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_Hashset::has(const rocket::refcounted_ptr<Variable> &var) const noexcept
+bool Variable_Hashset::has(const rocket::refcnt_ptr<Variable> &var) const noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -135,7 +135,7 @@ void Variable_Hashset::for_each(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-bool Variable_Hashset::insert(const rocket::refcounted_ptr<Variable> &var)
+bool Variable_Hashset::insert(const rocket::refcnt_ptr<Variable> &var)
   {
     if(!var) {
       ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_Hashset`.");
@@ -163,7 +163,7 @@ bool Variable_Hashset::insert(const rocket::refcounted_ptr<Variable> &var)
     return true;
   }
 
-bool Variable_Hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexcept
+bool Variable_Hashset::erase(const rocket::refcnt_ptr<Variable> &var) noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -189,7 +189,7 @@ bool Variable_Hashset::erase(const rocket::refcounted_ptr<Variable> &var) noexce
     return true;
   }
 
-rocket::refcounted_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
+rocket::refcnt_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -203,7 +203,7 @@ rocket::refcounted_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
       return nullptr;
     }
     ROCKET_ASSERT(*bkt);
-    rocket::refcounted_ptr<Variable> var;
+    rocket::refcnt_ptr<Variable> var;
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.

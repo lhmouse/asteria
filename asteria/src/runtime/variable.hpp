@@ -5,12 +5,12 @@
 #define ASTERIA_RUNTIME_VARIABLE_HPP_
 
 #include "../fwd.hpp"
-#include "refcounted_base.hpp"
+#include "refcnt_base.hpp"
 #include "value.hpp"
 
 namespace Asteria {
 
-class Variable : public Refcounted_Base
+class Variable : public RefCnt_Base
   {
   private:
     // These are only used during garbage collection and are uninitialized by default.

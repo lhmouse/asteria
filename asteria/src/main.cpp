@@ -5,36 +5,26 @@
 #include "runtime/global_context.hpp"
 #include "runtime/exception.hpp"
 #include <iostream>
-#include <sstream>
-#include <chrono>
 
 using namespace Asteria;
 
-int main()
-  {
-    std::istringstream iss(R"__(
-      func fib(n) {
-        var r = n;
-        if!(n <= 1) {
-          r = fib(n-1) + fib(n-2);
-        }
-        return& r;
+int main(int argc, char **argv)
+  try {
+    rocket::cow_vector<Reference> args;
+    for(int i = 0; i < argc; ++i) {
+      D_string arg;
+      if(argv[i]) {
+        arg += argv[i];
       }
-      return fib(30);
-    )__");
-    Simple_Source_File code(iss, std::ref("my_file"));
-    Global_Context global;
-    try {
-      const auto t1 = std::chrono::high_resolution_clock::now();
-      auto res = code.execute(global, { });
-      const auto t2 = std::chrono::high_resolution_clock::now();
-      std::cout << "result = " << res.read() << std::endl
-                << "time   = " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " ms" << std::endl;
-    } catch(Exception &e) {
-      std::cout << "caught `Exception`:" << std::endl
-                << e.get_value() << std::endl;
-    } catch(std::exception &e) {
-      std::cout << "caught `std::exception`:" << std::endl
-                << e.what() << std::endl;
+      Reference_Root::S_constant ref_c = { std::move(arg) };
+      args.emplace_back(std::move(ref_c));
     }
+    Global_Context global;
+    Simple_Source_File code(std::cin, std::ref("<stdin>"));
+    auto res = code.execute(global, std::move(args));
+    std::cout << res.read() << std::endl;
+  } catch(Exception &e) {
+    std::cerr << "Caught `Exception`: " << e.get_value() << std::endl;
+  } catch(std::exception &e) {
+    std::cerr << "Caught `std::exception`: " << e.what() << std::endl;
   }
