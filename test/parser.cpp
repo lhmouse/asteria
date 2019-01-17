@@ -18,7 +18,8 @@ int main()
   {
     std::istringstream iss(R"__(
       func third() {
-        throw "meow";
+        const f = func(p) p + "ow";
+        throw f("me");
       }
       func second() {
         return third();

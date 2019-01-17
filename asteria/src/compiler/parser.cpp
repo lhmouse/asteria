@@ -427,7 +427,7 @@ Parser::~Parser()
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
         // closure-function ::=
-        //   "func" "(" identifier-list-opt ")" statement
+        //   "func" "(" identifier-list-opt ")" ( block | expression )
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
@@ -442,8 +442,14 @@ Parser::~Parser()
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
         rocket::cow_vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_block_statement_list(body, tstrm_io)) {
+          // An expression is expected, which behaves as if it was the operand of a `return&` ststement.
+          rocket::cow_vector<Xpnode> nodes_ret;
+          if(!do_accept_expression(nodes_ret, tstrm_io)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_or_expression_expected);
+          }
+          Statement::S_return stmt_c = { true, std::move(nodes_ret) };
+          body.emplace_back(std::move(stmt_c));
         }
         Xpnode::S_closure_function node_c = { std::move(loc), std::move(params), std::move(body) };
         nodes_out.emplace_back(std::move(node_c));

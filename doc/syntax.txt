@@ -128,7 +128,7 @@ prefix-operator ::=
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
 closure-function ::=
-	"func" "(" identifier-list-opt ")" statement
+	"func" "(" identifier-list-opt ")" ( block | expression )
 unnamed-array ::=
 	"[" array-element-list-opt "]"
 array-element-list-opt ::=
