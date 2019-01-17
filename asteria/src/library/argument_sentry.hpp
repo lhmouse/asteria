@@ -25,14 +25,14 @@ class Argument_Sentry
     // This union is purely invented for `throw_no_matching_function_call()`.
     // Each overload is represented as follows:
     //   `number-of-parameters  parameter-one parameter-two`
-    // The number of parameters is of type `int`. All parameters have type `Value::Type`.
+    // The number of parameters is of type `unsigned char`. All parameters have type `Value::Type`.
     union Overload_Parameter
       {
         unsigned char nparams;
         Value::Type param;
 
-        constexpr Overload_Parameter(int xnparams) noexcept
-          : nparams(static_cast<unsigned char>(xnparams))
+        constexpr Overload_Parameter(unsigned char xnparams) noexcept
+          : nparams(xnparams)
           {
           }
         constexpr Overload_Parameter(Value::Type xparam) noexcept
