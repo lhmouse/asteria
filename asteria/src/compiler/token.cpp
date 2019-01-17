@@ -134,6 +134,10 @@ const char * Token::get_keyword(Keyword keyword) noexcept
       {
         return "not";
       }
+    case keyword_assert:
+      {
+        return "assert";
+      }
     default:
       return "<unknown keyword>";
     }

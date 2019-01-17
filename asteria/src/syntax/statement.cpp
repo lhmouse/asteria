@@ -68,6 +68,7 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
     case index_continue:
     case index_throw:
     case index_return:
+    case index_assert:
       {
         break;
       }
@@ -243,6 +244,15 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_return alt_bnd = { alt.by_ref, std::move(expr_bnd) };
+        stmts_out.emplace_back(std::move(alt_bnd));
+        return;
+      }
+    case index_assert:
+      {
+        const auto &alt = this->m_stor.as<S_assert>();
+        // Bind the condition recursively.
+        auto expr_bnd = alt.expr.bind(global, ctx_io);
+        Statement::S_assert alt_bnd = { alt.loc, std::move(expr_bnd), alt.msg };
         stmts_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -568,6 +578,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
+        // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing exception: ", value);
         throw Exception(alt.loc, std::move(value));
@@ -577,12 +588,32 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
-        // If the result refers a variable and the statement should pass it by value, replace it with a temporary value.
+        // If the result refers a variable and the statement will pass it by value, replace it with a temporary value.
         if(!alt.by_ref && !ref_out.is_constant() && !ref_out.is_temporary()) {
           Reference_Root::S_temporary ref_c = { ref_out.read() };
           ref_out = std::move(ref_c);
         }
         return Block::status_return;
+      }
+
+    Block::Status do_execute_assert(const Statement::S_assert &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+      {
+        // Evaluate the expression.
+        alt.expr.evaluate(ref_out, global, ctx_io);
+        // If the condition yields `false`, throw an exception.
+        auto value = ref_out.read();
+        if(!value.test()) {
+          D_string msg;
+          if(alt.msg.empty()) {
+            msg = std::ref("Assertion failed!");
+          } else {
+            msg = std::ref("Assertion failed: ");
+            msg += alt.msg;
+          }
+          ASTERIA_DEBUG_LOG("Throwing exception: ", msg);
+          throw Exception(alt.loc, std::move(msg));
+        }
+        return Block::status_next;
       }
 
     // Why do we have to duplicate these parameters so many times?
@@ -746,6 +777,12 @@ void Statement::compile(rocket::cow_vector<Block::Compiled_Instruction> &cinsts_
         cinsts_out.emplace_back(do_bind<S_return, do_execute_return>(alt));
         return;
       }
+    case index_assert:
+      {
+        const auto &alt = this->m_stor.as<S_assert>();
+        cinsts_out.emplace_back(do_bind<S_assert, do_execute_assert>(alt));
+        return;
+      }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
@@ -847,6 +884,12 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
     case index_return:
       {
         const auto &alt = this->m_stor.as<S_return>();
+        alt.expr.enumerate_variables(callback);
+        return;
+      }
+    case index_assert:
+      {
+        const auto &alt = this->m_stor.as<S_assert>();
         alt.expr.enumerate_variables(callback);
         return;
       }

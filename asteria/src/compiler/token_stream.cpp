@@ -255,6 +255,7 @@ Token_Stream::~Token_Stream()
         static constexpr s_keywords[] =
           {
             { "and",       Token::keyword_and       },
+            { "assert",    Token::keyword_assert    },
             { "break",     Token::keyword_break     },
             { "case",      Token::keyword_case      },
             { "catch",     Token::keyword_catch     },

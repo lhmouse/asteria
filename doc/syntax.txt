@@ -49,7 +49,7 @@ nonblock-statement ::=
 	expression-statement |
 	if-statement | switch-statement |
 	do-while-statement | while-statement | for-statement |
-	break-statement | continue-statement | throw-statement | return-statement |
+	break-statement | continue-statement | throw-statement | return-statement | assert-statement |
 	try-statement
 
 null-statement ::=
@@ -107,6 +107,8 @@ throw-statement ::=
 	"throw" expression ";"
 return-statement ::=
 	"return" ( "&" | "" ) expression-opt ";"
+assert-statement ::=
+	"assert" expression ( ":" string-literal | "" ) ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement

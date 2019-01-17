@@ -1663,6 +1663,34 @@ Parser::~Parser()
         return true;
       }
 
+    bool do_accept_assert_statement(rocket::cow_vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto loc = do_tell_source_location(tstrm_io);
+        // assert-statement ::=
+        //  "assert" expression ( ":" string-literal | "" ) ";"
+        if(!do_match_keyword(tstrm_io, Token::keyword_assert)) {
+          return false;
+        }
+        rocket::cow_vector<Xpnode> expr;
+        if(!do_accept_expression(expr, tstrm_io)) {
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        }
+        rocket::cow_string msg;
+        if(do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
+          // The descriptive message is optional.
+          if(!do_accept_string_literal(msg, tstrm_io)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_string_literal_expected);
+          }
+        }
+        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_assert stmt_c = { std::move(loc), std::move(expr), std::move(msg) };
+        stmts_out.emplace_back(std::move(stmt_c));
+        return true;
+      }
+
     bool do_accept_try_statement(rocket::cow_vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // try-statement ::=
@@ -1705,7 +1733,7 @@ Parser::~Parser()
         //   expression-statement |
         //   if-statement | switch-statement |
         //   do-while-statement | while-statement | for-statement |
-        //   break-statement | continue-statement | throw-statement | return-statement |
+        //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
         //   try-statement
         return do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
                do_accept_variable_definition(stmts_out, tstrm_io) ||
@@ -1721,6 +1749,7 @@ Parser::~Parser()
                do_accept_continue_statement(stmts_out, tstrm_io) ||
                do_accept_throw_statement(stmts_out, tstrm_io) ||
                do_accept_return_statement(stmts_out, tstrm_io) ||
+               do_accept_assert_statement(stmts_out, tstrm_io) ||
                do_accept_try_statement(stmts_out, tstrm_io);
       }
 

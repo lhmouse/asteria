@@ -109,6 +109,12 @@ class Statement
         bool by_ref;
         Expression expr;
       };
+    struct S_assert
+      {
+        Source_Location loc;
+        Expression expr;
+        rocket::cow_string msg;
+      };
 
     enum Index : std::size_t
       {
@@ -127,6 +133,7 @@ class Statement
         index_continue    = 12,
         index_throw       = 13,
         index_return      = 14,
+        index_assert      = 15,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -145,6 +152,7 @@ class Statement
         , S_continue    // 12,
         , S_throw       // 13,
         , S_return      // 14,
+        , S_assert      // 15,
       )>;
 
   private:
