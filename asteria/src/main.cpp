@@ -10,7 +10,7 @@ using namespace Asteria;
 
 int main(int argc, char **argv)
   try {
-    rocket::cow_vector<Reference> args;
+    Cow_Vector<Reference> args;
     for(int i = 0; i < argc; ++i) {
       D_string arg;
       if(argv[i]) {
