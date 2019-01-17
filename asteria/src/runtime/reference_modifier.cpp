@@ -19,11 +19,11 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
       {
         const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             return nullptr;
           }
-        case Value::type_array:
+        case type_array:
           {
             const auto &arr = parent.check<D_array>();
             auto wrap = wrap_index(alt.index, arr.size());
@@ -41,11 +41,11 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
       {
         const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             return nullptr;
           }
-        case Value::type_object:
+        case type_object:
           {
             const auto &obj = parent.check<D_object>();
             auto rit = obj.find(alt.key);
@@ -71,14 +71,14 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
       {
         const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             if(!create_new) {
               return nullptr;
             }
             parent = D_array();
             // Fallthrough.
-        case Value::type_array:
+        case type_array:
             auto &arr = parent.check<D_array>();
             auto wrap = wrap_index(alt.index, arr.size());
             if(wrap.index >= arr.size()) {
@@ -104,14 +104,14 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
       {
         const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             if(!create_new) {
               return nullptr;
             }
             parent = D_object();
             // Fallthrough.
-        case Value::type_object:
+        case type_object:
             auto &obj = parent.check<D_object>();
             auto rit = create_new ? obj.try_emplace(alt.key).first : obj.find_mut(alt.key);
             if(rit == obj.end()) {
@@ -136,11 +136,11 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
       {
         const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             return D_null();
           }
-        case Value::type_array:
+        case type_array:
           {
             auto &arr = parent.check<D_array>();
             auto wrap = wrap_index(alt.index, arr.size());
@@ -160,11 +160,11 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
       {
         const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
-        case Value::type_null:
+        case type_null:
           {
             return D_null();
           }
-        case Value::type_object:
+        case type_object:
           {
             auto &obj = parent.check<D_object>();
             auto rit = obj.find_mut(alt.key);

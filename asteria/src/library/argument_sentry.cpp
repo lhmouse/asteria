@@ -104,7 +104,7 @@ template<typename XvalueT>
     }
     // Check whether the value has the desired type.
     const auto &value = sentry.ref().read();
-    if(value.type() == Value::type_null) {
+    if(value.type() == type_null) {
       // If the value is `null`, set the default value.
       value_out = default_value;
     } else {
@@ -114,7 +114,7 @@ template<typename XvalueT>
         do_fail(*this, this->m_state,
           [&]{
             ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                        "but `", Value::get_type_name(Value::Type(Value::Variant::index_of<XvalueT>::value)), "` or `null` was expected.");
+                                        "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
           });
         return *this;
       }
@@ -139,7 +139,7 @@ template<typename XvalueT>
       do_fail(*this, this->m_state,
         [&]{
           ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                      "but `", Value::get_type_name(Value::Type(Value::Variant::index_of<XvalueT>::value)), "` was expected.");
+                                      "but `", Value::get_type_name<XvalueT>(), "` was expected.");
         });
       return *this;
     }

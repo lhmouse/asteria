@@ -15,7 +15,7 @@ namespace Asteria {
 class Value
   {
   public:
-    enum Compare : std::size_t
+    enum Compare : std::uint8_t
       {
         compare_unordered  = 0,
         compare_less       = 1,
@@ -23,18 +23,6 @@ class Value
         compare_greater    = 3,
       };
 
-    enum Type : std::size_t
-      {
-        type_null      = 0,
-        type_boolean   = 1,
-        type_integer   = 2,
-        type_real      = 3,
-        type_string    = 4,
-        type_opaque    = 5,
-        type_function  = 6,
-        type_array     = 7,
-        type_object    = 8,
-      };
     using Variant = rocket::variant<
       ROCKET_CDR(
         , D_null      // 0,
@@ -49,7 +37,13 @@ class Value
       )>;
 
   public:
-    static const char * get_type_name(Type type) noexcept;
+    template<typename TypeT>
+      static const char * get_type_name() noexcept
+      {
+        constexpr auto etype = static_cast<Value_Type>(Variant::index_of<TypeT>::value);
+        return Value::get_type_name(etype);
+      }
+    static const char * get_type_name(Value_Type etype) noexcept;
 
     // The object is allocated statically and exists throughout the program.
     static const Value & get_null() noexcept;
@@ -78,9 +72,9 @@ class Value
     ROCKET_COPYABLE_DESTRUCTOR(Value);
 
   public:
-    Type type() const noexcept
+    Value_Type type() const noexcept
       {
-        return Type(this->m_stor.index());
+        return Value_Type(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept

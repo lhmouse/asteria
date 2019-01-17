@@ -17,7 +17,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : std::size_t
+    enum Target : std::uint8_t
       {
         target_unspec  = 0,
         target_switch  = 1,
@@ -116,7 +116,7 @@ class Statement
         rocket::cow_string msg;
       };
 
-    enum Index : std::size_t
+    enum Index : std::uint8_t
       {
         index_expression  =  0,
         index_block       =  1,

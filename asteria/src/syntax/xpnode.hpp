@@ -19,7 +19,7 @@ namespace Asteria {
 class Xpnode
   {
   public:
-    enum Xop : std::size_t
+    enum Xop : std::uint8_t
       {
         // Postfix operators
         xop_postfix_inc      = 10,  // ++
@@ -110,7 +110,7 @@ class Xpnode
         bool assign;
       };
 
-    enum Index : std::size_t
+    enum Index : std::uint8_t
       {
         index_literal           =  0,
         index_named_reference   =  1,

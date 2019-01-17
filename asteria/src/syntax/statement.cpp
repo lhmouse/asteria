@@ -458,7 +458,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
         alt.init.evaluate(mapped, global, ctx_for);
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
-        case Value::type_array:
+        case type_array:
           {
             const auto &array = range_value.check<D_array>();
             for(auto it = array.begin(); it != array.end(); ++it) {
@@ -487,7 +487,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
             }
             break;
           }
-        case Value::type_object:
+        case type_object:
           {
             const auto &object = range_value.check<D_object>();
             for(auto it = object.begin(); it != object.end(); ++it) {

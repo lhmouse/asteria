@@ -752,7 +752,7 @@ Parser::~Parser()
     class Infix_Selection : public Infix_Element_Base
       {
       public:
-        enum Sop : std::size_t
+        enum Sop : std::uint8_t
           {
             sop_quest   = 0,  // ? :
             sop_and     = 1,  // &&

@@ -10,7 +10,7 @@
 
 #include <utility>  // std::pair<>, std::move(), std::forward()
 #include <cstddef>  // std::nullptr_t
-#include <cstdint>  // std::int64_t, std::uint64_t
+#include <cstdint>  // std::uint8_t, std::int64_t
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
@@ -74,7 +74,23 @@ using D_string    = rocket::cow_string;
 using D_opaque    = rocket::refcounted_object<Abstract_Opaque>;
 using D_function  = rocket::refcounted_object<Abstract_Function>;
 using D_array     = rocket::cow_vector<Value>;
-using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value, rocket::prehashed_string::hash, rocket::prehashed_string::equal_to>;
+using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value,
+                                        rocket::prehashed_string::hash,
+                                        rocket::prehashed_string::equal_to>;
+
+// Indices of Fundamental Types
+enum Value_Type : std::uint8_t
+  {
+    type_null      = 0,
+    type_boolean   = 1,
+    type_integer   = 2,
+    type_real      = 3,
+    type_string    = 4,
+    type_opaque    = 5,
+    type_function  = 6,
+    type_array     = 7,
+    type_object    = 8,
+  };
 
 }
 

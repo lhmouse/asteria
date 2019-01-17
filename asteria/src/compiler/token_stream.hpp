@@ -15,7 +15,7 @@ namespace Asteria {
 class Token_Stream
   {
   public:
-    enum State : std::size_t
+    enum State : std::uint8_t
       {
         state_empty    = 0,
         state_error    = 1,

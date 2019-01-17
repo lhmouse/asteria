@@ -29,8 +29,8 @@ class Argument_Sentry
     // Parameters may be enumerators having type `Value::Type` or `nullptr`.
     union Overload_Parameter
       {
-        unsigned char nparams;
-        Value::Type type;
+        std::uint8_t nparams;
+        Value_Type type;
 
         constexpr Overload_Parameter(int xnparams) noexcept
           : nparams(static_cast<unsigned char>(ROCKET_ASSERT(xnparams < 0xFF), xnparams))
@@ -40,7 +40,7 @@ class Argument_Sentry
           : nparams(0xFF)
           {
           }
-        constexpr Overload_Parameter(Value::Type xtype) noexcept
+        constexpr Overload_Parameter(Value_Type xtype) noexcept
           : type(xtype)
           {
           }

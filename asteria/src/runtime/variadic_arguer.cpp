@@ -47,7 +47,7 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, ro
       {
         // Remember to keep this list up-to-date.
         0,
-        1, Value::type_integer,
+        1, type_integer,
       });
   }
 

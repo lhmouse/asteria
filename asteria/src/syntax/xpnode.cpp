@@ -367,7 +367,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         // Pop the target off the stack.
         const auto tgt_value = stack_io.top().read();
         // Make sure it is really a function.
-        if(tgt_value.type() != Value::type_function) {
+        if(tgt_value.type() != type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
         const auto &func = tgt_value.check<D_function>();
@@ -402,13 +402,13 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         }
         // The subscript shall have type `integer` or `string`.
         switch(rocket::weaken_enum(subscript.type())) {
-        case Value::type_integer:
+        case type_integer:
           {
             Reference_Modifier::S_array_index mod_c = { subscript.check<D_integer>() };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
-        case Value::type_string:
+        case type_string:
           {
             Reference_Modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
             stack_io.mut_top().zoom_in(std::move(mod_c));
@@ -747,12 +747,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           {
             // Increment the operand and return the old value.
             // `alt.assign` is ignored.
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
             }
-            if(ref_c.value.type() == Value::type_real) {
+            if(ref_c.value.type() == type_real) {
               stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
@@ -763,12 +763,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           {
             // Decrement the operand and return the old value.
             // `alt.assign` is ignored.
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
             }
-            if(ref_c.value.type() == Value::type_real) {
+            if(ref_c.value.type() == type_real) {
               stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
@@ -785,12 +785,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         case Xpnode::xop_prefix_neg:
           {
             // Negate the operand to create a temporary value, then return it.
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               ref_c.value = do_negate(ref_c.value.check<D_integer>());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
-            if(ref_c.value.type() == Value::type_real) {
+            if(ref_c.value.type() == type_real) {
               ref_c.value = do_negate(ref_c.value.check<D_real>());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
@@ -800,12 +800,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         case Xpnode::xop_prefix_notb:
           {
             // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
-            if(ref_c.value.type() == Value::type_boolean) {
+            if(ref_c.value.type() == type_boolean) {
               ref_c.value = do_logical_not(ref_c.value.check<D_boolean>());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               ref_c.value = do_bitwise_not(ref_c.value.check<D_integer>());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
@@ -824,11 +824,11 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           {
             // Increment the operand and return it.
             // `alt.assign` is ignored.
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               stack_io.top().open() = do_add(ref_c.value.check<D_integer>(), D_integer(1));
               return;
             }
-            if(ref_c.value.type() == Value::type_real) {
+            if(ref_c.value.type() == type_real) {
               stack_io.top().open() = do_add(ref_c.value.check<D_real>(), D_real(1));
               return;
             }
@@ -838,12 +838,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           {
             // Decrement the operand and return it.
             // `alt.assign` is ignored.
-            if(ref_c.value.type() == Value::type_integer) {
+            if(ref_c.value.type() == type_integer) {
               stack_io.top().open() = do_subtract(ref_c.value.check<D_integer>(), D_integer(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
             }
-            if(ref_c.value.type() == Value::type_real) {
+            if(ref_c.value.type() == type_real) {
               stack_io.top().open() = do_subtract(ref_c.value.check<D_real>(), D_real(1));
               stack_io.mut_top() = std::move(ref_c);
               return;
@@ -857,22 +857,22 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         case Xpnode::xop_prefix_lengthof:
           {
             // Return the number of elements in the operand.
-            if(ref_c.value.type() == Value::type_null) {
+            if(ref_c.value.type() == type_null) {
               ref_c.value = D_integer(0);
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
-            if(ref_c.value.type() == Value::type_string) {
+            if(ref_c.value.type() == type_string) {
               ref_c.value = D_integer(ref_c.value.check<D_string>().size());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
-            if(ref_c.value.type() == Value::type_array) {
+            if(ref_c.value.type() == type_array) {
               ref_c.value = D_integer(ref_c.value.check<D_array>().size());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
             }
-            if(ref_c.value.type() == Value::type_object) {
+            if(ref_c.value.type() == type_object) {
               ref_c.value = D_integer(ref_c.value.check<D_object>().size());
               do_set_temporary(stack_io, alt, std::move(ref_c));
               return;
@@ -883,7 +883,8 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           {
             // Return the type name of the operand.
             // N.B. This is one of the few operators that work on all types.
-            ref_c.value = D_string(std::ref(reinterpret_cast<const char (&)[]>(*(Value::get_type_name(ref_c.value.type())))));
+            const auto type_name = Value::get_type_name(ref_c.value.type());
+            ref_c.value = D_string(std::ref(type_name));
             do_set_temporary(stack_io, alt, std::move(ref_c));
             return;
           }
@@ -989,22 +990,22 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // For the `boolean` type, return the logical OR'd result of both operands.
                 // For the `integer` and `real` types, return the sum of both operands.
                 // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_add(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
                   ref_c.value = do_add(lhs.check<D_real>(), ref_c.value.check<D_real>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_string)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_string)) {
                   ref_c.value = do_concatenate(lhs.check<D_string>(), ref_c.value.check<D_string>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1015,17 +1016,17 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
               {
                 // For the `boolean` type, return the logical XOR'd result of both operands.
                 // For the `integer` and `real` types, return the difference of both operands.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_subtract(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
                   ref_c.value = do_subtract(lhs.check<D_real>(), ref_c.value.check<D_real>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1037,27 +1038,27 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // For type `boolean`, return the logical AND'd result of both operands.
                 // For types `integer` and `real`, return the product of both operands.
                 // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_multiply(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
                   ref_c.value = do_multiply(lhs.check<D_real>(), ref_c.value.check<D_real>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_duplicate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_string)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_string)) {
                   ref_c.value = do_duplicate(ref_c.value.check<D_string>(), lhs.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1067,12 +1068,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
             case Xpnode::xop_infix_div:
               {
                 // For types `integer` and `real`, return the quotient of both operands.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_divide(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
                   ref_c.value = do_divide(lhs.check<D_real>(), ref_c.value.check<D_real>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1082,12 +1083,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
             case Xpnode::xop_infix_mod:
               {
                 // For types `integer` and `real`, return the reminder of both operands.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_modulo(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_real) && (ref_c.value.type() == Value::type_real)) {
+                if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
                   ref_c.value = do_modulo(lhs.check<D_real>(), ref_c.value.check<D_real>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1101,12 +1102,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // are discarded. Bits shifted in are filled with zeroes.
                 // If the first operand is of type `string`, fill space bytes in the right and discard charactrs from the left. The number of bytes in the first operand
                 // will not be changed.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_shift_left_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_move_left(lhs.check<D_string>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1120,12 +1121,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // are discarded. Bits shifted in are filled with zeroes.
                 // If the first operand is of type `string`, fill space bytes in the left and discard charactrs from the right. The number of bytes in the first operand
                 // will not be changed.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_shift_right_logical(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_move_right(lhs.check<D_string>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1139,12 +1140,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // that are equal to the sign bit are discarded. Bits shifted out that are unequal to the sign bit lead to an exception being thrown. Bits shifted in are
                 // filled with zeroes.
                 // If the first operand is of type `string`, fill space bytes in the right.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_shift_left_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_extend(lhs.check<D_string>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1157,12 +1158,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
                 // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand. Bits shifted out
                 // are discarded. Bits shifted in are filled with the sign bit.
                 // If the first operand is of type `string`, discard bytes from the right.
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_shift_right_arithmetic(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_string) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_truncate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1173,12 +1174,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
               {
                 // For the `boolean` type, return the logical AND'd result of both operands.
                 // For the `integer` type, return the bitwise AND'd result of both operands.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_and(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_bitwise_and(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1189,12 +1190,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
               {
                 // For the `boolean` type, return the logical OR'd result of both operands.
                 // For the `integer` type, return the bitwise OR'd result of both operands.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_or(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_bitwise_or(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1205,12 +1206,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
               {
                 // For the `boolean` type, return the logical XOR'd result of both operands.
                 // For the `integer` type, return the bitwise XOR'd result of both operands.
-                if((lhs.type() == Value::type_boolean) && (ref_c.value.type() == Value::type_boolean)) {
+                if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
                   ref_c.value = do_logical_xor(lhs.check<D_boolean>(), ref_c.value.check<D_boolean>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
                 }
-                if((lhs.type() == Value::type_integer) && (ref_c.value.type() == Value::type_integer)) {
+                if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
                   ref_c.value = do_bitwise_xor(lhs.check<D_integer>(), ref_c.value.check<D_integer>());
                   do_set_temporary(stack_io, alt, std::move(ref_c));
                   return;
@@ -1259,7 +1260,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
     void do_evaluate_coalescence(const Xpnode::S_coalescence &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
-        if(stack_io.top().read().type() != Value::type_null) {
+        if(stack_io.top().read().type() != type_null) {
           // If the result is non-null, leave the condition on the stack.
           return;
         }

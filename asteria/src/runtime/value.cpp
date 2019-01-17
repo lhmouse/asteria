@@ -7,9 +7,9 @@
 
 namespace Asteria {
 
-const char * Value::get_type_name(Value::Type type) noexcept
+const char * Value::get_type_name(Value_Type etype) noexcept
   {
-    switch(type) {
+    switch(etype) {
     case type_null:
       {
         return "null";

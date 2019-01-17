@@ -31,7 +31,7 @@ class Reference_Root
         rocket::refcounted_ptr<Variable> var_opt;
       };
 
-    enum Index : std::size_t
+    enum Index : std::uint8_t
       {
         index_null       = 0,
         index_constant   = 1,

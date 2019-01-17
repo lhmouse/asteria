@@ -10,28 +10,28 @@ using namespace Asteria;
 int main()
   {
     Value value(true);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_boolean);
+    ASTERIA_TEST_CHECK(value.type() == type_boolean);
     ASTERIA_TEST_CHECK(value.check<D_boolean>() == true);
     ASTERIA_TEST_CHECK_CATCH(value.check<D_string>());
     ASTERIA_TEST_CHECK(value.opt<D_real>() == nullptr);
 
     value = D_integer(42);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_integer);
+    ASTERIA_TEST_CHECK(value.type() == type_integer);
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 42);
 
     value = D_real(1.5);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_real);
+    ASTERIA_TEST_CHECK(value.type() == type_real);
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.5);
 
     value = D_string(std::ref("hello"));
-    ASTERIA_TEST_CHECK(value.type() == Value::type_string);
+    ASTERIA_TEST_CHECK(value.type() == type_string);
     ASTERIA_TEST_CHECK(value.check<D_string>() == "hello");
 
     D_array array;
     array.emplace_back(D_boolean(true));
     array.emplace_back(D_string("world"));
     value = std::move(array);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_array);
+    ASTERIA_TEST_CHECK(value.type() == type_array);
     ASTERIA_TEST_CHECK(value.check<D_array>().at(0).check<D_boolean>() == true);
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == "world");
 
@@ -39,7 +39,7 @@ int main()
     object.try_emplace(rocket::prehashed_string(std::ref("one")), D_boolean(true));
     object.try_emplace(rocket::prehashed_string(std::ref("two")), D_string("world"));
     value = std::move(object);
-    ASTERIA_TEST_CHECK(value.type() == Value::type_object);
+    ASTERIA_TEST_CHECK(value.type() == type_object);
     ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::prehashed_string(std::ref("one"))).check<D_boolean>() == true);
     ASTERIA_TEST_CHECK(value.check<D_object>().at(rocket::prehashed_string(std::ref("two"))).check<D_string>() == "world");
 

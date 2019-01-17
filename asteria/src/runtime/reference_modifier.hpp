@@ -22,7 +22,7 @@ class Reference_Modifier
         rocket::prehashed_string key;
       };
 
-    enum Index : std::size_t
+    enum Index : std::uint8_t
       {
         index_array_index  = 0,
         index_object_key   = 1,
