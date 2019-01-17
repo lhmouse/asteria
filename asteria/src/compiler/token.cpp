@@ -371,7 +371,7 @@ Token::~Token()
   {
   }
 
-void Token::dump(std::ostream &os) const
+void Token::print(std::ostream &os) const
   {
     switch(this->index()) {
     case index_keyword:

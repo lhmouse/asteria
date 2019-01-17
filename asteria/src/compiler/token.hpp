@@ -205,12 +205,12 @@ class Token
         return this->m_stor.as<AltT>();
       }
 
-    void dump(std::ostream &os) const;
+    void print(std::ostream &os) const;
   };
 
 inline std::ostream & operator<<(std::ostream &os, const Token &token)
   {
-    token.dump(os);
+    token.print(os);
     return os;
   }
 

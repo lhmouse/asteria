@@ -6,10 +6,9 @@
 
 namespace Asteria {
 
-std::ostream & operator<<(std::ostream &os, const Source_Location &loc)
+void Source_Location::print(std::ostream &os) const
   {
-    os << loc.get_file() << ':' << loc.get_line();
-    return os;
+    os << this->get_file() << ':' << this->get_line();
   }
 
 }

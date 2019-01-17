@@ -29,9 +29,15 @@ class Source_Location
       {
         return this->m_line;
       }
+
+    void print(std::ostream &os) const;
   };
 
-extern std::ostream & operator<<(std::ostream &os, const Source_Location &loc);
+inline std::ostream & operator<<(std::ostream &os, const Source_Location &loc)
+  {
+    loc.print(os);
+    return os;
+  }
 
 }
 

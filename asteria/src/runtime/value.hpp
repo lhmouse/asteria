@@ -106,7 +106,7 @@ class Value
 
     bool test() const noexcept;
     Compare compare(const Value &other) const noexcept;
-    void dump(std::ostream &os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
+    void print(std::ostream &os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
 
     bool unique() const noexcept;
     long use_count() const noexcept;
@@ -116,7 +116,7 @@ class Value
 
 inline std::ostream & operator<<(std::ostream &os, const Value &value)
   {
-    value.dump(os);
+    value.print(os);
     return os;
   }
 
