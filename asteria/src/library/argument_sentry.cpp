@@ -49,7 +49,7 @@ Argument_Sentry::~Argument_Sentry()
             if(state.finished) {
               do_fail(parent, state,
                 [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had been finished hence no argument could be extracted any further.");
+                  ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");
                 });
               return;
             }
@@ -275,7 +275,7 @@ Argument_Sentry & Argument_Sentry::cut()
     if(state.finished) {
       do_fail(*this, state,
         [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had been finished hence no argument could be extracted any further.");
+          ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");
         });
       return *this;
     }
@@ -329,7 +329,7 @@ Argument_Sentry & Argument_Sentry::cut()
         auto nparams = static_cast<std::size_t>(ptr->nparams);
         ++ptr;
         --size;
-        ROCKET_ASSERT_MSG(nparams <= size, "Overload list data were malformed.");
+        ROCKET_ASSERT_MSG(nparams <= size, "The overload list data were malformed.");
         // Assemble the function prototype.
         ASTERIA_FORMAT(msg, "`", this->m_name, "(");
         if(nparams != 0) {
