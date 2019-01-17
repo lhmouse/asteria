@@ -174,9 +174,11 @@ Reference & Reference_Dictionary::open(const rocket::prehashed_string &name)
     bkt->name = name;
     const auto templ = this->do_get_template_opt(name);
     if(ROCKET_UNEXPECT(templ)) {
+       // Copy the static template.
       static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
       rocket::construct_at(bkt->refv, *templ);
     } else {
+      // Construct a null reference.
       static_assert(std::is_nothrow_constructible<Reference>::value, "??");
       rocket::construct_at(bkt->refv);
     }
