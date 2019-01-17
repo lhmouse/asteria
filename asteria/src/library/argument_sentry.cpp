@@ -307,8 +307,10 @@ Argument_Sentry & Argument_Sentry::cut()
     if(size != 0) {
       // Deal with the nasty commas.
       auto ptr = args->data();
+      Value value;
       do {
-        ASTERIA_FORMAT(msg, Value::get_type_name(ptr->read().type()));
+        value = ptr->read();
+        ASTERIA_FORMAT(msg, Value::get_type_name(value.type()));
         ++ptr;
         if(--size == 0) {
           break;
@@ -334,7 +336,7 @@ Argument_Sentry & Argument_Sentry::cut()
           // Yay, nasty commas again.
           size -= nparams;
           do {
-            ASTERIA_FORMAT(msg, Value::get_type_name(ptr->param));
+            ASTERIA_FORMAT(msg, (ptr->nparams == 0xFF) ? "<any>" : Value::get_type_name(ptr->type));
             ++ptr;
             if(--nparams == 0) {
               break;
