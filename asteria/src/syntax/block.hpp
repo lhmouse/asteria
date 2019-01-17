@@ -5,9 +5,7 @@
 #define ASTERIA_SYNTAX_BLOCK_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/cow_vector.hpp"
 #include "../rocket/bind_first.hpp"
-#include "../rocket/refcnt_object.hpp"
 
 namespace Asteria {
 
@@ -32,15 +30,15 @@ class Block
                                                       const void *>;
 
   private:
-    rocket::cow_vector<Statement> m_stmts;
-    rocket::cow_vector<Compiled_Instruction> m_cinsts;
+    Cow_Vector<Statement> m_stmts;
+    Cow_Vector<Compiled_Instruction> m_cinsts;
 
   public:
     Block() noexcept
       : m_stmts()
       {
       }
-    Block(rocket::cow_vector<Statement> &&stmts) noexcept
+    Block(Cow_Vector<Statement> &&stmts) noexcept
       : m_stmts(std::move(stmts))
       {
         this->do_compile();
@@ -63,8 +61,8 @@ class Block
     Block bind(const Global_Context &global, const Analytic_Context &ctx) const;
     Status execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const;
 
-    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const;
-    void execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const;
+    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params) const;
+    void execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Cow_Vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

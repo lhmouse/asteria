@@ -16,29 +16,29 @@ Function_Executive_Context::~Function_Executive_Context()
 
     template<std::size_t capacityT, typename XnameT, typename XvalueT,
              ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      void do_predefine(rocket::static_vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XvalueT &&xvalue)
+      void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XvalueT &&xvalue)
       {
         Reference_Root::S_constant ref_c = { std::forward<XvalueT>(xvalue) };
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::move(ref_c));
       }
     template<std::size_t capacityT, typename XnameT, typename XrefT,
              ROCKET_ENABLE_IF(std::is_constructible<Reference, XrefT &&>::value)>
-      void do_predefine(rocket::static_vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XrefT &&xref)
+      void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XrefT &&xref)
       {
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }
 
-    inline rocket::refcnt_object<Abstract_Function> do_make_varg(const rocket::refcnt_object<Variadic_Arguer> &zvarg, rocket::cow_vector<Reference> &&args)
+    inline RefCnt_Object<Abstract_Function> do_make_varg(const RefCnt_Object<Variadic_Arguer> &zvarg, Cow_Vector<Reference> &&args)
       {
         if(ROCKET_EXPECT(args.empty())) {
           return zvarg;
         }
-        return rocket::refcnt_object<Variadic_Arguer>(zvarg.get(), std::move(args));
+        return RefCnt_Object<Variadic_Arguer>(zvarg.get(), std::move(args));
       }
 
     }
 
-void Function_Executive_Context::initialize(const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, Reference &&self, rocket::cow_vector<Reference> &&args)
+void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

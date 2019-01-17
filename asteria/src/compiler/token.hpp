@@ -118,7 +118,7 @@ class Token
       };
     struct S_identifier
       {
-        rocket::cow_string name;
+        Cow_String name;
       };
     struct S_integer_literal
       {
@@ -130,7 +130,7 @@ class Token
       };
     struct S_string_literal
       {
-        rocket::cow_string value;
+        Cow_String value;
       };
 
     enum Index : std::uint8_t
@@ -157,7 +157,7 @@ class Token
     static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
-    rocket::cow_string m_file;
+    Cow_String m_file;
     std::uint32_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
@@ -167,14 +167,14 @@ class Token
     // This constructor does not accept lvalues.
     template<typename AltT,
              ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Token(const rocket::cow_string &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
+      Token(const Cow_String &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
       : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Token);
 
   public:
-    const rocket::cow_string & get_file() const noexcept
+    const Cow_String & get_file() const noexcept
       {
         return this->m_file;
       }

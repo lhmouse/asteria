@@ -34,7 +34,7 @@ void Variable_Hashset::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
-    rocket::cow_vector<Bucket> stor;
+    Cow_Vector<Bucket> stor;
     stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.
@@ -83,7 +83,7 @@ void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
-          rocket::refcnt_ptr<Variable> var;
+          RefCnt_Ptr<Variable> var;
           // Release the old element.
           rbkt.detach();
           var.swap(rbkt.var);
@@ -100,7 +100,7 @@ void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_Hashset::has(const rocket::refcnt_ptr<Variable> &var) const noexcept
+bool Variable_Hashset::has(const RefCnt_Ptr<Variable> &var) const noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -135,7 +135,7 @@ void Variable_Hashset::for_each(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-bool Variable_Hashset::insert(const rocket::refcnt_ptr<Variable> &var)
+bool Variable_Hashset::insert(const RefCnt_Ptr<Variable> &var)
   {
     if(!var) {
       ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_Hashset`.");
@@ -163,7 +163,7 @@ bool Variable_Hashset::insert(const rocket::refcnt_ptr<Variable> &var)
     return true;
   }
 
-bool Variable_Hashset::erase(const rocket::refcnt_ptr<Variable> &var) noexcept
+bool Variable_Hashset::erase(const RefCnt_Ptr<Variable> &var) noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -189,7 +189,7 @@ bool Variable_Hashset::erase(const rocket::refcnt_ptr<Variable> &var) noexcept
     return true;
   }
 
-rocket::refcnt_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
+RefCnt_Ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -203,7 +203,7 @@ rocket::refcnt_ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
       return nullptr;
     }
     ROCKET_ASSERT(*bkt);
-    rocket::refcnt_ptr<Variable> var;
+    RefCnt_Ptr<Variable> var;
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.

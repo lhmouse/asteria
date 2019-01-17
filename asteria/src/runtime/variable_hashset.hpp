@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "variable.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -16,7 +15,7 @@ class Variable_Hashset
     struct Bucket
       {
         // A null pointer indicates an empty bucket.
-        rocket::refcnt_ptr<Variable> var;
+        RefCnt_Ptr<Variable> var;
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For each other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size; Bucket *prev; };
@@ -59,7 +58,7 @@ class Variable_Hashset
 
   private:
     // The first and last buckets are permanently reserved.
-    rocket::cow_vector<Bucket> m_stor;
+    Cow_Vector<Bucket> m_stor;
 
   public:
     Variable_Hashset() noexcept
@@ -96,11 +95,11 @@ class Variable_Hashset
         this->do_clear();
       }
 
-    bool has(const rocket::refcnt_ptr<Variable> &var) const noexcept;
+    bool has(const RefCnt_Ptr<Variable> &var) const noexcept;
     void for_each(const Abstract_Variable_Callback &callback) const;
-    bool insert(const rocket::refcnt_ptr<Variable> &var);
-    bool erase(const rocket::refcnt_ptr<Variable> &var) noexcept;
-    rocket::refcnt_ptr<Variable> erase_random_opt() noexcept;
+    bool insert(const RefCnt_Ptr<Variable> &var);
+    bool erase(const RefCnt_Ptr<Variable> &var) noexcept;
+    RefCnt_Ptr<Variable> erase_random_opt() noexcept;
   };
 
 }

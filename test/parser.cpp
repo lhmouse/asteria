@@ -41,7 +41,7 @@ int main()
 
     Reference res;
     Global_Context global;
-    rocket::refcnt_object<Variadic_Arguer> zvarg(Source_Location(std::ref("file"), 42), std::ref("scope"));
+    RefCnt_Object<Variadic_Arguer> zvarg(Source_Location(std::ref("file"), 42), std::ref("scope"));
     code.execute_as_function(res, global, zvarg, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }

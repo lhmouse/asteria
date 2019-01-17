@@ -5,7 +5,6 @@
 #define ASTERIA_SYNTAX_EXPRESSION_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/cow_vector.hpp"
 #include "../rocket/bind_first.hpp"
 
 namespace Asteria {
@@ -18,15 +17,15 @@ class Expression
                                                       const void *>;
 
   private:
-    rocket::cow_vector<Xpnode> m_nodes;
-    rocket::cow_vector<Compiled_Instruction> m_cinsts;
+    Cow_Vector<Xpnode> m_nodes;
+    Cow_Vector<Compiled_Instruction> m_cinsts;
 
   public:
     Expression() noexcept
       : m_nodes()
       {
       }
-    Expression(rocket::cow_vector<Xpnode> &&nodes)
+    Expression(Cow_Vector<Xpnode> &&nodes)
       : m_nodes(std::move(nodes))
       {
         this->do_compile();

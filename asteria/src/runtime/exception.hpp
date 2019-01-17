@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "../syntax/source_location.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -16,7 +15,7 @@ class Exception : public virtual std::exception
   private:
     Source_Location m_loc;
     Value m_value;
-    rocket::cow_vector<Source_Location> m_backtrace;
+    Cow_Vector<Source_Location> m_backtrace;
 
   public:
     template<typename XvalueT,ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
@@ -40,7 +39,7 @@ class Exception : public virtual std::exception
         return this->m_value;
       }
 
-    const rocket::cow_vector<Source_Location> & get_backtrace() const noexcept
+    const Cow_Vector<Source_Location> & get_backtrace() const noexcept
       {
         return this->m_backtrace;
       }

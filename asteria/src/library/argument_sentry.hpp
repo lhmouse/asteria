@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
 #include "../runtime/value.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -16,7 +15,7 @@ class Argument_Sentry
   public:
     struct State
       {
-        const rocket::cow_vector<Reference> *args;
+        const Cow_Vector<Reference> *args;
         unsigned offset;
         bool succeeded;
         bool finished;
@@ -47,7 +46,7 @@ class Argument_Sentry
       };
 
   private:
-    rocket::cow_string m_name;
+    Cow_String m_name;
     bool m_throw_on_failure;
 
     // N.B. The contents of `m_state` can be copied elsewhere and back.
@@ -55,7 +54,7 @@ class Argument_Sentry
     State m_state;
 
   public:
-    explicit Argument_Sentry(rocket::cow_string name) noexcept
+    explicit Argument_Sentry(Cow_String name) noexcept
       : m_name(std::move(name)), m_throw_on_failure(false),
         m_state()
       {
@@ -69,7 +68,7 @@ class Argument_Sentry
       Argument_Sentry & do_get_required_value(XvalueT &value_out);
 
   public:
-    const rocket::cow_string & get_name() const noexcept
+    const Cow_String & get_name() const noexcept
       {
         return this->m_name;
       }
@@ -95,7 +94,7 @@ class Argument_Sentry
       {
         return this->m_state.succeeded;
       }
-    void reset(const rocket::cow_vector<Reference> &args) noexcept
+    void reset(const Cow_Vector<Reference> &args) noexcept
       {
         this->m_state.args = &args;
         this->m_state.offset = 0;

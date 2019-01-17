@@ -21,7 +21,7 @@ Block::~Block()
 
 void Block::do_compile()
   {
-    rocket::cow_vector<Compiled_Instruction> cinsts;
+    Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
       stmt.compile(cinsts);
@@ -38,7 +38,7 @@ void Block::fly_over_in_place(Abstract_Context &ctx_io) const
 
 Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const
   {
-    rocket::cow_vector<Statement> stmts_bnd;
+    Cow_Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     for(const auto &stmt : this->m_stmts) {
       stmt.bind_in_place(stmts_bnd, ctx_io, global);
@@ -77,7 +77,7 @@ Block::Status Block::execute(Reference &ref_out, Global_Context &global, const E
     return this->execute_in_place(ref_out, ctx_next, global);
   }
 
-Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const rocket::prehashed_string &name, const rocket::cow_vector<rocket::prehashed_string> &params) const
+Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params) const
   {
     Function_Analytic_Context ctx_next(&ctx);
     ctx_next.initialize(params);
@@ -86,7 +86,7 @@ Instantiated_Function Block::instantiate_function(Global_Context &global, const 
     return Instantiated_Function(loc, name, params, std::move(body_bnd));
   }
 
-void Block::execute_as_function(Reference &self_io, Global_Context &global, const rocket::refcnt_object<Variadic_Arguer> &zvarg, const rocket::cow_vector<rocket::prehashed_string> &params, rocket::cow_vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Cow_Vector<Reference> &&args) const
   {
     Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));

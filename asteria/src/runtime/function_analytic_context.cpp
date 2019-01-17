@@ -15,14 +15,14 @@ Function_Analytic_Context::~Function_Analytic_Context()
     namespace {
 
     template<std::size_t capacityT, typename XnameT>
-      void do_predefine(rocket::static_vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
+      void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
       {
         predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_null());
       }
 
     }
 
-void Function_Analytic_Context::initialize(const rocket::cow_vector<rocket::prehashed_string> &params)
+void Function_Analytic_Context::initialize(const Cow_Vector<PreHashed_String> &params)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

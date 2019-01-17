@@ -28,11 +28,11 @@ class Abstract_Context
       }
 
   public:
-    const Reference * get_named_reference_opt(const rocket::prehashed_string &name) const
+    const Reference * get_named_reference_opt(const PreHashed_String &name) const
       {
         return this->m_dict.get_opt(name);
       }
-    Reference & open_named_reference(const rocket::prehashed_string &name)
+    Reference & open_named_reference(const PreHashed_String &name)
       {
         return this->m_dict.open(name);
       }

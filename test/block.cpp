@@ -12,9 +12,9 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_vector<Statement> text;
+    Cow_Vector<Statement> text;
     // var res = 0;
-    rocket::cow_vector<Xpnode> expr;
+    Cow_Vector<Xpnode> expr;
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     text.emplace_back(Statement::S_variable { Source_Location(std::ref("nonexistent"), 1), std::ref("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
@@ -30,7 +30,7 @@ int main()
     // for(each k, v in data) {
     //   res += k * v;
     // }
-    rocket::cow_vector<Xpnode> range;
+    Cow_Vector<Xpnode> range;
     range.emplace_back(Xpnode::S_named_reference { std::ref("data") });
     expr.clear();
     expr.emplace_back(Xpnode::S_named_reference { std::ref("res") });
@@ -38,7 +38,7 @@ int main()
     expr.emplace_back(Xpnode::S_named_reference { std::ref("v") });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
-    rocket::cow_vector<Statement> body;
+    Cow_Vector<Statement> body;
     body.emplace_back(Statement::S_expression { std::move(expr) });
     text.emplace_back(Statement::S_for_each { std::ref("k"), std::ref("v"), std::move(range), std::move(body) });
     // for(var j = 0; j <= 3; ++j) {
@@ -61,18 +61,18 @@ int main()
     expr.emplace_back(Xpnode::S_subscript { std::ref("") });
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
-    rocket::cow_vector<Statement> branch_true;
+    Cow_Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_unspec });
     body.emplace_back(Statement::S_if { false, std::move(expr), std::move(branch_true), Block() });
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
-    rocket::cow_vector<Statement> init;
+    Cow_Vector<Statement> init;
     init.emplace_back(Statement::S_variable { Source_Location(std::ref("nonexistent"), 3), std::ref("j"), false, std::move(expr) });
-    rocket::cow_vector<Xpnode> cond;
+    Cow_Vector<Xpnode> cond;
     cond.emplace_back(Xpnode::S_named_reference { std::ref("j") });
     cond.emplace_back(Xpnode::S_literal { D_integer(3) });
     cond.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_lte, false });
-    rocket::cow_vector<Xpnode> step;
+    Cow_Vector<Xpnode> step;
     step.emplace_back(Xpnode::S_named_reference { std::ref("j") });
     step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });

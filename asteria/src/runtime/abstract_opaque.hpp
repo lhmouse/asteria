@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "refcnt_base.hpp"
-#include "../rocket/cow_string.hpp"
 
 namespace Asteria {
 
@@ -19,8 +18,8 @@ class Abstract_Opaque : public RefCnt_Base
     ROCKET_COPYABLE_DESTRUCTOR(Abstract_Opaque, virtual);
 
   public:
-    virtual rocket::cow_string describe() const = 0;
-    virtual Abstract_Opaque * clone(rocket::refcnt_ptr<Abstract_Opaque> &value_out) const = 0;
+    virtual Cow_String describe() const = 0;
+    virtual Abstract_Opaque * clone(RefCnt_Ptr<Abstract_Opaque> &value_out) const = 0;
     virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
   };
 

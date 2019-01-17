@@ -77,7 +77,7 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
     }
   }
 
-void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
+void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
   {
     switch(Index(this->m_stor.index())) {
     case index_expression:
@@ -140,7 +140,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
         auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_Context ctx_next(&ctx_io);
-        rocket::cow_vector<std::pair<Expression, Block>> clauses_bnd;
+        Cow_Vector<std::pair<Expression, Block>> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
         for(const auto &pair : alt.clauses) {
           auto first_bnd = pair.first.bind(global, ctx_next);
@@ -641,7 +641,7 @@ void Statement::bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic
 
     }
 
-void Statement::compile(rocket::cow_vector<Block::Compiled_Instruction> &cinsts_out) const
+void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const
   {
     switch(Index(this->m_stor.index())) {
     case index_expression:

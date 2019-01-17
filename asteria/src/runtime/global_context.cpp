@@ -34,7 +34,7 @@ void Global_Context::do_initialize()
     Reference_Root::S_constant ref_c = { std::move(root) };
   }
 
-rocket::refcnt_ptr<Variable> Global_Context::create_variable()
+RefCnt_Ptr<Variable> Global_Context::create_variable()
   {
     const auto coll = static_cast<Generational_Collector *>(this->m_coll.get());
     ROCKET_ASSERT(coll);

@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -15,11 +14,11 @@ class Reference_Dictionary
   public:
     struct Template
       {
-        rocket::cow_string name;
+        Cow_String name;
         Reference ref;
 
         template<typename XnameT, typename XrefT,
-                 ROCKET_ENABLE_IF(std::is_constructible<rocket::cow_string, XnameT &&>::value && std::is_constructible<Reference, XrefT &&>::value)>
+                 ROCKET_ENABLE_IF(std::is_constructible<Cow_String, XnameT &&>::value && std::is_constructible<Reference, XrefT &&>::value)>
           Template(XnameT &&xname, XrefT &&xref)
           : name(std::forward<XnameT>(xname)), ref(std::forward<XrefT>(xref))
           {
@@ -31,7 +30,7 @@ class Reference_Dictionary
       {
         // An empty name indicates an empty bucket.
         // `refv[0]` is initialized if and only if `name` is non-empty.
-        rocket::prehashed_string name;
+        PreHashed_String name;
         union { Reference refv[1]; };
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For each other bucket: `prev` points to the previous non-empty bucket.
@@ -84,7 +83,7 @@ class Reference_Dictionary
     const Template *m_templ_data;
     std::size_t m_templ_size;
     // The first and last buckets are permanently reserved.
-    rocket::cow_vector<Bucket> m_stor;
+    Cow_Vector<Bucket> m_stor;
 
   public:
     Reference_Dictionary() noexcept
@@ -95,8 +94,8 @@ class Reference_Dictionary
     ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Dictionary);
 
   private:
-    const Reference * do_get_template_opt(const rocket::prehashed_string &name) const noexcept;
-    const Reference * do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept;
+    const Reference * do_get_template_opt(const PreHashed_String &name) const noexcept;
+    const Reference * do_get_dynamic_opt(const PreHashed_String &name) const noexcept;
 
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
@@ -140,7 +139,7 @@ class Reference_Dictionary
         this->do_clear();
       }
 
-    const Reference * get_opt(const rocket::prehashed_string &name) const noexcept
+    const Reference * get_opt(const PreHashed_String &name) const noexcept
       {
         auto qref = this->do_get_dynamic_opt(name);
         if(ROCKET_EXPECT(qref)) {
@@ -153,8 +152,8 @@ class Reference_Dictionary
         return nullptr;
       }
 
-    Reference & open(const rocket::prehashed_string &name);
-    bool unset(const rocket::prehashed_string &name) noexcept;
+    Reference & open(const PreHashed_String &name);
+    bool unset(const PreHashed_String &name) noexcept;
   };
 
 }

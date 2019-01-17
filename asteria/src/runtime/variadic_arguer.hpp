@@ -8,7 +8,6 @@
 #include "abstract_function.hpp"
 #include "reference.hpp"
 #include "../syntax/source_location.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -16,12 +15,12 @@ class Variadic_Arguer : public Abstract_Function
   {
   private:
     Source_Location m_loc;
-    rocket::prehashed_string m_name;
-    rocket::cow_vector<Reference> m_vargs;
+    PreHashed_String m_name;
+    Cow_Vector<Reference> m_vargs;
 
   public:
     template<typename ...XvargsT>
-      Variadic_Arguer(const Source_Location &loc, const rocket::prehashed_string &name, XvargsT &&...xvargs)
+      Variadic_Arguer(const Source_Location &loc, const PreHashed_String &name, XvargsT &&...xvargs)
       : m_loc(loc), m_name(name), m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
@@ -37,7 +36,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_loc;
       }
-    const rocket::prehashed_string & get_name() const noexcept
+    const PreHashed_String & get_name() const noexcept
       {
         return this->m_name;
       }
@@ -50,8 +49,8 @@ class Variadic_Arguer : public Abstract_Function
         return this->m_vargs.at(index);
       }
 
-    rocket::cow_string describe() const override;
-    void invoke(Reference &self_io, Global_Context &global, rocket::cow_vector<Reference> &&args) const override;
+    Cow_String describe() const override;
+    void invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 

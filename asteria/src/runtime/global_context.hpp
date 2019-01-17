@@ -13,7 +13,7 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    rocket::refcnt_ptr<RefCnt_Base> m_coll;
+    RefCnt_Ptr<RefCnt_Base> m_coll;
 
   public:
     Global_Context()
@@ -36,7 +36,7 @@ class Global_Context : public Abstract_Context
         return nullptr;
       }
 
-    rocket::refcnt_ptr<Variable> create_variable();
+    RefCnt_Ptr<Variable> create_variable();
   };
 
 }

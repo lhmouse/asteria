@@ -12,7 +12,6 @@
 #include "../runtime/reference.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -64,7 +63,7 @@ class Xpnode
       };
     struct S_named_reference
       {
-        rocket::prehashed_string name;
+        PreHashed_String name;
       };
     struct S_bound_reference
       {
@@ -73,7 +72,7 @@ class Xpnode
     struct S_closure_function
       {
         Source_Location loc;
-        rocket::cow_vector<rocket::prehashed_string> params;
+        Cow_Vector<PreHashed_String> params;
         Block body;
       };
     struct S_branch
@@ -89,7 +88,7 @@ class Xpnode
       };
     struct S_subscript
       {
-        rocket::prehashed_string name;  // If this is empty then the subscript is to be popped from the stack.
+        PreHashed_String name;  // If this is empty then the subscript is to be popped from the stack.
       };
     struct S_operator_rpn
       {
@@ -102,7 +101,7 @@ class Xpnode
       };
     struct S_unnamed_object
       {
-        rocket::cow_vector<rocket::prehashed_string> keys;
+        Cow_Vector<PreHashed_String> keys;
       };
     struct S_coalescence
       {
@@ -156,8 +155,8 @@ class Xpnode
     ROCKET_COPYABLE_DESTRUCTOR(Xpnode);
 
   public:
-    void bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
-    void compile(rocket::cow_vector<Expression::Compiled_Instruction> &cinsts_out) const;
+    void bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
+    void compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

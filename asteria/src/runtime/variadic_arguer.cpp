@@ -12,12 +12,12 @@ Variadic_Arguer::~Variadic_Arguer()
   {
   }
 
-rocket::cow_string Variadic_Arguer::describe() const
+Cow_String Variadic_Arguer::describe() const
   {
     return ASTERIA_FORMAT_STRING("variadic argument accessor for `", this->m_name, "()` at \'", this->m_loc, "\'");
   }
 
-void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, rocket::cow_vector<Reference> &&args) const
+void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
   {
     Argument_Sentry sentry(std::ref("<builtin>.__varg"));
     // `__varg()`:

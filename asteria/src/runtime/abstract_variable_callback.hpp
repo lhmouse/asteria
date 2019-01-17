@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_ABSTRACT_VARIABLE_CALLBACK_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/refcnt_ptr.hpp"
 
 namespace Asteria {
 
@@ -18,7 +17,7 @@ class Abstract_Variable_Callback
     ROCKET_COPYABLE_DESTRUCTOR(Abstract_Variable_Callback, virtual);
 
   public:
-    virtual bool operator()(const rocket::refcnt_ptr<Variable> &var) const = 0;
+    virtual bool operator()(const RefCnt_Ptr<Variable> &var) const = 0;
   };
 
 }

@@ -8,7 +8,6 @@
 #include "parser_error.hpp"
 #include "../syntax/block.hpp"
 #include "../rocket/variant.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -23,7 +22,7 @@ class Parser
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_Error, rocket::cow_vector<Statement>> m_stor;
+    rocket::variant<std::nullptr_t, Parser_Error, Cow_Vector<Statement>> m_stor;
 
   public:
     Parser() noexcept

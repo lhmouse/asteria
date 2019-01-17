@@ -14,8 +14,11 @@
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
+#include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/refcnt_object.hpp"
+#include "rocket/refcnt_ptr.hpp"
+#include "rocket/unique_ptr.hpp"
 
 namespace Asteria {
 
@@ -91,6 +94,24 @@ enum Value_Type : std::uint8_t
     type_array     = 7,
     type_object    = 8,
   };
+
+// Aliases
+template<typename ElementT>
+  using Unique_Ptr = rocket::unique_ptr<ElementT>;
+template<typename ElementT>
+  using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
+template<typename ElementT>
+  using RefCnt_Object = rocket::refcnt_object<ElementT>;
+
+template<typename ElementT>
+  using Cow_Vector = rocket::cow_vector<ElementT>;
+template<typename KeyT, typename ValueT>
+  using Cow_HashMap = rocket::cow_hashmap<KeyT, ValueT>;
+template<typename ElementT, std::size_t capacityT>
+  using Static_Vector = rocket::static_vector<ElementT, capacityT>;
+
+using Cow_String = rocket::cow_string;
+using PreHashed_String = rocket::prehashed_string;
 
 }
 

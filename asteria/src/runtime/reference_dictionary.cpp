@@ -11,7 +11,7 @@ Reference_Dictionary::~Reference_Dictionary()
   {
   }
 
-const Reference * Reference_Dictionary::do_get_template_opt(const rocket::prehashed_string &name) const noexcept
+const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_String &name) const noexcept
   {
     // Get template table range.
     auto bptr = this->m_templ_data;
@@ -35,7 +35,7 @@ const Reference * Reference_Dictionary::do_get_template_opt(const rocket::prehas
     return nullptr;
   }
 
-const Reference * Reference_Dictionary::do_get_dynamic_opt(const rocket::prehashed_string &name) const noexcept
+const Reference * Reference_Dictionary::do_get_dynamic_opt(const PreHashed_String &name) const noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -78,7 +78,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
-    rocket::cow_vector<Bucket> stor;
+    Cow_Vector<Bucket> stor;
     stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.
@@ -129,7 +129,7 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
-          rocket::prehashed_string name;
+          PreHashed_String name;
           // Release the old element.
           rbkt.detach();
           name.swap(rbkt.name);
@@ -150,7 +150,7 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-Reference & Reference_Dictionary::open(const rocket::prehashed_string &name)
+Reference & Reference_Dictionary::open(const PreHashed_String &name)
   {
     if(name.empty()) {
       ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
@@ -188,7 +188,7 @@ Reference & Reference_Dictionary::open(const rocket::prehashed_string &name)
     return bkt->refv[0];
   }
 
-bool Reference_Dictionary::unset(const rocket::prehashed_string &name) noexcept
+bool Reference_Dictionary::unset(const PreHashed_String &name) noexcept
   {
     if(this->m_stor.empty()) {
       return false;

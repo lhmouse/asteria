@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "reference.hpp"
-#include "../rocket/cow_vector.hpp"
-#include "../rocket/static_vector.hpp"
 
 namespace Asteria {
 
@@ -15,8 +13,8 @@ class Reference_Stack
   {
   private:
     Reference *m_tptr;
-    rocket::cow_vector<Reference> m_large;
-    rocket::static_vector<Reference, 7> m_small;
+    Cow_Vector<Reference> m_large;
+    Static_Vector<Reference, 7> m_small;
 
   public:
     Reference_Stack() noexcept

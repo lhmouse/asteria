@@ -31,7 +31,7 @@ class Generational_Collector : public RefCnt_Base
 
   public:
     Collector * get_collector_opt(unsigned gen_limit) noexcept;
-    rocket::refcnt_ptr<Variable> create_variable();
+    RefCnt_Ptr<Variable> create_variable();
     bool collect(unsigned gen_limit);
   };
 

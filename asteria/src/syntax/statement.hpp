@@ -10,7 +10,6 @@
 #include "block.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -36,15 +35,15 @@ class Statement
     struct S_variable
       {
         Source_Location loc;
-        rocket::prehashed_string name;
+        PreHashed_String name;
         bool immutable;
         Expression init;
       };
     struct S_function
       {
         Source_Location loc;
-        rocket::prehashed_string name;
-        rocket::cow_vector<rocket::prehashed_string> params;
+        PreHashed_String name;
+        Cow_Vector<PreHashed_String> params;
         Block body;
       };
     struct S_if
@@ -57,7 +56,7 @@ class Statement
     struct S_switch
       {
         Expression ctrl;
-        rocket::cow_vector<std::pair<Expression, Block>> clauses;
+        Cow_Vector<std::pair<Expression, Block>> clauses;
       };
     struct S_do_while
       {
@@ -80,15 +79,15 @@ class Statement
       };
     struct S_for_each
       {
-        rocket::prehashed_string key_name;
-        rocket::prehashed_string mapped_name;
+        PreHashed_String key_name;
+        PreHashed_String mapped_name;
         Expression init;
         Block body;
       };
     struct S_try
       {
         Block body_try;
-        rocket::prehashed_string except_name;
+        PreHashed_String except_name;
         Block body_catch;
       };
     struct S_break
@@ -113,7 +112,7 @@ class Statement
       {
         Source_Location loc;
         Expression expr;
-        rocket::cow_string msg;
+        Cow_String msg;
       };
 
     enum Index : std::uint8_t
@@ -170,8 +169,8 @@ class Statement
 
   public:
     void fly_over_in_place(Abstract_Context &ctx_io) const;
-    void bind_in_place(rocket::cow_vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
-    void compile(rocket::cow_vector<Block::Compiled_Instruction> &cinsts_out) const;
+    void bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
+    void compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

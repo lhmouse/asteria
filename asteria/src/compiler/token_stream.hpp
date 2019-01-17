@@ -8,7 +8,6 @@
 #include "parser_error.hpp"
 #include "token.hpp"
 #include "../rocket/variant.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -23,7 +22,7 @@ class Token_Stream
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_Error, rocket::cow_vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    rocket::variant<std::nullptr_t, Parser_Error, Cow_Vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
     Token_Stream() noexcept
@@ -45,7 +44,7 @@ class Token_Stream
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(std::istream &cstrm_io, const rocket::cow_string &file);
+    bool load(std::istream &cstrm_io, const Cow_String &file);
     void clear() noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();

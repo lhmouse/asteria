@@ -14,12 +14,12 @@ Instantiated_Function::~Instantiated_Function()
   {
   }
 
-rocket::cow_string Instantiated_Function::describe() const
+Cow_String Instantiated_Function::describe() const
   {
     return ASTERIA_FORMAT_STRING("function `", this->m_zvarg.get().get_name(), "()` defined at \'", this->m_zvarg.get().get_location(), "\'");
   }
 
-void Instantiated_Function::invoke(Reference &self_io, Global_Context &global, rocket::cow_vector<Reference> &&args) const
+void Instantiated_Function::invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     this->m_body_bnd.execute_as_function(self_io, global, this->m_zvarg, this->m_params, std::move(args));
   }

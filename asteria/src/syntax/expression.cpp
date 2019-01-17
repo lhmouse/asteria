@@ -17,7 +17,7 @@ Expression::~Expression()
 
 void Expression::do_compile()
   {
-    rocket::cow_vector<Compiled_Instruction> cinsts;
+    Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
       node.compile(cinsts);
@@ -27,7 +27,7 @@ void Expression::do_compile()
 
 Expression Expression::bind(const Global_Context &global, const Analytic_Context &ctx) const
   {
-    rocket::cow_vector<Xpnode> nodes_bnd;
+    Cow_Vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     for(const auto &node : this->m_nodes) {
       node.bind(nodes_bnd, global, ctx);

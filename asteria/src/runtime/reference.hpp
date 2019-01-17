@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "reference_root.hpp"
 #include "reference_modifier.hpp"
-#include "../rocket/cow_vector.hpp"
 
 namespace Asteria {
 
@@ -15,7 +14,7 @@ class Reference
   {
   private:
     Reference_Root m_root;
-    rocket::cow_vector<Reference_Modifier> m_mods;
+    Cow_Vector<Reference_Modifier> m_mods;
 
   public:
     Reference() noexcept

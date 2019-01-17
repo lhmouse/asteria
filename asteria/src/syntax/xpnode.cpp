@@ -156,7 +156,7 @@ Xpnode::~Xpnode()
 
     template<typename ContextT>
       std::pair<std::reference_wrapper<const Abstract_Context>,
-        std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const ContextT &ctx, const rocket::prehashed_string &name)
+        std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const ContextT &ctx, const PreHashed_String &name)
       {
         auto qctx = static_cast<const Abstract_Context *>(&ctx);
         // De-virtualize the first call by hand.
@@ -183,7 +183,7 @@ Xpnode::~Xpnode()
 
     }
 
-void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
+void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
@@ -358,7 +358,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
     void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context & /*ctx*/)
       {
         // Allocate the argument vector.
-        rocket::cow_vector<Reference> args;
+        Cow_Vector<Reference> args;
         args.resize(alt.arg_cnt);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           *it = std::move(stack_io.mut_top());
@@ -410,7 +410,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
           }
         case type_string:
           {
-            Reference_Modifier::S_object_key mod_c = { rocket::prehashed_string(subscript.check<D_string>()) };
+            Reference_Modifier::S_object_key mod_c = { PreHashed_String(subscript.check<D_string>()) };
             stack_io.mut_top().zoom_in(std::move(mod_c));
             break;
           }
@@ -635,21 +635,21 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_concatenate(const rocket::cow_string &lhs, const rocket::cow_string &rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_concatenate(const Cow_String &lhs, const Cow_String &rhs)
       {
-        rocket::cow_string res;
+        Cow_String res;
         res.reserve(lhs.size() + rhs.size());
         res.append(lhs);
         res.append(rhs);
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_duplicate(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_duplicate(const Cow_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
-        rocket::cow_string res;
+        Cow_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count == 0) {
           return res;
@@ -671,12 +671,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_move_left(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_move_left(const Cow_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        rocket::cow_string res;
+        Cow_String res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -686,12 +686,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_move_right(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_move_right(const Cow_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        rocket::cow_string res;
+        Cow_String res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -701,12 +701,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_extend(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_extend(const Cow_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        rocket::cow_string res;
+        Cow_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count > res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
@@ -716,12 +716,12 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline rocket::cow_string do_truncate(const rocket::cow_string &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline Cow_String do_truncate(const Cow_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        rocket::cow_string res;
+        Cow_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
@@ -1298,7 +1298,7 @@ void Xpnode::bind(rocket::cow_vector<Xpnode> &nodes_out, const Global_Context &g
 
     }
 
-void Xpnode::compile(rocket::cow_vector<Expression::Compiled_Instruction> &cinsts_out) const
+void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const
   {
     switch(Index(this->m_stor.index())) {
     case index_literal:
