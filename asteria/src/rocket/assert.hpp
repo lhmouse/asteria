@@ -8,9 +8,6 @@
 
 namespace rocket {
 
-// `report_assertion_failure()` is always provided even when assertions are disabled.
-[[noreturn]] extern bool report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept;
-
     namespace details_assert {
 
     [[noreturn]] ROCKET_ARTIFICIAL_FUNCTION inline bool unreachable() noexcept
@@ -19,6 +16,9 @@ namespace rocket {
       };
 
     }
+
+// `report_assertion_failure()` is always provided even when assertions are disabled.
+[[noreturn]] extern bool report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept;
 
 }
 
