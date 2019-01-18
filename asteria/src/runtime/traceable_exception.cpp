@@ -2,11 +2,11 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "exception.hpp"
+#include "traceable_exception.hpp"
 
 namespace Asteria {
 
-Exception::~Exception()
+Traceable_Exception::~Traceable_Exception()
   {
   }
 

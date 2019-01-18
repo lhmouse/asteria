@@ -25,7 +25,7 @@ namespace Asteria {
 // Utilities
 class Formatter;
 class Runtime_Error;
-class Exception;
+class Traceable_Exception;
 
 // Syntax
 class Source_Location;

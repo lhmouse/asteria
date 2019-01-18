@@ -11,7 +11,7 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/abstract_function.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/exception.hpp"
+#include "../runtime/traceable_exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -376,15 +376,15 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // Call the function now.
           func.get().invoke(stack_io.mut_top(), global, std::move(args));
           ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
-        } catch(Exception &except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
+        } catch(Traceable_Exception &except) {
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
           // Append backtrace information and rethrow the exception.
           except.append_backtrace(alt.loc);
           throw;
         } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.loc, "\': what = ", stdex.what());
           // Here we behave as if a `string` had been thrown.
-          Exception except(stdex);
+          Traceable_Exception except(stdex);
           except.append_backtrace(alt.loc);
           throw except;
         }

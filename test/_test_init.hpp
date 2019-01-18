@@ -4,15 +4,14 @@
 #ifndef ASTERIA_TEST_INIT_HPP_
 #define ASTERIA_TEST_INIT_HPP_
 
-#include "../asteria/src/fwd.hpp"
-#include "../asteria/src/runtime/exception.hpp"
-#include <iostream>  // std::cerr, operator<< ()
-#include <exception>  // std::terminate(), std::exception
-
 #ifndef ENABLE_DEBUG_LOGS
 #  define ENABLE_DEBUG_LOGS   1
 #endif
+
+#include "../asteria/src/fwd.hpp"
+#include "../asteria/src/runtime/traceable_exception.hpp"
 #include "../asteria/src/utilities.hpp"
+#include <iostream>  // std::cerr, operator<< ()
 
 #define ASTERIA_TEST_CHECK(expr_)  \
     do {  \
@@ -30,8 +29,8 @@
     do {  \
       try {  \
         static_cast<void>(expr_);  \
-      } catch(::Asteria::Exception &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Exception`:\n\t"  \
+      } catch(::Asteria::Traceable_Exception &e) {  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Traceable_Exception`:\n\t"  \
                     << e.get_value() << ::std::endl;  \
         break;  \
       } catch(::std::exception &e) {  \

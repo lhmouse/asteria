@@ -10,7 +10,7 @@
 #include "../runtime/function_analytic_context.hpp"
 #include "../runtime/variable.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/exception.hpp"
+#include "../runtime/traceable_exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -544,8 +544,8 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           try {
             // Translate the exception as needed.
             throw;
-          } catch(const Exception &except) {
-            // Handle an `Asteria::Exception`.
+          } catch(const Traceable_Exception &except) {
+            // Handle an `Asteria::Traceable_Exception`.
             ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
             Reference_Root::S_temporary ref_c = { except.get_value() };
             do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
@@ -559,9 +559,9 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
             Reference_Root::S_temporary ref_c = { D_string(stdex.what()) };
             do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
             // We say the exception was thrown from native code.
-            push_backtrace(Exception(stdex).get_location());
+            push_backtrace(Traceable_Exception(stdex).get_location());
           }
-          ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
+          ASTERIA_DEBUG_LOG("Traceable_Exception backtrace:\n", Value(backtrace));
           Reference_Root::S_temporary ref_c = { std::move(backtrace) };
           ctx_next.open_named_reference(std::ref("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
@@ -581,7 +581,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing exception: ", value);
-        throw Exception(alt.loc, std::move(value));
+        throw Traceable_Exception(alt.loc, std::move(value));
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)

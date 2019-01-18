@@ -103,7 +103,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/variable_hashset.hpp  \
   asteria/src/runtime/abstract_variable_callback.hpp  \
   asteria/src/runtime/collector.hpp  \
-  asteria/src/runtime/exception.hpp  \
+  asteria/src/runtime/traceable_exception.hpp  \
   asteria/src/runtime/abstract_context.hpp  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
@@ -146,7 +146,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/variable_hashset.cpp  \
   asteria/src/runtime/abstract_variable_callback.cpp  \
   asteria/src/runtime/collector.cpp  \
-  asteria/src/runtime/exception.cpp  \
+  asteria/src/runtime/traceable_exception.cpp  \
   asteria/src/runtime/abstract_context.cpp  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \
@@ -185,7 +185,7 @@ check_PROGRAMS =  \
   test/value.test  \
   test/variable.test  \
   test/reference.test  \
-  test/exception.test  \
+  test/traceable_exception.test  \
   test/executive_context.test  \
   test/expression.test  \
   test/block.test  \

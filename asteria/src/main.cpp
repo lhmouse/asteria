@@ -3,7 +3,7 @@
 
 #include "compiler/simple_source_file.hpp"
 #include "runtime/global_context.hpp"
-#include "runtime/exception.hpp"
+#include "runtime/traceable_exception.hpp"
 #include <iostream>
 
 using namespace Asteria;
@@ -23,8 +23,8 @@ int main(int argc, char **argv)
     Simple_Source_File code(std::cin, std::ref("<stdin>"));
     auto res = code.execute(global, std::move(args));
     std::cout << res.read() << std::endl;
-  } catch(Exception &e) {
-    std::cerr << "Caught `Exception`: " << e.get_value() << std::endl;
+  } catch(Traceable_Exception &e) {
+    std::cerr << "Caught `Traceable_Exception`: " << e.get_value() << std::endl;
   } catch(std::exception &e) {
     std::cerr << "Caught `std::exception`: " << e.what() << std::endl;
   }
