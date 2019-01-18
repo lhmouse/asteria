@@ -21,16 +21,16 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
   {
     Argument_Sentry sentry(std::ref("<builtin>.__varg"), args);
     // `__varg()`:
-    //   Return the number of variadic arguments.
     if(sentry.reset().cut()) {
+      // Return the number of variadic arguments.
       Reference_Root::S_constant ref_c = { D_integer(this->get_varg_size()) };
       self_io = std::move(ref_c);
       return;
     }
-    // `__varg(number)`:
-    //   Return the argument at the index specified.
+    // `__varg(integer)`:
     D_integer index;
     if(sentry.reset().req(index).cut()) {
+      // Return the argument at the index specified.
       auto wrap = wrap_index(index, this->get_varg_size());
       if(wrap.index >= this->get_varg_size()) {
         ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", this->get_varg_size());
@@ -41,12 +41,14 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
       return;
     }
     // Fail.
-    sentry.throw_no_matching_function_call(
+    static constexpr Argument_Sentry::Overload_Parameter s_overloads[] =
       {
-        // Remember to keep this list up-to-date.
+        // `__varg()`:
         0,
+        // `__varg(integer)`:
         1, type_integer,
-      });
+      };
+    sentry.throw_no_matching_function_call(s_overloads, rocket::countof(s_overloads));
   }
 
 void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &callback) const
