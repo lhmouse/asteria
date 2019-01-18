@@ -362,7 +362,7 @@ Argument_Sentry & Argument_Sentry::cut()
 
     }
 
-[[noreturn]] void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
+void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
   {
     const auto &name = this->m_name;
     const auto &args = this->m_args.get();

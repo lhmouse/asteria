@@ -11,7 +11,7 @@ Variable::~Variable()
   {
   }
 
-[[noreturn]] void Variable::do_throw_immutable() const
+void Variable::do_throw_immutable() const
   {
     ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", this->m_value, "` is immutable and cannot be modified.");
   }

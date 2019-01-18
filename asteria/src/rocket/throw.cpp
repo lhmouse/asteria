@@ -20,22 +20,22 @@ namespace rocket {
       throw Except_(msgbuf_);  \
     } while(false)
 
-[[noreturn]] void throw_invalid_argument(const char *fmt, ...)
+void throw_invalid_argument(const char *fmt, ...)
   {
     ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::invalid_argument, fmt);
   }
 
-[[noreturn]] void throw_out_of_range(const char *fmt, ...)
+void throw_out_of_range(const char *fmt, ...)
   {
     ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::out_of_range, fmt);
   }
 
-[[noreturn]] void throw_length_error(const char *fmt, ...)
+void throw_length_error(const char *fmt, ...)
   {
     ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::length_error, fmt);
   }
 
-[[noreturn]] void throw_domain_error(const char *fmt, ...)
+void throw_domain_error(const char *fmt, ...)
   {
     ROCKET_DEFINE_VSNPRINTF_AND_THROW(::std::domain_error, fmt);
   }

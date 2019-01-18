@@ -126,7 +126,7 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-[[noreturn]] void throw_runtime_error(Formatter &&fmt, const char *funcsig)
+void throw_runtime_error(Formatter &&fmt, const char *funcsig)
   {
     // Move the formatted message into a stream...
     rocket::insertable_ostream mos;
@@ -135,7 +135,7 @@ Runtime_Error::~Runtime_Error()
     throw_runtime_error(std::move(mos), funcsig);
   }
 
-[[noreturn]] void throw_runtime_error(rocket::insertable_ostream &&mos, const char *funcsig)
+void throw_runtime_error(rocket::insertable_ostream &&mos, const char *funcsig)
   {
     // Append the function signature.
     mos << "\n[thrown from `" << funcsig << "`]";
