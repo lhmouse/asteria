@@ -16,9 +16,9 @@ class Argument_Sentry
     struct State
       {
         std::uint8_t offset;
-        bool succeeded;
-        bool finished;
-        bool reserved;
+        bool succeeded : 1;
+        bool finished : 1;
+        std::uint16_t padding;
       };
 
     // This union is purely invented for `throw_no_matching_function_call()`.
