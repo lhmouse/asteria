@@ -48,7 +48,10 @@ class Exception : public virtual std::exception
         this->m_backtrace.emplace_back(loc);
       }
 
-    const char * what() const noexcept override;
+    const char * what() const noexcept override
+      {
+        return "Asteria::Exception";
+      }
   };
 
 }

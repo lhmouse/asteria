@@ -146,7 +146,10 @@ class Runtime_Error : public virtual std::exception
     ROCKET_COPYABLE_DESTRUCTOR(Runtime_Error);
 
   public:
-    const char * what() const noexcept override;
+    const char * what() const noexcept override
+      {
+        return this->m_msg.c_str();
+      }
   };
 
 [[noreturn]] extern void throw_runtime_error(const char *funcsig, Formatter &&fmt);

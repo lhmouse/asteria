@@ -126,11 +126,6 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-const char * Runtime_Error::what() const noexcept
-  {
-    return this->m_msg.c_str();
-  }
-
 [[noreturn]] void throw_runtime_error(const char *funcsig, Formatter &&fmt)
   {
     auto str = fmt.extract_string();

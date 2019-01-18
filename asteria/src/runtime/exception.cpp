@@ -10,9 +10,4 @@ Exception::~Exception()
   {
   }
 
-const char * Exception::what() const noexcept
-  {
-    return "Asteria::Exception";
-  }
-
 }

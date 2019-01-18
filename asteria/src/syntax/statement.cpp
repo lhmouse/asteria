@@ -252,7 +252,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         const auto &alt = this->m_stor.as<S_assert>();
         // Bind the condition recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_assert alt_bnd = { alt.loc, std::move(expr_bnd), alt.msg };
+        Statement::S_assert alt_bnd = { std::move(expr_bnd), alt.msg };
         stmts_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -603,15 +603,9 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // If the condition yields `false`, throw an exception.
         auto value = ref_out.read();
         if(!value.test()) {
-          D_string msg;
-          if(alt.msg.empty()) {
-            msg = std::ref("Assertion failed!");
-          } else {
-            msg = std::ref("Assertion failed: ");
-            msg += alt.msg;
-          }
+          auto msg = alt.msg.empty() ? std::ref("Assertion failed!") : "Assertion failed: " + alt.msg;
           ASTERIA_DEBUG_LOG("Throwing exception: ", msg);
-          throw Exception(alt.loc, std::move(msg));
+          throw Runtime_Error(std::move(msg));
         }
         return Block::status_next;
       }

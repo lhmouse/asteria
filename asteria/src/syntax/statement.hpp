@@ -110,7 +110,6 @@ class Statement
       };
     struct S_assert
       {
-        Source_Location loc;
         Expression expr;
         Cow_String msg;
       };
