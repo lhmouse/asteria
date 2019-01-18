@@ -97,7 +97,7 @@ bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept
           i += repn - 1;
         };
       // Check one character.
-      const long ch = str[i] & 0xFF;
+      const int ch = str[i] & 0xFF;
       if(ch == 0x7F) {
         replace_one("[DEL\\x7F]");
         continue;
