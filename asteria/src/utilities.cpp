@@ -337,10 +337,11 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
     }
     // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
     if(rindex >= rsize) {
+      // Calculate the number of elements to fill.
       wrap.back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
       return wrap;
     }
-    // `rindex` firs in range.
+    // `rindex` fits in range.
     return wrap;
   }
 
