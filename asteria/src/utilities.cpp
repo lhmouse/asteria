@@ -126,15 +126,21 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-[[noreturn]] void throw_runtime_error(const char *funcsig, Formatter &&fmt)
+[[noreturn]] void throw_runtime_error(Formatter &&fmt, const char *funcsig)
   {
-    auto str = fmt.extract_string();
+    // Move the formatted message into a stream...
+    rocket::insertable_ostream mos;
+    mos.set_string(fmt.extract_string());
+    // then use this stream for further processing.
+    throw_runtime_error(std::move(mos), funcsig);
+  }
+
+[[noreturn]] void throw_runtime_error(rocket::insertable_ostream &&mos, const char *funcsig)
+  {
     // Append the function signature.
-    str += "\n(thrown from `";
-    str += funcsig;
-    str += "`)";
+    mos << "\n[thrown from `" << funcsig << "`]";
     // Throw it.
-    throw Runtime_Error(std::move(str));
+    throw Runtime_Error(mos.extract_string());
   }
 
 ///////////////////////////////////////////////////////////////////////////////

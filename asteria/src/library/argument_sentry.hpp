@@ -15,7 +15,6 @@ class Argument_Sentry
   public:
     struct State
       {
-        const Cow_Vector<Reference> *args;
         unsigned offset;
         bool succeeded;
         bool finished;
@@ -25,7 +24,7 @@ class Argument_Sentry
     // Each overload is represented as follows:
     //   `number-of-parameters, parameter-one, parameter-two`
     // The number of parameters is an integer of type `unsigned char`.
-    // Parameters may be enumerators having type `Value::Type` or `nullptr`.
+    // Parameters may be empty `initializer_list`s (for type-generic or output-only parameters) or enumerators having type `Value_Type`.
     union Overload_Parameter
       {
         std::uint8_t nparams;
@@ -35,7 +34,7 @@ class Argument_Sentry
           : nparams(static_cast<unsigned char>(ROCKET_ASSERT(xnparams < 0xFF), xnparams))
           {
           }
-        constexpr Overload_Parameter(std::nullptr_t) noexcept
+        constexpr Overload_Parameter(std::initializer_list<int>) noexcept
           : nparams(0xFF)
           {
           }
@@ -47,6 +46,7 @@ class Argument_Sentry
 
   private:
     Cow_String m_name;
+    std::reference_wrapper<const Cow_Vector<Reference>> m_args;
     bool m_throw_on_failure;
 
     // N.B. The contents of `m_state` can be copied elsewhere and back.
@@ -54,8 +54,8 @@ class Argument_Sentry
     State m_state;
 
   public:
-    explicit Argument_Sentry(Cow_String name) noexcept
-      : m_name(std::move(name)), m_throw_on_failure(false),
+    Argument_Sentry(Cow_String name, const Cow_Vector<Reference> &args) noexcept
+      : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
         m_state()
       {
       }
@@ -71,6 +71,14 @@ class Argument_Sentry
     const Cow_String & get_name() const noexcept
       {
         return this->m_name;
+      }
+    std::size_t get_argument_count() const noexcept
+      {
+        return this->m_args.get().size();
+      }
+    const Reference & get_argument(std::size_t index) const
+      {
+        return this->m_args.get().at(index);
       }
 
     bool does_throw_on_failure() const noexcept
@@ -94,9 +102,8 @@ class Argument_Sentry
       {
         return this->m_state.succeeded;
       }
-    void reset(const Cow_Vector<Reference> &args) noexcept
+    void reset() noexcept
       {
-        this->m_state.args = &args;
         this->m_state.offset = 0;
         this->m_state.succeeded = true;
         this->m_state.finished = false;

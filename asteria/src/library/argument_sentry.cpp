@@ -54,15 +54,15 @@ Argument_Sentry::~Argument_Sentry()
               return;
             }
             // Get an argument.
-            if(state.offset >= state.args->size()) {
+            if(state.offset >= parent.get_argument_count()) {
               do_fail(parent, state,
                 [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", state.args->size(), ").");
+                  ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");
                 });
               return;
             }
             // Succeed.
-            this->m_ref = state.args->data() + state.offset;
+            this->m_ref = std::addressof(parent.get_argument(state.offset));
             this->m_committable = true;
           }
         ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Sentry)
@@ -280,10 +280,10 @@ Argument_Sentry & Argument_Sentry::cut()
       return *this;
     }
     // Check for the end of the argument list.
-    if(state.offset != state.args->size()) {
+    if(state.offset != this->get_argument_count()) {
       do_fail(*this, state,
         [&]{
-           ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", state.args->size(), ").");
+           ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");
         });
       return *this;
     }
@@ -292,69 +292,104 @@ Argument_Sentry & Argument_Sentry::cut()
     return *this;
   }
 
+    namespace {
+
+    template<typename IteratorT, typename FilterT>
+      class Type_Name_Imploder
+      {
+      private:
+        IteratorT m_begin;
+        std::size_t m_count;
+
+        FilterT m_filter;
+
+      public:
+        constexpr Type_Name_Imploder(IteratorT xbegin, std::size_t xcount, FilterT xfilter)
+          : m_begin(std::move(xbegin)), m_count(xcount),
+            m_filter(std::move(xfilter))
+          {
+          }
+
+      public:
+        const IteratorT & begin() const noexcept
+          {
+            return this->m_begin;
+          }
+        std::size_t count() const noexcept
+          {
+            return this->m_count;
+          }
+
+        const char * filt(typename std::iterator_traits<IteratorT>::reference param) const
+          {
+            return this->m_filter(static_cast<typename std::iterator_traits<IteratorT>::reference>(param));
+          }
+      };
+
+    template<typename IteratorT, typename FilterT>
+      std::ostream & operator<<(std::ostream &os, const Type_Name_Imploder<IteratorT, FilterT> &imploder)
+      {
+        auto cur = imploder.begin();
+        auto rem = imploder.count();
+        // Deal with nasty commas.
+        switch(rem) {
+        default:
+          while(--rem != 0) {
+            os << imploder.filt(*cur) << ", ";
+            ++cur;
+          }
+          // Fallthrough.
+        case 1:
+          os << imploder.filt(*cur);
+          ++cur;
+          // Fallthrough.
+        case 0:
+          break;
+        }
+        return os;
+      }
+
+    template<typename IteratorT, typename FilterT>
+      constexpr Type_Name_Imploder<typename std::decay<IteratorT>::type, FilterT> do_implode(IteratorT &&begin, std::size_t count, FilterT &&filter)
+      {
+        return Type_Name_Imploder<typename std::decay<IteratorT>::type, FilterT>(std::forward<IteratorT>(begin), count, std::forward<FilterT>(filter));
+      }
+
+    }
+
 [[noreturn]] void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
   {
-    const auto args = this->m_state.args;
-    if(!args) {
-      // Hmmm you have to call `.reset()` first.
-      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had not been initialized yet.");
-    }
+    const auto &name = this->m_name;
+    const auto &args = this->m_args.get();
     // Create a message containing arguments.
-    Formatter msg;
-    ASTERIA_FORMAT(msg, "There was no matching overload for function call `", this->m_name, "(");
-    // Append the types of all arguments.
-    auto size = args->size();
-    if(size != 0) {
-      // Deal with the nasty commas.
-      auto ptr = args->data();
-      Value value;
-      do {
-        value = ptr->read();
-        ASTERIA_FORMAT(msg, Value::get_type_name(value.type()));
-        ++ptr;
-        if(--size == 0) {
-          break;
-        }
-        ASTERIA_FORMAT(msg, ", ");
-      } while(true);
-    }
-    ASTERIA_FORMAT(msg, ")`.");
+    rocket::insertable_ostream mos;
+    mos << "There was no matching overload for function call `" << name << "("
+        << do_implode(args.data(), args.size(), [&](const Reference &arg) { return Value::get_type_name(arg.read().type()); })
+        << ")`.";
     // If an overload list is provided, append it.
-    size = overload_size;
-    if(size != 0) {
-      ASTERIA_FORMAT(msg, "\n(possible overload(s): ");
-      // Collect all overloads.
+    if(overload_size != 0) {
       auto ptr = overload_data;
+      ROCKET_ASSERT(ptr);
+      const auto end = ptr + overload_size;
+      // Collect all overloads.
+      mos << "\n[possible overloads: ";
       for(;;) {
-        auto nparams = static_cast<std::size_t>(ptr->nparams);
+        const auto nparams = static_cast<std::size_t>(ptr->nparams);
         ++ptr;
-        --size;
-        ROCKET_ASSERT_MSG(nparams <= size, "The overload list data were malformed.");
-        // Assemble the function prototype.
-        ASTERIA_FORMAT(msg, "`", this->m_name, "(");
-        if(nparams != 0) {
-          // Yay, nasty commas again.
-          size -= nparams;
-          do {
-            ASTERIA_FORMAT(msg, (ptr->nparams == 0xFF) ? "<any>" : Value::get_type_name(ptr->type));
-            ++ptr;
-            if(--nparams == 0) {
-              break;
-            }
-            ASTERIA_FORMAT(msg, ", ");
-          } while(true);
-        }
-        ASTERIA_FORMAT(msg, ")`");
-        // Finish the parameter list of this overload.
-        if(size == 0) {
+        ROCKET_ASSERT_MSG(nparams <= static_cast<std::size_t>(end - ptr), "The possible overload data were malformed.");
+        mos << "`" << name << "("
+            << do_implode(ptr, nparams, [&](const Overload_Parameter &param) { return (param.nparams == 0xFF) ? "<generic>" : Value::get_type_name(param.type); })
+            << ")`";
+        // Move to the next parameter.
+        if((ptr += nparams) == end) {
           break;
         }
-        ASTERIA_FORMAT(msg, ", ");
+        mos << ", ";
       }
-      ASTERIA_FORMAT(msg, ")");
+      mos << "]";
     }
     // Throw it now.
-    throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
+    throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
   }
 
 }

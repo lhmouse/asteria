@@ -19,17 +19,18 @@ Simple_Source_File::~Simple_Source_File()
 
 void Simple_Source_File::do_throw_error(const Parser_Error &err)
   {
-    Formatter msg;
-    ASTERIA_FORMAT(msg, "An error was encountered while parsing source data: ", Parser_Error::get_code_description(err.code()));
+    rocket::insertable_ostream mos;
+    mos << "An error was encountered while parsing source data: ERROR " << err.code() << ": " << Parser_Error::get_code_description(err.code());
     // Append error location information.
-    ASTERIA_FORMAT(msg, "\n(caught error ", err.code(), " at");
+    mos << "\n[stopped at ";
     if(err.line() == 0) {
-      ASTERIA_FORMAT(msg, " the end of data");
+      mos << "the end of data";
     } else {
-      ASTERIA_FORMAT(msg, " line ", err.line(), ", offset ", err.offset());
+      mos << "line " << err.line() << ", offset " << err.offset();
     }
-    ASTERIA_FORMAT(msg, ")");
-    throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
+    mos << "]";
+    // Throw it now.
+    throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
   }
 
 Parser_Error Simple_Source_File::load_file(const Cow_String &filename)

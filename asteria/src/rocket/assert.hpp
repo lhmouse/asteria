@@ -28,8 +28,7 @@ namespace rocket {
 #  define ROCKET_DETAILS_FAIL_ASSERTION_(...)    ::rocket::details_assert::unreachable()
 #endif
 
-#define ROCKET_DETAILS_ASSERT_(pred_, xstr_, msg_)    (void(static_cast<bool>(pred_) ||  \
-                                                            ROCKET_DETAILS_FAIL_ASSERTION_(xstr_, __FILE__, __LINE__, msg_)))
+#define ROCKET_DETAILS_ASSERT_(pred_, xstr_, msg_)    (void(bool(pred_) || ROCKET_DETAILS_FAIL_ASSERTION_(xstr_, __FILE__, __LINE__, msg_)))
 
 #define ROCKET_ASSERT(expr_)              ROCKET_DETAILS_ASSERT_(expr_, #expr_, "")
 #define ROCKET_ASSERT_MSG(expr_, m_)      ROCKET_DETAILS_ASSERT_(expr_, #expr_, m_)

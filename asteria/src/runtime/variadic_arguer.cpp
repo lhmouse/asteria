@@ -19,10 +19,10 @@ Cow_String Variadic_Arguer::describe() const
 
 void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
   {
-    Argument_Sentry sentry(std::ref("<builtin>.__varg"));
+    Argument_Sentry sentry(std::ref("<builtin>.__varg"), args);
     // `__varg()`:
     //   Return the number of variadic arguments.
-    sentry.reset(args);
+    sentry.reset();
     if(sentry.cut()) {
       Reference_Root::S_constant ref_c = { D_integer(this->get_varg_size()) };
       self_io = std::move(ref_c);
@@ -30,7 +30,7 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
     }
     // `__varg(number)`:
     //   Return the argument at the index specified.
-    sentry.reset(args);
+    sentry.reset();
     D_integer index;
     if(sentry.req(index).cut()) {
       auto wrap = wrap_index(index, this->get_varg_size());
