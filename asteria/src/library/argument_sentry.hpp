@@ -15,9 +15,10 @@ class Argument_Sentry
   public:
     struct State
       {
-        unsigned offset;
+        std::uint8_t offset;
         bool succeeded;
         bool finished;
+        bool reserved;
       };
 
     // This union is purely invented for `throw_no_matching_function_call()`.
@@ -102,11 +103,12 @@ class Argument_Sentry
       {
         return this->m_state.succeeded;
       }
-    void reset() noexcept
+    Argument_Sentry & reset() noexcept
       {
         this->m_state.offset = 0;
         this->m_state.succeeded = true;
         this->m_state.finished = false;
+        return *this;
       }
 
     // Sentry objects are allowed in `if` and `while` conditions, just like `std::istream`s.

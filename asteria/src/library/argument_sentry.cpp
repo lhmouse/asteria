@@ -72,8 +72,13 @@ Argument_Sentry::~Argument_Sentry()
             if(!state.succeeded) {
               return;
             }
-            // If an argument has been read consumed, bump up the index.
-            state.offset += !this->m_committable;
+            // If the argument was not consumed, don't do anything.
+            if(this->m_committable) {
+              return;
+            }
+            // Bump up the index.
+            ROCKET_ASSERT(state.offset < 0xFE);
+            state.offset++;
           }
 
       public:

@@ -22,17 +22,15 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
     Argument_Sentry sentry(std::ref("<builtin>.__varg"), args);
     // `__varg()`:
     //   Return the number of variadic arguments.
-    sentry.reset();
-    if(sentry.cut()) {
+    if(sentry.reset().cut()) {
       Reference_Root::S_constant ref_c = { D_integer(this->get_varg_size()) };
       self_io = std::move(ref_c);
       return;
     }
     // `__varg(number)`:
     //   Return the argument at the index specified.
-    sentry.reset();
     D_integer index;
-    if(sentry.req(index).cut()) {
+    if(sentry.reset().req(index).cut()) {
       auto wrap = wrap_index(index, this->get_varg_size());
       if(wrap.index >= this->get_varg_size()) {
         ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", this->get_varg_size());
