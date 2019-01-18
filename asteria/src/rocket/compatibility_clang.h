@@ -9,8 +9,8 @@
 #define ROCKET_FUNCSIG                      __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()                __builtin_unreachable()
 #define ROCKET_SELECTANY                    __attribute__((__weak__))
-#define ROCKET_EXPECT(...)                  __builtin_expect((__VA_ARGS__) ? 1 : 0, 1)
-#define ROCKET_UNEXPECT(...)                __builtin_expect((__VA_ARGS__) ? 1 : 0, 0)
+#define ROCKET_EXPECT(...)                  __builtin_expect((bool)(__VA_ARGS__), 1)
+#define ROCKET_UNEXPECT(...)                __builtin_expect((bool)(__VA_ARGS__), 0)
 #define ROCKET_SECTION(...)                 __attribute__((__section__(__VA_ARGS__)))
 #define ROCKET_NOINLINE                     __attribute__((__noinline__))
 #define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
