@@ -353,6 +353,7 @@ Argument_Sentry & Argument_Sentry::cut()
       }
       ASTERIA_FORMAT(msg, ")");
     }
+    // Throw it now.
     throw_runtime_error(ROCKET_FUNCSIG, std::move(msg));
   }
 
