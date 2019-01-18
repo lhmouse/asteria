@@ -23,7 +23,7 @@ Parser::~Parser()
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Parser_Error(0, 0, 0, code);
+          return Parser_Error(0, SIZE_MAX, 0, code);
         }
         return Parser_Error(qtok->get_line(), qtok->get_offset(), qtok->get_length(), code);
       }
