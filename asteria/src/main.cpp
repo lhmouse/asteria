@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     auto res = code.execute(global, std::move(args));
     std::cout << res.read() << std::endl;
   } catch(Traceable_Exception &e) {
-    std::cerr << "Caught `Traceable_Exception`: " << e.get_value() << std::endl;
+    std::cerr << "Caught `Traceable_Exception`:\n--\n" << e.get_value() << std::endl;
   } catch(std::exception &e) {
-    std::cerr << "Caught `std::exception`: " << e.what() << std::endl;
+    std::cerr << "Caught `std::exception`:\n--\n" << e.what() << std::endl;
   }
