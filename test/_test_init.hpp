@@ -30,8 +30,16 @@
       try {  \
         static_cast<void>(expr_);  \
       } catch(::Asteria::Traceable_Exception &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Traceable_Exception`:\n\t"  \
-                    << e.get_value() << ::std::endl;  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Traceable_Exception`:\n"  \
+                    << "\t" << e.get_value() << ::std::endl;  \
+        auto &bt = e.get_backtrace();  \
+        for(auto it = bt.rbegin(); it != bt.rend(); ++it) {  \
+          ::std::cout << "\t* thrown from: " << *it << ::std::endl;  \
+        }  \
+        break;  \
+      } catch(::Asteria::Runtime_Error &e) {  \
+        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Runtime_Error`:\n\t"  \
+                    << e.what() << ::std::endl;  \
         break;  \
       } catch(::std::exception &e) {  \
         ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `std::exception`:\n\t"  \
