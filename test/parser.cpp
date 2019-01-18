@@ -7,7 +7,6 @@
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/reference.hpp"
-#include "../asteria/src/runtime/exception.hpp"
 #include "../asteria/src/runtime/variadic_arguer.hpp"
 #include "../asteria/src/syntax/source_location.hpp"
 #include <sstream>
