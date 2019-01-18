@@ -68,7 +68,7 @@ class Parser_Error
       };
 
   public:
-    static const char * get_code_description(Code code) noexcept;
+    static const char * get_code_description(Code xcode) noexcept;
 
   private:
     std::uint32_t m_line;
@@ -77,25 +77,25 @@ class Parser_Error
     Code m_code;
 
   public:
-    constexpr Parser_Error(std::uint32_t line, std::size_t offset, std::size_t xlength, Code code) noexcept
-      : m_line(line), m_offset(offset), m_length(xlength), m_code(code)
+    constexpr Parser_Error(std::uint32_t xline, std::size_t xoffset, std::size_t xlength, Code xcode) noexcept
+      : m_line(xline), m_offset(xoffset), m_length(xlength), m_code(xcode)
       {
       }
 
   public:
-    constexpr std::uint32_t get_line() const noexcept
+    constexpr std::uint32_t line() const noexcept
       {
         return this->m_line;
       }
-    constexpr std::size_t get_offset() const noexcept
+    constexpr std::size_t offset() const noexcept
       {
         return this->m_offset;
       }
-    constexpr std::size_t get_length() const noexcept
+    constexpr std::size_t length() const noexcept
       {
         return this->m_length;
       }
-    constexpr Code get_code() const noexcept
+    constexpr Code code() const noexcept
       {
         return this->m_code;
       }
@@ -103,20 +103,20 @@ class Parser_Error
 
 constexpr bool operator==(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
   {
-    return lhs.get_code() == rhs;
+    return lhs.code() == rhs;
   }
 constexpr bool operator!=(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
   {
-    return lhs.get_code() != rhs;
+    return lhs.code() != rhs;
   }
 
 constexpr bool operator==(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
   {
-    return lhs == rhs.get_code();
+    return lhs == rhs.code();
   }
 constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
   {
-    return lhs != rhs.get_code();
+    return lhs != rhs.code();
   }
 
 }
