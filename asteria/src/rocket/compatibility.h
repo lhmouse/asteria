@@ -4,16 +4,23 @@
 #ifndef ROCKET_COMPATIBILITY_H_
 #define ROCKET_COMPATIBILITY_H_
 
-#include <cstdbool>  // standard library configuration macros
+#include <stdbool.h>  // standard library configuration macros
 
+#define ROCKET_DETAILS_COMPATIBILITY_IMPLEMENTATION_  1
+
+// Check for Clang before GCC or MSVC, because Clang can behave like either.
 #if defined(__clang__)
 #  include "_compatibility_clang.h"
-#elif defined(__GNUC__)
+#endif
+
+// Check for GCC.
+#if !defined(__clang__) && defined(__GNUC__)
 #  include "_compatibility_gcc.h"
-#elif defined(_MSC_VER)
+#endif
+
+// Check for MSVC.
+#if !defined(__clang__) && defined(_MSC_VER)
 #  include "_compatibility_msvc.h"
-#else
-#  error This compiler is not supported.
 #endif
 
 #endif
