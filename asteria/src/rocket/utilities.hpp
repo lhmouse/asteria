@@ -134,10 +134,21 @@ using ::std::reference_wrapper;
 using ::std::pair;
 using ::std::tuple;
 
-template<typename typeT>
+struct identity
+  {
+    template<typename paramT>
+      constexpr paramT && operator()(paramT &&param) const noexcept
+      {
+        return ::std::forward<paramT>(param);
+      }
+
+    using is_transparent = void;
+  };
+
+template<typename paramT>
   struct type_identity
   {
-    using type = typeT;
+    using type = paramT;
   };
 
 template<typename typeT, typename withT>
