@@ -25,20 +25,23 @@ class Argument_Sentry
     // Each overload is represented as follows:
     //   `number-of-parameters, parameter-one, parameter-two`
     // The number of parameters is an integer of type `unsigned char`.
-    // Parameters may be empty `initializer_list`s (for type-generic or output-only parameters) or enumerators having type `Value_Type`.
+    // Parameters may be `{ }` (for type-generic or write-only parameters) or enumerators having type `Value_Type`.
     union Overload_Parameter
       {
         std::uint8_t nparams;
         Value_Type type;
 
+        // number of parameters
         constexpr Overload_Parameter(int xnparams) noexcept
           : nparams(static_cast<unsigned char>(ROCKET_ASSERT(xnparams < 0xFF), xnparams))
           {
           }
+        // type-generic or write-only parameter
         constexpr Overload_Parameter(std::initializer_list<int>) noexcept
           : nparams(0xFF)
           {
           }
+        // exactly typed parameter
         constexpr Overload_Parameter(Value_Type xtype) noexcept
           : type(xtype)
           {
