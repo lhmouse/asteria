@@ -99,7 +99,8 @@ class Argument_Sentry
         this->m_state = state;
       }
 
-    bool succeeded() const noexcept
+    // Sentry objects are allowed in `if` and `while` conditions, just like `std::istream`s.
+    explicit operator bool () const noexcept
       {
         return this->m_state.succeeded;
       }
@@ -109,12 +110,6 @@ class Argument_Sentry
         this->m_state.succeeded = true;
         this->m_state.finished = false;
         return *this;
-      }
-
-    // Sentry objects are allowed in `if` and `while` conditions, just like `std::istream`s.
-    explicit operator bool () const noexcept
-      {
-        return this->succeeded();
       }
 
     // Get an OPTIONAL argument.
