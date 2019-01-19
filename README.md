@@ -1,15 +1,15 @@
 |CI            |Category  |Build on OS   |Host OS             |Build Status     |
 |:-------------|:---------|:-------------|:-------------------|:----------------|
-|**Travis CI** |Primary   |Ubuntu Trusty |Ubuntu Trusty       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
-|**Tea CI**    |Secondary |Wine          |Windows Server 2003 |[![Build Status](https://tea-ci.org/api/badges/lhmouse/asteria/status.svg)](https://tea-ci.org/lhmouse/asteria) |
+|**Travis CI** |🥇Primary   |Ubuntu Trusty |Ubuntu Trusty       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
+|**Tea CI**    |🥈Secondary |Wine          |Windows Server 2003 |[![Build Status](https://tea-ci.org/api/badges/lhmouse/asteria/status.svg)](https://tea-ci.org/lhmouse/asteria) |
 
 |Compiler      |Category  |Comments                                                    |
 |:-------------|:---------|:-----------------------------------------------------------|
-|**GCC 8**     |Primary   |                                                            |
-|**GCC 7**     |Secondary |Faulty strict overflow warnings.                            |
-|**GCC 4.8**   |Primary   |                                                            |
-|**Clang 6.0** |Secondary |Unknown warning options. A number of meaningless warnings.  |
-|**MSVC 19**   |Obsolete  |Little build system support. Internal compiler errors.      |
+|**GCC 8**     |🥇Primary   |                                                            |
+|**GCC 7**     |🥈Secondary |Faulty strict overflow warnings.                            |
+|**GCC 4.8**   |🥇Primary   |                                                            |
+|**Clang 6.0** |🥈Secondary |Unknown warning options. A number of meaningless warnings.  |
+|**MSVC 19**   |🚫Obsolete  |Little build system support. Internal compiler errors.      |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
