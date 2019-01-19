@@ -1213,21 +1213,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return const_iterator(this->m_sth, ptr + toff);
       }
-    template<typename ykeyT>
-      pair<const_iterator, const_iterator> equal_range(const ykeyT &key) const
-      {
-        const auto ptr = this->do_get_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
-          auto tcur = this->end();
-          return ::std::make_pair(tcur, tcur);
-        }
-        auto tnext = const_iterator(this->m_sth, ptr + toff);
-        auto tcur = tnext;
-        tnext.seek_next();
-        return ::std::make_pair(tcur, tnext);
-      }
-
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
@@ -1240,23 +1225,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return iterator(this->m_sth, ptr + toff);
       }
-    // N.B. This function may throw `std::bad_alloc`.
-    // N.B. This is a non-standard extension.
-    template<typename ykeyT>
-      pair<iterator, iterator> mut_equal_range(const ykeyT &key)
-      {
-        const auto ptr = this->do_mut_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
-          auto tcur = this->mut_end();
-          return ::std::make_pair(tcur, tcur);
-        }
-        auto tnext = iterator(this->m_sth, ptr + toff);
-        auto tcur = tnext;
-        tnext.seek_next();
-        return ::std::make_pair(tcur, tnext);
-      }
-
     template<typename ykeyT>
       size_t count(const ykeyT &key) const
       {
@@ -1278,7 +1246,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return ptr[toff]->second;
       }
-
     // N.B. This is a non-standard extension.
     template<typename ykeyT>
       mapped_type & mut(const ykeyT &key)
