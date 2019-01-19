@@ -23,10 +23,10 @@ template<typename iteratorT, typename differenceT, typename delimiterT,
              typename yfilterT,
              ROCKET_ENABLE_IF(conjunction<is_constructible<iteratorT, yiteratorT &&>, is_constructible<differenceT, ydifferenceT &&>, is_constructible<delimiterT, ydelimiterT &&>,
                                           is_constructible<filterT, yfilterT &&>>::value)>
-    constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&delimiter,
+    constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&ydelimiter,
                                yfilterT &&yfilter) noexcept(conjunction<is_nothrow_constructible<iteratorT, yiteratorT &&>, is_nothrow_constructible<differenceT, ydifferenceT &&>,
                                                                         is_nothrow_constructible<delimiterT, ydelimiterT &&>, is_nothrow_constructible<filterT, yfilterT &&>>::value)
-      : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)), m_delimiter(::std::forward<delimiterT>(delimiter)),
+      : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)), m_delimiter(::std::forward<ydelimiterT>(ydelimiter)),
         m_filter(::std::forward<yfilterT>(yfilter))
       {
       }
