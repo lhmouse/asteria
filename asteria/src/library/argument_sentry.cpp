@@ -346,7 +346,6 @@ Argument_Sentry & Argument_Sentry::cut()
           // Fallthrough.
         case 1:
           os << imploder.filt(*cur);
-          ++cur;
           // Fallthrough.
         case 0:
           break;
