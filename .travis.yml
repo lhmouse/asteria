@@ -19,6 +19,7 @@ compiler:
   - clang
 
 install:
+  - ${CXX} --version
   - ./check_includes.sh
   - mkdir -p m4
   - autoreconf -ifv

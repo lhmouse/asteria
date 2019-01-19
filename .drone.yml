@@ -11,6 +11,7 @@ build:
   pull: true
   shell: mingw$${arch}
   commands:
+    - g++ --version
     - ./check_includes.sh
     - mkdir -p m4
     - autoreconf -ifv
