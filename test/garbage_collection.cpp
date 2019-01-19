@@ -29,13 +29,18 @@ void operator delete(void *ptr) noexcept
     std::free(ptr);
   }
 
+#if __cplusplus >= 201402
 void operator delete(void *ptr, std::size_t) noexcept
   {
     operator delete(ptr);
   }
+#endif
 
 int main()
   {
+    // Ignore leaks of emutls, emergency pool, etc.
+    rocket::make_unique<std::ostringstream>().reset();
+
     ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);
     {
       std::istringstream iss(R"__(

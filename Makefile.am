@@ -193,7 +193,7 @@ check_PROGRAMS =  \
   test/token_stream.test  \
   test/parser.test  \
   test/simple_source_file.test  \
-  test/garbage_collector.test  \
+  test/garbage_collection.test  \
   test/varg.test
 
 TESTS = ${check_PROGRAMS}
