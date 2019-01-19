@@ -26,20 +26,16 @@
       try {  \
         static_cast<void>(expr_);  \
       } catch(::Asteria::Traceable_Exception &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Traceable_Exception`:\n"  \
-                    << "\t" << e.get_value() << ::std::endl;  \
-        auto &bt = e.get_backtrace();  \
-        for(auto it = bt.rbegin(); it != bt.rend(); ++it) {  \
-          ::std::cout << "\t* thrown from: " << *it << ::std::endl;  \
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception`: ", e.get_value());  \
+        for(const auto &loc : e.get_backtrace()) {  \
+          ASTERIA_DEBUG_LOG("\t* thrown from: ", loc);  \
         }  \
         break;  \
       } catch(::Asteria::Runtime_Error &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `Asteria::Runtime_Error`:\n\t"  \
-                    << e.what() << ::std::endl;  \
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", e.what());  \
         break;  \
       } catch(::std::exception &e) {  \
-        ::std::cout << "ASTERIA_TEST_CHECK_CATCH() caught `std::exception`:\n\t"  \
-                    << e.what() << ::std::endl;  \
+        ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());  \
         break;  \
       }  \
       ::std::cerr << "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " << #expr_ << '\n'  \
