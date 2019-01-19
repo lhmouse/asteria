@@ -150,7 +150,7 @@ class Argument_Sentry
     Argument_Sentry & cut();
 
     // Throw an exception saying there are no viable overloads.
-    // The overload list parameter is informative.
+    // The overload parameter list is informative.
     [[noreturn]] void throw_no_matching_function_call() const
       {
         this->throw_no_matching_function_call(nullptr, 0);
