@@ -63,7 +63,8 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/static_vector.hpp  \
   asteria/src/rocket/prehashed_string.hpp  \
   asteria/src/rocket/integer_sequence.hpp  \
-  asteria/src/rocket/bind_first.hpp
+  asteria/src/rocket/first_binder.hpp  \
+  asteria/src/rocket/ostream_imploder.hpp
 
 lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \

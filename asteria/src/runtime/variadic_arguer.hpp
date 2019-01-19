@@ -49,7 +49,7 @@ class Variadic_Arguer : public Abstract_Function
         return this->m_vargs.at(index);
       }
 
-    Cow_String describe() const override;
+    void describe(std::ostream &os) const override;
     void invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };

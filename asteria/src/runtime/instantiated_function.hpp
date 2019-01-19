@@ -26,7 +26,20 @@ class Instantiated_Function : public Abstract_Function
     ROCKET_COPYABLE_DESTRUCTOR(Instantiated_Function);
 
   public:
-    Cow_String describe() const override;
+    const Source_Location & get_location() const noexcept
+      {
+        return this->m_zvarg.get().get_location();
+      }
+    const PreHashed_String & get_name() const noexcept
+      {
+        return this->m_zvarg.get().get_name();
+      }
+    const Cow_Vector<PreHashed_String> & get_params() const noexcept
+      {
+        return this->m_params;
+      }
+
+    void describe(std::ostream &os) const override;
     void invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };

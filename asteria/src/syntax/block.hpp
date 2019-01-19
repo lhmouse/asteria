@@ -5,7 +5,7 @@
 #define ASTERIA_SYNTAX_BLOCK_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/bind_first.hpp"
+#include "../rocket/first_binder.hpp"
 
 namespace Asteria {
 
@@ -26,7 +26,7 @@ class Block
       };
 
     // TODO: In the future we will add JIT support.
-    using Compiled_Instruction = rocket::binder_first<Status (*)(const void *, Reference &, Executive_Context &, Global_Context &),
+    using Compiled_Instruction = rocket::first_binder<Status (*)(const void *, Reference &, Executive_Context &, Global_Context &),
                                                       const void *>;
 
   private:

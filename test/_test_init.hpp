@@ -4,10 +4,6 @@
 #ifndef ASTERIA_TEST_INIT_HPP_
 #define ASTERIA_TEST_INIT_HPP_
 
-#ifndef ENABLE_DEBUG_LOGS
-#  define ENABLE_DEBUG_LOGS   1
-#endif
-
 #include "../asteria/src/fwd.hpp"
 #include "../asteria/src/runtime/traceable_exception.hpp"
 #include "../asteria/src/utilities.hpp"

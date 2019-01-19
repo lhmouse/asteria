@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_BIND_FIRST_HPP_
-#define ROCKET_BIND_FIRST_HPP_
+#ifndef ROCKET_FIRST_BINDER_HPP_
+#define ROCKET_FIRST_BINDER_HPP_
 
 #include "utilities.hpp"
 #include "integer_sequence.hpp"
@@ -10,10 +10,10 @@
 namespace rocket {
 
 template<typename funcT, typename ...firstT>
-  class binder_first
+  class first_binder
   {
     template<typename, typename...>
-      friend class binder_first;
+      friend class first_binder;
 
   public:
     template<typename ...restT>
@@ -25,31 +25,31 @@ template<typename funcT, typename ...firstT>
 
   public:
     // piesewise construct
-    template<typename xfuncT, typename ...xfirstT,
-             ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, xfirstT &&...>::value)>
-      constexpr binder_first(xfuncT &&xfunc, firstT &&...xfirst) noexcept(conjunction<is_nothrow_constructible<funcT, xfuncT &&>,
-                                                                                      is_nothrow_constructible<tuple<firstT...>, xfirstT &&...>>::value)
-      : m_func(::std::forward<xfuncT>(xfunc)),
-        m_first(::std::forward<firstT>(xfirst)...)
+    template<typename yfuncT, typename ...yfirstT,
+             ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, yfirstT &&...>::value)>
+      constexpr first_binder(yfuncT &&yfunc, firstT &&...yfirst) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
+                                                                                      is_nothrow_constructible<tuple<firstT...>, yfirstT &&...>>::value)
+      : m_func(::std::forward<yfuncT>(yfunc)),
+        m_first(::std::forward<firstT>(yfirst)...)
       {
       }
     // conversion
     template<typename yfuncT, typename ...yfirstT>
-      constexpr binder_first(const binder_first<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_constructible<funcT, const yfuncT &>,
+      constexpr first_binder(const first_binder<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_constructible<funcT, const yfuncT &>,
                                                                                                  is_nothrow_constructible<tuple<firstT...>, const tuple<yfirstT...> &>>::value)
       : m_func(other.m_func),
         m_first(other.m_first)
       {
       }
     template<typename yfuncT, typename ...yfirstT>
-      constexpr binder_first(binder_first<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
+      constexpr first_binder(first_binder<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
                                                                                             is_nothrow_constructible<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
       : m_func(::std::move(other.m_func)),
         m_first(::std::move(other.m_first))
       {
       }
     template<typename yfuncT, typename ...yfirstT>
-      binder_first & operator=(const binder_first<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_assignable<funcT, const yfuncT &>,
+      first_binder & operator=(const first_binder<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_assignable<funcT, const yfuncT &>,
                                                                                                    is_nothrow_assignable<tuple<firstT...>, const tuple<yfirstT...> &>>::value)
       {
         this->m_func = other.m_func;
@@ -57,7 +57,7 @@ template<typename funcT, typename ...firstT>
         return *this;
       }
     template<typename yfuncT, typename ...yfirstT>
-      binder_first & operator=(binder_first<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_assignable<funcT, yfuncT &&>,
+      first_binder & operator=(first_binder<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_assignable<funcT, yfuncT &&>,
                                                                                               is_nothrow_assignable<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
       {
         this->m_func = ::std::move(other.m_func);
@@ -91,9 +91,9 @@ template<typename funcT, typename ...firstT>
   };
 
 template<typename xfuncT, typename ...xfirstT>
-  constexpr binder_first<typename decay<xfuncT>::type, typename decay<xfirstT>::type...> bind_first(xfuncT &&xfunc, xfirstT &&...xfirst)
+  constexpr first_binder<typename decay<xfuncT>::type, typename decay<xfirstT>::type...> bind_first(xfuncT &&xfunc, xfirstT &&...xfirst)
   {
-    return binder_first<typename decay<xfuncT>::type, typename decay<xfirstT>::type...>(::std::forward<xfuncT>(xfunc), ::std::forward<xfirstT>(xfirst)...);
+    return { ::std::forward<xfuncT>(xfunc), ::std::forward<xfirstT>(xfirst)... };
   }
 
 }

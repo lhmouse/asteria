@@ -301,7 +301,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
         auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
-        ASTERIA_DEBUG_LOG("Creating named function: ", func.describe());
+        ASTERIA_DEBUG_LOG("Creating named function: ", func);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
       }

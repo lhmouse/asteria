@@ -255,14 +255,14 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
       {
         const auto &alt = this->m_stor.as<D_opaque>();
         // opaque("typeid") "my opaque"
-        os << "opaque(\"" << typeid(alt.get()).name() << "\") " << quote(alt.get().describe());
+        os << "opaque(" << quote(typeid(alt.get()).name()) << "\") <[{" << alt.get() << "}]>";
         return;
       }
     case type_function:
       {
         const auto &alt = this->m_stor.as<D_function>();
         // function("typeid") "my function"
-        os << "function(\"" << typeid(alt.get()).name() << "\") " << quote(alt.get().describe());
+        os << "function(" << quote(typeid(alt.get()).name()) << "\") <[{" << alt.get() << "}]>";
         return;
       }
     case type_array:

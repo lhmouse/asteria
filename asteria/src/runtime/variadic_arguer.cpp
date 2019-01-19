@@ -12,9 +12,9 @@ Variadic_Arguer::~Variadic_Arguer()
   {
   }
 
-Cow_String Variadic_Arguer::describe() const
+void Variadic_Arguer::describe(std::ostream &os) const
   {
-    return ASTERIA_FORMAT_STRING("variadic argument accessor for `", this->m_name, "()` at \'", this->m_loc, "\'");
+    os << "<builtin>.__varg() @ " << this->m_loc;
   }
 
 void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Cow_Vector<Reference> &&args) const

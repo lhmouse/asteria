@@ -371,11 +371,11 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
         const auto &func = tgt_value.check<D_function>();
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\':\n", func.get().describe());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\': ", func.get());
         try {
           // Call the function now.
           func.get().invoke(stack_io.mut_top(), global, std::move(args));
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\'.");
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\': ", func.get());
         } catch(Traceable_Exception &except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
           // Append backtrace information and rethrow the exception.

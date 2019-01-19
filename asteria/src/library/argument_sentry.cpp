@@ -297,70 +297,6 @@ Argument_Sentry & Argument_Sentry::cut()
     return *this;
   }
 
-    namespace {
-
-    template<typename IteratorT, typename FilterT>
-      class Type_Name_Imploder
-      {
-      private:
-        IteratorT m_begin;
-        std::size_t m_count;
-
-        FilterT m_filter;
-
-      public:
-        constexpr Type_Name_Imploder(IteratorT xbegin, std::size_t xcount, FilterT xfilter)
-          : m_begin(std::move(xbegin)), m_count(xcount),
-            m_filter(std::move(xfilter))
-          {
-          }
-
-      public:
-        const IteratorT & begin() const noexcept
-          {
-            return this->m_begin;
-          }
-        std::size_t count() const noexcept
-          {
-            return this->m_count;
-          }
-
-        const char * filt(typename std::iterator_traits<IteratorT>::reference param) const
-          {
-            return this->m_filter(static_cast<typename std::iterator_traits<IteratorT>::reference>(param));
-          }
-      };
-
-    template<typename IteratorT, typename FilterT>
-      std::ostream & operator<<(std::ostream &os, const Type_Name_Imploder<IteratorT, FilterT> &imploder)
-      {
-        auto cur = imploder.begin();
-        auto rem = imploder.count();
-        // Deal with nasty commas.
-        switch(rem) {
-        default:
-          while(--rem != 0) {
-            os << imploder.filt(*cur) << ", ";
-            ++cur;
-          }
-          // Fallthrough.
-        case 1:
-          os << imploder.filt(*cur);
-          // Fallthrough.
-        case 0:
-          break;
-        }
-        return os;
-      }
-
-    template<typename IteratorT, typename FilterT>
-      constexpr Type_Name_Imploder<typename std::decay<IteratorT>::type, FilterT> do_implode(IteratorT &&begin, std::size_t count, FilterT &&filter)
-      {
-        return Type_Name_Imploder<typename std::decay<IteratorT>::type, FilterT>(std::forward<IteratorT>(begin), count, std::forward<FilterT>(filter));
-      }
-
-    }
-
 void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
   {
     const auto &name = this->m_name;
@@ -368,7 +304,8 @@ void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *
     // Create a message containing arguments.
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "("
-        << do_implode(args.data(), args.size(), [&](const Reference &arg) { return Value::get_type_name(arg.read().type()); })
+        << rocket::ostream_implode(args.data(), args.size(), ", ",
+                                   [&](const Reference &arg) { return Value::get_type_name(arg.read().type()); })
         << ")`.";
     // If an overload list is provided, append it.
     if(overload_size != 0) {
@@ -382,7 +319,8 @@ void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *
         ++ptr;
         ROCKET_ASSERT_MSG(nparams <= static_cast<std::size_t>(end - ptr), "The possible overload data were malformed.");
         mos << "`" << name << "("
-            << do_implode(ptr, nparams, [&](const Overload_Parameter &param) { return (param.nparams == 0xFF) ? "<generic>" : Value::get_type_name(param.type); })
+            << rocket::ostream_implode(ptr, nparams, ", ",
+                                       [&](const Overload_Parameter &param) { return (param.nparams == 0xFF) ? "<generic>" : Value::get_type_name(param.type); })
             << ")`";
         // Move to the next parameter.
         if((ptr += nparams) == end) {
