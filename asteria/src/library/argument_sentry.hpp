@@ -118,7 +118,7 @@ class Argument_Sentry
       }
 
     // Get an OPTIONAL argument.
-    // The argument must exist (and must be of the desired type or `null` for the overloads taking two parameters); otherwise this operation fails.
+    // The argument must exist (and must be of the desired type or `null` for the overloads taking two arguments); otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
     Argument_Sentry & opt(Reference &ref_out);
     Argument_Sentry & opt(Value &value_out);
