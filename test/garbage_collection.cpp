@@ -4,7 +4,7 @@
 #include "_test_init.hpp"
 #include "../asteria/src/compiler/simple_source_file.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
-#include <sstream>
+#include "../asteria/src/rocket/insertable_istream.hpp"
 
 using namespace Asteria;
 
@@ -39,21 +39,24 @@ void operator delete(void *ptr, std::size_t) noexcept
 int main()
   {
     // Ignore leaks of emutls, emergency pool, etc.
-    rocket::make_unique<std::ostringstream>().reset();
+    rocket::make_unique<int>().reset();
 
-    ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);
+    bcnt.store(0, std::memory_order_relaxed);
     {
-      std::istringstream iss(R"__(
-        var g;
-        func leak() {
-          var f;
-          f = func() { return f; };
-          g = f;
-        }
-        for(var i = 0; i < 10000; ++i) {
-          leak();
-        }
-      )__");
+      rocket::insertable_istream iss(
+        std::ref(
+          R"__(
+            var g;
+            func leak() {
+              var f;
+              f = func() { return f; };
+              g = f;
+            }
+            for(var i = 0; i < 10000; ++i) {
+              leak();
+            }
+          )__")
+        );
       Simple_Source_File code(iss, std::ref("my_file"));
       Global_Context global;
       code.execute(global, { });
