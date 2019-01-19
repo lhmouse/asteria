@@ -8,7 +8,8 @@
 
 namespace rocket {
 
-template<typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
+template<typename iteratorT, typename differenceT, typename delimiterT,
+         typename filterT>
   class ostream_imploder
   {
   private:
@@ -18,14 +19,15 @@ template<typename iteratorT, typename differenceT, typename delimiterT, typename
     filterT m_filter;
 
   public:
-    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT, typename yfilterT,
+    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT,
+             typename yfilterT,
              ROCKET_ENABLE_IF(conjunction<is_constructible<iteratorT, yiteratorT &&>, is_constructible<differenceT, ydifferenceT &&>, is_constructible<delimiterT, ydelimiterT &&>,
                                           is_constructible<filterT, yfilterT &&>>::value)>
     constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&delimiter,
                                yfilterT &&yfilter) noexcept(conjunction<is_nothrow_constructible<iteratorT, yiteratorT &&>, is_nothrow_constructible<differenceT, ydifferenceT &&>,
                                                                         is_nothrow_constructible<delimiterT, ydelimiterT &&>, is_nothrow_constructible<filterT, yfilterT &&>>::value)
-      : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)),
-        m_delimiter(::std::forward<delimiterT>(delimiter)), m_filter(::std::forward<yfilterT>(yfilter))
+      : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)), m_delimiter(::std::forward<delimiterT>(delimiter)),
+        m_filter(::std::forward<yfilterT>(yfilter))
       {
       }
 
@@ -48,7 +50,8 @@ template<typename iteratorT, typename differenceT, typename delimiterT, typename
       }
   };
 
-template<typename charT, typename traitsT, typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
+template<typename charT, typename traitsT,
+         typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
   basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const ostream_imploder<iteratorT, differenceT, delimiterT, filterT> &imploder)
   {
     auto cur = imploder.begin();
@@ -70,7 +73,8 @@ template<typename charT, typename traitsT, typename iteratorT, typename differen
     return os;
   }
 
-template<typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
+template<typename iteratorT, typename differenceT, typename delimiterT,
+         typename filterT>
   constexpr ostream_imploder<typename decay<iteratorT>::type, typename decay<differenceT>::type, typename decay<delimiterT>::type,
                              typename decay<filterT>::type> ostream_implode(iteratorT &&begin, differenceT &&count, delimiterT &&delimiter,
                                                                             filterT &&filter)
