@@ -777,10 +777,6 @@ Token_Stream::~Token_Stream()
           value = value * static_cast<int>(radix) + dvalue;
           zero |= dvalue;
         }
-        int vclass = std::fpclassify(value);
-        if(vclass == FP_INFINITE) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_overflow);
-        }
         // Parse the fractional part.
         double frac = 0;
         for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
@@ -799,7 +795,8 @@ Token_Stream::~Token_Stream()
         } else {
           value = value * std::pow(static_cast<int>(exp_base), exp);
         }
-        vclass = std::fpclassify(value);
+        // Check for overflow or underflow.
+        const int vclass = std::fpclassify(value);
         if(vclass == FP_INFINITE) {
           throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_overflow);
         }
