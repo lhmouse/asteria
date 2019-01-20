@@ -63,7 +63,7 @@ const char * Value::get_type_name(Value_Type etype) noexcept
 
 const Value & Value::get_null() noexcept
   {
-    return *static_cast<const Value *>(static_cast<const void *>(s_null.bytes));
+    return reinterpret_cast<const Value &>(s_null.bytes);
   }
 
 Value::~Value()
@@ -91,7 +91,7 @@ bool Value::test() const noexcept
       }
     case type_string:
       {
-        return !(this->m_stor.as<D_string>().empty());
+        return this->m_stor.as<D_string>().size() != 0;
       }
     case type_opaque:
     case type_function:
@@ -100,7 +100,7 @@ bool Value::test() const noexcept
       }
     case type_array:
       {
-        return !(this->m_stor.as<D_array>().empty());
+        return this->m_stor.as<D_array>().size() != 0;
       }
     case type_object:
       {
