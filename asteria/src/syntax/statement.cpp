@@ -615,7 +615,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
     template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_Context &, Global_Context &)>
       Block::Compiled_Instruction do_bind(const AltT &alt)
       {
-        return rocket::bind_first(
+        return rocket::bind_front(
           [](const void *qalt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
             {
               return funcT(*static_cast<const AltT *>(qalt), ref_out, ctx_io, global);
@@ -625,7 +625,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
 
     Block::Compiled_Instruction do_bind_constant(Block::Status status)
       {
-        return rocket::bind_first(
+        return rocket::bind_front(
           [](const void *value, Reference & /*ref_out*/, Executive_Context & /*ctx_io*/, Global_Context & /*global*/)
             {
               return static_cast<Block::Status>(reinterpret_cast<std::uintptr_t>(value));

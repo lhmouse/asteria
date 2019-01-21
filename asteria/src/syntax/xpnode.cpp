@@ -1288,7 +1288,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     template<typename AltT, void (&funcT)(const AltT &, Reference_Stack &, Global_Context &, const Executive_Context &)>
       Expression::Compiled_Instruction do_bind(const AltT &alt)
       {
-        return rocket::bind_first(
+        return rocket::bind_front(
           [](const void *qalt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
             {
               return funcT(*static_cast<const AltT *>(qalt), stack_io, global, ctx);
