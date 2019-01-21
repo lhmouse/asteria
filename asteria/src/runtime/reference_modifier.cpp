@@ -14,7 +14,7 @@ Reference_Modifier::~Reference_Modifier()
 
 const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
         const auto &alt = this->m_stor.as<S_array_index>();
@@ -66,7 +66,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
 
 Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
         const auto &alt = this->m_stor.as<S_array_index>();
@@ -131,7 +131,7 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
 
 Value Reference_Modifier::apply_and_erase(Value &parent) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
         const auto &alt = this->m_stor.as<S_array_index>();

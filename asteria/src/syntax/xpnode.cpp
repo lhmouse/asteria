@@ -185,7 +185,7 @@ Xpnode::~Xpnode()
 
 void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
         const auto &alt = this->m_stor.as<S_literal>();
@@ -1300,7 +1300,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
 
 void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
         const auto &alt = this->m_stor.as<S_literal>();
@@ -1531,7 +1531,7 @@ void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) c
 
 void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
         const auto &alt = this->m_stor.as<S_literal>();

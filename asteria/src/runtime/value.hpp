@@ -72,7 +72,7 @@ class Value
   public:
     Value_Type type() const noexcept
       {
-        return Value_Type(this->m_stor.index());
+        return static_cast<Value_Type>(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept

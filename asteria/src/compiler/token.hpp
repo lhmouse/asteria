@@ -193,7 +193,7 @@ class Token
 
     Index index() const noexcept
       {
-        return Index(this->m_stor.index());
+        return static_cast<Index>(this->m_stor.index());
       }
     template<typename AltT>
       const AltT * opt() const noexcept

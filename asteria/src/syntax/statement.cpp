@@ -37,7 +37,7 @@ Statement::~Statement()
 
 void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
     case index_block:
       {
@@ -79,7 +79,7 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
 
 void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
         const auto &alt = this->m_stor.as<S_expression>();
@@ -637,7 +637,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
 
 void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
         const auto &alt = this->m_stor.as<S_expression>();
@@ -784,7 +784,7 @@ void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) con
 
 void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    switch(Index(this->m_stor.index())) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
         const auto &alt = this->m_stor.as<S_expression>();

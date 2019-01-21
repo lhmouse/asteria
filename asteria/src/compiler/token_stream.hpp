@@ -32,13 +32,13 @@ class Token_Stream
     ROCKET_NONCOPYABLE_DESTRUCTOR(Token_Stream);
 
   public:
-    State state() const noexcept
-      {
-        return State(this->m_stor.index());
-      }
     explicit operator bool () const noexcept
       {
-        return this->state() == state_success;
+        return this->m_stor.get<Cow_Vector<Token>>() != nullptr;
+      }
+    State state() const noexcept
+      {
+        return static_cast<State>(this->m_stor.index());
       }
 
     Parser_Error get_parser_error() const noexcept;
