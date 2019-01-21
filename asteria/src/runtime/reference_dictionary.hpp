@@ -17,8 +17,7 @@ class Reference_Dictionary
         Cow_String name;
         Reference ref;
 
-        template<typename XnameT, typename XrefT,
-                 ROCKET_ENABLE_IF(std::is_constructible<Cow_String, XnameT &&>::value && std::is_constructible<Reference, XrefT &&>::value)>
+        template<typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XnameT, Cow_String>::value && std::is_convertible<XrefT, Reference>::value)>
           Template(XnameT &&xname, XrefT &&xref)
           : name(std::forward<XnameT>(xname)), ref(std::forward<XrefT>(xref))
           {
