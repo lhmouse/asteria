@@ -13,18 +13,16 @@ namespace Asteria {
 class Variable : public RefCnt_Base
   {
   private:
+    Value m_value;
+    bool m_immutable;
+
     // These are only used during garbage collection and are uninitialized by default.
     mutable long m_gcref_intg;
     mutable double m_gcref_mant;
 
-    Value m_value;
-    bool m_immutable;
-
   public:
-    template<typename XvalueT,
-             ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      Variable(XvalueT &&value, bool immutable)
-      : m_value(std::forward<XvalueT>(value)), m_immutable(immutable)
+    Variable() noexcept
+      : m_value(), m_immutable(true)
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Variable);
@@ -33,28 +31,6 @@ class Variable : public RefCnt_Base
     [[noreturn]] void do_throw_immutable() const;
 
   public:
-    long get_gcref() const noexcept
-      {
-        return this->m_gcref_intg;
-      }
-    void init_gcref(long intg) const noexcept
-      {
-        this->m_gcref_intg = intg;
-        this->m_gcref_mant = 1e-9;
-      }
-    void add_gcref(int dintg) const noexcept
-      {
-        this->m_gcref_intg += dintg;
-      }
-    void add_gcref(double dmant) const noexcept
-      {
-        this->m_gcref_mant += dmant;
-        // Add with carry.
-        const auto carry = static_cast<long>(this->m_gcref_mant);
-        this->m_gcref_intg += carry;
-        this->m_gcref_mant -= static_cast<double>(carry);
-      }
-
     const Value & get_value() const noexcept
       {
         return this->m_value;
@@ -90,6 +66,28 @@ class Variable : public RefCnt_Base
     void enumerate_variables(const Abstract_Variable_Callback &callback) const
       {
         this->m_value.enumerate_variables(callback);
+      }
+
+    long get_gcref() const noexcept
+      {
+        return this->m_gcref_intg;
+      }
+    void init_gcref(long intg) const noexcept
+      {
+        this->m_gcref_intg = intg;
+        this->m_gcref_mant = 1e-9;
+      }
+    void add_gcref(int dintg) const noexcept
+      {
+        this->m_gcref_intg += dintg;
+      }
+    void add_gcref(double dmant) const noexcept
+      {
+        this->m_gcref_mant += dmant;
+        // Add with carry.
+        const auto carry = static_cast<long>(this->m_gcref_mant);
+        this->m_gcref_intg += carry;
+        this->m_gcref_mant -= static_cast<double>(carry);
       }
   };
 

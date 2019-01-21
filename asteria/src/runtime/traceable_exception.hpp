@@ -18,9 +18,8 @@ class Traceable_Exception : public virtual std::exception
     Cow_Vector<Source_Location> m_backtrace;
 
   public:
-    template<typename XvalueT,ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      Traceable_Exception(const Source_Location &loc, XvalueT &&value)
-      : m_loc(loc), m_value(std::forward<XvalueT>(value))
+    Traceable_Exception(const Source_Location &loc, Value value)
+      : m_loc(loc), m_value(std::move(value))
       {
       }
     explicit Traceable_Exception(const std::exception &stdex)
