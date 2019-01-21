@@ -18,11 +18,11 @@ template<typename elementT, typename deleterT = default_delete<const elementT>>
     namespace details_unique_ptr {
 
     template<typename elementT, typename deleterT, typename = void>
-      struct pointer_of : type_identity<elementT *>
+      struct pointer_of : enable_if<true, elementT *>
       {
       };
     template<typename elementT, typename deleterT>
-      struct pointer_of<elementT, deleterT, typename make_void<typename deleterT::pointer>::type> : type_identity<typename deleterT::pointer>
+      struct pointer_of<elementT, deleterT, typename make_void<typename deleterT::pointer>::type> : enable_if<true, typename deleterT::pointer>
       {
       };
 

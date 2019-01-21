@@ -82,7 +82,7 @@ template<typename ...alternativesT>
       {
       };
     template<typename firstT, typename ...restT>
-      struct type_getter<0, firstT, restT...> : type_identity<firstT>
+      struct type_getter<0, firstT, restT...> : enable_if<true, firstT>
       {
       };
 

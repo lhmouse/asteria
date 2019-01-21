@@ -62,6 +62,7 @@ using ::std::nothrow_t;
 using ::std::true_type;
 using ::std::false_type;
 using ::std::integral_constant;
+using ::std::enable_if;
 using ::std::conditional;
 using ::std::decay;
 using ::std::common_type;
@@ -155,12 +156,6 @@ struct identity
       }
 
     using is_transparent = void;
-  };
-
-template<typename paramT>
-  struct type_identity
-  {
-    using type = paramT;
   };
 
     namespace details_utilities {
@@ -416,8 +411,8 @@ template<typename elementT, size_t countT>
       {
       };
     template<typename integerT, integerT valueT, typename firstT, typename ...remainingT>
-      struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<(static_cast<firstT>(valueT) == valueT),
-                                                                                     type_identity<firstT>, integer_selector<integerT, valueT, remainingT...>>::type
+      struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
+                                                                                     enable_if<true, firstT>, integer_selector<integerT, valueT, remainingT...>>::type
       {
       };
 
