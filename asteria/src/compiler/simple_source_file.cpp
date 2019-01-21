@@ -20,11 +20,11 @@ Simple_Source_File::~Simple_Source_File()
 void Simple_Source_File::do_throw_error(const Parser_Error &err)
   {
     rocket::insertable_ostream mos;
-    mos << "An error was encountered while parsing source data: ERROR " << err.code() << ": " << Parser_Error::get_code_description(err.code());
+    mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(err.code());
     // Append error location information.
-    mos << "\n[stopped at ";
+    mos << "\n[parser error " << err.code() << " encountered at ";
     if(err.line() == 0) {
-      mos << "the end of data";
+      mos << "the end of source data";
     } else {
       mos << "line " << err.line() << ", offset " << err.offset();
     }
