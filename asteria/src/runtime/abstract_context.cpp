@@ -11,7 +11,7 @@ namespace Asteria {
 Abstract_Context::~Abstract_Context()
   {
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(std::move(this->m_tied_collector_opt));
-    if(collector) {
+    if(ROCKET_UNEXPECT(collector)) {
       // Perform the final garbage collection.
       this->m_named_references.clear();
       try {
