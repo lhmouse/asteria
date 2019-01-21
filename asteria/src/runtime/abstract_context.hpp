@@ -12,33 +12,32 @@ namespace Asteria {
 class Abstract_Context
   {
   private:
-    Reference_Dictionary m_dict;
+    RefCnt_Ptr<RefCnt_Base> m_tied_collector_opt;
+    Reference_Dictionary m_named_references;
 
   public:
     Abstract_Context() noexcept
-      : m_dict()
+      : m_tied_collector_opt(), m_named_references()
       {
       }
     ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_Context, virtual);
 
   protected:
-    void do_set_named_reference_templates(const Reference_Dictionary::Template *tdata_opt, std::size_t tsize) noexcept
-      {
-        this->m_dict.set_templates(tdata_opt, tsize);
-      }
+    void do_tie_collector(const RefCnt_Ptr<Generational_Collector> &tied_collector_opt) noexcept;
+    void do_set_named_reference_templates(const Reference_Dictionary::Template *tdata_opt, std::size_t tsize) noexcept;
 
   public:
     const Reference * get_named_reference_opt(const PreHashed_String &name) const
       {
-        return this->m_dict.get_opt(name);
+        return this->m_named_references.get_opt(name);
       }
     Reference & open_named_reference(const PreHashed_String &name)
       {
-        return this->m_dict.open(name);
+        return this->m_named_references.open(name);
       }
     void clear_named_references() noexcept
       {
-        this->m_dict.clear();
+        this->m_named_references.clear();
       }
 
     virtual bool is_analytic() const noexcept = 0;

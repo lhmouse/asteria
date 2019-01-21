@@ -15,10 +15,25 @@ class RefCnt_Base : public rocket::refcnt_base<RefCnt_Base>
     RefCnt_Base() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(RefCnt_Base, virtual);
+    RefCnt_Base(const RefCnt_Base &) noexcept
+      : RefCnt_Base()
+      {
+      }
+    RefCnt_Base & operator=(const RefCnt_Base &) noexcept
+      {
+        return *this;
+      }
+    virtual ~RefCnt_Base();
 
   public:
-    // No public member functions.
+    bool unique() const noexcept
+      {
+        return rocket::refcnt_base<RefCnt_Base>::unique();
+      }
+    long use_count() const noexcept
+      {
+        return rocket::refcnt_base<RefCnt_Base>::use_count();
+      }
   };
 
 }

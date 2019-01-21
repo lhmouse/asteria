@@ -13,7 +13,7 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    RefCnt_Ptr<RefCnt_Base> m_coll;
+    RefCnt_Ptr<RefCnt_Base> m_collector;
 
   public:
     Global_Context()

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Variable : public RefCnt_Base
+class Variable : public virtual RefCnt_Base
   {
   private:
     Value m_value;

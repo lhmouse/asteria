@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Abstract_Function : public RefCnt_Base
+class Abstract_Function : public virtual RefCnt_Base
   {
   public:
     Abstract_Function() noexcept
