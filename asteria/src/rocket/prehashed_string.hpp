@@ -116,8 +116,6 @@ template<typename stringT, typename hashT>
     using const_reverse_iterator  = typename string_type::const_reverse_iterator;
     using reverse_iterator        = typename string_type::const_reverse_iterator;
 
-    // associative container support
-    struct equal_to;
     struct hash;
 
   private:
@@ -303,25 +301,12 @@ template<typename stringT, typename hashT>
   };
 
 template<typename stringT, typename hashT>
-  struct basic_prehashed_string<stringT, hashT>::equal_to
-  {
-    using result_type           = bool;
-    using first_argument_type   = basic_prehashed_string;
-    using second_argument_type  = basic_prehashed_string;
-
-    result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
-      {
-        return (lhs.rdhash() == rhs.rdhash()) && (lhs.rdstr() == rhs.rdstr());
-      }
-  };
-
-template<typename stringT, typename hashT>
   struct basic_prehashed_string<stringT, hashT>::hash
   {
-    using result_type    = size_t;
-    using argument_type  = basic_prehashed_string;
+    using result_type     = size_t;
+    using argument_type   = basic_prehashed_string;
 
-    result_type operator()(const argument_type &str) const noexcept
+    constexpr result_type operator()(const argument_type &str) const noexcept
       {
         return str.rdhash();
       }

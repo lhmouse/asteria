@@ -16,6 +16,7 @@
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
+#include "rocket/transparent_comparators.hpp"
 #include "rocket/refcnt_object.hpp"
 #include "rocket/refcnt_ptr.hpp"
 #include "rocket/unique_ptr.hpp"
@@ -68,18 +69,34 @@ class Single_Source_File;
 // Library
 class Argument_Sentry;
 
+// Aliases
+template<typename ElementT>
+  using Unique_Ptr = rocket::unique_ptr<ElementT>;
+template<typename ElementT>
+  using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
+template<typename ElementT>
+  using RefCnt_Object = rocket::refcnt_object<ElementT>;
+
+template<typename ElementT>
+  using Cow_Vector = rocket::cow_vector<ElementT>;
+template<typename KeyT, typename ValueT, typename HashT, typename EqualT = rocket::transparent_equal_to>
+  using Cow_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
+template<typename ElementT, std::size_t capacityT>
+  using Static_Vector = rocket::static_vector<ElementT, capacityT>;
+
+using Cow_String = rocket::cow_string;
+using PreHashed_String = rocket::prehashed_string;
+
 // Fundamental Types
 using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_real      = double;
-using D_string    = rocket::cow_string;
-using D_opaque    = rocket::refcnt_object<Abstract_Opaque>;
-using D_function  = rocket::refcnt_object<Abstract_Function>;
-using D_array     = rocket::cow_vector<Value>;
-using D_object    = rocket::cow_hashmap<rocket::prehashed_string, Value,
-                                        rocket::prehashed_string::hash,
-                                        rocket::prehashed_string::equal_to>;
+using D_string    = Cow_String;
+using D_opaque    = RefCnt_Object<Abstract_Opaque>;
+using D_function  = RefCnt_Object<Abstract_Function>;
+using D_array     = Cow_Vector<Value>;
+using D_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 
 // Indices of Fundamental Types
 enum Value_Type : std::uint8_t
@@ -94,24 +111,6 @@ enum Value_Type : std::uint8_t
     type_array     = 7,
     type_object    = 8,
   };
-
-// Aliases
-template<typename ElementT>
-  using Unique_Ptr = rocket::unique_ptr<ElementT>;
-template<typename ElementT>
-  using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
-template<typename ElementT>
-  using RefCnt_Object = rocket::refcnt_object<ElementT>;
-
-template<typename ElementT>
-  using Cow_Vector = rocket::cow_vector<ElementT>;
-template<typename KeyT, typename ValueT>
-  using Cow_HashMap = rocket::cow_hashmap<KeyT, ValueT>;
-template<typename ElementT, std::size_t capacityT>
-  using Static_Vector = rocket::static_vector<ElementT, capacityT>;
-
-using Cow_String = rocket::cow_string;
-using PreHashed_String = rocket::prehashed_string;
 
 }
 

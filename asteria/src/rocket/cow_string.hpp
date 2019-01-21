@@ -497,6 +497,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             if(n1 != n2) {
               return 2;
             }
+            if(s1 == s2) {
+              return 0;
+            }
             return traits_type::compare(s1, s2, n1);
           }
         static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
@@ -570,9 +573,6 @@ template<typename charT, typename traitsT, typename allocatorT>
     static constexpr size_type npos = size_type(-1);
     static constexpr value_type null_char = { };
 
-    // associative container support
-    struct equal_to;
-    struct less;
     struct hash;
 
   private:
@@ -1659,54 +1659,26 @@ template<typename charT, typename traitsT, typename allocatorT>
 #endif
 
 template<typename charT, typename traitsT, typename allocatorT>
-  struct basic_cow_string<charT, traitsT, allocatorT>::equal_to
-  {
-    using result_type           = bool;
-    using first_argument_type   = basic_cow_string;
-    using second_argument_type  = basic_cow_string;
-
-    result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
-      {
-        if(lhs.size() != rhs.size()) {
-          return false;
-        }
-        if(lhs.data() == rhs.data()) {
-          return true;
-        }
-        return lhs.compare(rhs) == 0;
-      }
-  };
-
-template<typename charT, typename traitsT, typename allocatorT>
-  struct basic_cow_string<charT, traitsT, allocatorT>::less
-  {
-    using result_type           = bool;
-    using first_argument_type   = basic_cow_string;
-    using second_argument_type  = basic_cow_string;
-
-#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304)
-    constexpr
-#endif
-      result_type operator()(const first_argument_type &lhs, const second_argument_type &rhs) const noexcept
-      {
-        return lhs.compare(rhs) < 0;
-      }
-  };
-
-template<typename charT, typename traitsT, typename allocatorT>
   struct basic_cow_string<charT, traitsT, allocatorT>::hash
   {
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
 
-#if defined(__cpp_constexpr) && (__cpp_constexpr >= 201304)
-    constexpr
-#endif
-      result_type operator()(const argument_type &str) const noexcept
+    result_type operator()(const argument_type &str) const noexcept
       {
         // This implements the DJBX33A hash algorithm.
         char32_t reg = 5381;
         for(auto rptr = str.data(), eptr = rptr + str.size(); rptr != eptr; ++rptr) {
+          const auto ch = static_cast<char32_t>(traits_type::to_int_type(*rptr));
+          reg = reg * 33 + ch;
+        }
+        return reg;
+      }
+    result_type operator()(const value_type *str) const noexcept
+      {
+        // This implements the DJBX33A hash algorithm.
+        char32_t reg = 5381;
+        for(auto rptr = str; !traits_type::eq(*rptr, value_type()); ++rptr) {
           const auto ch = static_cast<char32_t>(traits_type::to_int_type(*rptr));
           reg = reg * 33 + ch;
         }
