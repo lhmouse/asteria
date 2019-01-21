@@ -32,7 +32,7 @@ Parser::~Parser()
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Source_Location(std::ref("<no token>"), 0);
+          return Source_Location(rocket::sref("<no token>"), 0);
         }
         return Source_Location(qtok->get_file(), qtok->get_line());
       }
@@ -111,7 +111,7 @@ Parser::~Parser()
         if(!qalt) {
           return false;
         }
-        name_out = std::ref(reinterpret_cast<const char (&)[]>(*(Token::get_keyword(qalt->keyword))));
+        name_out = rocket::sref(Token::get_keyword(qalt->keyword));
         tstrm_io.shift();
         return true;
       }
@@ -417,7 +417,7 @@ Parser::~Parser()
         if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
           return false;
         }
-        Xpnode::S_named_reference node_c = { std::ref("__this") };
+        Xpnode::S_named_reference node_c = { rocket::sref("__this") };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -1724,7 +1724,7 @@ Parser::~Parser()
 
     bool do_accept_nonblock_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
-        ASTERIA_DEBUG_LOG("Looking for a nonblock statement: ", tstrm_io.empty() ? std::ref("<no token>") : ASTERIA_FORMAT_STRING(*(tstrm_io.peek_opt())));
+        ASTERIA_DEBUG_LOG("Looking for a nonblock statement: ", tstrm_io.empty() ? rocket::sref("<no token>") : ASTERIA_FORMAT_STRING(*(tstrm_io.peek_opt())));
         // nonblock-statement ::=
         //   null-statement |
         //   variable-definition | immutable-variable-definition | function-definition |

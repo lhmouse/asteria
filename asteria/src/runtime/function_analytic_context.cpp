@@ -39,15 +39,15 @@ void Function_Analytic_Context::initialize(const Cow_Vector<PreHashed_String> &p
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'function_executive_context.cpp' as well.
     do_predefine(this->m_predef_refs,
-                 std::ref("__file"));
+                 rocket::sref("__file"));
     do_predefine(this->m_predef_refs,
-                 std::ref("__func"));
+                 rocket::sref("__func"));
     do_predefine(this->m_predef_refs,
-                 std::ref("__line"));
+                 rocket::sref("__line"));
     do_predefine(this->m_predef_refs,
-                 std::ref("__this"));
+                 rocket::sref("__this"));
     do_predefine(this->m_predef_refs,
-                 std::ref("__varg"));
+                 rocket::sref("__varg"));
     // Set up them.
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }

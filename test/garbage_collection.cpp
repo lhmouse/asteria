@@ -44,7 +44,7 @@ int main()
     bcnt.store(0, std::memory_order_relaxed);
     {
       rocket::insertable_istream iss(
-        std::ref(
+        rocket::sref(
           R"__(
             var g;
             func leak() {
@@ -57,7 +57,7 @@ int main()
             }
           )__")
         );
-      Simple_Source_File code(iss, std::ref("my_file"));
+      Simple_Source_File code(iss, rocket::sref("my_file"));
       Global_Context global;
       code.execute(global, { });
     }

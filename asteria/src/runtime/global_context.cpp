@@ -23,7 +23,7 @@ void Global_Context::do_initialize()
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
     Reference_Root::S_constant ref_c = { std::move(root) };
-    this->open_named_reference(std::ref("std")) = std::move(ref_c);
+    this->open_named_reference(rocket::sref("std")) = std::move(ref_c);
   }
 
 RefCnt_Ptr<Variable> Global_Context::create_variable()

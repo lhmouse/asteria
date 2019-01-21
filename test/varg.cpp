@@ -24,7 +24,7 @@ int main()
         binary(1,2,3,4,5),   // [ 3, 4 ]
       ];
     )__");
-    Simple_Source_File code(iss, std::ref("my_file"));
+    Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global, { });
     const auto &array = res.read().check<D_array>();
@@ -42,6 +42,6 @@ int main()
 
     iss.clear();
     iss.str("return __varg('meow', 42, true);");
-    code.load_stream(iss, std::ref("erroneous_file"));
+    code.load_stream(iss, rocket::sref("erroneous_file"));
     ASTERIA_TEST_CHECK_CATCH(code.execute(global, { }));
   }

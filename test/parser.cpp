@@ -33,14 +33,14 @@ int main()
       }
     )__");
     Token_Stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, std::ref("dummy file")));
+    ASTERIA_TEST_CHECK(tis.load(iss, rocket::sref("dummy file")));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis));
     const auto code = pr.extract_document();
 
     Reference res;
     Global_Context global;
-    RefCnt_Object<Variadic_Arguer> zvarg(Source_Location(std::ref("file"), 42), std::ref("scope"));
+    RefCnt_Object<Variadic_Arguer> zvarg(Source_Location(rocket::sref("file"), 42), rocket::sref("scope"));
     code.execute_as_function(res, global, zvarg, { }, { });
     ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
   }

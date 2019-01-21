@@ -12,7 +12,7 @@ int main()
     ASTERIA_TEST_CHECK(var->get_value().type() == type_null);
     var->reset(D_real(123.456), false);
     ASTERIA_TEST_CHECK(var->get_value().type() == type_real);
-    var->set_value(D_string(std::ref("hello")));
+    var->set_value(D_string(rocket::sref("hello")));
     ASTERIA_TEST_CHECK(var->get_value().type() == type_string);
     var->reset(D_integer(42), true);
     ASTERIA_TEST_CHECK_CATCH(var->set_value(D_null()));

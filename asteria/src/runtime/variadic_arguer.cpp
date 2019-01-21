@@ -19,7 +19,7 @@ void Variadic_Arguer::describe(std::ostream &os) const
 
 void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
   {
-    Argument_Sentry sentry(std::ref("<builtin>.__varg"), args);
+    Argument_Sentry sentry(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`:
     if(sentry.reset().cut()) {
       // Return the number of variadic arguments.

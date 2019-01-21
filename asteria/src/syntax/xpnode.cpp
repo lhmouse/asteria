@@ -156,7 +156,7 @@ Xpnode::~Xpnode()
 
     template<typename ContextT>
       std::pair<std::reference_wrapper<const Abstract_Context>,
-        std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const ContextT &ctx, const PreHashed_String &name)
+                std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const ContextT &ctx, const PreHashed_String &name)
       {
         auto qctx = static_cast<const Abstract_Context *>(&ctx);
         // De-virtualize the first call by hand.
@@ -328,7 +328,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Instantiate the closure function.
-        auto func = alt.body.instantiate_function(global, ctx, alt.loc, std::ref("<closure function>"), alt.params);
+        auto func = alt.body.instantiate_function(global, ctx, alt.loc, rocket::sref("<closure function>"), alt.params);
         Reference_Root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.push(std::move(ref_c));
       }
@@ -883,8 +883,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           {
             // Return the type name of the operand.
             // N.B. This is one of the few operators that work on all types.
-            const auto type_name = Value::get_type_name(ref_c.value.type());
-            ref_c.value = D_string(std::ref(type_name));
+            ref_c.value = D_string(rocket::sref(Value::get_type_name(ref_c.value.type())));
             do_set_temporary(stack_io, alt, std::move(ref_c));
             return;
           }
@@ -978,7 +977,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
                   }
                 default:
                   {
-                    ref_c.value = D_string(std::ref("unordered"));
+                    ref_c.value = D_string(rocket::sref("unordered"));
                     break;
                   }
                 }

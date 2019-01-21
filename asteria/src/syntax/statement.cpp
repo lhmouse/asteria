@@ -537,8 +537,8 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           const auto push_backtrace = [&](const Source_Location &loc)
             {
               D_object elem;
-              elem.try_emplace(std::ref("file"), D_string(loc.get_file()));
-              elem.try_emplace(std::ref("line"), D_integer(loc.get_line()));
+              elem.try_emplace(rocket::sref("file"), D_string(loc.get_file()));
+              elem.try_emplace(rocket::sref("line"), D_integer(loc.get_line()));
               backtrace.emplace_back(std::move(elem));
             };
           // Translate the exception as needed.
@@ -563,7 +563,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_Root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.open_named_reference(std::ref("__backtrace")) = std::move(ref_c);
+          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, global, ctx_next);
         }
@@ -605,9 +605,9 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         if(!value.test()) {
           Cow_String msg;
           if(alt.msg.empty()) {
-            msg = std::ref("Assertion failed!");
+            msg = rocket::sref("Assertion failed!");
           } else {
-            msg = std::ref("Assertion failed: ");
+            msg = rocket::sref("Assertion failed: ");
             msg += alt.msg;
           }
           ASTERIA_DEBUG_LOG("Throwing exception: ", msg);

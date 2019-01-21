@@ -57,13 +57,13 @@ Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const Cow_S
 void Simple_Source_File::clear() noexcept
   {
     this->m_code = Cow_Vector<Statement>();
-    this->m_file = std::ref("");
+    this->m_file = rocket::sref("");
   }
 
 Reference Simple_Source_File::execute(Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     Reference self;
-    Variadic_Arguer zvarg(Source_Location(this->m_file, 0), std::ref("<file scope>"));
+    Variadic_Arguer zvarg(Source_Location(this->m_file, 0), rocket::sref("<file scope>"));
     this->m_code.execute_as_function(self, global, std::ref(zvarg), { }, std::move(args));
     return self;
   }

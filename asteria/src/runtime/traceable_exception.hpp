@@ -23,7 +23,7 @@ class Traceable_Exception : public virtual std::exception
       {
       }
     explicit Traceable_Exception(const std::exception &stdex)
-      : m_loc(std::ref("<native code>"), 0), m_value(D_string(stdex.what()))
+      : m_loc(rocket::sref("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
     ROCKET_COPYABLE_DESTRUCTOR(Traceable_Exception);

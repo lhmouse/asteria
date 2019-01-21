@@ -123,7 +123,7 @@ class Argument_Sentry
     Argument_Sentry & opt(D_boolean &value_out, D_boolean default_value = false);
     Argument_Sentry & opt(D_integer &value_out, D_integer default_value = 0);
     Argument_Sentry & opt(D_real &value_out, D_real default_value = 0);
-    Argument_Sentry & opt(D_string &value_out, const D_string &default_value = std::ref(""));
+    Argument_Sentry & opt(D_string &value_out, const D_string &default_value = rocket::sref(""));
     Argument_Sentry & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
     Argument_Sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
     Argument_Sentry & opt(D_array &value_out, const D_array &default_value = D_array());
