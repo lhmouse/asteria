@@ -134,6 +134,18 @@ using ::std::reference_wrapper;
 using ::std::pair;
 using ::std::tuple;
 
+#if defined(__cpp_lib_exchange_function) && (__cpp_lib_exchange_function >= 201304)
+using ::std::exchange;
+#else
+template<typename typeT, typename withT>
+  inline typeT exchange(typeT &ref, withT &&with)
+  {
+    auto old = ::std::move(ref);
+    ref = ::std::forward<withT>(with);
+    return old;
+  }
+#endif
+
 struct identity
   {
     template<typename paramT>
@@ -150,14 +162,6 @@ template<typename paramT>
   {
     using type = paramT;
   };
-
-template<typename typeT, typename withT>
-  inline typeT exchange(typeT &ref, withT &&with)
-  {
-    auto old = ::std::move(ref);
-    ref = ::std::forward<withT>(with);
-    return old;
-  }
 
     namespace details_utilities {
 
@@ -193,6 +197,7 @@ template<typename lhsT, typename rhsT>
                            : ::std::forward<lhsT>(lhs);
   }
 
+// Note that the order of parameters is different from `std::clamp()` from C++17.
 template<typename lowerT, typename testT, typename upperT>
   constexpr typename common_type<lowerT &&, testT &&, upperT &&>::type clamp(lowerT &&lower, testT &&test, upperT &&upper)
   {
