@@ -116,6 +116,7 @@ template<typename stringT, typename hashT>
     using const_reverse_iterator  = typename string_type::const_reverse_iterator;
     using reverse_iterator        = typename string_type::const_reverse_iterator;
 
+    // hash support
     struct hash;
 
   private:
