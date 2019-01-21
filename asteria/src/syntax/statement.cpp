@@ -530,6 +530,8 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           // This is straightforward and hopefully zero-cost if no exception is thrown.
           status = alt.body_try.execute(ref_out, global, ctx_io);
         } catch(const std::exception &stdex) {
+          // The exception variable shall not outlast the `catch` body.
+          Executive_Context ctx_next(&ctx_io);
           // Prepare the backtrace as an `array` for processing by code inside `catch`.
           D_array backtrace;
           const auto push_backtrace = [&](const Source_Location &loc)
@@ -539,10 +541,8 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
               elem.try_emplace(std::ref("line"), D_integer(loc.get_line()));
               backtrace.emplace_back(std::move(elem));
             };
-          // The exception variable shall not outlast the `catch` body.
-          Executive_Context ctx_next(&ctx_io);
+          // Translate the exception as needed.
           try {
-            // Translate the exception as needed.
             throw;
           } catch(const Traceable_Exception &except) {
             // Handle an `Asteria::Traceable_Exception`.
@@ -603,7 +603,13 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // If the condition yields `false`, throw an exception.
         auto value = ref_out.read();
         if(!value.test()) {
-          auto msg = alt.msg.empty() ? std::ref("Assertion failed!") : "Assertion failed: " + alt.msg;
+          Cow_String msg;
+          if(alt.msg.empty()) {
+            msg = std::ref("Assertion failed!");
+          } else {
+            msg = std::ref("Assertion failed: ");
+            msg += alt.msg;
+          }
           ASTERIA_DEBUG_LOG("Throwing exception: ", msg);
           throw Runtime_Error(std::move(msg));
         }

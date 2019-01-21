@@ -142,7 +142,7 @@ template<typename stringT, typename hashT>
       : m_sth(hf, ::std::move(str))
       {
       }
-    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<typename remove_reference<paramT>::type &&, string_type>::value)>
+    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)>
       basic_prehashed_string(paramT &&param, const hasher &hf = hasher())
       : m_sth(hf, ::std::forward<paramT>(param))
       {
@@ -328,46 +328,24 @@ template<typename stringT, typename hashT>
     return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());
   }
 
-template<typename stringT, typename hashT>
-  inline bool operator==(const basic_prehashed_string<stringT, hashT> &lhs, const stringT &rhs) noexcept
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT &>() == ::std::declval<const otherT &>()))>
+  inline bool operator==(const basic_prehashed_string<stringT, hashT> &lhs, const otherT &rhs)
   {
     return lhs.rdstr() == rhs;
   }
-template<typename stringT, typename hashT>
-  inline bool operator!=(const basic_prehashed_string<stringT, hashT> &lhs, const stringT &rhs) noexcept
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT &>() != ::std::declval<const otherT &>()))>
+  inline bool operator!=(const basic_prehashed_string<stringT, hashT> &lhs, const otherT &rhs)
   {
     return lhs.rdstr() != rhs;
   }
 
-template<typename stringT, typename hashT>
-  inline bool operator==(const stringT &lhs, const basic_prehashed_string<stringT, hashT> &rhs) noexcept
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT &>() == ::std::declval<const otherT &>()))>
+  inline bool operator==(const otherT &lhs, const basic_prehashed_string<stringT, hashT> &rhs)
   {
     return lhs == rhs.rdstr();
   }
-template<typename stringT, typename hashT>
-  inline bool operator!=(const stringT &lhs, const basic_prehashed_string<stringT, hashT> &rhs) noexcept
-  {
-    return lhs != rhs.rdstr();
-  }
-
-template<typename stringT, typename hashT>
-  inline bool operator==(const basic_prehashed_string<stringT, hashT> &lhs, const typename stringT::value_type *rhs) noexcept
-  {
-    return lhs.rdstr() == rhs;
-  }
-template<typename stringT, typename hashT>
-  inline bool operator!=(const basic_prehashed_string<stringT, hashT> &lhs, const typename stringT::value_type *rhs) noexcept
-  {
-    return lhs.rdstr() != rhs;
-  }
-
-template<typename stringT, typename hashT>
-  inline bool operator==(const typename stringT::value_type *lhs, const basic_prehashed_string<stringT, hashT> &rhs) noexcept
-  {
-    return lhs == rhs.rdstr();
-  }
-template<typename stringT, typename hashT>
-  inline bool operator!=(const typename stringT::value_type *lhs, const basic_prehashed_string<stringT, hashT> &rhs) noexcept
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT &>() != ::std::declval<const otherT &>()))>
+  inline bool operator!=(const otherT &lhs, const basic_prehashed_string<stringT, hashT> &rhs)
   {
     return lhs != rhs.rdstr();
   }
