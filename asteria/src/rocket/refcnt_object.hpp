@@ -23,36 +23,31 @@ template<typename elementT>
     pointer m_rptr;
 
   public:
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
       constexpr refcnt_object(reference_wrapper<yelementT> ref) noexcept
       : m_owns(),
         m_rptr(::std::addressof(ref.get()))
       {
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_base_of<element_type, typename decay<yelementT>::type>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, typename decay<yelementT>::type>::value)>
       explicit refcnt_object(yelementT &&yelem)
       : m_owns(noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem))),
         m_rptr(this->m_owns.get())
       {
       }
-    template<typename firstT, typename ...restT,
-             ROCKET_ENABLE_IF(is_constructible<element_type, firstT &&, restT &&...>::value)>
+    template<typename firstT, typename ...restT, ROCKET_ENABLE_IF(is_constructible<element_type, firstT &&, restT &&...>::value)>
       refcnt_object(firstT &&first, restT &&...rest)
       : m_owns(noadl::make_refcnt<element_type>(::std::forward<firstT>(first), ::std::forward<restT>(rest)...)),
         m_rptr(this->m_owns.get())
       {
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
       refcnt_object(const refcnt_object<yelementT> &other) noexcept
       : m_owns(other.m_owns),
         m_rptr(other.m_rptr)
       {
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)>
       refcnt_object(refcnt_object<yelementT> &&other) noexcept
       : m_owns(::std::move(other.m_owns)),
         m_rptr(::std::move(other.m_rptr))

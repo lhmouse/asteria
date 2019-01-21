@@ -25,8 +25,7 @@ template<typename funcT, typename ...firstT>
 
   public:
     // piesewise construct
-    template<typename yfuncT, typename ...yfirstT,
-             ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, yfirstT &&...>::value)>
+    template<typename yfuncT, typename ...yfirstT, ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, yfirstT &&...>::value)>
       constexpr bind_front_result(yfuncT &&yfunc, firstT &&...yfirst) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
                                                                                            is_nothrow_constructible<tuple<firstT...>, yfirstT &&...>>::value)
       : m_func(::std::forward<yfuncT>(yfunc)),

@@ -19,8 +19,7 @@ template<typename iteratorT, typename differenceT, typename delimiterT,
     filterT m_filter;
 
   public:
-    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT,
-             typename yfilterT,
+    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT, typename yfilterT,
              ROCKET_ENABLE_IF(conjunction<is_constructible<iteratorT, yiteratorT &&>, is_constructible<differenceT, ydifferenceT &&>, is_constructible<delimiterT, ydelimiterT &&>,
                                           is_constructible<filterT, yfilterT &&>>::value)>
     constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&ydelimiter,

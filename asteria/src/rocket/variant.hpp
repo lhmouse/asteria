@@ -268,8 +268,7 @@ template<typename ...alternativesT>
         noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor));
         this->m_index = index_new;
       }
-    template<typename paramT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
       variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
       {
 #ifdef ROCKET_DEBUG
@@ -301,8 +300,7 @@ template<typename ...alternativesT>
         this->m_index = index_new;
       }
     // 23.7.3.3, assignment
-    template<typename paramT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
       variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>, is_nothrow_copy_constructible<paramT>>::value)
       {
         const auto index_old = this->m_index;
@@ -338,8 +336,7 @@ template<typename ...alternativesT>
         return *this;
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
-    template<typename paramT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
       variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         const auto index_old = this->m_index;
@@ -446,8 +443,7 @@ template<typename ...alternativesT>
         }
         return static_cast<const typename type_at<indexT>::type *>(this->m_stor);
       }
-    template<typename targetT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
       const targetT * get() const noexcept
       {
         return this->get<index_of<targetT>::value>();
@@ -460,8 +456,7 @@ template<typename ...alternativesT>
         }
         return static_cast<typename type_at<indexT>::type *>(this->m_stor);
       }
-    template<typename targetT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
       targetT * get() noexcept
       {
         return this->get<index_of<targetT>::value>();
@@ -476,8 +471,7 @@ template<typename ...alternativesT>
         }
         return *ptr;
       }
-    template<typename targetT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
       const targetT & as() const
       {
         return this->as<index_of<targetT>::value>();
@@ -491,8 +485,7 @@ template<typename ...alternativesT>
         }
         return *ptr;
       }
-    template<typename targetT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
       targetT & as()
       {
         return this->as<index_of<targetT>::value>();
@@ -544,8 +537,7 @@ template<typename ...alternativesT>
         variant::do_dispatch_destroy(index_old, backup);
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
       }
-    template<typename targetT, typename ...paramsT,
-             ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
+    template<typename targetT, typename ...paramsT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
       targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
       {
         return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);

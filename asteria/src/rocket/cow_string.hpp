@@ -327,8 +327,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           : string_iterator(nullptr, nullptr)
           {
           }
-        template<typename ycharT,
-                 ROCKET_ENABLE_IF(is_convertible<ycharT *, charT *>::value)>
+        template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT *, charT *>::value)>
           constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
           : string_iterator(other.m_ref, other.m_ptr)
           {
@@ -590,14 +589,12 @@ template<typename charT, typename traitsT, typename allocatorT>
       : basic_cow_string(allocator_type())
       {
       }
-    template<typename refT,
-             ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
+    template<typename refT, ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
       constexpr basic_cow_string(reference_wrapper<refT> ref, const allocator_type &alloc) noexcept
       : m_ptr(ref.get()), m_len(traits_type::length(ref.get())), m_sth(alloc)
       {
       }
-    template<typename refT,
-             ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
+    template<typename refT, ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
       constexpr basic_cow_string(reference_wrapper<refT> ref) noexcept(is_nothrow_constructible<allocator_type>::value)
       : basic_cow_string(ref, allocator_type())
       {
@@ -653,8 +650,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       {
         this->assign(init);
       }
-    template<typename refT,
-             ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
+    template<typename refT, ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
       basic_cow_string & operator=(reference_wrapper<refT> ref) noexcept
       {
         this->assign(ref);
@@ -1083,9 +1079,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         ROCKET_ASSERT(first <= last);
         return this->append(first, static_cast<size_type>(last - first));
       }
-    template<typename inputT,
-             ROCKET_DISABLE_IF(is_convertible<inputT, const value_type *>::value),
-             ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+    template<typename inputT, ROCKET_DISABLE_IF(is_convertible<inputT, const value_type *>::value), ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
       basic_cow_string & append(inputT first, inputT last)
       {
         if(first == last) {
@@ -1160,8 +1154,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->m_len = noadl::exchange(other.m_len, size_type(0));
         return *this;
       }
-    template<typename refT,
-             ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
+    template<typename refT, ROCKET_ENABLE_IF(is_convertible<refT, const value_type *>::value)>
       basic_cow_string & assign(reference_wrapper<refT> ref) noexcept
       {
         this->m_sth.deallocate();

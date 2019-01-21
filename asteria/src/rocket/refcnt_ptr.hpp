@@ -300,15 +300,13 @@ template<typename elementT>
       {
         this->reset(other.m_sth.release());
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
       refcnt_ptr(const refcnt_ptr<yelementT> &other) noexcept
       : refcnt_ptr()
       {
         this->reset(other.m_sth.copy_release());
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
       refcnt_ptr(refcnt_ptr<yelementT> &&other) noexcept
       : refcnt_ptr()
       {
@@ -329,15 +327,13 @@ template<typename elementT>
         this->reset(other.m_sth.release());
         return *this;
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
       refcnt_ptr & operator=(const refcnt_ptr<yelementT> &other) noexcept
       {
         this->reset(other.m_sth.copy_release());
         return *this;
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
       refcnt_ptr & operator=(refcnt_ptr<yelementT> &&other) noexcept
       {
         this->reset(other.m_sth.release());
