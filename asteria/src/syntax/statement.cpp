@@ -561,7 +561,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
             // We say the exception was thrown from native code.
             push_backtrace(Traceable_Exception(stdex).get_location());
           }
-          ASTERIA_DEBUG_LOG("Traceable_Exception backtrace:\n", Value(backtrace));
+          ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
           Reference_Root::S_temporary ref_c = { std::move(backtrace) };
           ctx_next.open_named_reference(std::ref("__backtrace")) = std::move(ref_c);
           // Execute the `catch` body.
