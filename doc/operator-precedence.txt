@@ -6,7 +6,7 @@ Postfix operators             ()   []                       Left-to-right
 -------------------------------------------------------------------------------
                               +   -   ~   !
 Prefix operators              ++   --                       Right-to-left
-                              unset   lengthof
+                              unset   lengthof   typeof
 -------------------------------------------------------------------------------
 Multiplicative operators      *   /   %                     Left-to-right
 -------------------------------------------------------------------------------
