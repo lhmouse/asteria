@@ -463,9 +463,7 @@ Parser::~Parser()
         // array-element-list-opt ::=
         //   array-element-list | ""
         // array-element-list ::=
-        //   expression ( comma-or-semicolon array-element-list-opt | "" )
-        // comma-or-semicolon ::=
-        //   "," | ";"
+        //   expression ( ( "," | ";" ) array-element-list-opt | "" )
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
           return false;
         }
@@ -496,7 +494,7 @@ Parser::~Parser()
         // key-mapped-list-opt ::=
         //   key-mapped-list | ""
         // key-mapped-list ::=
-        //   ( string-literal | identifier ) ( "=" | ":" ) expression ( comma-or-semicolon key-mapped-list-opt | "" )
+        //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           return false;
         }
