@@ -144,7 +144,7 @@ unnamed-object ::=
 key-mapped-list-opt ::=
 	key-mapped-list | ""
 key-mapped-list ::=
-	( string-literal | identifier ) "=" expression ( comma-or-semicolon key-mapped-list-opt | "" )
+	( string-literal | identifier ) ( "=" | ":" ) expression ( comma-or-semicolon key-mapped-list-opt | "" )
 nested-expression ::=
 	"(" expression ")"
 

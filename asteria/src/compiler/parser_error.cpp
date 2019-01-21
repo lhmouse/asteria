@@ -195,6 +195,10 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "Expectation failed while looking for an `{` or expression.";
       }
+    case code_equals_sign_or_colon_expected:
+      {
+        return "Expectation failed while looking for an `=` or `:`.";
+      }
     default:
       {
         return "No description is available for this error code.";

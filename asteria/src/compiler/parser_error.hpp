@@ -65,6 +65,7 @@ class Parser_Error
         code_close_parenthesis_or_argument_expected     = 4022,
         code_close_bracket_expected                     = 4023,
         code_open_brace_or_expression_expected          = 4024,
+        code_equals_sign_or_colon_expected              = 4025,
       };
 
   public:

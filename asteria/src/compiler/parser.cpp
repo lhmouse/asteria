@@ -496,7 +496,7 @@ Parser::~Parser()
         // key-mapped-list-opt ::=
         //   key-mapped-list | ""
         // key-mapped-list ::=
-        //   ( string-literal | identifier ) "=" expression ( comma-or-semicolon key-mapped-list-opt | "" )
+        //   ( string-literal | identifier ) ( "=" | ":" ) expression ( comma-or-semicolon key-mapped-list-opt | "" )
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           return false;
         }
@@ -511,7 +511,9 @@ Parser::~Parser()
             break;
           }
           if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_expected);
+            if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
+              throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_or_colon_expected);
+            }
           }
           if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
             throw duplicate_key_error;
