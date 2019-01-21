@@ -5,38 +5,31 @@
 #include "runtime/global_context.hpp"
 #include "runtime/traceable_exception.hpp"
 #include <iostream>
+#include <sstream>
+#include <chrono>
 
 using namespace Asteria;
 
-int main(int argc, char **argv)
-  {
-    Cow_Vector<Reference> args;
-    for(int i = 0; i < argc; ++i) {
-      D_string arg;
-      if(argv[i]) {
-        arg += argv[i];
+int main()
+  try {
+    std::istringstream iss(R"__(
+      func fib(n) {
+        var r = n;
+        if!(n <= 1) {
+          r = fib(n-1) + fib(n-2);
+        }
+        return& r;
       }
-      Reference_Root::S_constant ref_c = { std::move(arg) };
-      args.emplace_back(std::move(ref_c));
-    }
-    std::cerr << "# Input your program:" << std::endl
-              << "---" << std::endl;
-    try {
-      Global_Context global;
-      Simple_Source_File code(std::cin, std::ref("<stdin>"));
-      auto res = code.execute(global, std::move(args));
-      std::cerr << std::endl
-                << "---" << std::endl;
-      std::cout << res.read() << std::endl;
-    } catch(Traceable_Exception &e) {
-      std::cerr << std::endl
-                << "---" << std::endl
-                << "# Caught `Traceable_Exception`:" << std::endl
-                << e.get_value() << std::endl;
-    } catch(std::exception &e) {
-      std::cerr << std::endl
-                << "---" << std::endl
-                << "# Caught `std::exception`:" << std::endl
-                << e.what() << std::endl;
-    }
+      return fib(30);
+    )__");
+    Simple_Source_File code(iss, std::ref("my_file"));
+    Global_Context global;
+    const auto t1 = std::chrono::high_resolution_clock::now();
+    auto res = code.execute(global, { });
+    const auto t2 = std::chrono::high_resolution_clock::now();
+    std::cout << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " ms:\n--\n" << res.read() << std::endl;
+  } catch(Traceable_Exception &e) {
+    std::cerr << "Caught `Traceable_Exception`:\n--\n" << e.get_value() << std::endl;
+  } catch(std::exception &e) {
+    std::cerr << "Caught `std::exception`:\n--\n" << e.what() << std::endl;
   }
