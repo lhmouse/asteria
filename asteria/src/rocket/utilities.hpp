@@ -372,20 +372,16 @@ template<typename elementT>
   inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
   {
     auto ptr = init.begin();
-    do {
-      if(*ptr == elem) {
-        return true;
-      }
-      if(++ptr == init.end()) {
+    for(;;) {
+      if(ptr == init.end()) {
         return false;
       }
-    } while(true);
-  }
-
-template<typename elementT>
-  inline bool is_none_of(const elementT &elem, initializer_list<elementT> init)
-  {
-    return !is_any_of(elem, init);
+      if(*ptr == elem) {
+        break;
+      }
+      ++ptr;
+    }
+    return true;
   }
 
 template<typename enumT>
