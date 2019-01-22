@@ -7,10 +7,6 @@
 
 namespace Asteria {
 
-Reference::~Reference()
-  {
-  }
-
 void Reference::do_throw_unset_no_modifier() const
   {
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");

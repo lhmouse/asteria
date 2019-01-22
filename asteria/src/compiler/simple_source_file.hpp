@@ -33,7 +33,6 @@ class Simple_Source_File
         const auto err = this->load_stream(cstrm_io, filename);
         this->do_throw_on_error(err);
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Simple_Source_File);
 
   private:
     void do_throw_on_error(const Parser_Error &err)

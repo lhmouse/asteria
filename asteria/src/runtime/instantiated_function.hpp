@@ -23,7 +23,7 @@ class Instantiated_Function : public Abstract_Function
       : m_zvarg(loc, name), m_params(params), m_body_bnd(std::move(body_bnd))
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Instantiated_Function);
+    ~Instantiated_Function() override;
 
   public:
     const Source_Location & get_location() const noexcept

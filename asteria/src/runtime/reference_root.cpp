@@ -8,10 +8,6 @@
 
 namespace Asteria {
 
-Reference_Root::~Reference_Root()
-  {
-  }
-
 const Value & Reference_Root::dereference_const() const
   {
     switch(static_cast<Index>(this->m_stor.index())) {

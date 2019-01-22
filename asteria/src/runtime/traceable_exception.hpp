@@ -26,7 +26,7 @@ class Traceable_Exception : public virtual std::exception
       : m_loc(rocket::sref("<native code>"), 0), m_value(D_string(stdex.what()))
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Traceable_Exception);
+    ~Traceable_Exception() override;
 
   public:
     const Source_Location & get_location() const noexcept

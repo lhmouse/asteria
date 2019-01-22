@@ -8,10 +8,6 @@
 
 namespace Asteria {
 
-Reference_Modifier::~Reference_Modifier()
-  {
-  }
-
 const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {

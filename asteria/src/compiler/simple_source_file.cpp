@@ -13,10 +13,6 @@
 
 namespace Asteria {
 
-Simple_Source_File::~Simple_Source_File()
-  {
-  }
-
 void Simple_Source_File::do_throw_error(const Parser_Error &err)
   {
     rocket::insertable_ostream mos;

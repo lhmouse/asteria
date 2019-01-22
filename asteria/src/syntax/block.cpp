@@ -15,10 +15,6 @@
 
 namespace Asteria {
 
-Block::~Block()
-  {
-  }
-
 void Block::do_compile()
   {
     Cow_Vector<Compiled_Instruction> cinsts;

@@ -8,10 +8,6 @@
 
 namespace Asteria {
 
-Variadic_Arguer::~Variadic_Arguer()
-  {
-  }
-
 void Variadic_Arguer::describe(std::ostream &os) const
   {
     os << "<builtin>.__varg() @ " << this->m_loc;

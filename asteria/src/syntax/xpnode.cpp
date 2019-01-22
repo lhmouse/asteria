@@ -148,10 +148,6 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
     }
   }
 
-Xpnode::~Xpnode()
-  {
-  }
-
     namespace {
 
     template<typename ContextT>

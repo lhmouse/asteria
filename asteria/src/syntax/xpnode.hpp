@@ -151,7 +151,6 @@ class Xpnode
       : m_stor(std::forward<AltT>(alt))
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Xpnode);
 
   public:
     void bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;

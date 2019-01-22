@@ -14,7 +14,7 @@ class Abstract_Variable_Callback
     Abstract_Variable_Callback() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Variable_Callback, virtual);
+    virtual ~Abstract_Variable_Callback();
 
   public:
     virtual bool operator()(const RefCnt_Ptr<Variable> &var) const = 0;

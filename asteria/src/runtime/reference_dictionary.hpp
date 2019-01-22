@@ -45,13 +45,18 @@ class Reference_Dictionary
             std::memset(static_cast<void *>(this->refv), 0xEC, sizeof(Reference));
 #endif
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Bucket)
+        ~Bucket()
           {
             // Be careful, VERY careful.
             if(ROCKET_UNEXPECT(*this)) {
               rocket::destroy_at(this->refv);
             }
           }
+
+        Bucket(const Bucket &)
+          = delete;
+        Bucket & operator=(const Bucket &)
+          = delete;
 
         explicit operator bool () const noexcept
           {

@@ -15,7 +15,7 @@ class Abstract_Opaque : public virtual RefCnt_Base
     Abstract_Opaque() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Opaque, virtual);
+    ~Abstract_Opaque() override;
 
   public:
     virtual void describe(std::ostream &os) const = 0;

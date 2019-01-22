@@ -20,7 +20,12 @@ class Abstract_Context
       : m_tied_collector_opt(), m_named_references()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Abstract_Context, virtual);
+    virtual ~Abstract_Context();
+
+    Abstract_Context(const Abstract_Context &)
+      = delete;
+    Abstract_Context & operator=(const Abstract_Context &)
+      = delete;
 
   protected:
     void do_tie_collector(const RefCnt_Ptr<Generational_Collector> &tied_collector_opt) noexcept;

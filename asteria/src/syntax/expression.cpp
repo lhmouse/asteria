@@ -11,10 +11,6 @@
 
 namespace Asteria {
 
-Expression::~Expression()
-  {
-  }
-
 void Expression::do_compile()
   {
     Cow_Vector<Compiled_Instruction> cinsts;

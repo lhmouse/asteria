@@ -371,10 +371,6 @@ const char * Token::get_punctuator(Punctuator punct) noexcept
     }
   }
 
-Token::~Token()
-  {
-  }
-
 void Token::print(std::ostream &os) const
   {
     switch(this->index()) {

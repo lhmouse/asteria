@@ -149,7 +149,7 @@ class Runtime_Error : public virtual std::exception
       : m_msg(std::move(msg))
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Runtime_Error);
+    ~Runtime_Error() override;
 
   public:
     const char * what() const noexcept override

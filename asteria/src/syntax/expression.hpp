@@ -30,7 +30,6 @@ class Expression
       {
         this->do_compile();
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Expression);
 
   private:
     void do_compile();

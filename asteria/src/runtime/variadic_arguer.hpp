@@ -29,7 +29,6 @@ class Variadic_Arguer : public Abstract_Function
       : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::forward<XfirstT>(xfirst), std::forward<XvargsT>(xvargs)...)
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Variadic_Arguer);
 
   public:
     const Source_Location & get_location() const noexcept

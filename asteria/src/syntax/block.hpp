@@ -43,7 +43,6 @@ class Block
       {
         this->do_compile();
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Block);
 
   private:
     void do_compile();

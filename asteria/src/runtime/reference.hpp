@@ -35,7 +35,6 @@ class Reference
         this->m_mods.clear();
         return *this;
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Reference);
 
   private:
     [[noreturn]] void do_throw_unset_no_modifier() const;

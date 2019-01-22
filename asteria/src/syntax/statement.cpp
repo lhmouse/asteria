@@ -15,10 +15,6 @@
 
 namespace Asteria {
 
-Statement::~Statement()
-  {
-  }
-
     namespace {
 
     template<typename XnameT, typename XrefT>

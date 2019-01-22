@@ -66,10 +66,6 @@ const Value & Value::get_null() noexcept
     return *static_cast<const Value *>(static_cast<const void *>(s_null.bytes));
   }
 
-Value::~Value()
-  {
-  }
-
 bool Value::test() const noexcept
   {
     switch(this->type()) {

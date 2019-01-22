@@ -50,7 +50,6 @@ class Reference_Modifier
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Reference_Modifier);
 
   public:
     const Value * apply_const_opt(const Value &parent) const;

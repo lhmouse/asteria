@@ -15,7 +15,7 @@ class Abstract_Function : public virtual RefCnt_Base
     Abstract_Function() noexcept
       {
       }
-    ROCKET_COPYABLE_DESTRUCTOR(Abstract_Function, virtual);
+    ~Abstract_Function() override;
 
   public:
     virtual void describe(std::ostream &os) const = 0;

@@ -27,9 +27,14 @@ class Variable_Hashset
           : var()
           {
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Bucket)
+        ~Bucket()
           {
           }
+
+        Bucket(const Bucket &)
+          = delete;
+        Bucket & operator=(const Bucket &)
+          = delete;
 
         explicit operator bool () const noexcept
           {
