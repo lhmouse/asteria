@@ -135,18 +135,6 @@ using ::std::reference_wrapper;
 using ::std::pair;
 using ::std::tuple;
 
-#if defined(__cpp_lib_exchange_function) && (__cpp_lib_exchange_function >= 201304)
-using ::std::exchange;
-#else
-template<typename typeT, typename withT>
-  inline typeT exchange(typeT &ref, withT &&with)
-  {
-    auto old = ::std::move(ref);
-    ref = ::std::forward<withT>(with);
-    return old;
-  }
-#endif
-
 struct identity
   {
     template<typename paramT>
@@ -157,6 +145,14 @@ struct identity
 
     using is_transparent = void;
   };
+
+template<typename valueT, typename withT>
+  inline valueT exchange(valueT &value, withT &&with)
+  {
+    auto old = ::std::move(value);
+    value = ::std::forward<withT>(with);
+    return old;
+  }
 
     namespace details_utilities {
 
@@ -181,15 +177,15 @@ using details_utilities::adl_swap;
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
   {
-    return bool(rhs < lhs) ? ::std::forward<rhsT>(rhs)
-                           : ::std::forward<lhsT>(lhs);
+    return rhs < lhs ? ::std::forward<rhsT>(rhs)
+                     : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
   constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
   {
-    return bool(lhs < rhs) ? ::std::forward<rhsT>(rhs)
-                           : ::std::forward<lhsT>(lhs);
+    return lhs < rhs ? ::std::forward<rhsT>(rhs)
+                     : ::std::forward<lhsT>(lhs);
   }
 
 // Note that the order of parameters is different from `std::clamp()` from C++17.
