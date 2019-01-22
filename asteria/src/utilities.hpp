@@ -28,7 +28,6 @@ class Formatter
       : m_strm()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Formatter);
 
   private:
     std::ostream & do_open_stream();

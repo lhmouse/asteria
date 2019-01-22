@@ -8,10 +8,6 @@
 
 namespace Asteria {
 
-Variable_Hashset::~Variable_Hashset()
-  {
-  }
-
 void Variable_Hashset::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);

@@ -95,7 +95,11 @@ class Reference_Dictionary
         m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Dictionary);
+
+    Reference_Dictionary(const Reference_Dictionary &)
+      = delete;
+    Reference_Dictionary & operator=(const Reference_Dictionary &)
+      = delete;
 
   private:
     const Reference * do_get_template_opt(const PreHashed_String &name) const noexcept;

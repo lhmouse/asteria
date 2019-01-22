@@ -70,7 +70,11 @@ class Variable_Hashset
       : m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Variable_Hashset);
+
+    Variable_Hashset(const Variable_Hashset &)
+      = delete;
+    Variable_Hashset & operator=(const Variable_Hashset &)
+      = delete;
 
   private:
     void do_clear() noexcept;

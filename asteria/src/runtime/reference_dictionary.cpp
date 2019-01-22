@@ -7,10 +7,6 @@
 
 namespace Asteria {
 
-Reference_Dictionary::~Reference_Dictionary()
-  {
-  }
-
 const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_String &name) const noexcept
   {
     // Get template table range.
