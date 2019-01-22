@@ -32,7 +32,7 @@ Parser::~Parser()
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Source_Location(rocket::sref("<no token>"), 0);
+          return Source_Location(rocket::sref("<end of stream>"), 0);
         }
         return Source_Location(qtok->get_file(), qtok->get_line());
       }
@@ -1724,7 +1724,6 @@ Parser::~Parser()
 
     bool do_accept_nonblock_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
-        ASTERIA_DEBUG_LOG("Looking for a nonblock statement: ", tstrm_io.empty() ? rocket::sref("<no token>") : ASTERIA_FORMAT_STRING(*(tstrm_io.peek_opt())));
         // nonblock-statement ::=
         //   null-statement |
         //   variable-definition | immutable-variable-definition | function-definition |

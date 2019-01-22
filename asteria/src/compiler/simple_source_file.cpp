@@ -24,7 +24,7 @@ void Simple_Source_File::do_throw_error(const Parser_Error &err)
     // Append error location information.
     mos << "\n[parser error " << err.code() << " encountered at ";
     if(err.line() == 0) {
-      mos << "the end of source data";
+      mos << "the end of stream";
     } else {
       mos << "line " << err.line() << ", offset " << err.offset();
     }
