@@ -21,7 +21,7 @@ class Function_Analytic_Context : public Analytic_Context
         m_predef_refs()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Function_Analytic_Context);
+    ~Function_Analytic_Context() override;
 
   public:
     void initialize(const Cow_Vector<PreHashed_String> &params);

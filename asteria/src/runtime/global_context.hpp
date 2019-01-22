@@ -21,7 +21,7 @@ class Global_Context : public Abstract_Context
       {
         this->do_initialize();
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Global_Context);
+    ~Global_Context() override;
 
   private:
     void do_initialize();

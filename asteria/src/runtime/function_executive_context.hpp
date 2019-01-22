@@ -21,7 +21,7 @@ class Function_Executive_Context : public Executive_Context
         m_predef_refs()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Function_Executive_Context);
+    ~Function_Executive_Context() override;
 
   public:
     void initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);

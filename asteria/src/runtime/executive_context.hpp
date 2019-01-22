@@ -20,7 +20,7 @@ class Executive_Context : public Abstract_Context
         m_parent_opt(parent_opt)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Executive_Context);
+    ~Executive_Context() override;
 
   public:
     bool is_analytic() const noexcept override
