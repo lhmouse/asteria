@@ -9,10 +9,6 @@
 
 namespace Asteria {
 
-Collector::~Collector()
-  {
-  }
-
 bool Collector::track_variable(const RefCnt_Ptr<Variable> &var)
   {
     if(!this->m_tracked.insert(var)) {

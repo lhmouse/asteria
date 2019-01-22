@@ -27,7 +27,11 @@ class Collector
         m_counter(0), m_recur(0)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Collector);
+
+    Collector(const Collector &)
+      = delete;
+    Collector & operator=(const Collector &)
+      = delete;
 
   public:
     Variable_Hashset * get_output_pool_opt() const noexcept
