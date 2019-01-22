@@ -701,17 +701,15 @@ Parser::~Parser()
         Infix_Element_Base() noexcept
           {
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Infix_Element_Base, virtual);
+        virtual ~Infix_Element_Base()
+          {
+          }
 
       public:
         virtual Precedence precedence() const noexcept = 0;
         virtual void extract(Cow_Vector<Xpnode> &nodes_out) = 0;
         virtual void append(Infix_Element_Base &&elem) = 0;
       };
-
-    Infix_Element_Base::~Infix_Element_Base()
-      {
-      }
 
     class Infix_Head : public Infix_Element_Base
       {
