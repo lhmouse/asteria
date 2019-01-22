@@ -151,7 +151,6 @@ class Reference_Dictionary
         }
         return nullptr;
       }
-
     Reference & open(const PreHashed_String &name);
     bool unset(const PreHashed_String &name) noexcept;
   };
