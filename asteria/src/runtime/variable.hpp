@@ -25,7 +25,11 @@ class Variable : public virtual RefCnt_Base
       : m_value(), m_immutable(true)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Variable);
+
+    Variable(const Variable &)
+      = delete;
+    Variable & operator=(const Variable &)
+      = delete;
 
   private:
     [[noreturn]] void do_throw_immutable() const;

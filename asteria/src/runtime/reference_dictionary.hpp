@@ -113,14 +113,6 @@ class Reference_Dictionary
     void set_templates(const Template *tdata_opt, std::size_t tsize) noexcept
       {
         // Elements in [begin, end) must have been sorted.
-#ifdef ROCKET_DEBUG
-        if(tsize != 0) {
-          ROCKET_ASSERT(tdata_opt);
-          for(auto ptr = tdata_opt + 1; ptr != tdata_opt + tsize; ++ptr) {
-            ROCKET_ASSERT(ptr[-1].name < ptr[0].name);
-          }
-        }
-#endif
         this->m_templ_data = tdata_opt;
         this->m_templ_size = tsize;
       }

@@ -27,7 +27,11 @@ class Generational_Collector : public virtual RefCnt_Base
         m_gen_zero(&(this->m_pool), &(this->m_gen_one), 500)
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Generational_Collector);
+
+    Generational_Collector(const Generational_Collector &)
+      = delete;
+    Generational_Collector & operator=(const Generational_Collector &)
+      = delete;
 
   public:
     Collector * get_collector_opt(unsigned gen_limit) noexcept;

@@ -63,7 +63,11 @@ class Argument_Sentry
         m_state()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Argument_Sentry);
+
+    Argument_Sentry(const Argument_Sentry &)
+      = delete;
+    Argument_Sentry & operator=(const Argument_Sentry &)
+      = delete;
 
   private:
     template<typename XvalueT>

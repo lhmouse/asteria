@@ -9,10 +9,6 @@
 
 namespace Asteria {
 
-Token_Stream::~Token_Stream()
-  {
-  }
-
     namespace {
 
     class Source_Reader
@@ -36,9 +32,11 @@ Token_Stream::~Token_Stream()
               throw Parser_Error(0, 0, 0, Parser_Error::code_istream_open_failure);
             }
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Source_Reader)
-          {
-          }
+
+        Source_Reader(const Source_Reader &)
+          = delete;
+        Source_Reader & operator=(const Source_Reader &)
+          = delete;
 
       public:
         std::istream & stream() const noexcept

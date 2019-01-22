@@ -7,10 +7,6 @@
 
 namespace Asteria {
 
-Argument_Sentry::~Argument_Sentry()
-  {
-  }
-
     namespace {
 
     template<typename ThrowerT>
@@ -65,7 +61,7 @@ Argument_Sentry::~Argument_Sentry()
             this->m_ref = std::addressof(parent.get_argument(state.offset));
             this->m_committable = true;
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Sentry)
+        ~Reference_Sentry()
           {
             Argument_Sentry::State &state = this->m_state;
             // If anything went wrong, don't do anything.
@@ -80,6 +76,11 @@ Argument_Sentry::~Argument_Sentry()
             ROCKET_ASSERT(state.offset < 0xFE);
             state.offset++;
           }
+
+        Reference_Sentry(const Reference_Sentry &)
+          = delete;
+        Reference_Sentry & operator=(const Reference_Sentry &)
+          = delete;
 
       public:
         explicit operator bool () const noexcept

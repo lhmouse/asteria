@@ -12,6 +12,9 @@ const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_Stri
     // Get template table range.
     auto bptr = this->m_templ_data;
     auto eptr = bptr + this->m_templ_size;
+#ifdef ROCKET_DEBUG
+    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const Template &lhs, const Template &rhs) { return lhs.name < rhs.name; }));
+#endif
     while(bptr != eptr) {
       // This is a handwritten binary search, utilizing 3-way comparison result of strings.
       const auto mptr = bptr + (eptr - bptr) / 2;

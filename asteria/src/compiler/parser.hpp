@@ -29,7 +29,11 @@ class Parser
       : m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Parser);
+
+    Parser(const Parser &)
+      = delete;
+    Parser & operator=(const Parser &)
+      = delete;
 
   public:
     explicit operator bool () const noexcept

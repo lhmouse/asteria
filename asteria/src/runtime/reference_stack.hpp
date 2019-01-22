@@ -23,7 +23,11 @@ class Reference_Stack
         // Do not call any member function of `m_small` before its initialization.
         this->m_tptr = this->m_small.mut_data();
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Reference_Stack);
+
+    Reference_Stack(const Reference_Stack &)
+      = delete;
+    Reference_Stack & operator=(const Reference_Stack &)
+      = delete;
 
   private:
     void do_switch_to_large();

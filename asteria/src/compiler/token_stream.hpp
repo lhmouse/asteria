@@ -29,7 +29,11 @@ class Token_Stream
       : m_stor()
       {
       }
-    ROCKET_NONCOPYABLE_DESTRUCTOR(Token_Stream);
+
+    Token_Stream(const Token_Stream &)
+      = delete;
+    Token_Stream & operator=(const Token_Stream &)
+      = delete;
 
   public:
     explicit operator bool () const noexcept

@@ -13,10 +13,6 @@
 
 namespace Asteria {
 
-Parser::~Parser()
-  {
-  }
-
     namespace {
 
     Parser_Error do_make_parser_error(const Token_Stream &tstrm_io, Parser_Error::Code code)

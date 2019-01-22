@@ -43,10 +43,15 @@ bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
           {
             this->m_ref++;
           }
-        ROCKET_NONCOPYABLE_DESTRUCTOR(Recursion_Sentry)
+        ~Recursion_Sentry()
           {
             this->m_ref--;
           }
+
+        Recursion_Sentry(const Recursion_Sentry &)
+          = delete;
+        Recursion_Sentry & operator=(const Recursion_Sentry &)
+          = delete;
 
       public:
         explicit operator bool () const noexcept
