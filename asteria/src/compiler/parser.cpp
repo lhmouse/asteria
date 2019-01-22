@@ -23,18 +23,18 @@ Parser::~Parser()
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Parser_Error(0, SIZE_MAX, 0, code);
+          return { 0, SIZE_MAX, 0, code };
         }
-        return Parser_Error(qtok->get_line(), qtok->get_offset(), qtok->get_length(), code);
+        return { qtok->get_line(), qtok->get_offset(), qtok->get_length(), code };
       }
 
     Source_Location do_tell_source_location(const Token_Stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
-          return Source_Location(rocket::sref("<end of stream>"), 0);
+          return { rocket::sref("<end of stream>"), 0 };
         }
-        return Source_Location(qtok->get_file(), qtok->get_line());
+        return { qtok->get_file(), qtok->get_line() };
       }
 
     bool do_match_keyword(Token_Stream &tstrm_io, Token::Keyword keyword)
