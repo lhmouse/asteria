@@ -363,6 +363,14 @@ template<typename elementT>
     return true;
   }
 
+template<typename containerT, typename functorT, typename ...paramsT>
+  inline void for_each(containerT &cont, functorT &&func, paramsT &&...params)
+  {
+    for(auto &elem : cont) {
+      ::std::forward<functorT>(func)(elem, ::std::forward<paramsT>(params)...);
+    }
+  }
+
 template<typename enumT>
   constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
   {

@@ -19,26 +19,20 @@ void Block::do_compile()
   {
     CoW_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
-    for(const auto &stmt : this->m_stmts) {
-      stmt.compile(cinsts);
-    }
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.compile(cinsts); });
     this->m_cinsts = std::move(cinsts);
   }
 
 void Block::fly_over_in_place(Abstract_Context &ctx_io) const
   {
-    for(const auto &stmt : this->m_stmts) {
-      stmt.fly_over_in_place(ctx_io);
-    }
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.fly_over_in_place(ctx_io); });
   }
 
 Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const
   {
     CoW_Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
-    for(const auto &stmt : this->m_stmts) {
-      stmt.bind_in_place(stmts_bnd, ctx_io, global);
-    }
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.bind_in_place(stmts_bnd, ctx_io, global); });
     return std::move(stmts_bnd);
   }
 
@@ -120,9 +114,7 @@ void Block::execute_as_function(Reference &self_io, Global_Context &global, cons
 
 void Block::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    for(const auto &stmt : this->m_stmts) {
-      stmt.enumerate_variables(callback);
-    }
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback); });
   }
 
 }
