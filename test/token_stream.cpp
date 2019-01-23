@@ -17,7 +17,7 @@ int main()
                            "* - 0x`01`7.8`4p+4  // comments\n"
                            ".false/*more\n"
                            "comments*/;/*yet more*/-42e13");
-    auto r = ts.load(iss, Cow_String("dummy_file"));
+    auto r = ts.load(iss, CoW_String("dummy_file"));
     ASTERIA_TEST_CHECK(r);
     ASTERIA_TEST_CHECK(iss.eof());
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_identifier>().name == "hh");

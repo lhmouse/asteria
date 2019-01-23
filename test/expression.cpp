@@ -35,24 +35,24 @@ int main()
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr
     //                         |\-- dval ++ 0.25 +     ::= branch_true
     //                         \--- ival "hello," *    ::= branch_false
-    Cow_Vector<Xpnode> branch_true;
+    CoW_Vector<Xpnode> branch_true;
     {
       branch_true.emplace_back(Xpnode::S_named_reference { rocket::sref("dval") });
       branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_inc, false });
       branch_true.emplace_back(Xpnode::S_literal { D_real(0.25) });
       branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, false });
     }
-    Cow_Vector<Xpnode> branch_false;
+    CoW_Vector<Xpnode> branch_false;
     {
       branch_false.emplace_back(Xpnode::S_named_reference { rocket::sref("ival") });
       branch_false.emplace_back(Xpnode::S_literal { D_string("hello,") });
       branch_false.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
     }
-    Cow_Vector<Xpnode> nodes;
+    CoW_Vector<Xpnode> nodes;
     {
       nodes.emplace_back(Xpnode::S_named_reference { rocket::sref("aval") });
       nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
-      nodes.emplace_back(Xpnode::S_subscript { Cow_String() });
+      nodes.emplace_back(Xpnode::S_subscript { CoW_String() });
       nodes.emplace_back(Xpnode::S_named_reference { rocket::sref("cond") });
       nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
       nodes.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false), false });
