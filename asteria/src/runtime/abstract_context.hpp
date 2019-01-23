@@ -14,13 +14,8 @@ class Abstract_Context
   private:
     struct Collection_Trigger
       {
-        void operator()(RefCnt_Base *base_opt) noexcept
-          {
-            Abstract_Context::do_perform_full_collection(base_opt);
-          }
+        void operator()(RefCnt_Base *base_opt) noexcept;
       };
-
-    static void do_perform_full_collection(RefCnt_Base *base_opt) noexcept;
 
   private:
     Unique_Ptr<RefCnt_Base, Collection_Trigger> m_tied_collector_opt;
