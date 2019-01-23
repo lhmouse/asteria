@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-void Variable_Hashset::do_clear() noexcept
+void Variable_HashSet::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
     // Get table bounds.
@@ -26,7 +26,7 @@ void Variable_Hashset::do_clear() noexcept
     pre->size = 0;
   }
 
-void Variable_Hashset::do_rehash(std::size_t res_arg)
+void Variable_HashSet::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
@@ -67,7 +67,7 @@ void Variable_Hashset::do_rehash(std::size_t res_arg)
     }
   }
 
-void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
+void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
     const auto pre = this->m_stor.mut_data();
@@ -96,7 +96,7 @@ void Variable_Hashset::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_Hashset::has(const RefCnt_Ptr<Variable> &var) const noexcept
+bool Variable_HashSet::has(const RefCnt_Ptr<Variable> &var) const noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -116,7 +116,7 @@ bool Variable_Hashset::has(const RefCnt_Ptr<Variable> &var) const noexcept
     return true;
   }
 
-void Variable_Hashset::for_each(const Abstract_Variable_Callback &callback) const
+void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) const
   {
     if(this->m_stor.empty()) {
       return;
@@ -131,10 +131,10 @@ void Variable_Hashset::for_each(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-bool Variable_Hashset::insert(const RefCnt_Ptr<Variable> &var)
+bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
   {
     if(!var) {
-      ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_Hashset`.");
+      ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_HashSet`.");
     }
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 97);
@@ -159,7 +159,7 @@ bool Variable_Hashset::insert(const RefCnt_Ptr<Variable> &var)
     return true;
   }
 
-bool Variable_Hashset::erase(const RefCnt_Ptr<Variable> &var) noexcept
+bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -185,7 +185,7 @@ bool Variable_Hashset::erase(const RefCnt_Ptr<Variable> &var) noexcept
     return true;
   }
 
-RefCnt_Ptr<Variable> Variable_Hashset::erase_random_opt() noexcept
+RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;

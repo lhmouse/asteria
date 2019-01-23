@@ -86,7 +86,7 @@ bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
       }
 
     template<typename FunctionT>
-      void do_enumerate_variables(const Variable_Hashset &set, FunctionT &&func)
+      void do_enumerate_variables(const Variable_HashSet &set, FunctionT &&func)
       {
         set.for_each(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }

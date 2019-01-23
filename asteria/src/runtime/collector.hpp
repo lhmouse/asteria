@@ -12,17 +12,17 @@ namespace Asteria {
 class Collector
   {
   private:
-    Variable_Hashset *m_output_opt;
+    Variable_HashSet *m_output_opt;
     Collector *m_tied_opt;
     unsigned m_threshold;
 
     unsigned m_counter;
     long m_recur;
-    Variable_Hashset m_tracked;
-    Variable_Hashset m_staging;
+    Variable_HashSet m_tracked;
+    Variable_HashSet m_staging;
 
   public:
-    Collector(Variable_Hashset *output_opt, Collector *tied_opt, unsigned threshold) noexcept
+    Collector(Variable_HashSet *output_opt, Collector *tied_opt, unsigned threshold) noexcept
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
@@ -34,11 +34,11 @@ class Collector
       = delete;
 
   public:
-    Variable_Hashset * get_output_pool_opt() const noexcept
+    Variable_HashSet * get_output_pool_opt() const noexcept
       {
         return this->m_output_opt;
       }
-    void set_output_pool(Variable_Hashset *output_opt) noexcept
+    void set_output_pool(Variable_HashSet *output_opt) noexcept
       {
         this->m_output_opt = output_opt;
       }

@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-class Variable_Hashset
+class Variable_HashSet
   {
   private:
     struct Bucket
@@ -66,14 +66,14 @@ class Variable_Hashset
     Cow_Vector<Bucket> m_stor;
 
   public:
-    Variable_Hashset() noexcept
+    Variable_HashSet() noexcept
       : m_stor()
       {
       }
 
-    Variable_Hashset(const Variable_Hashset &)
+    Variable_HashSet(const Variable_HashSet &)
       = delete;
-    Variable_Hashset & operator=(const Variable_Hashset &)
+    Variable_HashSet & operator=(const Variable_HashSet &)
       = delete;
 
   private:

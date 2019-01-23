@@ -14,7 +14,7 @@ namespace Asteria {
 class Generational_Collector : public virtual RefCnt_Base
   {
   private:
-    Variable_Hashset m_pool;
+    Variable_HashSet m_pool;
     Collector m_gen_two;
     Collector m_gen_one;
     Collector m_gen_zero;

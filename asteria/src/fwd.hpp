@@ -47,7 +47,7 @@ class Reference;
 class Reference_Stack;
 class Reference_Dictionary;
 class Variable;
-class Variable_Hashset;
+class Variable_HashSet;
 class Abstract_Variable_Callback;
 class Collector;
 class Abstract_Context;
