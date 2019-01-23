@@ -364,10 +364,10 @@ template<typename elementT>
   }
 
 template<typename containerT, typename functorT, typename ...paramsT>
-  inline void for_each(containerT &cont, functorT &&func, paramsT &&...params)
+  inline void for_each(containerT &cont, functorT &&func, const paramsT &...params)
   {
     for(auto &elem : cont) {
-      ::std::forward<functorT>(func)(elem, ::std::forward<paramsT>(params)...);
+      ::std::forward<functorT>(func)(elem, params...);
     }
   }
 
