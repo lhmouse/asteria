@@ -67,7 +67,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_identifier(Cow_String &name_out, Token_Stream &tstrm_io)
+    bool do_accept_identifier(CoW_String &name_out, Token_Stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -82,7 +82,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_string_literal(Cow_String &value_out, Token_Stream &tstrm_io)
+    bool do_accept_string_literal(CoW_String &value_out, Token_Stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -97,7 +97,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_keyword_as_identifier(Cow_String &name_out, Token_Stream &tstrm_io)
+    bool do_accept_keyword_as_identifier(CoW_String &name_out, Token_Stream &tstrm_io)
       {
         const auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -112,7 +112,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_prefix_operator(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
@@ -208,7 +208,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_operator(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // postfix-operator ::=
         //   "++" | "--"
@@ -326,11 +326,11 @@ namespace Asteria {
         return true;
       }
 
-    extern bool do_accept_statement_as_block(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
-    extern bool do_accept_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
-    extern bool do_accept_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io);
+    extern bool do_accept_statement_as_block(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
+    extern bool do_accept_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
+    extern bool do_accept_expression(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io);
 
-    bool do_accept_block_statement_list(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_block_statement_list(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -353,9 +353,9 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_block_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_block_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
-        Cow_Vector<Statement> stmts;
+        CoW_Vector<Statement> stmts;
         if(!do_accept_block_statement_list(stmts, tstrm_io)) {
           return false;
         }
@@ -364,13 +364,13 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_identifier_list(Cow_Vector<PreHashed_String> &names_out, Token_Stream &tstrm_io)
+    bool do_accept_identifier_list(CoW_Vector<PreHashed_String> &names_out, Token_Stream &tstrm_io)
       {
         // identifier-list-opt ::=
         //   identifier-list | ""
         // identifier-list ::=
         //   identifier ( "," identifier-list | "" )
-        Cow_String name;
+        CoW_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
@@ -386,9 +386,9 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_named_reference(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_named_reference(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
-        Cow_String name;
+        CoW_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
@@ -397,7 +397,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_literal(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         Value value;
         if(!do_accept_literal(value, tstrm_io)) {
@@ -408,7 +408,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_this(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
           return false;
@@ -418,7 +418,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_closure_function(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -427,7 +427,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
-        Cow_Vector<PreHashed_String> params;
+        CoW_Vector<PreHashed_String> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -437,10 +437,10 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> body;
+        CoW_Vector<Statement> body;
         if(!do_accept_block_statement_list(body, tstrm_io)) {
           // An expression is expected, which behaves as if it was the operand of a `return&` ststement.
-          Cow_Vector<Xpnode> nodes_ret;
+          CoW_Vector<Xpnode> nodes_ret;
           if(!do_accept_expression(nodes_ret, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_or_expression_expected);
           }
@@ -452,7 +452,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_array(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -483,7 +483,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_object(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -494,10 +494,10 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           return false;
         }
-        Cow_Vector<PreHashed_String> keys;
+        CoW_Vector<PreHashed_String> keys;
         for(;;) {
           const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_Error::code_duplicate_object_key);
-          Cow_String key;
+          CoW_String key;
           bool key_got = do_accept_string_literal(key, tstrm_io) ||
                          do_accept_identifier(key, tstrm_io) ||
                          do_accept_keyword_as_identifier(key, tstrm_io);
@@ -530,7 +530,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_nested_expression(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // nested-expression ::=
         //   "(" expression ")"
@@ -546,7 +546,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_primary_expression(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
@@ -559,7 +559,7 @@ namespace Asteria {
                do_accept_nested_expression(nodes_out, tstrm_io);
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_function_call(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -592,7 +592,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_subscript(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
@@ -610,14 +610,14 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_member_access(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
         if(!do_match_punctuator(tstrm_io, Token::punctuator_dot)) {
           return false;
         }
-        Cow_String key;
+        CoW_String key;
         bool key_got = do_accept_string_literal(key, tstrm_io) ||
                        do_accept_identifier(key, tstrm_io) ||
                        do_accept_keyword_as_identifier(key, tstrm_io);
@@ -629,7 +629,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_element(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // infix-element ::=
         //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
@@ -641,7 +641,7 @@ namespace Asteria {
         //   postfix-operator-list | ""
         // postfix-operator-list ::=
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
-        Cow_Vector<Xpnode> prefixes;
+        CoW_Vector<Xpnode> prefixes;
         if(!do_accept_prefix_operator(prefixes, tstrm_io)) {
           if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
             return false;
@@ -703,17 +703,17 @@ namespace Asteria {
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Cow_Vector<Xpnode> &nodes_out) = 0;
+        virtual void extract(CoW_Vector<Xpnode> &nodes_out) = 0;
         virtual void append(Infix_Element_Base &&elem) = 0;
       };
 
     class Infix_Head : public Infix_Element_Base
       {
       private:
-        Cow_Vector<Xpnode> m_nodes;
+        CoW_Vector<Xpnode> m_nodes;
 
       public:
-        explicit Infix_Head(Cow_Vector<Xpnode> &&nodes)
+        explicit Infix_Head(CoW_Vector<Xpnode> &&nodes)
           : m_nodes(std::move(nodes))
           {
           }
@@ -723,7 +723,7 @@ namespace Asteria {
           {
             return precedence_max;
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(CoW_Vector<Xpnode> &nodes_out) override
           {
             nodes_out.append(std::make_move_iterator(this->m_nodes.mut_begin()), std::make_move_iterator(this->m_nodes.mut_end()));
           }
@@ -735,7 +735,7 @@ namespace Asteria {
 
     bool do_accept_infix_head(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
-        Cow_Vector<Xpnode> nodes;
+        CoW_Vector<Xpnode> nodes;
         if(!do_accept_infix_element(nodes, tstrm_io)) {
           return false;
         }
@@ -757,11 +757,11 @@ namespace Asteria {
       private:
         Sop m_sop;
         bool m_assign;
-        Cow_Vector<Xpnode> m_branch_true;
-        Cow_Vector<Xpnode> m_branch_false;
+        CoW_Vector<Xpnode> m_branch_true;
+        CoW_Vector<Xpnode> m_branch_false;
 
       public:
-        Infix_Selection(Sop sop, bool assign, Cow_Vector<Xpnode> &&branch_true, Cow_Vector<Xpnode> &&branch_false)
+        Infix_Selection(Sop sop, bool assign, CoW_Vector<Xpnode> &&branch_true, CoW_Vector<Xpnode> &&branch_false)
           : m_sop(sop), m_assign(assign), m_branch_true(std::move(branch_true)), m_branch_false(std::move(branch_false))
           {
           }
@@ -793,7 +793,7 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(CoW_Vector<Xpnode> &nodes_out) override
           {
             if(this->m_sop == sop_coales) {
               Xpnode::S_coalescence node_c = { std::move(this->m_branch_false), this->m_assign };
@@ -818,14 +818,14 @@ namespace Asteria {
           }
           assign = true;
         }
-        Cow_Vector<Xpnode> branch_true;
+        CoW_Vector<Xpnode> branch_true;
         if(!do_accept_expression(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_colon_expected);
         }
-        Cow_Vector<Xpnode> branch_false;
+        CoW_Vector<Xpnode> branch_false;
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
@@ -842,11 +842,11 @@ namespace Asteria {
           }
           assign = true;
         }
-        Cow_Vector<Xpnode> branch_true;
+        CoW_Vector<Xpnode> branch_true;
         if(!do_accept_infix_element(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, std::move(branch_true), Cow_Vector<Xpnode>());
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, std::move(branch_true), CoW_Vector<Xpnode>());
         return true;
       }
 
@@ -859,11 +859,11 @@ namespace Asteria {
           }
           assign = true;
         }
-        Cow_Vector<Xpnode> branch_false;
+        CoW_Vector<Xpnode> branch_false;
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, Cow_Vector<Xpnode>(), std::move(branch_false));
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, CoW_Vector<Xpnode>(), std::move(branch_false));
         return true;
       }
 
@@ -876,11 +876,11 @@ namespace Asteria {
           }
           assign = true;
         }
-        Cow_Vector<Xpnode> branch_null;
+        CoW_Vector<Xpnode> branch_null;
         if(!do_accept_infix_element(branch_null, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, Cow_Vector<Xpnode>(), std::move(branch_null));
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, CoW_Vector<Xpnode>(), std::move(branch_null));
         return true;
       }
 
@@ -889,10 +889,10 @@ namespace Asteria {
       private:
         Xpnode::Xop m_xop;
         bool m_assign;
-        Cow_Vector<Xpnode> m_rhs;
+        CoW_Vector<Xpnode> m_rhs;
 
       public:
-        Infix_Carriage(Xpnode::Xop xop, bool assign, Cow_Vector<Xpnode> &&rhs)
+        Infix_Carriage(Xpnode::Xop xop, bool assign, CoW_Vector<Xpnode> &&rhs)
           : m_xop(xop), m_assign(assign), m_rhs(std::move(rhs))
           {
           }
@@ -955,7 +955,7 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(CoW_Vector<Xpnode> &nodes_out) override
           {
             nodes_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
@@ -1144,7 +1144,7 @@ namespace Asteria {
         default:
           return false;
         }
-        Cow_Vector<Xpnode> rhs;
+        CoW_Vector<Xpnode> rhs;
         if(!do_accept_infix_element(rhs, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
@@ -1152,7 +1152,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_expression(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // expression ::=
         //   infix-element infix-carriage-list-opt
@@ -1167,7 +1167,7 @@ namespace Asteria {
         if(!do_accept_infix_head(elem, tstrm_io)) {
           return false;
         }
-        Cow_Vector<Unique_Ptr<Infix_Element_Base>> stack;
+        CoW_Vector<Unique_Ptr<Infix_Element_Base>> stack;
         stack.emplace_back(std::move(elem));
         for(;;) {
           bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
@@ -1196,7 +1196,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_variable_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_variable_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1209,11 +1209,11 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_var)) {
           return false;
         }
-        Cow_String name;
+        CoW_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
-        Cow_Vector<Xpnode> init;
+        CoW_Vector<Xpnode> init;
         if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
           // The initializer is optional.
           if(!do_accept_expression(init, tstrm_io)) {
@@ -1228,7 +1228,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_immutable_variable_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_immutable_variable_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1239,14 +1239,14 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_const)) {
           return false;
         }
-        Cow_String name;
+        CoW_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_expected);
         }
-        Cow_Vector<Xpnode> init;
+        CoW_Vector<Xpnode> init;
         if(!do_accept_expression(init, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
@@ -1258,7 +1258,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_function_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_function_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1267,11 +1267,11 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
           return false;
         }
-        Cow_String name;
+        CoW_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
-        Cow_Vector<PreHashed_String> params;
+        CoW_Vector<PreHashed_String> params;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1281,7 +1281,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> body;
+        CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1290,11 +1290,11 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_expression_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // expression-statement ::=
         //   expression ";"
-        Cow_Vector<Xpnode> expr;
+        CoW_Vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           return false;
         }
@@ -1306,7 +1306,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_if_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_if_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // if-statement ::=
         //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
@@ -1327,7 +1327,7 @@ namespace Asteria {
           goto z;
         }
       z:
-        Cow_Vector<Xpnode> cond;
+        CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1337,11 +1337,11 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> branch_true;
+        CoW_Vector<Statement> branch_true;
         if(!do_accept_statement_as_block(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Cow_Vector<Statement> branch_false;
+        CoW_Vector<Statement> branch_false;
         if(do_match_keyword(tstrm_io, Token::keyword_else)) {
           // The `else` branch is optional.
           if(!do_accept_statement_as_block(branch_false, tstrm_io)) {
@@ -1353,7 +1353,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_switch_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_switch_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // switch-statement ::=
         //   "switch" "(" expression ")" switch-block
@@ -1366,7 +1366,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_switch)) {
           return false;
         }
-        Cow_Vector<Xpnode> ctrl;
+        CoW_Vector<Xpnode> ctrl;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1376,12 +1376,12 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<std::pair<Expression, Block>> clauses;
+        CoW_Vector<std::pair<Expression, Block>> clauses;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_expected);
         }
         for(;;) {
-          Cow_Vector<Xpnode> cond;
+          CoW_Vector<Xpnode> cond;
           if(!do_match_keyword(tstrm_io, Token::keyword_default)) {
             if(!do_match_keyword(tstrm_io, Token::keyword_case)) {
               break;
@@ -1393,7 +1393,7 @@ namespace Asteria {
           if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_colon_expected);
           }
-          Cow_Vector<Statement> stmts;
+          CoW_Vector<Statement> stmts;
           for(;;) {
             bool stmt_got = do_accept_statement(stmts, tstrm_io);
             if(!stmt_got) {
@@ -1410,14 +1410,14 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_do_while_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_do_while_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // do-while-statement ::=
         //   "do" statement "while" negation-opt "(" expression ")" ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_do)) {
           return false;
         }
-        Cow_Vector<Statement> body;
+        CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1434,7 +1434,7 @@ namespace Asteria {
           goto z;
         }
       z:
-        Cow_Vector<Xpnode> cond;
+        CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1452,7 +1452,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_while_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_while_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // while-statement ::=
         //   "while" negation-opt "(" expression ")" statement
@@ -1469,7 +1469,7 @@ namespace Asteria {
           goto z;
         }
       z:
-        Cow_Vector<Xpnode> cond;
+        CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1479,7 +1479,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> body;
+        CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1488,7 +1488,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_for_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_for_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // for-statement ::=
         //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
@@ -1500,11 +1500,11 @@ namespace Asteria {
           return false;
         }
         // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
-        Cow_String key_name;
-        Cow_String mapped_name;
-        Cow_Vector<Statement> init;
-        Cow_Vector<Xpnode> cond;
-        Cow_Vector<Xpnode> step;
+        CoW_String key_name;
+        CoW_String mapped_name;
+        CoW_Vector<Statement> init;
+        CoW_Vector<Xpnode> cond;
+        CoW_Vector<Xpnode> step;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1544,7 +1544,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> body;
+        CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1558,7 +1558,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_break_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_break_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // break-statement ::=
         //   "break" ( "switch" | "while" | "for" ) ";"
@@ -1587,7 +1587,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_continue_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_continue_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // continue-statement ::=
         //   "continue" ( "while" | "for" ) ";"
@@ -1612,7 +1612,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_throw_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_throw_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto loc = do_tell_source_location(tstrm_io);
@@ -1621,7 +1621,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
           return false;
         }
-        Cow_Vector<Xpnode> expr;
+        CoW_Vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
@@ -1633,7 +1633,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_return_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_return_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // return-statement ::=
         //   "return" ( "&" | "" ) expression-opt ";"
@@ -1645,7 +1645,7 @@ namespace Asteria {
           // The reference specifier is optional.
           by_ref = true;
         }
-        Cow_Vector<Xpnode> expr;
+        CoW_Vector<Xpnode> expr;
         if(do_accept_expression(expr, tstrm_io)) {
           // This is optional.
         }
@@ -1657,18 +1657,18 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_assert_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_assert_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // assert-statement ::=
         //  "assert" expression ( ":" string-literal | "" ) ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_assert)) {
           return false;
         }
-        Cow_Vector<Xpnode> expr;
+        CoW_Vector<Xpnode> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        Cow_String msg;
+        CoW_String msg;
         if(do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
           // The descriptive message is optional.
           if(!do_accept_string_literal(msg, tstrm_io)) {
@@ -1683,14 +1683,14 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_try_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_try_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
         if(!do_match_keyword(tstrm_io, Token::keyword_try)) {
           return false;
         }
-        Cow_Vector<Statement> body_try;
+        CoW_Vector<Statement> body_try;
         if(!do_accept_statement_as_block(body_try, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1700,14 +1700,14 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
         }
-        Cow_String except_name;
+        CoW_String except_name;
         if(!do_accept_identifier(except_name, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
         }
-        Cow_Vector<Statement> body_catch;
+        CoW_Vector<Statement> body_catch;
         if(!do_accept_statement_as_block(body_catch, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
@@ -1716,7 +1716,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_nonblock_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_nonblock_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // nonblock-statement ::=
         //   null-statement |
@@ -1744,7 +1744,7 @@ namespace Asteria {
                do_accept_try_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement_as_block(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_statement_as_block(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1752,7 +1752,7 @@ namespace Asteria {
                do_accept_nonblock_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1795,7 +1795,7 @@ bool Parser::empty() const noexcept
       }
     case state_success:
       {
-        return this->m_stor.as<Cow_Vector<Statement>>().empty();
+        return this->m_stor.as<CoW_Vector<Statement>>().empty();
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
@@ -1810,7 +1810,7 @@ bool Parser::load(Token_Stream &tstrm_io)
     // Phase 3
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
-    Cow_Vector<Statement> stmts;
+    CoW_Vector<Statement> stmts;
     while(!tstrm_io.empty()) {
       // document ::=
       //   statement-list-opt
@@ -1849,7 +1849,7 @@ Block Parser::extract_document()
       }
     case state_success:
       {
-        auto stmts = std::move(this->m_stor.as<Cow_Vector<Statement>>());
+        auto stmts = std::move(this->m_stor.as<CoW_Vector<Statement>>());
         this->m_stor = nullptr;
         return std::move(stmts);
       }

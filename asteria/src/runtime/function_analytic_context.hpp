@@ -24,7 +24,7 @@ class Function_Analytic_Context : public Analytic_Context
     ~Function_Analytic_Context() override;
 
   public:
-    void initialize(const Cow_Vector<PreHashed_String> &params);
+    void initialize(const CoW_Vector<PreHashed_String> &params);
   };
 
 }

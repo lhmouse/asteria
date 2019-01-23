@@ -81,13 +81,13 @@ template<typename ElementT>
   using RefCnt_Object = rocket::refcnt_object<ElementT>;
 
 template<typename ElementT>
-  using Cow_Vector = rocket::cow_vector<ElementT>;
+  using CoW_Vector = rocket::cow_vector<ElementT>;
 template<typename KeyT, typename ValueT, typename HashT, typename EqualT = rocket::transparent_equal_to>
-  using Cow_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
+  using CoW_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
 template<typename ElementT, std::size_t capacityT>
   using Static_Vector = rocket::static_vector<ElementT, capacityT>;
 
-using Cow_String = rocket::cow_string;
+using CoW_String = rocket::cow_string;
 using PreHashed_String = rocket::prehashed_string;
 
 // Fundamental Types
@@ -95,11 +95,11 @@ using D_null      = std::nullptr_t;
 using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_real      = double;
-using D_string    = Cow_String;
+using D_string    = CoW_String;
 using D_opaque    = RefCnt_Object<Abstract_Opaque>;
 using D_function  = RefCnt_Object<Abstract_Function>;
-using D_array     = Cow_Vector<Value>;
-using D_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
+using D_array     = CoW_Vector<Value>;
+using D_object    = CoW_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 
 // Indices of Fundamental Types
 enum Value_Type : std::uint8_t

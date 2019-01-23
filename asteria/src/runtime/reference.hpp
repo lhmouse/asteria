@@ -14,7 +14,7 @@ class Reference
   {
   private:
     Reference_Root m_root;
-    Cow_Vector<Reference_Modifier> m_mods;
+    CoW_Vector<Reference_Modifier> m_mods;
 
   public:
     Reference() noexcept

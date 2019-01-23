@@ -15,7 +15,7 @@ class Traceable_Exception : public virtual std::exception
   private:
     Source_Location m_loc;
     Value m_value;
-    Cow_Vector<Source_Location> m_backtrace;
+    CoW_Vector<Source_Location> m_backtrace;
 
   public:
     Traceable_Exception(const Source_Location &loc, Value value)
@@ -38,7 +38,7 @@ class Traceable_Exception : public virtual std::exception
         return this->m_value;
       }
 
-    const Cow_Vector<Source_Location> & get_backtrace() const noexcept
+    const CoW_Vector<Source_Location> & get_backtrace() const noexcept
       {
         return this->m_backtrace;
       }

@@ -26,7 +26,7 @@ Function_Executive_Context::~Function_Executive_Context()
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }
 
-    inline RefCnt_Object<Abstract_Function> do_make_varg(const RefCnt_Object<Variadic_Arguer> &zvarg, Cow_Vector<Reference> &&args)
+    inline RefCnt_Object<Abstract_Function> do_make_varg(const RefCnt_Object<Variadic_Arguer> &zvarg, CoW_Vector<Reference> &&args)
       {
         if(ROCKET_EXPECT(args.empty())) {
           return zvarg;
@@ -36,7 +36,7 @@ Function_Executive_Context::~Function_Executive_Context()
 
     }
 
-void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
+void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

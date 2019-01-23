@@ -97,7 +97,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
-    Cow_Vector<Bucket> stor;
+    CoW_Vector<Bucket> stor;
     stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.

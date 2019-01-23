@@ -15,14 +15,14 @@ namespace Asteria {
       {
       private:
         std::reference_wrapper<std::istream> m_strm;
-        Cow_String m_file;
+        CoW_String m_file;
 
-        Cow_String m_str;
+        CoW_String m_str;
         std::uint32_t m_line;
         std::size_t m_offset;
 
       public:
-        Source_Reader(std::istream &xstrm, const Cow_String &xfile)
+        Source_Reader(std::istream &xstrm, const CoW_String &xfile)
           : m_strm(xstrm), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
@@ -43,7 +43,7 @@ namespace Asteria {
           {
             return this->m_strm;
           }
-        const Cow_String & file() const noexcept
+        const CoW_String & file() const noexcept
           {
             return this->m_file;
           }
@@ -205,7 +205,7 @@ namespace Asteria {
       }
 
     template<typename TokenT>
-      void do_push_token(Cow_Vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
+      void do_push_token(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
       {
         seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
         reader_io.consume(length);
@@ -230,7 +230,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_identifier_or_keyword(Cow_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_identifier_or_keyword(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -292,7 +292,7 @@ namespace Asteria {
         for(;;) {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
-            Token::S_identifier token_c = { Cow_String(bptr, tlen) };
+            Token::S_identifier token_c = { CoW_String(bptr, tlen) };
             do_push_token(seq_out, reader_io, tlen, std::move(token_c));
             return true;
           }
@@ -307,7 +307,7 @@ namespace Asteria {
         }
       }
 
-    bool do_accept_punctuator(Cow_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_punctuator(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         const auto bptr = reader_io.data_avail();
@@ -403,7 +403,7 @@ namespace Asteria {
         }
       }
 
-    bool do_accept_string_literal(Cow_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -413,7 +413,7 @@ namespace Asteria {
         }
         // Get a string literal with regard to escape sequences.
         std::size_t tlen = 1;
-        Cow_String value;
+        CoW_String value;
         for(;;) {
           const auto qavail = reader_io.size_avail() - tlen;
           if(qavail == 0) {
@@ -563,7 +563,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_noescape_string_literal(Cow_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_noescape_string_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
@@ -573,7 +573,7 @@ namespace Asteria {
         }
         // Escape sequences do not have special meanings inside single quotation marks.
         std::size_t tlen = 1;
-        Cow_String value;
+        CoW_String value;
         {
           auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, '\'');
           if(!tptr) {
@@ -588,7 +588,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(Cow_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_numeric_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -846,20 +846,20 @@ bool Token_Stream::empty() const noexcept
       }
     case state_success:
       {
-        return this->m_stor.as<Cow_Vector<Token>>().empty();
+        return this->m_stor.as<CoW_Vector<Token>>().empty();
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
-bool Token_Stream::load(std::istream &cstrm_io, const Cow_String &file)
+bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
     // Store tokens parsed here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
-    Cow_Vector<Token> seq;
+    CoW_Vector<Token> seq;
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
@@ -969,7 +969,7 @@ const Token * Token_Stream::peek_opt() const noexcept
       }
     case state_success:
       {
-        const auto &alt = this->m_stor.as<Cow_Vector<Token>>();
+        const auto &alt = this->m_stor.as<CoW_Vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }
@@ -993,7 +993,7 @@ Token Token_Stream::shift()
       }
     case state_success:
       {
-        auto &alt = this->m_stor.as<Cow_Vector<Token>>();
+        auto &alt = this->m_stor.as<CoW_Vector<Token>>();
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }

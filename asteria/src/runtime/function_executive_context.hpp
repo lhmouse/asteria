@@ -24,7 +24,7 @@ class Function_Executive_Context : public Executive_Context
     ~Function_Executive_Context() override;
 
   public:
-    void initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
+    void initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args);
   };
 
 }

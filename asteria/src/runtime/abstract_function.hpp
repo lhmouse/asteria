@@ -19,7 +19,7 @@ class Abstract_Function : public virtual RefCnt_Base
 
   public:
     virtual void describe(std::ostream &os) const = 0;
-    virtual void invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const = 0;
+    virtual void invoke(Reference &self_io, Global_Context &global, CoW_Vector<Reference> &&args) const = 0;
     virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
   };
 

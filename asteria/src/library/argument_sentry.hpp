@@ -22,8 +22,8 @@ class Argument_Sentry
       };
 
   private:
-    Cow_String m_name;
-    std::reference_wrapper<const Cow_Vector<Reference>> m_args;
+    CoW_String m_name;
+    std::reference_wrapper<const CoW_Vector<Reference>> m_args;
     bool m_throw_on_failure;
 
     // This string stores all overloads that have been tested so far.
@@ -34,7 +34,7 @@ class Argument_Sentry
     State m_state;
 
   public:
-    Argument_Sentry(Cow_String name, const Cow_Vector<Reference> &args) noexcept
+    Argument_Sentry(CoW_String name, const CoW_Vector<Reference> &args) noexcept
       : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
@@ -52,7 +52,7 @@ class Argument_Sentry
       Argument_Sentry & do_get_required_value(XvalueT &value_out);
 
   public:
-    const Cow_String & get_name() const noexcept
+    const CoW_String & get_name() const noexcept
       {
         return this->m_name;
       }

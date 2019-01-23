@@ -22,7 +22,7 @@ class Token_Stream
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_Error, Cow_Vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    rocket::variant<std::nullptr_t, Parser_Error, CoW_Vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
     Token_Stream() noexcept
@@ -38,7 +38,7 @@ class Token_Stream
   public:
     explicit operator bool () const noexcept
       {
-        return this->m_stor.get<Cow_Vector<Token>>() != nullptr;
+        return this->m_stor.get<CoW_Vector<Token>>() != nullptr;
       }
     State state() const noexcept
       {
@@ -48,7 +48,7 @@ class Token_Stream
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(std::istream &cstrm_io, const Cow_String &file);
+    bool load(std::istream &cstrm_io, const CoW_String &file);
     void clear() noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();

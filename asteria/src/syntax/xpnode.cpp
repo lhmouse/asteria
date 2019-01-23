@@ -175,7 +175,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
 
     }
 
-void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
+void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
@@ -350,7 +350,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context & /*ctx*/)
       {
         // Allocate the argument vector.
-        Cow_Vector<Reference> args;
+        CoW_Vector<Reference> args;
         args.resize(alt.arg_cnt);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           *it = std::move(stack_io.mut_top());
@@ -627,21 +627,21 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_concatenate(const Cow_String &lhs, const Cow_String &rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_concatenate(const CoW_String &lhs, const CoW_String &rhs)
       {
-        Cow_String res;
+        CoW_String res;
         res.reserve(lhs.size() + rhs.size());
         res.append(lhs);
         res.append(rhs);
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_duplicate(const Cow_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_duplicate(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
+        CoW_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count == 0) {
           return res;
@@ -663,12 +663,12 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_move_left(const Cow_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_move_left(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
+        CoW_String res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -678,12 +678,12 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_move_right(const Cow_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_move_right(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
+        CoW_String res;
         res.assign(lhs.size(), ' ');
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
@@ -693,12 +693,12 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_extend(const Cow_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_extend(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
+        CoW_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count > res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
@@ -708,12 +708,12 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline Cow_String do_truncate(const Cow_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION inline CoW_String do_truncate(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
+        CoW_String res;
         const auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
@@ -1436,7 +1436,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
 
     }
 
-void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const
+void Xpnode::compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:

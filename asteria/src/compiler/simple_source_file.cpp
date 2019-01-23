@@ -29,13 +29,13 @@ void Simple_Source_File::do_throw_error(const Parser_Error &err)
     throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
   }
 
-Parser_Error Simple_Source_File::load_file(const Cow_String &filename)
+Parser_Error Simple_Source_File::load_file(const CoW_String &filename)
   {
     std::ifstream ifs(filename.c_str());
     return this->load_stream(ifs, filename);
   }
 
-Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const Cow_String &filename)
+Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const CoW_String &filename)
   {
     Token_Stream tstrm;
     if(!tstrm.load(cstrm_io, filename)) {
@@ -52,11 +52,11 @@ Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const Cow_S
 
 void Simple_Source_File::clear() noexcept
   {
-    this->m_code = Cow_Vector<Statement>();
+    this->m_code = CoW_Vector<Statement>();
     this->m_file = rocket::sref("");
   }
 
-Reference Simple_Source_File::execute(Global_Context &global, Cow_Vector<Reference> &&args) const
+Reference Simple_Source_File::execute(Global_Context &global, CoW_Vector<Reference> &&args) const
   {
     Reference self;
     Variadic_Arguer zvarg(Source_Location(this->m_file, 0), rocket::sref("<file scope>"));

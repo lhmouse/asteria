@@ -14,10 +14,10 @@ class Reference_Dictionary
   public:
     struct Template
       {
-        Cow_String name;
+        CoW_String name;
         Reference ref;
 
-        template<typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XnameT, Cow_String>::value && std::is_convertible<XrefT, Reference>::value)>
+        template<typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XnameT, CoW_String>::value && std::is_convertible<XrefT, Reference>::value)>
           Template(XnameT &&xname, XrefT &&xref)
           : name(std::forward<XnameT>(xname)), ref(std::forward<XrefT>(xref))
           {
@@ -72,7 +72,7 @@ class Reference_Dictionary
     const Template *m_templ_data;
     std::size_t m_templ_size;
     // The first and last buckets are permanently reserved.
-    Cow_Vector<Bucket> m_stor;
+    CoW_Vector<Bucket> m_stor;
 
   public:
     Reference_Dictionary() noexcept

@@ -16,7 +16,7 @@ class Variadic_Arguer : public Abstract_Function
   private:
     Source_Location m_loc;
     PreHashed_String m_name;
-    Cow_Vector<Reference> m_vargs;
+    CoW_Vector<Reference> m_vargs;
 
   public:
     template<typename ...XvargsT>
@@ -49,7 +49,7 @@ class Variadic_Arguer : public Abstract_Function
       }
 
     void describe(std::ostream &os) const override;
-    void invoke(Reference &self_io, Global_Context &global, Cow_Vector<Reference> &&args) const override;
+    void invoke(Reference &self_io, Global_Context &global, CoW_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 

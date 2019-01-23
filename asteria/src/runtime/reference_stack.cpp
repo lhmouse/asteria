@@ -14,7 +14,7 @@ void Reference_Stack::do_switch_to_large()
     auto tptr = this->m_tptr;
     const auto nelem = this->m_small.size();
     // Note that this function has to provide strong exception safety guarantee.
-    Cow_Vector<Reference> large;
+    CoW_Vector<Reference> large;
     large.reserve(nelem * 2);
     for(auto i = nelem; i != 0; --i) {
       large.emplace_back(std::move(tptr[-i]));

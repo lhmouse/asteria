@@ -17,15 +17,15 @@ class Expression
                                                            const void *>;
 
   private:
-    Cow_Vector<Xpnode> m_nodes;
-    Cow_Vector<Compiled_Instruction> m_cinsts;
+    CoW_Vector<Xpnode> m_nodes;
+    CoW_Vector<Compiled_Instruction> m_cinsts;
 
   public:
     Expression() noexcept
       : m_nodes()
       {
       }
-    Expression(Cow_Vector<Xpnode> &&nodes)
+    Expression(CoW_Vector<Xpnode> &&nodes)
       : m_nodes(std::move(nodes))
       {
         this->do_compile();

@@ -72,7 +72,7 @@ class Xpnode
     struct S_closure_function
       {
         Source_Location loc;
-        Cow_Vector<PreHashed_String> params;
+        CoW_Vector<PreHashed_String> params;
         Block body;
       };
     struct S_branch
@@ -101,7 +101,7 @@ class Xpnode
       };
     struct S_unnamed_object
       {
-        Cow_Vector<PreHashed_String> keys;
+        CoW_Vector<PreHashed_String> keys;
       };
     struct S_coalescence
       {
@@ -153,8 +153,8 @@ class Xpnode
       }
 
   public:
-    void bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
-    void compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const;
+    void bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
+    void compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

@@ -13,7 +13,7 @@ void Variadic_Arguer::describe(std::ostream &os) const
     os << "<builtin>.__varg() @ " << this->m_loc;
   }
 
-void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
+void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, CoW_Vector<Reference> &&args) const
   {
     Argument_Sentry sentry(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`

@@ -30,15 +30,15 @@ class Block
                                                            const void *>;
 
   private:
-    Cow_Vector<Statement> m_stmts;
-    Cow_Vector<Compiled_Instruction> m_cinsts;
+    CoW_Vector<Statement> m_stmts;
+    CoW_Vector<Compiled_Instruction> m_cinsts;
 
   public:
     Block() noexcept
       : m_stmts()
       {
       }
-    Block(Cow_Vector<Statement> &&stmts) noexcept
+    Block(CoW_Vector<Statement> &&stmts) noexcept
       : m_stmts(std::move(stmts))
       {
         this->do_compile();
@@ -60,8 +60,8 @@ class Block
     Block bind(const Global_Context &global, const Analytic_Context &ctx) const;
     Status execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const;
 
-    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params) const;
-    void execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Cow_Vector<Reference> &&args) const;
+    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const;
+    void execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, CoW_Vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

@@ -73,7 +73,7 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
     }
   }
 
-void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
+void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
@@ -136,7 +136,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_Context ctx_next(&ctx_io);
-        Cow_Vector<std::pair<Expression, Block>> clauses_bnd;
+        CoW_Vector<std::pair<Expression, Block>> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
         for(const auto &pair : alt.clauses) {
           auto first_bnd = pair.first.bind(global, ctx_next);
@@ -599,7 +599,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // If the condition yields `false`, throw an exception.
         auto value = ref_out.read();
         if(!value.test()) {
-          Cow_String msg;
+          CoW_String msg;
           if(alt.msg.empty()) {
             msg = rocket::sref("Assertion failed!");
           } else {
@@ -637,7 +637,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
 
     }
 
-void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const
+void Statement::compile(CoW_Vector<Block::Compiled_Instruction> &cinsts_out) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
