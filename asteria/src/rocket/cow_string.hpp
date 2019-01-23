@@ -56,17 +56,11 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           {
             return this->m_len;
           }
+        constexpr operator const charT * () const noexcept
+          {
+            return this->m_str;
+          }
       };
-
-    }
-
-template<typename charT>
-  constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT *str) noexcept
-  {
-    return details_cow_string::shallow<charT, char_traits<charT>>(str);
-  }
-
-    namespace details_cow_string {
 
     struct storage_header
       {
@@ -579,6 +573,12 @@ template<typename charT>
       }
 
     }
+
+template<typename charT>
+  constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT *str) noexcept
+  {
+    return details_cow_string::shallow<charT, char_traits<charT>>(str);
+  }
 
 template<typename charT, typename traitsT, typename allocatorT>
   class basic_cow_string
@@ -1174,6 +1174,13 @@ template<typename charT, typename traitsT, typename allocatorT>
         return *this;
       }
 
+    basic_cow_string & assign(shallow_type sh) noexcept
+      {
+        this->m_sth.deallocate();
+        this->m_ptr = sh.c_str();
+        this->m_len = sh.length();
+        return *this;
+      }
     basic_cow_string & assign(const basic_cow_string &other) noexcept
       {
         this->m_sth.share_with(other.m_sth);
@@ -1186,13 +1193,6 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->m_sth.share_with(::std::move(other.m_sth));
         this->m_ptr = noadl::exchange(other.m_ptr, ::std::addressof(null_char));
         this->m_len = noadl::exchange(other.m_len, size_type(0));
-        return *this;
-      }
-    basic_cow_string & assign(shallow_type sh) noexcept
-      {
-        this->m_sth.deallocate();
-        this->m_ptr = sh.c_str();
-        this->m_len = sh.length();
         return *this;
       }
     basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos)
