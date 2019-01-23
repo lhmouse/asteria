@@ -7,6 +7,26 @@
 
 namespace Asteria {
 
+void Reference_Dictionary::do_attach_bucket(Reference_Dictionary::Bucket *self, Reference_Dictionary::Bucket *ipos) noexcept
+  {
+    const auto prev = ipos->prev;
+    const auto next = ipos;
+    // Set up pointers.
+    self->prev = prev;
+    prev->next = self;
+    self->next = next;
+    next->prev = self;
+  }
+
+void Reference_Dictionary::do_detach_bucket(Reference_Dictionary::Bucket *self) noexcept
+  {
+    const auto prev = self->prev;
+    const auto next = self->next;
+    // Set up pointers.
+    prev->next = next;
+    next->prev = prev;
+  }
+
 const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_String &name) const noexcept
   {
     // Get template table range.
@@ -108,7 +128,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
         bkt->name.swap(rbkt.name);
         rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
         rocket::destroy_at(rbkt.refv);
-        bkt->attach(*end);
+        do_attach_bucket(bkt, end);
         // Update the number of elements.
         pre->size++;
       }
@@ -130,7 +150,7 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
         {
           PreHashed_String name;
           // Release the old element.
-          rbkt.detach();
+          do_detach_bucket(&rbkt);
           name.swap(rbkt.name);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
@@ -143,7 +163,7 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
             rocket::construct_at(bkt->refv, std::move(rbkt.refv[0]));
             rocket::destroy_at(rbkt.refv);
           }
-          bkt->attach(*end);
+          do_attach_bucket(bkt, end);
           return false;
         }
       );
@@ -181,7 +201,7 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
       static_assert(std::is_nothrow_constructible<Reference>::value, "??");
       rocket::construct_at(bkt->refv);
     }
-    bkt->attach(*end);
+    do_attach_bucket(bkt, end);
     // Update the number of elements.
     pre->size++;
     return bkt->refv[0];
@@ -206,7 +226,7 @@ bool Reference_Dictionary::unset(const PreHashed_String &name) noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    bkt->detach();
+    do_detach_bucket(bkt);
     bkt->name.clear();
     rocket::destroy_at(bkt->refv);
     // Relocate elements that are not placed in their immediate locations.

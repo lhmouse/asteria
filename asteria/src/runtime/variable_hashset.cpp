@@ -8,6 +8,26 @@
 
 namespace Asteria {
 
+void Variable_HashSet::do_attach_bucket(Variable_HashSet::Bucket *self, Variable_HashSet::Bucket *ipos) noexcept
+  {
+    const auto prev = ipos->prev;
+    const auto next = ipos;
+    // Set up pointers.
+    self->prev = prev;
+    prev->next = self;
+    self->next = next;
+    next->prev = self;
+  }
+
+void Variable_HashSet::do_detach_bucket(Variable_HashSet::Bucket *self) noexcept
+  {
+    const auto prev = self->prev;
+    const auto next = self->next;
+    // Set up pointers.
+    prev->next = next;
+    next->prev = prev;
+  }
+
 void Variable_HashSet::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
@@ -59,7 +79,7 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
         bkt->var = std::move(rbkt.var);
-        bkt->attach(*end);
+        do_attach_bucket(bkt, end);
         // Update the number of elements.
         pre->size++;
       }
@@ -81,7 +101,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
         {
           RefCnt_Ptr<Variable> var;
           // Release the old element.
-          rbkt.detach();
+          do_detach_bucket(&rbkt);
           var.swap(rbkt.var);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
@@ -90,7 +110,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
           bkt->var = std::move(var);
-          bkt->attach(*end);
+          do_attach_bucket(bkt, end);
           return false;
         }
       );
@@ -153,7 +173,7 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
     }
     // Insert it into the new bucket.
     bkt->var = var;
-    bkt->attach(*end);
+    do_attach_bucket(bkt, end);
     // Update the number of elements.
     pre->size++;
     return true;
@@ -178,7 +198,7 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    bkt->detach();
+    do_detach_bucket(bkt);
     bkt->var.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
@@ -203,7 +223,7 @@ RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    bkt->detach();
+    do_detach_bucket(bkt);
     var.swap(bkt->var);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);

@@ -40,26 +40,11 @@ class Variable_HashSet
           {
             return this->var != nullptr;
           }
-
-        void attach(Bucket &xpos) noexcept
-          {
-            const auto xprev = xpos.prev;
-            const auto xnext = &xpos;
-            // Set up pointers.
-            this->prev = xprev;
-            xprev->next = this;
-            this->next = xnext;
-            xnext->prev = this;
-          }
-        void detach() noexcept
-          {
-            const auto xprev = this->prev;
-            const auto xnext = this->next;
-            // Set up pointers.
-            xprev->next = next;
-            xnext->prev = prev;
-          }
       };
+
+  private:
+    static void do_attach_bucket(Bucket *self, Bucket *ipos) noexcept;
+    static void do_detach_bucket(Bucket *self) noexcept;
 
   private:
     // The first and last buckets are permanently reserved.
