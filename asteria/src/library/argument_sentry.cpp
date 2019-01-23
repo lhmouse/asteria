@@ -7,6 +7,15 @@
 
 namespace Asteria {
 
+Argument_Sentry & Argument_Sentry::start() noexcept
+  {
+    this->m_state.history.clear();
+    this->m_state.offset = 0;
+    this->m_state.succeeded = true;
+    this->m_state.finished = false;
+    return *this;
+  }
+
     namespace {
 
     template<typename ThrowerT>
@@ -104,6 +113,9 @@ namespace Asteria {
 template<typename XvalueT>
   Argument_Sentry & Argument_Sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
+    // Record the type of this parameter.
+    this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
+    // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
@@ -134,6 +146,9 @@ template<typename XvalueT>
 template<typename XvalueT>
   Argument_Sentry & Argument_Sentry::do_get_required_value(XvalueT &value_out)
   {
+    // Record the type of this parameter.
+    this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
+    // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
@@ -157,6 +172,9 @@ template<typename XvalueT>
 
 Argument_Sentry & Argument_Sentry::opt(Reference &ref_out)
   {
+    // Record a type-generic or output-only parameter.
+    this->m_state.history.push_back(-1);
+    // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
@@ -170,6 +188,9 @@ Argument_Sentry & Argument_Sentry::opt(Reference &ref_out)
 
 Argument_Sentry & Argument_Sentry::opt(Value &value_out)
   {
+    // Record a type-generic or output-only parameter.
+    this->m_state.history.push_back(-1);
+    // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
@@ -267,38 +288,45 @@ Argument_Sentry & Argument_Sentry::req(D_object &value_out)
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::cut()
+Argument_Sentry & Argument_Sentry::finish()
   {
-    auto &state = this->m_state;
+    // Record this overload.
+    // 0) Append the number of parameters in native byte order.
+    unsigned nparams;
+    nparams = static_cast<unsigned>(this->m_state.history.size());
+    this->m_overloads.reserve(this->m_overloads.size() + sizeof(nparams) + nparams);
+    this->m_overloads.append(reinterpret_cast<const std::int8_t *>(&nparams), sizeof(nparams));
+    // 1) Append all parameters.
+    this->m_overloads.append(this->m_state.history.data(), nparams);
     // Check for general conditions.
-    if(!state.succeeded) {
-      do_fail(*this, state,
+    if(!this->m_state.succeeded) {
+      do_fail(*this, this->m_state,
         [&]{
           ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
         });
       return *this;
     }
-    if(state.finished) {
-      do_fail(*this, state,
+    if(this->m_state.finished) {
+      do_fail(*this, this->m_state,
         [&]{
           ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");
         });
       return *this;
     }
     // Check for the end of the argument list.
-    if(state.offset != this->get_argument_count()) {
-      do_fail(*this, state,
+    if(this->m_state.offset != this->get_argument_count()) {
+      do_fail(*this, this->m_state,
         [&]{
            ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");
         });
       return *this;
     }
     // Succeed.
-    state.finished = true;
+    this->m_state.finished = true;
     return *this;
   }
 
-void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const
+void Argument_Sentry::throw_no_matching_function_call() const
   {
     const auto &name = this->m_name;
     const auto &args = this->m_args.get();
@@ -308,25 +336,28 @@ void Argument_Sentry::throw_no_matching_function_call(const Overload_Parameter *
         << rocket::ostream_implode(args.data(), args.size(), ", ",
                                    [&](const Reference &arg) { return Value::get_type_name(arg.read().type()); })
         << ")`.";
-    // If an overload list is provided, append it.
-    if(overload_size != 0) {
-      auto ptr = overload_data;
-      ROCKET_ASSERT(ptr);
-      const auto end = ptr + overload_size;
-      // Collect all overloads.
+    // If overload information is available, append the list of overloads.
+    if(!this->m_overloads.empty()) {
       mos << "\n[possible overloads: ";
+      // Decode overloads one by one.
+      unsigned nparams;
+      auto read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams));
+      auto offset = read;
       for(;;) {
-        const auto nparams = static_cast<std::size_t>(ptr->nparams);
-        ++ptr;
-        ROCKET_ASSERT_MSG(nparams <= static_cast<std::size_t>(end - ptr), "The possible overload data were malformed.");
+        ROCKET_ASSERT(read == sizeof(nparams));
+        ROCKET_ASSERT(offset + nparams <= this->m_overloads.size());
+        // Append this overload.
         mos << "`" << name << "("
-            << rocket::ostream_implode(ptr, nparams, ", ",
-                                       [&](const Overload_Parameter &param) { return (param.nparams == 0xFF) ? "<generic>" : Value::get_type_name(param.type); })
+            << rocket::ostream_implode(this->m_overloads.data() + offset, nparams, ", ",
+                                       [&](std::int8_t param) { return (param < 0) ? "<generic>" : Value::get_type_name(static_cast<Value_Type>(param)); })
             << ")`";
-        // Move to the next parameter.
-        if((ptr += nparams) == end) {
+        offset += nparams;
+        read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams), offset);
+        if(read == 0) {
           break;
         }
+        offset += read;
+        // Read the next overload.
         mos << ", ";
       }
       mos << "]";

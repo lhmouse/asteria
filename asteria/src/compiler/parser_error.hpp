@@ -69,7 +69,7 @@ class Parser_Error
       };
 
   public:
-    static const char * get_code_description(Code xcode) noexcept;
+    ROCKET_PURE_FUNCTION static const char * get_code_description(Code xcode) noexcept;
 
   private:
     std::uint32_t m_line;

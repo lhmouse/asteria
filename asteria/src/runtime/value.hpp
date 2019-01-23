@@ -38,15 +38,19 @@ class Value
 
   public:
     template<typename TypeT>
-      static const char * get_type_name() noexcept
+      ROCKET_PURE_FUNCTION static constexpr Value_Type get_type() noexcept
       {
-        constexpr auto etype = static_cast<Value_Type>(Variant::index_of<TypeT>::value);
-        return Value::get_type_name(etype);
+        return static_cast<Value_Type>(Variant::index_of<TypeT>::value);
       }
-    static const char * get_type_name(Value_Type etype) noexcept;
+    template<typename TypeT>
+      ROCKET_PURE_FUNCTION static const char * get_type_name() noexcept
+      {
+        return Value::get_type_name(get_type<TypeT>());
+      }
 
-    // The object is allocated statically and exists throughout the program.
-    static const Value & get_null() noexcept;
+    // The objects returned by these functions are allocated statically and exist throughout the program.
+    ROCKET_PURE_FUNCTION static const char * get_type_name(Value_Type etype) noexcept;
+    ROCKET_PURE_FUNCTION static const Value & get_null() noexcept;
 
   private:
     Variant m_stor;

@@ -153,8 +153,8 @@ class Token
       )>;
 
   public:
-    static const char * get_keyword(Keyword keyword) noexcept;
-    static const char * get_punctuator(Punctuator punct) noexcept;
+    ROCKET_PURE_FUNCTION static const char * get_keyword(Keyword keyword) noexcept;
+    ROCKET_PURE_FUNCTION static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
     Cow_String m_file;

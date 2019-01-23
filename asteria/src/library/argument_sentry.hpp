@@ -15,37 +15,10 @@ class Argument_Sentry
   public:
     struct State
       {
-        std::uint8_t offset;
-        bool succeeded : 1;
-        bool finished : 1;
-        std::uint16_t padding;
-      };
-
-    // This union is purely invented for `throw_no_matching_function_call()`.
-    // Each overload is represented as follows:
-    //   `number-of-parameters, parameter-one, parameter-two`
-    // The number of parameters is an integer of type `unsigned char`.
-    // Parameters may be `{ }` (for type-generic or write-only parameters) or enumerators having type `Value_Type`.
-    union Overload_Parameter
-      {
-        std::uint8_t nparams;
-        Value_Type type;
-
-        // number of parameters
-        constexpr Overload_Parameter(int xnparams) noexcept
-          : nparams(static_cast<unsigned char>(ROCKET_ASSERT(xnparams < 0xFF), xnparams))
-          {
-          }
-        // type-generic or write-only parameter
-        constexpr Overload_Parameter(std::initializer_list<int>) noexcept
-          : nparams(0xFF)
-          {
-          }
-        // exactly typed parameter
-        constexpr Overload_Parameter(Value_Type xtype) noexcept
-          : type(xtype)
-          {
-          }
+        rocket::basic_cow_string<std::int8_t> history;
+        std::size_t offset;
+        bool succeeded;
+        bool finished;
       };
 
   private:
@@ -53,6 +26,9 @@ class Argument_Sentry
     std::reference_wrapper<const Cow_Vector<Reference>> m_args;
     bool m_throw_on_failure;
 
+    // This string stores all overloads that have been tested so far.
+    // Overloads are encoded in binary formats.
+    rocket::basic_cow_string<std::int8_t> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;
@@ -60,7 +36,7 @@ class Argument_Sentry
   public:
     Argument_Sentry(Cow_String name, const Cow_Vector<Reference> &args) noexcept
       : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
-        m_state()
+        m_overloads(), m_state()
       {
       }
 
@@ -111,14 +87,8 @@ class Argument_Sentry
       {
         return this->m_state.succeeded;
       }
-    Argument_Sentry & reset() noexcept
-      {
-        this->m_state.offset = 0;
-        this->m_state.succeeded = true;
-        this->m_state.finished = false;
-        return *this;
-      }
-
+    // Start recording an overload.
+    Argument_Sentry & start() noexcept;
     // Get an OPTIONAL argument.
     // The argument must exist (and must be of the desired type or `null` for the overloads taking two arguments); otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
@@ -132,7 +102,6 @@ class Argument_Sentry
     Argument_Sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
     Argument_Sentry & opt(D_array &value_out, const D_array &default_value = D_array());
     Argument_Sentry & opt(D_object &value_out, const D_object &default_value = D_object());
-
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
@@ -145,23 +114,13 @@ class Argument_Sentry
     Argument_Sentry & req(D_function &value_out);
     Argument_Sentry & req(D_array &value_out);
     Argument_Sentry & req(D_object &value_out);
-
-    // Terminate the argument list.
+    // Terminate the argument list and finish this overload.
     // There will be no more argument; otherwise this operation fails.
     // N.B. This function provides STRONG exception safety guarantee.
-    Argument_Sentry & cut();
+    Argument_Sentry & finish();
 
     // Throw an exception saying there are no viable overloads.
-    // The overload parameter list is informative.
-    [[noreturn]] void throw_no_matching_function_call() const
-      {
-        this->throw_no_matching_function_call(nullptr, 0);
-      }
-    [[noreturn]] void throw_no_matching_function_call(std::initializer_list<Overload_Parameter> init) const
-      {
-        this->throw_no_matching_function_call(init.begin(), init.size());
-      }
-    [[noreturn]] void throw_no_matching_function_call(const Overload_Parameter *overload_data, std::size_t overload_size) const;
+    [[noreturn]] void throw_no_matching_function_call() const;
   };
 
 }

@@ -139,7 +139,7 @@ class Xpnode
       )>;
 
   public:
-    static const char * get_operator_name(Xop xop) noexcept;
+    ROCKET_PURE_FUNCTION static const char * get_operator_name(Xop xop) noexcept;
 
   private:
     Variant m_stor;
