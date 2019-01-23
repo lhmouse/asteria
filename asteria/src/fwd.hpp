@@ -17,9 +17,10 @@
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/transparent_comparators.hpp"
-#include "rocket/refcnt_object.hpp"
-#include "rocket/refcnt_ptr.hpp"
+#include "rocket/unique_handle.hpp"
 #include "rocket/unique_ptr.hpp"
+#include "rocket/refcnt_ptr.hpp"
+#include "rocket/refcnt_object.hpp"
 
 namespace Asteria {
 
@@ -70,8 +71,10 @@ class Single_Source_File;
 class Argument_Sentry;
 
 // Aliases
-template<typename ElementT>
-  using Unique_Ptr = rocket::unique_ptr<ElementT>;
+template<typename HandleT, typename CloserT>
+  using Unique_Handle = rocket::unique_handle<HandleT, CloserT>;
+template<typename ElementT, typename DeleterT = std::default_delete<const ElementT>>
+  using Unique_Ptr = rocket::unique_ptr<ElementT, DeleterT>;
 template<typename ElementT>
   using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
 template<typename ElementT>

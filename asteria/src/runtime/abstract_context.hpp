@@ -12,7 +12,19 @@ namespace Asteria {
 class Abstract_Context
   {
   private:
-    RefCnt_Ptr<RefCnt_Base> m_tied_collector_opt;
+    struct Collection_Trigger
+      {
+        void operator()(RefCnt_Base *base_opt) noexcept
+          {
+            Abstract_Context::do_perform_full_collection(base_opt);
+          }
+      };
+
+    static void do_perform_full_collection(RefCnt_Base *base_opt) noexcept;
+
+  private:
+    Unique_Ptr<RefCnt_Base, Collection_Trigger> m_tied_collector_opt;
+    // This has to be defined after `m_tied_collector_opt` because of the order of destruction.
     Reference_Dictionary m_named_references;
 
   public:
@@ -28,7 +40,7 @@ class Abstract_Context
       = delete;
 
   protected:
-    void do_tie_collector(const RefCnt_Ptr<Generational_Collector> &tied_collector_opt) noexcept;
+    void do_tie_collector(RefCnt_Ptr<Generational_Collector> tied_collector_opt) noexcept;
     void do_set_named_reference_templates(const Reference_Dictionary::Template *tdata_opt, std::size_t tsize) noexcept;
 
   public:
