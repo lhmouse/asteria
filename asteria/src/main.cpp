@@ -15,10 +15,11 @@ int main()
     // prepare test code.
     static constexpr char src[] = R"_____(
       func fib(n) {
-        if(n <= 1) {
-          return& n;
+        var r = n;
+        if!(n <= 1) {
+          r = fib(n-1) + fib(n-2);
         }
-        return& fib(n-1) + fib(n-2);
+        return& r;
       }
       return fib(30);
     )_____";
