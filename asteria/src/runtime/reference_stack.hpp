@@ -119,6 +119,18 @@ class Reference_Stack
         --tptr;
         this->m_tptr = tptr;
       }
+    void pop_next() noexcept
+      {
+        auto tptr = this->m_tptr;
+        ROCKET_ASSERT(tptr != this->m_small.data());
+        ROCKET_ASSERT(tptr != this->m_large.data());
+        // Drop the next element.
+        --tptr;
+        ROCKET_ASSERT(tptr != this->m_small.data());
+        ROCKET_ASSERT(tptr != this->m_large.data());
+        tptr[-1] = std::move(tptr[0]);
+        this->m_tptr = tptr;
+      }
   };
 
 }

@@ -325,26 +325,34 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.push(std::move(ref_c));
       }
 
+    void do_forward(Reference_Stack &stack_io, bool assign)
+      {
+        if(assign) {
+          stack_io.mut_top().convert_to_temporary();
+        } else {
+          stack_io.pop_next();
+        }
+      }
+
+    void do_set_temporary(Reference_Stack &stack_io, bool assign, Reference_Root::S_temporary &&ref_c)
+      {
+        if(assign) {
+          stack_io.top().open() = std::move(ref_c.value);
+        } else {
+          stack_io.mut_top() = std::move(ref_c);
+        }
+      }
+
     void do_evaluate_branch(const Xpnode::S_branch &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
-        const auto branch = stack_io.top().read().test() ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        const auto has_result = branch.get().evaluate_partial(stack_io, global, ctx);
-        if(!has_result) {
-          // If the branch is empty, leave the condition on the stack.
+        const auto result = stack_io.top().read().test() ? alt.branch_true.evaluate_partial(stack_io, global, ctx)
+                                                         : alt.branch_false.evaluate_partial(stack_io, global, ctx);
+        if(!result) {
+          // If the branch is empty, leave the condition reference on the stack.
           return;
         }
-        // The result will have been pushed onto `stack_io`.
-        ASTERIA_DEBUG_LOG("Setting branch result: ", stack_io.top().read());
-        if(alt.assign) {
-          auto value = stack_io.top().read();
-          stack_io.pop();
-          stack_io.top().open() = std::move(value);
-        } else {
-          auto result = std::move(stack_io.mut_top());
-          stack_io.pop();
-          stack_io.mut_top() = std::move(result);
-        }
+        do_forward(stack_io, alt.assign);
       }
 
     void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context & /*ctx*/)
@@ -408,15 +416,6 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("The value `", subscript, "` cannot be used as a subscript.");
-        }
-      }
-
-    void do_set_temporary(Reference_Stack &stack_io, const Xpnode::S_operator_rpn &alt, Reference_Root::S_temporary &&ref_c)
-      {
-        if(alt.assign) {
-          stack_io.top().open() = std::move(ref_c.value);
-        } else {
-          stack_io.mut_top() = std::move(ref_c);
         }
       }
 
@@ -774,7 +773,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_prefix_neg(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -785,13 +784,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_negate(rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_real) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_negate(rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -805,13 +804,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(ref_c.value.type() == type_boolean) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_logical_not(rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_bitwise_not(rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -824,7 +823,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         ref_c.value = do_logical_not(ref_c.value.test());
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_prefix_inc(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -870,7 +869,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_unset);
         // Unset the reference and return the old value.
         Reference_Root::S_temporary ref_c = { stack_io.top().unset() };
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_prefix_lengthof(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -880,22 +879,22 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_null) {
           ref_c.value = D_integer(0);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_string) {
           ref_c.value = D_integer(ref_c.value.check<D_string>().size());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_array) {
           ref_c.value = D_integer(ref_c.value.check<D_array>().size());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_object) {
           ref_c.value = D_integer(ref_c.value.check<D_object>().size());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
@@ -908,7 +907,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         ref_c.value = D_string(rocket::sref(Value::get_type_name(ref_c.value.type())));
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_eq(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -921,7 +920,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // N.B. This is one of the few operators that work on all types.
         const auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp == Value::compare_equal);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_ne(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -934,7 +933,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // N.B. This is one of the few operators that work on all types.
         const auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp != Value::compare_equal);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_lt(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -949,7 +948,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp == Value::compare_less);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_gt(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -964,7 +963,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp == Value::compare_greater);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_lte(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -979,7 +978,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp != Value::compare_greater);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_gte(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -994,7 +993,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp != Value::compare_less);
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_cmp_3way(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -1027,7 +1026,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
             break;
           }
         }
-        do_set_temporary(stack_io, alt, std::move(ref_c));
+        do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
     void do_evaluate_operator_infix_add(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)
@@ -1040,27 +1039,27 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_logical_or(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` and `real` types, return the sum of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_add(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_add(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
           rhs = do_concatenate(lhs.check<D_string>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1082,13 +1081,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_subtract(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_subtract(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1110,26 +1109,26 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_multiply(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_multiply(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
           // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
           ref_c.value = do_duplicate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
           rhs = do_duplicate(rhs, lhs.check<D_integer>());
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1145,13 +1144,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_divide(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_divide(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1167,13 +1166,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_modulo(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_modulo(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1192,7 +1191,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_shift_left_logical(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, fill space characters in the right and discard characters from the left.
@@ -1200,7 +1199,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_move_left(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
         }
@@ -1220,7 +1219,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_shift_right_logical(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, fill space characters in the left and discard characters from the right.
@@ -1228,7 +1227,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_move_right(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
         }
@@ -1249,14 +1248,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_shift_left_arithmetic(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, fill space characters in the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_extend(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
         }
@@ -1276,14 +1275,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_shift_right_arithmetic(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, discard characters from the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_truncate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, alt, std::move(ref_c));
+            do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
         }
@@ -1300,14 +1299,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_logical_and(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise AND'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_bitwise_and(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1323,14 +1322,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_logical_or(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise OR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_bitwise_or(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1346,14 +1345,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_logical_xor(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise XOR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_bitwise_xor(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, alt, std::move(ref_c));
+          do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1399,26 +1398,15 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         // Pick a branch basing on the condition.
         if(stack_io.top().read().type() != type_null) {
-          // If the result is non-null, leave the condition on the stack.
+          // If the value is non-null, leave the condition reference on the stack.
           return;
         }
-        const auto has_result = alt.branch_null.evaluate_partial(stack_io, global, ctx);
-        if(!has_result) {
-          // If the branch is empty, push a hard `null` on the stack.
-          stack_io.mut_top() = Reference_Root::S_null();
+        const auto result = alt.branch_null.evaluate_partial(stack_io, global, ctx);
+        if(!result) {
+          // If the branch is empty, leave the condition reference on the stack.
           return;
         }
-        // The result will have been pushed onto `stack_io`.
-        ASTERIA_DEBUG_LOG("Setting coalescence result: ", stack_io.top().read());
-        if(alt.assign) {
-          auto value = stack_io.top().read();
-          stack_io.pop();
-          stack_io.top().open() = std::move(value);
-        } else {
-          auto result = std::move(stack_io.mut_top());
-          stack_io.pop();
-          stack_io.mut_top() = std::move(result);
-        }
+        do_forward(stack_io, alt.assign);
       }
 
     // Why do we have to duplicate these parameters so many times?
