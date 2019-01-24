@@ -306,8 +306,8 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       {
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto branch = (ref_out.read().test() != alt.neg) ? std::ref(alt.branch_true) : std::ref(alt.branch_false);
-        const auto status = branch.get().execute(ref_out, global, ctx_io);
+        const auto status = (ref_out.read().test() != alt.neg) ? alt.branch_true.execute(ref_out, global, ctx_io)
+                                                               : alt.branch_false.execute(ref_out, global, ctx_io);
         return status;
       }
 
@@ -585,9 +585,8 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
         // If the result refers a variable and the statement will pass it by value, replace it with a temporary value.
-        if(!alt.by_ref && !ref_out.is_constant() && !ref_out.is_temporary()) {
-          Reference_Root::S_temporary ref_c = { ref_out.read() };
-          ref_out = std::move(ref_c);
+        if(!alt.by_ref) {
+          ref_out.convert_to_temporary();
         }
         return Block::status_return;
       }
