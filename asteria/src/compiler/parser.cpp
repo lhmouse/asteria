@@ -1836,12 +1836,16 @@ bool Parser::load(Token_Stream &tstrm_io, Parser_Options /*options*/)
     //   Parse the document recursively.
     ///////////////////////////////////////////////////////////////////////////
     CoW_Vector<Statement> stmts;
-    while(!tstrm_io.empty()) {
-      // document ::=
-      //   statement-list-opt
-      if(!do_accept_statement(stmts, tstrm_io)) {
-        throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+    // document ::=
+    //   statement-list-opt
+    for(;;) {
+      bool stmt_got = do_accept_statement(stmts, tstrm_io);
+      if(!stmt_got) {
+        break;
       }
+    }
+    if(!tstrm_io.empty()) {
+      throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
     }
     ///////////////////////////////////////////////////////////////////////////
     // Finish
