@@ -35,6 +35,7 @@ class Value
         , D_array     // 7,
         , D_object    // 8,
       )>;
+    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 
   public:
     template<typename TypeT>

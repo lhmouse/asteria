@@ -45,6 +45,7 @@ class Reference_Root
         , S_temporary  // 2,
         , S_variable   // 3,
       )>;
+    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 
   private:
     Variant m_stor;

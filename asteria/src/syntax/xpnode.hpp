@@ -137,6 +137,7 @@ class Xpnode
         , S_unnamed_object    //  9,
         , S_coalescence       // 10,
       )>;
+    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 
   public:
     ROCKET_PURE_FUNCTION static const char * get_operator_name(Xop xop) noexcept;
