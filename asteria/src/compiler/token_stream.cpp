@@ -588,7 +588,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_numeric_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, bool integer_as_real)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -727,7 +727,7 @@ namespace Asteria {
           exp = -exp;
         }
         // Is this literal an integral or floating-point number?
-        if(frac_begin == int_end) {
+        if(!integer_as_real && (frac_begin == int_end)) {
           // Parse the literal as an integer.
           // Negative exponents are not allowed, even when the significant part is zero.
           if(exp < 0) {
@@ -853,7 +853,7 @@ bool Token_Stream::empty() const noexcept
     }
   }
 
-bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file)
+bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, Parser_Options options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -925,7 +925,7 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file)
                          do_accept_punctuator(seq, reader) ||
                          do_accept_string_literal(seq, reader) ||
                          do_accept_noescape_string_literal(seq, reader) ||
-                         do_accept_numeric_literal(seq, reader);
+                         do_accept_numeric_literal(seq, reader, (options & Parser_Options::integer_as_real) != Parser_Options::none);
         if(!token_got) {
           ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
           throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);

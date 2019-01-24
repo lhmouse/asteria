@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_PARSER_HPP_
 
 #include "../fwd.hpp"
+#include "parser_options.hpp"
 #include "parser_error.hpp"
 #include "../syntax/block.hpp"
 #include "../rocket/variant.hpp"
@@ -48,7 +49,7 @@ class Parser
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(Token_Stream &tstrm_io);
+    bool load(Token_Stream &tstrm_io, Parser_Options options = Parser_Options::none);
     void clear() noexcept;
     Block extract_document();
   };

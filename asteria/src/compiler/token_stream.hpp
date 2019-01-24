@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_TOKEN_STREAM_HPP_
 
 #include "../fwd.hpp"
+#include "parser_options.hpp"
 #include "parser_error.hpp"
 #include "token.hpp"
 #include "../rocket/variant.hpp"
@@ -48,7 +49,7 @@ class Token_Stream
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(std::istream &cstrm_io, const CoW_String &file);
+    bool load(std::istream &cstrm_io, const CoW_String &file, Parser_Options options = Parser_Options::none);
     void clear() noexcept;
     const Token * peek_opt() const noexcept;
     Token shift();
