@@ -436,17 +436,13 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
     case type_array:
       {
         const auto &alt = this->check<D_array>();
-        for(const auto &elem : alt) {
-          elem.enumerate_variables(callback);
-        }
+        rocket::for_each(alt, [&](const D_array::value_type &elem) { elem.enumerate_variables(callback); });
         return;
       }
     case type_object:
       {
         const auto &alt = this->check<D_object>();
-        for(const auto &pair : alt) {
-          pair.second.enumerate_variables(callback);
-        }
+        rocket::for_each(alt, [&](const D_object::value_type &pair) { pair.second.enumerate_variables(callback); });
         return;
       }
     default:
