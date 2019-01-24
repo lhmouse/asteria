@@ -153,17 +153,20 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
     std::pair<std::reference_wrapper<const Abstract_Context>,
               std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const Abstract_Context &ctx, const PreHashed_String &name)
       {
-        const Abstract_Context *qctx = &ctx;
-        const Reference *qref;
         // Search for the name in `ctx` recursively.
-        do {
-          qref = qctx->get_named_reference_opt(name);
+        auto qref = ctx.get_named_reference_opt(name);
+        auto qctx = std::addressof(ctx);
+        for(;;) {
           if(ROCKET_EXPECT(qref)) {
             return std::make_pair(std::ref(*qctx), std::ref(*qref));
           }
           // Search for the name in deeper contexts.
           qctx = qctx->get_parent_opt();
-        } while(qctx);
+          if(!qctx) {
+            break;
+          }
+          qref = qctx->get_named_reference_opt(name);
+        }
         // Search for the name in the global context.
         qref = global.Global_Context::get_named_reference_opt(name);
         if(ROCKET_EXPECT(qref)) {
