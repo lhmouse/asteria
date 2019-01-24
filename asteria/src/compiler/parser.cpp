@@ -326,6 +326,51 @@ namespace Asteria {
         return true;
       }
 
+    bool do_accept_negation(bool &negative_out, Token_Stream &tstrm_io)
+      {
+        // negation ::=
+        //   "!" | "not"
+        const auto qtok = tstrm_io.peek_opt();
+        if(!qtok) {
+          return false;
+        }
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword:
+          {
+            const auto &alt = qtok->check<Token::S_keyword>();
+            switch(rocket::weaken_enum(alt.keyword)) {
+            case Token::keyword_not:
+              {
+                negative_out = true;
+                tstrm_io.shift();
+                break;
+              }
+            default:
+              return false;
+            }
+            break;
+          }
+        case Token::index_punctuator:
+          {
+            const auto &alt = qtok->check<Token::S_punctuator>();
+            switch(rocket::weaken_enum(alt.punct)) {
+            case Token::punctuator_notl:
+              {
+                negative_out = true;
+                tstrm_io.shift();
+                break;
+              }
+            default:
+              return false;
+            }
+            break;
+          }
+        default:
+          return false;
+        }
+        return true;
+      }
+
     extern bool do_accept_statement_as_block(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
     extern bool do_accept_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
     extern bool do_accept_expression(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io);
@@ -1312,21 +1357,13 @@ namespace Asteria {
         //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
         // negation-opt ::=
         //   negation | ""
-        // negation ::=
-        //   "!" | "not"
         if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
           return false;
         }
         bool neg = false;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
-          neg = true;
-          goto z;
+        if(do_accept_negation(neg, tstrm_io)) {
+          // This is optional.
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
-          neg = true;
-          goto z;
-        }
-      z:
         CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
@@ -1425,15 +1462,9 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_keyword_while_expected);
         }
         bool neg = false;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
-          neg = true;
-          goto z;
+        if(do_accept_negation(neg, tstrm_io)) {
+          // This is optional.
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
-          neg = true;
-          goto z;
-        }
-      z:
         CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
@@ -1460,15 +1491,9 @@ namespace Asteria {
           return false;
         }
         bool neg = false;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_notl)) {
-          neg = true;
-          goto z;
+        if(do_accept_negation(neg, tstrm_io)) {
+          // This is optional.
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_not)) {
-          neg = true;
-          goto z;
-        }
-      z:
         CoW_Vector<Xpnode> cond;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
