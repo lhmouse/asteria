@@ -43,8 +43,6 @@ class Reference
     Value & do_open_with_modifiers() const;
     Value do_unset_with_modifiers() const;
 
-    void do_convert_to_temporary();
-
   public:
     bool is_constant() const noexcept
       {
@@ -75,15 +73,6 @@ class Reference
           this->do_throw_unset_no_modifier();
         }
         return this->do_unset_with_modifiers();
-      }
-
-    Reference & convert_to_temporary()
-      {
-        if(ROCKET_EXPECT(this->is_temporary())) {
-          return *this;
-        }
-        this->do_convert_to_temporary();
-        return *this;
       }
 
     template<typename XmodT>

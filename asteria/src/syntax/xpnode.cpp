@@ -325,21 +325,23 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.push(std::move(ref_c));
       }
 
-    void do_forward(Reference_Stack &stack_io, bool assign)
-      {
-        if(assign) {
-          stack_io.mut_top().convert_to_temporary();
-        } else {
-          stack_io.pop_next();
-        }
-      }
-
     void do_set_temporary(Reference_Stack &stack_io, bool assign, Reference_Root::S_temporary &&ref_c)
       {
         if(assign) {
           stack_io.top().open() = std::move(ref_c.value);
         } else {
           stack_io.mut_top() = std::move(ref_c);
+        }
+      }
+
+    void do_forward(Reference_Stack &stack_io, bool assign)
+      {
+        if(assign) {
+          Reference_Root::S_temporary ref_c = { stack_io.top().read() };
+          stack_io.pop();
+          do_set_temporary(stack_io, true, std::move(ref_c));
+        } else {
+          stack_io.pop_next();
         }
       }
 
@@ -731,14 +733,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_add(lhs, D_integer(1));
-          stack_io.mut_top() = std::move(ref_c);
+          do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_add(lhs, D_real(1));
-          stack_io.mut_top() = std::move(ref_c);
+          do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
@@ -754,14 +756,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_subtract(lhs, D_integer(1));
-          stack_io.mut_top() = std::move(ref_c);
+          do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_subtract(lhs, D_real(1));
-          stack_io.mut_top() = std::move(ref_c);
+          do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
@@ -1365,7 +1367,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.pop();
         // Copy the operand.
         // `alt.assign` is ignored.
-        stack_io.top().open() = std::move(ref_c.value);
+        do_set_temporary(stack_io, true, std::move(ref_c));
       }
 
     void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)

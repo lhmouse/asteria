@@ -60,12 +60,6 @@ Value Reference::do_unset_with_modifiers() const
     return this->m_mods.at(epos).apply_and_erase(cur);
   }
 
-void Reference::do_convert_to_temporary()
-  {
-    Reference_Root::S_temporary ref_c = { this->read() };
-    *this = std::move(ref_c);
-  }
-
 void Reference::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     this->m_root.enumerate_variables(callback);

@@ -585,8 +585,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, global, ctx_io);
         // If the result refers a variable and the statement will pass it by value, replace it with a temporary value.
-        if(!alt.by_ref) {
-          ref_out.convert_to_temporary();
+        if(!alt.by_ref && !ref_out.is_temporary()) {
+          Reference_Root::S_temporary ref_c = { ref_out.read() };
+          ref_out = std::move(ref_c);
         }
         return Block::status_return;
       }
