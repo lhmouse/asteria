@@ -576,7 +576,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         alt.expr.evaluate(ref_out, global, ctx_io);
         // Throw an exception containing the value.
         auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Throwing exception: ", value);
+        ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception`: ", value);
         throw Traceable_Exception(alt.loc, std::move(value));
       }
 
@@ -606,7 +606,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           } else {
             mos << ": " << alt.msg;
           }
-          ASTERIA_DEBUG_LOG("Throwing exception: ", mos.get_string());
+          ASTERIA_DEBUG_LOG("Throwing `Runtime_Error`: ", value);
           throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
         }
         return Block::status_next;
