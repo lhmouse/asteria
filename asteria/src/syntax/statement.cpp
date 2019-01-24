@@ -598,16 +598,16 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         alt.expr.evaluate(ref_out, global, ctx_io);
         // If the condition yields `false`, throw an exception.
         auto value = ref_out.read();
-        if(!value.test()) {
-          CoW_String msg;
+        if(ROCKET_UNEXPECT(!value.test())) {
+          rocket::insertable_ostream mos;
+          mos << "Assertion failed";
           if(alt.msg.empty()) {
-            msg = rocket::sref("Assertion failed!");
+            mos << "!";
           } else {
-            msg = rocket::sref("Assertion failed: ");
-            msg += alt.msg;
+            mos << ": " << alt.msg;
           }
-          ASTERIA_DEBUG_LOG("Throwing exception: ", msg);
-          throw Runtime_Error(std::move(msg));
+          ASTERIA_DEBUG_LOG("Throwing exception: ", mos.get_string());
+          throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
         }
         return Block::status_next;
       }
