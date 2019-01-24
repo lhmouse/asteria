@@ -11,20 +11,11 @@ namespace Asteria {
 
 Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexcept
   {
-    unsigned gen = 0;
     auto qcoll = &(this->m_gen_zero);
     // Find the collector with the given generation from the newest generation to the oldest.
-    for(;;) {
-      // Has the generation limit been reached?
-      if(gen >= gen_limit) {
-        break;
-      }
+    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
       // Go to the next generation.
       qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        break;
-      }
-      ++gen;
     }
     return qcoll;
   }
@@ -44,24 +35,15 @@ RefCnt_Ptr<Variable> Generational_Collector::create_variable()
 
 bool Generational_Collector::collect(unsigned gen_limit)
   {
-    unsigned gen = 0;
     auto qcoll = &(this->m_gen_zero);
     // Force collection from the newest generation to the oldest.
-    for(;;) {
+    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
       // Collect this generation.
       ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection begins.");
       qcoll->collect();
       ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection ends.");
-      // Has the generation limit been reached?
-      if(gen >= gen_limit) {
-        break;
-      }
       // Go to the next generation.
       qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        break;
-      }
-      ++gen;
     }
     return qcoll != nullptr;
   }
