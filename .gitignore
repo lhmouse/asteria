@@ -15,7 +15,7 @@ __pch.*
 .libs
 .deps
 aclocal.m4
-autom4te.cache
+autom4te.cache/
 compile
 config.guess
 config.h
@@ -31,7 +31,7 @@ libtool
 ltmain.sh
 Makefile
 Makefile.in
-m4
+m4/
 missing
 stamp-h1
 test-driver
@@ -42,10 +42,11 @@ test-driver
 description-pak
 callgrind.*
 
-lib
-bin
-sbin
-tmp
+lib/
+bin/
+sbin/
+tmp/
+var/
 
 *.save*
 *.swp
