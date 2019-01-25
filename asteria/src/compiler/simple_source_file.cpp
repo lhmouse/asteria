@@ -22,7 +22,7 @@ void Simple_Source_File::do_throw_error(const Parser_Error &err)
     if(err.line() == 0) {
       mos << "the end of stream";
     } else {
-      mos << "line " << err.line() << ", offset " << err.offset();
+      mos << "line " << err.line() << ", offset " << err.offset() << ", length " << err.length();
     }
     mos << "]";
     // Throw it now.

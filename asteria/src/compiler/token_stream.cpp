@@ -646,7 +646,7 @@ namespace Asteria {
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
         int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
+          throw do_make_parser_error(reader_io, int_end, Parser_Error::code_numeric_literal_incomplete);
         }
         // Look for the fractional part.
         frac_begin = int_end;
@@ -657,7 +657,7 @@ namespace Asteria {
           tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader_io, frac_end, Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Look for the exponent.
@@ -699,17 +699,17 @@ namespace Asteria {
           tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch); });
           exp_end = static_cast<std::size_t>(tptr - bptr);
           if(exp_end == exp_begin) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader_io, exp_end, Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
         // Since we make no use of them, we just reserve them for further use for good.
         static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
         tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch); });
-        if(tptr != bptr + exp_end) {
-          throw do_make_parser_error(reader_io, exp_end + 1, Parser_Error::code_numeric_literal_suffix_disallowed);
+        const auto tlen = static_cast<std::size_t>(tptr - bptr);
+        if(tlen != exp_end) {
+          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
         }
-        const auto tlen = exp_end;
         // Parse the exponent.
         int exp = 0;
         for(auto i = exp_begin; i != exp_end; ++i) {
