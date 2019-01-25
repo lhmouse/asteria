@@ -618,9 +618,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       Block::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
-          [](const void *qalt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+          [](const void *qalt, const std::tuple<Reference &, Executive_Context &, Global_Context &> &params)
             {
-              return funcT(*static_cast<const AltT *>(qalt), ref_out, ctx_io, global);
+              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params));
             },
           std::addressof(alt));
       }
@@ -628,7 +628,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     Block::Compiled_Instruction do_bind_constant(Block::Status status)
       {
         return rocket::bind_front(
-          [](const void *value, Reference & /*ref_out*/, Executive_Context & /*ctx_io*/, Global_Context & /*global*/)
+          [](const void *value, const std::tuple<Reference &, Executive_Context &, Global_Context &> & /*params*/)
             {
               return static_cast<Block::Status>(reinterpret_cast<std::uintptr_t>(value));
             },

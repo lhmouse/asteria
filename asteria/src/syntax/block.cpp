@@ -43,14 +43,19 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx
     if(rptr == eptr) {
       return status_next;
     }
-    do {
+    const auto params = std::tie(ref_out, ctx_io, global);
+    for(;;) {
       // Execute statements one by one.
-      const auto status = (*rptr)(ref_out, ctx_io, global);
+      const auto status = (*rptr)(params);
       if(ROCKET_UNEXPECT(status != status_next)) {
         // Forward anything unexpected recursively.
         return status;
       }
-    } while(ROCKET_EXPECT(++rptr != eptr));
+      ++rptr;
+      if(rptr == eptr) {
+        break;
+      }
+    }
     // The current control flow has reached the end of this block.
     return status_next;
   }

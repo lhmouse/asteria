@@ -1420,9 +1420,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       Expression::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
-          [](const void *qalt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
+          [](const void *qalt, const std::tuple<Reference_Stack &, Global_Context &, const Executive_Context &> &params)
             {
-              return funcT(*static_cast<const AltT *>(qalt), stack_io, global, ctx);
+              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params));
             },
           std::addressof(alt));
       }

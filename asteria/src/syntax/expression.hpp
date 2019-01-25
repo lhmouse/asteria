@@ -13,8 +13,10 @@ class Expression
   {
   public:
     // TODO: In the future we will add JIT support.
-    using Compiled_Instruction = rocket::bind_front_result<void (*)(const void *, Reference_Stack &, Global_Context &, const Executive_Context &),
-                                                           const void *>;
+    using Compiled_Instruction = rocket::bind_front_result<
+      void (*)(const void *,
+               const std::tuple<Reference_Stack &, Global_Context &, const Executive_Context &> &),
+      const void *>;
 
   private:
     CoW_Vector<Xpnode> m_nodes;

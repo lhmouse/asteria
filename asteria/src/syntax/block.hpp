@@ -26,8 +26,10 @@ class Block
       };
 
     // TODO: In the future we will add JIT support.
-    using Compiled_Instruction = rocket::bind_front_result<Status (*)(const void *, Reference &, Executive_Context &, Global_Context &),
-                                                           const void *>;
+    using Compiled_Instruction = rocket::bind_front_result<
+      Status (*)(const void *,
+                 const std::tuple<Reference &, Executive_Context &, Global_Context &> &),
+      const void *>;
 
   private:
     CoW_Vector<Statement> m_stmts;
