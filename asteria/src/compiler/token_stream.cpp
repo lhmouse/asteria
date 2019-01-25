@@ -514,18 +514,18 @@ namespace Asteria {
                 static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
                 const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
                 if(!dptr) {
-                  throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_invalid_hex);
+                  throw do_make_parser_error(reader_io, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                 }
                 const auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
                 code_point = code_point * 16 + dvalue;
               }
               if((0xD800 <= code_point) && (code_point < 0xE000)) {
                 // Surrogates are not allowed.
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_utf_code_point_invalid);
+                throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
               }
               if(code_point >= 0x110000) {
                 // Code point value is too large.
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_utf_code_point_invalid);
+                throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
               }
               // Encode it.
               const auto encode_one = [&](unsigned shift, unsigned mask)
@@ -554,7 +554,7 @@ namespace Asteria {
               break;
             }
           default:
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_unknown);
+            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_escape_sequence_unknown);
           }
           tlen += xcnt;
         }
@@ -706,7 +706,7 @@ namespace Asteria {
         static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
         tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch); });
         if(tptr != bptr + exp_end) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_suffix_disallowed);
+          throw do_make_parser_error(reader_io, exp_end + 1, Parser_Error::code_numeric_literal_suffix_disallowed);
         }
         const auto tlen = exp_end;
         // Parse the exponent.
@@ -719,7 +719,7 @@ namespace Asteria {
           const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
           const auto bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_exponent_overflow);
+            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
           }
           exp = exp * 10 + dvalue;
         }
@@ -731,7 +731,7 @@ namespace Asteria {
           // Parse the literal as an integer.
           // Negative exponents are not allowed, even when the significant part is zero.
           if(exp < 0) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_exponent_negative);
+            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
           std::int64_t value = 0;
@@ -743,7 +743,7 @@ namespace Asteria {
             const auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
             const auto bound = (INT64_MAX - dvalue) / radix;
             if(value > bound) {
-              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_overflow);
+              throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
             }
             value = value * radix + dvalue;
           }
@@ -752,7 +752,7 @@ namespace Asteria {
             for(int i = 0; i < exp; ++i) {
               const auto bound = INT64_MAX / exp_base;
               if(value > bound) {
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_integer_literal_overflow);
+                throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
               }
               value *= exp_base;
             }
@@ -800,10 +800,10 @@ namespace Asteria {
         // Check for overflow or underflow.
         const int vclass = std::fpclassify(value);
         if(vclass == FP_INFINITE) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_overflow);
+          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_overflow);
         }
         if((vclass == FP_ZERO) && !zero) {
-          throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_real_literal_underflow);
+          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_underflow);
         }
         // Push a floating-point literal.
         Token::S_real_literal token_c = { value };
