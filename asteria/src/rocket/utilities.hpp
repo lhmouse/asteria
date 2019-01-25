@@ -316,7 +316,9 @@ template<typename elementT>
       // After:         bot   brk     end
       //        > 3 4 5 0 1 2 6 7 8 9 -
       do {
-        noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        noadl::adl_swap(ptr[bot], ptr[brk]);
+        ++bot;
+        ++brk;
       } while(bot != stp);
       // `isr` will have been decreased by `isl`, which will not result in zero.
       isr = end - brk;
@@ -330,7 +332,9 @@ template<typename elementT>
       // After:       bot       brk   end
       //        > 7 8 9 3 4 5 6 0 1 2 -
       do {
-        noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        noadl::adl_swap(ptr[bot], ptr[brk]);
+        ++bot;
+        ++brk;
       } while(brk != end);
       // `isl` will have been decreased by `isr`, which will not result in zero.
       isl = stp - bot;
@@ -343,7 +347,9 @@ template<typename elementT>
     // After:             bot       brk
     //        > 5 6 7 8 9 0 1 2 3 4 -
     do {
-      noadl::adl_swap(ptr[bot++], ptr[brk++]);
+      noadl::adl_swap(ptr[bot], ptr[brk]);
+      ++bot;
+      ++brk;
     } while(bot != stp);
   }
 

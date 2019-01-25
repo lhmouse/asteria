@@ -63,14 +63,15 @@ template<typename valueT>
     bool try_increment() noexcept
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
-        do {
+        for(;;) {
           if(old == 0) {
             return false;
           }
           if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed)) {
-            return true;
+            break;
           }
-        } while(true);
+        }
+        return true;
       }
     void increment() noexcept
       {
