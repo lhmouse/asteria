@@ -22,6 +22,7 @@ void Global_Context::do_initialize()
     // Add standard library interfaces.
     D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
+    // All standard library interfaces reside in the `std` object.
     Reference_Root::S_constant ref_c = { std::move(root) };
     this->open_named_reference(rocket::sref("std")) = std::move(ref_c);
   }
