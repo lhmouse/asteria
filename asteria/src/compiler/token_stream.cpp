@@ -615,10 +615,10 @@ namespace Asteria {
         // 0. The integral part is required. The fractional and exponent parts are optional.
         // 1. If `frac_begin` equals `int_end` then there is no fractional part.
         // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
-        unsigned radix = 10;
+        int radix = 10;
         std::size_t int_begin = 0, int_end = 0;
         std::size_t frac_begin = 0, frac_end = 0;
-        unsigned exp_base = 0;
+        int exp_base = 0;
         bool exp_sign = false;
         std::size_t exp_begin = 0, exp_end = 0;
         // Check for radix prefixes.
@@ -641,8 +641,9 @@ namespace Asteria {
             }
           }
         }
+        const auto max_digits = static_cast<std::size_t>(radix * 2);
         // Look for the end of the integral part.
-        auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
+        auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
         int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
           throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
@@ -653,7 +654,7 @@ namespace Asteria {
         auto next = bptr[int_end];
         if(next == '.') {
           ++frac_begin;
-          tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, radix * 2, ch); });
+          tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_numeric_literal_incomplete);
@@ -736,7 +737,7 @@ namespace Asteria {
           // Parse the significant part.
           std::int64_t value = 0;
           for(auto i = int_begin; i != int_end; ++i) {
-            const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
+            const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
             if(!dptr) {
               continue;
             }
@@ -767,23 +768,23 @@ namespace Asteria {
         double value = 0;
         bool zero = true;
         for(auto i = int_begin; i != int_end; ++i) {
-          const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
+          const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
           if(!dptr) {
             continue;
           }
           const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          value = value * static_cast<int>(radix) + dvalue;
+          value = value * radix + dvalue;
           zero |= dvalue;
         }
         // Parse the fractional part.
         double frac = 0;
         for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
-          const auto dptr = std::char_traits<char>::find(s_digits, radix * 2, bptr[i]);
+          const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
           if(!dptr) {
             continue;
           }
           const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          frac = (frac + dvalue) / static_cast<int>(radix);
+          frac = (frac + dvalue) / radix;
           zero |= dvalue;
         }
         value += frac;
@@ -795,7 +796,7 @@ namespace Asteria {
           value = std::ldexp(value, exp);
 #endif
         } else {
-          value = value * std::pow(static_cast<int>(exp_base), exp);
+          value = value * std::pow(exp_base, exp);
         }
         // Check for overflow or underflow.
         const int vclass = std::fpclassify(value);
