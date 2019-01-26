@@ -55,6 +55,6 @@
 #include "rocket/prehashed_string.hpp"
 #include "rocket/integer_sequence.hpp"
 #include "rocket/bind_front.hpp"
-#include "rocket/ostream_imploder.hpp"
+#include "rocket/ostream_implode.hpp"
 
 #endif

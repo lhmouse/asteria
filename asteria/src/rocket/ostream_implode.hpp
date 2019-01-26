@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_OSTREAM_IMPLODER_HPP_
-#define ROCKET_OSTREAM_IMPLODER_HPP_
+#ifndef ROCKET_OSTREAM_IMPLODE_HPP_
+#define ROCKET_OSTREAM_IMPLODE_HPP_
 
 #include "utilities.hpp"
 
