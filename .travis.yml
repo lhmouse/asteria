@@ -23,7 +23,7 @@ install:
   - ./check_includes.sh
   - mkdir -p m4
   - autoreconf -ifv
-  - test "${CXX#g++}" == "${CXX}" || _options+=" CPPFLAGS=\"-Werror\""
+  - test "${CXX#g++}" == "${CXX}" || _options+=" CPPFLAGS=-Werror"
   - ./configure --disable-silent-rules ${_options}
   - make -j$(nproc) check
 
