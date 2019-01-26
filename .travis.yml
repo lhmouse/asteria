@@ -24,8 +24,8 @@ install:
   - mkdir -p m4
   - autoreconf -ifv
   - test "${CXX#g++}" == "${CXX}" || _options+=" CPPFLAGS=\"-Werror\""
-  - ./configure
-  - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-silent-rules ${_options}" distcheck
+  - ./configure --disable-silent-rules ${_options}
+  - make -j$(nproc) check
 
 script:
   - exit 0

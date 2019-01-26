@@ -15,8 +15,8 @@ build:
     - ./check_includes.sh
     - mkdir -p m4
     - autoreconf -ifv
-    - ./configure
-    - make -j$(nproc) DISTCHECK_CONFIGURE_FLAGS="--disable-silent-rules $${_options}" distcheck
+    - ./configure --disable-silent-rules $${_options}
+    - make -j$(nproc) check
 
 notify:
   irc:
