@@ -1,3 +1,4 @@
+.*
 *.lo
 *.o
 *.so
@@ -9,7 +10,6 @@
 *.gch
 *.exe
 *.dll
-__pch.*
 
 .dirstamp
 .libs

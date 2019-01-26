@@ -9,20 +9,20 @@ AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
-__pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
+.pch.hpp: ${srcdir}/asteria/src/precompiled.hpp
 	${AM_V_GEN}echo "#include \"$$(cygpath -m $< 2>/dev/null || readlink -f $<)\"" >$@
-__pch.hpp.gch: __pch.hpp
+.pch.hpp.gch: .pch.hpp
 	${AM_V_CXX}${LTCXXCOMPILE} -x c++-header -Wno-error $< -o $@.o
 	${AM_V_GEN}${LIBTOOL} ${AM_V_lt} --tag=CXX --mode=link sh -c 'mv -f "$$1" "$$2"' _ $@.lo $@ -o $@
 	${AM_V_GEN}test -z "${EXEEXT}" || rm -f $@${EXEEXT}
 
 BUILT_SOURCES =  \
-  __pch.hpp  \
-  __pch.hpp.gch
+  .pch.hpp  \
+  .pch.hpp.gch
 
 CLEANFILES =  \
-  __pch.hpp  \
-  __pch.hpp.gch
+  .pch.hpp  \
+  .pch.hpp.gch
 
 noinst_HEADERS =  \
   test/_test_init.hpp
@@ -76,7 +76,7 @@ lib_librocket_la_SOURCES =  \
   asteria/src/rocket/cow_string.cpp
 
 lib_librocket_la_CXXFLAGS =  \
-  ${AM_CXXFLAGS} -include __pch.hpp
+  ${AM_CXXFLAGS} -include .pch.hpp
 
 pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
@@ -168,7 +168,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/argument_sentry.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
-  ${AM_CXXFLAGS} -include __pch.hpp
+  ${AM_CXXFLAGS} -include .pch.hpp
 
 lib_libasteria_la_LIBADD =  \
   lib/librocket.la
