@@ -10,8 +10,8 @@ namespace Asteria {
 
 enum class Parser_Options : std::uint32_t
   {
-    none                  =          0,
-    integer_as_real       =  1ul <<  0,  // Tokenize `integer` literals as `real` literals.
+    none                  =  0x00000000,
+    integer_as_real       =  0x00000001,  // Tokenize `integer` literals as `real` literals.
   };
 
 constexpr Parser_Options operator&(Parser_Options lhs, Parser_Options rhs) noexcept
