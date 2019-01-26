@@ -34,12 +34,16 @@ bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &glo
     if(rptr == eptr) {
       return false;
     }
-    const auto params = std::tie(stack_io, global, ctx);
     const auto stack_size_old = stack_io.size();
+    // Evaluate nodes one by one.
+    const auto params = std::tie(stack_io, global, ctx);
     for(;;) {
-      // Evaluate nodes one by one.
       (*rptr)(params);
-      ROCKET_ASSERT_MSG(stack_io.size() >= stack_size_old, "The expression evaluation stack is corrupted.");
+#ifdef ROCKET_DEBUG
+      if(stack_io.size() < stack_size_old) {
+        ASTERIA_TERMINATE("The expression evaluation stack is corrupted: stack_size_old = ", stack_size_old, ", stack_size_new = ", stack_io.size());
+      }
+#endif
       ++rptr;
       if(rptr == eptr) {
         break;
