@@ -1207,7 +1207,8 @@ namespace Asteria {
         //   ( infix-selection | infix-carriage ) infix-carriage-list-opt
         // infix-selection ::=
         //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
-        //     "?=" expression ":" | "&&=" | "||=" | "??=" ) infix-element
+        //     "?=" expression ":" | "&&=" | "||=" | "??=" |
+        //     "and" | "or" ) infix-element
         Unique_Ptr<Infix_Element_Base> elem;
         if(!do_accept_infix_head(elem, tstrm_io)) {
           return false;
