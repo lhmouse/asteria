@@ -38,7 +38,7 @@ Parser_Error Simple_Source_File::load_file(const CoW_String &filename)
 Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const CoW_String &filename)
   {
     // Use default options.
-    const Parser_Options options = { };
+    static constexpr Parser_Options options;
     // Tokenize.
     Token_Stream tstrm;
     if(!tstrm.load(cstrm_io, filename, options)) {

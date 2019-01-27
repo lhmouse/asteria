@@ -12,6 +12,11 @@ struct Parser_Options
   {
     bool integer_as_real : 1;
     bool keyword_as_identifier : 1;
+
+    constexpr Parser_Options() noexcept
+      : integer_as_real(false), keyword_as_identifier(false)
+      {
+      }
   };
 
 }
