@@ -294,37 +294,39 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
     case type_array:
       {
         const auto &alt = this->check<D_array>();
-        // array(3) = [
+        // array(3) =
+        //  [
         //   0 = integer 1;
         //   1 = integer 2;
         //   2 = integer 3;
-        // ]
+        //  ]
         os << "array(" << std::dec << alt.size() << ")";
-        os << do_indent_or_space(indent_increment, indent_next) << " [";
+        os << do_indent_or_space(indent_increment, indent_next + 1) << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << std::dec << (it - alt.begin()) << " = ";
           it->print(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        os << do_indent_or_space(indent_increment, indent_next) << " ]";
+        os << do_indent_or_space(indent_increment, indent_next + 1) << ']';
         return;
       }
     case type_object:
       {
         const auto &alt = this->check<D_object>();
-        // object(3) = {
+        // object(3) =
+        //  {
         //   "one" = integer 1;
         //   "two" = integer 2;
         //   "three" = integer 3;
-        // }
+        //  }
         os << "object(" << std::dec << alt.size() << ")";
-        os << do_indent_or_space(indent_increment, indent_next) << " {";
+        os << do_indent_or_space(indent_increment, indent_next + 1) << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << quote(it->first) << " = ";
           it->second.print(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        os << do_indent_or_space(indent_increment, indent_next) << " }";
+        os << do_indent_or_space(indent_increment, indent_next + 1) << '}';
         return;
       }
     default:
