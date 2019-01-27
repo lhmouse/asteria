@@ -230,7 +230,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_identifier_or_keyword(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_identifier_or_keyword(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, bool keyword_as_identifier)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -243,68 +243,71 @@ namespace Asteria {
         const auto eptr = bptr + reader_io.size_avail();
         auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch); });
         const auto tlen = static_cast<std::size_t>(tptr - bptr);
-        // Check whether this identifier matches a keyword.
-        struct Keyword_Element
-          {
-            char first[12];
-            Token::Keyword second;
-            std::uintptr_t : 0;
-          }
-        static constexpr s_keywords[] =
-          {
-            { "and",       Token::keyword_and       },
-            { "assert",    Token::keyword_assert    },
-            { "break",     Token::keyword_break     },
-            { "case",      Token::keyword_case      },
-            { "catch",     Token::keyword_catch     },
-            { "const",     Token::keyword_const     },
-            { "continue",  Token::keyword_continue  },
-            { "default",   Token::keyword_default   },
-            { "defer",     Token::keyword_defer     },
-            { "do",        Token::keyword_do        },
-            { "each",      Token::keyword_each      },
-            { "else",      Token::keyword_else      },
-            { "false",     Token::keyword_false     },
-            { "for",       Token::keyword_for       },
-            { "func",      Token::keyword_func      },
-            { "if",        Token::keyword_if        },
-            { "infinity",  Token::keyword_infinity  },
-            { "lengthof",  Token::keyword_lengthof  },
-            { "nan",       Token::keyword_nan       },
-            { "not",       Token::keyword_not       },
-            { "null",      Token::keyword_null      },
-            { "or",        Token::keyword_or        },
-            { "return",    Token::keyword_return    },
-            { "switch",    Token::keyword_switch    },
-            { "this",      Token::keyword_this      },
-            { "throw",     Token::keyword_throw     },
-            { "true",      Token::keyword_true      },
-            { "try",       Token::keyword_try       },
-            { "typeof",    Token::keyword_typeof    },
-            { "unset",     Token::keyword_unset     },
-            { "var",       Token::keyword_var       },
-            { "while",     Token::keyword_while     },
-          };
+        if(!keyword_as_identifier) {
+          // Check whether this identifier matches a keyword.
+          struct Keyword_Element
+            {
+              char first[12];
+              Token::Keyword second;
+              std::uintptr_t : 0;
+            }
+          static constexpr s_keywords[] =
+            {
+              { "and",       Token::keyword_and       },
+              { "assert",    Token::keyword_assert    },
+              { "break",     Token::keyword_break     },
+              { "case",      Token::keyword_case      },
+              { "catch",     Token::keyword_catch     },
+              { "const",     Token::keyword_const     },
+              { "continue",  Token::keyword_continue  },
+              { "default",   Token::keyword_default   },
+              { "defer",     Token::keyword_defer     },
+              { "do",        Token::keyword_do        },
+              { "each",      Token::keyword_each      },
+              { "else",      Token::keyword_else      },
+              { "false",     Token::keyword_false     },
+              { "for",       Token::keyword_for       },
+              { "func",      Token::keyword_func      },
+              { "if",        Token::keyword_if        },
+              { "infinity",  Token::keyword_infinity  },
+              { "lengthof",  Token::keyword_lengthof  },
+              { "nan",       Token::keyword_nan       },
+              { "not",       Token::keyword_not       },
+              { "null",      Token::keyword_null      },
+              { "or",        Token::keyword_or        },
+              { "return",    Token::keyword_return    },
+              { "switch",    Token::keyword_switch    },
+              { "this",      Token::keyword_this      },
+              { "throw",     Token::keyword_throw     },
+              { "true",      Token::keyword_true      },
+              { "try",       Token::keyword_try       },
+              { "typeof",    Token::keyword_typeof    },
+              { "unset",     Token::keyword_unset     },
+              { "var",       Token::keyword_var       },
+              { "while",     Token::keyword_while     },
+            };
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_Comparator()));
+          ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_Comparator()));
 #endif
-        auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), bptr[0], Prefix_Comparator());
-        for(;;) {
-          if(range.first == range.second) {
-            // No matching keyword has been found so far.
-            Token::S_identifier token_c = { CoW_String(bptr, tlen) };
-            do_push_token(seq_out, reader_io, tlen, std::move(token_c));
-            return true;
+          auto range = std::equal_range(std::begin(s_keywords), std::end(s_keywords), bptr[0], Prefix_Comparator());
+          for(;;) {
+            if(range.first == range.second) {
+              // No matching keyword has been found so far.
+              break;
+            }
+            const auto &cur = range.first[0];
+            if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
+              // A keyword has been found.
+              Token::S_keyword token_c = { cur.second };
+              do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+              return true;
+            }
+            range.first++;
           }
-          const auto &cur = range.first[0];
-          if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
-            // A keyword has been found.
-            Token::S_keyword token_c = { cur.second };
-            do_push_token(seq_out, reader_io, tlen, std::move(token_c));
-            return true;
-          }
-          range.first++;
         }
+        Token::S_identifier token_c = { CoW_String(bptr, tlen) };
+        do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+        return true;
       }
 
     bool do_accept_punctuator(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
@@ -387,9 +390,7 @@ namespace Asteria {
         auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
-            // No matching punctuator has been found so far.
-            // This is caused by a character in `punct_chars` that does not exist in the table above.
-            ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
+            break;
           }
           const auto &cur = range.second[-1];
           const auto tlen = std::char_traits<char>::length(cur.first);
@@ -401,6 +402,9 @@ namespace Asteria {
           }
           range.second--;
         }
+        // No matching punctuator has been found so far.
+        // This is caused by a character in `punct_chars` that does not exist in the table above.
+        ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
       }
 
     bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
@@ -854,7 +858,7 @@ bool Token_Stream::empty() const noexcept
     }
   }
 
-bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, Parser_Options options)
+bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, const Parser_Options &options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -922,11 +926,11 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, Parser_O
             continue;
           }
         }
-        bool token_got = do_accept_identifier_or_keyword(seq, reader) ||
+        bool token_got = do_accept_identifier_or_keyword(seq, reader, options.keyword_as_identifier) ||
                          do_accept_punctuator(seq, reader) ||
                          do_accept_string_literal(seq, reader) ||
                          do_accept_noescape_string_literal(seq, reader) ||
-                         do_accept_numeric_literal(seq, reader, (options & Parser_Options::integer_as_real) != Parser_Options::none);
+                         do_accept_numeric_literal(seq, reader, options.integer_as_real);
         if(!token_got) {
           ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
           throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);

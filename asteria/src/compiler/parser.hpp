@@ -49,9 +49,9 @@ class Parser
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(Token_Stream &tstrm_io, Parser_Options options = Parser_Options::none);
+    bool load(Token_Stream &tstrm_io, const Parser_Options &options);
     void clear() noexcept;
-    Block extract_document();
+    Block extract_block();
   };
 
 }

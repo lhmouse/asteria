@@ -8,37 +8,11 @@
 
 namespace Asteria {
 
-enum class Parser_Options : std::uint32_t
+struct Parser_Options
   {
-    none                  =  0x00000000,
-    integer_as_real       =  0x00000001,  // Tokenize `integer` literals as `real` literals.
+    bool integer_as_real : 1;
+    bool keyword_as_identifier : 1;
   };
-
-constexpr Parser_Options operator&(Parser_Options lhs, Parser_Options rhs) noexcept
-  {
-    return Parser_Options(std::uint32_t(lhs) & std::uint32_t(rhs));
-  }
-constexpr Parser_Options operator|(Parser_Options lhs, Parser_Options rhs) noexcept
-  {
-    return Parser_Options(std::uint32_t(lhs) | std::uint32_t(rhs));
-  }
-constexpr Parser_Options operator^(Parser_Options lhs, Parser_Options rhs) noexcept
-  {
-    return Parser_Options(std::uint32_t(lhs) ^ std::uint32_t(rhs));
-  }
-
-inline Parser_Options & operator&=(Parser_Options &lhs, Parser_Options rhs) noexcept
-  {
-    return lhs = lhs & rhs;
-  }
-inline Parser_Options & operator|=(Parser_Options &lhs, Parser_Options rhs) noexcept
-  {
-    return lhs = lhs | rhs;
-  }
-inline Parser_Options & operator^=(Parser_Options &lhs, Parser_Options rhs) noexcept
-  {
-    return lhs = lhs ^ rhs;
-  }
 
 }
 

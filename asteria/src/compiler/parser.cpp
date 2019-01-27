@@ -1827,7 +1827,7 @@ bool Parser::empty() const noexcept
     }
   }
 
-bool Parser::load(Token_Stream &tstrm_io, Parser_Options /*options*/)
+bool Parser::load(Token_Stream &tstrm_io, const Parser_Options & /*options*/)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -1865,7 +1865,7 @@ void Parser::clear() noexcept
     this->m_stor = nullptr;
   }
 
-Block Parser::extract_document()
+Block Parser::extract_block()
   {
     switch(this->state()) {
     case state_empty:

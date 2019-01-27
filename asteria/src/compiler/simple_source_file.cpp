@@ -37,15 +37,20 @@ Parser_Error Simple_Source_File::load_file(const CoW_String &filename)
 
 Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const CoW_String &filename)
   {
+    // Use default options.
+    const Parser_Options options = { };
+    // Tokenize.
     Token_Stream tstrm;
-    if(!tstrm.load(cstrm_io, filename)) {
+    if(!tstrm.load(cstrm_io, filename, options)) {
       return tstrm.get_parser_error();
     }
+    // Parse.
     Parser parser;
-    if(!parser.load(tstrm)) {
+    if(!parser.load(tstrm, options)) {
       return parser.get_parser_error();
     }
-    this->m_code = parser.extract_document();
+    // Accept the document.
+    this->m_code = parser.extract_block();
     this->m_file = filename;
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
