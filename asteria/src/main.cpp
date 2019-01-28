@@ -22,7 +22,7 @@ int main(int argc, char **argv)
       args.emplace_back(std::move(ref_c));
     }
     // prepare test code.
-#if 0
+#if 1
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
     Simple_Source_File code(std::cin, rocket::sref("<stdin>"));
@@ -63,6 +63,9 @@ int main(int argc, char **argv)
               << "---" << std::endl
               << "# Caught `Traceable_Exception`:" << std::endl
               << e.get_value() << std::endl;
+    for(const auto &loc : e.get_backtrace()) {
+      std::cerr << "[thrown from `" << loc << "`]" << std::endl;
+    }
     return 1;
   } catch(std::exception &e) {
     // print the exception.
