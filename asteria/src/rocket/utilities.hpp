@@ -228,7 +228,7 @@ template<typename ...typesT>
   {
   };
 template<typename firstT, typename ...restT>
-  struct conjunction<firstT, restT...> : conditional<!bool(firstT::value), firstT, conjunction<restT...>>::type
+  struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
   {
   };
 
