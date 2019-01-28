@@ -13,18 +13,26 @@ namespace Asteria {
 class Traceable_Exception : public virtual std::exception
   {
   private:
-    Source_Location m_loc;
     Value m_value;
-    CoW_Vector<Source_Location> m_backtrace;
+    CoW_Vector<Source_Location> m_frames;
 
   public:
-    Traceable_Exception(const Source_Location &loc, Value value)
-      : m_loc(loc), m_value(std::move(value))
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
+      explicit Traceable_Exception(XvalueT &&xvalue)
       {
+        this->m_value = std::forward<XvalueT>(xvalue);
       }
-    explicit Traceable_Exception(const std::exception &stdex)
-      : m_loc(rocket::sref("<native code>"), 0), m_value(D_string(stdex.what()))
+    // This constructor does not accept lvalues.
+    template<typename ExceptT, ROCKET_ENABLE_IF(std::is_base_of<std::exception, ExceptT>::value)>
+      explicit Traceable_Exception(ExceptT &&except)
       {
+        const auto other = dynamic_cast<Traceable_Exception *>(std::addressof(except));
+        if(!other) {
+          this->m_value = D_string(except.what());
+          return;
+        }
+        this->m_value = std::move(other->m_value);
+        this->m_frames = std::move(other->m_frames);
       }
     ~Traceable_Exception() override;
 
@@ -34,22 +42,26 @@ class Traceable_Exception : public virtual std::exception
         return "Asteria::Traceable_Exception";
       }
 
-    const Source_Location & get_location() const noexcept
-      {
-        return this->m_loc;
-      }
     const Value & get_value() const noexcept
       {
         return this->m_value;
       }
-
-    const CoW_Vector<Source_Location> & get_backtrace() const noexcept
+    Value & get_value() noexcept
       {
-        return this->m_backtrace;
+        return this->m_value;
       }
-    void append_backtrace(const Source_Location &loc)
+
+    std::size_t get_frame_count() const noexcept
       {
-        this->m_backtrace.emplace_back(loc);
+        return this->m_frames.size();
+      }
+    const Source_Location & get_frame(std::size_t index) const
+      {
+        return this->m_frames.at(index);
+      }
+    void append_frame(const Source_Location &loc)
+      {
+        this->m_frames.emplace_back(loc);
       }
   };
 

@@ -9,10 +9,13 @@ using namespace Asteria;
 int main()
   {
     try {
-      throw Traceable_Exception(Source_Location(rocket::sref("myfile"), 123), D_integer(42));
+      Traceable_Exception except(D_integer(42));
+      except.append_frame(Source_Location(rocket::sref("myfile"), 123));
+      throw except;
     } catch(Traceable_Exception &e) {
-      ASTERIA_TEST_CHECK(e.get_location().get_file() == "myfile");
-      ASTERIA_TEST_CHECK(e.get_location().get_line() == 123);
       ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
+      ASTERIA_TEST_CHECK(e.get_frame_count() == 1);
+      ASTERIA_TEST_CHECK(e.get_frame(0).get_file() == "myfile");
+      ASTERIA_TEST_CHECK(e.get_frame(0).get_line() == 123);
     }
   }

@@ -380,19 +380,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         try {
           // Call the function now.
           func.get().invoke(stack_io.mut_top(), global, std::move(args));
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\': ", func.get());
-        } catch(Traceable_Exception &except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception` thrown inside function call at \'", alt.loc, "\': value = ", except.get_value());
-          // Append backtrace information and rethrow the exception.
-          except.append_backtrace(alt.loc);
-          throw;
         } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.loc, "\': what = ", stdex.what());
-          // Here we behave as if a `string` had been thrown.
-          Traceable_Exception except(stdex);
-          except.append_backtrace(alt.loc);
+          // Translate the exception.
+          Traceable_Exception except(std::move(stdex));
+          except.append_frame(alt.loc);
           throw except;
         }
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\': ", func.get());
       }
 
     void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)

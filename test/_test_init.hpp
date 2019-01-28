@@ -27,8 +27,8 @@
         static_cast<void>(expr_);  \
       } catch(::Asteria::Traceable_Exception &e) {  \
         ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception`: ", e.get_value());  \
-        for(const auto &loc : e.get_backtrace()) {  \
-          ASTERIA_DEBUG_LOG("\t* thrown from: ", loc);  \
+        for(::std::size_t i = 0; i < e.get_frame_count(); ++i) {  \
+          ASTERIA_DEBUG_LOG("\t* thrown from: ", e.get_frame(i));  \
         }  \
         break;  \
       } catch(::Asteria::Runtime_Error &e) {  \

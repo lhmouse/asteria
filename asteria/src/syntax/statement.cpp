@@ -525,41 +525,26 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
           status = alt.body_try.execute(ref_out, global, ctx_io);
-        } catch(const std::exception &stdex) {
+        } catch(std::exception &stdex) {
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
-          // Prepare the backtrace as an `array` for processing by code inside `catch`.
+          // Translate the exception.
+          Traceable_Exception except(std::move(stdex));
+          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
+          Reference_Root::S_temporary eref_c = { except.get_value() };
+          do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, std::move(eref_c));
+          // Backtrace frames.
           D_array backtrace;
-          const auto push_backtrace = [&](const Source_Location &loc)
-            {
-              D_object elem;
-              elem.try_emplace(rocket::sref("file"), D_string(loc.get_file()));
-              elem.try_emplace(rocket::sref("line"), D_integer(loc.get_line()));
-              backtrace.emplace_back(std::move(elem));
-            };
-          // Translate the exception as needed.
-          try {
-            throw;
-          } catch(const Traceable_Exception &except) {
-            // Handle an `Asteria::Traceable_Exception`.
-            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
-            Reference_Root::S_temporary ref_c = { except.get_value() };
-            do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
-            // Unpack the backtrace array.
-            backtrace.reserve(1 + except.get_backtrace().size());
-            push_backtrace(except.get_location());
-            std::for_each(except.get_backtrace().begin(), except.get_backtrace().end(), push_backtrace);
-          } catch(...) {
-            // Handle an `std::exception`.
-            ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", stdex.what());
-            Reference_Root::S_temporary ref_c = { D_string(stdex.what()) };
-            do_safe_set_named_reference(ctx_next, "exception", alt.except_name, std::move(ref_c));
-            // We say the exception was thrown from native code.
-            push_backtrace(Traceable_Exception(stdex).get_location());
+          for(std::size_t i = 0; i < except.get_frame_count(); ++i) {
+            const auto &frame = except.get_frame(i);
+            D_object elem;
+            elem.try_emplace(rocket::sref("file"), D_string(frame.get_file()));
+            elem.try_emplace(rocket::sref("line"), D_integer(frame.get_line()));
+            backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_Root::S_temporary ref_c = { std::move(backtrace) };
-          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(ref_c);
+          Reference_Root::S_temporary bref_c = { std::move(backtrace) };
+          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(bref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, global, ctx_next);
         }
@@ -577,7 +562,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception`: ", value);
-        throw Traceable_Exception(alt.loc, std::move(value));
+        Traceable_Exception except(std::move(value));
+        except.append_frame(alt.loc);
+        throw except;
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)

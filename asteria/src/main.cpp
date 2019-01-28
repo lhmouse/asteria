@@ -63,8 +63,8 @@ int main(int argc, char **argv)
               << "---" << std::endl
               << "# Caught `Traceable_Exception`:" << std::endl
               << e.get_value() << std::endl;
-    for(const auto &loc : e.get_backtrace()) {
-      std::cerr << "[thrown from `" << loc << "`]" << std::endl;
+    for(std::size_t i = 0; i < e.get_frame_count(); ++i) {
+      std::cerr << "[thrown from `" << e.get_frame(i) << "`]" << std::endl;
     }
     return 1;
   } catch(std::exception &e) {
