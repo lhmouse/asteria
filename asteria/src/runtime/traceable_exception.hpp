@@ -29,6 +29,11 @@ class Traceable_Exception : public virtual std::exception
     ~Traceable_Exception() override;
 
   public:
+    const char * what() const noexcept override
+      {
+        return "Asteria::Traceable_Exception";
+      }
+
     const Source_Location & get_location() const noexcept
       {
         return this->m_loc;
@@ -45,11 +50,6 @@ class Traceable_Exception : public virtual std::exception
     void append_backtrace(const Source_Location &loc)
       {
         this->m_backtrace.emplace_back(loc);
-      }
-
-    const char * what() const noexcept override
-      {
-        return "Asteria::Traceable_Exception";
       }
   };
 
