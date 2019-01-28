@@ -225,7 +225,9 @@ void Collector::collect()
         {
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
-            root->reset(D_null(), true);
+            // Overwrite the value of this variable with a scalar value to break reference cycles.
+            root->reset(D_integer(0xFEEDFACECAFEBEEF), true);
+            // Cache this variable, if a pool is provided.
             if(output) {
               output->insert(root);
             }
