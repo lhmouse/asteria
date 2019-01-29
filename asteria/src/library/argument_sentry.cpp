@@ -349,7 +349,8 @@ void Argument_Sentry::throw_no_matching_function_call() const
         // Append this overload.
         mos << "`" << name << "("
             << rocket::ostream_implode(this->m_overloads.data() + offset, nparams, ", ",
-                                       [&](std::int8_t param) { return (param < 0) ? "<generic>" : Value::get_type_name(static_cast<Value_Type>(param)); })
+                                       [&](std::int8_t param) { return (param >= 0) ? Value::get_type_name(static_cast<Value_Type>(param))
+                                                                                    : "<generic>"; })
             << ")`";
         offset += nparams;
         read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams), offset);

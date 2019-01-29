@@ -295,7 +295,11 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, alt.name.rdstr() + "()", alt.params);
+        rocket::insertable_ostream nos;
+        nos << alt.name << "("
+            << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
+            <<")";
+        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, nos.extract_string(), alt.params);
         ASTERIA_DEBUG_LOG("Creating named function: ", func);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
