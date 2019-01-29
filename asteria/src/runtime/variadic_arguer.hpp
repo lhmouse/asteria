@@ -19,14 +19,12 @@ class Variadic_Arguer : public Abstract_Function
     CoW_Vector<Reference> m_vargs;
 
   public:
-    template<typename ...XvargsT>
-      Variadic_Arguer(const Source_Location &loc, const PreHashed_String &name, XvargsT &&...xvargs)
-      : m_loc(loc), m_name(name), m_vargs(std::forward<XvargsT>(xvargs)...)
+    Variadic_Arguer(const Source_Location &loc, const PreHashed_String &name)
+      : m_loc(loc), m_name(name), m_vargs()
       {
       }
-    template<typename XfirstT, typename ...XvargsT>
-      Variadic_Arguer(const Variadic_Arguer &other, XfirstT &&xfirst, XvargsT &&...xvargs)
-      : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::forward<XfirstT>(xfirst), std::forward<XvargsT>(xvargs)...)
+    Variadic_Arguer(const Variadic_Arguer &other, CoW_Vector<Reference> &&vargs)
+      : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::move(vargs))
       {
       }
 
