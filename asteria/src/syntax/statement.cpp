@@ -173,7 +173,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Analytic_Context ctx_next(&ctx_io);
         // Bind the loop initializer, condition, step expression and loop body recursively.
-        auto init_bnd = alt.init.bind(global, ctx_next);
+        auto init_bnd = alt.init.bind_in_place(ctx_next, global);
         auto cond_bnd = alt.cond.bind(global, ctx_next);
         auto step_bnd = alt.step.bind(global, ctx_next);
         auto body_bnd = alt.body.bind(global, ctx_next);
