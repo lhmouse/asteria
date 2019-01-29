@@ -26,15 +26,15 @@ class Instantiated_Function : public Abstract_Function
     ~Instantiated_Function() override;
 
   public:
-    const Source_Location & get_location() const noexcept
+    const Source_Location & get_source_location() const noexcept
       {
-        return this->m_zvarg->get_location();
+        return this->m_zvarg->get_source_location();
       }
     const PreHashed_String & get_name() const noexcept
       {
         return this->m_zvarg->get_name();
       }
-    const CoW_Vector<PreHashed_String> & get_params() const noexcept
+    const CoW_Vector<PreHashed_String> & get_parameters() const noexcept
       {
         return this->m_params;
       }

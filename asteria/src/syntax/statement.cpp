@@ -537,8 +537,8 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           for(std::size_t i = 0; i < except.get_frame_count(); ++i) {
             const auto &frame = except.get_frame(i);
             D_object elem;
-            elem.try_emplace(rocket::sref("file"), D_string(frame.get_file()));
-            elem.try_emplace(rocket::sref("line"), D_integer(frame.get_line()));
+            elem.try_emplace(rocket::sref("file"), D_string(frame.file()));
+            elem.try_emplace(rocket::sref("line"), D_integer(frame.line()));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));

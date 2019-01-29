@@ -29,7 +29,7 @@ class Variadic_Arguer : public Abstract_Function
       }
 
   public:
-    const Source_Location & get_location() const noexcept
+    const Source_Location & get_source_location() const noexcept
       {
         return this->m_sloc;
       }
@@ -37,11 +37,11 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_name;
       }
-    std::size_t get_varg_size() const noexcept
+    std::size_t get_argument_count() const noexcept
       {
         return this->m_vargs.size();
       }
-    const Reference & get_varg(std::size_t index) const
+    const Reference & get_argument(std::size_t index) const
       {
         return this->m_vargs.at(index);
       }

@@ -63,11 +63,11 @@ void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer>
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'analytic_executive_context.cpp' as well.
     do_predefine(this->m_predef_refs,
-                 rocket::sref("__file"), D_string(zvarg->get_location().get_file()));
+                 rocket::sref("__file"), D_string(zvarg->get_source_location().file()));
     do_predefine(this->m_predef_refs,
                  rocket::sref("__func"), D_string(zvarg->get_name()));
     do_predefine(this->m_predef_refs,
-                 rocket::sref("__line"), D_integer(zvarg->get_location().get_line()));
+                 rocket::sref("__line"), D_integer(zvarg->get_source_location().line()));
     do_predefine(this->m_predef_refs,
                  rocket::sref("__this"), std::move(self));
     do_predefine(this->m_predef_refs,

@@ -15,7 +15,7 @@ int main()
     } catch(Traceable_Exception &e) {
       ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 1);
-      ASTERIA_TEST_CHECK(e.get_frame(0).get_file() == "myfile");
-      ASTERIA_TEST_CHECK(e.get_frame(0).get_line() == 123);
+      ASTERIA_TEST_CHECK(e.get_frame(0).file() == "myfile");
+      ASTERIA_TEST_CHECK(e.get_frame(0).line() == 123);
     }
   }

@@ -17,9 +17,10 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
   {
     Argument_Sentry sentry(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
+    const auto nvargs = this->get_argument_count();
     if(sentry.start().finish()) {
       // Return the number of variadic arguments.
-      Reference_Root::S_constant ref_c = { D_integer(this->get_varg_size()) };
+      Reference_Root::S_constant ref_c = { D_integer(nvargs) };
       self_io = std::move(ref_c);
       return;
     }
@@ -27,13 +28,13 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
     D_integer index;
     if(sentry.start().req(index).finish()) {
       // Return the argument at the index specified.
-      auto wrap = wrap_index(index, this->get_varg_size());
-      if(wrap.index >= this->get_varg_size()) {
-        ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", this->get_varg_size());
+      auto wrap = wrap_index(index, nvargs);
+      if(wrap.index >= nvargs) {
+        ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", nvargs);
         self_io = Reference_Root::S_null();
         return;
       }
-      self_io = this->get_varg(static_cast<std::size_t>(wrap.index));
+      self_io = this->get_argument(static_cast<std::size_t>(wrap.index));
       return;
     }
     // Fail.

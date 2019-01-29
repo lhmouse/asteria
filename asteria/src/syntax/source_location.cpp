@@ -8,7 +8,7 @@ namespace Asteria {
 
 void Source_Location::print(std::ostream &os) const
   {
-    os << this->get_file() << ':' << this->get_line();
+    os << this->file() << ':' << this->line();
   }
 
 }

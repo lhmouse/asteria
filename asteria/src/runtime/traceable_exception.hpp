@@ -46,7 +46,7 @@ class Traceable_Exception : public virtual std::exception
       {
         return this->m_value;
       }
-    Value & get_value() noexcept
+    Value & mut_value() noexcept
       {
         return this->m_value;
       }
