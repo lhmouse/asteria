@@ -308,7 +308,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // Look for the reference in the current context.
         auto pair = do_name_lookup(global, ctx, alt.name);
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(!pair.first->is_analytic());
+        ROCKET_ASSERT(!pair.first.get().is_analytic());
 #endif
         // Push the reference found.
         stack_io.push(pair.second);
