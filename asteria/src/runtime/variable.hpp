@@ -39,7 +39,7 @@ class Variable : public virtual RefCnt_Base
       {
         return this->m_value;
       }
-    Value & open_value() noexcept
+    Value & open_value()
       {
         if(this->m_immutable) {
           this->do_throw_immutable();
