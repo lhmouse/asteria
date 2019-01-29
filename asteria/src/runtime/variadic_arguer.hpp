@@ -15,16 +15,16 @@ class Variadic_Arguer : public Abstract_Function
   {
   private:
     Source_Location m_sloc;
-    PreHashed_String m_name;
+    PreHashed_String m_func;
     CoW_Vector<Reference> m_vargs;
 
   public:
-    Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &name)
-      : m_sloc(sloc), m_name(name), m_vargs()
+    Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &func)
+      : m_sloc(sloc), m_func(func), m_vargs()
       {
       }
     Variadic_Arguer(const Variadic_Arguer &other, CoW_Vector<Reference> &&vargs)
-      : m_sloc(other.m_sloc), m_name(other.m_name), m_vargs(std::move(vargs))
+      : m_sloc(other.m_sloc), m_func(other.m_func), m_vargs(std::move(vargs))
       {
       }
 
@@ -33,9 +33,17 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc;
       }
-    const PreHashed_String & get_name() const noexcept
+    const CoW_String & get_source_file() const noexcept
       {
-        return this->m_name;
+        return this->m_sloc.file();
+      }
+    std::uint32_t get_source_line() const noexcept
+      {
+        return this->m_sloc.line();
+      }
+    const PreHashed_String & get_function_name() const noexcept
+      {
+        return this->m_func;
       }
     std::size_t get_argument_count() const noexcept
       {

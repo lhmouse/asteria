@@ -48,6 +48,7 @@ class Reference_Stack;
 class Reference_Dictionary;
 class Variable;
 class Variable_HashSet;
+class Variable_Callback;
 class Abstract_Variable_Callback;
 class Collector;
 class Abstract_Context;
@@ -59,18 +60,19 @@ class Global_Context;
 class Generational_Collector;
 class Variadic_Arguer;
 class Instantiated_Function;
+class Backtrace_Frame;
 
 // Compiler
 class Parser_Error;
 class Token;
 class Token_Stream;
 class Parser;
-class Single_Source_File;
+class Simple_Source_File;
 
 // Library
 class Argument_Sentry;
 
-// Aliases
+// Template Aliases
 template<typename HandleT, typename CloserT>
   using Unique_Handle = rocket::unique_handle<HandleT, CloserT>;
 template<typename ElementT, typename DeleterT = std::default_delete<const ElementT>>
@@ -87,6 +89,7 @@ template<typename KeyT, typename ValueT, typename HashT, typename EqualT = rocke
 template<typename ElementT, std::size_t capacityT>
   using Static_Vector = rocket::static_vector<ElementT, capacityT>;
 
+// Type Aliases
 using CoW_String = rocket::cow_string;
 using PreHashed_String = rocket::prehashed_string;
 

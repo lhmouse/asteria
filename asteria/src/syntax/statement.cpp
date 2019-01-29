@@ -295,7 +295,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, alt.name, alt.params);
+        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, alt.name.rdstr() + "()", alt.params);
         ASTERIA_DEBUG_LOG("Creating named function: ", func);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
@@ -537,13 +537,15 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           for(std::size_t i = 0; i < except.get_frame_count(); ++i) {
             const auto &frame = except.get_frame(i);
             D_object elem;
-            elem.try_emplace(rocket::sref("file"), D_string(frame.file()));
-            elem.try_emplace(rocket::sref("line"), D_integer(frame.line()));
+            // Append frame information.
+            elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
+            elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
+            elem.try_emplace(rocket::sref("func"), D_string(frame.function_name()));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_Root::S_temporary bref_c = { std::move(backtrace) };
-          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(bref_c);
+          Reference_Root::S_temporary btref_c = { std::move(backtrace) };
+          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(btref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, global, func, ctx_next);
         }
@@ -560,9 +562,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         alt.expr.evaluate(ref_out, global, func, ctx_io);
         // Throw an exception containing the value.
         auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception`: ", value);
+        ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception` at \'", alt.sloc, "\' inside `", func, "`: ", value);
         Traceable_Exception except(std::move(value));
-        except.append_frame(alt.sloc);
+        except.append_frame(alt.sloc, func);
         throw except;
       }
 

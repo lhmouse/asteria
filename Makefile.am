@@ -115,7 +115,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/variadic_arguer.hpp  \
   asteria/src/runtime/reference_stack.hpp  \
   asteria/src/runtime/reference_dictionary.hpp  \
-  asteria/src/runtime/instantiated_function.hpp
+  asteria/src/runtime/instantiated_function.hpp  \
+  asteria/src/runtime/backtrace_frame.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \

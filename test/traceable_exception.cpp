@@ -10,12 +10,13 @@ int main()
   {
     try {
       Traceable_Exception except(D_integer(42));
-      except.append_frame(Source_Location(rocket::sref("myfile"), 123));
+      except.append_frame(Source_Location(rocket::sref("myfile"), 123), rocket::sref("myfunc"));
       throw except;
     } catch(Traceable_Exception &e) {
       ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 1);
-      ASTERIA_TEST_CHECK(e.get_frame(0).file() == "myfile");
-      ASTERIA_TEST_CHECK(e.get_frame(0).line() == 123);
+      ASTERIA_TEST_CHECK(e.get_frame(0).source_file() == "myfile");
+      ASTERIA_TEST_CHECK(e.get_frame(0).source_line() == 123);
+      ASTERIA_TEST_CHECK(e.get_frame(0).function_name() == "myfunc");
     }
   }

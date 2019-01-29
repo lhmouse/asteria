@@ -376,18 +376,18 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("`", target_value, "` is not a function and cannot be called.");
         }
         const auto &target = target_value.check<D_function>();
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\': ", target.get());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
         try {
           // Call the function now.
           target->invoke(stack_io.mut_top(), global, std::move(args));
         } catch(std::exception &stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\': what = ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
           Traceable_Exception except(std::move(stdex));
-          except.append_frame(alt.sloc);
+          except.append_frame(alt.sloc, func);
           throw except;
         }
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\': ", target.get());
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
       }
 
     void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const CoW_String & /*func*/, const Executive_Context & /*ctx*/)

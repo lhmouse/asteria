@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "value.hpp"
-#include "../syntax/source_location.hpp"
+#include "backtrace_frame.hpp"
 
 namespace Asteria {
 
@@ -14,7 +14,7 @@ class Traceable_Exception : public virtual std::exception
   {
   private:
     Value m_value;
-    CoW_Vector<Source_Location> m_frames;
+    CoW_Vector<Backtrace_Frame> m_frames;
 
   public:
     template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
@@ -55,13 +55,13 @@ class Traceable_Exception : public virtual std::exception
       {
         return this->m_frames.size();
       }
-    const Source_Location & get_frame(std::size_t index) const
+    const Backtrace_Frame & get_frame(std::size_t index) const
       {
         return this->m_frames.at(index);
       }
-    void append_frame(const Source_Location &sloc)
+    void append_frame(const Source_Location &sloc, const CoW_String &func)
       {
-        this->m_frames.emplace_back(sloc);
+        this->m_frames.emplace_back(sloc, func);
       }
   };
 
