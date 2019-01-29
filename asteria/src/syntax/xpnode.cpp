@@ -379,7 +379,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
         try {
           // Call the function now.
-          target->invoke(stack_io.mut_top(), global, std::move(args));
+          target->invoke(stack_io.mut_top().zoom_out(), global, std::move(args));
+          // The result will have been written to `stack_io.mut_top()`, destroying its old contents.
         } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
