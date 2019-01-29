@@ -101,7 +101,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         do_safe_set_named_reference(ctx_io, "variable", alt.name, Reference_Root::S_null());
         // Bind the initializer recursively.
         auto init_bnd = alt.init.bind(global, ctx_io);
-        Statement::S_variable alt_bnd = { alt.loc, alt.name, alt.immutable, std::move(init_bnd) };
+        Statement::S_variable alt_bnd = { alt.sloc, alt.name, alt.immutable, std::move(init_bnd) };
         stmts_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -114,7 +114,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         Function_Analytic_Context ctx_next(&ctx_io);
         ctx_next.initialize(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Statement::S_function alt_bnd = { alt.loc, alt.name, alt.params, std::move(body_bnd) };
+        Statement::S_function alt_bnd = { alt.sloc, alt.name, alt.params, std::move(body_bnd) };
         stmts_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -230,7 +230,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         const auto &alt = this->m_stor.as<S_throw>();
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_throw alt_bnd = { alt.loc, std::move(expr_bnd) };
+        Statement::S_throw alt_bnd = { alt.sloc, std::move(expr_bnd) };
         stmts_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -296,7 +296,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
         // Instantiate the function here.
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.loc, alt.name, alt.params);
+        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, alt.name, alt.params);
         ASTERIA_DEBUG_LOG("Creating named function: ", func);
         var->reset(D_function(std::move(func)), true);
         return Block::status_next;
@@ -563,7 +563,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception`: ", value);
         Traceable_Exception except(std::move(value));
-        except.append_frame(alt.loc);
+        except.append_frame(alt.sloc);
         throw except;
       }
 

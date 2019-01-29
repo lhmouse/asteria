@@ -59,9 +59,9 @@ class Traceable_Exception : public virtual std::exception
       {
         return this->m_frames.at(index);
       }
-    void append_frame(const Source_Location &loc)
+    void append_frame(const Source_Location &sloc)
       {
-        this->m_frames.emplace_back(loc);
+        this->m_frames.emplace_back(sloc);
       }
   };
 

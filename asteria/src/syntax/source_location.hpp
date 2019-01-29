@@ -33,9 +33,9 @@ class Source_Location
     void print(std::ostream &os) const;
   };
 
-inline std::ostream & operator<<(std::ostream &os, const Source_Location &loc)
+inline std::ostream & operator<<(std::ostream &os, const Source_Location &sloc)
   {
-    loc.print(os);
+    sloc.print(os);
     return os;
   }
 

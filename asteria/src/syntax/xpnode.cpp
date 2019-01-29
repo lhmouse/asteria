@@ -226,7 +226,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         Function_Analytic_Context ctx_next(&ctx);
         ctx_next.initialize(alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Xpnode::S_closure_function alt_bnd = { alt.loc, alt.params, std::move(body_bnd) };
+        Xpnode::S_closure_function alt_bnd = { alt.sloc, alt.params, std::move(body_bnd) };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -244,7 +244,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
-        Xpnode::S_function_call alt_bnd = { alt.loc, alt.arg_cnt };
+        Xpnode::S_function_call alt_bnd = { alt.sloc, alt.arg_cnt };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -323,7 +323,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx)
       {
         // Instantiate the closure function.
-        auto func = alt.body.instantiate_function(global, ctx, alt.loc, rocket::sref("<closure function>"), alt.params);
+        auto func = alt.body.instantiate_function(global, ctx, alt.sloc, rocket::sref("<closure function>"), alt.params);
         Reference_Root::S_temporary ref_c = { D_function(std::move(func)) };
         stack_io.push(std::move(ref_c));
       }
@@ -376,18 +376,18 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("`", tgt_value, "` is not a function and cannot be called.");
         }
         const auto &func = tgt_value.check<D_function>();
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.loc, "\': ", func.get());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\': ", func.get());
         try {
           // Call the function now.
           func.get().invoke(stack_io.mut_top(), global, std::move(args));
         } catch(std::exception &stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.loc, "\': what = ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\': what = ", stdex.what());
           // Translate the exception.
           Traceable_Exception except(std::move(stdex));
-          except.append_frame(alt.loc);
+          except.append_frame(alt.sloc);
           throw except;
         }
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.loc, "\': ", func.get());
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\': ", func.get());
       }
 
     void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, Global_Context & /*global*/, const Executive_Context & /*ctx*/)

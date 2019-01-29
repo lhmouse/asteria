@@ -19,8 +19,8 @@ class Instantiated_Function : public Abstract_Function
     Block m_body_bnd;
 
   public:
-    Instantiated_Function(const Source_Location &loc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, Block body_bnd)
-      : m_zvarg(loc, name), m_params(params), m_body_bnd(std::move(body_bnd))
+    Instantiated_Function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, Block body_bnd)
+      : m_zvarg(sloc, name), m_params(params), m_body_bnd(std::move(body_bnd))
       {
       }
     ~Instantiated_Function() override;

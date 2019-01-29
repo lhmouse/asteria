@@ -14,24 +14,24 @@ namespace Asteria {
 class Variadic_Arguer : public Abstract_Function
   {
   private:
-    Source_Location m_loc;
+    Source_Location m_sloc;
     PreHashed_String m_name;
     CoW_Vector<Reference> m_vargs;
 
   public:
-    Variadic_Arguer(const Source_Location &loc, const PreHashed_String &name)
-      : m_loc(loc), m_name(name), m_vargs()
+    Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &name)
+      : m_sloc(sloc), m_name(name), m_vargs()
       {
       }
     Variadic_Arguer(const Variadic_Arguer &other, CoW_Vector<Reference> &&vargs)
-      : m_loc(other.m_loc), m_name(other.m_name), m_vargs(std::move(vargs))
+      : m_sloc(other.m_sloc), m_name(other.m_name), m_vargs(std::move(vargs))
       {
       }
 
   public:
     const Source_Location & get_location() const noexcept
       {
-        return this->m_loc;
+        return this->m_sloc;
       }
     const PreHashed_String & get_name() const noexcept
       {

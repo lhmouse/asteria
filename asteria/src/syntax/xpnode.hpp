@@ -71,7 +71,7 @@ class Xpnode
       };
     struct S_closure_function
       {
-        Source_Location loc;
+        Source_Location sloc;
         CoW_Vector<PreHashed_String> params;
         Block body;
       };
@@ -83,7 +83,7 @@ class Xpnode
       };
     struct S_function_call
       {
-        Source_Location loc;
+        Source_Location sloc;
         std::size_t arg_cnt;
       };
     struct S_subscript

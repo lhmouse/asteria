@@ -62,7 +62,7 @@ class Block
     Block bind(const Global_Context &global, const Analytic_Context &ctx) const;
     Status execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const;
 
-    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &loc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const;
+    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const;
     void execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, CoW_Vector<Reference> &&args) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;

@@ -1987,7 +1987,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     str.erase();
     // Copy stream parameters.
     const auto width = is.width();
-    const auto loc = is.getloc();
+    const auto sloc = is.getloc();
     // We need to set stream state bits outside the `try` block.
     auto state = ios_base::goodbit;
     try {
@@ -2003,7 +2003,7 @@ template<typename charT, typename traitsT, typename allocatorT>
           break;
         }
         const auto ch = traitsT::to_char_type(ich);
-        if(::std::isspace<charT>(ch, loc)) {
+        if(::std::isspace<charT>(ch, sloc)) {
           break;
         }
         str.push_back(ch);

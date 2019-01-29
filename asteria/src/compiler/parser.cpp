@@ -466,7 +466,7 @@ namespace Asteria {
     bool do_accept_closure_function(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // closure-function ::=
         //   "func" "(" identifier-list-opt ")" ( block | expression )
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
@@ -492,7 +492,7 @@ namespace Asteria {
           Statement::S_return stmt_c = { true, std::move(nodes_ret) };
           body.emplace_back(std::move(stmt_c));
         }
-        Xpnode::S_closure_function node_c = { std::move(loc), std::move(params), std::move(body) };
+        Xpnode::S_closure_function node_c = { std::move(sloc), std::move(params), std::move(body) };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -607,7 +607,7 @@ namespace Asteria {
     bool do_accept_postfix_function_call(CoW_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // postfix-function-call ::=
         //   "(" argument-list-opt ")"
         // argument-list-opt ::=
@@ -632,7 +632,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_or_argument_expected);
         }
-        Xpnode::S_function_call node_c = { std::move(loc), arg_cnt };
+        Xpnode::S_function_call node_c = { std::move(sloc), arg_cnt };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -1245,7 +1245,7 @@ namespace Asteria {
     bool do_accept_variable_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // variable-definition ::=
         //   "var" identifier equal-initailizer-opt ";"
         // equal-initializer-opt ::=
@@ -1269,7 +1269,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { std::move(loc), std::move(name), false, std::move(init) };
+        Statement::S_variable stmt_c = { std::move(sloc), std::move(name), false, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1277,7 +1277,7 @@ namespace Asteria {
     bool do_accept_immutable_variable_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // immutable-variable-definition ::=
         //   "const" identifier equal-initailizer ";"
         // equal-initializer ::=
@@ -1299,7 +1299,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { std::move(loc), std::move(name), true, std::move(init) };
+        Statement::S_variable stmt_c = { std::move(sloc), std::move(name), true, std::move(init) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1307,7 +1307,7 @@ namespace Asteria {
     bool do_accept_function_definition(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // function-definition ::=
         //   "func" identifier "(" identifier-list-opt ")" statement
         if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
@@ -1331,7 +1331,7 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Statement::S_function stmt_c = { std::move(loc), std::move(name), std::move(params), std::move(body) };
+        Statement::S_function stmt_c = { std::move(sloc), std::move(name), std::move(params), std::move(body) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }
@@ -1641,7 +1641,7 @@ namespace Asteria {
     bool do_accept_throw_statement(CoW_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto loc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm_io);
         // throw-statement ::=
         //   "throw" expression ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
@@ -1654,7 +1654,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_throw stmt_c = { std::move(loc), std::move(expr) };
+        Statement::S_throw stmt_c = { std::move(sloc), std::move(expr) };
         stmts_out.emplace_back(std::move(stmt_c));
         return true;
       }

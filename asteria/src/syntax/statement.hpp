@@ -34,14 +34,14 @@ class Statement
       };
     struct S_variable
       {
-        Source_Location loc;
+        Source_Location sloc;
         PreHashed_String name;
         bool immutable;
         Expression init;
       };
     struct S_function
       {
-        Source_Location loc;
+        Source_Location sloc;
         PreHashed_String name;
         CoW_Vector<PreHashed_String> params;
         Block body;
@@ -100,7 +100,7 @@ class Statement
       };
     struct S_throw
       {
-        Source_Location loc;
+        Source_Location sloc;
         Expression expr;
       };
     struct S_return
