@@ -76,6 +76,15 @@ template<typename elementT>
       {
         return this->m_rptr;
       }
+
+    constexpr const element_type & operator*() const noexcept
+      {
+        return this->get();
+      }
+    constexpr pointer operator->() const noexcept
+      {
+        return this->ptr();
+      }
   };
 
 }
