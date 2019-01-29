@@ -16,9 +16,9 @@ Instantiated_Function::~Instantiated_Function()
 
 void Instantiated_Function::describe(std::ostream &os) const
   {
-    os << this->m_zvarg.get().get_name() << "("
+    os << this->m_zvarg->get_name() << "("
        << rocket::ostream_implode(this->m_params.begin(), this->m_params.size(), ", ")
-       << ") @ " << this->m_zvarg.get().get_location();
+       << ") @ " << this->m_zvarg->get_location();
   }
 
 void Instantiated_Function::invoke(Reference &self_io, Global_Context &global, CoW_Vector<Reference> &&args) const

@@ -58,11 +58,13 @@ class Argument_Sentry
       }
     std::size_t get_argument_count() const noexcept
       {
-        return this->m_args.get().size();
+        const auto &args = this->m_args.get();
+        return args.size();
       }
     const Reference & get_argument(std::size_t index) const
       {
-        return this->m_args.get().at(index);
+        const auto &args = this->m_args.get();
+        return args.at(index);
       }
 
     bool does_throw_on_failure() const noexcept

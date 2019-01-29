@@ -28,11 +28,11 @@ class Instantiated_Function : public Abstract_Function
   public:
     const Source_Location & get_location() const noexcept
       {
-        return this->m_zvarg.get().get_location();
+        return this->m_zvarg->get_location();
       }
     const PreHashed_String & get_name() const noexcept
       {
-        return this->m_zvarg.get().get_name();
+        return this->m_zvarg->get_name();
       }
     const CoW_Vector<PreHashed_String> & get_params() const noexcept
       {

@@ -259,21 +259,20 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
 
     namespace {
 
-    Block::Status do_execute_expression(const Statement::S_expression &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_expression(const Statement::S_expression &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
+        alt.expr.evaluate(ref_out, global, func, ctx_io);
         return Block::status_next;
       }
 
-    Block::Status do_execute_block(const Statement::S_block &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_block(const Statement::S_block &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Execute the body.
-        const auto status = alt.body.execute(ref_out, global, ctx_io);
-        return status;
+        return alt.body.execute(ref_out, global, func, ctx_io);
       }
 
-    Block::Status do_execute_variable(const Statement::S_variable &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_variable(const Statement::S_variable &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -281,14 +280,14 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", alt.name, std::move(ref_c));
         // Create a variable using the initializer.
-        alt.init.evaluate(ref_out, global, ctx_io);
+        alt.init.evaluate(ref_out, global, func, ctx_io);
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
         var->reset(std::move(value), alt.immutable);
         return Block::status_next;
       }
 
-    Block::Status do_execute_function(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_function(const Statement::S_function &alt, Reference & /*ref_out*/, Executive_Context &ctx_io, Global_Context &global, const CoW_String & /*func*/)
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
@@ -302,19 +301,19 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_if(const Statement::S_if &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_if(const Statement::S_if &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the condition and pick a branch.
-        alt.cond.evaluate(ref_out, global, ctx_io);
-        const auto status = (ref_out.read().test() != alt.neg) ? alt.branch_true.execute(ref_out, global, ctx_io)
-                                                               : alt.branch_false.execute(ref_out, global, ctx_io);
+        alt.cond.evaluate(ref_out, global, func, ctx_io);
+        const auto status = (ref_out.read().test() != alt.neg) ? alt.branch_true.execute(ref_out, global, func, ctx_io)
+                                                               : alt.branch_false.execute(ref_out, global, func, ctx_io);
         return status;
       }
 
-    Block::Status do_execute_switch(const Statement::S_switch &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_switch(const Statement::S_switch &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the control expression.
-        alt.ctrl.evaluate(ref_out, global, ctx_io);
+        alt.ctrl.evaluate(ref_out, global, func, ctx_io);
         const auto value_ctrl = ref_out.read();
         // Note that all `switch` clauses share the same context.
         // We will iterate from the first clause to the last one. If a `default` clause is encountered in the middle
@@ -339,7 +338,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             ctx_test = std::ref(ctx_second);
           } else {
             // This is a `case` clause.
-            it->first.evaluate(ref_out, global, ctx_next);
+            it->first.evaluate(ref_out, global, func, ctx_next);
             const auto value_comp = ref_out.read();
             if(value_ctrl.compare(value_comp) == Value::compare_equal) {
               // If this is a match, we resume from wherever `ctx_test` is pointing.
@@ -353,7 +352,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         }
         // Iterate from the match clause to the end of the body, falling through clause boundaries if any.
         for(auto it = match; it != alt.clauses.end(); ++it) {
-          const auto status = it->second.execute_in_place(ref_out, ctx_next, global);
+          const auto status = it->second.execute_in_place(ref_out, ctx_next, global, func);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_switch })) {
             // Break out of the body as requested.
             break;
@@ -366,11 +365,11 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_do_while(const Statement::S_do_while &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_do_while(const Statement::S_do_while &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         for(;;) {
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_io);
+          const auto status = alt.body.execute(ref_out, global, func, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -380,7 +379,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             return status;
           }
           // Check the loop condition.
-          alt.cond.evaluate(ref_out, global, ctx_io);
+          alt.cond.evaluate(ref_out, global, func, ctx_io);
           if(ref_out.read().test() == alt.neg) {
             break;
           }
@@ -388,16 +387,16 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_while(const Statement::S_while &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_while(const Statement::S_while &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         for(;;) {
           // Check the loop condition.
-          alt.cond.evaluate(ref_out, global, ctx_io);
+          alt.cond.evaluate(ref_out, global, func, ctx_io);
           if(ref_out.read().test() == alt.neg) {
             break;
           }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_io);
+          const auto status = alt.body.execute(ref_out, global, func, ctx_io);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_while })) {
             // Break out of the body as requested.
             break;
@@ -410,24 +409,24 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_for(const Statement::S_for &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_for(const Statement::S_for &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Executive_Context ctx_next(&ctx_io);
         // Execute the initializer. The status is ignored.
         ASTERIA_DEBUG_LOG("Begin running `for` initialization...");
-        alt.init.execute_in_place(ref_out, ctx_next, global);
+        alt.init.execute_in_place(ref_out, ctx_next, global, func);
         ASTERIA_DEBUG_LOG("Done running `for` initialization: ", ref_out.read());
         for(;;) {
           // Check the loop condition.
           if(!alt.cond.empty()) {
-            alt.cond.evaluate(ref_out, global, ctx_next);
+            alt.cond.evaluate(ref_out, global, func, ctx_next);
             if(!ref_out.read().test()) {
               break;
             }
           }
           // Execute the loop body.
-          const auto status = alt.body.execute(ref_out, global, ctx_next);
+          const auto status = alt.body.execute(ref_out, global, func, ctx_next);
           if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
             // Break out of the body as requested.
             break;
@@ -437,12 +436,12 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             return status;
           }
           // Evaluate the loop step expression.
-          alt.step.evaluate(ref_out, global, ctx_next);
+          alt.step.evaluate(ref_out, global, func, ctx_next);
         }
         return Block::status_next;
       }
 
-    Block::Status do_execute_for_each(const Statement::S_for_each &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_for_each(const Statement::S_for_each &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // The key and mapped variables shall not outlast the loop body.
         Executive_Context ctx_for(&ctx_io);
@@ -451,7 +450,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_Root::S_null());
         // Calculate the range using the initializer.
         Reference mapped;
-        alt.init.evaluate(mapped, global, ctx_for);
+        alt.init.evaluate(mapped, global, func, ctx_for);
         const auto range_value = mapped.read();
         switch(rocket::weaken_enum(range_value.type())) {
         case type_array:
@@ -471,7 +470,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               mapped.zoom_out();
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global, func);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -500,7 +499,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               mapped.zoom_out();
               // Execute the loop body.
-              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global);
+              const auto status = alt.body.execute_in_place(ref_out, ctx_next, global, func);
               if(rocket::is_any_of(status, { Block::status_break_unspec, Block::status_break_for })) {
                 // Break out of the body as requested.
                 break;
@@ -518,13 +517,13 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_try(const Statement::S_try &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_try(const Statement::S_try &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         Block::Status status;
         try {
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
-          status = alt.body_try.execute(ref_out, global, ctx_io);
+          status = alt.body_try.execute(ref_out, global, func, ctx_io);
         } catch(std::exception &stdex) {
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
@@ -546,7 +545,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           Reference_Root::S_temporary bref_c = { std::move(backtrace) };
           ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(bref_c);
           // Execute the `catch` body.
-          status = alt.body_catch.execute(ref_out, global, ctx_next);
+          status = alt.body_catch.execute(ref_out, global, func, ctx_next);
         }
         if(status != Block::status_next) {
           // Forward anything unexpected to the caller.
@@ -555,10 +554,10 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_next;
       }
 
-    Block::Status do_execute_throw(const Statement::S_throw &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_throw(const Statement::S_throw &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
+        alt.expr.evaluate(ref_out, global, func, ctx_io);
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception`: ", value);
@@ -567,10 +566,10 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         throw except;
       }
 
-    Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
+        alt.expr.evaluate(ref_out, global, func, ctx_io);
         // If the result refers a variable and the statement will pass it by value, replace it with a temporary value.
         if(!alt.by_ref && !ref_out.is_temporary()) {
           Reference_Root::S_temporary ref_c = { ref_out.read() };
@@ -579,10 +578,10 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         return Block::status_return;
       }
 
-    Block::Status do_execute_assert(const Statement::S_assert &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global)
+    Block::Status do_execute_assert(const Statement::S_assert &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
       {
         // Evaluate the expression.
-        alt.expr.evaluate(ref_out, global, ctx_io);
+        alt.expr.evaluate(ref_out, global, func, ctx_io);
         // If the condition yields `false`, throw an exception.
         auto value = ref_out.read();
         if(ROCKET_UNEXPECT(!value.test())) {
@@ -601,13 +600,13 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_Context &, Global_Context &)>
+    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_Context &, Global_Context &, const CoW_String &)>
       Block::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
-          [](const void *qalt, const std::tuple<Reference &, Executive_Context &, Global_Context &> &params)
+          [](const void *qalt, const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> &params)
             {
-              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params));
+              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
             },
           std::addressof(alt));
       }
@@ -615,7 +614,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     Block::Compiled_Instruction do_bind_constant(Block::Status status)
       {
         return rocket::bind_front(
-          [](const void *value, const std::tuple<Reference &, Executive_Context &, Global_Context &> & /*params*/)
+          [](const void *value, const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> & /*params*/)
             {
               return static_cast<Block::Status>(reinterpret_cast<std::uintptr_t>(value));
             },

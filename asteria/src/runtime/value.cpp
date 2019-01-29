@@ -428,13 +428,13 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
     case type_opaque:
       {
         const auto &alt = this->check<D_opaque>();
-        alt.get().enumerate_variables(callback);
+        alt->enumerate_variables(callback);
         return;
       }
     case type_function:
       {
         const auto &alt = this->check<D_function>();
-        alt.get().enumerate_variables(callback);
+        alt->enumerate_variables(callback);
         return;
       }
     case type_array:

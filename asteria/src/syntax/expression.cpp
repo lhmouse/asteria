@@ -27,7 +27,7 @@ Expression Expression::bind(const Global_Context &global, const Analytic_Context
     return std::move(nodes_bnd);
   }
 
-bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &global, const Executive_Context &ctx) const
+bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const
   {
     auto rptr = this->m_cinsts.data();
     const auto eptr = rptr + this->m_cinsts.size();
@@ -36,7 +36,7 @@ bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &glo
     }
     const auto stack_size_old = stack_io.size();
     // Evaluate nodes one by one.
-    const auto params = std::tie(stack_io, global, ctx);
+    const auto params = std::tie(stack_io, global, func, ctx);
     for(;;) {
       (*rptr)(params);
 #ifdef ROCKET_DEBUG
@@ -54,10 +54,10 @@ bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &glo
     return true;
   }
 
-void Expression::evaluate(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const
+void Expression::evaluate(Reference &ref_out, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const
   {
     Reference_Stack stack;
-    if(!this->evaluate_partial(stack, global, ctx)) {
+    if(!this->evaluate_partial(stack, global, func, ctx)) {
       ref_out = Reference_Root::S_null();
       return;
     }

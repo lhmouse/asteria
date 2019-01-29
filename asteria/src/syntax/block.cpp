@@ -36,7 +36,7 @@ Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &globa
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func) const
   {
     auto rptr = this->m_cinsts.data();
     const auto eptr = rptr + this->m_cinsts.size();
@@ -44,7 +44,7 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx
       return status_next;
     }
     // Execute statements one by one.
-    const auto params = std::tie(ref_out, ctx_io, global);
+    const auto params = std::tie(ref_out, ctx_io, global, func);
     for(;;) {
       const auto status = (*rptr)(params);
       if(ROCKET_UNEXPECT(status != status_next)) {
@@ -66,10 +66,10 @@ Block Block::bind(const Global_Context &global, const Analytic_Context &ctx) con
     return this->bind_in_place(ctx_next, global);
   }
 
-Block::Status Block::execute(Reference &ref_out, Global_Context &global, const Executive_Context &ctx) const
+Block::Status Block::execute(Reference &ref_out, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const
   {
     Executive_Context ctx_next(&ctx);
-    return this->execute_in_place(ref_out, ctx_next, global);
+    return this->execute_in_place(ref_out, ctx_next, global, func);
   }
 
 Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const
@@ -86,7 +86,7 @@ void Block::execute_as_function(Reference &self_io, Global_Context &global, cons
     Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, ctx_next, global);
+    const auto status = this->execute_in_place(self_io, ctx_next, global, zvarg->get_name());
     switch(status) {
     case status_next:
       {

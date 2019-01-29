@@ -28,7 +28,8 @@ namespace Asteria {
           {
             // Check whether the stream can be read from.
             // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
-            if(this->m_strm.get().fail()) {
+            auto &strm = this->m_strm.get();
+            if(strm.fail()) {
               throw Parser_Error(0, 0, 0, Parser_Error::code_istream_open_failure);
             }
           }
@@ -55,12 +56,13 @@ namespace Asteria {
         bool advance_line()
           {
             // Call `getline()` via ADL.
-            getline(this->m_strm.get(), this->m_str);
+            auto &strm = this->m_strm.get();
+            getline(strm, this->m_str);
             // Check `bad()` before `fail()` because the latter checks for both `badbit` and `failbit`.
-            if(this->m_strm.get().bad()) {
+            if(strm.bad()) {
               throw Parser_Error(this->m_line, this->m_offset, 0, Parser_Error::code_istream_badbit_set);
             }
-            if(this->m_strm.get().fail()) {
+            if(strm.fail()) {
               return false;
             }
             // A line has been read successfully.
