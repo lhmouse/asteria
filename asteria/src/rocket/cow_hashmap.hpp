@@ -194,7 +194,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                 throw;
               }
               // Insert it into the new bucket.
-              ROCKET_ASSERT(*bkt);
+              ROCKET_ASSERT(!*bkt);
               bkt->reset(eptr);
               ptr->nelem++;
             }
@@ -234,7 +234,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               const auto eptr = ptr_old->data[i].reset();
               ptr_old->nelem--;
               // Insert it into the new bucket.
-              ROCKET_ASSERT(*bkt);
+              ROCKET_ASSERT(!*bkt);
               bkt->reset(eptr);
               ptr->nelem++;
             }
