@@ -60,7 +60,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         pointer m_ptr;
 
       public:
-        bucket()
+        bucket() noexcept
           = default;
 
         bucket(const bucket &)
@@ -167,8 +167,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       };
 
     template<typename pointerT, typename hashT, typename allocatorT,
-            bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
-      struct copy_storage_helper
+             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value>
+     struct copy_storage_helper
       {
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -202,7 +202,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       };
     template<typename pointerT, typename hashT, typename allocatorT>
      struct copy_storage_helper<pointerT, hashT, allocatorT,
-                                 false>     // copyable
+                                false>     // copyable
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, const hashT & /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
@@ -253,10 +253,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
     template<typename allocatorT, typename hashT, typename eqT>
      class storage_handle : private allocator_wrapper_base_for<allocatorT>::type,
-                             private conditional<is_same<hashT, allocatorT>::value,
-                                                 ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
-                             private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
-                                                 ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
+                            private conditional<is_same<hashT, allocatorT>::value,
+                                                ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
+                            private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+                                                ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
       {
       public:
         using allocator_type   = allocatorT;
