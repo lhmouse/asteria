@@ -9,9 +9,8 @@ using namespace Asteria;
 int main()
   {
     try {
-      Traceable_Exception except(D_integer(42));
-      except.append_frame(Source_Location(rocket::sref("myfile"), 123), rocket::sref("myfunc"));
-      throw except;
+      throw Traceable_Exception(D_integer(42),
+                                Source_Location(rocket::sref("myfile"), 123), rocket::sref("myfunc"));
     } catch(Traceable_Exception &e) {
       ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 1);
