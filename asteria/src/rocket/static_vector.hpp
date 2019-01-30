@@ -447,7 +447,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
       {
         this->assign(n, value);
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      static_vector(inputT first, inputT last, const allocator_type &alloc = allocator_type())
       : static_vector(alloc)
       {
@@ -689,7 +689,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return this->append(init.begin(), init.end());
       }
     // N.B. This is a non-standard extension.
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      static_vector & append(inputT first, inputT last)
       {
         if(first == last) {
@@ -760,7 +760,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
         return iterator(this->m_sth, ptr);
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      iterator insert(const_iterator tins, inputT first, inputT last)
       {
         const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
@@ -850,7 +850,7 @@ template<typename valueT, size_t capacityT, typename allocatorT>
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      static_vector & assign(inputT first, inputT last)
       {
         this->clear();

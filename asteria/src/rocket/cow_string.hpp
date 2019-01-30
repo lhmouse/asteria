@@ -674,7 +674,7 @@ template<typename charT, typename traitsT, typename allocatorT>
       {
         this->assign(n, ch);
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      basic_cow_string(inputT first, inputT last, const allocator_type &alloc = allocator_type())
       : basic_cow_string(alloc)
       {
@@ -1222,7 +1222,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->append(init);
         return *this;
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      basic_cow_string & assign(inputT first, inputT last)
       {
         this->do_replace_no_bound_check(0, this->size(), details_cow_string::append, ::std::move(first), ::std::move(last));
@@ -1288,7 +1288,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
         return iterator(this, ptr);
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
    iterator insert(const_iterator tins, inputT first, inputT last)
       {
         const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
@@ -1358,7 +1358,7 @@ template<typename charT, typename traitsT, typename allocatorT>
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, init);
         return *this;
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
       {
         const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());

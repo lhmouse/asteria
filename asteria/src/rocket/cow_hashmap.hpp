@@ -856,19 +856,19 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->assign(::std::move(other));
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      cow_hashmap(inputT first, inputT last, size_type res_arg = 0, const hasher &hf = hasher(), const key_equal &eq = key_equal(), const allocator_type &alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       {
         this->assign(::std::move(first), ::std::move(last));
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher &hf, const allocator_type &alloc)
       : cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
         this->assign(::std::move(first), ::std::move(last));
       }
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type &alloc)
       : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
@@ -1105,7 +1105,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->try_emplace(::std::move(value.first), ::std::move(value.second));
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      cow_hashmap & insert(inputT first, inputT last)
       {
         if(first == last) {
@@ -1284,7 +1284,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return *this;
       }
     // N.B. This function is a non-standard extension.
-    template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
      cow_hashmap & assign(inputT first, inputT last)
       {
         this->clear();
