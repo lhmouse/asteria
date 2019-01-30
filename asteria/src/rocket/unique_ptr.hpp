@@ -204,9 +204,9 @@ template<typename elementT, typename deleterT>
         this->reset(other.m_sth.release());
       }
     template<typename yelementT, typename ydeleterT,
-            ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
+             ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
-      unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+     unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       : unique_ptr(::std::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
@@ -219,9 +219,9 @@ template<typename elementT, typename deleterT>
         return *this;
       }
     template<typename yelementT, typename ydeleterT,
-            ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
+             ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
-      unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+     unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       {
         allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());
