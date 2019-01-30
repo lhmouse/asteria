@@ -207,7 +207,7 @@ namespace Asteria {
       }
 
     template<typename TokenT>
-      void do_push_token(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
+     void do_push_token(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
       {
         seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
         reader_io.consume(length);
@@ -216,17 +216,17 @@ namespace Asteria {
     struct Prefix_Comparator
       {
         template<typename ElementT>
-          bool operator()(const ElementT &lhs, const ElementT &rhs) const noexcept
+         bool operator()(const ElementT &lhs, const ElementT &rhs) const noexcept
           {
             return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
           }
         template<typename ElementT>
-          bool operator()(char lhs, const ElementT &rhs) const noexcept
+         bool operator()(char lhs, const ElementT &rhs) const noexcept
           {
             return std::char_traits<char>::lt(lhs, rhs.first[0]);
           }
         template<typename ElementT>
-          bool operator()(const ElementT &lhs, char rhs) const noexcept
+         bool operator()(const ElementT &lhs, char rhs) const noexcept
           {
             return std::char_traits<char>::lt(lhs.first[0], rhs);
           }

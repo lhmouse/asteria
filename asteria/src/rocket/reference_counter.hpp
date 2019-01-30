@@ -12,7 +12,7 @@
 namespace rocket {
 
 template<typename valueT>
-  class reference_counter
+ class reference_counter
   {
   private:
     ::std::atomic<valueT> m_nref;

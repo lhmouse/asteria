@@ -10,10 +10,10 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-  class basic_insertable_ostream;
+ class basic_insertable_ostream;
 
 template<typename charT, typename traitsT, typename allocatorT>
-  class basic_insertable_ostream : public basic_ostream<charT, traitsT>
+ class basic_insertable_ostream : public basic_ostream<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -81,11 +81,11 @@ template<typename charT, typename traitsT, typename allocatorT>
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
 template<typename charT, typename traitsT, typename allocatorT>
-  constexpr typename basic_insertable_ostream<charT, traitsT, allocatorT>::size_type basic_insertable_ostream<charT, traitsT, allocatorT>::npos;
+ constexpr typename basic_insertable_ostream<charT, traitsT, allocatorT>::size_type basic_insertable_ostream<charT, traitsT, allocatorT>::npos;
 #endif
 
 template<typename charT, typename traitsT, typename allocatorT>
-  basic_insertable_ostream<charT, traitsT, allocatorT>::~basic_insertable_ostream()
+ basic_insertable_ostream<charT, traitsT, allocatorT>::~basic_insertable_ostream()
   = default;
 
 extern template class basic_insertable_ostream<char>;

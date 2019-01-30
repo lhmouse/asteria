@@ -12,7 +12,7 @@ namespace rocket {
     namespace details_allocator_utilities {
 
     template<typename typeT>
-      using is_final =
+     using is_final =
 #if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
         ::std::is_final<typeT>
 #else
@@ -21,7 +21,7 @@ namespace rocket {
         ;
 
     template<typename allocatorT>
-      class final_wrapper
+     class final_wrapper
       {
       private:
         allocatorT m_alloc;
@@ -54,19 +54,19 @@ namespace rocket {
     }
 
 template<typename allocatorT>
-  struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
+ struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
   {
   };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value>
-  struct allocator_copy_assigner
+ struct allocator_copy_assigner
   {
     void operator()(allocatorT & /*lhs*/, const allocatorT & /*rhs*/) const
       {
       }
   };
 template<typename allocatorT>
-  struct allocator_copy_assigner<allocatorT, true>
+ struct allocator_copy_assigner<allocatorT, true>
   {
     void operator()(allocatorT &lhs, const allocatorT &rhs) const
       {
@@ -75,14 +75,14 @@ template<typename allocatorT>
   };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value>
-  struct allocator_move_assigner
+ struct allocator_move_assigner
   {
     void operator()(allocatorT & /*lhs*/, allocatorT && /*rhs*/) const
       {
       }
   };
 template<typename allocatorT>
-  struct allocator_move_assigner<allocatorT, true>
+ struct allocator_move_assigner<allocatorT, true>
   {
     void operator()(allocatorT &lhs, allocatorT &&rhs) const
       {
@@ -91,14 +91,14 @@ template<typename allocatorT>
   };
 
 template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value>
-  struct allocator_swapper
+ struct allocator_swapper
   {
     void operator()(allocatorT & /*lhs*/, allocatorT & /*rhs*/) const
       {
       }
   };
 template<typename allocatorT>
-  struct allocator_swapper<allocatorT, true>
+ struct allocator_swapper<allocatorT, true>
   {
     void operator()(allocatorT &lhs, allocatorT &rhs) const
       {
@@ -107,11 +107,11 @@ template<typename allocatorT>
   };
 
 template<typename allocatorT>
-  struct is_std_allocator : false_type
+ struct is_std_allocator : false_type
   {
   };
 template<typename valueT>
-  struct is_std_allocator<::std::allocator<valueT>> : true_type
+ struct is_std_allocator<::std::allocator<valueT>> : true_type
   {
   };
 

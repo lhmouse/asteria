@@ -77,15 +77,15 @@ using ::std::is_trivially_copy_assignable;
 using ::std::is_trivially_move_assignable;
 #else
 template<typename typeT>
-  using is_trivially_default_constructible = ::std::has_trivial_default_constructor<typeT>;
+ using is_trivially_default_constructible = ::std::has_trivial_default_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_copy_constructible = ::std::has_trivial_copy_constructor<typeT>;
+ using is_trivially_copy_constructible = ::std::has_trivial_copy_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_move_constructible = ::std::has_trivial_copy_constructor<typeT>;
+ using is_trivially_move_constructible = ::std::has_trivial_copy_constructor<typeT>;
 template<typename typeT>
-  using is_trivially_copy_assignable = ::std::has_trivial_copy_assign<typeT>;
+ using is_trivially_copy_assignable = ::std::has_trivial_copy_assign<typeT>;
 template<typename typeT>
-  using is_trivially_move_assignable = ::std::has_trivial_copy_assign<typeT>;
+ using is_trivially_move_assignable = ::std::has_trivial_copy_assign<typeT>;
 #endif
 using ::std::is_trivially_destructible;
 using ::std::underlying_type;
@@ -117,7 +117,7 @@ using ::std::tuple;
 struct identity
   {
     template<typename paramT>
-      constexpr paramT && operator()(paramT &&param) const noexcept
+     constexpr paramT && operator()(paramT &&param) const noexcept
       {
         return ::std::forward<paramT>(param);
       }
@@ -126,7 +126,7 @@ struct identity
   };
 
 template<typename valueT, typename withT>
-  inline valueT exchange(valueT &value, withT &&with)
+ inline valueT exchange(valueT &value, withT &&with)
   {
     auto old = ::std::move(value);
     value = ::std::forward<withT>(with);
@@ -138,12 +138,12 @@ template<typename valueT, typename withT>
     using ::std::swap;
 
     template<typename typeT>
-      struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
+     struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
       {
       };
 
     template<typename typeT>
-      void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
+     void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
       {
         swap(lhs, rhs);
       }
@@ -154,14 +154,14 @@ using details_utilities::is_nothrow_swappable;
 using details_utilities::adl_swap;
 
 template<typename lhsT, typename rhsT>
-  constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
+ constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
-  constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
+ constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
@@ -169,7 +169,7 @@ template<typename lhsT, typename rhsT>
 
 // Note that the order of parameters is different from `std::clamp()` from C++17.
 template<typename lowerT, typename testT, typename upperT>
-  constexpr typename common_type<lowerT &&, testT &&, upperT &&>::type clamp(lowerT &&lower, testT &&test, upperT &&upper)
+ constexpr typename common_type<lowerT &&, testT &&, upperT &&>::type clamp(lowerT &&lower, testT &&test, upperT &&upper)
   {
     return (test < lower) ? ::std::forward<lowerT>(lower)
                           : (upper < test) ? ::std::forward<upperT>(upper)
@@ -177,7 +177,7 @@ template<typename lowerT, typename testT, typename upperT>
   }
 
 template<typename charT, typename traitsT>
-  void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
+ void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
     // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
@@ -195,7 +195,7 @@ template<typename charT, typename traitsT>
   }
 
 template<typename iteratorT, typename eiteratorT, typename functionT, typename ...paramsT>
-  inline void ranged_for(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
+ inline void ranged_for(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
   {
     for(auto it = ::std::move(first); it != last; ++it) {
       ::std::forward<functionT>(func)(it, params...);
@@ -203,7 +203,7 @@ template<typename iteratorT, typename eiteratorT, typename functionT, typename .
   }
 
 template<typename iteratorT, typename eiteratorT, typename functionT, typename ...paramsT>
-  inline void ranged_do_while(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
+ inline void ranged_do_while(iteratorT first, eiteratorT last, functionT &&func, const paramsT &...params)
   {
     auto it = ::std::move(first);
     do {
@@ -215,7 +215,7 @@ template<typename iteratorT, typename eiteratorT, typename functionT, typename .
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type * = nullptr
 
 template<typename ...unusedT>
-  struct make_void
+ struct make_void
   {
     using type = void;
   };
@@ -224,32 +224,32 @@ template<typename ...unusedT>
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type * = nullptr
 
 template<typename ...typesT>
-  struct conjunction : true_type
+ struct conjunction : true_type
   {
   };
 template<typename firstT, typename ...restT>
-  struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
+ struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
   {
   };
 
 template<typename ...typesT>
-  struct disjunction : false_type
+ struct disjunction : false_type
   {
   };
 template<typename firstT, typename ...restT>
-  struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+ struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
   {
   };
 
     namespace details_utilities {
 
     template<typename iteratorT>
-      constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+     constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
       {
         return 0;
       }
     template<typename iteratorT>
-      inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
+     inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
         for(auto it = ::std::move(first); it != last; ++it) {
@@ -258,7 +258,7 @@ template<typename firstT, typename ...restT>
         return total;
       }
     template<typename iteratorT>
-      constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
+     constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
       {
         return static_cast<size_t>(last - first);
       }
@@ -266,25 +266,25 @@ template<typename firstT, typename ...restT>
     }
 
 template<typename iteratorT>
-  constexpr size_t estimate_distance(iteratorT first, iteratorT last)
+ constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
     return details_utilities::estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), ::std::move(first), ::std::move(last));
   }
 
 template<typename elementT, typename ...paramsT>
-  elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+ elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
 
 template<typename elementT>
-  elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+ elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
     return ::new(static_cast<void *>(ptr)) elementT;
   }
 
 template<typename elementT>
-  void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+ void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
@@ -293,7 +293,7 @@ template<typename elementT>
   }
 
 template<typename elementT>
-  void rotate(elementT *ptr, size_t begin, size_t seek, size_t end)
+ void rotate(elementT *ptr, size_t begin, size_t seek, size_t end)
   {
     auto bot = begin;
     auto brk = seek;
@@ -354,7 +354,7 @@ template<typename elementT>
   }
 
 template<typename elementT>
-  inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
+ inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
   {
     auto ptr = init.begin();
     for(;;) {
@@ -370,7 +370,7 @@ template<typename elementT>
   }
 
 template<typename containerT, typename functorT, typename ...paramsT>
-  void for_each(containerT &cont, functorT &&func, const paramsT &...params)
+ void for_each(containerT &cont, functorT &&func, const paramsT &...params)
   {
     for(auto &&elem : cont) {
       ::std::forward<functorT>(func)(elem, params...);
@@ -378,13 +378,13 @@ template<typename containerT, typename functorT, typename ...paramsT>
   }
 
 template<typename enumT>
-  constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
+ constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
   {
     return static_cast<typename underlying_type<enumT>::type>(value);
   }
 
 template<typename elementT, size_t countT>
-  constexpr size_t countof(const elementT (&)[countT]) noexcept
+ constexpr size_t countof(const elementT (&)[countT]) noexcept
   {
     return countT;
   }
@@ -392,11 +392,11 @@ template<typename elementT, size_t countT>
     namespace details_utilities {
 
     template<typename integerT, integerT valueT, typename ...candidatesT>
-      struct integer_selector  // Be SFINAE-friendly.
+     struct integer_selector  // Be SFINAE-friendly.
       {
       };
     template<typename integerT, integerT valueT, typename firstT, typename ...remainingT>
-      struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
+     struct integer_selector<integerT, valueT, firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
                                                                                      enable_if<true, firstT>, integer_selector<integerT, valueT, remainingT...>>::type
       {
       };
@@ -404,13 +404,13 @@ template<typename elementT, size_t countT>
     }
 
 template<long long valueT>
-  struct lowest_signed : details_utilities::integer_selector<long long, valueT,
+ struct lowest_signed : details_utilities::integer_selector<long long, valueT,
                                                              signed char, short, int, long, long long>
   {
   };
 
 template<unsigned long long valueT>
-  struct lowest_unsigned : details_utilities::integer_selector<unsigned long long, valueT,
+ struct lowest_unsigned : details_utilities::integer_selector<unsigned long long, valueT,
                                                                unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
   {
   };

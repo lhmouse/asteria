@@ -10,10 +10,10 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>>
-  class basic_insertable_streambuf;
+ class basic_insertable_streambuf;
 
 template<typename charT, typename traitsT, typename allocatorT>
-  class basic_insertable_streambuf : public basic_streambuf<charT, traitsT>
+ class basic_insertable_streambuf : public basic_streambuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -95,15 +95,15 @@ template<typename charT, typename traitsT, typename allocatorT>
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
 template<typename charT, typename traitsT, typename allocatorT>
-  constexpr typename basic_insertable_streambuf<charT, traitsT, allocatorT>::size_type basic_insertable_streambuf<charT, traitsT, allocatorT>::npos;
+ constexpr typename basic_insertable_streambuf<charT, traitsT, allocatorT>::size_type basic_insertable_streambuf<charT, traitsT, allocatorT>::npos;
 #endif
 
 template<typename charT, typename traitsT, typename allocatorT>
-  basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf()
+ basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf()
   = default;
 
 template<typename charT, typename traitsT, typename allocatorT>
-  int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()
+ int basic_insertable_streambuf<charT, traitsT, allocatorT>::sync()
   {
     if(this->gptr() != nullptr) {
       // Empty the get area. If there are any characters read from it, remove them from the internal buffer.
@@ -115,7 +115,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 template<typename charT, typename traitsT, typename allocatorT>
-  streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc()
+ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::showmanyc()
   {
     if(this->m_which & ios_base::in) {
       // Return the number of characters inside the internal buffer, minus those that have been read from it.
@@ -129,7 +129,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     }
   }
 template<typename charT, typename traitsT, typename allocatorT>
-  streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_type *s, streamsize n)
+ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsgetn(char_type *s, streamsize n)
   {
     if(this->m_which & ios_base::in) {
       // Tidy the get area.
@@ -144,7 +144,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     }
   }
 template<typename charT, typename traitsT, typename allocatorT>
-  typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::underflow()
+ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::underflow()
   {
     if(this->m_which & ios_base::in) {
       // Tidy the get area.
@@ -163,7 +163,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 template<typename charT, typename traitsT, typename allocatorT>
-  typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::pbackfail(int_type c)
+ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::pbackfail(int_type c)
   {
     if(this->m_which & ios_base::out) {
       if(traits_type::eq_int_type(c, traits_type::eof())) {
@@ -181,7 +181,7 @@ template<typename charT, typename traitsT, typename allocatorT>
   }
 
 template<typename charT, typename traitsT, typename allocatorT>
-  streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n)
+ streamsize basic_insertable_streambuf<charT, traitsT, allocatorT>::xsputn(const char_type *s, streamsize n)
   {
     if(this->m_which & ios_base::out) {
       // Tidy the get area, as the internal buffer is subject to reallocation.
@@ -203,7 +203,7 @@ template<typename charT, typename traitsT, typename allocatorT>
     }
   }
 template<typename charT, typename traitsT, typename allocatorT>
-  typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c)
+ typename basic_insertable_streambuf<charT, traitsT, allocatorT>::int_type basic_insertable_streambuf<charT, traitsT, allocatorT>::overflow(int_type c)
   {
     if(this->m_which & ios_base::out) {
       if(traits_type::eq_int_type(c, traits_type::eof())) {

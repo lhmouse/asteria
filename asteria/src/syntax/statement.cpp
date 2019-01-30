@@ -18,7 +18,7 @@ namespace Asteria {
     namespace {
 
     template<typename XnameT, typename XrefT>
-      void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
+     void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
@@ -603,7 +603,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
     template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_Context &, Global_Context &, const CoW_String &)>
-      Block::Compiled_Instruction do_bind(const AltT &alt)
+     Block::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
           [](const void *qalt, const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> &params)

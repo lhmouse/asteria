@@ -26,7 +26,7 @@
 namespace rocket {
 
 template<typename valueT, typename allocatorT = allocator<valueT>>
-  class cow_vector;
+ class cow_vector;
 
     namespace details_cow_vector {
 
@@ -44,7 +44,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename allocatorT>
-      struct basic_storage : storage_header
+     struct basic_storage : storage_header
       {
         using allocator_type   = allocatorT;
         using value_type       = typename allocator_type::value_type;
@@ -88,7 +88,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename pointerT, typename allocatorT,
-             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
+            bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
              bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct copy_storage_helper
       {
@@ -105,7 +105,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           }
       };
     template<typename pointerT, typename allocatorT, bool memcpyT>
-      struct copy_storage_helper<pointerT, allocatorT,
+     struct copy_storage_helper<pointerT, allocatorT,
                                  false,     // copyable
                                  memcpyT>   // trivial && std::allocator
       {
@@ -116,7 +116,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           }
       };
     template<typename pointerT, typename allocatorT>
-      struct copy_storage_helper<pointerT, allocatorT,
+     struct copy_storage_helper<pointerT, allocatorT,
                                  true,      // copyable
                                  true>      // trivial && std::allocator
       {
@@ -132,7 +132,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename pointerT, typename allocatorT,
-             bool movableT = is_move_constructible<typename allocatorT::value_type>::value,
+            bool movableT = is_move_constructible<typename allocatorT::value_type>::value,
              bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value>
       struct move_storage_helper
       {
@@ -149,7 +149,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           }
       };
     template<typename pointerT, typename allocatorT, bool memcpyT>
-      struct move_storage_helper<pointerT, allocatorT,
+     struct move_storage_helper<pointerT, allocatorT,
                                  false,     // movable
                                  memcpyT>   // trivial && std::allocator
       {
@@ -160,7 +160,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           }
       };
     template<typename pointerT, typename allocatorT>
-      struct move_storage_helper<pointerT, allocatorT,
+     struct move_storage_helper<pointerT, allocatorT,
                                  true,      // movable
                                  true>      // trivial && std::allocator
       {
@@ -176,7 +176,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename allocatorT>
-      class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
+     class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
       {
       public:
         using allocator_type   = allocatorT;
@@ -408,7 +408,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
             return ptr->data;
           }
         template<typename ...paramsT>
-          value_type * emplace_back_unchecked(paramsT &&...params)
+         value_type * emplace_back_unchecked(paramsT &&...params)
           {
             ROCKET_ASSERT(this->unique());
             ROCKET_ASSERT(this->size() < this->capacity());
@@ -437,10 +437,10 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename vectorT, typename valueT>
-      class vector_iterator
+     class vector_iterator
       {
         template<typename, typename>
-          friend class vector_iterator;
+         friend class vector_iterator;
         friend vectorT;
 
       public:
@@ -468,7 +468,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
           {
           }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT *, valueT *>::value)>
-          constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+         constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
           : vector_iterator(other.m_ref, other.m_ptr)
           {
           }
@@ -527,25 +527,25 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       };
 
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> & operator++(vector_iterator<vectorT, valueT> &rhs) noexcept
+     inline vector_iterator<vectorT, valueT> & operator++(vector_iterator<vectorT, valueT> &rhs) noexcept
       {
         return rhs.seek(rhs.tell() + 1);
       }
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> & operator--(vector_iterator<vectorT, valueT> &rhs) noexcept
+     inline vector_iterator<vectorT, valueT> & operator--(vector_iterator<vectorT, valueT> &rhs) noexcept
       {
         return rhs.seek(rhs.tell() - 1);
       }
 
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+     inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT> &lhs, int) noexcept
       {
         auto res = lhs;
         lhs.seek(lhs.tell() + 1);
         return res;
       }
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+     inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT> &lhs, int) noexcept
       {
         auto res = lhs;
         lhs.seek(lhs.tell() - 1);
@@ -553,25 +553,25 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       }
 
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> & operator+=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+     inline vector_iterator<vectorT, valueT> & operator+=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         return lhs.seek(lhs.tell() + rhs);
       }
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> & operator-=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+     inline vector_iterator<vectorT, valueT> & operator-=(vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         return lhs.seek(lhs.tell() - rhs);
       }
 
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+     inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         auto res = lhs;
         res.seek(res.tell() + rhs);
         return res;
       }
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
+     inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT> &lhs, typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         auto res = lhs;
         res.seek(res.tell() - rhs);
@@ -579,46 +579,46 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
       }
 
     template<typename vectorT, typename valueT>
-      inline vector_iterator<vectorT, valueT> operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs, const vector_iterator<vectorT, valueT> &rhs) noexcept
+     inline vector_iterator<vectorT, valueT> operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs, const vector_iterator<vectorT, valueT> &rhs) noexcept
       {
         auto res = rhs;
         res.seek(res.tell() + lhs);
         return res;
       }
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
       }
 
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell() == rhs.tell();
       }
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell() != rhs.tell();
       }
 
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) < rhs.tell();
       }
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator>(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator>(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) > rhs.tell();
       }
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator<=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator<=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();
       }
     template<typename vectorT, typename xvalueT, typename yvalueT>
-      inline bool operator>=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+     inline bool operator>=(const vector_iterator<vectorT, xvalueT> &lhs, const vector_iterator<vectorT, yvalueT> &rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();
       }
@@ -630,7 +630,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
     constexpr append;
 
     template<typename vectorT, typename ...paramsT>
-      inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
+     inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
       {
         vec->append(::std::forward<paramsT>(params)...);
       }
@@ -641,7 +641,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
     constexpr emplace_back;
 
     template<typename vectorT, typename ...paramsT>
-      inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
+     inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
       {
         vec->emplace_back(::std::forward<paramsT>(params)...);
       }
@@ -652,7 +652,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
     constexpr push_back;
 
     template<typename vectorT, typename ...paramsT>
-      inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
+     inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
       {
         vec->push_back(::std::forward<paramsT>(params)...);
       }
@@ -660,7 +660,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>>
     }
 
 template<typename valueT, typename allocatorT>
-  class cow_vector
+ class cow_vector
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
     static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
@@ -724,7 +724,7 @@ template<typename valueT, typename allocatorT>
         this->assign(n, value);
       }
     template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-      cow_vector(inputT first, inputT last, const allocator_type &alloc = allocator_type())
+     cow_vector(inputT first, inputT last, const allocator_type &alloc = allocator_type())
       : cow_vector(alloc)
       {
         this->assign(::std::move(first), ::std::move(last));
@@ -800,7 +800,7 @@ template<typename valueT, typename allocatorT>
       }
 
     template<typename ...paramsT>
-      value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
+     value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
       {
         const auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
@@ -902,7 +902,7 @@ template<typename valueT, typename allocatorT>
       }
     // N.B. The parameter pack is a non-standard extension.
     template<typename ...paramsT>
-      void resize(size_type n, const paramsT &...params)
+     void resize(size_type n, const paramsT &...params)
       {
         const auto cnt_old = this->size();
         if(cnt_old == n) {
@@ -1014,7 +1014,7 @@ template<typename valueT, typename allocatorT>
 
     // N.B. This is a non-standard extension.
     template<typename ...paramsT>
-      cow_vector & append(size_type n, const paramsT &...params)
+     cow_vector & append(size_type n, const paramsT &...params)
       {
         if(n == 0) {
           return *this;
@@ -1030,7 +1030,7 @@ template<typename valueT, typename allocatorT>
       }
     // N.B. This is a non-standard extension.
     template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-      cow_vector & append(inputT first, inputT last)
+     cow_vector & append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;
@@ -1046,7 +1046,7 @@ template<typename valueT, typename allocatorT>
       }
     // 26.3.11.5, modifiers
     template<typename ...paramsT>
-      reference emplace_back(paramsT &&...params)
+     reference emplace_back(paramsT &&...params)
       {
         this->do_reserve_more(1);
         const auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
@@ -1088,7 +1088,7 @@ template<typename valueT, typename allocatorT>
       }
     // N.B. The parameter pack is a non-standard extension.
     template<typename ...paramsT>
-      iterator insert(const_iterator tins, size_type n, const paramsT &...params)
+     iterator insert(const_iterator tins, size_type n, const paramsT &...params)
       {
         const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, n, params...);
@@ -1101,7 +1101,7 @@ template<typename valueT, typename allocatorT>
         return iterator(this->m_sth, ptr);
       }
     template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-      iterator insert(const_iterator tins, inputT first, inputT last)
+     iterator insert(const_iterator tins, inputT first, inputT last)
       {
         const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         const auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, ::std::move(first), ::std::move(last));
@@ -1155,7 +1155,7 @@ template<typename valueT, typename allocatorT>
     // N.B. The parameter pack is a non-standard extension.
     // N.B. The return type is a non-standard extension.
     template<typename ...paramsT>
-      cow_vector & assign(size_type n, const paramsT &...params)
+     cow_vector & assign(size_type n, const paramsT &...params)
       {
         this->clear();
         this->append(n, params...);
@@ -1170,7 +1170,7 @@ template<typename valueT, typename allocatorT>
       }
     // N.B. The return type is a non-standard extension.
     template<typename inputT, typename iterator_traits<inputT>::iterator_category * = nullptr>
-      cow_vector & assign(inputT first, inputT last)
+     cow_vector & assign(inputT first, inputT last)
       {
         this->clear();
         this->append(::std::move(first), ::std::move(last));
@@ -1211,7 +1211,7 @@ template<typename valueT, typename allocatorT>
   };
 
 template<typename valueT, typename allocatorT>
-  inline void swap(cow_vector<valueT, allocatorT> &lhs, cow_vector<valueT, allocatorT> &rhs) noexcept
+ inline void swap(cow_vector<valueT, allocatorT> &lhs, cow_vector<valueT, allocatorT> &rhs) noexcept
   {
     lhs.swap(rhs);
   }

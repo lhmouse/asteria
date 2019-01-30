@@ -15,7 +15,7 @@ Function_Analytic_Context::~Function_Analytic_Context()
     namespace {
 
     template<std::size_t capacityT, typename XnameT>
-      void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
+     void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname)
       {
         predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_null());
       }

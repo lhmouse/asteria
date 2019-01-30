@@ -57,13 +57,13 @@ class Reference_Root
       }
     // This constructor does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_Root(AltT &&alt)
+     Reference_Root(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Reference_Root & operator=(AltT &&alt)
+     Reference_Root & operator=(AltT &&alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
@@ -75,12 +75,12 @@ class Reference_Root
         return static_cast<Index>(this->m_stor.index());
       }
     template<typename AltT>
-      const AltT * opt() const noexcept
+     const AltT * opt() const noexcept
       {
         return this->m_stor.get<AltT>();
       }
     template<typename AltT>
-      const AltT & check() const
+     const AltT & check() const
       {
         return this->m_stor.as<AltT>();
       }

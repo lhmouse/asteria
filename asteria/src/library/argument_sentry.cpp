@@ -19,7 +19,7 @@ Argument_Sentry & Argument_Sentry::start() noexcept
     namespace {
 
     template<typename ThrowerT>
-      void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
+     void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
       {
         // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
         if(parent.does_throw_on_failure()) {
@@ -111,7 +111,7 @@ Argument_Sentry & Argument_Sentry::start() noexcept
     }
 
 template<typename XvalueT>
-  Argument_Sentry & Argument_Sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
+ Argument_Sentry & Argument_Sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
@@ -144,7 +144,7 @@ template<typename XvalueT>
   }
 
 template<typename XvalueT>
-  Argument_Sentry & Argument_Sentry::do_get_required_value(XvalueT &value_out)
+ Argument_Sentry & Argument_Sentry::do_get_required_value(XvalueT &value_out)
   {
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);

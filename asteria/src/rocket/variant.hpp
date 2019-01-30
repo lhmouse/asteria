@@ -12,12 +12,12 @@
 namespace rocket {
 
 template<typename ...alternativesT>
-  class variant;
+ class variant;
 
     namespace details_variant {
 
     template<typename firstT, typename secondT>
-      union union_pair
+     union union_pair
       {
         using first_type   = firstT;
         using second_type  = secondT;
@@ -35,7 +35,7 @@ template<typename ...alternativesT>
 
     // Main template definition for no type parameters.
     template<size_t minlenT, typename ...typesT>
-      struct aligned_union
+     struct aligned_union
       {
         struct type
           {
@@ -44,7 +44,7 @@ template<typename ...alternativesT>
       };
     // Specialization for a size of zero and no type parameters. This has to exist to avoid arrays of zero elements.
     template<>
-      struct aligned_union<0>
+     struct aligned_union<0>
       {
         struct type
           {
@@ -52,7 +52,7 @@ template<typename ...alternativesT>
       };
     // Specialization for at least one type parameter.
     template<size_t minlenT, typename firstT, typename ...restT>
-      struct aligned_union<minlenT, firstT, restT...>
+     struct aligned_union<minlenT, firstT, restT...>
       {
         struct type
           {
@@ -61,69 +61,69 @@ template<typename ...alternativesT>
       };
 
     template<size_t indexT, typename targetT, typename ...alternativesT>
-      struct type_finder  // no value
+     struct type_finder  // no value
       {
       };
     template<size_t indexT, typename targetT, typename firstT, typename ...restT>
-      struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
+     struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
       {
       };
     template<size_t indexT, typename firstT, typename ...restT>
-      struct type_finder<indexT, firstT, firstT, restT...> : integral_constant<size_t, indexT>
+     struct type_finder<indexT, firstT, firstT, restT...> : integral_constant<size_t, indexT>
       {
       };
 
     template<size_t indexT, typename ...alternativesT>
-      struct type_getter  // no type
+     struct type_getter  // no type
       {
       };
     template<size_t indexT, typename firstT, typename ...restT>
-      struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
+     struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
       {
       };
     template<typename firstT, typename ...restT>
-      struct type_getter<0, firstT, restT...> : enable_if<true, firstT>
+     struct type_getter<0, firstT, restT...> : enable_if<true, firstT>
       {
       };
 
     template<typename alternativeT>
-      void wrapped_copy_construct(void *tptr, const void *rptr)
+     void wrapped_copy_construct(void *tptr, const void *rptr)
       {
         noadl::construct_at(static_cast<alternativeT *>(tptr), *static_cast<const alternativeT *>(rptr));
       }
     template<typename alternativeT>
-      void wrapped_move_construct(void *tptr, void *rptr)
+     void wrapped_move_construct(void *tptr, void *rptr)
       {
         noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*static_cast<alternativeT *>(rptr)));
       }
     template<typename alternativeT>
-      void wrapped_copy_assign(void *tptr, const void *rptr)
+     void wrapped_copy_assign(void *tptr, const void *rptr)
       {
         *static_cast<alternativeT *>(tptr) = *static_cast<const alternativeT *>(rptr);
       }
     template<typename alternativeT>
-      void wrapped_move_assign(void *tptr, void *rptr)
+     void wrapped_move_assign(void *tptr, void *rptr)
       {
         *static_cast<alternativeT *>(tptr) = ::std::move(*static_cast<alternativeT *>(rptr));
       }
     template<typename alternativeT>
-      void wrapped_destroy(void *tptr) noexcept
+     void wrapped_destroy(void *tptr) noexcept
       {
         noadl::destroy_at(static_cast<alternativeT *>(tptr));
       }
     template<typename alternativeT>
-      void wrapped_move_construct_then_destroy(void *tptr, void *rptr)
+     void wrapped_move_construct_then_destroy(void *tptr, void *rptr)
       {
         noadl::construct_at(static_cast<alternativeT *>(tptr), ::std::move(*static_cast<alternativeT *>(rptr)));
         noadl::destroy_at(static_cast<alternativeT *>(rptr));
       }
     template<typename resultT, typename alternativeT, typename voidT, typename visitorT>
-      resultT wrapped_visit(voidT *tptr, visitorT &visitor)
+     resultT wrapped_visit(voidT *tptr, visitorT &visitor)
       {
         return ::std::forward<visitorT>(visitor)(*static_cast<alternativeT *>(tptr));
       }
     template<typename alternativeT>
-      void wrapped_swap(void *tptr, void *rptr)
+     void wrapped_swap(void *tptr, void *rptr)
       {
         noadl::adl_swap(*static_cast<alternativeT *>(tptr), *static_cast<alternativeT *>(rptr));
       }
@@ -131,19 +131,19 @@ template<typename ...alternativesT>
     }
 
 template<typename ...alternativesT>
-  class variant
+ class variant
   {
     static_assert(sizeof...(alternativesT) > 0, "At least one alternative type must be provided.");
     static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value, "No move constructors of alternative types are allowed to throw exceptions.");
 
   public:
     template<typename targetT>
-      struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
+     struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
       {
       };
 
     template<size_t indexT>
-      struct type_at : details_variant::type_getter<indexT, alternativesT...>
+     struct type_at : details_variant::type_getter<indexT, alternativesT...>
       {
       };
 
@@ -155,12 +155,12 @@ template<typename ...alternativesT>
         typename details_variant::aligned_union<1, alternativesT...>::type bytes;
 
         template<typename otherT>
-          operator const otherT * () const noexcept
+         operator const otherT * () const noexcept
           {
             return static_cast<const otherT *>(static_cast<const void *>(this));
           }
         template<typename otherT>
-          operator otherT * () noexcept
+         operator otherT * () noexcept
           {
             return static_cast<otherT *>(static_cast<void *>(this));
           }
@@ -180,7 +180,7 @@ template<typename ...alternativesT>
       }
 
     template<typename resultT>
-      static constexpr typename add_const<resultT>::type & do_lookup(resultT *const (&table)[type_size], size_t rindex) noexcept
+     static constexpr typename add_const<resultT>::type & do_lookup(resultT *const (&table)[type_size], size_t rindex) noexcept
       {
         return *(table[rindex]);
       }
@@ -269,7 +269,7 @@ template<typename ...alternativesT>
         this->m_index = index_new;
       }
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
-      variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
+     variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
@@ -301,7 +301,7 @@ template<typename ...alternativesT>
       }
     // 23.7.3.3, assignment
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
-      variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>, is_nothrow_copy_constructible<paramT>>::value)
+     variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>, is_nothrow_copy_constructible<paramT>>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -337,7 +337,7 @@ template<typename ...alternativesT>
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
-      variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
+     variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -436,7 +436,7 @@ template<typename ...alternativesT>
 
     // accessors
     template<size_t indexT>
-      const typename type_at<indexT>::type * get() const noexcept
+     const typename type_at<indexT>::type * get() const noexcept
       {
         if(this->m_index != indexT) {
           return nullptr;
@@ -444,12 +444,12 @@ template<typename ...alternativesT>
         return static_cast<const typename type_at<indexT>::type *>(this->m_stor);
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
-      const targetT * get() const noexcept
+     const targetT * get() const noexcept
       {
         return this->get<index_of<targetT>::value>();
       }
     template<size_t indexT>
-      typename type_at<indexT>::type * get() noexcept
+     typename type_at<indexT>::type * get() noexcept
       {
         if(this->m_index != indexT) {
           return nullptr;
@@ -457,13 +457,13 @@ template<typename ...alternativesT>
         return static_cast<typename type_at<indexT>::type *>(this->m_stor);
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
-      targetT * get() noexcept
+     targetT * get() noexcept
       {
         return this->get<index_of<targetT>::value>();
       }
 
     template<size_t indexT>
-      const typename type_at<indexT>::type & as() const
+     const typename type_at<indexT>::type & as() const
       {
         const auto ptr = this->get<indexT>();
         if(!ptr) {
@@ -472,12 +472,12 @@ template<typename ...alternativesT>
         return *ptr;
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
-      const targetT & as() const
+     const targetT & as() const
       {
         return this->as<index_of<targetT>::value>();
       }
     template<size_t indexT>
-      typename type_at<indexT>::type & as()
+     typename type_at<indexT>::type & as()
       {
         const auto ptr = this->get<indexT>();
         if(!ptr) {
@@ -486,20 +486,20 @@ template<typename ...alternativesT>
         return *ptr;
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
-      targetT & as()
+     targetT & as()
       {
         return this->as<index_of<targetT>::value>();
       }
 
     template<typename visitorT>
-      typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
+     typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
         return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
     template<typename visitorT>
-      typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
+     typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
@@ -508,7 +508,7 @@ template<typename ...alternativesT>
 
     // 23.7.3.4, modifiers
     template<size_t indexT, typename ...paramsT>
-      typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value)
+     typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = indexT;
@@ -538,7 +538,7 @@ template<typename ...alternativesT>
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
       }
     template<typename targetT, typename ...paramsT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)>
-      targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
+     targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
       {
         return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);
       }
@@ -567,11 +567,11 @@ template<typename ...alternativesT>
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
 template<typename ...alternativesT>
-  constexpr size_t variant<alternativesT...>::type_size;
+ constexpr size_t variant<alternativesT...>::type_size;
 #endif
 
 template<typename ...alternativesT>
-  void swap(variant<alternativesT...> &lhs, variant<alternativesT...> &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
+ void swap(variant<alternativesT...> &lhs, variant<alternativesT...> &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
   {
     lhs.swap(other);
   }

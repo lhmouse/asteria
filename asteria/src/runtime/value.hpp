@@ -39,12 +39,12 @@ class Value
 
   public:
     template<typename TypeT>
-      ROCKET_PURE_FUNCTION static constexpr Value_Type get_type() noexcept
+     ROCKET_PURE_FUNCTION static constexpr Value_Type get_type() noexcept
       {
         return static_cast<Value_Type>(Variant::index_of<TypeT>::value);
       }
     template<typename TypeT>
-      ROCKET_PURE_FUNCTION static const char * get_type_name() noexcept
+     ROCKET_PURE_FUNCTION static const char * get_type_name() noexcept
       {
         return Value::get_type_name(get_type<TypeT>());
       }
@@ -62,12 +62,12 @@ class Value
       {
       }
     template<typename AltT, ROCKET_ENABLE_IF(std::is_convertible<AltT, Variant>::value)>
-      Value(AltT &&alt)
+     Value(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     template<typename AltT, ROCKET_ENABLE_IF(std::is_convertible<AltT, Variant>::value)>
-      Value & operator=(AltT &&alt)
+     Value & operator=(AltT &&alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
@@ -79,23 +79,23 @@ class Value
         return static_cast<Value_Type>(this->m_stor.index());
       }
     template<typename AltT>
-      const AltT * opt() const noexcept
+     const AltT * opt() const noexcept
       {
         return this->m_stor.get<AltT>();
       }
     template<typename AltT>
-      const AltT & check() const
+     const AltT & check() const
       {
         return this->m_stor.as<AltT>();
       }
 
     template<typename AltT>
-      AltT * opt() noexcept
+     AltT * opt() noexcept
       {
         return this->m_stor.get<AltT>();
       }
     template<typename AltT>
-      AltT & check()
+     AltT & check()
       {
         return this->m_stor.as<AltT>();
       }

@@ -161,7 +161,7 @@ class Statement
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Statement(AltT &&alt)
+     Statement(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }

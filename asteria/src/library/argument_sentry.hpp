@@ -47,9 +47,9 @@ class Argument_Sentry
 
   private:
     template<typename XvalueT>
-      Argument_Sentry & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
+     Argument_Sentry & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
     template<typename XvalueT>
-      Argument_Sentry & do_get_required_value(XvalueT &value_out);
+     Argument_Sentry & do_get_required_value(XvalueT &value_out);
 
   public:
     const CoW_String & get_name() const noexcept

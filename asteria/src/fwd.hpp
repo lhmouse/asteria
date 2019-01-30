@@ -74,20 +74,20 @@ class Argument_Sentry;
 
 // Template Aliases
 template<typename HandleT, typename CloserT>
-  using Unique_Handle = rocket::unique_handle<HandleT, CloserT>;
+ using Unique_Handle = rocket::unique_handle<HandleT, CloserT>;
 template<typename ElementT, typename DeleterT = std::default_delete<const ElementT>>
-  using Unique_Ptr = rocket::unique_ptr<ElementT, DeleterT>;
+ using Unique_Ptr = rocket::unique_ptr<ElementT, DeleterT>;
 template<typename ElementT>
-  using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
+ using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
 template<typename ElementT>
-  using RefCnt_Object = rocket::refcnt_object<ElementT>;
+ using RefCnt_Object = rocket::refcnt_object<ElementT>;
 
 template<typename ElementT>
-  using CoW_Vector = rocket::cow_vector<ElementT>;
+ using CoW_Vector = rocket::cow_vector<ElementT>;
 template<typename KeyT, typename ValueT, typename HashT, typename EqualT = rocket::transparent_equal_to>
-  using CoW_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
+ using CoW_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
 template<typename ElementT, std::size_t capacityT>
-  using Static_Vector = rocket::static_vector<ElementT, capacityT>;
+ using Static_Vector = rocket::static_vector<ElementT, capacityT>;
 
 // Type Aliases
 using CoW_String = rocket::cow_string;

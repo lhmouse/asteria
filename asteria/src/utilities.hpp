@@ -34,7 +34,7 @@ class Formatter
     rocket::cow_string do_extract_string() noexcept;
 
     template<typename ValueT>
-      void do_put(const ValueT &value)
+     void do_put(const ValueT &value)
       {
         this->do_open_stream() << value;
       }
@@ -105,7 +105,7 @@ class Formatter
 
   public:
     template<typename ValueT>
-      Formatter & operator,(const ValueT &value) noexcept
+     Formatter & operator,(const ValueT &value) noexcept
       try {
         this->do_put(value);
         return *this;

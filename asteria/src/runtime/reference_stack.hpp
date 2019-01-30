@@ -77,7 +77,7 @@ class Reference_Stack
         return tptr[-1];
       }
     template<typename ParamT>
-      Reference & push(ParamT &&param)
+     Reference & push(ParamT &&param)
       {
         auto tptr = this->m_tptr;
         if(this->m_large.capacity() == 0) {

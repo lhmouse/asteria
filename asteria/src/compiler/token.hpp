@@ -167,7 +167,7 @@ class Token
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)>
-      Token(const CoW_String &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
+     Token(const CoW_String &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
       : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
       {
       }
@@ -195,12 +195,12 @@ class Token
         return static_cast<Index>(this->m_stor.index());
       }
     template<typename AltT>
-      const AltT * opt() const noexcept
+     const AltT * opt() const noexcept
       {
         return this->m_stor.get<AltT>();
       }
     template<typename AltT>
-      const AltT & check() const
+     const AltT & check() const
       {
         return this->m_stor.as<AltT>();
       }
