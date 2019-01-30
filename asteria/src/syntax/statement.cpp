@@ -544,7 +544,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             // Append frame information.
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
             elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
-            elem.try_emplace(rocket::sref("func"), D_string(frame.function_prototype()));
+            elem.try_emplace(rocket::sref("func"), D_string(frame.function_signature()));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));

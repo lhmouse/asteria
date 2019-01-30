@@ -64,7 +64,7 @@ int main(int argc, char **argv)
               << "# Caught `Traceable_Exception`:" << std::endl
               << e.get_value() << std::endl;
     for(std::size_t i = 0; i < e.get_frame_count(); ++i) {
-      std::cerr << "[thrown from `" << e.get_frame(i).function_prototype() << "` at '" << e.get_frame(i).source_location() << "']" << std::endl;
+      std::cerr << "[thrown from `" << e.get_frame(i).function_signature() << "` at '" << e.get_frame(i).source_location() << "']" << std::endl;
     }
     return 1;
   } catch(std::exception &e) {

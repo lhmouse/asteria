@@ -30,9 +30,9 @@ class Instantiated_Function : public Abstract_Function
       {
         return this->m_zvarg->get_source_location();
       }
-    const PreHashed_String & get_function_prototype() const noexcept
+    const PreHashed_String & get_function_signature() const noexcept
       {
-        return this->m_zvarg->get_function_prototype();
+        return this->m_zvarg->get_function_signature();
       }
     const CoW_Vector<PreHashed_String> & get_parameters() const noexcept
       {

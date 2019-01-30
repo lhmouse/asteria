@@ -38,7 +38,7 @@ class Backtrace_Frame
       {
         return this->m_sloc.line();
       }
-    const CoW_String & function_prototype() const noexcept
+    const CoW_String & function_signature() const noexcept
       {
         return this->m_func;
       }

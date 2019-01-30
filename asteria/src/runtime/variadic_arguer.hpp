@@ -41,7 +41,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc.line();
       }
-    const PreHashed_String & get_function_prototype() const noexcept
+    const PreHashed_String & get_function_signature() const noexcept
       {
         return this->m_func;
       }
