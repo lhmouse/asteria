@@ -17,22 +17,19 @@ class Traceable_Exception : public virtual std::exception
     CoW_Vector<Backtrace_Frame> m_frames;
 
   public:
-    Traceable_Exception(Value &&value, const Source_Location &sloc, const CoW_String &func)
+    explicit Traceable_Exception(Value &&value)
       {
         this->m_value = std::move(value);
-        this->m_frames.emplace_back(sloc, func);
       }
-    Traceable_Exception(std::exception &&except, const Source_Location &sloc, const CoW_String &func)
+    explicit Traceable_Exception(std::exception &&except)
       {
         const auto other = dynamic_cast<Traceable_Exception *>(std::addressof(except));
-        if(other) {
-          this->m_value = std::move(other->m_value);
-          this->m_frames.assign(std::move(other->m_frames));
-        } else {
+        if(!other) {
           this->m_value = D_string(except.what());
-          this->m_frames.emplace_back(rocket::sref("<native code>"), 0, rocket::sref("<native code>"));
+          return;
         }
-        this->m_frames.emplace_back(sloc, func);
+        this->m_value = std::move(other->m_value);
+        this->m_frames = std::move(other->m_frames);
       }
     ~Traceable_Exception() override;
 

@@ -532,7 +532,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
           // Translate the exception.
-          Traceable_Exception except(std::move(stdex), alt.sloc, rocket::sref("<exception handler>"));
+          Traceable_Exception except(std::move(stdex));
           ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
           Reference_Root::S_temporary eref_c = { except.get_value() };
           do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, std::move(eref_c));
@@ -563,7 +563,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception` at \'", alt.sloc, "\' inside `", func, "`: ", value);
-        throw Traceable_Exception(std::move(value), alt.sloc, func);
+        Traceable_Exception except(std::move(value));
+        except.append_frame(alt.sloc, func);
+        throw except;
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
