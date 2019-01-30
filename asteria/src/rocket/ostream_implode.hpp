@@ -9,8 +9,7 @@
 namespace rocket {
 
 template<typename iteratorT, typename differenceT, typename delimiterT,
-        typename filterT>
-  class ostream_imploder
+         typename filterT> class ostream_imploder
   {
   private:
     iteratorT m_begin;
@@ -19,12 +18,12 @@ template<typename iteratorT, typename differenceT, typename delimiterT,
     filterT m_filter;
 
   public:
-    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT, typename yfilterT,
-             ROCKET_ENABLE_IF(conjunction<is_constructible<iteratorT, yiteratorT &&>, is_constructible<differenceT, ydifferenceT &&>, is_constructible<delimiterT, ydelimiterT &&>,
-                                          is_constructible<filterT, yfilterT &&>>::value)>
-     constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&ydelimiter,
-                                yfilterT &&yfilter) noexcept(conjunction<is_nothrow_constructible<iteratorT, yiteratorT &&>, is_nothrow_constructible<differenceT, ydifferenceT &&>,
-                                                                         is_nothrow_constructible<delimiterT, ydelimiterT &&>, is_nothrow_constructible<filterT, yfilterT &&>>::value)
+    template<typename yiteratorT, typename ydifferenceT, typename ydelimiterT,
+             typename yfilterT> constexpr ostream_imploder(yiteratorT &&ybegin, ydifferenceT &&ycount, ydelimiterT &&ydelimiter,
+                                                           yfilterT &&yfilter) noexcept(conjunction<is_nothrow_constructible<iteratorT, yiteratorT &&>,
+                                                                                        is_nothrow_constructible<differenceT, ydifferenceT &&>,
+                                                                                        is_nothrow_constructible<delimiterT, ydelimiterT &&>,
+                                                                                        is_nothrow_constructible<filterT, yfilterT &&>>::value)
       : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)), m_delimiter(::std::forward<ydelimiterT>(ydelimiter)),
         m_filter(::std::forward<yfilterT>(yfilter))
       {
@@ -73,18 +72,17 @@ template<typename charT, typename traitsT,
   }
 
 template<typename iteratorT, typename differenceT, typename delimiterT,
-         typename filterT>
- constexpr ostream_imploder<typename decay<iteratorT>::type, typename decay<differenceT>::type, typename decay<delimiterT>::type,
-                            typename decay<filterT>::type> ostream_implode(iteratorT &&begin, differenceT &&count, delimiterT &&delimiter,
-                                                                           filterT &&filter)
+         typename filterT> constexpr ostream_imploder<typename decay<iteratorT>::type, typename decay<differenceT>::type, typename decay<delimiterT>::type,
+                                                      typename decay<filterT>::type> ostream_implode(iteratorT &&begin, differenceT &&count, delimiterT &&delimiter,
+                                                                                                     filterT &&filter)
   {
     return { ::std::forward<iteratorT>(begin), ::std::forward<differenceT>(count), ::std::forward<delimiterT>(delimiter),
              ::std::forward<filterT>(filter) };
   }
 
-template<typename iteratorT, typename differenceT, typename delimiterT>
- constexpr ostream_imploder<typename decay<iteratorT>::type, typename decay<differenceT>::type, typename decay<delimiterT>::type,
-                             identity> ostream_implode(iteratorT &&begin, differenceT &&count, delimiterT &&delimiter)
+template<typename iteratorT, typename differenceT, typename delimiterT
+         > constexpr ostream_imploder<typename decay<iteratorT>::type, typename decay<differenceT>::type, typename decay<delimiterT>::type,
+                                      identity> ostream_implode(iteratorT &&begin, differenceT &&count, delimiterT &&delimiter)
   {
     return { ::std::forward<iteratorT>(begin), ::std::forward<differenceT>(count), ::std::forward<delimiterT>(delimiter),
              identity() };

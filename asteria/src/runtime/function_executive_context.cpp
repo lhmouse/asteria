@@ -14,16 +14,14 @@ Function_Executive_Context::~Function_Executive_Context()
 
     namespace {
 
-    template<std::size_t capacityT, typename XnameT, typename XvalueT,
-             ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out,
-                                                                                             XnameT &&xname, XvalueT &&xvalue)
+    template<std::size_t capacityT, typename XnameT, typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)
+             > void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XvalueT &&xvalue)
       {
         Reference_Root::S_constant ref_c = { std::forward<XvalueT>(xvalue) };
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::move(ref_c));
       }
-    template<std::size_t capacityT, typename XnameT, typename XrefT,
-             ROCKET_ENABLE_IF(std::is_convertible<XrefT, Reference>::value)> void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out,
-                                                                                               XnameT &&xname, XrefT &&xref)
+    template<std::size_t capacityT, typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XrefT, Reference>::value)
+             > void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XrefT &&xref)
       {
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }

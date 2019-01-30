@@ -11,17 +11,15 @@ namespace rocket {
 
     namespace details_allocator_utilities {
 
-    template<typename typeT>
-     using is_final =
+    template<typename typeT> using is_final =
 #if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
-        ::std::is_final<typeT>
+                                              ::std::is_final<typeT>
 #else
-        ::std::false_type
+                                              ::std::false_type
 #endif
-        ;
+                                                                     ;
 
-    template<typename allocatorT>
-     class final_wrapper
+    template<typename allocatorT> class final_wrapper
       {
       private:
         allocatorT m_alloc;
@@ -53,20 +51,22 @@ namespace rocket {
 
     }
 
-template<typename allocatorT>
- struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value, details_allocator_utilities::final_wrapper<allocatorT>, allocatorT>
+template<typename allocatorT> struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value,
+                                                                              details_allocator_utilities::final_wrapper<allocatorT>,
+                                                                              allocatorT>
   {
   };
 
-template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value>
- struct allocator_copy_assigner
+template<typename allocatorT,
+         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value
+         > struct allocator_copy_assigner
   {
     void operator()(allocatorT & /*lhs*/, const allocatorT & /*rhs*/) const
       {
       }
   };
-template<typename allocatorT>
- struct allocator_copy_assigner<allocatorT, true>
+template<typename allocatorT> struct allocator_copy_assigner<allocatorT,
+                                                             true>  // propagateT
   {
     void operator()(allocatorT &lhs, const allocatorT &rhs) const
       {
@@ -74,15 +74,16 @@ template<typename allocatorT>
       }
   };
 
-template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value>
- struct allocator_move_assigner
+template<typename allocatorT,
+         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value
+         > struct allocator_move_assigner
   {
     void operator()(allocatorT & /*lhs*/, allocatorT && /*rhs*/) const
       {
       }
   };
-template<typename allocatorT>
- struct allocator_move_assigner<allocatorT, true>
+template<typename allocatorT> struct allocator_move_assigner<allocatorT,
+                                                             true>  // propagateT
   {
     void operator()(allocatorT &lhs, allocatorT &&rhs) const
       {
@@ -90,15 +91,16 @@ template<typename allocatorT>
       }
   };
 
-template<typename allocatorT, bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value>
- struct allocator_swapper
+template<typename allocatorT,
+         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value
+         > struct allocator_swapper
   {
     void operator()(allocatorT & /*lhs*/, allocatorT & /*rhs*/) const
       {
       }
   };
-template<typename allocatorT>
- struct allocator_swapper<allocatorT, true>
+template<typename allocatorT> struct allocator_swapper<allocatorT,
+                                                       true>  // propagateT
   {
     void operator()(allocatorT &lhs, allocatorT &rhs) const
       {
@@ -106,20 +108,20 @@ template<typename allocatorT>
       }
   };
 
-template<typename allocatorT>
- struct is_std_allocator : false_type
+template<typename allocatorT> struct is_std_allocator : false_type
   {
   };
-template<typename valueT>
- struct is_std_allocator<::std::allocator<valueT>> : true_type
+template<typename valueT> struct is_std_allocator<::std::allocator<valueT>> : true_type
   {
   };
 
 template<typename xpointerT>
 #if defined(__cpp_lib_addressof_constexpr) && (__cpp_lib_addressof_constexpr >= 201603)
-  constexpr
+                             constexpr
+#else
+                             inline
 #endif
-    inline typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type * unfancy(xpointerT &&xptr) noexcept
+                                       typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type * unfancy(xpointerT &&xptr) noexcept
   {
     return ::std::addressof(*xptr);
   }

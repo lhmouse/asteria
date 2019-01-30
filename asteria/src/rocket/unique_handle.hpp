@@ -21,13 +21,11 @@
 
 namespace rocket {
 
-template<typename handleT, typename closerT>
- class unique_handle;
+template<typename handleT, typename closerT> class unique_handle;
 
     namespace details_unique_handle {
 
-    template<typename handleT, typename closerT>
-     class stored_handle : private allocator_wrapper_base_for<closerT>::type
+    template<typename handleT, typename closerT> class stored_handle : private allocator_wrapper_base_for<closerT>::type
       {
       public:
         using handle_type  = handleT;
@@ -97,8 +95,8 @@ template<typename handleT, typename closerT>
           }
       };
 
-    template<typename handleT, typename = void>
-     struct dereference_helper
+    template<typename handleT,
+             typename = void> struct dereference_helper
       {
         using result_type = handleT;
 
@@ -108,8 +106,9 @@ template<typename handleT, typename closerT>
           }
       };
 
-    template<typename pointerT>
-     struct dereference_helper<pointerT, typename make_void<decltype(*(::std::declval<pointerT>()))>::type>
+    template<typename pointerT
+             > struct dereference_helper<pointerT,
+                                         typename make_void<decltype(*(::std::declval<pointerT>()))>::type>
       {
         using result_type = decltype(*(::std::declval<pointerT>()));
 
@@ -121,8 +120,7 @@ template<typename handleT, typename closerT>
 
     }
 
-template<typename handleT, typename closerT>
- class unique_handle
+template<typename handleT, typename closerT> class unique_handle
   {
     static_assert(!is_array<handleT>::value, "`handleT` must not be an array type.");
     static_assert(is_trivial<handleT>::value, "`handleT` must be a trivial type.");
@@ -174,8 +172,7 @@ template<typename handleT, typename closerT>
 
   public:
     // 23.11.1.2.4, observers
-    template<typename checkT = handleT>
-     constexpr typename details_unique_handle::dereference_helper<handleT>::result_type operator*() const noexcept
+    template<typename checkT = handleT> constexpr typename details_unique_handle::dereference_helper<handleT>::result_type operator*() const noexcept
       {
         return details_unique_handle::dereference_helper<handleT>()(this->m_sth.get());
       }
@@ -228,45 +225,46 @@ template<typename handleT, typename closerT>
       }
   };
 
-template<typename handleT, typename closerT>
- inline bool operator==(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename handleT, typename closerT> inline bool operator==(const unique_handle<handleT, closerT> &lhs,
+                                                                    const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() == rhs.get();
   }
-template<typename handleT, typename closerT>
- inline bool operator!=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs) noexcept
+template<typename handleT, typename closerT> inline bool operator!=(const unique_handle<handleT, closerT> &lhs,
+                                                                    const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() != rhs.get();
   }
-template<typename handleT, typename closerT>
- inline bool operator<(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs)
+template<typename handleT, typename closerT> inline bool operator<(const unique_handle<handleT, closerT> &lhs,
+                                                                   const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() < rhs.get();
   }
-template<typename handleT, typename closerT>
- inline bool operator>(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs)
+template<typename handleT, typename closerT> inline bool operator>(const unique_handle<handleT, closerT> &lhs,
+                                                                   const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() > rhs.get();
   }
-template<typename handleT, typename closerT>
- inline bool operator<=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs)
+template<typename handleT, typename closerT> inline bool operator<=(const unique_handle<handleT, closerT> &lhs,
+                                                                    const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() <= rhs.get();
   }
-template<typename handleT, typename closerT>
- inline bool operator>=(const unique_handle<handleT, closerT> &lhs, const unique_handle<handleT, closerT> &rhs)
+template<typename handleT, typename closerT> inline bool operator>=(const unique_handle<handleT, closerT> &lhs,
+                                                                    const unique_handle<handleT, closerT> &rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename handleT, typename closerT>
- inline void swap(unique_handle<handleT, closerT> &lhs, unique_handle<handleT, closerT> &rhs) noexcept
+template<typename handleT, typename closerT> inline void swap(unique_handle<handleT, closerT> &lhs,
+                                                              unique_handle<handleT, closerT> &rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename handleT, typename closerT>
- inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const unique_handle<handleT, closerT> &rhs)
+template<typename charT, typename traitsT,
+         typename handleT, typename closerT> inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os,
+                                                                                               const unique_handle<handleT, closerT> &rhs)
   {
     return os << rhs.get();
   }
