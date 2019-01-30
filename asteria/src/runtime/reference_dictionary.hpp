@@ -12,25 +12,15 @@ namespace Asteria {
 class Reference_Dictionary
   {
   public:
-    struct Template
-      {
-        CoW_String name;
-        Reference ref;
-
-        template<typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XnameT, CoW_String>::value && std::is_convertible<XrefT, Reference>::value)>
-         Template(XnameT &&xname, XrefT &&xref)
-          : name(std::forward<XnameT>(xname)), ref(std::forward<XrefT>(xref))
-          {
-          }
-      };
+    using Template = std::pair<CoW_String, Reference>;
 
   private:
     struct Bucket
       {
         // An empty name indicates an empty bucket.
-        // `refv[0]` is initialized if and only if `name` is non-empty.
-        PreHashed_String name;
-        union { Reference refv[1]; };
+        // `second[0]` is initialized if and only if `name` is non-empty.
+        PreHashed_String first;
+        union { Reference second[1]; };
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For each other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size; Bucket *prev; };
@@ -39,17 +29,17 @@ class Reference_Dictionary
         union { std::size_t reserved; Bucket *next; };
 
         Bucket() noexcept
-          : name()
+          : first()
           {
 #ifdef ROCKET_DEBUG
-            std::memset(static_cast<void *>(this->refv), 0xEC, sizeof(Reference));
+            std::memset(static_cast<void *>(this->second), 0xEC, sizeof(Reference));
 #endif
           }
         ~Bucket()
           {
             // Be careful, VERY careful.
             if(ROCKET_UNEXPECT(*this)) {
-              rocket::destroy_at(this->refv);
+              rocket::destroy_at(this->second);
             }
           }
 
@@ -60,7 +50,7 @@ class Reference_Dictionary
 
         explicit operator bool () const noexcept
           {
-            return !this->name.empty();
+            return this->first.empty() == false;
           }
       };
 

@@ -37,7 +37,7 @@ void Variable_HashSet::do_clear() noexcept
     // Clear all buckets.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
       ROCKET_ASSERT(*bkt);
-      bkt->var.reset();
+      bkt->first.reset();
     }
     // Clear the table.
     pre->next = end;
@@ -73,12 +73,12 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
       auto &rbkt = stor.mut_back();
       if(ROCKET_UNEXPECT(rbkt)) {
         // Find a bucket for the new element.
-        const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.var.get()));
+        const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
         const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
-        bkt->var = std::move(rbkt.var);
+        bkt->first = std::move(rbkt.first);
         do_attach_bucket(bkt, end);
         // Update the number of elements.
         pre->size++;
@@ -101,15 +101,15 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
         {
           RefCnt_Ptr<Variable> var;
           // Release the old element.
-          do_detach_bucket(&rbkt);
-          var.swap(rbkt.var);
+          do_detach_bucket(std::addressof(rbkt));
+          var.swap(rbkt.first);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
           const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
-          bkt->var = std::move(var);
+          bkt->first = std::move(var);
           do_attach_bucket(bkt, end);
           return false;
         }
@@ -126,7 +126,7 @@ bool Variable_HashSet::has(const RefCnt_Ptr<Variable> &var) const noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var; });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -144,10 +144,10 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) cons
     // Get table bounds.
     const auto pre = this->m_stor.data();
     const auto end = pre + (this->m_stor.size() - 1);
-    // Enumerate all buckets. The return value of `callback(bkt->var)` is ignored.
+    // Enumerate all buckets. The return value of `callback(bkt->first)` is ignored.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
       ROCKET_ASSERT(*bkt);
-      callback(bkt->var);
+      callback(bkt->first);
     }
   }
 
@@ -164,7 +164,7 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
     const auto end = pre + (this->m_stor.size() - 1);
     // Find a bucket for the new element.
     const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var; });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(*bkt) {
@@ -172,7 +172,7 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
       return false;
     }
     // Insert it into the new bucket.
-    bkt->var = var;
+    bkt->first = var;
     do_attach_bucket(bkt, end);
     // Update the number of elements.
     pre->size++;
@@ -189,7 +189,7 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.var == var; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var; });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -199,7 +199,7 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
     pre->size--;
     // Empty the bucket.
     do_detach_bucket(bkt);
-    bkt->var.reset();
+    bkt->first.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
     return true;
@@ -224,7 +224,7 @@ RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
     pre->size--;
     // Empty the bucket.
     do_detach_bucket(bkt);
-    var.swap(bkt->var);
+    var.swap(bkt->first);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
     return std::move(var);

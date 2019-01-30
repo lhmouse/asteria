@@ -15,7 +15,7 @@ class Variable_HashSet
     struct Bucket
       {
         // A null pointer indicates an empty bucket.
-        RefCnt_Ptr<Variable> var;
+        RefCnt_Ptr<Variable> first;
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For each other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size; Bucket *prev; };
@@ -24,7 +24,7 @@ class Variable_HashSet
         union { std::size_t reserved; Bucket *next; };
 
         Bucket() noexcept
-          : var()
+          : first()
           {
           }
         ~Bucket()
@@ -38,7 +38,7 @@ class Variable_HashSet
 
         explicit operator bool () const noexcept
           {
-            return this->var != nullptr;
+            return this->first != nullptr;
           }
       };
 
