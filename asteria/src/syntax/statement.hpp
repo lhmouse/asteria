@@ -87,6 +87,7 @@ class Statement
     struct S_try
       {
         Block body_try;
+        Source_Location sloc;
         PreHashed_String except_name;
         Block body_catch;
       };

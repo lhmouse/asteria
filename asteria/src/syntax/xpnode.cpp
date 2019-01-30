@@ -384,9 +384,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
-          Traceable_Exception except(std::move(stdex));
-          except.append_frame(alt.sloc, func);
-          throw except;
+          throw Traceable_Exception(std::move(stdex), alt.sloc, func);
         }
         ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
       }

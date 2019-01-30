@@ -17,22 +17,22 @@ class Traceable_Exception : public virtual std::exception
     CoW_Vector<Backtrace_Frame> m_frames;
 
   public:
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_constructible<Value, XvalueT &&>::value)>
-      explicit Traceable_Exception(XvalueT &&xvalue)
+    Traceable_Exception(Value &&value, const Source_Location &sloc, const CoW_String &func)
       {
-        this->m_value = std::forward<XvalueT>(xvalue);
+        this->m_value = std::move(value);
+        this->m_frames.emplace_back(sloc, func);
       }
-    // This constructor does not accept lvalues.
-    template<typename ExceptT, ROCKET_ENABLE_IF(std::is_base_of<std::exception, ExceptT>::value)>
-      explicit Traceable_Exception(ExceptT &&except)
+    Traceable_Exception(std::exception &&except, const Source_Location &sloc, const CoW_String &func)
       {
         const auto other = dynamic_cast<Traceable_Exception *>(std::addressof(except));
-        if(!other) {
+        if(other) {
+          this->m_value = std::move(other->m_value);
+          this->m_frames.assign(std::move(other->m_frames));
+        } else {
           this->m_value = D_string(except.what());
-          return;
+          this->m_frames.emplace_back(rocket::sref("<native code>"), 0, rocket::sref("<native code>"));
         }
-        this->m_value = std::move(other->m_value);
-        this->m_frames = std::move(other->m_frames);
+        this->m_frames.emplace_back(sloc, func);
       }
     ~Traceable_Exception() override;
 
