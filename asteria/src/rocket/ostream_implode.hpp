@@ -49,7 +49,7 @@ template<typename iteratorT, typename differenceT, typename delimiterT,
   };
 
 template<typename charT, typename traitsT,
-        typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
+         typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
   basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const ostream_imploder<iteratorT, differenceT, delimiterT, filterT> &imploder)
   {
     auto cur = imploder.begin();
