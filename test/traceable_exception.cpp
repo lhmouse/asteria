@@ -17,6 +17,6 @@ int main()
       ASTERIA_TEST_CHECK(e.get_frame_count() == 1);
       ASTERIA_TEST_CHECK(e.get_frame(0).source_file() == "myfile");
       ASTERIA_TEST_CHECK(e.get_frame(0).source_line() == 123);
-      ASTERIA_TEST_CHECK(e.get_frame(0).function_name() == "myfunc");
+      ASTERIA_TEST_CHECK(e.get_frame(0).function_signature() == "myfunc");
     }
   }
