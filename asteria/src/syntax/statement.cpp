@@ -299,9 +299,9 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         nos << alt.name << "("
             << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
             <<")";
-        auto func = alt.body.instantiate_function(global, ctx_io, alt.sloc, nos.extract_string(), alt.params);
-        ASTERIA_DEBUG_LOG("Creating named function: ", func);
-        var->reset(D_function(std::move(func)), true);
+        auto value = D_function(alt.body.instantiate_function(global, ctx_io, alt.sloc, nos.extract_string(), alt.params));
+        ASTERIA_DEBUG_LOG("Creating named function: ", value);
+        var->reset(std::move(value), true);
         return Block::status_next;
       }
 
@@ -544,7 +544,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             // Append frame information.
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
             elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
-            elem.try_emplace(rocket::sref("func"), D_string(frame.function_name()));
+            elem.try_emplace(rocket::sref("func"), D_string(frame.function_prototype()));
             backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));

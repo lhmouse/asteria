@@ -281,14 +281,14 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
       {
         const auto &alt = this->check<D_opaque>();
         // opaque("typeid") "my opaque"
-        os << "opaque(" << quote(typeid(alt.get()).name()) << ") [|" << alt.get() << "|]";
+        os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
         const auto &alt = this->check<D_function>();
         // function("typeid") "my function"
-        os << "function(" << quote(typeid(alt.get()).name()) << ") [|" << alt.get() << "|]";
+        os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_array:

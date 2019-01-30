@@ -16,9 +16,7 @@ Instantiated_Function::~Instantiated_Function()
 
 void Instantiated_Function::describe(std::ostream &os) const
   {
-    os << this->m_zvarg->get_function_name() << "("
-       << rocket::ostream_implode(this->m_params.begin(), this->m_params.size(), ", ")
-       << ") @ " << this->m_zvarg->get_source_location();
+    os << this->m_zvarg->get_function_prototype() << " @ " << this->m_zvarg->get_source_location();
   }
 
 void Instantiated_Function::invoke(Reference &self_io, Global_Context &global, CoW_Vector<Reference> &&args) const

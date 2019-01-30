@@ -65,7 +65,7 @@ void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer>
     do_predefine(this->m_predef_refs,
                  rocket::sref("__file"), D_string(zvarg->get_source_file()));
     do_predefine(this->m_predef_refs,
-                 rocket::sref("__func"), D_string(zvarg->get_function_name()));
+                 rocket::sref("__func"), D_string(zvarg->get_function_prototype()));
     do_predefine(this->m_predef_refs,
                  rocket::sref("__line"), D_integer(zvarg->get_source_line()));
     do_predefine(this->m_predef_refs,

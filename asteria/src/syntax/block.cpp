@@ -86,7 +86,7 @@ void Block::execute_as_function(Reference &self_io, Global_Context &global, cons
     Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, ctx_next, global, zvarg->get_function_name());
+    const auto status = this->execute_in_place(self_io, ctx_next, global, zvarg->get_function_prototype());
     switch(status) {
     case status_next:
       {
