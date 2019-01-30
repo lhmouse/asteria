@@ -114,8 +114,7 @@ bool Value::test() const noexcept
 
     namespace {
 
-    template<typename ElementT>
-     Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
+    template<typename ElementT> Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
       {
         if(lhs < rhs) {
           return Value::compare_less;
@@ -126,8 +125,7 @@ bool Value::test() const noexcept
         return Value::compare_equal;
       }
 
-    template<typename IteratorT>
-     Value::Compare do_lexicographical_compare(IteratorT s1, IteratorT s2, std::size_t n)
+    template<typename IteratorT> Value::Compare do_lexicographical_compare(IteratorT s1, IteratorT s2, std::size_t n)
       {
         auto p1 = std::move(s1);
         const auto e1 = p1 + static_cast<typename std::iterator_traits<IteratorT>::difference_type>(n);

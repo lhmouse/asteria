@@ -1412,13 +1412,17 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, void (&funcT)(const AltT &, Reference_Stack &, Global_Context &, const CoW_String &, const Executive_Context &)>
-     Expression::Compiled_Instruction do_bind(const AltT &alt)
+    template<typename AltT,
+             void (&funcT)(const AltT &,
+                           Reference_Stack &, Global_Context &, const CoW_String &, const Executive_Context &)
+             > Expression::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
-          [](const void *qalt, const std::tuple<Reference_Stack &, Global_Context &, const CoW_String &, const Executive_Context &> &params)
+          [](const void *qalt,
+             const std::tuple<Reference_Stack &, Global_Context &, const CoW_String &, const Executive_Context &> &params)
             {
-              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
+              return funcT(*static_cast<const AltT *>(qalt),
+                           std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
             },
           std::addressof(alt));
       }

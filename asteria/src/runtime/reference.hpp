@@ -18,18 +18,18 @@ class Reference
 
   public:
     Reference() noexcept
-      : m_root(), m_mods()
+      : m_root(),
+        m_mods()
       {
       }
     // This constructor does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)>
-     Reference(XrootT &&xroot)
-      : m_root(std::forward<XrootT>(xroot)), m_mods()
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference(XrootT &&xroot)
+      : m_root(std::forward<XrootT>(xroot)),
+        m_mods()
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)>
-     Reference & operator=(XrootT &&xroot)
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference & operator=(XrootT &&xroot)
       {
         this->m_root = std::forward<XrootT>(xroot);
         this->m_mods.clear();
@@ -75,8 +75,7 @@ class Reference
         return this->do_unset_with_modifiers();
       }
 
-    template<typename XmodT>
-     Reference & zoom_in(XmodT &&mod)
+    template<typename XmodT, ROCKET_ENABLE_IF_HAS_VALUE(std::is_convertible<XmodT &&, Reference_Modifier::Variant>::value)> Reference & zoom_in(XmodT &&mod)
       {
         // Append a modifier.
         this->m_mods.emplace_back(std::forward<XmodT>(mod));

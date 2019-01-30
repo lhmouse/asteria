@@ -17,8 +17,7 @@ namespace Asteria {
 
     namespace {
 
-    template<typename XnameT, typename XrefT>
-     void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
+    template<typename XnameT, typename XrefT> void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
@@ -602,13 +601,17 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
 
     // Why do we have to duplicate these parameters so many times?
     // BECAUSE C++ IS STUPID, PERIOD.
-    template<typename AltT, Block::Status (&funcT)(const AltT &, Reference &, Executive_Context &, Global_Context &, const CoW_String &)>
-     Block::Compiled_Instruction do_bind(const AltT &alt)
+    template<typename AltT,
+             Block::Status (&funcT)(const AltT &,
+                                    Reference &, Executive_Context &, Global_Context &, const CoW_String &)
+             > Block::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
-          [](const void *qalt, const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> &params)
+          [](const void *qalt,
+             const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> &params)
             {
-              return funcT(*static_cast<const AltT *>(qalt), std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
+              return funcT(*static_cast<const AltT *>(qalt),
+                           std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
             },
           std::addressof(alt));
       }
@@ -616,11 +619,12 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     Block::Compiled_Instruction do_bind_constant(Block::Status status)
       {
         return rocket::bind_front(
-          [](const void *value, const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> & /*params*/)
+          [](const void *value,
+             const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> & /*params*/)
             {
-              return static_cast<Block::Status>(reinterpret_cast<std::uintptr_t>(value));
+              return static_cast<Block::Status>(reinterpret_cast<std::intptr_t>(value));
             },
-          reinterpret_cast<void *>(static_cast<std::uintptr_t>(status)));
+          reinterpret_cast<void *>(static_cast<std::intptr_t>(status)));
       }
 
     }

@@ -73,21 +73,14 @@ class Simple_Source_File;
 class Argument_Sentry;
 
 // Template Aliases
-template<typename HandleT, typename CloserT>
- using Unique_Handle = rocket::unique_handle<HandleT, CloserT>;
-template<typename ElementT, typename DeleterT = std::default_delete<const ElementT>>
- using Unique_Ptr = rocket::unique_ptr<ElementT, DeleterT>;
-template<typename ElementT>
- using RefCnt_Ptr = rocket::refcnt_ptr<ElementT>;
-template<typename ElementT>
- using RefCnt_Object = rocket::refcnt_object<ElementT>;
+template<typename H, typename C> using Unique_Handle = rocket::unique_handle<H, C>;
+template<typename E, typename D = std::default_delete<const E>> using Unique_Ptr = rocket::unique_ptr<E, D>;
+template<typename E> using RefCnt_Ptr = rocket::refcnt_ptr<E>;
+template<typename E> using RefCnt_Object = rocket::refcnt_object<E>;
 
-template<typename ElementT>
- using CoW_Vector = rocket::cow_vector<ElementT>;
-template<typename KeyT, typename ValueT, typename HashT, typename EqualT = rocket::transparent_equal_to>
- using CoW_HashMap = rocket::cow_hashmap<KeyT, ValueT, HashT, EqualT>;
-template<typename ElementT, std::size_t capacityT>
- using Static_Vector = rocket::static_vector<ElementT, capacityT>;
+template<typename E> using CoW_Vector = rocket::cow_vector<E>;
+template<typename K, typename V, typename H, typename E = rocket::transparent_equal_to> using CoW_HashMap = rocket::cow_hashmap<K, V, H, E>;
+template<typename E, std::size_t c> using Static_Vector = rocket::static_vector<E, c>;
 
 // Type Aliases
 using CoW_String = rocket::cow_string;

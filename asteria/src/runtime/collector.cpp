@@ -60,8 +60,7 @@ bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
           }
       };
 
-    template<typename FunctionT>
-     class Variable_Callback : public Abstract_Variable_Callback
+    template<typename FunctionT> class Variable_Callback : public Abstract_Variable_Callback
       {
       private:
         FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
@@ -79,14 +78,12 @@ bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
           }
       };
 
-    template<typename PointerT, typename FunctionT>
-     void do_enumerate_variables(const PointerT &ptr, FunctionT &&func)
+    template<typename PointerT, typename FunctionT> void do_enumerate_variables(const PointerT &ptr, FunctionT &&func)
       {
         ptr->enumerate_variables(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
-    template<typename FunctionT>
-     void do_enumerate_variables(const Variable_HashSet &set, FunctionT &&func)
+    template<typename FunctionT> void do_enumerate_variables(const Variable_HashSet &set, FunctionT &&func)
       {
         set.for_each(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }
