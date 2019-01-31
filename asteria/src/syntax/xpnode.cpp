@@ -29,7 +29,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
     case xop_prefix_pos:
       {
-        return "unary plus";
+        return "unary promotion";
       }
     case xop_prefix_neg:
       {
