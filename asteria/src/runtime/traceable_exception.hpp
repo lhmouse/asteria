@@ -53,7 +53,7 @@ class Traceable_Exception : public virtual std::exception
       }
   };
 
-template<typename ExceptionT> Traceable_Exception trace_exception(const ExceptionT &except)
+template<typename ExceptionT> inline Traceable_Exception trace_exception(const ExceptionT &except)
   {
     const auto traceable = dynamic_cast<const Traceable_Exception *>(std::addressof(except));
     if(traceable) {
