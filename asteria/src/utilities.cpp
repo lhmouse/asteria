@@ -330,17 +330,19 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
     if(rindex < 0) {
       rindex += rsize;
     }
-    Wrapped_Index wrap = { static_cast<std::uint64_t>(rindex), 0, 0 };
+    Wrapped_Index wrap = { static_cast<std::size_t>(rindex), 0, 0 };
     // If `rindex` is still negative, we will have to insert elements in the front.
     if(rindex < 0) {
       // Calculate the number of elements to fill.
-      wrap.front_fill = 0 - static_cast<std::uint64_t>(rindex);
+      const auto front_fill = rocket::min<std::uint64_t>(0 - static_cast<std::uint64_t>(rindex), SIZE_MAX);
+      wrap.front_fill = static_cast<std::size_t>(front_fill);
       return wrap;
     }
     // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
     if(rindex >= rsize) {
       // Calculate the number of elements to fill.
-      wrap.back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
+      const auto back_fill = rocket::min<std::uint64_t>(static_cast<std::uint64_t>(rindex - rsize) + 1, SIZE_MAX);
+      wrap.back_fill = static_cast<std::size_t>(back_fill);
       return wrap;
     }
     // `rindex` fits in range.

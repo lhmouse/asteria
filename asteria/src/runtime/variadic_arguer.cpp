@@ -34,7 +34,7 @@ void Variadic_Arguer::invoke(Reference &self_io, Global_Context & /*global*/, Co
         self_io = Reference_Root::S_null();
         return;
       }
-      self_io = this->get_argument(static_cast<std::size_t>(wrap.index));
+      self_io = this->get_argument(wrap.index);
       return;
     }
     // Fail.

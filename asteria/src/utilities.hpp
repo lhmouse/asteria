@@ -243,9 +243,9 @@ extern std::ostream & operator<<(std::ostream &os, const Quote &q);
 
 struct Wrapped_Index
   {
-    std::uint64_t index;
-    std::uint64_t front_fill;
-    std::uint64_t back_fill;
+    std::size_t index;
+    std::size_t front_fill;
+    std::size_t back_fill;
   };
 
 extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;

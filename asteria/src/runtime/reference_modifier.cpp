@@ -27,7 +27,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
               ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return nullptr;
             }
-            return &(arr.at(static_cast<std::size_t>(wrap.index)));
+            return arr.data() + wrap.index;
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -82,15 +82,11 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
                 ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
                 return nullptr;
               }
-              const auto size_add = wrap.front_fill + wrap.back_fill;
-              if(size_add >= arr.max_size() - arr.size()) {
-                ASTERIA_THROW_RUNTIME_ERROR("Extending the array of size `", arr.size(), "` by `", size_add, "` would exceed system resource limits.");
-              }
-              arr.insert(arr.begin(), static_cast<std::size_t>(wrap.front_fill));
-              wrap.index += static_cast<std::size_t>(wrap.front_fill);
-              arr.insert(arr.end(), static_cast<std::size_t>(wrap.back_fill));
+              arr.insert(arr.begin(), wrap.front_fill);
+              wrap.index += wrap.front_fill;
+              arr.insert(arr.end(), wrap.back_fill);
             }
-            return &(arr.mut(static_cast<std::size_t>(wrap.index)));
+            return arr.mut_data() + wrap.index;
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -144,9 +140,9 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
               ASTERIA_DEBUG_LOG("Array index is out of range: index = ", alt.index, ", size = ", arr.size());
               return D_null();
             }
-            auto erased = std::move(arr.mut(static_cast<std::size_t>(wrap.index)));
-            arr.erase(arr.begin() + static_cast<std::ptrdiff_t>(wrap.index));
-            return erased;
+            auto erased = std::move(arr.mut(wrap.index));
+            arr.erase(wrap.index, 1);
+            return std::move(erased);
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
