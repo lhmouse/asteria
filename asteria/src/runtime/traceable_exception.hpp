@@ -17,19 +17,10 @@ class Traceable_Exception : public virtual std::exception
     CoW_Vector<Backtrace_Frame> m_frames;
 
   public:
-    explicit Traceable_Exception(Value &&value)
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> Traceable_Exception(XvalueT &&xvalue, const Source_Location &sloc, const CoW_String &func)
+      : m_value(std::forward<XvalueT>(xvalue))
       {
-        this->m_value = std::move(value);
-      }
-    explicit Traceable_Exception(std::exception &&except)
-      {
-        const auto other = dynamic_cast<Traceable_Exception *>(std::addressof(except));
-        if(!other) {
-          this->m_value = D_string(except.what());
-          return;
-        }
-        this->m_value = std::move(other->m_value);
-        this->m_frames = std::move(other->m_frames);
+        this->m_frames.emplace_back(sloc, func);
       }
     ~Traceable_Exception() override;
 
@@ -61,6 +52,15 @@ class Traceable_Exception : public virtual std::exception
         this->m_frames.emplace_back(sloc, func);
       }
   };
+
+template<typename ExceptionT> Traceable_Exception trace_exception(const ExceptionT &except)
+  {
+    const auto traceable = dynamic_cast<const Traceable_Exception *>(std::addressof(except));
+    if(traceable) {
+      return *traceable;
+    }
+    return Traceable_Exception(D_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
+  }
 
 }
 

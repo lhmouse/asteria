@@ -527,18 +527,18 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
           status = alt.body_try.execute(ref_out, global, func, ctx_io);
-        } catch(std::exception &stdex) {
+        } catch(const std::exception &stdex) {
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
           // Translate the exception.
-          Traceable_Exception except(std::move(stdex));
-          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", except.get_value());
-          Reference_Root::S_temporary eref_c = { except.get_value() };
+          const auto traceable = trace_exception(stdex);
+          ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", traceable.get_value());
+          Reference_Root::S_temporary eref_c = { traceable.get_value() };
           do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, std::move(eref_c));
           // Backtrace frames.
           D_array backtrace;
-          for(std::size_t i = 0; i < except.get_frame_count(); ++i) {
-            const auto &frame = except.get_frame(i);
+          for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
+            const auto &frame = traceable.get_frame(i);
             D_object elem;
             // Append frame information.
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
@@ -562,9 +562,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception` at \'", alt.sloc, "\' inside `", func, "`: ", value);
-        Traceable_Exception except(std::move(value));
-        except.append_frame(alt.sloc, func);
-        throw except;
+        throw Traceable_Exception(std::move(value), alt.sloc, func);
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt, Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func)
