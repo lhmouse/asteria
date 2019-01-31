@@ -33,9 +33,9 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 1. Each header and source file is assigned a _root namespace_. The root namespace may be a nested namespace, an unnamed namespace or the global namespace.
 
-2. Root namespaces are not indented. Nested namespaces are indented relatively to their direct parent namespaces by **4 spaces**. Namespace members that are not namespaces are not indented relatively to the enclosing namespaces.
+2. The root namespaces is not indented. A nested namespaces is indented relatively to it direct parent namespace by **4 spaces**. A namespace member that is not a namespace is not indented relatively to its enclosing namespace.
 
-3. There shall be one blank line following the initiation of the root namespace and all other namespaces, as well as preceding the termination of the root namespace and all other namespaces.
+3. There shall be one blank line following the initiation of a namespace, as well as preceding the termination of it.
 
 4. An example is as follows:
 
