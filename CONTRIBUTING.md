@@ -39,7 +39,7 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 4. An example is as follows:
 
-```c++
+    ```c++
     namespace Some_Project {
     namespace Some_Component {
     
@@ -56,7 +56,7 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
     
     }
     }
-```
+    ```
 
 ### Formatting of Function and Function Templates
 
@@ -68,14 +68,14 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 4. An example is as follows:
 
-```c++
+    ```c++
     template<typename xelementT, typename xdeleterT,
              typename yelementT, typename ydeleterT> inline bool operator==(const unique_ptr<xelementT, xdeleterT> &lhs,
                                                                             const unique_ptr<yelementT, ydeleterT> &rhs) noexcept
       {
         return lhs.get() == rhs.get();
       }
-```
+    ```
 
 5. For a constructor or constructor template, the member initializer list starts at the next line following the prototype, indented by **2 spaces**. A line may contain purely base initializers or non-base member initializers, but not a mixture of both.
 
@@ -87,7 +87,7 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 9. An example is as follows:
 
-```c++
+    ```c++
     template<typename stringT, typename hashT> class string_storage : private allocator_wrapper_base_for<hashT>::type
       {
       public:
@@ -132,4 +132,4 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
             return this->m_hval;
           }
       };
-```
+    ```
