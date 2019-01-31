@@ -762,14 +762,14 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
 
     // This function works the same way as `substr()`.
-    // Ensure `tpos` is in `[0, size()]` and return `min(n, size() - tpos)`.
-    size_type do_clamp_substr(size_type tpos, size_type n) const
+    // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
+    size_type do_clamp_substr(size_type tpos, size_type tn) const
       {
         const auto tlen = this->size();
         if(tpos > tlen) {
           this->do_throw_subscript_out_of_range(tpos);
         }
-        return noadl::min(tlen - tpos, n);
+        return noadl::min(tlen - tpos, tn);
       }
 
     template<typename ...paramsT> value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
@@ -1035,7 +1035,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
 
     // 24.3.2.6, modifiers
-    basic_cow_string & operator+=(const basic_cow_string & other)
+    basic_cow_string & operator+=(const basic_cow_string &other)
       {
         return this->append(other);
       }
@@ -1052,7 +1052,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         return this->append(init);
       }
 
-    basic_cow_string & append(const basic_cow_string & other, size_type pos = 0, size_type n = npos)
+    basic_cow_string & append(const basic_cow_string &other, size_type pos = 0, size_type n = npos)
       {
         return this->append(other.data() + pos, other.do_clamp_substr(pos, n));
       }
@@ -1216,7 +1216,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         return *this;
       }
 
-    basic_cow_string & insert(size_type tpos, const basic_cow_string & other, size_type pos = 0, size_type n = npos)
+    basic_cow_string & insert(size_type tpos, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
       {
         this->do_replace_no_bound_check(tpos, this->do_clamp_substr(tpos, 0), details_cow_string::append, other, pos, n);
         return *this;
