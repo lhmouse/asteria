@@ -17,10 +17,10 @@ class Variable_HashSet
         // A null pointer indicates an empty bucket.
         RefCnt_Ptr<Variable> first;
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
-        // For each other bucket: `prev` points to the previous non-empty bucket.
+        // For every other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size; Bucket *prev; };
         // For the last bucket:   `reserved` is reserved for future use.
-        // For each other bucket: `next` points to the next non-empty bucket.
+        // For every other bucket: `next` points to the next non-empty bucket.
         union { std::size_t reserved; Bucket *next; };
 
         Bucket() noexcept
