@@ -29,27 +29,20 @@ Expression Expression::bind(const Global_Context &global, const Analytic_Context
 
 bool Expression::evaluate_partial(Reference_Stack &stack_io, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const
   {
-    auto rptr = this->m_cinsts.data();
-    const auto eptr = rptr + this->m_cinsts.size();
-    if(rptr == eptr) {
+    auto count = this->m_cinsts.size();
+    if(count == 0) {
       return false;
     }
-    const auto stack_size_old = stack_io.size();
     // Evaluate nodes one by one.
+    const auto stack_size_old = stack_io.size();
     const auto params = std::tie(stack_io, global, func, ctx);
-    for(;;) {
-      (*rptr)(params);
-#ifdef ROCKET_DEBUG
-      if(stack_io.size() < stack_size_old) {
-        ASTERIA_TERMINATE("The expression evaluation stack is corrupted: stack_size_old = ", stack_size_old, ", stack_size_new = ", stack_io.size());
-      }
-#endif
-      ++rptr;
-      if(rptr == eptr) {
-        break;
-      }
+    auto cptr = this->m_cinsts.data();
+    while(--count != 0) {
+      (*cptr)(params);
+      ROCKET_ASSERT_MSG(stack_io.size() >= stack_size_old, "The expression evaluation stack is corrupted.");
+      ++cptr;
     }
-    // The value of this expression shall be on the top of `stack_io`. There will be no more elements pushed after all.
+    (*cptr)(params);
     ROCKET_ASSERT(stack_io.size() - stack_size_old == 1);
     return true;
   }

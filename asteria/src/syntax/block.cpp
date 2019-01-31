@@ -38,26 +38,22 @@ Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &globa
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func) const
   {
-    auto rptr = this->m_cinsts.data();
-    const auto eptr = rptr + this->m_cinsts.size();
-    if(rptr == eptr) {
+    auto count = this->m_cinsts.size();
+    if(count == 0) {
       return status_next;
     }
     // Execute statements one by one.
     const auto params = std::tie(ref_out, ctx_io, global, func);
-    for(;;) {
-      const auto status = (*rptr)(params);
+    auto cptr = this->m_cinsts.data();
+    while(--count != 0) {
+      const auto status = (*cptr)(params);
       if(ROCKET_UNEXPECT(status != status_next)) {
         // Forward anything unexpected recursively.
         return status;
       }
-      ++rptr;
-      if(rptr == eptr) {
-        break;
-      }
+      ++cptr;
     }
-    // The current control flow has reached the end of this block.
-    return status_next;
+    return (*cptr)(params);
   }
 
 Block Block::bind(const Global_Context &global, const Analytic_Context &ctx) const
@@ -92,10 +88,8 @@ void Block::execute_as_function(Reference &self_io, Global_Context &global, cons
       {
         // Return `null` if the control flow reached the end of the function.
         self_io = Reference_Root::S_null();
-        return;
-      }
+        // Fallthough.
     case status_return:
-      {
         // Return the reference in `self_io`.
         return;
       }
