@@ -15,8 +15,8 @@ void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noe
       return;
     }
     collector->collect(UINT_MAX);
-  } catch(std::exception &e) {
-    ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection and some resources might have leaked: ", e.what());
+  } catch(const std::exception &stdex) {
+    ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection and some resources might have leaked: ", stdex.what());
   }
 
 Abstract_Context::~Abstract_Context()
