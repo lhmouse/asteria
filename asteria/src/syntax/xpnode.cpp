@@ -420,27 +420,27 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         }
       }
 
-    ROCKET_PURE_FUNCTION inline bool do_logical_not(bool rhs)
+    ROCKET_PURE_FUNCTION bool do_operator_not(bool rhs)
       {
         return !rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline bool do_logical_and(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION bool do_operator_and(bool lhs, bool rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline bool do_logical_or(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION bool do_operator_or(bool lhs, bool rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline bool do_logical_xor(bool lhs, bool rhs)
+    ROCKET_PURE_FUNCTION bool do_operator_xor(bool lhs, bool rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_negate(std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_neg(std::int64_t rhs)
       {
         if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
@@ -450,7 +450,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return static_cast<std::int64_t>(res);
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_add(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_add(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -458,7 +458,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_subtract(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_sub(std::int64_t lhs, std::int64_t rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -466,7 +466,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_multiply(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_mul(std::int64_t lhs, std::int64_t rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -488,7 +488,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return slhs * arhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_divide(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_div(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -499,7 +499,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_modulo(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_mod(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -510,7 +510,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return lhs % rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_left_logical(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_sll(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -523,7 +523,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return static_cast<std::int64_t>(res);
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_right_logical(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_srl(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -536,7 +536,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return static_cast<std::int64_t>(res);
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_left_arithmetic(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_sla(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -558,7 +558,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return static_cast<std::int64_t>(res);
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_shift_right_arithmetic(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_sra(std::int64_t lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -577,57 +577,57 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return static_cast<std::int64_t>(res);
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_not(std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_not(std::int64_t rhs)
       {
         return ~rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_and(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_and(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_or(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_or(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline std::int64_t do_bitwise_xor(std::int64_t lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION std::int64_t do_operator_xor(std::int64_t lhs, std::int64_t rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_negate(double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_neg(double rhs)
       {
         return -rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_add(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_add(double lhs, double rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_subtract(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_sub(double lhs, double rhs)
       {
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_multiply(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_mul(double lhs, double rhs)
       {
         return lhs * rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_divide(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_div(double lhs, double rhs)
       {
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION inline double do_modulo(double lhs, double rhs)
+    ROCKET_PURE_FUNCTION double do_operator_mod(double lhs, double rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_concatenate(const CoW_String &lhs, const CoW_String &rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_add(const CoW_String &lhs, const CoW_String &rhs)
       {
         CoW_String res;
         res.reserve(lhs.size() + rhs.size());
@@ -636,7 +636,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_duplicate(const CoW_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_mul(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
@@ -663,7 +663,12 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_move_left(const CoW_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_mul(std::int64_t lhs, const CoW_String &rhs)
+      {
+        return do_operator_mul(rhs, lhs);
+      }
+
+    ROCKET_PURE_FUNCTION CoW_String do_operator_sll(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -678,7 +683,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_move_right(const CoW_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_srl(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -693,7 +698,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_extend(const CoW_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_sla(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -708,7 +713,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    ROCKET_PURE_FUNCTION inline CoW_String do_truncate(const CoW_String &lhs, std::int64_t rhs)
+    ROCKET_PURE_FUNCTION CoW_String do_operator_sra(const CoW_String &lhs, std::int64_t rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -731,14 +736,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(value.type() == type_integer) {
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
-          lhs = do_add(lhs, D_integer(1));
+          lhs = do_operator_add(lhs, D_integer(1));
           do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
-          lhs = do_add(lhs, D_real(1));
+          lhs = do_operator_add(lhs, D_real(1));
           do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
@@ -754,14 +759,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(value.type() == type_integer) {
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
-          lhs = do_subtract(lhs, D_integer(1));
+          lhs = do_operator_sub(lhs, D_integer(1));
           do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
-          lhs = do_subtract(lhs, D_real(1));
+          lhs = do_operator_sub(lhs, D_real(1));
           do_set_temporary(stack_io, false, std::move(ref_c));
           return;
         }
@@ -784,13 +789,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_negate(rhs);
+          rhs = do_operator_neg(rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_real) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_negate(rhs);
+          rhs = do_operator_neg(rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -804,13 +809,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_boolean) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_not(rhs);
+          rhs = do_operator_not(rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_bitwise_not(rhs);
+          rhs = do_operator_not(rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -823,7 +828,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
-        ref_c.value = do_logical_not(ref_c.value.test());
+        ref_c.value = do_operator_not(ref_c.value.test());
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
@@ -835,12 +840,12 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         auto &value = stack_io.top().open();
         if(value.type() == type_integer) {
           auto &rhs = value.check<D_integer>();
-          rhs = do_add(rhs, D_integer(1));
+          rhs = do_operator_add(rhs, D_integer(1));
           return;
         }
         if(value.type() == type_real) {
           auto &rhs = value.check<D_real>();
-          rhs = do_add(rhs, D_real(1));
+          rhs = do_operator_add(rhs, D_real(1));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
@@ -854,12 +859,12 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         auto &value = stack_io.top().open();
         if(value.type() == type_integer) {
           auto &rhs = value.check<D_integer>();
-          rhs = do_subtract(rhs, D_integer(1));
+          rhs = do_operator_sub(rhs, D_integer(1));
           return;
         }
         if(value.type() == type_real) {
           auto &rhs = value.check<D_real>();
-          rhs = do_subtract(rhs, D_real(1));
+          rhs = do_operator_sub(rhs, D_real(1));
           return;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
@@ -1039,27 +1044,27 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_or(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_or(lhs.check<D_boolean>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` and `real` types, return the sum of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_add(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_add(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_add(lhs.check<D_real>(), rhs);
+          rhs = do_operator_add(lhs.check<D_real>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
-          rhs = do_concatenate(lhs.check<D_string>(), rhs);
+          rhs = do_operator_add(lhs.check<D_string>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1075,19 +1080,19 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_xor(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_xor(lhs.check<D_boolean>(), rhs);
           return;
         }
         // For the `integer` and `real` types, return the difference of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_subtract(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_sub(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_subtract(lhs.check<D_real>(), rhs);
+          rhs = do_operator_sub(lhs.check<D_real>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1103,32 +1108,32 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For type `boolean`, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_and(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_and(lhs.check<D_boolean>(), rhs);
           return;
         }
         // For the `integer` and `real` types, return the product of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_multiply(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_mul(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_multiply(lhs.check<D_real>(), rhs);
+          rhs = do_operator_mul(lhs.check<D_real>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
           // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
-          ref_c.value = do_duplicate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+          ref_c.value = do_operator_mul(lhs.check<D_string>(), ref_c.value.check<D_integer>());
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
-          rhs = do_duplicate(rhs, lhs.check<D_integer>());
+          rhs = do_operator_mul(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1144,13 +1149,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `integer` and `real` types, return the quotient of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_divide(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_div(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_divide(lhs.check<D_real>(), rhs);
+          rhs = do_operator_div(lhs.check<D_real>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1166,13 +1171,13 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For types `integer` and `real`, return the reminder of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_modulo(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_mod(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
-          rhs = do_modulo(lhs.check<D_real>(), rhs);
+          rhs = do_operator_mod(lhs.check<D_real>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1191,7 +1196,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
-            rhs = do_shift_left_logical(lhs.check<D_integer>(), rhs);
+            rhs = do_operator_sll(lhs.check<D_integer>(), rhs);
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1199,7 +1204,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // The number of bytes in the first operand will be preserved.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
-            ref_c.value = do_move_left(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+            ref_c.value = do_operator_sll(lhs.check<D_string>(), ref_c.value.check<D_integer>());
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1219,7 +1224,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
-            rhs = do_shift_right_logical(lhs.check<D_integer>(), rhs);
+            rhs = do_operator_srl(lhs.check<D_integer>(), rhs);
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1227,7 +1232,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // The number of bytes in the first operand will be preserved.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
-            ref_c.value = do_move_right(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+            ref_c.value = do_operator_srl(lhs.check<D_string>(), ref_c.value.check<D_integer>());
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1248,14 +1253,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
-            rhs = do_shift_left_arithmetic(lhs.check<D_integer>(), rhs);
+            rhs = do_operator_sla(lhs.check<D_integer>(), rhs);
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, fill space characters in the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
-            ref_c.value = do_extend(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+            ref_c.value = do_operator_sla(lhs.check<D_string>(), ref_c.value.check<D_integer>());
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1275,14 +1280,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
-            rhs = do_shift_right_arithmetic(lhs.check<D_integer>(), rhs);
+            rhs = do_operator_sra(lhs.check<D_integer>(), rhs);
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
           // If the first operand has type `string`, discard characters from the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
-            ref_c.value = do_truncate(lhs.check<D_string>(), ref_c.value.check<D_integer>());
+            ref_c.value = do_operator_sra(lhs.check<D_string>(), ref_c.value.check<D_integer>());
             do_set_temporary(stack_io, alt.assign, std::move(ref_c));
             return;
           }
@@ -1299,14 +1304,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `boolean` type, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_and(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_and(lhs.check<D_boolean>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise AND'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_bitwise_and(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_and(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1322,14 +1327,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_or(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_or(lhs.check<D_boolean>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise OR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_bitwise_or(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_or(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
@@ -1345,14 +1350,14 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
-          rhs = do_logical_xor(lhs.check<D_boolean>(), rhs);
+          rhs = do_operator_xor(lhs.check<D_boolean>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
         // For the `integer` type, return the bitwise XOR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
-          rhs = do_bitwise_xor(lhs.check<D_integer>(), rhs);
+          rhs = do_operator_xor(lhs.check<D_integer>(), rhs);
           do_set_temporary(stack_io, alt.assign, std::move(ref_c));
           return;
         }
