@@ -88,14 +88,14 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 9. An example is as follows:
 
     ```c++
-    template<typename stringT, typename hashT> class string_storage : private allocator_wrapper_base_for<hashT>::type
+    template<typename stringT, typename hashT> class string_storage : private ebo_wrapper<hashT>::type
       {
       public:
         using string_type  = stringT;
         using hasher       = hashT;
     
       private:
-        using hasher_base   = typename allocator_wrapper_base_for<hasher>::type;
+        using hasher_base   = typename ebo_wrapper<hasher>::type;
     
       private:
         string_type m_str;
