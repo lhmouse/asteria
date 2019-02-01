@@ -148,16 +148,16 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }
+            storage_handle::do_drop_reference(ptr);
+          }
+
+        static void do_drop_reference(storage_pointer ptr) noexcept
+          {
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
             if(ROCKET_EXPECT(!ptr->nref.decrement())) {
               return;
             }
             // If it has been decremented to zero, deallocate the block.
-            storage_handle::do_deallocate_storage(ptr);
-          }
-
-        ROCKET_NOINLINE static void do_deallocate_storage(storage_pointer ptr) noexcept
-          {
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));

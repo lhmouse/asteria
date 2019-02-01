@@ -217,18 +217,17 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }
-            // This is needed for incompleteness support.
-            const auto hptr = reinterpret_cast<storage_header *>(noadl::unfancy(ptr));
+            // This is needed for incomplete type support.
+            (*reinterpret_cast<void (*)(storage_pointer)>(reinterpret_cast<const storage_header *>(noadl::unfancy(ptr))->dtor))(ptr);
+          }
+
+        ROCKET_NOINLINE static void do_drop_reference(storage_pointer ptr) noexcept
+          {
             // Decrement the reference count with acquire-release semantics to prevent races on `ptr->alloc`.
-            if(ROCKET_EXPECT(!hptr->nref.decrement())) {
+            if(ROCKET_EXPECT(!ptr->nref.decrement())) {
               return;
             }
             // If it has been decremented to zero, deallocate the block.
-            (*reinterpret_cast<void (*)(storage_pointer)>(hptr->dtor))(ptr);
-          }
-
-        ROCKET_NOINLINE static void do_deallocate_storage(storage_pointer ptr) noexcept
-          {
             auto st_alloc = storage_allocator(ptr->alloc);
             const auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
@@ -334,7 +333,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-            noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_deallocate_storage), this->as_allocator(), nblk);
+            noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
             const auto ptr_old = this->m_ptr;
             if(ROCKET_UNEXPECT(ptr_old)) {
               try {
