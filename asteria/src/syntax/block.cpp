@@ -75,8 +75,7 @@ void Block::enumerate_variables(const Abstract_Variable_Callback &callback) cons
 
 void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, CoW_Vector<Reference> &&args) const
   {
-    Function_Executive_Context ctx_next(nullptr);
-    ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
+    Function_Executive_Context ctx_next(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
     const auto status = this->execute_in_place(self_io, ctx_next, zvarg->get_function_signature(), global);
     switch(status) {
@@ -109,8 +108,7 @@ void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic
 
 Instantiated_Function Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
   {
-    Function_Analytic_Context ctx_next(&ctx);
-    ctx_next.initialize(params);
+    Function_Analytic_Context ctx_next(&ctx, params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
     return Instantiated_Function(sloc, name, params, std::move(body_bnd));

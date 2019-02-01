@@ -223,8 +223,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
-        Function_Analytic_Context ctx_next(&ctx);
-        ctx_next.initialize(alt.params);
+        Function_Analytic_Context ctx_next(&ctx, alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Xpnode::S_closure_function alt_bnd = { alt.sloc, alt.params, std::move(body_bnd) };
         nodes_out.emplace_back(std::move(alt_bnd));

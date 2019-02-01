@@ -110,8 +110,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "function", alt.name, Reference_Root::S_null());
         // Bind the function body recursively.
-        Function_Analytic_Context ctx_next(&ctx_io);
-        ctx_next.initialize(alt.params);
+        Function_Analytic_Context ctx_next(&ctx_io, alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
         Statement::S_function alt_bnd = { alt.sloc, alt.name, alt.params, std::move(body_bnd) };
         stmts_out.emplace_back(std::move(alt_bnd));

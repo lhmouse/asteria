@@ -36,7 +36,7 @@ Function_Executive_Context::~Function_Executive_Context()
 
     }
 
-void Function_Executive_Context::initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args)
+void Function_Executive_Context::do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
     for(const auto &param : params) {

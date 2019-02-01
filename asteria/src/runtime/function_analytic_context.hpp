@@ -16,15 +16,16 @@ class Function_Analytic_Context : public Analytic_Context
     Static_Vector<Reference_Dictionary::Template, 7> m_predef_refs;
 
   public:
-    explicit Function_Analytic_Context(const Abstract_Context *parent_opt) noexcept
-      : Analytic_Context(parent_opt),
-        m_predef_refs()
+    Function_Analytic_Context(const Abstract_Context *parent_opt,
+                              const CoW_Vector<PreHashed_String> &params)
+      : Analytic_Context(parent_opt)
       {
+        this->do_set_parameters(params);
       }
     ~Function_Analytic_Context() override;
 
-  public:
-    void initialize(const CoW_Vector<PreHashed_String> &params);
+  private:
+    void do_set_parameters(const CoW_Vector<PreHashed_String> &params);
   };
 
 }

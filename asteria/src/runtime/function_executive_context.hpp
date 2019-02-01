@@ -16,15 +16,16 @@ class Function_Executive_Context : public Executive_Context
     Static_Vector<Reference_Dictionary::Template, 7> m_predef_refs;
 
   public:
-    explicit Function_Executive_Context(std::nullptr_t) noexcept  // The argument is reserved.
-      : Executive_Context(nullptr),
-        m_predef_refs()
+    Function_Executive_Context(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params,
+                               Reference &&self, CoW_Vector<Reference> &&args)
+      : Executive_Context(nullptr)
       {
+        this->do_set_arguments(zvarg, params, std::move(self), std::move(args));
       }
     ~Function_Executive_Context() override;
 
-  public:
-    void initialize(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args);
+  private:
+    void do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args);
   };
 
 }
