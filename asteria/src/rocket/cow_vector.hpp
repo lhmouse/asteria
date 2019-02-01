@@ -716,6 +716,13 @@ template<typename valueT, typename allocatorT> class cow_vector
       {
         this->assign(n, value);
       }
+    // N.B. This is a non-standard extension.
+    template<typename firstT, typename ...restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type,
+                                                                           allocator_type>::value)> cow_vector(size_type n, const firstT &first, const restT &...rest)
+      : cow_vector(allocator_type())
+      {
+        this->assign(n, first, rest...);
+      }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector(inputT first, inputT last,
                                                                                                                 const allocator_type &alloc = allocator_type())
       : cow_vector(alloc)

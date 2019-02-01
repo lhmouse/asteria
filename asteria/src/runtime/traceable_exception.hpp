@@ -17,10 +17,12 @@ class Traceable_Exception : public virtual std::exception
     CoW_Vector<Backtrace_Frame> m_frames;
 
   public:
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> Traceable_Exception(XvalueT &&xvalue, const Source_Location &sloc, const CoW_String &func)
-      : m_value(std::forward<XvalueT>(xvalue))
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT,
+                                                                    Value>::value)> Traceable_Exception(XvalueT &&xvalue,
+                                                                                                        const Source_Location &sloc, const CoW_String &func)
+      : m_value(std::forward<XvalueT>(xvalue)),
+        m_frames(1, sloc, func)
       {
-        this->m_frames.emplace_back(sloc, func);
       }
     ~Traceable_Exception() override;
 
