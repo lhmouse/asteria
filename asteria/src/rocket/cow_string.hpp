@@ -566,6 +566,17 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         str->push_back(::std::forward<paramsT>(params)...);
       }
 
+    template<typename traitsT, typename eofT> inline size_t xhash_range(const typename traitsT::char_type *str, eofT &&eof)
+      {
+        // This implements the FNV-1a hash algorithm.
+        char32_t reg = 0x811c9dc5;
+        for(auto q = str; !::std::forward<eofT>(eof)(q); ++q) {
+          reg ^= static_cast<char32_t>(traitsT::to_int_type(*q));
+          reg *= 0x1000193;
+        }
+        return reg;
+      }
+
     }
 
 template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT *str) noexcept
@@ -1670,25 +1681,13 @@ template<typename charT, typename traitsT, typename allocatorT> struct basic_cow
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
 
-    result_type operator()(const argument_type &str) const noexcept
+    constexpr result_type operator()(const argument_type &str) const noexcept
       {
-        // This implements the DJBX33A hash algorithm.
-        char32_t reg = 5381;
-        for(auto rptr = str.data(), eptr = rptr + str.size(); rptr != eptr; ++rptr) {
-          const auto ch = static_cast<char32_t>(traits_type::to_int_type(*rptr));
-          reg = reg * 33 + ch;
-        }
-        return reg;
+        return details_cow_string::xhash_range<traitsT>(str.data(), [&](const charT *ptr) { return ptr == str.data() + str.size(); });
       }
-    result_type operator()(const value_type *str) const noexcept
+    constexpr result_type operator()(const charT *str) const noexcept
       {
-        // This implements the DJBX33A hash algorithm.
-        char32_t reg = 5381;
-        for(auto rptr = str; !traits_type::eq(*rptr, value_type()); ++rptr) {
-          const auto ch = static_cast<char32_t>(traits_type::to_int_type(*rptr));
-          reg = reg * 33 + ch;
-        }
-        return reg;
+        return details_cow_string::xhash_range<traitsT>(str, [&](const charT *ptr) { return traitsT::eq(*ptr, charT()); });
       }
   };
 
