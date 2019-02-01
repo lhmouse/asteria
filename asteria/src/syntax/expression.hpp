@@ -16,7 +16,7 @@ class Expression
     using Compiled_Instruction =
       rocket::bind_front_result<
         void (*)(const void *,
-                 const std::tuple<Reference_Stack &, Global_Context &, const CoW_String &, const Executive_Context &> &),
+                 const std::tuple<Reference_Stack &, const CoW_String &, const Global_Context &, const Executive_Context &> &),
         const void *>;
 
   private:
@@ -44,8 +44,8 @@ class Expression
       }
 
     Expression bind(const Global_Context &global, const Analytic_Context &ctx) const;
-    bool evaluate_partial(Reference_Stack &stack_io, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const;
-    void evaluate(Reference &ref_out, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const;
+    bool evaluate_partial(Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const;
+    void evaluate(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

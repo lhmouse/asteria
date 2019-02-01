@@ -40,7 +40,7 @@ class Instantiated_Function : public Abstract_Function
       }
 
     void describe(std::ostream &os) const override;
-    void invoke(Reference &self_io, Global_Context &global, CoW_Vector<Reference> &&args) const override;
+    void invoke(Reference &self_io, const Global_Context &global, CoW_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 

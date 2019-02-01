@@ -61,11 +61,11 @@ void Simple_Source_File::clear() noexcept
     this->m_file = rocket::sref("");
   }
 
-Reference Simple_Source_File::execute(Global_Context &global, CoW_Vector<Reference> &&args) const
+Reference Simple_Source_File::execute(const Global_Context &global, CoW_Vector<Reference> &&args) const
   {
     Reference self;
     Variadic_Arguer zvarg(Source_Location(this->m_file, 0), rocket::sref("<file scope>"));
-    this->m_code.execute_as_function(self, global, std::ref(zvarg), { }, std::move(args));
+    this->m_code.execute_as_function(self, std::ref(zvarg), { } /* no parameters */, global, std::move(args));
     return self;
   }
 

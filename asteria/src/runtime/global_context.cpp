@@ -27,7 +27,7 @@ void Global_Context::do_initialize()
     this->open_named_reference(rocket::sref("std")) = std::move(ref_c);
   }
 
-RefCnt_Ptr<Variable> Global_Context::create_variable()
+RefCnt_Ptr<Variable> Global_Context::create_variable() const
   {
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
     ROCKET_ASSERT(collector);

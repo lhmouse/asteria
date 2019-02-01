@@ -81,7 +81,7 @@ int main()
     Global_Context global;
     Executive_Context ctx(nullptr);
     Reference ref;
-    auto status = block.execute_in_place(ref, ctx, global, rocket::sref("dummy_function"));
+    auto status = block.execute_in_place(ref, ctx, rocket::sref("dummy_function"), global);
     ASTERIA_TEST_CHECK(status == Block::status_next);
     auto qref = ctx.get_named_reference_opt(rocket::sref("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);

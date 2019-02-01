@@ -36,7 +36,7 @@ class Global_Context : public Abstract_Context
         return nullptr;
       }
 
-    RefCnt_Ptr<Variable> create_variable();
+    RefCnt_Ptr<Variable> create_variable() const;
   };
 
 }

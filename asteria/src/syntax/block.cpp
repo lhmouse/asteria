@@ -36,14 +36,14 @@ Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &globa
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global) const
   {
     auto count = this->m_cinsts.size();
     if(count == 0) {
       return status_next;
     }
     // Execute statements one by one.
-    const auto params = std::tie(ref_out, ctx_io, global, func);
+    const auto params = std::tie(ref_out, ctx_io, func, global);
     auto cptr = this->m_cinsts.data();
     while(--count != 0) {
       const auto status = (*cptr)(params);
@@ -62,27 +62,23 @@ Block Block::bind(const Global_Context &global, const Analytic_Context &ctx) con
     return this->bind_in_place(ctx_next, global);
   }
 
-Block::Status Block::execute(Reference &ref_out, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const
+Block::Status Block::execute(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const
   {
     Executive_Context ctx_next(&ctx);
-    return this->execute_in_place(ref_out, ctx_next, global, func);
+    return this->execute_in_place(ref_out, ctx_next, func, global);
   }
 
-Instantiated_Function Block::instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const
+void Block::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    Function_Analytic_Context ctx_next(&ctx);
-    ctx_next.initialize(params);
-    // Bind the body recursively.
-    auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Instantiated_Function(sloc, name, params, std::move(body_bnd));
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback); });
   }
 
-void Block::execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, CoW_Vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, CoW_Vector<Reference> &&args) const
   {
     Function_Executive_Context ctx_next(nullptr);
     ctx_next.initialize(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, ctx_next, global, zvarg->get_function_signature());
+    const auto status = this->execute_in_place(self_io, ctx_next, zvarg->get_function_signature(), global);
     switch(status) {
     case status_next:
       {
@@ -111,9 +107,13 @@ void Block::execute_as_function(Reference &self_io, Global_Context &global, cons
     }
   }
 
-void Block::enumerate_variables(const Abstract_Variable_Callback &callback) const
+Instantiated_Function Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
   {
-    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback); });
+    Function_Analytic_Context ctx_next(&ctx);
+    ctx_next.initialize(params);
+    // Bind the body recursively.
+    auto body_bnd = this->bind_in_place(ctx_next, global);
+    return Instantiated_Function(sloc, name, params, std::move(body_bnd));
   }
 
 }

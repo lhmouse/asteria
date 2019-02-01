@@ -29,7 +29,7 @@ class Block
     using Compiled_Instruction =
       rocket::bind_front_result<
         Status (*)(const void *,
-                   const std::tuple<Reference &, Executive_Context &, Global_Context &, const CoW_String &> &),
+                   const std::tuple<Reference &, Executive_Context &, const CoW_String &, const Global_Context &> &),
         const void *>;
 
   private:
@@ -58,15 +58,15 @@ class Block
 
     void fly_over_in_place(Abstract_Context &ctx_io) const;
     Block bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const;
-    Status execute_in_place(Reference &ref_out, Executive_Context &ctx_io, Global_Context &global, const CoW_String &func) const;
+    Status execute_in_place(Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global) const;
 
     Block bind(const Global_Context &global, const Analytic_Context &ctx) const;
-    Status execute(Reference &ref_out, Global_Context &global, const CoW_String &func, const Executive_Context &ctx) const;
-
-    Instantiated_Function instantiate_function(Global_Context &global, const Executive_Context &ctx, const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params) const;
-    void execute_as_function(Reference &self_io, Global_Context &global, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, CoW_Vector<Reference> &&args) const;
+    Status execute(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+
+    void execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, CoW_Vector<Reference> &&args) const;
+    Instantiated_Function instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const;
   };
 
 }

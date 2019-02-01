@@ -49,7 +49,7 @@ class Simple_Source_File
     Parser_Error load_stream(std::istream &cstrm_io, const CoW_String &filename);
     void clear() noexcept;
 
-    Reference execute(Global_Context &global, CoW_Vector<Reference> &&args) const;
+    Reference execute(const Global_Context &global, CoW_Vector<Reference> &&args) const;
   };
 
 }
