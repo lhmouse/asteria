@@ -19,12 +19,18 @@ class Variadic_Arguer : public Abstract_Function
     CoW_Vector<Reference> m_vargs;
 
   public:
-    Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &func)
-      : m_sloc(sloc), m_func(func), m_vargs()
+    template<typename ...XvargsT, ROCKET_ENABLE_IF(std::is_constructible<CoW_Vector<Reference>,
+                                                                         XvargsT &&...>::value)> Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &func,
+                                                                                                                 XvargsT &&...xvargs)
+      : m_sloc(sloc), m_func(func),
+        m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
-    Variadic_Arguer(const Variadic_Arguer &other, CoW_Vector<Reference> &&vargs)
-      : m_sloc(other.m_sloc), m_func(other.m_func), m_vargs(std::move(vargs))
+    template<typename ...XvargsT, ROCKET_ENABLE_IF(std::is_constructible<CoW_Vector<Reference>,
+                                                                         XvargsT &&...>::value)> Variadic_Arguer(const Variadic_Arguer &other,
+                                                                                                                 XvargsT &&...xvargs)
+      : m_sloc(other.m_sloc), m_func(other.m_func),
+        m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
 
