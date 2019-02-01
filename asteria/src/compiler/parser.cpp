@@ -1676,7 +1676,7 @@ namespace Asteria {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_or_expression_expected);
         }
         Statement::S_return stmt_c = { by_ref, std::move(expr) };
         stmts_out.emplace_back(std::move(stmt_c));
