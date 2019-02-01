@@ -799,9 +799,9 @@ template<typename valueT, typename allocatorT> class cow_vector
                                   static_cast<long long>(pos), static_cast<long long>(this->size()));
       }
 
-    // This function works the same way as `substr()`.
+    // This function works the same way as `std::string::substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
-    size_type do_clamp_substr(size_type tpos, size_type tn) const
+    ROCKET_PURE_FUNCTION size_type do_clamp_subrange(size_type tpos, size_type tn) const
       {
         const auto tcnt = this->size();
         if(tpos > tcnt) {
@@ -1083,31 +1083,31 @@ template<typename valueT, typename allocatorT> class cow_vector
     // N.B. This is a non-standard extension.
     cow_vector & insert(size_type tpos, const value_type &value)
       {
-        this->do_insert_no_bound_check(this->do_clamp_substr(tpos, 0), details_cow_vector::push_back, value);
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::push_back, value);
         return *this;
       }
     // N.B. This is a non-standard extension.
     cow_vector & insert(size_type tpos, value_type &&value)
       {
-        this->do_insert_no_bound_check(this->do_clamp_substr(tpos, 0), details_cow_vector::push_back, ::std::move(value));
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::push_back, ::std::move(value));
         return *this;
       }
     // N.B. This is a non-standard extension.
     template<typename ...paramsT> cow_vector & insert(size_type tpos, size_type n, const paramsT &...params)
       {
-        this->do_insert_no_bound_check(this->do_clamp_substr(tpos, 0), details_cow_vector::append, n, params...);
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, n, params...);
         return *this;
       }
     // N.B. This is a non-standard extension.
     cow_vector & insert(size_type tpos, initializer_list<value_type> init)
       {
-        this->do_insert_no_bound_check(this->do_clamp_substr(tpos, 0), details_cow_vector::append, init);
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, init);
         return *this;
       }
     // N.B. This is a non-standard extension.
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector & insert(size_type tpos, inputT first, inputT last)
       {
-        this->do_insert_no_bound_check(this->do_clamp_substr(tpos, 0), details_cow_vector::append, ::std::move(first), ::std::move(last));
+        this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, ::std::move(first), ::std::move(last));
         return *this;
       }
     iterator insert(const_iterator tins, const value_type &value)
@@ -1146,7 +1146,7 @@ template<typename valueT, typename allocatorT> class cow_vector
     // N.B. This is a non-standard extension.
     cow_vector & erase(size_type tpos = 0, size_type tn = size_type(-1))
       {
-        this->do_erase_no_bound_check(tpos, this->do_clamp_substr(tpos, tn));
+        this->do_erase_no_bound_check(tpos, this->do_clamp_subrange(tpos, tn));
         return *this;
       }
     // N.B. This function may throw `std::bad_alloc`.

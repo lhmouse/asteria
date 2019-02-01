@@ -763,7 +763,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
 
     // This function works the same way as `substr()`.
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
-    size_type do_clamp_substr(size_type tpos, size_type tn) const
+    ROCKET_PURE_FUNCTION size_type do_clamp_substr(size_type tpos, size_type tn) const
       {
         const auto tlen = this->size();
         if(tpos > tlen) {
