@@ -16,6 +16,7 @@ class Global_Context : public Abstract_Context
     RefCnt_Ptr<RefCnt_Base> m_collector;
 
   public:
+    // A global context does not have a parent context.
     Global_Context()
       : Abstract_Context()
       {

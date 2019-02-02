@@ -16,6 +16,7 @@ class Function_Analytic_Context : public Analytic_Context
     Static_Vector<Reference_Dictionary::Template, 7> m_predef_refs;
 
   public:
+    // A function analytic context can be created on another analytic or executive context.
     Function_Analytic_Context(const Abstract_Context *parent_opt,
                               const CoW_Vector<PreHashed_String> &params)
       : Analytic_Context(parent_opt)
