@@ -570,9 +570,10 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       {
         // This implements the FNV-1a hash algorithm.
         char32_t reg = 0x811c9dc5;
-        for(auto q = str; !::std::forward<eofT>(eof)(q); ++q) {
-          reg ^= static_cast<char32_t>(traitsT::to_int_type(*q));
-          reg *= 0x1000193;
+        for(auto cp = str; !::std::forward<eofT>(eof)(cp); ++cp) {
+          unsigned char cbytes[sizeof(*cp)];
+          ::std::memcpy(cbytes, cp, sizeof(*cp));
+          noadl::ranged_for(cbytes, cbytes + sizeof(cbytes), [&](const unsigned char *bp) { reg = (reg ^ *bp) * 0x1000193; });
         }
         return reg;
       }
