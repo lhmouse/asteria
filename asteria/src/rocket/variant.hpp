@@ -249,8 +249,8 @@ template<typename ...alternativesT> class variant
         noadl::construct_at(static_cast<typename type_at<index_new>::type *>(this->m_stor));
         this->m_index = index_new;
       }
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)
-             > variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT &&>::value)
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)> variant(paramT &&param) noexcept(is_nothrow_constructible<typename decay<paramT>::type,
+                                                                                                                                                                   paramT &&>::value)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
@@ -281,8 +281,8 @@ template<typename ...alternativesT> class variant
         this->m_index = index_new;
       }
     // 23.7.3.3, assignment
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)
-             > variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>, is_nothrow_copy_constructible<paramT>>::value)
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)> variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
+                                                                                                                                                 is_nothrow_copy_constructible<paramT>>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -317,8 +317,7 @@ template<typename ...alternativesT> class variant
         return *this;
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
-    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)
-             > variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
+    template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)> variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -464,15 +463,13 @@ template<typename ...alternativesT> class variant
         return this->as<index_of<targetT>::value>();
       }
 
-    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...
-                                                            >::type visit(visitorT &&visitor) const
+    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
         return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
-    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...
-                                                            >::type visit(visitorT &&visitor)
+    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
       {
         using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
@@ -481,7 +478,8 @@ template<typename ...alternativesT> class variant
 
     // 23.7.3.4, modifiers
     template<size_t indexT,
-             typename ...paramsT> typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type, paramsT &&...>::value)
+             typename ...paramsT> typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type,
+                                                                                                                                  paramsT &&...>::value)
       {
         const auto index_old = this->m_index;
         constexpr auto index_new = indexT;
@@ -511,7 +509,8 @@ template<typename ...alternativesT> class variant
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
       }
     template<typename targetT,
-             typename ...paramsT> targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT, paramsT &&...>::value)
+             typename ...paramsT> targetT & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<targetT,
+                                                                                                           paramsT &&...>::value)
       {
         return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);
       }
