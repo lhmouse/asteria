@@ -21,7 +21,7 @@ namespace Asteria {
         if(!qtok) {
           return { 0, SIZE_MAX, 0, code };
         }
-        return { qtok->get_line(), qtok->get_offset(), qtok->get_length(), code };
+        return { qtok->line(), qtok->offset(), qtok->length(), code };
       }
 
     Source_Location do_tell_source_location(const Token_Stream &tstrm_io)
@@ -30,7 +30,7 @@ namespace Asteria {
         if(!qtok) {
           return { rocket::sref("<end of stream>"), 0 };
         }
-        return { qtok->get_file(), qtok->get_line() };
+        return { qtok->file(), qtok->line() };
       }
 
     bool do_match_keyword(Token_Stream &tstrm_io, Token::Keyword keyword)

@@ -166,25 +166,29 @@ class Token
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Token(const CoW_String &file, std::uint32_t line, std::size_t offset, std::size_t length, AltT &&alt)
-      : m_file(file), m_line(line), m_offset(offset), m_length(length), m_stor(std::forward<AltT>(alt))
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Token(const CoW_String &xfile, std::uint32_t xline,
+                                                                                              std::size_t xoffset, std::size_t xlength,
+                                                                                              AltT &&alt)
+      : m_file(xfile), m_line(xline),
+        m_offset(xoffset), m_length(xlength),
+        m_stor(std::forward<AltT>(alt))
       {
       }
 
   public:
-    const CoW_String & get_file() const noexcept
+    const CoW_String & file() const noexcept
       {
         return this->m_file;
       }
-    std::uint32_t get_line() const noexcept
+    std::uint32_t line() const noexcept
       {
         return this->m_line;
       }
-    std::size_t get_offset() const noexcept
+    std::size_t offset() const noexcept
       {
         return this->m_offset;
       }
-    std::size_t get_length() const noexcept
+    std::size_t length() const noexcept
       {
         return this->m_length;
       }
