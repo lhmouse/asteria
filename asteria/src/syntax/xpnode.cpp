@@ -168,7 +168,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           qref = qctx->get_named_reference_opt(name);
         }
         // Search for the name in the global context.
-        qref = global.Global_Context::get_named_reference_opt(name);
+        qref = global.get_named_reference_opt(name);
         if(ROCKET_EXPECT(qref)) {
           return std::make_pair(std::ref(*qctx), std::ref(*qref));
         }

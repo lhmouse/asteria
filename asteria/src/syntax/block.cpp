@@ -5,7 +5,6 @@
 #include "block.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
-#include "../runtime/global_context.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
 #include "../runtime/function_analytic_context.hpp"

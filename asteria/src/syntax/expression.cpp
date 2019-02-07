@@ -5,7 +5,6 @@
 #include "expression.hpp"
 #include "xpnode.hpp"
 #include "statement.hpp"
-#include "../runtime/global_context.hpp"
 #include "../runtime/reference_stack.hpp"
 #include "../utilities.hpp"
 
