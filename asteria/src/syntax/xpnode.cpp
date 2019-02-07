@@ -193,21 +193,18 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
-        if(alt.name.rdstr().starts_with("__")) {
-          // Copy it as-is.
-          Xpnode::S_named_reference alt_bnd = { alt.name };
-          nodes_out.emplace_back(std::move(alt_bnd));
-          return;
-        }
-        // Look for the reference in the current context.
-        auto pair = do_name_lookup(global, ctx, alt.name);
-        if(pair.first.get().is_analytic()) {
+        if(!alt.name.rdstr().starts_with("__")) {
+          // Look for the reference in the current context.
+          const auto pair = do_name_lookup(global, ctx, alt.name);
           // Don't bind it onto something in a analytic context which will soon get destroyed.
-          Xpnode::S_named_reference alt_bnd = { alt.name };
-          nodes_out.emplace_back(std::move(alt_bnd));
-          return;
+          if(!pair.first.get().is_analytic()) {
+            Xpnode::S_bound_reference alt_bnd = { pair.second };
+            nodes_out.emplace_back(std::move(alt_bnd));
+            return;
+          }
         }
-        Xpnode::S_bound_reference alt_bnd = { pair.second };
+        // Copy it as-is.
+        Xpnode::S_named_reference alt_bnd = { alt.name };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -305,7 +302,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     void do_evaluate_named_reference(const Xpnode::S_named_reference &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
       {
         // Look for the reference in the current context.
-        auto pair = do_name_lookup(global, ctx, alt.name);
+        const auto pair = do_name_lookup(global, ctx, alt.name);
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(!pair.first.get().is_analytic());
 #endif
