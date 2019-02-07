@@ -368,18 +368,20 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           *it = std::move(stack_io.mut_top());
           stack_io.pop();
         }
-        // Pop the target off the stack.
+        // Get the target reference.
         const auto target_value = stack_io.top().read();
         // Make sure it is really a function.
         if(target_value.type() != type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", target_value, "` is not a function and cannot be called.");
         }
-        const auto &target = target_value.check<D_function>();
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
+        const auto &target = target_value.check<D_function>().get();
+        // Make the `this` reference. On the function's return it is reused to store the result of the function.
+        auto &self_result = stack_io.mut_top().zoom_out();
+        // Call the function now.
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
         try {
-          // Call the function now.
-          target->invoke(stack_io.mut_top().zoom_out(), global, std::move(args));
-          // The result will have been written to `stack_io.mut_top()`, destroying its old contents.
+          target.invoke(self_result, global, std::move(args));
+          // The result will have been written to `self_result`.
         } catch(const std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
@@ -387,7 +389,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           traceable.append_frame(alt.sloc, func);
           throw traceable;
         }
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: ", target.get());
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: target = ", target, ", result = ", self_result.read());
       }
 
     void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)

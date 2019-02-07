@@ -58,10 +58,13 @@ class Traceable_Exception : public virtual std::exception
 template<typename ExceptionT> inline Traceable_Exception trace_exception(const ExceptionT &except)
   {
     const auto traceable = dynamic_cast<const Traceable_Exception *>(std::addressof(except));
-    if(traceable) {
-      return *traceable;
+    if(!traceable) {
+      // Say the exception was thrown from native code.
+      return Traceable_Exception(D_string(except.what()),
+                                 Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
     }
-    return Traceable_Exception(D_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
+    // Copy backtrace information.
+    return *traceable;
   }
 
 }
