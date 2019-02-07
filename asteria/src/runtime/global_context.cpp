@@ -38,7 +38,7 @@ bool Global_Context::collect_variables(unsigned gen_limit) const
   {
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
     ROCKET_ASSERT(collector);
-    return collector->collect(gen_limit);
+    return collector->collect_variables(gen_limit);
   }
 
 }

@@ -35,7 +35,7 @@ RefCnt_Ptr<Variable> Generational_Collector::create_variable()
     return var;
   }
 
-bool Generational_Collector::collect(unsigned gen_limit)
+bool Generational_Collector::collect_variables(unsigned gen_limit)
   {
     auto qcoll = &(this->m_gen_zero);
     // Force collection from the newest generation to the oldest.

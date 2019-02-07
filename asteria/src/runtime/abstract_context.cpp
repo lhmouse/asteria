@@ -16,7 +16,7 @@ void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noe
       return;
     }
     // Collect all generations.
-    collector->collect(0x7F);
+    collector->collect_variables(0x7F);
     // Finish.
   } catch(const std::exception &stdex) {
     ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection; some resources might have leaked: ", stdex.what());
