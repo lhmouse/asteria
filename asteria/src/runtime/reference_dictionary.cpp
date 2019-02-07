@@ -141,6 +141,45 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
     }
   }
 
+Reference & Reference_Dictionary::do_open(const PreHashed_String &name, bool with_templates)
+  {
+    if(name.empty()) {
+      ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
+    }
+    if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
+      this->do_rehash(this->m_stor.size() * 2 | 11);
+    }
+    // Get table bounds.
+    const auto pre = this->m_stor.mut_data();
+    const auto end = pre + (this->m_stor.size() - 1);
+    // Find a bucket for the new element.
+    const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name; });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(*bkt) {
+      // A duplicate key has been found.
+      return bkt->second[0];
+    }
+    // Find the template to copy from.
+    const auto templ = with_templates ? this->do_get_template_opt(name) : nullptr;
+    // Insert it into the new bucket.
+    bkt->first = name;
+    if(ROCKET_UNEXPECT(templ)) {
+       // Copy the static template.
+      static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
+      rocket::construct_at(bkt->second, *templ);
+    } else {
+      // Construct a null reference.
+      static_assert(std::is_nothrow_constructible<Reference>::value, "??");
+      rocket::construct_at(bkt->second);
+    }
+    bkt->do_attach(end);
+    // Update the number of elements.
+    pre->size++;
+    return bkt->second[0];
+  }
+
 void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
@@ -172,44 +211,6 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
           return false;
         }
       );
-  }
-
-Reference & Reference_Dictionary::open(const PreHashed_String &name)
-  {
-    if(name.empty()) {
-      ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
-    }
-    if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
-      this->do_rehash(this->m_stor.size() * 2 | 11);
-    }
-    // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
-    // Find a bucket for the new element.
-    const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name; });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(*bkt) {
-      // A duplicate key has been found.
-      return bkt->second[0];
-    }
-    // Insert it into the new bucket.
-    bkt->first = name;
-    const auto templ = this->do_get_template_opt(name);
-    if(ROCKET_UNEXPECT(templ)) {
-       // Copy the static template.
-      static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
-      rocket::construct_at(bkt->second, *templ);
-    } else {
-      // Construct a null reference.
-      static_assert(std::is_nothrow_constructible<Reference>::value, "??");
-      rocket::construct_at(bkt->second);
-    }
-    bkt->do_attach(end);
-    // Update the number of elements.
-    pre->size++;
-    return bkt->second[0];
   }
 
 bool Reference_Dictionary::unset(const PreHashed_String &name) noexcept
