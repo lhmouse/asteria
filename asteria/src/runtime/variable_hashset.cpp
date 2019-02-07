@@ -8,24 +8,29 @@
 
 namespace Asteria {
 
-void Variable_HashSet::do_attach_bucket(Variable_HashSet::Bucket *self, Variable_HashSet::Bucket *ipos) noexcept
+Variable_HashSet::Bucket::operator bool () const noexcept
   {
-    const auto prev = ipos->prev;
-    const auto next = ipos;
-    // Set up pointers.
-    self->prev = prev;
-    prev->next = self;
-    self->next = next;
-    next->prev = self;
+    return this->first != nullptr;
   }
 
-void Variable_HashSet::do_detach_bucket(Variable_HashSet::Bucket *self) noexcept
+void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcept
   {
-    const auto prev = self->prev;
-    const auto next = self->next;
+    const auto iprev = ipos->prev;
+    const auto inext = ipos;
     // Set up pointers.
-    prev->next = next;
-    next->prev = prev;
+    this->prev = iprev;
+    prev->next = this;
+    this->next = inext;
+    next->prev = this;
+  }
+
+void Variable_HashSet::Bucket::do_detach() noexcept
+  {
+    const auto iprev = this->prev;
+    const auto inext = this->next;
+    // Set up pointers.
+    prev->next = inext;
+    next->prev = iprev;
   }
 
 void Variable_HashSet::do_clear() noexcept
@@ -78,8 +83,8 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
-        bkt->first = std::move(rbkt.first);
-        do_attach_bucket(bkt, end);
+        bkt->first.swap(rbkt.first);
+        bkt->do_attach(end);
         // Update the number of elements.
         pre->size++;
       }
@@ -101,7 +106,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
         {
           RefCnt_Ptr<Variable> var;
           // Release the old element.
-          do_detach_bucket(std::addressof(rbkt));
+          rbkt.do_detach();
           var.swap(rbkt.first);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
@@ -110,7 +115,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
           bkt->first = std::move(var);
-          do_attach_bucket(bkt, end);
+          bkt->do_attach(end);
           return false;
         }
       );
@@ -173,7 +178,7 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
     }
     // Insert it into the new bucket.
     bkt->first = var;
-    do_attach_bucket(bkt, end);
+    bkt->do_attach(end);
     // Update the number of elements.
     pre->size++;
     return true;
@@ -198,7 +203,7 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    do_detach_bucket(bkt);
+    bkt->do_detach();
     bkt->first.reset();
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
@@ -223,7 +228,7 @@ RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.
-    do_detach_bucket(bkt);
+    bkt->do_detach();
     var.swap(bkt->first);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);

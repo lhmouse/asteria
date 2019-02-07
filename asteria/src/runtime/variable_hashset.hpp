@@ -36,15 +36,10 @@ class Variable_HashSet
         Bucket & operator=(const Bucket &)
           = delete;
 
-        explicit operator bool () const noexcept
-          {
-            return this->first != nullptr;
-          }
+        explicit operator bool () const noexcept;
+        void do_attach(Bucket *ipos) noexcept;
+        void do_detach() noexcept;
       };
-
-  private:
-    static void do_attach_bucket(Bucket *self, Bucket *ipos) noexcept;
-    static void do_detach_bucket(Bucket *self) noexcept;
 
   private:
     // The first and last buckets are permanently reserved.

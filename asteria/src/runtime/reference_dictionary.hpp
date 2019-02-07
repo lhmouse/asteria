@@ -48,15 +48,10 @@ class Reference_Dictionary
         Bucket & operator=(const Bucket &)
           = delete;
 
-        explicit operator bool () const noexcept
-          {
-            return this->first.empty() == false;
-          }
+        explicit operator bool () const noexcept;
+        void do_attach(Bucket *ipos) noexcept;
+        void do_detach() noexcept;
       };
-
-  private:
-    static void do_attach_bucket(Bucket *self, Bucket *ipos) noexcept;
-    static void do_detach_bucket(Bucket *self) noexcept;
 
   private:
     const Template *m_templ_data;
