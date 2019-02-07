@@ -13,7 +13,7 @@ Global_Context::~Global_Context()
   {
   }
 
-void Global_Context::do_initialize()
+void Global_Context::do_initialize_runtime()
   {
     // Initialize all components.
     const auto collector = rocket::make_refcnt<Generational_Collector>();
@@ -32,6 +32,13 @@ RefCnt_Ptr<Variable> Global_Context::create_variable() const
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
     ROCKET_ASSERT(collector);
     return collector->create_variable();
+  }
+
+bool Global_Context::collect_variables(unsigned gen_limit) const
+  {
+    const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
+    ROCKET_ASSERT(collector);
+    return collector->collect(gen_limit);
   }
 
 }

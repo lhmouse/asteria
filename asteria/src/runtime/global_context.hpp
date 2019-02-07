@@ -20,12 +20,12 @@ class Global_Context : public Abstract_Context
     Global_Context()
       : Abstract_Context()
       {
-        this->do_initialize();
+        this->do_initialize_runtime();
       }
     ~Global_Context() override;
 
   private:
-    void do_initialize();
+    void do_initialize_runtime();
 
   public:
     bool is_analytic() const noexcept override
@@ -37,7 +37,9 @@ class Global_Context : public Abstract_Context
         return nullptr;
       }
 
+    // Garbage Collector Interfaces
     RefCnt_Ptr<Variable> create_variable() const;
+    bool collect_variables(unsigned gen_limit = 0x7F) const;
   };
 
 }

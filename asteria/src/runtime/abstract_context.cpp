@@ -10,13 +10,16 @@ namespace Asteria {
 
 void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noexcept
   try {
+    // Take ownership of the argument.
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(RefCnt_Ptr<RefCnt_Base>(base_opt));
     if(!collector) {
       return;
     }
-    collector->collect(UINT_MAX);
+    // Collect all generations.
+    collector->collect(0x7F);
+    // Finish.
   } catch(const std::exception &stdex) {
-    ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection and some resources might have leaked: ", stdex.what());
+    ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection; some resources might have leaked: ", stdex.what());
   }
 
 Abstract_Context::~Abstract_Context()
