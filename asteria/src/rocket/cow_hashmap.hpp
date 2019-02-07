@@ -1147,7 +1147,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
-          result.first->second = ::std::forward<yvalueT>(yvalue);
+          result.first->get()->second = ::std::forward<yvalueT>(yvalue);
         }
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
@@ -1239,7 +1239,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         this->do_reserve_more(1);
         const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
                                                                 ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
-        return result.first->second;
+        return result.first->get()->second;
       }
 
     // N.B. This function is a non-standard extension.
