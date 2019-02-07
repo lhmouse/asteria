@@ -84,7 +84,7 @@ class Xpnode
     struct S_function_call
       {
         Source_Location sloc;
-        std::size_t arg_cnt;
+        std::size_t nargs;
       };
     struct S_subscript
       {
@@ -97,7 +97,7 @@ class Xpnode
       };
     struct S_unnamed_array
       {
-        std::size_t elem_cnt;
+        std::size_t nelems;
       };
     struct S_unnamed_object
       {

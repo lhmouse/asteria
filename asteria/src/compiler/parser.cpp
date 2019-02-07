@@ -508,12 +508,12 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
           return false;
         }
-        std::size_t elem_cnt = 0;
+        std::size_t nelems = 0;
         for(;;) {
           if(!do_accept_expression(nodes_out, tstrm_io)) {
             break;
           }
-          ++elem_cnt;
+          ++nelems;
           bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
                           do_match_punctuator(tstrm_io, Token::punctuator_semicol);
           if(!has_next) {
@@ -523,7 +523,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_bracket_or_expression_expected);
         }
-        Xpnode::S_unnamed_array node_c = { elem_cnt };
+        Xpnode::S_unnamed_array node_c = { nelems };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -617,10 +617,10 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           return false;
         }
-        std::size_t arg_cnt = 0;
+        std::size_t nargs = 0;
         if(do_accept_expression(nodes_out, tstrm_io)) {
           for(;;) {
-            ++arg_cnt;
+            ++nargs;
             if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
               break;
             }
@@ -632,7 +632,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_or_argument_expected);
         }
-        Xpnode::S_function_call node_c = { std::move(sloc), arg_cnt };
+        Xpnode::S_function_call node_c = { std::move(sloc), nargs };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }

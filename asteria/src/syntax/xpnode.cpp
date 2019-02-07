@@ -243,7 +243,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
-        Xpnode::S_function_call alt_bnd = { alt.sloc, alt.arg_cnt };
+        Xpnode::S_function_call alt_bnd = { alt.sloc, alt.nargs };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -267,7 +267,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Copy it as-is.
-        Xpnode::S_unnamed_array alt_bnd = { alt.elem_cnt };
+        Xpnode::S_unnamed_array alt_bnd = { alt.nelems };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -363,7 +363,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         // Allocate the argument vector.
         CoW_Vector<Reference> args;
-        args.resize(alt.arg_cnt);
+        args.resize(alt.nargs);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           *it = std::move(stack_io.mut_top());
           stack_io.pop();
@@ -1379,7 +1379,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       {
         // Pop references to create an array.
         D_array array;
-        array.resize(alt.elem_cnt);
+        array.resize(alt.nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
           *it = stack_io.top().read();
           stack_io.pop();
