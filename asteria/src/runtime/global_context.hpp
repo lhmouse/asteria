@@ -13,7 +13,10 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
+    // This is the global garbage collector.
     RefCnt_Ptr<RefCnt_Base> m_collector;
+    // This is the variable holding an object referenced as `std` in this context.
+    RefCnt_Ptr<RefCnt_Base> m_std_var;
 
   public:
     // A global context does not have a parent context.
@@ -37,9 +40,18 @@ class Global_Context : public Abstract_Context
         return nullptr;
       }
 
-    // Garbage Collector Interfaces
+    // These are interfaces of the global garbage collector/
     RefCnt_Ptr<Variable> create_variable() const;
     bool collect_variables(unsigned gen_limit = 0x7F) const;
+
+    // These are interfaces of the standard library.
+    const Value & get_std_member(const PreHashed_String &name) const;
+    Value & open_std_member(const PreHashed_String &name);
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> void set_std_member(const PreHashed_String &name, XvalueT &&xvalue)
+      {
+        this->open_std_member(name) = std::forward<XvalueT>(xvalue);
+      }
+    bool unset_std_member(const PreHashed_String &name);
   };
 
 }

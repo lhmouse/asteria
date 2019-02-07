@@ -15,16 +15,18 @@ Global_Context::~Global_Context()
 
 void Global_Context::do_initialize_runtime()
   {
-    // Initialize all components.
+    // Initialize the global garbage collector.
     const auto collector = rocket::make_refcnt<Generational_Collector>();
     this->do_tie_collector(collector);
     this->m_collector = collector;
+    // Create the `std` variable.
+    const auto std_var = collector->create_variable();
+    std_var->reset(D_object(), true);
+    Reference_Root::S_variable std_ref_c = { std_var };
+    this->open_named_reference(rocket::sref("std")) = std::move(std_ref_c);
+    this->m_std_var = std_var;
     // Add standard library interfaces.
-    D_object root;
     ASTERIA_DEBUG_LOG("TODO add std library");
-    // All standard library interfaces reside in the `std` object.
-    Reference_Root::S_constant ref_c = { std::move(root) };
-    this->open_named_reference(rocket::sref("std")) = std::move(ref_c);
   }
 
 RefCnt_Ptr<Variable> Global_Context::create_variable() const
@@ -39,6 +41,43 @@ bool Global_Context::collect_variables(unsigned gen_limit) const
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
     ROCKET_ASSERT(collector);
     return collector->collect_variables(gen_limit);
+  }
+
+const Value & Global_Context::get_std_member(const PreHashed_String &name) const
+  {
+    const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
+    ROCKET_ASSERT(std_var);
+    const auto &obj = std_var->get_value().check<D_object>();
+    // Search for the member.
+    const auto it = obj.find(name);
+    if(it == obj.end()) {
+      return Value::get_null();
+    }
+    return it->second;
+  }
+
+Value & Global_Context::open_std_member(const PreHashed_String &name)
+  {
+    const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
+    ROCKET_ASSERT(std_var);
+    auto &obj = std_var->open_value().check<D_object>();
+    // Return the member.
+    const auto it = obj.try_emplace(name).first;
+    return it->second;
+  }
+
+bool Global_Context::unset_std_member(const PreHashed_String &name)
+  {
+    const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
+    ROCKET_ASSERT(std_var);
+    auto &obj = std_var->open_value().check<D_object>();
+    // Search for the member.
+    const auto it = obj.find(name);
+    if(it == obj.end()) {
+      return false;
+    }
+    obj.erase(it);
+    return true;
   }
 
 }
