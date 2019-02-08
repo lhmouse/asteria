@@ -7,6 +7,14 @@
 
 namespace Asteria {
 
+Reference_Dictionary::Bucket::~Bucket()
+  {
+    // Be careful, VERY careful.
+    if(ROCKET_UNEXPECT(*this)) {
+      rocket::destroy_at(this->second);
+    }
+  }
+
 Reference_Dictionary::Bucket::operator bool () const noexcept
   {
     return this->first.empty() == false;

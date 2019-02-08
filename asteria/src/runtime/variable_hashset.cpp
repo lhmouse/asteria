@@ -8,6 +8,10 @@
 
 namespace Asteria {
 
+Variable_HashSet::Bucket::~Bucket()
+  {
+  }
+
 Variable_HashSet::Bucket::operator bool () const noexcept
   {
     return this->first != nullptr;

@@ -35,13 +35,7 @@ class Reference_Dictionary
             std::memset(static_cast<void *>(this->second), 0xEC, sizeof(Reference));
 #endif
           }
-        ~Bucket()
-          {
-            // Be careful, VERY careful.
-            if(ROCKET_UNEXPECT(*this)) {
-              rocket::destroy_at(this->second);
-            }
-          }
+        ~Bucket();
 
         Bucket(const Bucket &)
           = delete;

@@ -27,9 +27,7 @@ class Variable_HashSet
           : first()
           {
           }
-        ~Bucket()
-          {
-          }
+        ~Bucket();
 
         Bucket(const Bucket &)
           = delete;
