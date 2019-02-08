@@ -8,16 +8,16 @@
 
 namespace Asteria {
 
-Variable_HashSet::Bucket::~Bucket()
+inline Variable_HashSet::Bucket::~Bucket()
   {
   }
 
-Variable_HashSet::Bucket::operator bool () const noexcept
+inline Variable_HashSet::Bucket::operator bool () const noexcept
   {
     return this->first != nullptr;
   }
 
-void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcept
+inline void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcept
   {
     const auto iprev = ipos->prev;
     const auto inext = ipos;
@@ -28,7 +28,7 @@ void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcep
     next->prev = this;
   }
 
-void Variable_HashSet::Bucket::do_detach() noexcept
+inline void Variable_HashSet::Bucket::do_detach() noexcept
   {
     const auto iprev = this->prev;
     const auto inext = this->next;

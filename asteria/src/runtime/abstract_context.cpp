@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noexcept
+inline void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noexcept
   try {
     // Take ownership of the argument.
     const auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(RefCnt_Ptr<RefCnt_Base>(base_opt));
