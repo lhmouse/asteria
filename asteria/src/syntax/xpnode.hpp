@@ -151,6 +151,12 @@ class Xpnode
       : m_stor(std::forward<AltT>(alt))
       {
       }
+    // This assignment operator does not accept lvalues.
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xpnode & operator=(AltT &&alt)
+      {
+        this->m_stor = std::forward<AltT>(alt);
+        return *this;
+      }
 
   public:
     void bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;

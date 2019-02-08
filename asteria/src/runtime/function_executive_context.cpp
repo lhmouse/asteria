@@ -14,14 +14,13 @@ Function_Executive_Context::~Function_Executive_Context()
 
     namespace {
 
-    template<std::size_t capacityT, typename XnameT, typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)
-             > void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XvalueT &&xvalue)
+    template<typename XcontainerT, typename XnameT, typename XvalueT> void do_predefine_constant(XcontainerT &predefs_out, XnameT &&xname, XvalueT &&xvalue)
       {
         Reference_Root::S_constant ref_c = { std::forward<XvalueT>(xvalue) };
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::move(ref_c));
       }
-    template<std::size_t capacityT, typename XnameT, typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XrefT, Reference>::value)
-             > void do_predefine(Static_Vector<Reference_Dictionary::Template, capacityT> &predefs_out, XnameT &&xname, XrefT &&xref)
+
+    template<typename XcontainerT, typename XnameT, typename XrefT> void do_predefine_reference(XcontainerT &predefs_out, XnameT &&xname, XrefT &&xref)
       {
         predefs_out.emplace_back(std::forward<XnameT>(xname), std::forward<XrefT>(xref));
       }
@@ -62,16 +61,16 @@ void Function_Executive_Context::do_set_arguments(const RefCnt_Object<Variadic_A
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'analytic_executive_context.cpp' as well.
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__file"), D_string(zvarg->get_source_file()));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__func"), D_string(zvarg->get_function_signature()));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__line"), D_integer(zvarg->get_source_line()));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__this"), std::move(self));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__varg"), D_function(do_make_varg(zvarg, std::move(args))));
+    do_predefine_constant(this->m_predef_refs,
+                          rocket::sref("__file"), D_string(zvarg->get_source_file()));
+    do_predefine_constant(this->m_predef_refs,
+                          rocket::sref("__func"), D_string(zvarg->get_function_signature()));
+    do_predefine_constant(this->m_predef_refs,
+                          rocket::sref("__line"), D_integer(zvarg->get_source_line()));
+    do_predefine_reference(this->m_predef_refs,
+                           rocket::sref("__this"), std::move(self));
+    do_predefine_constant(this->m_predef_refs,
+                          rocket::sref("__varg"), D_function(do_make_varg(zvarg, std::move(args))));
     // Set up them.
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }

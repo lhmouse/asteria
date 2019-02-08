@@ -126,10 +126,6 @@ class Reference_Dictionary
       {
         return this->do_open(name, true);
       }
-    template<typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XrefT, Reference>::value)> void set(const PreHashed_String &name, XrefT &&xref)
-      {
-        this->do_open(name, false) = std::forward<XrefT>(xref);
-      }
     bool unset(const PreHashed_String &name) noexcept;
   };
 

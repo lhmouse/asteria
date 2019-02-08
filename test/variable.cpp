@@ -10,10 +10,13 @@ int main()
   {
     const auto var = rocket::make_refcnt<Variable>();
     ASTERIA_TEST_CHECK(var->get_value().type() == type_null);
+
     var->reset(D_real(123.456), false);
     ASTERIA_TEST_CHECK(var->get_value().type() == type_real);
-    var->set_value(D_string(rocket::sref("hello")));
+
+    var->open_value() = D_string(rocket::sref("hello"));
     ASTERIA_TEST_CHECK(var->get_value().type() == type_string);
-    var->reset(D_integer(42), true);
-    ASTERIA_TEST_CHECK_CATCH(var->set_value(D_null()));
+
+    var->reset(D_integer(42), true);  // immutable
+    ASTERIA_TEST_CHECK_CATCH(var->open_value());
   }

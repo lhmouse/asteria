@@ -67,14 +67,6 @@ class Reference
         }
         return this->do_open_with_modifiers();
       }
-    template<typename XrefT, ROCKET_ENABLE_IF_HAS_VALUE(std::is_convertible<XrefT, Reference>::value)> void write(XrefT &&xref)
-      {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          this->m_root.dereference_mutable() = std::forward<XrefT>(xref);
-          return;
-        }
-        this->do_open_with_modifiers();
-      }
     Value unset() const
       {
         if(ROCKET_UNEXPECT(this->m_mods.empty())) {
@@ -83,7 +75,7 @@ class Reference
         return this->do_unset_with_modifiers();
       }
 
-    template<typename XmodT, ROCKET_ENABLE_IF_HAS_VALUE(std::is_convertible<XmodT, Reference_Modifier>::value)> Reference & zoom_in(XmodT &&xmod)
+    template<typename XmodT> Reference & zoom_in(XmodT &&xmod)
       {
         // Append a modifier.
         this->m_mods.emplace_back(std::forward<XmodT>(xmod));

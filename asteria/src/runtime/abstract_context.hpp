@@ -47,10 +47,6 @@ class Abstract_Context
       {
         return this->m_named_references.open(name);
       }
-    template<typename XrefT, ROCKET_ENABLE_IF(std::is_convertible<XrefT, Reference>::value)> void set_named_reference(const PreHashed_String &name, XrefT &&xref)
-      {
-        this->m_named_references.set(name, std::forward<XrefT>(xref));
-      }
     void clear_named_references() noexcept
       {
         this->m_named_references.clear();

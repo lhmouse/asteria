@@ -71,7 +71,7 @@ int main()
     value = result.read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
-    cond->set_value(D_integer(42));
+    cond->open_value() = D_integer(42);
     expr.evaluate(result, rocket::sref("dummy_function"), global, ctx);
     value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);

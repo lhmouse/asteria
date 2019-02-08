@@ -164,6 +164,12 @@ class Statement
       : m_stor(std::forward<AltT>(alt))
       {
       }
+    // This assignment operator does not accept lvalues.
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Statement & operator=(AltT &&alt)
+      {
+        this->m_stor = std::forward<AltT>(alt);
+        return *this;
+      }
 
   public:
     void fly_over_in_place(Abstract_Context &ctx_io) const;

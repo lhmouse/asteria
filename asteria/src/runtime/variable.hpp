@@ -46,13 +46,6 @@ class Variable : public virtual RefCnt_Base
         }
         return this->m_value;
       }
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> void set_value(XvalueT &&value)
-      {
-        if(this->m_immutable) {
-          this->do_throw_immutable();
-        }
-        this->m_value = std::forward<XvalueT>(value);
-      }
     bool is_immutable() const noexcept
       {
         return this->m_immutable;
@@ -61,7 +54,7 @@ class Variable : public virtual RefCnt_Base
       {
         this->m_immutable = immutable;
       }
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> void reset(XvalueT &&value, bool immutable)
+    template<typename XvalueT> void reset(XvalueT &&value, bool immutable)
       {
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;

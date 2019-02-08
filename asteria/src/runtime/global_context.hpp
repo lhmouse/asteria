@@ -47,10 +47,6 @@ class Global_Context : public Abstract_Context
     // These are interfaces of the standard library.
     const Value & get_std_member(const PreHashed_String &name) const;
     Value & open_std_member(const PreHashed_String &name);
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_convertible<XvalueT, Value>::value)> void set_std_member(const PreHashed_String &name, XvalueT &&xvalue)
-      {
-        this->open_std_member(name) = std::forward<XvalueT>(xvalue);
-      }
     bool unset_std_member(const PreHashed_String &name);
   };
 

@@ -126,11 +126,9 @@ template<typename ...alternativesT> class variant
     template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
       {
       };
-
     template<size_t indexT> struct type_at : details_variant::type_getter<indexT, alternativesT...>
       {
       };
-
     static constexpr size_t type_size = sizeof...(alternativesT);
 
   private:
