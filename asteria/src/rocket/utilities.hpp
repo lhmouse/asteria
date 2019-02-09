@@ -258,9 +258,7 @@ template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first,
 template<typename elementT, typename ...paramsT> elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
 #ifdef ROCKET_DEBUG
-    if(!(is_trivially_constructible<elementT>::value)) {
-      ::std::memset(static_cast<void *>(ptr), 0xAA, sizeof(elementT)));
-    }
+    ::std::memset(static_cast<void *>(ptr), 0xAA, sizeof(elementT));
 #endif
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
@@ -268,20 +266,19 @@ template<typename elementT, typename ...paramsT> elementT * construct_at(element
 template<typename elementT> elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
-    if(!(is_trivially_constructible<elementT>::value)) {
-      ::std::memset(static_cast<void *>(ptr), 0xBE, sizeof(elementT)));
-    }
+    ::std::memset(static_cast<void *>(ptr), 0xBE, sizeof(elementT));
 #endif
     return ::new(static_cast<void *>(ptr)) elementT;
   }
 
 template<typename elementT> void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
+    if(is_trivially_destructible<elementT>::value) {
+      return;
+    }
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
-    if(!(is_trivially_destructible<elementT>::value)) {
-      ::std::memset(static_cast<void *>(ptr), 0xD9, sizeof(elementT)));
-    }
+    ::std::memset(static_cast<void *>(ptr), 0xD9, sizeof(elementT));
 #endif
   }
 
