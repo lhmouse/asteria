@@ -47,31 +47,24 @@ const Value & Global_Context::get_std_member(const PreHashed_String &name) const
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    const auto &obj = std_var->get_value().check<D_object>();
     // Search for the member.
-    const auto it = obj.find(name);
-    if(it == obj.end()) {
-      return Value::get_null();
-    }
-    return it->second;
+    return std_var->get_value().check<D_object>().get_or(name, Value::get_null());
   }
 
 Value & Global_Context::open_std_member(const PreHashed_String &name)
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    auto &obj = std_var->open_value().check<D_object>();
     // Return the member.
-    return obj[name];
+    return std_var->open_value().check<D_object>()[name];
   }
 
 bool Global_Context::unset_std_member(const PreHashed_String &name)
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    auto &obj = std_var->open_value().check<D_object>();
     // Erase the member.
-    return obj.erase(name) != 0;
+    return std_var->open_value().check<D_object>().erase(name);
   }
 
 }

@@ -1213,6 +1213,16 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return 1;
       }
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT, typename ydefaultT> decltype(0 ? ::std::declval<ydefaultT>() : ::std::declval<const mapped_type &>()) get_or(const ykeyT &key, ydefaultT &&ydef) const
+      {
+        const auto ptr = this->do_get_table();
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
+          return ::std::forward<ydefaultT>(ydef);
+        }
+        return ptr[tpos]->second;
+      }
 
     // 26.5.4.3, element access
     template<typename ykeyT> const mapped_type & at(const ykeyT &key) const
