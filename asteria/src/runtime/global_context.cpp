@@ -13,7 +13,7 @@ Global_Context::~Global_Context()
   {
   }
 
-void Global_Context::do_initialize_runtime()
+void Global_Context::do_initialize_runtime(void * /*reserved*/)
   {
     // Initialize the global garbage collector.
     const auto collector = rocket::make_refcnt<Generational_Collector>();

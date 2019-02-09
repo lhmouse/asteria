@@ -20,15 +20,15 @@ class Global_Context : public Abstract_Context
 
   public:
     // A global context does not have a parent context.
-    Global_Context()
+    explicit Global_Context(std::nullptr_t reserved = nullptr)
       : Abstract_Context()
       {
-        this->do_initialize_runtime();
+        this->do_initialize_runtime(reserved);
       }
     ~Global_Context() override;
 
   private:
-    void do_initialize_runtime();
+    void do_initialize_runtime(void *reserved);
 
   public:
     bool is_analytic() const noexcept override
