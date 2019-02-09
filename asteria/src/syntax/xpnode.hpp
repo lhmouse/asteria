@@ -23,6 +23,7 @@ class Xpnode
         // Postfix operators
         xop_postfix_inc      = 10,  // ++
         xop_postfix_dec      = 11,  // --
+        xop_postfix_at       = 12,  // []
         // Prefix operators
         xop_prefix_pos       = 30,  // +
         xop_prefix_neg       = 31,  // -
@@ -86,14 +87,14 @@ class Xpnode
         Source_Location sloc;
         std::size_t nargs;
       };
-    struct S_subscript
+    struct S_member_access
       {
-        PreHashed_String name;  // If this is empty then the subscript is to be popped from the stack.
+        PreHashed_String name;
       };
     struct S_operator_rpn
       {
         Xop xop;
-        bool assign;  // This parameter is ignored for `++`, `--` and `=`.
+        bool assign;  // This parameter is ignored for `++`, `--`, `[]` and `=`.
       };
     struct S_unnamed_array
       {
@@ -117,7 +118,7 @@ class Xpnode
         index_closure_function  =  3,
         index_branch            =  4,
         index_function_call     =  5,
-        index_subscript         =  6,
+        index_member_access     =  6,
         index_operator_rpn      =  7,
         index_unnamed_array     =  8,
         index_unnamed_object    =  9,
@@ -131,7 +132,7 @@ class Xpnode
         , S_closure_function  //  3,
         , S_branch            //  4,
         , S_function_call     //  5,
-        , S_subscript         //  6,
+        , S_member_access     //  6,
         , S_operator_rpn      //  7,
         , S_unnamed_array     //  8,
         , S_unnamed_object    //  9,

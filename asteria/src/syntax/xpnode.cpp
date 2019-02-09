@@ -27,6 +27,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       {
         return "postfix decrement";
       }
+    case xop_postfix_at:
+      {
+        return "postfix subscript";
+      }
     case xop_prefix_pos:
       {
         return "unary promotion";
@@ -244,11 +248,11 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
-    case index_subscript:
+    case index_member_access:
       {
-        const auto &alt = this->m_stor.as<S_subscript>();
+        const auto &alt = this->m_stor.as<S_member_access>();
         // Copy it as-is.
-        Xpnode::S_subscript alt_bnd = { alt.name };
+        Xpnode::S_member_access alt_bnd = { alt.name };
         nodes_out.emplace_back(std::move(alt_bnd));
         return;
       }
@@ -292,14 +296,16 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
 
     namespace {
 
-    void do_evaluate_literal(const Xpnode::S_literal &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_literal(const Xpnode::S_literal &alt,
+                             Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Push the constant.
         Reference_Root::S_constant ref_c = { alt.value };
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_named_reference(const Xpnode::S_named_reference &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
+    void do_evaluate_named_reference(const Xpnode::S_named_reference &alt,
+                                     Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
       {
         // Look for the reference in the current context.
         const auto pair = do_name_lookup(global, ctx, alt.name);
@@ -310,13 +316,15 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.push(pair.second);
       }
 
-    void do_evaluate_bound_reference(const Xpnode::S_bound_reference &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_bound_reference(const Xpnode::S_bound_reference &alt,
+                                     Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Push the reference stored.
         stack_io.push(alt.ref);
       }
 
-    void do_evaluate_closure_function(const Xpnode::S_closure_function &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
+    void do_evaluate_closure_function(const Xpnode::S_closure_function &alt,
+                                      Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
       {
         // Instantiate the closure function.
         auto func = alt.body.instantiate_function(alt.sloc, rocket::sref("<closure function>"), alt.params, global, ctx);
@@ -344,7 +352,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         }
       }
 
-    void do_evaluate_branch(const Xpnode::S_branch &alt, Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx)
+    void do_evaluate_branch(const Xpnode::S_branch &alt,
+                            Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
         const auto result = stack_io.top().read().test() ? alt.branch_true.evaluate_partial(stack_io, func, global, ctx)
@@ -356,7 +365,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_forward(stack_io, alt.assign);
       }
 
-    void do_evaluate_function_call(const Xpnode::S_function_call &alt, Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context & /*ctx*/)
+    void do_evaluate_function_call(const Xpnode::S_function_call &alt,
+                                   Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context & /*ctx*/)
       {
         // Allocate the argument vector.
         CoW_Vector<Reference> args;
@@ -389,33 +399,12 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: target = ", target, ", result = ", self_result.read());
       }
 
-    void do_evaluate_subscript(const Xpnode::S_subscript &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_member_access(const Xpnode::S_member_access &alt,
+                                   Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
-        // Get the subscript.
-        Value subscript;
-        if(alt.name.empty()) {
-          subscript = stack_io.top().read();
-          stack_io.pop();
-        } else {
-          subscript = D_string(alt.name);
-        }
-        // The subscript shall have type `integer` or `string`.
-        switch(rocket::weaken_enum(subscript.type())) {
-        case type_integer:
-          {
-            Reference_Modifier::S_array_index mod_c = { subscript.check<D_integer>() };
-            stack_io.mut_top().zoom_in(std::move(mod_c));
-            break;
-          }
-        case type_string:
-          {
-            Reference_Modifier::S_object_key mod_c = { PreHashed_String(subscript.check<D_string>()) };
-            stack_io.mut_top().zoom_in(std::move(mod_c));
-            break;
-          }
-        default:
-          ASTERIA_THROW_RUNTIME_ERROR("The value `", subscript, "` cannot be used as a subscript.");
-        }
+        // Append a modifier.
+        Reference_Modifier::S_object_key mod_c = { alt.name };
+        stack_io.mut_top().zoom_in(std::move(mod_c));
       }
 
     ROCKET_PURE_FUNCTION bool do_operator_not(bool rhs)
@@ -725,7 +714,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         return res;
       }
 
-    void do_evaluate_operator_postfix_inc(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_postfix_inc(const Xpnode::S_operator_rpn &alt,
+                                          Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_inc);
         // Increment the operand and return the old value.
@@ -748,7 +738,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
       }
 
-    void do_evaluate_operator_postfix_dec(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_postfix_dec(const Xpnode::S_operator_rpn &alt,
+                                          Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_dec);
         // Decrement the operand and return the old value.
@@ -771,7 +762,34 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
       }
 
-    void do_evaluate_operator_prefix_pos(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_postfix_at(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+      {
+        ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_at);
+        // Append a reference modifier.
+        // `alt.assign` is ignored.
+        const auto subscript = stack_io.top().read();
+        stack_io.pop();
+        switch(rocket::weaken_enum(subscript.type())) {
+        case type_integer:
+          {
+            Reference_Modifier::S_array_index mod_c = { subscript.check<D_integer>() };
+            stack_io.mut_top().zoom_in(std::move(mod_c));
+            break;
+          }
+        case type_string:
+          {
+            Reference_Modifier::S_object_key mod_c = { subscript.check<D_string>() };
+            stack_io.mut_top().zoom_in(std::move(mod_c));
+            break;
+          }
+        default:
+          ASTERIA_THROW_RUNTIME_ERROR("The value `", subscript, "` cannot be used as a subscript.");
+        }
+      }
+
+    void do_evaluate_operator_prefix_pos(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_pos);
         // Copy the operand to create a temporary value, then return it.
@@ -780,7 +798,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_prefix_neg(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_neg(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_neg);
         // Negate the operand to create a temporary value, then return it.
@@ -800,7 +819,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_prefix_notb(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_notb(const Xpnode::S_operator_rpn &alt,
+                                          Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_notb);
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
@@ -820,7 +840,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_prefix_notl(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_notl(const Xpnode::S_operator_rpn &alt,
+                                          Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_notl);
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
@@ -830,7 +851,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_prefix_inc(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_inc(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_inc);
         // Increment the operand and return it.
@@ -849,7 +871,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
       }
 
-    void do_evaluate_operator_prefix_dec(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_dec(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_dec);
         // Decrement the operand and return it.
@@ -868,7 +891,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", value, "`.");
       }
 
-    void do_evaluate_operator_prefix_unset(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_unset(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_unset);
         // Unset the reference and return the old value.
@@ -876,7 +900,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_prefix_lengthof(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_lengthof(const Xpnode::S_operator_rpn &alt,
+                                              Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_lengthof);
         // Return the number of elements in the operand.
@@ -904,7 +929,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_prefix_typeof(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_prefix_typeof(const Xpnode::S_operator_rpn &alt,
+                                            Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_prefix_typeof);
         // Return the type name of the operand.
@@ -914,7 +940,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_eq(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_eq(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_eq);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -927,7 +954,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_ne(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_ne(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_ne);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -940,7 +968,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_lt(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_lt(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lt);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -955,7 +984,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_gt(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_gt(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gt);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -970,7 +1000,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_lte(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_lte(const Xpnode::S_operator_rpn &alt,
+                                            Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lte);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -985,7 +1016,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_gte(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_gte(const Xpnode::S_operator_rpn &alt,
+                                            Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gte);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1000,7 +1032,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_cmp_3way(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_cmp_3way(const Xpnode::S_operator_rpn &alt,
+                                             Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_3way);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1033,7 +1066,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
 
-    void do_evaluate_operator_infix_add(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_add(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_add);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1069,7 +1103,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_sub(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_sub(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sub);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1097,7 +1132,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_mul(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_mul(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mul);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1138,7 +1174,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_div(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_div(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_div);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1160,7 +1197,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_mod(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_mod(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mod);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1182,7 +1220,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_sll(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_sll(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sll);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1210,7 +1249,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_srl(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_srl(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_srl);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1238,7 +1278,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_sla(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_sla(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sla);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1266,7 +1307,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_sra(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_sra(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sra);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1293,7 +1335,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_andb(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_andb(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_andb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1316,7 +1359,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_orb(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_orb(const Xpnode::S_operator_rpn &alt,
+                                        Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_orb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1339,7 +1383,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_xorb(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_xorb(const Xpnode::S_operator_rpn &alt,
+                                         Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_xorb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1362,7 +1407,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(alt.xop), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    void do_evaluate_operator_infix_assign(const Xpnode::S_operator_rpn &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_operator_infix_assign(const Xpnode::S_operator_rpn &alt,
+                                           Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_assign);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1372,7 +1418,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         do_set_temporary(stack_io, true, std::move(ref_c));
       }
 
-    void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_unnamed_array(const Xpnode::S_unnamed_array &alt,
+                                   Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Pop references to create an array.
         D_array array;
@@ -1385,7 +1432,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_unnamed_object(const Xpnode::S_unnamed_object &alt, Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
+    void do_evaluate_unnamed_object(const Xpnode::S_unnamed_object &alt,
+                                    Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
       {
         // Pop references to create an object.
         D_object object;
@@ -1398,7 +1446,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         stack_io.push(std::move(ref_c));
       }
 
-    void do_evaluate_coalescence(const Xpnode::S_coalescence &alt, Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx)
+    void do_evaluate_coalescence(const Xpnode::S_coalescence &alt,
+                                 Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
         if(stack_io.top().read().type() != type_null) {
@@ -1471,10 +1520,10 @@ void Xpnode::compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) c
         cinsts_out.emplace_back(do_bind<S_function_call, do_evaluate_function_call>(alt));
         return;
       }
-    case index_subscript:
+    case index_member_access:
       {
-        const auto &alt = this->m_stor.as<S_subscript>();
-        cinsts_out.emplace_back(do_bind<S_subscript, do_evaluate_subscript>(alt));
+        const auto &alt = this->m_stor.as<S_member_access>();
+        cinsts_out.emplace_back(do_bind<S_member_access, do_evaluate_member_access>(alt));
         return;
       }
     case index_operator_rpn:
@@ -1489,6 +1538,11 @@ void Xpnode::compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) c
         case xop_postfix_dec:
           {
             cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_postfix_dec>(alt));
+            return;
+          }
+        case xop_postfix_at:
+          {
+            cinsts_out.emplace_back(do_bind<S_operator_rpn, do_evaluate_operator_postfix_at>(alt));
             return;
           }
         case xop_prefix_pos:
@@ -1696,7 +1750,7 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
         return;
       }
     case index_function_call:
-    case index_subscript:
+    case index_member_access:
     case index_operator_rpn:
     case index_unnamed_array:
     case index_unnamed_object:
