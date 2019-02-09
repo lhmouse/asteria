@@ -7,9 +7,8 @@
 
 namespace Asteria {
 
-void Variable::do_throw_immutable() const
+Variable::~Variable()
   {
-    ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", this->m_value, "` is immutable and cannot be modified.");
   }
 
 }

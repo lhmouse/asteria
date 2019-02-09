@@ -61,6 +61,9 @@ Value & Reference_Root::dereference_mutable() const
         if(!alt.var_opt) {
           ASTERIA_THROW_RUNTIME_ERROR("The reference cannot be written after being moved. This is likely a bug. Please report.");
         }
+        if(alt.var_opt->is_immutable()) {
+          ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", alt.var_opt->get_value(), "` is immutable and cannot be modified.");
+        }
         return alt.var_opt->open_value();
       }
     default:

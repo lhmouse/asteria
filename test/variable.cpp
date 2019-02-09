@@ -16,7 +16,4 @@ int main()
 
     var->open_value() = D_string(rocket::sref("hello"));
     ASTERIA_TEST_CHECK(var->get_value().type() == type_string);
-
-    var->reset(D_integer(42), true);  // immutable
-    ASTERIA_TEST_CHECK_CATCH(var->open_value());
   }

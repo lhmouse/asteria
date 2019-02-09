@@ -25,14 +25,12 @@ class Variable : public virtual RefCnt_Base
       : m_value(), m_immutable(true)
       {
       }
+    ~Variable();
 
     Variable(const Variable &)
       = delete;
     Variable & operator=(const Variable &)
       = delete;
-
-  private:
-    [[noreturn]] void do_throw_immutable() const;
 
   public:
     const Value & get_value() const noexcept
@@ -41,9 +39,6 @@ class Variable : public virtual RefCnt_Base
       }
     Value & open_value()
       {
-        if(this->m_immutable) {
-          this->do_throw_immutable();
-        }
         return this->m_value;
       }
     bool is_immutable() const noexcept
