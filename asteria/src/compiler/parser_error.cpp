@@ -131,7 +131,7 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "Expectation failed while looking for an `{`.";
       }
-    case code_close_brace_or_statement_expected:
+    case code_closed_brace_or_statement_expected:
       {
         return "Expectation failed while looking for a `}` or statement.";
       }
@@ -139,11 +139,11 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "Expectation failed while looking for an `(`.";
       }
-    case code_close_parenthesis_or_parameter_expected:
+    case code_closed_parenthesis_or_parameter_expected:
       {
         return "Expectation failed while looking for a `)` or identifier.";
       }
-    case code_close_parenthesis_expected:
+    case code_closed_parenthesis_expected:
       {
         return "Expectation failed while looking for a `)`.";
       }
@@ -151,7 +151,7 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "Expectation failed while looking for a `:`.";
       }
-    case code_close_brace_or_switch_clause_expected:
+    case code_closed_brace_or_switch_clause_expected:
       {
         return "Expectation failed while looking for a `}`, `case` clause or `default` clause.";
       }
@@ -171,11 +171,11 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "Expectation failed while looking for an `each`, variable definition or expression statement.";
       }
-    case code_close_bracket_or_expression_expected:
+    case code_closed_bracket_or_expression_expected:
       {
         return "Expectation failed while looking for a `]` or expression.";
       }
-    case code_close_brace_or_object_key_expected:
+    case code_closed_brace_or_object_key_expected:
       {
         return "Expectation failed while looking for a `}`, identifier or string literal.";
       }
@@ -183,11 +183,11 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       {
         return "A duplicate key was to be created in the same object.";
       }
-    case code_close_parenthesis_or_argument_expected:
+    case code_closed_parenthesis_or_argument_expected:
       {
         return "Expectation failed while looking for a `)` or expression.";
       }
-    case code_close_bracket_expected:
+    case code_closed_bracket_expected:
       {
         return "Expectation failed while looking for a `]`.";
       }

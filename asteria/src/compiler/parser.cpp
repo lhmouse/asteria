@@ -393,7 +393,7 @@ namespace Asteria {
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_brace_or_statement_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_statement_expected);
         }
         return true;
       }
@@ -480,7 +480,7 @@ namespace Asteria {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> body;
         if(!do_accept_block_statement_list(body, tstrm_io)) {
@@ -521,7 +521,7 @@ namespace Asteria {
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_bracket_or_expression_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_or_expression_expected);
         }
         Xpnode::S_unnamed_array node_c = { nelems };
         nodes_out.emplace_back(std::move(node_c));
@@ -568,7 +568,7 @@ namespace Asteria {
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_brace_or_object_key_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_object_key_expected);
         }
         Xpnode::S_unnamed_object node_c = { std::move(keys) };
         nodes_out.emplace_back(std::move(node_c));
@@ -586,7 +586,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         return true;
       }
@@ -630,7 +630,7 @@ namespace Asteria {
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_or_argument_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
         Xpnode::S_function_call node_c = { std::move(sloc), nargs };
         nodes_out.emplace_back(std::move(node_c));
@@ -648,9 +648,9 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_bracket_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_expected);
         }
-        Xpnode::S_subscript node_c = { PreHashed_String() };
+        Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -669,7 +669,7 @@ namespace Asteria {
         if(!key_got) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
-        Xpnode::S_subscript node_c = { std::move(key) };
+        Xpnode::S_member_access node_c = { std::move(key) };
         nodes_out.emplace_back(std::move(node_c));
         return true;
       }
@@ -1325,7 +1325,7 @@ namespace Asteria {
           // This is optional.
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
@@ -1373,7 +1373,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> branch_true;
         if(!do_accept_statement_as_block(branch_true, tstrm_io)) {
@@ -1412,7 +1412,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<std::pair<Expression, Block>> clauses;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
@@ -1441,7 +1441,7 @@ namespace Asteria {
           clauses.emplace_back(std::move(cond), std::move(stmts));
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_brace_or_switch_clause_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_switch_clause_expected);
         }
         Statement::S_switch stmt_c = { std::move(ctrl), std::move(clauses) };
         stmts_out.emplace_back(std::move(stmt_c));
@@ -1474,7 +1474,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
@@ -1503,7 +1503,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
@@ -1568,7 +1568,7 @@ namespace Asteria {
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> body;
         if(!do_accept_statement_as_block(body, tstrm_io)) {
@@ -1733,7 +1733,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_close_parenthesis_expected);
+          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
         CoW_Vector<Statement> body_catch;
         if(!do_accept_statement_as_block(body_catch, tstrm_io)) {

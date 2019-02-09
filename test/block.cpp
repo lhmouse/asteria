@@ -52,13 +52,13 @@ int main()
     expr.emplace_back(Xpnode::S_named_reference { rocket::sref("res") });
     expr.emplace_back(Xpnode::S_named_reference { rocket::sref("data") });
     expr.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    expr.emplace_back(Xpnode::S_subscript { rocket::sref("") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
     body.emplace_back(Statement::S_expression { std::move(expr) });
     expr.clear();
     expr.emplace_back(Xpnode::S_named_reference { rocket::sref("data") });
     expr.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    expr.emplace_back(Xpnode::S_subscript { rocket::sref("") });
+    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
     expr.emplace_back(Xpnode::S_literal { D_integer(2) });
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
     CoW_Vector<Statement> branch_true;
