@@ -18,10 +18,10 @@ Argument_Sentry & Argument_Sentry::start() noexcept
 
     namespace {
 
-    template<typename ThrowerT> void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
+    template<typename ThrowerT> inline void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
       {
-        // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
         if(parent.does_throw_on_failure()) {
+          // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
           std::forward<ThrowerT>(thrower)();
         }
         // Error codes are preferred.
@@ -45,24 +45,18 @@ Argument_Sentry & Argument_Sentry::start() noexcept
             // Check for general conditions.
             if(!state.succeeded) {
               do_fail(parent, state,
-                [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
-                });
+                [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
               return;
             }
             if(state.finished) {
               do_fail(parent, state,
-                [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");
-                });
+                [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");  });
               return;
             }
             // Get an argument.
             if(state.offset >= parent.get_argument_count()) {
               do_fail(parent, state,
-                [&]{
-                  ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");
-                });
+                [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");  });
               return;
             }
             // Succeed.
@@ -128,10 +122,8 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_optional_va
       const auto qvalue = value.opt<XvalueT>();
       if(!qvalue) {
         do_fail(*this, this->m_state,
-          [&]{
-            ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                        "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
-          });
+          [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                           "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");  });
         return *this;
       }
       value_out = *qvalue;
@@ -155,10 +147,8 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_required_va
     const auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
       do_fail(*this, this->m_state,
-        [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                      "but `", Value::get_type_name<XvalueT>(), "` was expected.");
-        });
+        [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                         "but `", Value::get_type_name<XvalueT>(), "` was expected.");  });
       return *this;
     }
     value_out = *qvalue;
@@ -298,24 +288,18 @@ Argument_Sentry & Argument_Sentry::finish()
     // Check for general conditions.
     if(!this->m_state.succeeded) {
       do_fail(*this, this->m_state,
-        [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
-        });
+        [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
       return *this;
     }
     if(this->m_state.finished) {
       do_fail(*this, this->m_state,
-        [&]{
-          ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");
-        });
+        [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");  });
       return *this;
     }
     // Check for the end of the argument list.
     if(this->m_state.offset != this->get_argument_count()) {
       do_fail(*this, this->m_state,
-        [&]{
-           ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");
-        });
+        [&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");  });
       return *this;
     }
     // Succeed.
@@ -331,7 +315,7 @@ void Argument_Sentry::throw_no_matching_function_call() const
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "("
         << rocket::ostream_implode(args.data(), args.size(), ", ",
-                                   [&](const Reference &arg) { return Value::get_type_name(arg.read().type()); })
+                                   [&](const Reference &arg) { return Value::get_type_name(arg.read().type());  })
         << ")`.";
     // If overload information is available, append the list of overloads.
     if(!this->m_overloads.empty()) {
@@ -347,7 +331,7 @@ void Argument_Sentry::throw_no_matching_function_call() const
         mos << "`" << name << "("
             << rocket::ostream_implode(this->m_overloads.data() + offset, nparams, ", ",
                                        [&](std::int8_t param) { return (param >= 0) ? Value::get_type_name(static_cast<Value_Type>(param))
-                                                                                    : "<generic>"; })
+                                                                                    : "<generic>";  })
             << ")`";
         offset += nparams;
         read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams), offset);

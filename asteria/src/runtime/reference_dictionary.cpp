@@ -46,7 +46,7 @@ const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_Stri
     auto bptr = this->m_templ_data;
     auto eptr = bptr + this->m_templ_size;
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const Template &lhs, const Template &rhs) { return lhs.first < rhs.first; }));
+    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const Template &lhs, const Template &rhs) { return lhs.first < rhs.first;  }));
 #endif
     while(bptr != eptr) {
       // This is a handwritten binary search, utilizing 3-way comparison result of strings.
@@ -77,7 +77,7 @@ const Reference * Reference_Dictionary::do_get_dynamic_opt(const PreHashed_Strin
     const auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -134,7 +134,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
       if(ROCKET_UNEXPECT(rbkt)) {
         // Find a bucket for the new element.
         const auto origin = rocket::get_probing_origin(pre + 1, end, rbkt.first.rdhash());
-        const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
+        const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
@@ -167,7 +167,7 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
           name.swap(rbkt.first);
           // Find a new bucket for it using linear probing.
           const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-          const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false; });
+          const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
@@ -195,7 +195,7 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
     const auto end = pre + (this->m_stor.size() - 1);
     // Find a bucket for the new element.
     const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(*bkt) {
@@ -231,7 +231,7 @@ bool Reference_Dictionary::remove(const PreHashed_String &name) noexcept
     const auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     const auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name; });
+    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {

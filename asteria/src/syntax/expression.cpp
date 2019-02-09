@@ -14,7 +14,7 @@ void Expression::do_compile()
   {
     CoW_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
-    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.compile(cinsts); });
+    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.compile(cinsts);  });
     this->m_cinsts = std::move(cinsts);
   }
 
@@ -22,7 +22,7 @@ Expression Expression::bind(const Global_Context &global, const Analytic_Context
   {
     CoW_Vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
-    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.bind(nodes_bnd, global, ctx); });
+    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.bind(nodes_bnd, global, ctx);  });
     return std::move(nodes_bnd);
   }
 
@@ -59,7 +59,7 @@ void Expression::evaluate(Reference &ref_out, const CoW_String &func, const Glob
 
 void Expression::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.enumerate_variables(callback); });
+    rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.enumerate_variables(callback);  });
   }
 
 }

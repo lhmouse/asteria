@@ -122,7 +122,7 @@ template<typename keyT, typename mappedT,
 
         allocator_type alloc;
         size_type nblk;
-        union { bucket_type data[0]; };
+        union { bucket_type data[0];  };
 
         pointer_storage(void (*xdtor)(...), const allocator_type &xalloc, size_type xnblk) noexcept
           : storage_header(xdtor),
@@ -183,7 +183,7 @@ template<typename keyT, typename mappedT,
               }
               // Find a bucket for the new element.
               const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
+              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Allocate a new element by copy-constructing from the old one.
               const auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
@@ -228,7 +228,7 @@ template<typename keyT, typename mappedT,
               }
               // Find a bucket for the new element.
               const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false; });
+              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Detach the old element.
               const auto eptr = ptr_old->data[i].reset();
@@ -527,7 +527,7 @@ template<typename keyT, typename mappedT,
             const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find the desired element using linear probing.
             const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey); });
+            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             if(!bkt) {
               // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
               ROCKET_ASSERT(max_load_factor_reciprocal == 1);
@@ -561,7 +561,7 @@ template<typename keyT, typename mappedT,
             const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find an empty bucket using linear probing.
             const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey); });
+            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             ROCKET_ASSERT(bkt);
             if(*bkt) {
               // A duplicate key has been found.
@@ -616,7 +616,7 @@ template<typename keyT, typename mappedT,
                   auto eptr = rbkt.reset();
                   // Find a new bucket for it using linear probing.
                   const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
-                  const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false; });
+                  const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false;  });
                   ROCKET_ASSERT(bkt);
                   // Insert it into the new bucket.
                   ROCKET_ASSERT(!*bkt);
@@ -1104,11 +1104,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         const auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->insert(*it); });
+          noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->insert(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.keyed_emplace_unchecked(it->first, *it); });
+        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
         return *this;
       }
     // N.B. The return type is a non-standard extension.

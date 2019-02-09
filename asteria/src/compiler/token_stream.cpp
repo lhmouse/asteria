@@ -239,7 +239,7 @@ namespace Asteria {
         }
         // Get an identifier.
         const auto eptr = bptr + reader_io.size_avail();
-        auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch); });
+        auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch);  });
         const auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(!keyword_as_identifier) {
           // Check whether this identifier matches a keyword.
@@ -645,7 +645,7 @@ namespace Asteria {
         }
         const auto max_digits = static_cast<std::size_t>(radix * 2);
         // Look for the end of the integral part.
-        auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
+        auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
         int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
           throw do_make_parser_error(reader_io, int_end, Parser_Error::code_numeric_literal_incomplete);
@@ -656,7 +656,7 @@ namespace Asteria {
         auto next = bptr[int_end];
         if(next == '.') {
           ++frac_begin;
-          tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch); });
+          tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
             throw do_make_parser_error(reader_io, frac_end, Parser_Error::code_numeric_literal_incomplete);
@@ -698,7 +698,7 @@ namespace Asteria {
               break;
             }
           }
-          tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch); });
+          tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch);  });
           exp_end = static_cast<std::size_t>(tptr - bptr);
           if(exp_end == exp_begin) {
             throw do_make_parser_error(reader_io, exp_end, Parser_Error::code_numeric_literal_incomplete);
@@ -707,7 +707,7 @@ namespace Asteria {
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
         // Since we make no use of them, we just reserve them for further use for good.
         static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
-        tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch); });
+        tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch);  });
         const auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(tlen != exp_end) {
           throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);

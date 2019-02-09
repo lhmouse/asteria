@@ -87,7 +87,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         allocator_type alloc;
         size_type nblk;
-        union { value_type data[0]; };
+        union { value_type data[0];  };
 
         basic_storage(const allocator_type &xalloc, size_type xnblk) noexcept
           : alloc(xalloc), nblk(xnblk)
@@ -573,7 +573,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         for(auto cp = str; !::std::forward<eofT>(eof)(cp); ++cp) {
           unsigned char cbytes[sizeof(*cp)];
           ::std::memcpy(cbytes, cp, sizeof(*cp));
-          noadl::ranged_for(cbytes, cbytes + sizeof(cbytes), [&](const unsigned char *bp) { reg = (reg ^ *bp) * 0x1000193; });
+          noadl::ranged_for(cbytes, cbytes + sizeof(cbytes), [&](const unsigned char *bp) { reg = (reg ^ *bp) * 0x1000193;  });
         }
         return reg;
       }
@@ -1122,7 +1122,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         auto temp = basic_cow_string(this->m_sth.as_allocator());
         temp.reserve(this->size(), noadl::estimate_distance(first, last));
         temp.append(*this);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { temp.push_back(*it); });
+        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { temp.push_back(*it);  });
         this->assign(::std::move(temp));
         return *this;
       }
@@ -1428,7 +1428,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find(const value_type *s, size_type from, size_type n) const noexcept
       {
-        return this->do_find_forwards_if(from, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0; });
+        return this->do_find_forwards_if(from, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0;  });
       }
     size_type find(const value_type *s, size_type from = 0) const noexcept
       {
@@ -1460,7 +1460,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type rfind(const value_type *s, size_type to, size_type n) const noexcept
       {
-        return this->do_find_backwards_if(to, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0; });
+        return this->do_find_backwards_if(to, n, [&](const value_type *ts) { return traits_type::compare(ts, s, n) == 0;  });
       }
     size_type rfind(const value_type *s, size_type to = npos) const noexcept
       {
@@ -1468,7 +1468,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type rfind(value_type ch, size_type to = npos) const noexcept
       {
-        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch); });
+        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::eq(*ts, ch);  });
       }
 
     // N.B. This is a non-standard extension.
@@ -1482,7 +1482,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_first_of(const value_type *s, size_type from, size_type n) const noexcept
       {
-        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr; });
+        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr;  });
       }
     size_type find_first_of(const value_type *s, size_type from = 0) const noexcept
       {
@@ -1504,7 +1504,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_last_of(const value_type *s, size_type to, size_type n) const noexcept
       {
-        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr; });
+        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) != nullptr;  });
       }
     size_type find_last_of(const value_type *s, size_type to = npos) const noexcept
       {
@@ -1526,7 +1526,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_first_not_of(const value_type *s, size_type from, size_type n) const noexcept
       {
-        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr; });
+        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr;  });
       }
     size_type find_first_not_of(const value_type *s, size_type from = 0) const noexcept
       {
@@ -1534,7 +1534,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_first_not_of(value_type ch, size_type from = 0) const noexcept
       {
-        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch); });
+        return this->do_find_forwards_if(from, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch);  });
       }
 
     // N.B. This is a non-standard extension.
@@ -1548,7 +1548,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_last_not_of(const value_type *s, size_type to, size_type n) const noexcept
       {
-        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr; });
+        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return traits_type::find(s, n, *ts) == nullptr;  });
       }
     size_type find_last_not_of(const value_type *s, size_type to = npos) const noexcept
       {
@@ -1556,18 +1556,18 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     size_type find_last_not_of(value_type ch, size_type to = npos) const noexcept
       {
-        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch); });
+        return this->do_find_backwards_if(to, 1, [&](const value_type *ts) { return !traits_type::eq(*ts, ch);  });
       }
 
     // N.B. This is a non-standard extension.
     template<typename predT> size_type find_first_if(predT pred, size_type from = 0) const
       {
-        return this->do_find_forwards_if(from, 1, [&](const char *p) { return pred(*p); });
+        return this->do_find_forwards_if(from, 1, [&](const char *p) { return pred(*p);  });
       }
     // N.B. This is a non-standard extension.
     template<typename predT> size_type find_last_if(predT pred, size_type to = npos) const
       {
-        return this->do_find_backwards_if(to, 1, [&](const char *p) { return pred(*p); });
+        return this->do_find_backwards_if(to, 1, [&](const char *p) { return pred(*p);  });
       }
 
     basic_cow_string substr(size_type pos = 0, size_type n = npos) const
@@ -1684,11 +1684,11 @@ template<typename charT, typename traitsT, typename allocatorT> struct basic_cow
 
     constexpr result_type operator()(const argument_type &str) const noexcept
       {
-        return details_cow_string::xhash_range<traitsT>(str.data(), [&](const charT *ptr) { return ptr == str.data() + str.size(); });
+        return details_cow_string::xhash_range<traitsT>(str.data(), [&](const charT *ptr) { return ptr == str.data() + str.size();  });
       }
     constexpr result_type operator()(const charT *str) const noexcept
       {
-        return details_cow_string::xhash_range<traitsT>(str, [&](const charT *ptr) { return traitsT::eq(*ptr, charT()); });
+        return details_cow_string::xhash_range<traitsT>(str, [&](const charT *ptr) { return traitsT::eq(*ptr, charT());  });
       }
   };
 

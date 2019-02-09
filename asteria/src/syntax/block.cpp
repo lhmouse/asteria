@@ -18,20 +18,20 @@ void Block::do_compile()
   {
     CoW_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
-    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.compile(cinsts); });
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.compile(cinsts);  });
     this->m_cinsts = std::move(cinsts);
   }
 
 void Block::fly_over_in_place(Abstract_Context &ctx_io) const
   {
-    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.fly_over_in_place(ctx_io); });
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.fly_over_in_place(ctx_io);  });
   }
 
 Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const
   {
     CoW_Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
-    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.bind_in_place(stmts_bnd, ctx_io, global); });
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.bind_in_place(stmts_bnd, ctx_io, global);  });
     return std::move(stmts_bnd);
   }
 
@@ -69,7 +69,7 @@ Block::Status Block::execute(Reference &ref_out, const CoW_String &func, const G
 
 void Block::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback); });
+    rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback);  });
   }
 
 void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, CoW_Vector<Reference> &&args) const

@@ -43,7 +43,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
 
 void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_vargs, [&](const Reference &arg) { arg.enumerate_variables(callback); });
+    rocket::for_each(this->m_vargs, [&](const Reference &arg) { arg.enumerate_variables(callback);  });
   }
 
 }

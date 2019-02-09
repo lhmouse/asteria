@@ -40,7 +40,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
       private:
         typename lowest_unsigned<capacityT - 1>::type m_nelem;
-        union { value_type m_ebase[capacityT]; };
+        union { value_type m_ebase[capacityT];  };
 
       public:
         explicit storage_handle(const allocator_type &alloc) noexcept
@@ -670,7 +670,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
           return *this;
         }
         this->do_reserve_more(n);
-        noadl::ranged_do_while(size_type(0), n, [&](size_type, const paramsT &...fwdp) { this->m_sth.emplace_back_unchecked(fwdp...); }, params...);
+        noadl::ranged_do_while(size_type(0), n, [&](size_type, const paramsT &...fwdp) { this->m_sth.emplace_back_unchecked(fwdp...);  }, params...);
         return *this;
       }
     // N.B. This is a non-standard extension.
@@ -686,11 +686,11 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         }
         const auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it); });
+          noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it); });
+        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
     // 26.3.11.5, modifiers
