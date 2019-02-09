@@ -516,11 +516,11 @@ template<typename keyT, typename mappedT,
             return this;
           }
 
-        template<typename ykeyT> difference_type index_of(const ykeyT &ykey) const
+        template<typename ykeyT> bool index_of(size_type &index, const ykeyT &ykey) const
           {
             const auto ptr = this->m_ptr;
             if(!ptr) {
-              return -1;
+              return false;
             }
             // Get table bounds.
             const auto data = ptr->data;
@@ -531,15 +531,15 @@ template<typename keyT, typename mappedT,
             if(!bkt) {
               // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
               ROCKET_ASSERT(max_load_factor_reciprocal == 1);
-              return -1;
+              return false;
             }
             if(!*bkt) {
               // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
-              return -1;
+              return false;
             }
-            const auto dist = bkt - data;
-            ROCKET_ASSERT(dist >= 0);
-            return dist;
+            ROCKET_ASSERT(data <= bkt);
+            index = static_cast<size_type>(bkt - data);
+            return true;
           }
         bucket_type * mut_buckets_unchecked() noexcept
           {
@@ -1176,11 +1176,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. The return type differs from `std::unordered_map`.
     template<typename ykeyT, ROCKET_DISABLE_IF(is_convertible<ykeyT, const_iterator>::value)> bool erase(const ykeyT &key)
       {
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           return false;
         }
-        this->do_erase_no_bound_check(static_cast<size_type>(toff), 1);
+        this->do_erase_no_bound_check(tpos, 1);
         return true;
       }
 
@@ -1188,27 +1188,27 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename ykeyT> const_iterator find(const ykeyT &key) const
       {
         const auto ptr = this->do_get_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           return this->end();
         }
-        return const_iterator(this->m_sth, ptr + toff);
+        return const_iterator(this->m_sth, ptr + tpos);
       }
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
     template<typename ykeyT> iterator find_mut(const ykeyT &key)
       {
         const auto ptr = this->do_mut_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           return this->mut_end();
         }
-        return iterator(this->m_sth, ptr + toff);
+        return iterator(this->m_sth, ptr + tpos);
       }
     template<typename ykeyT> size_t count(const ykeyT &key) const
       {
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           return 0;
         }
         return 1;
@@ -1218,21 +1218,21 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename ykeyT> const mapped_type & at(const ykeyT &key) const
       {
         const auto ptr = this->do_get_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           this->do_throw_key_not_found();
         }
-        return ptr[toff]->second;
+        return ptr[tpos]->second;
       }
     // N.B. This is a non-standard extension.
     template<typename ykeyT> mapped_type & mut(const ykeyT &key)
       {
         const auto ptr = this->do_mut_table();
-        const auto toff = this->m_sth.index_of(key);
-        if(toff < 0) {
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
           this->do_throw_key_not_found();
         }
-        return ptr[toff]->second;
+        return ptr[tpos]->second;
       }
     template<typename ykeyT> mapped_type & operator[](ykeyT &&key)
       {
