@@ -15,7 +15,7 @@ class Argument_Reader
   public:
     struct State
       {
-        rocket::basic_cow_string<std::int8_t> history;
+        CoW_Vector<unsigned char> history;
         std::size_t offset;
         bool succeeded;
         bool finished;
@@ -28,7 +28,7 @@ class Argument_Reader
 
     // This string stores all overloads that have been tested so far.
     // Overloads are encoded in binary formats.
-    rocket::basic_cow_string<std::int8_t> m_overloads;
+    CoW_Vector<unsigned char> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;

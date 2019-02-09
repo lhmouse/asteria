@@ -160,7 +160,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
 Argument_Reader & Argument_Reader::opt(Reference &ref_out)
   {
     // Record a type-generic or output-only parameter.
-    this->m_state.history.push_back(-1);
+    this->m_state.history.push_back(0xFF);
     // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
@@ -176,7 +176,7 @@ Argument_Reader & Argument_Reader::opt(Reference &ref_out)
 Argument_Reader & Argument_Reader::opt(Value &value_out)
   {
     // Record a type-generic or output-only parameter.
-    this->m_state.history.push_back(-1);
+    this->m_state.history.push_back(0xFF);
     // Get the next argument.
     Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
@@ -278,12 +278,16 @@ Argument_Reader & Argument_Reader::req(D_object &value_out)
 Argument_Reader & Argument_Reader::finish()
   {
     // Record this overload.
-    // 0) Append the number of parameters in native byte order.
     unsigned nparams = static_cast<unsigned>(this->m_state.history.size());
-    this->m_overloads.reserve(this->m_overloads.size() + sizeof(nparams) + nparams);
-    this->m_overloads.append(reinterpret_cast<const std::int8_t *>(&nparams), sizeof(nparams));
+    std::size_t offset = this->m_overloads.size();
+    this->m_overloads.append(sizeof(nparams) + nparams);
+    // 0) Append the number of parameters in native byte order.
+    std::memcpy(this->m_overloads.mut_data() + offset, &nparams, sizeof(nparams));
+    offset += sizeof(nparams);
     // 1) Append all parameters.
-    this->m_overloads.append(this->m_state.history.data(), nparams);
+    std::memcpy(this->m_overloads.mut_data() + offset, this->m_state.history.data(), nparams);
+    offset += nparams;
+    ROCKET_ASSERT(offset == this->m_overloads.size());
     // Check for general conditions.
     if(!this->m_state.succeeded) {
       do_fail(*this, this->m_state,
@@ -318,26 +322,26 @@ void Argument_Reader::throw_no_matching_function_call() const
         << ")`.";
     // If overload information is available, append the list of overloads.
     if(!this->m_overloads.empty()) {
-      mos << "\n[possible overloads: ";
+      mos << "\n[list of overloads: ";
       // Decode overloads one by one.
+      std::size_t offset = 0;
       unsigned nparams;
-      auto read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams));
-      auto offset = read;
       for(;;) {
-        ROCKET_ASSERT(read == sizeof(nparams));
-        ROCKET_ASSERT(offset + nparams <= this->m_overloads.size());
+        // 0) Decode the number of parameters in native byte order.
+        ROCKET_ASSERT(offset + sizeof(nparams) <= this->m_overloads.size());
+        std::memcpy(&nparams, this->m_overloads.data() + offset, sizeof(nparams));
+        offset += sizeof(nparams);
         // Append this overload.
         mos << "`" << name << "("
             << rocket::ostream_implode(this->m_overloads.data() + offset, nparams, ", ",
-                                       [&](std::int8_t param) { return (param >= 0) ? Value::get_type_name(static_cast<Value_Type>(param))
-                                                                                    : "<generic>";  })
+                                       [&](unsigned char param) { return (param == 0xFF) ? "<generic>"
+                                                                                         : Value::get_type_name(static_cast<Value_Type>(param));  })
             << ")`";
         offset += nparams;
-        read = this->m_overloads.copy(reinterpret_cast<std::int8_t *>(&nparams), sizeof(nparams), offset);
-        if(read == 0) {
+        // Break if there are no more data.
+        if(offset == this->m_overloads.size()) {
           break;
         }
-        offset += read;
         // Read the next overload.
         mos << ", ";
       }
