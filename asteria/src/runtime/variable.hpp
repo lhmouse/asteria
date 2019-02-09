@@ -25,7 +25,7 @@ class Variable : public virtual RefCnt_Base
       : m_value(), m_immutable(true)
       {
       }
-    ~Variable();
+    ~Variable() override;
 
     Variable(const Variable &)
       = delete;

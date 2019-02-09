@@ -27,6 +27,7 @@ class Generational_Collector : public virtual RefCnt_Base
         m_gen_zero(&(this->m_pool), &(this->m_gen_one), 500)
       {
       }
+    ~Generational_Collector() override;
 
     Generational_Collector(const Generational_Collector &)
       = delete;
