@@ -14,8 +14,13 @@ template<typename funcT, typename ...firstT> class bind_front_result
     template<typename, typename...> friend class bind_front_result;
 
   public:
-    template<typename ...restT> using result_type_for = decltype(::std::declval<const funcT &>()(::std::declval<const firstT &>()...,
-                                                                                                 ::std::declval<restT>()...));
+    template<typename ...restT> using result_type_for = typename
+#if defined(__cpp_lib_is_invocable) && (__cpp_lib_is_invocable >= 201703)
+                                                                 ::std::invoke_result<const funcT &, const firstT &..., restT &&...>
+#else
+                                                                 ::std::result_of<const funcT & (const firstT &..., restT &&...)>
+#endif
+                                                                                                                                    ::type;
 
   private:
     funcT m_func;
@@ -25,8 +30,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
     // piesewise construct
     template<typename yfuncT, typename ...yfirstT, ROCKET_ENABLE_IF(is_constructible<tuple<firstT...>, yfirstT &&...>::value)
              > constexpr bind_front_result(yfuncT &&yfunc, firstT &&...yfirst) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
-                                                                                                    is_nothrow_constructible<tuple<firstT...>,
-                                                                                                    yfirstT &&...>>::value)
+                                                                                                    is_nothrow_constructible<tuple<firstT...>, yfirstT &&...>>::value)
       : m_func(::std::forward<yfuncT>(yfunc)),
         m_first(::std::forward<firstT>(yfirst)...)
       {
@@ -34,24 +38,21 @@ template<typename funcT, typename ...firstT> class bind_front_result
     // conversion
     template<typename yfuncT, typename ...yfirstT
              > constexpr bind_front_result(const bind_front_result<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_constructible<funcT, const yfuncT &>,
-                                                                                                                    is_nothrow_constructible<tuple<firstT...>,
-                                                                                                                    const tuple<yfirstT...> &>>::value)
+                                                                                                                    is_nothrow_constructible<tuple<firstT...>, const tuple<yfirstT...> &>>::value)
       : m_func(other.m_func),
         m_first(other.m_first)
       {
       }
     template<typename yfuncT, typename ...yfirstT
              > constexpr bind_front_result(bind_front_result<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
-                                                                                                               is_nothrow_constructible<tuple<firstT...>,
-                                                                                                               tuple<yfirstT...> &&>>::value)
+                                                                                                               is_nothrow_constructible<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
       : m_func(::std::move(other.m_func)),
         m_first(::std::move(other.m_first))
       {
       }
     template<typename yfuncT, typename ...yfirstT
              > bind_front_result & operator=(const bind_front_result<yfuncT, yfirstT...> &other) noexcept(conjunction<is_nothrow_assignable<funcT, const yfuncT &>,
-                                                                                                                      is_nothrow_assignable<tuple<firstT...>,
-                                                                                                                      const tuple<yfirstT...> &>>::value)
+                                                                                                                      is_nothrow_assignable<tuple<firstT...>, const tuple<yfirstT...> &>>::value)
       {
         this->m_func = other.m_func;
         this->m_first = other.m_first;
@@ -59,8 +60,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
       }
     template<typename yfuncT, typename ...yfirstT
              > bind_front_result & operator=(bind_front_result<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_assignable<funcT, yfuncT &&>,
-                                                                                                                 is_nothrow_assignable<tuple<firstT...>,
-                                                                                                                 tuple<yfirstT...> &&>>::value)
+                                                                                                                 is_nothrow_assignable<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
       {
         this->m_func = ::std::move(other.m_func);
         this->m_first = ::std::move(other.m_first);
@@ -68,9 +68,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
       }
 
   private:
-    template<size_t ...indicesT,
-             typename ...restT> constexpr result_type_for<restT...> do_unpack_forward_then_invoke(index_sequence<indicesT...>,
-                                                                                                  restT &&...rest) const
+    template<size_t ...indicesT, typename ...restT> constexpr result_type_for<restT...> do_invoke_with(index_sequence<indicesT...>, restT &&...rest) const
       {
         return
 #if defined(__cpp_lib_invoke) && (__cpp_lib_invoke >= 201411)
@@ -78,8 +76,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
 #else
                this->m_func(
 #endif
-                                           ::std::get<indicesT>(this->m_first)...,
-                                           ::std::forward<restT>(rest)...);
+                                           ::std::get<indicesT>(this->m_first)..., ::std::forward<restT>(rest)...);
       }
 
   public:
@@ -90,7 +87,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
       }
     template<typename ...restT> constexpr result_type_for<restT...> operator()(restT &&...rest) const
       {
-        return this->do_unpack_forward_then_invoke(index_sequence_for<firstT...>(), ::std::forward<restT>(rest)...);
+        return this->do_invoke_with(index_sequence_for<firstT...>(), ::std::forward<restT>(rest)...);
       }
   };
 
@@ -99,7 +96,8 @@ template<typename xfuncT,
                                                           typename decay<xfirstT>::type...> bind_front(xfuncT &&xfunc,
                                                                                                        xfirstT &&...xfirst)
   {
-    return { ::std::forward<xfuncT>(xfunc), ::std::forward<xfirstT>(xfirst)... };
+    return { ::std::forward<xfuncT>(xfunc),
+             ::std::forward<xfirstT>(xfirst)... };
   }
 
 }

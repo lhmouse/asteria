@@ -188,8 +188,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           : vector_iterator(nullptr, nullptr)
           {
           }
-        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT *, valueT *>::value)
-                 > constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT *, valueT *>::value)> constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
           : vector_iterator(other.m_ref, other.m_ptr)
           {
           }

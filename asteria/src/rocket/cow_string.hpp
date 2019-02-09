@@ -349,8 +349,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           : string_iterator(nullptr, nullptr)
           {
           }
-        template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT *, charT *>::value)
-                 > constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
+        template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT *, charT *>::value)> constexpr string_iterator(const string_iterator<stringT, ycharT> &other) noexcept
           : string_iterator(other.m_ref, other.m_ptr)
           {
           }
