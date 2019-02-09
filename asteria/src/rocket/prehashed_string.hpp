@@ -128,7 +128,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, ::std::forward<paramsT>(params)...)
       {
       }
-    explicit basic_prehashed_string(const string_type &str, const hasher &hf = hasher())
+    basic_prehashed_string(const string_type &str, const hasher &hf = hasher())
       : m_sth(hf, str)
       {
       }
