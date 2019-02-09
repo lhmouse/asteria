@@ -62,8 +62,7 @@ Value & Global_Context::open_std_member(const PreHashed_String &name)
     ROCKET_ASSERT(std_var);
     auto &obj = std_var->open_value().check<D_object>();
     // Return the member.
-    const auto it = obj.try_emplace(name).first;
-    return it->second;
+    return obj[name];
   }
 
 bool Global_Context::unset_std_member(const PreHashed_String &name)
@@ -71,13 +70,8 @@ bool Global_Context::unset_std_member(const PreHashed_String &name)
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
     auto &obj = std_var->open_value().check<D_object>();
-    // Search for the member.
-    const auto it = obj.find(name);
-    if(it == obj.end()) {
-      return false;
-    }
-    obj.erase(it);
-    return true;
+    // Erase the member.
+    return obj.erase(name) != 0;
   }
 
 }
