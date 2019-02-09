@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_ARGUMENT_SENTRY_HPP_
-#define ASTERIA_LIBRARY_ARGUMENT_SENTRY_HPP_
+#ifndef ASTERIA_LIBRARY_ARGUMENT_READER_HPP_
+#define ASTERIA_LIBRARY_ARGUMENT_READER_HPP_
 
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Argument_Sentry
+class Argument_Reader
   {
   public:
     struct State
@@ -34,20 +34,20 @@ class Argument_Sentry
     State m_state;
 
   public:
-    Argument_Sentry(CoW_String name, const CoW_Vector<Reference> &args) noexcept
+    Argument_Reader(CoW_String name, const CoW_Vector<Reference> &args) noexcept
       : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
       }
 
-    Argument_Sentry(const Argument_Sentry &)
+    Argument_Reader(const Argument_Reader &)
       = delete;
-    Argument_Sentry & operator=(const Argument_Sentry &)
+    Argument_Reader & operator=(const Argument_Reader &)
       = delete;
 
   private:
-    template<typename XvalueT> Argument_Sentry & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
-    template<typename XvalueT> Argument_Sentry & do_get_required_value(XvalueT &value_out);
+    template<typename XvalueT> Argument_Reader & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
+    template<typename XvalueT> Argument_Reader & do_get_required_value(XvalueT &value_out);
 
   public:
     const CoW_String & get_name() const noexcept
@@ -80,42 +80,42 @@ class Argument_Sentry
         this->m_state = state;
       }
 
-    // Sentry objects are allowed in `if` and `while` conditions, just like `std::istream`s.
+    // Reader objects are allowed in `if` and `while` conditions, just like `std::istream`s.
     explicit operator bool () const noexcept
       {
         return this->m_state.succeeded;
       }
     // Start recording an overload.
-    Argument_Sentry & start() noexcept;
+    Argument_Reader & start() noexcept;
     // Get an OPTIONAL argument.
     // The argument must exist (and must be of the desired type or `null` for the overloads taking two arguments); otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
-    Argument_Sentry & opt(Reference &ref_out);
-    Argument_Sentry & opt(Value &value_out);
-    Argument_Sentry & opt(D_boolean &value_out, D_boolean default_value = false);
-    Argument_Sentry & opt(D_integer &value_out, D_integer default_value = 0);
-    Argument_Sentry & opt(D_real &value_out, D_real default_value = 0);
-    Argument_Sentry & opt(D_string &value_out, const D_string &default_value = rocket::sref(""));
-    Argument_Sentry & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
-    Argument_Sentry & opt(D_function &value_out, const D_function &default_value);  // no default value
-    Argument_Sentry & opt(D_array &value_out, const D_array &default_value = D_array());
-    Argument_Sentry & opt(D_object &value_out, const D_object &default_value = D_object());
+    Argument_Reader & opt(Reference &ref_out);
+    Argument_Reader & opt(Value &value_out);
+    Argument_Reader & opt(D_boolean &value_out, D_boolean default_value = false);
+    Argument_Reader & opt(D_integer &value_out, D_integer default_value = 0);
+    Argument_Reader & opt(D_real &value_out, D_real default_value = 0);
+    Argument_Reader & opt(D_string &value_out, const D_string &default_value = rocket::sref(""));
+    Argument_Reader & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
+    Argument_Reader & opt(D_function &value_out, const D_function &default_value);  // no default value
+    Argument_Reader & opt(D_array &value_out, const D_array &default_value = D_array());
+    Argument_Reader & opt(D_object &value_out, const D_object &default_value = D_object());
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
-    Argument_Sentry & req(D_null &value_out);
-    Argument_Sentry & req(D_boolean &value_out);
-    Argument_Sentry & req(D_integer &value_out);
-    Argument_Sentry & req(D_real &value_out);
-    Argument_Sentry & req(D_string &value_out);
-    Argument_Sentry & req(D_opaque &value_out);
-    Argument_Sentry & req(D_function &value_out);
-    Argument_Sentry & req(D_array &value_out);
-    Argument_Sentry & req(D_object &value_out);
+    Argument_Reader & req(D_null &value_out);
+    Argument_Reader & req(D_boolean &value_out);
+    Argument_Reader & req(D_integer &value_out);
+    Argument_Reader & req(D_real &value_out);
+    Argument_Reader & req(D_string &value_out);
+    Argument_Reader & req(D_opaque &value_out);
+    Argument_Reader & req(D_function &value_out);
+    Argument_Reader & req(D_array &value_out);
+    Argument_Reader & req(D_object &value_out);
     // Terminate the argument list and finish this overload.
     // There will be no more argument; otherwise this operation fails.
     // N.B. This function provides STRONG exception safety guarantee.
-    Argument_Sentry & finish();
+    Argument_Reader & finish();
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

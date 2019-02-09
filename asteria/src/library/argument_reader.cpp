@@ -2,12 +2,12 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "argument_sentry.hpp"
+#include "argument_reader.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Argument_Sentry & Argument_Sentry::start() noexcept
+Argument_Reader & Argument_Reader::start() noexcept
   {
     this->m_state.history.clear();
     this->m_state.offset = 0;
@@ -18,7 +18,7 @@ Argument_Sentry & Argument_Sentry::start() noexcept
 
     namespace {
 
-    template<typename ThrowerT> inline void do_fail(const Argument_Sentry &parent, Argument_Sentry::State &state, ThrowerT &&thrower)
+    template<typename ThrowerT> inline void do_fail(const Argument_Reader &parent, Argument_Reader::State &state, ThrowerT &&thrower)
       {
         if(parent.does_throw_on_failure()) {
           // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
@@ -31,32 +31,32 @@ Argument_Sentry & Argument_Sentry::start() noexcept
     class Reference_Sentry
       {
       private:
-        std::reference_wrapper<const Argument_Sentry> m_parent;
-        std::reference_wrapper<Argument_Sentry::State> m_state;
+        std::reference_wrapper<const Argument_Reader> m_parent;
+        std::reference_wrapper<Argument_Reader::State> m_state;
 
         bool m_committable;
         const Reference *m_ref;
 
       public:
-        Reference_Sentry(const Argument_Sentry &parent, Argument_Sentry::State &state) noexcept
+        Reference_Sentry(const Argument_Reader &parent, Argument_Reader::State &state) noexcept
           : m_parent(std::ref(parent)), m_state(std::ref(state)),
             m_committable(false)
           {
             // Check for general conditions.
             if(!state.succeeded) {
               do_fail(parent, state,
-                [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
+                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
               return;
             }
             if(state.finished) {
               do_fail(parent, state,
-                [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");  });
+                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");  });
               return;
             }
             // Get an argument.
             if(state.offset >= parent.get_argument_count()) {
               do_fail(parent, state,
-                [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");  });
+                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");  });
               return;
             }
             // Succeed.
@@ -65,7 +65,7 @@ Argument_Sentry & Argument_Sentry::start() noexcept
           }
         ~Reference_Sentry()
           {
-            Argument_Sentry::State &state = this->m_state;
+            Argument_Reader::State &state = this->m_state;
             // If anything went wrong, don't do anything.
             if(!state.succeeded) {
               return;
@@ -103,7 +103,7 @@ Argument_Sentry & Argument_Sentry::start() noexcept
 
     }
 
-template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
+template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
@@ -122,8 +122,8 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_optional_va
       const auto qvalue = value.opt<XvalueT>();
       if(!qvalue) {
         do_fail(*this, this->m_state,
-          [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                           "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");  });
+                [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                                 "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");  });
         return *this;
       }
       value_out = *qvalue;
@@ -133,7 +133,7 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_optional_va
     return *this;
   }
 
-template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_required_value(XvalueT &value_out)
+template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_value(XvalueT &value_out)
   {
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
@@ -147,8 +147,8 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_required_va
     const auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
       do_fail(*this, this->m_state,
-        [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                         "but `", Value::get_type_name<XvalueT>(), "` was expected.");  });
+              [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                               "but `", Value::get_type_name<XvalueT>(), "` was expected.");  });
       return *this;
     }
     value_out = *qvalue;
@@ -157,7 +157,7 @@ template<typename XvalueT> Argument_Sentry & Argument_Sentry::do_get_required_va
     return *this;
   }
 
-Argument_Sentry & Argument_Sentry::opt(Reference &ref_out)
+Argument_Reader & Argument_Reader::opt(Reference &ref_out)
   {
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(-1);
@@ -173,7 +173,7 @@ Argument_Sentry & Argument_Sentry::opt(Reference &ref_out)
     return *this;
   }
 
-Argument_Sentry & Argument_Sentry::opt(Value &value_out)
+Argument_Reader & Argument_Reader::opt(Value &value_out)
   {
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(-1);
@@ -190,97 +190,96 @@ Argument_Sentry & Argument_Sentry::opt(Value &value_out)
     return *this;
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_boolean &value_out, D_boolean default_value)
+Argument_Reader & Argument_Reader::opt(D_boolean &value_out, D_boolean default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_integer &value_out, D_integer default_value)
+Argument_Reader & Argument_Reader::opt(D_integer &value_out, D_integer default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_real &value_out, D_real default_value)
+Argument_Reader & Argument_Reader::opt(D_real &value_out, D_real default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_string &value_out, const D_string &default_value)
+Argument_Reader & Argument_Reader::opt(D_string &value_out, const D_string &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_opaque &value_out, const D_opaque &default_value)
+Argument_Reader & Argument_Reader::opt(D_opaque &value_out, const D_opaque &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_function &value_out, const D_function &default_value)
+Argument_Reader & Argument_Reader::opt(D_function &value_out, const D_function &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_array &value_out, const D_array &default_value)
+Argument_Reader & Argument_Reader::opt(D_array &value_out, const D_array &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::opt(D_object &value_out, const D_object &default_value)
+Argument_Reader & Argument_Reader::opt(D_object &value_out, const D_object &default_value)
   {
     return this->do_get_optional_value(value_out, default_value);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_null &value_out)
+Argument_Reader & Argument_Reader::req(D_null &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_boolean &value_out)
+Argument_Reader & Argument_Reader::req(D_boolean &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_integer &value_out)
+Argument_Reader & Argument_Reader::req(D_integer &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_real &value_out)
+Argument_Reader & Argument_Reader::req(D_real &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_string &value_out)
+Argument_Reader & Argument_Reader::req(D_string &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_opaque &value_out)
+Argument_Reader & Argument_Reader::req(D_opaque &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_function &value_out)
+Argument_Reader & Argument_Reader::req(D_function &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_array &value_out)
+Argument_Reader & Argument_Reader::req(D_array &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::req(D_object &value_out)
+Argument_Reader & Argument_Reader::req(D_object &value_out)
   {
     return this->do_get_required_value(value_out);
   }
 
-Argument_Sentry & Argument_Sentry::finish()
+Argument_Reader & Argument_Reader::finish()
   {
     // Record this overload.
     // 0) Append the number of parameters in native byte order.
-    unsigned nparams;
-    nparams = static_cast<unsigned>(this->m_state.history.size());
+    unsigned nparams = static_cast<unsigned>(this->m_state.history.size());
     this->m_overloads.reserve(this->m_overloads.size() + sizeof(nparams) + nparams);
     this->m_overloads.append(reinterpret_cast<const std::int8_t *>(&nparams), sizeof(nparams));
     // 1) Append all parameters.
@@ -288,18 +287,18 @@ Argument_Sentry & Argument_Sentry::finish()
     // Check for general conditions.
     if(!this->m_state.succeeded) {
       do_fail(*this, this->m_state,
-        [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
+              [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
       return *this;
     }
     if(this->m_state.finished) {
       do_fail(*this, this->m_state,
-        [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");  });
+              [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");  });
       return *this;
     }
     // Check for the end of the argument list.
     if(this->m_state.offset != this->get_argument_count()) {
       do_fail(*this, this->m_state,
-        [&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");  });
+              [&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");  });
       return *this;
     }
     // Succeed.
@@ -307,7 +306,7 @@ Argument_Sentry & Argument_Sentry::finish()
     return *this;
   }
 
-void Argument_Sentry::throw_no_matching_function_call() const
+void Argument_Reader::throw_no_matching_function_call() const
   {
     const auto &name = this->m_name;
     const auto &args = this->m_args.get();

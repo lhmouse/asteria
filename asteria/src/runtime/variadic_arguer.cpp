@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "variadic_arguer.hpp"
-#include "../library/argument_sentry.hpp"
+#include "../library/argument_reader.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -15,10 +15,10 @@ void Variadic_Arguer::describe(std::ostream &os) const
 
 void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global*/, CoW_Vector<Reference> &&args) const
   {
-    Argument_Sentry sentry(rocket::sref("<builtin>.__varg"), args);
+    Argument_Reader reader(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
     const auto nvargs = this->get_argument_count();
-    if(sentry.start().finish()) {
+    if(reader.start().finish()) {
       // Return the number of variadic arguments.
       Reference_Root::S_constant ref_c = { D_integer(nvargs) };
       self_io = std::move(ref_c);
@@ -26,7 +26,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
     }
     // `__varg(index)`
     D_integer index;
-    if(sentry.start().req(index).finish()) {
+    if(reader.start().req(index).finish()) {
       // Return the argument at the index specified.
       auto wrap = wrap_index(index, nvargs);
       if(wrap.index >= nvargs) {
@@ -38,7 +38,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
       return;
     }
     // Fail.
-    sentry.throw_no_matching_function_call();
+    reader.throw_no_matching_function_call();
   }
 
 void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &callback) const

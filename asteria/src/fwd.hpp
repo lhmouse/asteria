@@ -70,7 +70,7 @@ class Parser;
 class Simple_Source_File;
 
 // Library
-class Argument_Sentry;
+class Argument_Reader;
 
 // Template Aliases
 template<typename H, typename C> using Unique_Handle = rocket::unique_handle<H, C>;
