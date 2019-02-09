@@ -24,4 +24,8 @@ int main()
     global.open_std_member(rocket::sref("meow")) = D_integer(42);
     retv = code.execute(global, { }).read();
     ASTERIA_TEST_CHECK(retv.check<D_integer>() == 42);
+
+    global.remove_std_member(rocket::sref("meow"));
+    retv = code.execute(global, { }).read();
+    ASTERIA_TEST_CHECK(retv.type() == type_null);
   }

@@ -47,7 +47,7 @@ class Global_Context : public Abstract_Context
     // These are interfaces of the standard library.
     const Value & get_std_member(const PreHashed_String &name) const;
     Value & open_std_member(const PreHashed_String &name);
-    bool unset_std_member(const PreHashed_String &name);
+    bool remove_std_member(const PreHashed_String &name);
   };
 
 }

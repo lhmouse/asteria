@@ -71,7 +71,6 @@ class Reference_Dictionary
 
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
-    Reference & do_open(const PreHashed_String &name, bool with_templates);
     void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
@@ -116,11 +115,8 @@ class Reference_Dictionary
         }
         return nullptr;
       }
-    Reference & open(const PreHashed_String &name)
-      {
-        return this->do_open(name, true);
-      }
-    bool unset(const PreHashed_String &name) noexcept;
+    Reference & open(const PreHashed_String &name);
+    bool remove(const PreHashed_String &name) noexcept;
   };
 
 }

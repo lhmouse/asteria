@@ -59,7 +59,7 @@ Value & Global_Context::open_std_member(const PreHashed_String &name)
     return std_var->open_value().check<D_object>()[name];
   }
 
-bool Global_Context::unset_std_member(const PreHashed_String &name)
+bool Global_Context::remove_std_member(const PreHashed_String &name)
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
