@@ -25,7 +25,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     Reference_Root::S_variable std_ref_c = { std_var };
     this->open_named_reference(rocket::sref("std")) = std::move(std_ref_c);
     this->m_std_var = std_var;
-    // Add standard library interfaces.
+    // Add standard library components.
     ASTERIA_DEBUG_LOG("TODO add std library");
   }
 
@@ -47,7 +47,6 @@ const Value & Global_Context::get_std_member(const PreHashed_String &name) const
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    // Search for the member.
     return std_var->get_value().check<D_object>().get_or(name, Value::get_null());
   }
 
@@ -55,7 +54,6 @@ Value & Global_Context::open_std_member(const PreHashed_String &name)
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    // Return the member.
     return std_var->open_value().check<D_object>()[name];
   }
 
@@ -63,7 +61,6 @@ bool Global_Context::remove_std_member(const PreHashed_String &name)
   {
     const auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    // Erase the member.
     return std_var->open_value().check<D_object>().erase(name);
   }
 
