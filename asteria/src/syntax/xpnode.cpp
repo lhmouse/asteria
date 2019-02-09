@@ -174,7 +174,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // Search for the name in the global context.
         qref = global.get_named_reference_opt(name);
         if(ROCKET_EXPECT(qref)) {
-          return std::make_pair(std::ref(*qctx), std::ref(*qref));
+          return std::make_pair(std::ref(global), std::ref(*qref));
         }
         // Not found...
         ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
