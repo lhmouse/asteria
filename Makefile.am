@@ -196,6 +196,7 @@ check_PROGRAMS =  \
   test/parser.test  \
   test/simple_source_file.test  \
   test/garbage_collection.test  \
+  test/std_library.test  \
   test/varg.test
 
 TESTS = ${check_PROGRAMS}
