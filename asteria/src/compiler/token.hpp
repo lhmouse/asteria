@@ -162,6 +162,7 @@ class Token
     std::uint32_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
+
     Variant m_stor;
 
   public:
