@@ -144,20 +144,24 @@ template<typename valueT, typename withT> inline valueT exchange(valueT &value, 
 using details_utilities::is_nothrow_swappable;
 using details_utilities::adl_swap;
 
-template<typename lhsT, typename rhsT> constexpr typename common_type<lhsT &&, rhsT &&>::type min(lhsT &&lhs, rhsT &&rhs)
+template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
+                                                            : ::std::declval<rhsT>()) min(lhsT &&lhs, rhsT &&rhs)
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
   }
 
-template<typename lhsT, typename rhsT> constexpr typename common_type<lhsT &&, rhsT &&>::type max(lhsT &&lhs, rhsT &&rhs)
+template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
+                                                            : ::std::declval<rhsT>()) max(lhsT &&lhs, rhsT &&rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
   }
 
 // Note that the order of parameters is different from `std::clamp()` from C++17.
-template<typename lowerT, typename testT, typename upperT> constexpr typename common_type<lowerT &&, testT &&, upperT &&>::type clamp(lowerT &&lower, testT &&test, upperT &&upper)
+template<typename lowerT, typename testT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
+                                                                                : 0 ? ::std::declval<testT>()
+                                                                                    : ::std::declval<upperT>()) mclamp(lowerT &&lower, testT &&test, upperT &&upper)
   {
     return (test < lower) ? ::std::forward<lowerT>(lower)
                           : (upper < test) ? ::std::forward<upperT>(upper)
@@ -181,18 +185,18 @@ template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<c
     state &= ~ios_base::badbit;
   }
 
-template<typename iteratorT, typename eiteratorT, typename functionT,
-         typename ...paramsT> inline void ranged_for(iteratorT first, eiteratorT last, functionT &&func,
-                                                     const paramsT &...params)
+template<typename iteratorT, typename eiteratorT,
+         typename functionT, typename ...paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
+                                                                         functionT &&func, const paramsT &...params)
   {
     for(auto it = ::std::move(first); it != last; ++it) {
       ::std::forward<functionT>(func)(it, params...);
     }
   }
 
-template<typename iteratorT, typename eiteratorT, typename functionT,
-         typename ...paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last, functionT &&func,
-                                                          const paramsT &...params)
+template<typename iteratorT, typename eiteratorT,
+         typename functionT, typename ...paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
+                                                                              functionT &&func, const paramsT &...params)
   {
     auto it = ::std::move(first);
     do {
@@ -227,11 +231,11 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
 
     namespace details_utilities {
 
-    template<typename iteratorT> constexpr size_t estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+    template<typename iteratorT> constexpr size_t tagged_estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
       {
         return 0;
       }
-    template<typename iteratorT> inline size_t estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> inline size_t tagged_estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
         for(auto it = ::std::move(first); it != last; ++it) {
@@ -239,7 +243,7 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
         }
         return total;
       }
-    template<typename iteratorT> constexpr size_t estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> constexpr size_t tagged_estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
       {
         return static_cast<size_t>(last - first);
       }
@@ -248,16 +252,26 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
 
 template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_utilities::estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), ::std::move(first), ::std::move(last));
+    return details_utilities::tagged_estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), ::std::move(first), ::std::move(last));
   }
 
 template<typename elementT, typename ...paramsT> elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
   {
+#ifdef ROCKET_DEBUG
+    if(!(is_trivially_constructible<elementT>::value)) {
+      ::std::memset(static_cast<void *>(ptr), 0xAA, sizeof(elementT)));
+    }
+#endif
     return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
 
 template<typename elementT> elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
+#ifdef ROCKET_DEBUG
+    if(!(is_trivially_constructible<elementT>::value)) {
+      ::std::memset(static_cast<void *>(ptr), 0xBE, sizeof(elementT)));
+    }
+#endif
     return ::new(static_cast<void *>(ptr)) elementT;
   }
 
@@ -265,7 +279,9 @@ template<typename elementT> void destroy_at(elementT *ptr) noexcept(is_nothrow_d
   {
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
-    static_cast<void>(is_trivially_destructible<elementT>::value || ::std::memset(static_cast<void *>(ptr), 0xD4, sizeof(elementT)));
+    if(!(is_trivially_destructible<elementT>::value)) {
+      ::std::memset(static_cast<void *>(ptr), 0xD9, sizeof(elementT)));
+    }
 #endif
   }
 

@@ -461,15 +461,15 @@ template<typename ...alternativesT> class variant
         return this->as<index_of<targetT>::value>();
       }
 
-    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
+    template<typename visitorT> typename common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type visit(visitorT &&visitor) const
       {
-        using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
+        using result_type = typename common_type<decltype(::std::declval<visitorT &&>()(::std::declval<const alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(const void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, const void, visitorT>... };
         return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
-    template<typename visitorT> typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
+    template<typename visitorT> typename common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type visit(visitorT &&visitor)
       {
-        using result_type = typename ::std::common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
+        using result_type = typename common_type<decltype(::std::declval<visitorT &&>()(::std::declval<alternativesT &>()))...>::type;
         static constexpr result_type (*const s_table[])(void *, visitorT &) = { &details_variant::wrapped_visit<result_type, alternativesT, void, visitorT>... };
         return variant::do_lookup(s_table, this->m_index)(this->m_stor, visitor);
       }
