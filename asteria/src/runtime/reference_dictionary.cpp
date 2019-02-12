@@ -40,7 +40,7 @@ void Reference_Dictionary::Bucket::do_detach() noexcept
     next->prev = iprev;
   }
 
-const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_String &name) const noexcept
+const Reference * Reference_Dictionary::do_get_template_noninline_opt(const PreHashed_String &name) const noexcept
   {
     // Get template table range.
     auto bptr = this->m_templ_data;
@@ -67,7 +67,7 @@ const Reference * Reference_Dictionary::do_get_template_opt(const PreHashed_Stri
     return nullptr;
   }
 
-const Reference * Reference_Dictionary::do_get_dynamic_opt(const PreHashed_String &name) const noexcept
+const Reference * Reference_Dictionary::do_get_dynamic_noninline_opt(const PreHashed_String &name) const noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -202,10 +202,10 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
       // A duplicate key has been found.
       return bkt->second[0];
     }
-    // Find the template to copy from.
-    const auto templ = this->do_get_template_opt(name);
     // Insert it into the new bucket.
     bkt->first = name;
+    // Find the template to copy from.
+    const auto templ = this->do_get_template_opt(name);
     if(ROCKET_UNEXPECT(templ)) {
        // Copy the static template.
       static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");

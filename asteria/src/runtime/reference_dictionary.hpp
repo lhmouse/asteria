@@ -66,8 +66,23 @@ class Reference_Dictionary
       = delete;
 
   private:
-    const Reference * do_get_template_opt(const PreHashed_String &name) const noexcept;
-    const Reference * do_get_dynamic_opt(const PreHashed_String &name) const noexcept;
+    const Reference * do_get_template_noninline_opt(const PreHashed_String &name) const noexcept;
+    const Reference * do_get_dynamic_noninline_opt(const PreHashed_String &name) const noexcept;
+
+    const Reference * do_get_template_opt(const PreHashed_String &name) const noexcept
+      {
+        if(ROCKET_EXPECT(this->m_templ_size == 0)) {
+          return nullptr;
+        }
+        return this->do_get_template_noninline_opt(name);
+      }
+    const Reference * do_get_dynamic_opt(const PreHashed_String &name) const noexcept
+      {
+        if(ROCKET_EXPECT(this->m_stor.empty())) {
+          return nullptr;
+        }
+        return this->do_get_dynamic_noninline_opt(name);
+      }
 
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
