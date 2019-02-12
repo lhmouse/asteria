@@ -537,11 +537,11 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
           // Execute the `try` body.
           // This is straightforward and hopefully zero-cost if no exception is thrown.
           status = alt.body_try.execute(ref_out, func, global, ctx_io);
-        } catch(const std::exception &stdex) {
+        } catch(std::exception &stdex) {
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
           // Translate the exception.
-          const auto traceable = trace_exception(stdex);
+          const auto traceable = trace_exception(std::move(stdex));
           ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", traceable.get_value());
           Reference_Root::S_temporary eref_c = { traceable.get_value() };
           do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, std::move(eref_c));

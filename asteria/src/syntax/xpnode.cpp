@@ -389,10 +389,10 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         try {
           target.invoke(self_result, global, std::move(args));
           // The result will have been written to `self_result`.
-        } catch(const std::exception &stdex) {
+        } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
-          auto traceable = trace_exception(stdex);
+          auto traceable = trace_exception(std::move(stdex));
           traceable.append_frame(alt.sloc, func);
           throw traceable;
         }
