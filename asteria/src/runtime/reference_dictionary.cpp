@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-inline Reference_Dictionary::Bucket::~Bucket()
+Reference_Dictionary::Bucket::~Bucket()
   {
     // Be careful, VERY careful.
     if(ROCKET_UNEXPECT(*this)) {
@@ -15,12 +15,12 @@ inline Reference_Dictionary::Bucket::~Bucket()
     }
   }
 
-inline Reference_Dictionary::Bucket::operator bool () const noexcept
+Reference_Dictionary::Bucket::operator bool () const noexcept
   {
     return this->first.empty() == false;
   }
 
-inline void Reference_Dictionary::Bucket::do_attach(Reference_Dictionary::Bucket *ipos) noexcept
+void Reference_Dictionary::Bucket::do_attach(Reference_Dictionary::Bucket *ipos) noexcept
   {
     const auto iprev = ipos->prev;
     const auto inext = ipos;
@@ -31,7 +31,7 @@ inline void Reference_Dictionary::Bucket::do_attach(Reference_Dictionary::Bucket
     next->prev = this;
   }
 
-inline void Reference_Dictionary::Bucket::do_detach() noexcept
+void Reference_Dictionary::Bucket::do_detach() noexcept
   {
     const auto iprev = this->prev;
     const auto inext = this->next;

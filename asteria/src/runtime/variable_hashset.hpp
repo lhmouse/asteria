@@ -27,16 +27,16 @@ class Variable_HashSet
           : first()
           {
           }
-        ~Bucket();
+        inline ~Bucket();
 
         Bucket(const Bucket &)
           = delete;
         Bucket & operator=(const Bucket &)
           = delete;
 
-        explicit operator bool () const noexcept;
-        void do_attach(Bucket *ipos) noexcept;
-        void do_detach() noexcept;
+        explicit inline operator bool () const noexcept;
+        inline void do_attach(Bucket *ipos) noexcept;
+        inline void do_detach() noexcept;
       };
 
   private:
