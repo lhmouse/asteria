@@ -57,7 +57,7 @@ class Traceable_Exception : public virtual std::exception
 template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT &&except)
   {
     // Is `except` an lvalue reference or a const reference (i.e. it isn't a non-const rvalue reference)?
-    constexpr bool copy_or_move = std::is_lvalue_reference<ExceptionT &&>::value || std::is_const<typename std::remove_reference<ExceptionT &&>::type>::value;
+    static constexpr bool copy_or_move = std::is_lvalue_reference<ExceptionT &&>::value || std::is_const<typename std::remove_reference<ExceptionT &&>::type>::value;
     // Is `except` derived from `Traceable_Exception`?
     const auto traceable = dynamic_cast<typename std::conditional<copy_or_move, const Traceable_Exception *, Traceable_Exception *>::type>(std::addressof(except));
     if(!traceable) {
