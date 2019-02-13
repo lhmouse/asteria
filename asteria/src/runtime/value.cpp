@@ -376,6 +376,9 @@ long Value::use_count() const noexcept
   {
     switch(this->type()) {
     case type_null:
+      {
+        return 0;
+      }
     case type_boolean:
     case type_integer:
     case type_real:

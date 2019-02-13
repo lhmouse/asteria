@@ -149,6 +149,7 @@ void Collector::collect()
           switch(value_nref) {
           case 0:
             {
+              // `root->get_value()` is null.
               break;
             }
           case 1:
@@ -223,11 +224,12 @@ void Collector::collect()
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             // Overwrite the value of this variable with a scalar value to break reference cycles.
-            root->reset(D_integer(0xFEEDFACECAFEBEEF), true);
-            // Cache this variable, if a pool is provided.
+            root->reset(D_string(rocket::sref("<garbage value>")), true);
+            // Cache this variable if a pool is provided.
             if(output) {
               output->insert(root);
             }
+            // Collect it.
             this->m_tracked.erase(root);
             return false;
           }
