@@ -9,26 +9,6 @@
 
 namespace Asteria {
 
-bool Collector::track_variable(const RefCnt_Ptr<Variable> &var)
-  {
-    if(!this->m_tracked.insert(var)) {
-      return false;
-    }
-    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
-      this->collect();
-    }
-    return true;
-  }
-
-bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
-  {
-    if(!this->m_tracked.erase(var)) {
-      return false;
-    }
-    this->m_counter--;
-    return true;
-  }
-
     namespace {
 
     class Recursion_Sentry
@@ -90,12 +70,12 @@ bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
 
     }
 
-void Collector::collect()
+Collector * Collector::do_collect_once()
   {
     // Ignore recursive requests.
     const Recursion_Sentry sentry(this->m_recur);
     if(!sentry) {
-      return;
+      return nullptr;
     }
     const auto output = this->m_output_opt;
     const auto tied = this->m_tied_opt;
@@ -249,12 +229,37 @@ void Collector::collect()
     // Finish
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.clear();
-    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
-    // N.B. This is subject to exceptions.
-    if(ROCKET_UNEXPECT(collect_tied)) {
-      tied->collect();
-    }
     this->m_counter = 0;
+    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void *>(this));
+    return collect_tied ? tied : nullptr;
+  }
+
+bool Collector::track_variable(const RefCnt_Ptr<Variable> &var)
+  {
+    if(!this->m_tracked.insert(var)) {
+      return false;
+    }
+    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
+      this->collect();
+    }
+    return true;
+  }
+
+bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
+  {
+    if(!this->m_tracked.erase(var)) {
+      return false;
+    }
+    this->m_counter--;
+    return true;
+  }
+
+void Collector::collect()
+  {
+    auto cur = this;
+    do {
+      cur = cur->do_collect_once();
+    } while(cur);
   }
 
 }

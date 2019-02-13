@@ -33,6 +33,9 @@ class Collector
     Collector & operator=(const Collector &)
       = delete;
 
+  private:
+    Collector * do_collect_once();
+
   public:
     Variable_HashSet * get_output_pool_opt() const noexcept
       {
