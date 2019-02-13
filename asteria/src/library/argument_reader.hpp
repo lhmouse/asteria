@@ -16,7 +16,7 @@ class Argument_Reader
     struct State
       {
         CoW_Vector<unsigned char> history;
-        std::size_t offset;
+        std::uint32_t offset;
         bool succeeded;
         bool finished;
       };

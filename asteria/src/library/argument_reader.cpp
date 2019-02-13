@@ -34,13 +34,12 @@ Argument_Reader & Argument_Reader::start() noexcept
         std::reference_wrapper<const Argument_Reader> m_parent;
         std::reference_wrapper<Argument_Reader::State> m_state;
 
-        bool m_committable;
         const Reference *m_ref;
 
       public:
         Reference_Sentry(const Argument_Reader &parent, Argument_Reader::State &state)
           : m_parent(std::ref(parent)), m_state(std::ref(state)),
-            m_committable(false)
+            m_ref(nullptr)
           {
             // Check for general conditions.
             if(!state.succeeded) {
@@ -61,22 +60,6 @@ Argument_Reader & Argument_Reader::start() noexcept
             }
             // Succeed.
             this->m_ref = std::addressof(parent.get_argument(state.offset));
-            this->m_committable = true;
-          }
-        ~Reference_Sentry()
-          {
-            Argument_Reader::State &state = this->m_state;
-            // If the previous operation failed, don't do anything.
-            if(!state.succeeded) {
-              return;
-            }
-            // If the argument was not consumed, don't do anything.
-            if(this->m_committable) {
-              return;
-            }
-            // Bump up the index.
-            ROCKET_ASSERT(state.offset < 0xFE);
-            state.offset++;
           }
 
         Reference_Sentry(const Reference_Sentry &)
@@ -87,16 +70,11 @@ Argument_Reader & Argument_Reader::start() noexcept
       public:
         explicit operator bool () const noexcept
           {
-            return this->m_committable;
-          }
-        void commit() noexcept
-          {
-            ROCKET_ASSERT(this->m_committable);
-            this->m_committable = false;
+            return this->m_ref != nullptr;
           }
         const Reference & ref() const noexcept
           {
-            ROCKET_ASSERT(this->m_committable);
+            ROCKET_ASSERT(*this);
             return *(this->m_ref);
           }
       };
@@ -108,7 +86,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    Reference_Sentry sentry(*this, this->m_state);
+    const Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -129,7 +107,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
       value_out = *qvalue;
     }
     // Succeed.
-    sentry.commit();
+    this->m_state.offset++;
     return *this;
   }
 
@@ -138,7 +116,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    Reference_Sentry sentry(*this, this->m_state);
+    const Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -153,7 +131,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     }
     value_out = *qvalue;
     // Succeed.
-    sentry.commit();
+    this->m_state.offset++;
     return *this;
   }
 
@@ -162,14 +140,14 @@ Argument_Reader & Argument_Reader::opt(Reference &ref_out)
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    Reference_Sentry sentry(*this, this->m_state);
+    const Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
     // Copy the reference as is.
     ref_out = sentry.ref();
     // Succeed.
-    sentry.commit();
+    this->m_state.offset++;
     return *this;
   }
 
@@ -178,7 +156,7 @@ Argument_Reader & Argument_Reader::opt(Value &value_out)
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    Reference_Sentry sentry(*this, this->m_state);
+    const Reference_Sentry sentry(*this, this->m_state);
     if(!sentry) {
       return *this;
     }
@@ -186,7 +164,7 @@ Argument_Reader & Argument_Reader::opt(Value &value_out)
     const auto &value = sentry.ref().read();
     value_out = value;
     // Succeed.
-    sentry.commit();
+    this->m_state.offset++;
     return *this;
   }
 
