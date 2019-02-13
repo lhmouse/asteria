@@ -321,7 +321,7 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
 // Wrappable Index
 ///////////////////////////////////////////////////////////////////////////////
 
-Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
+Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
   {
     const auto rsize = static_cast<std::int64_t>(size);
     // Wrap `index` if it is negative.
@@ -330,18 +330,24 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
     if(rindex < 0) {
       rindex += rsize;
     }
-    Wrapped_Index wrap = { static_cast<std::size_t>(rindex), 0, 0 };
+    Wrapped_Subscript wrap = { static_cast<std::size_t>(rindex), 0, 0 };
     // If `rindex` is still negative, we will have to insert elements in the front.
     if(rindex < 0) {
       // Calculate the number of elements to fill.
-      const auto front_fill = rocket::min<std::uint64_t>(0 - static_cast<std::uint64_t>(rindex), SIZE_MAX);
+      const auto front_fill = 0 - static_cast<std::uint64_t>(rindex);
+      if(front_fill > PTRDIFF_MAX) {
+        rocket::throw_length_error("wrap_subscript: The subscript `%lld` is invalid.", static_cast<long long>(index));
+      }
       wrap.front_fill = static_cast<std::size_t>(front_fill);
       return wrap;
     }
     // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
     if(rindex >= rsize) {
       // Calculate the number of elements to fill.
-      const auto back_fill = rocket::min<std::uint64_t>(static_cast<std::uint64_t>(rindex - rsize) + 1, SIZE_MAX);
+      const auto back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
+      if(back_fill > PTRDIFF_MAX) {
+        rocket::throw_length_error("wrap_subscript: The subscript `%lld` is invalid.", static_cast<long long>(index));
+      }
       wrap.back_fill = static_cast<std::size_t>(back_fill);
       return wrap;
     }
