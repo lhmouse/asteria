@@ -56,7 +56,7 @@ Argument_Reader & Argument_Reader::start() noexcept
             // Get an argument.
             if(state.offset >= parent.get_argument_count()) {
               do_fail(parent, state,
-                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", parent.get_argument_count(), ").");  });
+                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", state.offset + 1, ").");  });
               return;
             }
             // Succeed.
