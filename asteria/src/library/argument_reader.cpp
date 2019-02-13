@@ -38,7 +38,7 @@ Argument_Reader & Argument_Reader::start() noexcept
         const Reference *m_ref;
 
       public:
-        Reference_Sentry(const Argument_Reader &parent, Argument_Reader::State &state) noexcept
+        Reference_Sentry(const Argument_Reader &parent, Argument_Reader::State &state)
           : m_parent(std::ref(parent)), m_state(std::ref(state)),
             m_committable(false)
           {
@@ -66,7 +66,7 @@ Argument_Reader & Argument_Reader::start() noexcept
         ~Reference_Sentry()
           {
             Argument_Reader::State &state = this->m_state;
-            // If anything went wrong, don't do anything.
+            // If the previous operation failed, don't do anything.
             if(!state.succeeded) {
               return;
             }
