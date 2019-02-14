@@ -28,6 +28,7 @@ class Formatter
       : m_strm()
       {
       }
+    ~Formatter();
 
   private:
     std::ostream & do_open_stream();

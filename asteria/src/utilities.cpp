@@ -17,6 +17,10 @@ namespace Asteria {
 // Formatter
 ///////////////////////////////////////////////////////////////////////////////
 
+Formatter::~Formatter()
+  {
+  }
+
 std::ostream & Formatter::do_open_stream()
   {
     if(!this->m_strm) {
