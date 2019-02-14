@@ -119,12 +119,7 @@ class Formatter
 extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept;
 
-ROCKET_PURE_FUNCTION ROCKET_ARTIFICIAL_FUNCTION inline bool are_debug_logs_enabled_with_hint() noexcept
-  {
-    return ROCKET_UNEXPECT(are_debug_logs_enabled());
-  }
-
-#define ASTERIA_DEBUG_LOG(...)       (::Asteria::are_debug_logs_enabled_with_hint() &&  \
+#define ASTERIA_DEBUG_LOG(...)       (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) &&  \
                                        ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                                                       ::std::move((::Asteria::Formatter(), __VA_ARGS__))))
 #define ASTERIA_TERMINATE(...)       (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
