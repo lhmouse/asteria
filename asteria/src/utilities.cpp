@@ -23,18 +23,20 @@ Formatter::~Formatter()
 
 std::ostream & Formatter::do_open_stream()
   {
-    if(!this->m_strm) {
-      this->m_strm = rocket::make_unique<rocket::insertable_ostream>();
+    auto &strm = this->m_strm_opt;
+    if(!strm) {
+      strm = rocket::make_unique<rocket::insertable_ostream>();
     }
-    return *(this->m_strm);
+    return *strm;
   }
 
 rocket::cow_string Formatter::do_extract_string() noexcept
   {
-    if(!this->m_strm) {
-      return { };
+    auto &strm = this->m_strm_opt;
+    if(!strm) {
+      return rocket::sref("");
     }
-    return this->m_strm->extract_string();
+    return strm->extract_string();
   }
 
 bool are_debug_logs_enabled() noexcept

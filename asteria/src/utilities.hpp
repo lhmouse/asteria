@@ -21,11 +21,11 @@ namespace Asteria {
 class Formatter
   {
   private:
-    rocket::unique_ptr<rocket::insertable_ostream> m_strm;
+    rocket::unique_ptr<rocket::insertable_ostream> m_strm_opt;
 
   public:
     Formatter() noexcept
-      : m_strm()
+      : m_strm_opt()
       {
       }
     ~Formatter();
@@ -137,7 +137,11 @@ class Runtime_Error : public virtual std::exception
     rocket::cow_string m_msg;
 
   public:
-    explicit Runtime_Error(rocket::cow_string msg) noexcept
+    explicit Runtime_Error(const rocket::cow_string &msg) noexcept
+      : m_msg(msg)
+      {
+      }
+    explicit Runtime_Error(rocket::cow_string &&msg) noexcept
       : m_msg(std::move(msg))
       {
       }
