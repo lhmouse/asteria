@@ -124,7 +124,6 @@ ROCKET_PURE_FUNCTION ROCKET_ARTIFICIAL_FUNCTION inline bool are_debug_logs_enabl
     return ROCKET_UNEXPECT(are_debug_logs_enabled());
   }
 
-#define ASTERIA_FORMAT_STRING(...)   ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 #define ASTERIA_DEBUG_LOG(...)       (::Asteria::are_debug_logs_enabled_with_hint() &&  \
                                        ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                                                       ::std::move((::Asteria::Formatter(), __VA_ARGS__))))
