@@ -107,8 +107,7 @@ bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept
     // We will not involve `std::endl` here which breaks the atomicity.
     str.push_back('\n');
     // Write it.
-    std::cerr.write(str.data(), static_cast<std::streamsize>(str.size())).flush();
-    return std::cerr.fail() == false;
+    return !!(std::cerr << str);
   } catch(...) {
     // Any exception thrown above is ignored.
     return false;
