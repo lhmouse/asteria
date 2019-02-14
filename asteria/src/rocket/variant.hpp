@@ -309,7 +309,7 @@ template<typename ...alternativesT> class variant
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
-          []{ throw;  }();
+          [] { throw;  }();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *this;
@@ -360,7 +360,7 @@ template<typename ...alternativesT> class variant
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
-          []{ throw;  }();
+          [] { throw;  }();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *this;
@@ -501,7 +501,7 @@ template<typename ...alternativesT> class variant
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
           // Wrapping the `throw` expression in a lambda could silence this warning.
-          []{ throw;  }();
+          [] { throw;  }();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
