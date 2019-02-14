@@ -108,7 +108,7 @@ bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept
     str.push_back('\n');
     // Write it.
     std::cerr.write(str.data(), static_cast<std::streamsize>(str.size())).flush();
-    return true;
+    return std::cerr.fail() == false;
   } catch(...) {
     // Any exception thrown above is ignored.
     return false;
