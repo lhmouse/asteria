@@ -7,91 +7,47 @@
 
 namespace Asteria {
 
-Argument_Reader & Argument_Reader::start() noexcept
+#define ASTERIA_HANDLE_BAD_ARGUMENT_(...)  \
+    do {  \
+      if(this->m_throw_on_failure) {  \
+        ASTERIA_THROW_RUNTIME_ERROR(__VA_ARGS__);  \
+      }  \
+      this->m_state.succeeded = false;  \
+    } while(0)
+
+const Reference * Argument_Reader::do_peek_argument()
   {
-    this->m_state.history.clear();
-    this->m_state.offset = 0;
-    this->m_state.succeeded = true;
-    this->m_state.finished = false;
-    return *this;
-  }
-
-    namespace {
-
-    template<typename ThrowerT> inline void do_fail(const Argument_Reader &parent, Argument_Reader::State &state, ThrowerT &&thrower)
-      {
-        if(parent.does_throw_on_failure()) {
-          // If exceptions are preferred, throw an exception. Do not set `state.succeeded` in this case.
-          std::forward<ThrowerT>(thrower)();
-        }
-        // Error codes are preferred.
-        state.succeeded = false;
-      }
-
-    class Reference_Sentry
-      {
-      private:
-        std::reference_wrapper<const Argument_Reader> m_parent;
-        std::reference_wrapper<Argument_Reader::State> m_state;
-
-        const Reference *m_ref;
-
-      public:
-        Reference_Sentry(const Argument_Reader &parent, Argument_Reader::State &state)
-          : m_parent(std::ref(parent)), m_state(std::ref(state)),
-            m_ref(nullptr)
-          {
-            // Check for general conditions.
-            if(!state.succeeded) {
-              do_fail(parent, state,
-                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
-              return;
-            }
-            if(state.finished) {
-              do_fail(parent, state,
-                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");  });
-              return;
-            }
-            // Get an argument.
-            if(state.offset >= parent.get_argument_count()) {
-              do_fail(parent, state,
-                      [&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", state.offset + 1, ").");  });
-              return;
-            }
-            // Succeed.
-            this->m_ref = std::addressof(parent.get_argument(state.offset));
-          }
-
-        Reference_Sentry(const Reference_Sentry &)
-          = delete;
-        Reference_Sentry & operator=(const Reference_Sentry &)
-          = delete;
-
-      public:
-        explicit operator bool () const noexcept
-          {
-            return this->m_ref != nullptr;
-          }
-        const Reference & ref() const noexcept
-          {
-            ROCKET_ASSERT(*this);
-            return *(this->m_ref);
-          }
-      };
-
+    // Check for the end of operation.
+    if(this->m_state.finished) {
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");
     }
+    // Check for previous failures.
+    if(!this->m_state.succeeded) {
+      ASTERIA_HANDLE_BAD_ARGUMENT_("A previous operation had failed.");
+      return nullptr;
+    }
+    // Check for the end of arguments.
+    if(this->m_state.offset >= this->m_args.get().size()) {
+      ASTERIA_HANDLE_BAD_ARGUMENT_("No enough arguments were provided (expecting at least ", this->m_state.offset + 1, ").");
+      return nullptr;
+    }
+    // Succeed.
+    const auto arg = this->m_args.get().data() + this->m_state.offset;
+    ROCKET_ASSERT(arg);
+    return arg;
+  }
 
 template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
   {
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    const Reference_Sentry sentry(*this, this->m_state);
-    if(!sentry) {
+    const auto arg = this->do_peek_argument();
+    if(!arg) {
       return *this;
     }
     // Check whether the value has the desired type.
-    const auto &value = sentry.ref().read();
+    const auto &value = arg->read();
     if(value.type() == type_null) {
       // If the value is `null`, set the default value.
       value_out = default_value;
@@ -99,9 +55,8 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
       // Not null...
       const auto qvalue = value.opt<XvalueT>();
       if(!qvalue) {
-        do_fail(*this, this->m_state,
-                [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                                 "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");  });
+        ASTERIA_HANDLE_BAD_ARGUMENT_("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                     "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
         return *this;
       }
       value_out = *qvalue;
@@ -116,17 +71,17 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    const Reference_Sentry sentry(*this, this->m_state);
-    if(!sentry) {
+    const auto arg = this->do_peek_argument();
+    if(!arg) {
       return *this;
     }
     // Check whether the value has the desired type.
-    const auto &value = sentry.ref().read();
+    const auto &value = arg->read();
+    // `null` is not an option.
     const auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
-      do_fail(*this, this->m_state,
-              [&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                               "but `", Value::get_type_name<XvalueT>(), "` was expected.");  });
+      ASTERIA_HANDLE_BAD_ARGUMENT_("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                   "but `", Value::get_type_name<XvalueT>(), "` was expected.");
       return *this;
     }
     value_out = *qvalue;
@@ -135,17 +90,26 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     return *this;
   }
 
+Argument_Reader & Argument_Reader::start() noexcept
+  {
+    this->m_state.history.clear();
+    this->m_state.offset = 0;
+    this->m_state.finished = false;
+    this->m_state.succeeded = true;
+    return *this;
+  }
+
 Argument_Reader & Argument_Reader::opt(Reference &ref_out)
   {
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    const Reference_Sentry sentry(*this, this->m_state);
-    if(!sentry) {
+    const auto arg = this->do_peek_argument();
+    if(!arg) {
       return *this;
     }
     // Copy the reference as is.
-    ref_out = sentry.ref();
+    ref_out = *arg;
     // Succeed.
     this->m_state.offset++;
     return *this;
@@ -156,13 +120,12 @@ Argument_Reader & Argument_Reader::opt(Value &value_out)
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    const Reference_Sentry sentry(*this, this->m_state);
-    if(!sentry) {
+    const auto arg = this->do_peek_argument();
+    if(!arg) {
       return *this;
     }
     // Copy the value as is.
-    const auto &value = sentry.ref().read();
-    value_out = value;
+    value_out = arg->read();
     // Succeed.
     this->m_state.offset++;
     return *this;
@@ -255,7 +218,11 @@ Argument_Reader & Argument_Reader::req(D_object &value_out)
 
 Argument_Reader & Argument_Reader::finish()
   {
-    // Record this overload.
+    // Check for the end of operation.
+    if(this->m_state.finished) {
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence cannot be finished a second time.");
+    }
+    // Record this overload, despite potential previous failures.
     unsigned nparams = static_cast<unsigned>(this->m_state.history.size());
     std::size_t offset = this->m_overloads.size();
     this->m_overloads.append(sizeof(nparams) + nparams);
@@ -266,21 +233,14 @@ Argument_Reader & Argument_Reader::finish()
     std::memcpy(this->m_overloads.mut_data() + offset, this->m_state.history.data(), nparams);
     offset += nparams;
     ROCKET_ASSERT(offset == this->m_overloads.size());
-    // Check for general conditions.
+    // Check for previous failures.
     if(!this->m_state.succeeded) {
-      do_fail(*this, this->m_state,
-              [&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
+      ASTERIA_HANDLE_BAD_ARGUMENT_("A previous operation had failed.");
       return *this;
     }
-    if(this->m_state.finished) {
-      do_fail(*this, this->m_state,
-              [&]{ ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence could not be finished a second time.");  });
-      return *this;
-    }
-    // Check for the end of the argument list.
-    if(this->m_state.offset != this->get_argument_count()) {
-      do_fail(*this, this->m_state,
-              [&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->get_argument_count(), ").");  });
+    // Check for the end of arguments.
+    if(this->m_state.offset != this->m_args.get().size()) {
+      ASTERIA_HANDLE_BAD_ARGUMENT_("Wrong number of arguments were provided (expecting exactly ", this->m_state.offset, ").");
       return *this;
     }
     // Succeed.

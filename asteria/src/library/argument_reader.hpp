@@ -17,8 +17,8 @@ class Argument_Reader
       {
         CoW_Vector<unsigned char> history;
         std::uint32_t offset;
-        bool succeeded;
         bool finished;
+        bool succeeded;
       };
 
   private:
@@ -46,8 +46,9 @@ class Argument_Reader
       = delete;
 
   private:
-    template<typename XvalueT> Argument_Reader & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
-    template<typename XvalueT> Argument_Reader & do_get_required_value(XvalueT &value_out);
+    inline const Reference * do_peek_argument();
+    template<typename XvalueT> inline Argument_Reader & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
+    template<typename XvalueT> inline Argument_Reader & do_get_required_value(XvalueT &value_out);
 
   public:
     const CoW_String & get_name() const noexcept
