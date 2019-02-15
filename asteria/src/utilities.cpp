@@ -102,7 +102,7 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
       tstr[tlen++] = ':';
       print_0ld(2, tr.tm_sec);
       tstr[tlen++] = '.';
-      print_0ld(3, ts.tv_nsec / 1000000);
+      print_0ld(3, static_cast<long>(ts.tv_nsec / 1000000));
 #endif
       if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
         state |= std::ios_base::failbit;
