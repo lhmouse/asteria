@@ -1056,11 +1056,27 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     basic_cow_string & operator+=(value_type ch)
       {
-        return this->append(size_type(1), ch);
+        return this->push_back(ch);
       }
     basic_cow_string & operator+=(initializer_list<value_type> init)
       {
         return this->append(init);
+      }
+
+    // N.B. This is a non-standard extension.
+    basic_cow_string & operator<<(const basic_cow_string &other)
+      {
+        return this->append(other);
+      }
+    // N.B. This is a non-standard extension.
+    basic_cow_string & operator<<(const value_type *s)
+      {
+        return this->append(s);
+      }
+    // N.B. This is a non-standard extension.
+    basic_cow_string & operator<<(value_type ch)
+      {
+        return this->push_back(ch);
       }
 
     basic_cow_string & append(const basic_cow_string &other, size_type pos = 0, size_type n = npos)
