@@ -29,9 +29,10 @@ RefCnt_Ptr<Variable> Generational_Collector::create_variable()
     // Get one from the pool.
     auto var = this->m_pool.erase_random_opt();
     if(ROCKET_EXPECT(var)) {
+      // Initialize it to `null`.
       var->reset(D_null(), true);
     } else {
-      // The pool has been exhausted. Create a new variable.
+      // Create a new one if the pool has been exhausted.
       var = rocket::make_refcnt<Variable>();
     }
     // The variable is alive now.
