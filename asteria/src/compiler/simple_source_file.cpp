@@ -26,7 +26,7 @@ void Simple_Source_File::do_throw_error(const Parser_Error &err)
     }
     mos << "]";
     // Throw it now.
-    throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
+    throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
   }
 
 Parser_Error Simple_Source_File::load_file(const CoW_String &filename)

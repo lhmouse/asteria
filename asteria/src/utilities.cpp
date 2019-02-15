@@ -30,15 +30,6 @@ std::ostream & Formatter::do_open_stream()
     return *strm;
   }
 
-rocket::cow_string Formatter::do_extract_string() noexcept
-  {
-    auto &strm = this->m_strm_opt;
-    if(!strm) {
-      return rocket::sref("");
-    }
-    return strm->extract_string();
-  }
-
 bool are_debug_logs_enabled() noexcept
   {
 #ifdef ASTERIA_ENABLE_DEBUG_LOGS
@@ -48,75 +39,81 @@ bool are_debug_logs_enabled() noexcept
 #endif
   }
 
-bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept
-  try {
-    auto str = fmt.extract_string();
-    // Decorate the message.
-    rocket::insertable_ostream mos;
-    mos.set_string(std::move(str), 0);
-    // Prepend the timestamp.
-#ifdef _WIN32
-    ::SYSTEMTIME st;
-    ::GetSystemTime(&st);
-    mos << std::setfill('0')
-        << std::setw(4) << st.wYear << '-' << std::setw(2) << st.wMonth << '-' << std::setw(2) << st.wDay
-        <<' ' << std::setw(2) << st.wHour << ':' << std::setw(2) << st.wMinute << ':' << std::setw(2) << st.wSecond
-        <<'.' << std::setw(3) << st.wMilliseconds;
-#else
-    ::timespec ts;
-    ::clock_gettime(CLOCK_REALTIME, &ts);
-    ::tm tr;
-    ::localtime_r(&(ts.tv_sec), &tr);
-    mos << std::setfill('0')
-        << std::setw(4) << tr.tm_year + 1900 << '-' << std::setw(2) << tr.tm_mon + 1 << '-' << std::setw(2) << tr.tm_mday
-        <<' ' << std::setw(2) << tr.tm_hour << ':' << std::setw(2) << tr.tm_min << ':' << std::setw(2) << tr.tm_sec
-        <<'.' << std::setw(3) << ts.tv_nsec / 1000000;
-#endif
-    // Insert the file name and line number.
-    mos << " @@ " << file << ':' << line;
-    // Start a new line for the user-defined message.
-    mos << '\n';
-    str = mos.extract_string();
-    // Neutralize control characters and indent paragraphs.
-    for(std::size_t i = 0; i < str.size(); ++i) {
-      // Control characters are ['\x00','\x20') and '\x7F'.
-      static constexpr char s_lower_table[][16] =
-        {
-          "[NUL""\\x00]",  "[SOH""\\x01]",  "[STX""\\x02]",  "[ETX""\\x03]",
-          "[EOT""\\x04]",  "[ENQ""\\x05]",  "[ACK""\\x06]",  "[BEL""\\x07]",
-          "[BS" "\\x08]",  /*TAB*/   "\t",  /*LF*/  "\n\t",  "[VT" "\\x0B]",
-          "[FF" "\\x0C]",  /*CR*/    "\r",  "[SO" "\\x0E]",  "[SI" "\\x0F]",
-          "[DLE""\\x10]",  "[DC1""\\x11]",  "[DC2""\\x12]",  "[DC3""\\x13]",
-          "[DC4""\\x14]",  "[NAK""\\x15]",  "[SYN""\\x16]",  "[ETB""\\x17]",
-          "[CAN""\\x18]",  "[EM" "\\x19]",  "[SUB""\\x1A]",  "[ESC""\\x1B]",
-          "[FS" "\\x1C]",  "[GS" "\\x1D]",  "[RS" "\\x1E]",  "[US" "\\x1F]",
-        };
-      // Replace this character with a string.
-      const auto replace_one = [&](const char *reps)
-        {
-          const auto repn = std::strlen(reps);
-          str.replace(i, 1, reps, repn);
-          i += repn - 1;
-        };
-      // Check one character.
-      const int ch = str[i] & 0xFF;
-      if(ch == 0x7F) {
-        replace_one("[DEL\\x7F]");
-        continue;
-      }
-      if(ch < 0x20) {
-        replace_one(s_lower_table[ch]);
-        continue;
-      }
+bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept
+  {
+    // Behaves like an UnformattedOutputFunction.
+    auto &os = std::cerr;
+    const std::ostream::sentry sentry(os);
+    if(!sentry) {
+      return false;
     }
-    // Append the final line feed.
-    // We will not involve `std::endl` here which breaks the atomicity.
-    str.push_back('\n');
-    // Write it.
-    return !!(std::cerr << str);
-  } catch(...) {
-    // Any exception thrown above is ignored.
-    return false;
+    auto state = std::ios_base::goodbit;
+    try {
+      // Prepend the timestamp.
+      rocket::insertable_ostream mos;
+#ifdef _WIN32
+      ::SYSTEMTIME st;
+      ::GetSystemTime(&st);
+      mos << std::setfill('0')
+          << std::setw(4) << st.wYear << '-' << std::setw(2) << st.wMonth << '-' << std::setw(2) << st.wDay
+          <<' ' << std::setw(2) << st.wHour << ':' << std::setw(2) << st.wMinute << ':' << std::setw(2) << st.wSecond
+          <<'.' << std::setw(3) << st.wMilliseconds;
+#else
+      ::timespec ts;
+      ::clock_gettime(CLOCK_REALTIME, &ts);
+      ::tm tr;
+      ::localtime_r(&(ts.tv_sec), &tr);
+      mos << std::setfill('0')
+          << std::setw(4) << tr.tm_year + 1900 << '-' << std::setw(2) << tr.tm_mon + 1 << '-' << std::setw(2) << tr.tm_mday
+          <<' ' << std::setw(2) << tr.tm_hour << ':' << std::setw(2) << tr.tm_min << ':' << std::setw(2) << tr.tm_sec
+          <<'.' << std::setw(3) << ts.tv_nsec / 1000000;
+#endif
+      // Insert the file name and line number.
+      mos << " @@ " << file << ':' << line;
+      // Start a new line for the user-defined message.
+      mos << "\n\t";
+      // Neutralize control characters and indent paragraphs.
+      for(auto it = msg.begin(); it != msg.end(); ++it) {
+        // Control characters are ['\x00','\x20') and '\x7F'.
+        static constexpr char s_lower_table[][16] =
+          {
+            "[NUL""\\x00]",  "[SOH""\\x01]",  "[STX""\\x02]",  "[ETX""\\x03]",
+            "[EOT""\\x04]",  "[ENQ""\\x05]",  "[ACK""\\x06]",  "[BEL""\\x07]",
+            "[BS" "\\x08]",  /*TAB*/   "\t",  /*LF*/  "\n\t",  "[VT" "\\x0B]",
+            "[FF" "\\x0C]",  /*CR*/    "\r",  "[SO" "\\x0E]",  "[SI" "\\x0F]",
+            "[DLE""\\x10]",  "[DC1""\\x11]",  "[DC2""\\x12]",  "[DC3""\\x13]",
+            "[DC4""\\x14]",  "[NAK""\\x15]",  "[SYN""\\x16]",  "[ETB""\\x17]",
+            "[CAN""\\x18]",  "[EM" "\\x19]",  "[SUB""\\x1A]",  "[ESC""\\x1B]",
+            "[FS" "\\x1C]",  "[GS" "\\x1D]",  "[RS" "\\x1E]",  "[US" "\\x1F]",
+          };
+        // Check this character.
+        const auto ch = static_cast<unsigned>(*it & 0xFF);
+        if(ch == 0x7F) {
+          mos << "[DEL\\x7F]";
+          continue;
+        }
+        if(ch < rocket::countof(s_lower_table)) {
+          mos << s_lower_table[ch];
+          continue;
+        }
+        // Copy it as is.
+        mos << static_cast<char>(ch);
+      }
+      // Terminate the message with a line feed.
+      mos << "\n";
+      // Write the message now.
+      msg = mos.extract_string();
+      auto nchars = static_cast<std::streamsize>(msg.size());
+      if(os.rdbuf()->sputn(msg.data(), nchars) < nchars) {
+        state |= std::ios_base::failbit;
+      }
+    } catch(...) {
+      rocket::handle_ios_exception(os, state);
+    }
+    if(state) {
+      os.setstate(state);
+    }
+    return !!os;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -127,21 +124,12 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-void throw_runtime_error(Formatter &&fmt, const char *funcsig)
-  {
-    // Move the formatted message into a stream...
-    rocket::insertable_ostream mos;
-    mos.set_string(fmt.extract_string());
-    // then use this stream for further processing.
-    throw_runtime_error(std::move(mos), funcsig);
-  }
-
-void throw_runtime_error(rocket::insertable_ostream &&mos, const char *funcsig)
+bool throw_runtime_error(const char *funcsig, rocket::cow_string &&msg)
   {
     // Append the function signature.
-    mos << "\n[thrown from `" << funcsig << "`]";
+    msg << "\n[thrown from `" << funcsig << "`]";
     // Throw it.
-    throw Runtime_Error(mos.extract_string());
+    throw Runtime_Error(std::move(msg));
   }
 
 ///////////////////////////////////////////////////////////////////////////////

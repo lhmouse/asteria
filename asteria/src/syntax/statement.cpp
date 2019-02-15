@@ -605,7 +605,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
             mos << ": " << alt.msg;
           }
           ASTERIA_DEBUG_LOG("Throwing `Runtime_Error`: ", value);
-          throw_runtime_error(std::move(mos), ROCKET_FUNCSIG);
+          throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
         }
         return Block::status_next;
       }

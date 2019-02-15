@@ -15,6 +15,14 @@
 namespace Asteria {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Internal Macros
+///////////////////////////////////////////////////////////////////////////////
+
+#define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
+#define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
+#define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
+
+///////////////////////////////////////////////////////////////////////////////
 // Formatter
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -25,14 +33,12 @@ class Formatter
 
   public:
     Formatter() noexcept
-      : m_strm_opt()
       {
       }
     ~Formatter();
 
   private:
     std::ostream & do_open_stream();
-    rocket::cow_string do_extract_string() noexcept;
 
     template<typename ValueT> void do_put(const ValueT &value)
       {
@@ -113,19 +119,22 @@ class Formatter
       }
     rocket::cow_string extract_string() noexcept
       {
-        return this->do_extract_string();
+        return this->m_strm_opt ? this->m_strm_opt->extract_string() : rocket::sref("");
       }
   };
 
-extern bool are_debug_logs_enabled() noexcept;
-extern bool write_log_to_stderr(const char *file, long line, Formatter &&fmt) noexcept;
+#define ASTERIA_XFORMAT_(...)      ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 
-#define ASTERIA_DEBUG_LOG(...)       (ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()) &&  \
-                                       ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                                                      ::std::move((::Asteria::Formatter(), __VA_ARGS__))))
-#define ASTERIA_TERMINATE(...)       (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                                                     ::std::move((::Asteria::Formatter(), __VA_ARGS__))),  \
-                                       ::std::terminate())
+extern bool are_debug_logs_enabled() noexcept;
+extern bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept;
+
+// If `are_debug_logs_enabled()` returns `true`, evaluate arguments and write the result to `std::cerr`; otherwise, do nothing.
+#define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()),  \
+                                                ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)))
+
+// Evaluate arguments and write the result to `std::cerr`, then call `std::terminate()`.
+#define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
+                                                  ::std::terminate())
 
 ///////////////////////////////////////////////////////////////////////////////
 // Runtime_Error
@@ -154,11 +163,11 @@ class Runtime_Error : public virtual std::exception
       }
   };
 
-[[noreturn]] extern void throw_runtime_error(Formatter &&fmt, const char *funcsig);
-[[noreturn]] extern void throw_runtime_error(rocket::insertable_ostream &&mos, const char *funcsig);
+[[noreturn]] extern bool throw_runtime_error(const char *funcsig, rocket::cow_string &&msg);
 
-#define ASTERIA_THROW_RUNTIME_ERROR(...)      (::Asteria::throw_runtime_error(::std::move((::Asteria::Formatter(), __VA_ARGS__)),  \
-                                                                              ROCKET_FUNCSIG))
+// Evaluate arguments to create a string, then throw an exception containing this string.
+#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(ROCKET_FUNCSIG, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
+                                                            ::std::terminate())
 
 ///////////////////////////////////////////////////////////////////////////////
 // Indent
