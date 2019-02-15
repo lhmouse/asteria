@@ -17,9 +17,17 @@ Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexce
   {
     auto qcoll = &(this->m_gen_zero);
     // Find the collector with the given generation from the newest generation to the oldest.
-    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
+    unsigned gen = 0;
+    for(;;) {
+      if(gen == gen_limit) {
+        break;
+      }
       // Go to the next generation.
       qcoll = qcoll->get_tied_collector_opt();
+      if(!qcoll) {
+        return nullptr;
+      }
+      ++gen;
     }
     return qcoll;
   }
@@ -44,15 +52,23 @@ bool Generational_Collector::collect_variables(unsigned gen_limit)
   {
     auto qcoll = &(this->m_gen_zero);
     // Force collection from the newest generation to the oldest.
-    for(unsigned gen = 0; (gen < gen_limit) && qcoll; ++gen) {
+    unsigned gen = 0;
+    for(;;) {
       // Collect this generation.
       ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection begins.");
       qcoll->collect();
       ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection ends.");
       // Go to the next generation.
+      if(gen == gen_limit) {
+        break;
+      }
       qcoll = qcoll->get_tied_collector_opt();
+      if(!qcoll) {
+        return false;
+      }
+      ++gen;
     }
-    return qcoll != nullptr;
+    return true;
   }
 
 }

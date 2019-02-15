@@ -64,6 +64,10 @@ class Collector
         this->m_threshold = threshold;
       }
 
+    std::size_t get_tracked_variable_count() const noexcept
+      {
+        return this->m_tracked.size();
+      }
     bool track_variable(const RefCnt_Ptr<Variable> &var);
     bool untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept;
     void collect();

@@ -36,6 +36,7 @@ class Generational_Collector : public virtual RefCnt_Base
 
   public:
     Collector * get_collector_opt(unsigned gen_limit) noexcept;
+
     RefCnt_Ptr<Variable> create_variable();
     bool collect_variables(unsigned gen_limit);
   };
