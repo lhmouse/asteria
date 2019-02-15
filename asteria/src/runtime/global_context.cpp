@@ -26,6 +26,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     this->open_named_reference(rocket::sref("std")) = std::move(std_ref_c);
     this->m_std_var = std_var;
     // Add standard library components.
+    auto &std_obj = std_var->open_value().check<D_object>();
     ASTERIA_DEBUG_LOG("TODO add std library");
   }
 
