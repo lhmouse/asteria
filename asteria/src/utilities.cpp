@@ -49,67 +49,162 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
     }
     auto state = std::ios_base::goodbit;
     try {
+      const auto eof = std::char_traits<char>::eof();
+      char tstr[64];
+      long tlen = 0;
+      // This will be faster than `printf()`.
+      const auto print_0ld = [&](long width, long num)
+        {
+          static constexpr char s_digits[] = "0123456789";
+          // Write digits from the right to the left.
+          auto reg = num;
+          for(long i = 0; i < width; ++i) {
+            const auto d = reg % 10;
+            reg /= 10;
+            tstr[tlen + width + ~i] = s_digits[d];
+          }
+          // Don't forget to update `tlen`.
+          tlen += width;
+        };
       // Prepend the timestamp.
-      rocket::insertable_ostream mos;
 #ifdef _WIN32
       ::SYSTEMTIME st;
       ::GetSystemTime(&st);
-      mos << std::setfill('0')
-          << std::setw(4) << st.wYear << '-' << std::setw(2) << st.wMonth << '-' << std::setw(2) << st.wDay
-          <<' ' << std::setw(2) << st.wHour << ':' << std::setw(2) << st.wMinute << ':' << std::setw(2) << st.wSecond
-          <<'.' << std::setw(3) << st.wMilliseconds;
+      // YYYY-MM-DD hh:mm:ss.sss
+      print_0ld(4, st.wYear);
+      tstr[tlen++] = '-';
+      print_0ld(2, st.wMonth);
+      tstr[tlen++] = '-';
+      print_0ld(2, st.wDay);
+      tstr[tlen++] = ' ';
+      print_0ld(2, st.wHour);
+      tstr[tlen++] = ':';
+      print_0ld(2, st.wMinute);
+      tstr[tlen++] = ':';
+      print_0ld(2, st.wSecond);
+      tstr[tlen++] = '.';
+      print_0ld(3, st.wMilliseconds);
 #else
       ::timespec ts;
       ::clock_gettime(CLOCK_REALTIME, &ts);
       ::tm tr;
       ::localtime_r(&(ts.tv_sec), &tr);
-      mos << std::setfill('0')
-          << std::setw(4) << tr.tm_year + 1900 << '-' << std::setw(2) << tr.tm_mon + 1 << '-' << std::setw(2) << tr.tm_mday
-          <<' ' << std::setw(2) << tr.tm_hour << ':' << std::setw(2) << tr.tm_min << ':' << std::setw(2) << tr.tm_sec
-          <<'.' << std::setw(3) << ts.tv_nsec / 1000000;
+      // YYYY-MM-DD hh:mm:ss.sss
+      print_0ld(4, tr.tm_year + 1900);
+      tstr[tlen++] = '-';
+      print_0ld(2, tr.tm_mon + 1);
+      tstr[tlen++] = '-';
+      print_0ld(2, tr.tm_mday);
+      tstr[tlen++] = ' ';
+      print_0ld(2, tr.tm_hour);
+      tstr[tlen++] = ':';
+      print_0ld(2, tr.tm_min);
+      tstr[tlen++] = ':';
+      print_0ld(2, tr.tm_sec);
+      tstr[tlen++] = '.';
+      print_0ld(3, static_cast<long>(ts.tv_nsec / 1000000));
 #endif
+      if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
       // Insert the file name and line number.
-      mos << " @@ " << file << ':' << line;
+      if(os.rdbuf()->sputn(" @@ ", 4) < 4) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
+      tlen = static_cast<long>(std::strlen(file));
+      if(os.rdbuf()->sputn(file, tlen) < tlen) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
+      if(os.rdbuf()->sputc(':') == eof) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
+      tlen = 0;
+      print_0ld(1, line);
+      if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
       // Start a new line for the user-defined message.
-      mos << "\n\t";
+      if(os.rdbuf()->sputn("\n\t", 2) < 2) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
       // Neutralize control characters and indent paragraphs.
       for(auto it = msg.begin(); it != msg.end(); ++it) {
         // Control characters are ['\x00','\x20') and '\x7F'.
-        static constexpr char s_lower_table[][16] =
+        static constexpr char s_replacements[][16] =
           {
-            "[NUL""\\x00]",  "[SOH""\\x01]",  "[STX""\\x02]",  "[ETX""\\x03]",
-            "[EOT""\\x04]",  "[ENQ""\\x05]",  "[ACK""\\x06]",  "[BEL""\\x07]",
-            "[BS" "\\x08]",  /*TAB*/   "\t",  /*LF*/  "\n\t",  "[VT" "\\x0B]",
-            "[FF" "\\x0C]",  /*CR*/    "\r",  "[SO" "\\x0E]",  "[SI" "\\x0F]",
-            "[DLE""\\x10]",  "[DC1""\\x11]",  "[DC2""\\x12]",  "[DC3""\\x13]",
-            "[DC4""\\x14]",  "[NAK""\\x15]",  "[SYN""\\x16]",  "[ETB""\\x17]",
-            "[CAN""\\x18]",  "[EM" "\\x19]",  "[SUB""\\x1A]",  "[ESC""\\x1B]",
-            "[FS" "\\x1C]",  "[GS" "\\x1D]",  "[RS" "\\x1E]",  "[US" "\\x1F]",
+            "[NUL"   "\\x00]",
+            "[SOH"   "\\x01]",
+            "[STX"   "\\x02]",
+            "[ETX"   "\\x03]",
+            "[EOT"   "\\x04]",
+            "[ENQ"   "\\x05]",
+            "[ACK"   "\\x06]",
+            "[BEL"   "\\x07]",
+            "[BS"    "\\x08]",
+            /*TAB*/  "\t",
+            /*LF*/   "\n\t",
+            "[VT"    "\\x0B]",
+            "[FF"    "\\x0C]",
+            /*CR*/   "\r",
+            "[SO"    "\\x0E]",
+            "[SI"    "\\x0F]",
+            "[DLE"   "\\x10]",
+            "[DC1"   "\\x11]",
+            "[DC2"   "\\x12]",
+            "[DC3"   "\\x13]",
+            "[DC4"   "\\x14]",
+            "[NAK"   "\\x15]",
+            "[SYN"   "\\x16]",
+            "[ETB"   "\\x17]",
+            "[CAN"   "\\x18]",
+            "[EM"    "\\x19]",
+            "[SUB"   "\\x1A]",
+            "[ESC"   "\\x1B]",
+            "[FS"    "\\x1C]",
+            "[GS"    "\\x1D]",
+            "[RS"    "\\x1E]",
+            "[US"    "\\x1F]",
           };
-        // Check this character.
-        const auto ch = static_cast<unsigned>(*it & 0xFF);
-        if(ch == 0x7F) {
-          mos << "[DEL\\x7F]";
+        // Check one character.
+        const auto uch = static_cast<unsigned>(*it & 0xFF);
+        if(uch == 0x7F) {
+          const auto srep = "[DEL\\x7F]";
+          tlen = static_cast<long>(std::strlen(srep));
+          if(os.rdbuf()->sputn(srep, tlen) < tlen) {
+            state |= std::ios_base::failbit;
+            goto z;
+          }
           continue;
         }
-        if(ch < rocket::countof(s_lower_table)) {
-          mos << s_lower_table[ch];
+        if(uch < rocket::countof(s_replacements)) {
+          const auto srep = s_replacements[uch];
+          tlen = static_cast<long>(std::strlen(srep));
+          if(os.rdbuf()->sputn(srep, tlen) < tlen) {
+            state |= std::ios_base::failbit;
+            goto z;
+          }
           continue;
         }
-        // Copy it as is.
-        mos << static_cast<char>(ch);
+        if(os.rdbuf()->sputc(static_cast<char>(uch)) == eof) {
+          state |= std::ios_base::failbit;
+          goto z;
+        }
       }
       // Terminate the message with a line feed.
-      mos << "\n";
-      // Write the message now.
-      msg = mos.extract_string();
-      auto nchars = static_cast<std::streamsize>(msg.size());
-      if(os.rdbuf()->sputn(msg.data(), nchars) < nchars) {
+      if(os.rdbuf()->sputc('\n') == eof) {
         state |= std::ios_base::failbit;
+        goto z;
       }
     } catch(...) {
       rocket::handle_ios_exception(os, state);
     }
+  z:
     if(state) {
       os.setstate(state);
     }
@@ -144,31 +239,27 @@ std::ostream & operator<<(std::ostream &os, const Indent &n)
     }
     auto state = std::ios_base::goodbit;
     try {
-      // Optimize stream insertion a little.
-      std::array<char, 256> buf;
-      const auto fc = os.fill();
-      buf.fill(fc);
-      buf[0] = n.head();
-      std::size_t nb = 1;
-      // Write chunks.
-      std::size_t rem = n.count();
-      for(;;) {
-        const auto nq = rocket::min(rem, buf.size() - nb);
-        nb += nq;
-        rem -= nq;
-        if(os.rdbuf()->sputn(buf.data(), static_cast<long>(nb)) != static_cast<long>(nb)) {
+      const auto eof = std::char_traits<char>::eof();
+      // Insert the head character.
+      const auto head = n.head();
+      if(os.rdbuf()->sputc(head) == eof) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
+      // Insert filling characters.
+      const auto fill = os.fill();
+      auto rem = n.count();
+      while(rem > 0) {
+        if(os.rdbuf()->sputc(fill) == eof) {
           state |= std::ios_base::failbit;
-          break;
+          goto z;
         }
-        if(rem == 0) {
-          break;
-        }
-        nb = 0;
-        buf[0] = fc;
+        --rem;
       }
     } catch(...) {
       rocket::handle_ios_exception(os, state);
     }
+  z:
     if(state) {
       os.setstate(state);
     }
@@ -187,91 +278,106 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
     }
     auto state = std::ios_base::goodbit;
     try {
-      // Optimize stream insertion a little.
-      std::array<char, 272> buf;
-      buf[0] = '\"';
-      std::size_t nb = 1;
-      // Write chunks.
-      std::size_t rem = q.size();
-      for(;;) {
-        if((rem == 0) || (nb >= buf.size() - 16)) {
-          if(rem == 0) {
-            buf[nb++] = '\"';
-          }
-          if(os.rdbuf()->sputn(buf.data(), static_cast<long>(nb)) != static_cast<long>(nb)) {
-            state |= std::ios_base::failbit;
-            break;
-          }
-          if(rem == 0) {
-            break;
-          }
-          nb = 0;
-        }
-        const int ch = *(q.data() + q.size() - rem);
-        switch(ch) {
+      const auto eof = std::char_traits<char>::eof();
+      // Insert the open quote mark.
+      if(os.rdbuf()->sputc('\"') == eof) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
+      // Insert the string.
+      const auto rbase = q.data() + q.size();
+      auto rem = q.size();
+      while(rem > 0) {
+        const auto uch = static_cast<unsigned>(rbase[-rem] & 0xFF);
+        switch(uch) {
         case '\a':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'a';
+            if(os.rdbuf()->sputn("\\a", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\b':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'b';
+            if(os.rdbuf()->sputn("\\b", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\f':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'f';
+            if(os.rdbuf()->sputn("\\f", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\n':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'n';
+            if(os.rdbuf()->sputn("\\n", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\r':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'r';
+            if(os.rdbuf()->sputn("\\r", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\t':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 't';
+            if(os.rdbuf()->sputn("\\t", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\v':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'v';
+            if(os.rdbuf()->sputn("\\v", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\0':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = '0';
+            if(os.rdbuf()->sputn("\\0", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\x1A':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'Z';
+            if(os.rdbuf()->sputn("\\Z", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         case '\x1B':
           {
-            buf[nb++] = '\\';
-            buf[nb++] = 'e';
+            if(os.rdbuf()->sputn("\\e", 2) < 2) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
-        case '\"':  case '\'':  case '\\':
+        case '\"':
+        case '\'':
+        case '\\':
           {
-            buf[nb++] = '\\';
+            if(os.rdbuf()->sputc('\\') == eof) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             // Fallthrough.
         case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
         case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
@@ -286,24 +392,34 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
         case 0x70:  case 0x71:  case 0x72:  case 0x73:  case 0x74:  case 0x75:  case 0x76:  case 0x77:
         case 0x78:  case 0x79:  case 0x7a:  case 0x7b:  case 0x7c:  case 0x7d:  case 0x7e:
             // Write the character as is.
-            buf[nb++] = static_cast<char>(ch);
+            if(os.rdbuf()->sputc(static_cast<char>(uch)) == eof) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         default:
           {
             static constexpr char s_digits[] = "0123456789ABCDEF";
-            buf[nb++] = '\\';
-            buf[nb++] = 'x';
-            buf[nb++] = s_digits[(ch >> 4) & 0x0F];
-            buf[nb++] = s_digits[(ch >> 0) & 0x0F];
+            const char xseq[4] = { '\\', 'x', s_digits[(uch >> 4) & 0x0F], s_digits[uch & 0x0F] };
+            if(os.rdbuf()->sputn(xseq, 4) < 4) {
+              state |= std::ios_base::failbit;
+              goto z;
+            }
             break;
           }
         }
         --rem;
       }
+      // Insert the closed quote mark.
+      if(os.rdbuf()->sputc('\"') == eof) {
+        state |= std::ios_base::failbit;
+        goto z;
+      }
     } catch(...) {
       rocket::handle_ios_exception(os, state);
     }
+z:
     if(state) {
       os.setstate(state);
     }
