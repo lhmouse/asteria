@@ -78,11 +78,11 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         static constexpr size_type min_nblk_for_nchar(size_type nchar) noexcept
           {
-            return ((nchar + 1) * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+            return (sizeof(value_type) * (nchar + 1) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
           }
         static constexpr size_type max_nchar_for_nblk(size_type nblk) noexcept
           {
-            return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type) - 1;
+            return sizeof(basic_storage) * (nblk - 1) / sizeof(value_type) - 1;
           }
 
         allocator_type alloc;
@@ -565,17 +565,62 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         str->push_back(::std::forward<paramsT>(params)...);
       }
 
-    template<typename traitsT, typename eofT> inline size_t xhash_range(const typename traitsT::char_type *str, eofT &&eof)
+
+    // Implement the FNV-1a hash algorithm.
+    template<typename charT, typename traitsT> class basic_hasher
       {
-        // This implements the FNV-1a hash algorithm.
-        char32_t reg = 0x811c9dc5;
-        for(auto cp = str; !::std::forward<eofT>(eof)(cp); ++cp) {
-          unsigned char cbytes[sizeof(*cp)];
-          ::std::memcpy(cbytes, cp, sizeof(*cp));
-          noadl::ranged_for(cbytes, cbytes + sizeof(cbytes), [&](const unsigned char *bp) { reg = (reg ^ *bp) * 0x1000193;  });
-        }
-        return reg;
-      }
+      private:
+        char32_t m_reg;
+
+      public:
+        basic_hasher() noexcept
+          {
+            this->do_init();
+          }
+
+      private:
+        void do_init() noexcept
+          {
+            this->m_reg = 0x811c9dc5;
+          }
+        void do_append(const unsigned char *s, size_t n) noexcept
+          {
+            auto reg = this->m_reg;
+            for(size_t i = 0; i < n; ++i) {
+              reg = (reg ^ s[i]) * 0x1000193;
+            }
+            this->m_reg = reg;
+          }
+        size_t do_finish() noexcept
+          {
+            return this->m_reg;
+          }
+
+      public:
+         basic_hasher & append(const charT *s, size_t n) noexcept
+           {
+             this->do_append(reinterpret_cast<const unsigned char *>(s), sizeof(charT) * n);
+             return *this;
+           }
+         basic_hasher & append(const charT *s) noexcept
+           {
+             for(;;) {
+               const auto &ch = *s;
+               if(traitsT::eq(ch, charT())) {
+                 break;
+               }
+               ++s;
+               this->do_append(reinterpret_cast<const unsigned char *>(::std::addressof(ch)), sizeof(charT));
+             }
+             return *this;
+           }
+         size_t finish() noexcept
+           {
+             const auto r = this->do_finish();
+             this->do_init();
+             return r;
+           }
+      };
 
     }
 
@@ -1699,11 +1744,11 @@ template<typename charT, typename traitsT, typename allocatorT> struct basic_cow
 
     constexpr result_type operator()(const argument_type &str) const noexcept
       {
-        return details_cow_string::xhash_range<traitsT>(str.data(), [&](const charT *ptr) { return ptr == str.data() + str.size();  });
+        return details_cow_string::basic_hasher<charT, traitsT>().append(str.data(), str.size()).finish();
       }
-    constexpr result_type operator()(const charT *str) const noexcept
+    constexpr result_type operator()(const charT *s) const noexcept
       {
-        return details_cow_string::xhash_range<traitsT>(str, [&](const charT *ptr) { return traitsT::eq(*ptr, charT());  });
+        return details_cow_string::basic_hasher<charT, traitsT>().append(s).finish();
       }
   };
 

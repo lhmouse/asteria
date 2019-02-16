@@ -50,11 +50,11 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 
         static constexpr size_type min_nblk_for_nelem(size_type nelem) noexcept
           {
-            return (nelem * sizeof(value_type) + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
+            return (sizeof(value_type) * nelem + sizeof(basic_storage) - 1) / sizeof(basic_storage) + 1;
           }
         static constexpr size_type max_nelem_for_nblk(size_type nblk) noexcept
           {
-            return (nblk - 1) * sizeof(basic_storage) / sizeof(value_type);
+            return sizeof(basic_storage) * (nblk - 1) / sizeof(value_type);
           }
 
         allocator_type alloc;

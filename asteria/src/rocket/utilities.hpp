@@ -69,6 +69,7 @@ using ::std::add_rvalue_reference;
 using ::std::remove_reference;
 using ::std::is_same;
 using ::std::is_trivial;
+using ::std::is_integral;
 #ifdef ROCKET_HAS_TRIVIALITY_TRAITS
 using ::std::is_trivially_default_constructible;
 using ::std::is_trivially_copy_constructible;

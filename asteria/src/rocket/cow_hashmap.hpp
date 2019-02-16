@@ -113,11 +113,11 @@ template<typename keyT, typename mappedT,
 
         static constexpr size_type min_nblk_for_nbkt(size_type nbkt) noexcept
           {
-            return (nbkt * sizeof(bucket_type) + sizeof(pointer_storage) - 1) / sizeof(pointer_storage) + 1;
+            return (sizeof(bucket_type) * nbkt + sizeof(pointer_storage) - 1) / sizeof(pointer_storage) + 1;
           }
         static constexpr size_type max_nbkt_for_nblk(size_type nblk) noexcept
           {
-            return (nblk - 1) * sizeof(pointer_storage) / sizeof(bucket_type);
+            return sizeof(pointer_storage) * (nblk - 1) / sizeof(bucket_type);
           }
 
         allocator_type alloc;
