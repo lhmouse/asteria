@@ -36,27 +36,27 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
     template<typename charT, typename traitsT> class shallow
       {
       private:
-        const charT *m_str;
+        const charT *m_ptr;
         size_t m_len;
 
       public:
-        explicit constexpr shallow(const charT *str) noexcept
-          : m_str(str), m_len(traitsT::length(str))
+        explicit constexpr shallow(const charT *ptr) noexcept
+          : m_ptr(ptr), m_len(traitsT::length(ptr))
+          {
+          }
+        template<typename allocatorT> explicit shallow(const basic_cow_string<charT, traitsT, allocatorT> &str) noexcept
+          : m_ptr(str.c_str()), m_len(str.length())
           {
           }
 
       public:
         constexpr const charT * c_str() const noexcept
           {
-            return this->m_str;
+            return this->m_ptr;
           }
         constexpr size_t length() const noexcept
           {
             return this->m_len;
-          }
-        constexpr operator const charT * () const noexcept
-          {
-            return this->m_str;
           }
       };
 
@@ -1174,7 +1174,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         return this->append(first, static_cast<size_type>(last - first));
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category),
-             ROCKET_DISABLE_IF(is_convertible<inputT, const value_type *>::value)> basic_cow_string & append(inputT first, inputT last)
+                              ROCKET_DISABLE_IF(is_convertible<inputT, const value_type *>::value)> basic_cow_string & append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;
@@ -1762,88 +1762,91 @@ using cow_wstring    = basic_cow_string<wchar_t>;
 using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
 
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs,
+                                                                                                                       const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
-    auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
-    const auto rhs_len = traitsT::length(rhs);
-    res.reserve(lhs.size() + rhs_len);
-    res.append(lhs.data(), lhs.size());
-    res.append(rhs, rhs_len);
+    // Copy `lhs` to create a new string then append `rhs` to it.
+    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
+    string_type res;
+    res.assign(typename string_type::shallow(lhs));
+    res.append(rhs);
     return res;
   }
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, charT rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> && operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs,
+                                                                                                                          basic_cow_string<charT, traitsT, allocatorT> &&rhs)
   {
-    auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
-    res.reserve(lhs.size() + 1);
-    res.append(lhs.data(), lhs.size());
+    // Append `rhs` to `lhs` if no reallocation is required.
+    if(ROCKET_EXPECT(lhs.size() + rhs.size() <= lhs.capacity())) {
+      lhs.append(rhs);
+      return ::std::move(lhs);
+    }
+    // Prepend `lhs` to `rhs` otherwise.
+    rhs.insert(0, lhs);
+    return ::std::move(rhs);
+  }
+
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs)
+  {
+    // Copy `lhs` to create a new string then append `rhs` to it.
+    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
+    string_type res;
+    res.assign(typename string_type::shallow(lhs));
+    res.append(rhs);
+    return res;
+  }
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, charT rhs)
+  {
+    // Copy `lhs` to create a new string then append `rhs` to it.
+    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
+    string_type res;
+    res.assign(typename string_type::shallow(lhs));
     res.push_back(rhs);
     return res;
   }
 
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
-    auto res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
-    const auto lhs_len = traitsT::length(lhs);
-    res.reserve(lhs_len + rhs.size());
-    res.append(lhs, lhs_len);
-    res.append(rhs.data(), rhs.size());
+    // Copy `rhs` to create a new string then prepend `lhs` to it.
+    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
+    string_type res;
+    res.assign(typename string_type::shallow(rhs));
+    res.insert(0, lhs);
     return res;
   }
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
-    auto res = basic_cow_string<charT, traitsT, allocatorT>(rhs.get_allocator());
-    res.reserve(1 + rhs.size());
-    res.push_back(lhs);
-    res.append(rhs.data(), rhs.size());
-    return res;
-  }
-
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, const charT *rhs)
-  {
-    auto res = ::std::move(lhs);
-    res.append(rhs, traitsT::length(rhs));
-    return res;
-  }
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, charT rhs)
-  {
-    auto res = ::std::move(lhs);
-    res.push_back(rhs);
-    return res;
-  }
-
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
-  {
-    auto res = ::std::move(rhs);
-    res.insert(0, lhs, traitsT::length(lhs));
-    return res;
-  }
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
-  {
-    auto res = ::std::move(rhs);
+    // Copy `rhs` to create a new string then prepend `lhs` to it.
+    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
+    string_type res;
+    res.assign(typename string_type::shallow(rhs));
     res.insert(0, 1, lhs);
     return res;
   }
 
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs,
-                                                                                                                              const basic_cow_string<charT, traitsT, allocatorT> &rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> && operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, const charT *rhs)
   {
-    auto res = basic_cow_string<charT, traitsT, allocatorT>(lhs.get_allocator());
-    res.reserve(lhs.size() + rhs.size());
-    res.append(lhs.data(), lhs.size());
-    res.append(rhs.data(), rhs.size());
-    return res;
+    // Append `rhs` to `lhs`.
+    lhs.append(rhs);
+    return ::std::move(lhs);
   }
-template<typename charT, typename traitsT, typename allocatorT> inline basic_cow_string<charT, traitsT, allocatorT> operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs,
-                                                                                                                              basic_cow_string<charT, traitsT, allocatorT> &&rhs)
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> && operator+(basic_cow_string<charT, traitsT, allocatorT> &&lhs, charT rhs)
   {
-    if((lhs.size() + rhs.size() > lhs.capacity()) && (lhs.size() + rhs.size() <= rhs.capacity())) {
-      auto res = ::std::move(rhs);
-      res.insert(0, lhs.data(), lhs.size());
-      return res;
-    }
-    auto res = ::std::move(lhs);
-    res.append(rhs);
-    return res;
+    // Append `rhs` to `lhs`.
+    lhs.push_back(rhs);
+    return ::std::move(lhs);
+  }
+
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> && operator+(const charT *lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
+  {
+    // Prepend `lhs` to `rhs`.
+    rhs.insert(0, lhs);
+    return ::std::move(rhs);
+  }
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> && operator+(charT lhs, basic_cow_string<charT, traitsT, allocatorT> &&rhs)
+  {
+    // Prepend `lhs` to `rhs`.
+    rhs.insert(0, 1, lhs);
+    return ::std::move(rhs);
   }
 
 template<typename charT, typename traitsT, typename allocatorT> inline bool operator==(const basic_cow_string<charT, traitsT, allocatorT> &lhs,
