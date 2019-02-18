@@ -13,6 +13,7 @@
 #include <ios>  // std::ios_base, std::basic_ios<>
 #include <functional>  // std::hash<>, std::equal_to<>, std::reference_wrapper<>, std::ref()
 #include <tuple>  // std::tuple<>
+#include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 #include "compatibility.h"
@@ -108,6 +109,16 @@ using ::std::hash;
 using ::std::reference_wrapper;
 using ::std::pair;
 using ::std::tuple;
+
+using ::std::logic_error;
+using ::std::domain_error;
+using ::std::invalid_argument;
+using ::std::length_error;
+using ::std::out_of_range;
+using ::std::runtime_error;
+using ::std::range_error;
+using ::std::overflow_error;
+using ::std::underflow_error;
 
 struct identity
   {

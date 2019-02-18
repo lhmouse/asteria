@@ -208,7 +208,8 @@ template<typename keyT, typename mappedT,
           {
             // `allocatorT::value_type` is not copy-constructible.
             // Throw an exception unconditionally, even when there is nothing to copy.
-            noadl::throw_domain_error("cow_hashmap: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
+            noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` is not copy-constructible.",
+                                                   typeid(typename allocatorT::value_type).name());
           }
       };
 
@@ -335,8 +336,8 @@ template<typename keyT, typename mappedT,
 
         [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
           {
-            noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+            noadl::sprintf_and_throw<length_error>("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
+                                                   static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
           }
 
       public:
@@ -942,7 +943,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_key_not_found() const
       {
-        noadl::throw_out_of_range("cow_hashmap: The specified key does not exist in this hashmap.");
+        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: The specified key does not exist in this hashmap.");
       }
 
     const details_cow_hashmap::bucket<allocator_type> * do_get_table() const noexcept

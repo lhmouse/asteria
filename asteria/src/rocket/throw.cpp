@@ -2,46 +2,29 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "throw.hpp"
-#include <stdexcept>
 #include <cstdarg>
-#include <cstdio>
 
 namespace rocket {
 
-#define ROCKET_VSNPRINTF_(buf_, fmt_)  \
-    do {  \
-      ::std::va_list ap_;  \
-      va_start(ap_, fmt_);  \
-      ::std::vsnprintf((buf_), sizeof(buf_), (fmt_), ap_);  \
-      va_end(ap_);  \
-    } while(0)
-
-void throw_invalid_argument(const char *fmt, ...)
+template<typename exceptT> [[noreturn]] ROCKET_ATTRIBUTE_PRINTF(1, 2) void sprintf_and_throw(const char *fmt, ...)
   {
-    char buf[1024];
-    ROCKET_VSNPRINTF_(buf, fmt);
-    throw ::std::invalid_argument(buf);
+    char msg[1024];
+    ::std::va_list ap;
+    va_start(ap, fmt);
+    ::std::vsnprintf(msg, sizeof(msg), fmt, ap);
+    va_end(ap);
+    throw exceptT(msg);
   }
 
-void throw_out_of_range(const char *fmt, ...)
-  {
-    char buf[1024];
-    ROCKET_VSNPRINTF_(buf, fmt);
-    throw ::std::out_of_range(buf);
-  }
+template void sprintf_and_throw<logic_error>      (const char *fmt, ...);
+template void sprintf_and_throw<domain_error>     (const char *fmt, ...);
+template void sprintf_and_throw<invalid_argument> (const char *fmt, ...);
+template void sprintf_and_throw<length_error>     (const char *fmt, ...);
+template void sprintf_and_throw<out_of_range>     (const char *fmt, ...);
 
-void throw_length_error(const char *fmt, ...)
-  {
-    char buf[1024];
-    ROCKET_VSNPRINTF_(buf, fmt);
-    throw ::std::length_error(buf);
-  }
-
-void throw_domain_error(const char *fmt, ...)
-  {
-    char buf[1024];
-    ROCKET_VSNPRINTF_(buf, fmt);
-    throw ::std::domain_error(buf);
-  }
+template void sprintf_and_throw<runtime_error>    (const char *fmt, ...);
+template void sprintf_and_throw<range_error>      (const char *fmt, ...);
+template void sprintf_and_throw<overflow_error>   (const char *fmt, ...);
+template void sprintf_and_throw<underflow_error>  (const char *fmt, ...);
 
 }

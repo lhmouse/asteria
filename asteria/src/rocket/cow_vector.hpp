@@ -110,7 +110,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // Throw an exception unconditionally, even when there is nothing to copy.
-            noadl::throw_domain_error("cow_vector: `%s` is not copy-constructible.", typeid(typename allocatorT::value_type).name());
+            noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` is not copy-constructible.",
+                                                   typeid(typename allocatorT::value_type).name());
           }
       };
     template<typename pointerT, typename allocatorT
@@ -154,7 +155,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // Throw an exception unconditionally, even when there is nothing to move.
-            noadl::throw_domain_error("cow_vector: `%s` is not move-constructible.", typeid(typename allocatorT::value_type).name());
+            noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` is not move-constructible.",
+                                                   typeid(typename allocatorT::value_type).name());
           }
       };
     template<typename pointerT, typename allocatorT
@@ -239,8 +241,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 
         [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
           {
-            noadl::throw_length_error("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                      static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+            noadl::sprintf_and_throw<length_error>("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
+                                                   static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
           }
 
       public:
@@ -793,8 +795,8 @@ template<typename valueT, typename allocatorT> class cow_vector
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
       {
-        noadl::throw_out_of_range("cow_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
-                                  static_cast<long long>(pos), static_cast<long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>("cow_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
+                                               static_cast<long long>(pos), static_cast<long long>(this->size()));
       }
 
     // This function works the same way as `std::string::substr()`.

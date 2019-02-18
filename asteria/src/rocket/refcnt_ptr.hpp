@@ -202,8 +202,8 @@ template<typename elementT, typename deleterT> class refcnt_base : protected vir
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info &ytype) const
       {
-        noadl::throw_domain_error("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                  ytype.name(), typeid(*this).name());
+        noadl::sprintf_and_throw<domain_error>("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+                                               ytype.name(), typeid(*this).name());
       }
 
   public:

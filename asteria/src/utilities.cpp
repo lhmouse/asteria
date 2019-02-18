@@ -445,7 +445,8 @@ Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
       // Calculate the number of elements to fill.
       const auto front_fill = 0 - static_cast<std::uint64_t>(rindex);
       if(front_fill > PTRDIFF_MAX) {
-        rocket::throw_length_error("wrap_subscript: The subscript `%lld` is invalid.", static_cast<long long>(index));
+        rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
+                                                     static_cast<long long>(index));
       }
       wrap.front_fill = static_cast<std::size_t>(front_fill);
       return wrap;
@@ -455,7 +456,8 @@ Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
       // Calculate the number of elements to fill.
       const auto back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
       if(back_fill > PTRDIFF_MAX) {
-        rocket::throw_length_error("wrap_subscript: The subscript `%lld` is invalid.", static_cast<long long>(index));
+        rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
+                                                     static_cast<long long>(index));
       }
       wrap.back_fill = static_cast<std::size_t>(back_fill);
       return wrap;
