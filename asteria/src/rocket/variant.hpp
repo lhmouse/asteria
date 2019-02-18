@@ -115,6 +115,13 @@ template<typename ...alternativesT> class variant;
         noadl::adl_swap(*static_cast<alternativeT *>(tptr), *static_cast<alternativeT *>(rptr));
       }
 
+    // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
+    // Wrapping the `throw` expression in a lambda could silence this warning.
+    [[noreturn]] inline void rethrow_current_exception()
+      {
+        throw;
+      }
+
     }
 
 template<typename ...alternativesT> class variant
@@ -307,9 +314,7 @@ template<typename ...alternativesT> class variant
         } catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
-          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
-          // Wrapping the `throw` expression in a lambda could silence this warning.
-          [] { throw;  }();
+          details_variant::rethrow_current_exception();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *this;
@@ -358,9 +363,7 @@ template<typename ...alternativesT> class variant
         } catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
-          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
-          // Wrapping the `throw` expression in a lambda could silence this warning.
-          [] { throw;  }();
+          details_variant::rethrow_current_exception();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *this;
@@ -499,9 +502,7 @@ template<typename ...alternativesT> class variant
         } catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
-          // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
-          // Wrapping the `throw` expression in a lambda could silence this warning.
-          [] { throw;  }();
+          details_variant::rethrow_current_exception();
         }
         variant::do_dispatch_destroy(index_old, backup);
         return *static_cast<typename type_at<index_new>::type *>(this->m_stor);
