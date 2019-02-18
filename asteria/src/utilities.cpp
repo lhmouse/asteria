@@ -39,6 +39,44 @@ bool are_debug_logs_enabled() noexcept
 #endif
   }
 
+    namespace {
+
+    int do_ltoa_fixed(char *buf, int width, long num) noexcept
+      {
+        static constexpr char s_digits[] = "0123456789";
+        // Write digits from the right to the left.
+        auto reg = num;
+        for(int i = width - 1; i >= 0; --i) {
+          const auto d = reg % 10;
+          reg /= 10;
+          buf[i] = s_digits[d];
+        }
+        // Return the number of characters written.
+        return width;
+      }
+
+    int do_print_timestamp(char *buf, long year, long mon, long day, long hour, long min, long sec, long msec) noexcept
+      {
+        int len = 0;
+        // YYYY-MM-DD hh:mm:ss.sss
+        len += do_ltoa_fixed(buf + len, 4, year);
+        buf[len++] = '-';
+        len += do_ltoa_fixed(buf + len, 2, mon);
+        buf[len++] = '-';
+        len += do_ltoa_fixed(buf + len, 2, day);
+        buf[len++] = ' ';
+        len += do_ltoa_fixed(buf + len, 2, hour);
+        buf[len++] = ':';
+        len += do_ltoa_fixed(buf + len, 2, min);
+        buf[len++] = ':';
+        len += do_ltoa_fixed(buf + len, 2, sec);
+        buf[len++] = '.';
+        len += do_ltoa_fixed(buf + len, 3, msec);
+        return len;
+      }
+
+    }
+
 bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept
   {
     // Behaves like an UnformattedOutputFunction.
@@ -51,58 +89,22 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
     try {
       const auto eof = std::char_traits<char>::eof();
       char tstr[64];
-      long tlen = 0;
-      // This will be faster than `printf()`.
-      const auto print_0ld = [&](long width, long num)
-        {
-          static constexpr char s_digits[] = "0123456789";
-          // Write digits from the right to the left.
-          auto reg = num;
-          for(long i = 0; i < width; ++i) {
-            const auto d = reg % 10;
-            reg /= 10;
-            tstr[tlen + width + ~i] = s_digits[d];
-          }
-          // Don't forget to update `tlen`.
-          tlen += width;
-        };
+      long tlen;
       // Prepend the timestamp.
 #ifdef _WIN32
       ::SYSTEMTIME st;
       ::GetSystemTime(&st);
-      // YYYY-MM-DD hh:mm:ss.sss
-      print_0ld(4, st.wYear);
-      tstr[tlen++] = '-';
-      print_0ld(2, st.wMonth);
-      tstr[tlen++] = '-';
-      print_0ld(2, st.wDay);
-      tstr[tlen++] = ' ';
-      print_0ld(2, st.wHour);
-      tstr[tlen++] = ':';
-      print_0ld(2, st.wMinute);
-      tstr[tlen++] = ':';
-      print_0ld(2, st.wSecond);
-      tstr[tlen++] = '.';
-      print_0ld(3, st.wMilliseconds);
+      tlen = do_print_timestamp(tstr, st.wYear, st.wMonth, st.wDay,
+                                      st.wHour, st.wMinute, st.wSecond,
+                                      st.wMilliseconds);
 #else
       ::timespec ts;
       ::clock_gettime(CLOCK_REALTIME, &ts);
       ::tm tr;
       ::localtime_r(&(ts.tv_sec), &tr);
-      // YYYY-MM-DD hh:mm:ss.sss
-      print_0ld(4, tr.tm_year + 1900);
-      tstr[tlen++] = '-';
-      print_0ld(2, tr.tm_mon + 1);
-      tstr[tlen++] = '-';
-      print_0ld(2, tr.tm_mday);
-      tstr[tlen++] = ' ';
-      print_0ld(2, tr.tm_hour);
-      tstr[tlen++] = ':';
-      print_0ld(2, tr.tm_min);
-      tstr[tlen++] = ':';
-      print_0ld(2, tr.tm_sec);
-      tstr[tlen++] = '.';
-      print_0ld(3, static_cast<long>(ts.tv_nsec / 1000000));
+      tlen = do_print_timestamp(tstr, tr.tm_year + 1900, tr.tm_mon + 1, tr.tm_mday,
+                                      tr.tm_hour, tr.tm_min, tr.tm_sec,
+                                      static_cast<long>(ts.tv_nsec / 1000000));
 #endif
       if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
         state |= std::ios_base::failbit;
@@ -122,8 +124,7 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
         state |= std::ios_base::failbit;
         goto z;
       }
-      tlen = 0;
-      print_0ld(1, line);
+      tlen = do_ltoa_fixed(tstr, 1, line);
       if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
         state |= std::ios_base::failbit;
         goto z;
