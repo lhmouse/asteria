@@ -18,15 +18,15 @@ template<typename exceptT> [[noreturn]] ROCKET_ATTRIBUTE_PRINTF(1, 2) void sprin
   }
 
 // Define specializations.
-template void sprintf_and_throw< logic_error      >(const char *fmt, ...);
-template void sprintf_and_throw< domain_error     >(const char *fmt, ...);
-template void sprintf_and_throw< invalid_argument >(const char *fmt, ...);
-template void sprintf_and_throw< length_error     >(const char *fmt, ...);
-template void sprintf_and_throw< out_of_range     >(const char *fmt, ...);
+template void sprintf_and_throw<logic_error>(const char *fmt, ...);
+template void sprintf_and_throw<domain_error>(const char *fmt, ...);
+template void sprintf_and_throw<invalid_argument>(const char *fmt, ...);
+template void sprintf_and_throw<length_error>(const char *fmt, ...);
+template void sprintf_and_throw<out_of_range>(const char *fmt, ...);
 
-template void sprintf_and_throw< runtime_error    >(const char *fmt, ...);
-template void sprintf_and_throw< range_error      >(const char *fmt, ...);
-template void sprintf_and_throw< overflow_error   >(const char *fmt, ...);
-template void sprintf_and_throw< underflow_error  >(const char *fmt, ...);
+template void sprintf_and_throw<runtime_error>(const char *fmt, ...);
+template void sprintf_and_throw<range_error>(const char *fmt, ...);
+template void sprintf_and_throw<overflow_error>(const char *fmt, ...);
+template void sprintf_and_throw<underflow_error>(const char *fmt, ...);
 
 }
