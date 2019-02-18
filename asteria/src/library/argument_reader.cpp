@@ -7,14 +7,6 @@
 
 namespace Asteria {
 
-#define ASTERIA_HANDLE_BAD_ARGUMENT_(...)  \
-    do {  \
-      if(this->m_throw_on_failure) {  \
-        ASTERIA_THROW_RUNTIME_ERROR(__VA_ARGS__);  \
-      }  \
-      this->m_state.succeeded = false;  \
-    } while(0)
-
 const Reference * Argument_Reader::do_peek_argument()
   {
     // Check for the end of operation.
@@ -23,12 +15,18 @@ const Reference * Argument_Reader::do_peek_argument()
     }
     // Check for previous failures.
     if(!this->m_state.succeeded) {
-      ASTERIA_HANDLE_BAD_ARGUMENT_("A previous operation had failed.");
+      if(this->m_throw_on_failure) {
+        ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
+      }
+      this->m_state.succeeded = false;
       return nullptr;
     }
     // Check for the end of arguments.
     if(this->m_state.offset >= this->m_args.get().size()) {
-      ASTERIA_HANDLE_BAD_ARGUMENT_("No enough arguments were provided (expecting at least ", this->m_state.offset + 1, ").");
+      if(this->m_throw_on_failure) {
+        ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", this->m_state.offset + 1, ").");
+      }
+      this->m_state.succeeded = false;
       return nullptr;
     }
     // Succeed.
@@ -55,8 +53,11 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
       // Not null...
       const auto qvalue = value.opt<XvalueT>();
       if(!qvalue) {
-        ASTERIA_HANDLE_BAD_ARGUMENT_("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                     "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
+        if(this->m_throw_on_failure) {
+          ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                      "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
+        }
+        this->m_state.succeeded = false;
         return *this;
       }
       value_out = *qvalue;
@@ -80,8 +81,11 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     // `null` is not an option.
     const auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
-      ASTERIA_HANDLE_BAD_ARGUMENT_("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                   "but `", Value::get_type_name<XvalueT>(), "` was expected.");
+      if(this->m_throw_on_failure) {
+        ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
+                                    "but `", Value::get_type_name<XvalueT>(), "` was expected.");
+      }
+      this->m_state.succeeded = false;
       return *this;
     }
     value_out = *qvalue;
@@ -235,12 +239,18 @@ Argument_Reader & Argument_Reader::finish()
     ROCKET_ASSERT(offset == this->m_overloads.size());
     // Check for previous failures.
     if(!this->m_state.succeeded) {
-      ASTERIA_HANDLE_BAD_ARGUMENT_("A previous operation had failed.");
+      if(this->m_throw_on_failure) {
+        ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
+      }
+      this->m_state.succeeded = false;
       return *this;
     }
     // Check for the end of arguments.
     if(this->m_state.offset != this->m_args.get().size()) {
-      ASTERIA_HANDLE_BAD_ARGUMENT_("Wrong number of arguments were provided (expecting exactly ", this->m_state.offset, ").");
+      if(this->m_throw_on_failure) {
+        ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->m_state.offset, ").");
+      }
+      this->m_state.succeeded = false;
       return *this;
     }
     // Succeed.
