@@ -87,8 +87,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 
     template<typename pointerT, typename allocatorT,
              bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
-             bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value
-             > struct copy_storage_helper
+             bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>,
+                                        is_std_allocator<allocatorT>>::value> struct copy_storage_helper
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -102,10 +102,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             }
           }
       };
-    template<typename pointerT, typename allocatorT, bool memcpyT
-             > struct copy_storage_helper<pointerT, allocatorT,
-                                          false,  // copyableT
-                                          memcpyT>  // trivial && std::allocator
+    template<typename pointerT, typename allocatorT, bool memcpyT> struct copy_storage_helper<pointerT, allocatorT,
+                                                                                              false,  // copyableT
+                                                                                              memcpyT>  // trivial && std::allocator
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
@@ -114,10 +113,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
                                                    typeid(typename allocatorT::value_type).name());
           }
       };
-    template<typename pointerT, typename allocatorT
-             > struct copy_storage_helper<pointerT, allocatorT,
-                                          true,  // copyableT
-                                          true>  // trivial && std::allocator
+    template<typename pointerT, typename allocatorT> struct copy_storage_helper<pointerT, allocatorT,
+                                                                                true,  // copyableT
+                                                                                true>  // trivial && std::allocator
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -132,8 +130,8 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 
     template<typename pointerT, typename allocatorT,
              bool movableT = is_move_constructible<typename allocatorT::value_type>::value,
-             bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>, is_std_allocator<allocatorT>>::value
-             > struct move_storage_helper
+             bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>,
+                                        is_std_allocator<allocatorT>>::value> struct move_storage_helper
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -147,10 +145,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             }
           }
       };
-    template<typename pointerT, typename allocatorT, bool memcpyT
-             > struct move_storage_helper<pointerT, allocatorT,
-                                          false,  // movableT
-                                          memcpyT>  // trivial && std::allocator
+    template<typename pointerT, typename allocatorT, bool memcpyT> struct move_storage_helper<pointerT, allocatorT,
+                                                                                              false,  // movableT
+                                                                                              memcpyT>  // trivial && std::allocator
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
@@ -159,10 +156,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
                                                    typeid(typename allocatorT::value_type).name());
           }
       };
-    template<typename pointerT, typename allocatorT
-             > struct move_storage_helper<pointerT, allocatorT,
-                                          true,  // movableT
-                                          true>  // trivial && std::allocator
+    template<typename pointerT, typename allocatorT> struct move_storage_helper<pointerT, allocatorT,
+                                                                                true,  // movableT
+                                                                                true>  // trivial && std::allocator
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {

@@ -167,8 +167,7 @@ template<typename keyT, typename mappedT,
       };
 
     template<typename pointerT, typename hashT, typename allocatorT,
-             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value
-             > struct copy_storage_helper
+             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value> struct copy_storage_helper
       {
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -200,9 +199,8 @@ template<typename keyT, typename mappedT,
             }
           }
       };
-    template<typename pointerT, typename hashT, typename allocatorT
-             > struct copy_storage_helper<pointerT, hashT, allocatorT,
-                                          false>     // copyableT
+    template<typename pointerT, typename hashT, typename allocatorT> struct copy_storage_helper<pointerT, hashT, allocatorT,
+                                                                                                false>     // copyableT
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, const hashT & /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
@@ -213,8 +211,7 @@ template<typename keyT, typename mappedT,
           }
       };
 
-    template<typename pointerT, typename hashT, typename allocatorT
-             > struct move_storage_helper
+    template<typename pointerT, typename hashT, typename allocatorT> struct move_storage_helper
       {
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
