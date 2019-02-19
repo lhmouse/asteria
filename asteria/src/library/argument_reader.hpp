@@ -96,11 +96,11 @@ class Argument_Reader
     Argument_Reader & opt(D_boolean &value_out, D_boolean default_value = false);
     Argument_Reader & opt(D_integer &value_out, D_integer default_value = 0);
     Argument_Reader & opt(D_real &value_out, D_real default_value = 0);
-    Argument_Reader & opt(D_string &value_out, const D_string &default_value = rocket::sref(""));
-    Argument_Reader & opt(D_opaque &value_out, const D_opaque &default_value);  // no default value
-    Argument_Reader & opt(D_function &value_out, const D_function &default_value);  // no default value
-    Argument_Reader & opt(D_array &value_out, const D_array &default_value = D_array());
-    Argument_Reader & opt(D_object &value_out, const D_object &default_value = D_object());
+    Argument_Reader & opt(D_string &value_out, const D_string &default_value = { });
+    Argument_Reader & opt(D_opaque &value_out, const D_opaque &default_value /* no default value */);
+    Argument_Reader & opt(D_function &value_out, const D_function &default_value /* no default value */);
+    Argument_Reader & opt(D_array &value_out, const D_array &default_value = { });
+    Argument_Reader & opt(D_object &value_out, const D_object &default_value = { });
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise this operation fails.
     // N.B. These functions provide STRONG exception safety guarantee.
