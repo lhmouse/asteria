@@ -20,34 +20,35 @@ template<typename elementT> class refcnt_object
     refcnt_ptr<element_type> m_ptr;
 
   public:
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
-                                                             typename decay<yelementT>::type>::value)> explicit refcnt_object(yelementT &&yelem)
-      : m_ptr(noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem)))
+    template<typename ...paramsT, ROCKET_ENABLE_IF(is_constructible<element_type,
+                                                                    paramsT &&...>::value)> explicit refcnt_object(paramsT &&...params)
+      : m_ptr(noadl::make_refcnt<element_type>(::std::forward<paramsT>(params)...))
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
-                                                             yelementT>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
+                                                                 pointer>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
       : m_ptr(other.m_ptr)
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
-                                                             yelementT>::value)> refcnt_object(refcnt_object<yelementT> &&other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
+                                                                 pointer>::value)> refcnt_object(refcnt_object<yelementT> &&other) noexcept
       : m_ptr(::std::move(other.m_ptr))
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, typename decay<yelementT>::type>::value)> refcnt_object & operator=(yelementT &&yelem)
+    template<typename paramT, ROCKET_ENABLE_IF(is_assignable<elementT,
+                                                             paramT &&>::value)> refcnt_object & operator=(paramT &&param) noexcept(is_nothrow_assignable<elementT, paramT &&>::value)
       {
-        this->m_ptr = noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem));
+        *(this->m_ptr) = ::std::forward<paramT>(param);
         return *this;
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
-                                                             yelementT>::value)> refcnt_object & operator=(const refcnt_object<yelementT> &other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
+                                                                 pointer>::value)> refcnt_object & operator=(const refcnt_object<yelementT> &other) noexcept
       {
         this->m_ptr = other.m_ptr;
         return *this;
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
-                                                             yelementT>::value)> refcnt_object & operator=(refcnt_object<yelementT> &&other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
+                                                                 pointer>::value)> refcnt_object & operator=(refcnt_object<yelementT> &&other) noexcept
       {
         this->m_ptr = ::std::move(other.m_ptr);
         return *this;
