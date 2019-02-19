@@ -93,7 +93,7 @@ template<typename funcT, typename ...firstT> class bind_front_result
 
 template<typename xfuncT, typename ...xfirstT> constexpr bind_front_result<typename decay<xfuncT>::type, typename decay<xfirstT>::type...> bind_front(xfuncT &&xfunc, xfirstT &&...xfirst)
   {
-    return { ::std::forward<xfuncT>(xfunc), std::forward<xfirstT>(xfirst)... };
+    return { ::std::forward<xfuncT>(xfunc), ::std::forward<xfirstT>(xfirst)... };
   }
 
 }
