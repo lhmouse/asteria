@@ -355,33 +355,114 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
 
     namespace details_utilities {
 
-    template<typename elementT> inline bool is_any_of_nonconstexpr(const elementT &elem, initializer_list<elementT> init)
+    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT &&cont, callbackT &&call)
       {
-        auto ptr = init.begin();
-        for(;;) {
-          if(ptr == init.end()) {
+        for(auto &elem : cont) {
+          ::std::forward<callbackT>(call)(elem);
+        }
+      }
+
+    }
+
+template<typename containerT, typename callbackT> constexpr void for_each(containerT &&cont, callbackT &&call)
+  {
+    return details_utilities::for_each_nonconstexpr<containerT &&, callbackT &&>(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+  }
+template<typename elementT, typename callbackT> constexpr void for_each(initializer_list<elementT> init, callbackT &&call)
+  {
+    return details_utilities::for_each_nonconstexpr<initializer_list<elementT> &, callbackT &&>(init, ::std::forward<callbackT>(call));
+  }
+
+    namespace details_utilities {
+
+    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT &&cont, callbackT &&call)
+      {
+        for(auto &elem : cont) {
+          if(::std::forward<callbackT>(call)(elem)) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+    }
+
+template<typename containerT, typename callbackT> constexpr bool any_of(containerT &&cont, callbackT &&call)
+  {
+    return details_utilities::any_of_nonconstexpr<containerT &&, callbackT &&>(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+  }
+template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&call)
+  {
+    return details_utilities::any_of_nonconstexpr<initializer_list<elementT> &, callbackT &&>(init, ::std::forward<callbackT>(call));
+  }
+
+    namespace details_utilities {
+
+    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT &&cont, callbackT &&call)
+      {
+        for(auto &elem : cont) {
+          if(::std::forward<callbackT>(call)(elem)) {
             return false;
           }
-          if(*ptr == elem) {
-            break;
-          }
-          ++ptr;
         }
         return true;
       }
 
     }
 
-template<typename elementT> constexpr bool is_any_of(const elementT &elem, initializer_list<elementT> init)
+template<typename containerT, typename callbackT> constexpr bool none_of(containerT &&cont, callbackT &&call)
   {
-    return details_utilities::is_any_of_nonconstexpr(elem, init);
+    return details_utilities::none_of_nonconstexpr<containerT &&, callbackT &&>(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+  }
+template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&call)
+  {
+    return details_utilities::none_of_nonconstexpr<initializer_list<elementT> &, callbackT &&>(init, ::std::forward<callbackT>(call));
   }
 
-template<typename containerT, typename functorT, typename ...paramsT> void for_each(containerT &cont, functorT &&func, const paramsT &...params)
-  {
-    for(auto &&elem : cont) {
-      ::std::forward<functorT>(func)(elem, params...);
+    namespace details_utilities {
+
+    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT &&targ, containerT &&cont)
+      {
+        for(auto &elem : cont) {
+          if(::std::forward<targetT>(targ) == elem) {
+            return true;
+          }
+        }
+        return false;
+      }
+
     }
+
+template<typename targetT, typename containerT> constexpr bool is_any_of(targetT &&targ, containerT &&cont)
+  {
+    return details_utilities::is_any_of_nonconstexpr<targetT &&, containerT &&>(::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+  }
+template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &&targ, initializer_list<elementT> init)
+  {
+    return details_utilities::is_any_of_nonconstexpr<targetT &&, initializer_list<elementT> &>(::std::forward<targetT>(targ), init);
+  }
+
+    namespace details_utilities {
+
+    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT &&targ, containerT &&cont)
+      {
+        for(auto &elem : cont) {
+          if(::std::forward<targetT>(targ) == elem) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+    }
+
+template<typename targetT, typename containerT> constexpr bool is_none_of(targetT &&targ, containerT &&cont)
+  {
+    return details_utilities::is_none_of_nonconstexpr<targetT &&, containerT &&>(::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+  }
+template<typename targetT, typename elementT> constexpr bool is_none_of(targetT &&targ, initializer_list<elementT> init)
+  {
+    return details_utilities::is_none_of_nonconstexpr<targetT &&, initializer_list<elementT> &>(::std::forward<targetT>(targ), init);
   }
 
 template<typename enumT> constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
