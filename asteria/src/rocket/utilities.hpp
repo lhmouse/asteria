@@ -353,19 +353,28 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
     } while(bot != stp);
   }
 
-template<typename elementT> inline bool is_any_of(const elementT &elem, initializer_list<elementT> init)
-  {
-    auto ptr = init.begin();
-    for(;;) {
-      if(ptr == init.end()) {
-        return false;
+    namespace details_utilities {
+
+    template<typename elementT> inline bool is_any_of_nonconstexpr(const elementT &elem, initializer_list<elementT> init)
+      {
+        auto ptr = init.begin();
+        for(;;) {
+          if(ptr == init.end()) {
+            return false;
+          }
+          if(*ptr == elem) {
+            break;
+          }
+          ++ptr;
+        }
+        return true;
       }
-      if(*ptr == elem) {
-        break;
-      }
-      ++ptr;
+
     }
-    return true;
+
+template<typename elementT> constexpr bool is_any_of(const elementT &elem, initializer_list<elementT> init)
+  {
+    return details_utilities::is_any_of_nonconstexpr(elem, init);
   }
 
 template<typename containerT, typename functorT, typename ...paramsT> void for_each(containerT &cont, functorT &&func, const paramsT &...params)
