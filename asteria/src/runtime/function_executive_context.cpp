@@ -30,7 +30,7 @@ Function_Executive_Context::~Function_Executive_Context()
         if(ROCKET_EXPECT(args.empty())) {
           return zvarg;
         }
-        return RefCnt_Object<Variadic_Arguer>(zvarg.get(), std::move(args));
+        return RefCnt_Object<Abstract_Function>(Variadic_Arguer(zvarg.get(), std::move(args)));
       }
 
     }

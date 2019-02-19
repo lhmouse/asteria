@@ -14,60 +14,66 @@ template<typename elementT> class refcnt_object
 
   public:
     using element_type  = elementT;
-    using pointer       = elementT *;
+    using pointer       = typename refcnt_ptr<element_type>::pointer;
 
   private:
-    refcnt_ptr<element_type> m_owns;
-    pointer m_rptr;
+    refcnt_ptr<element_type> m_ptr;
 
   public:
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)> constexpr refcnt_object(reference_wrapper<yelementT> ref) noexcept
-      : m_owns(),
-        m_rptr(::std::addressof(ref.get()))
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
+                                                             typename decay<yelementT>::type>::value)> explicit refcnt_object(yelementT &&yelem)
+      : m_ptr(noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem)))
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, typename decay<yelementT>::type>::value)> explicit refcnt_object(yelementT &&yelem)
-      : m_owns(noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem))),
-        m_rptr(this->m_owns.get())
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
+                                                             yelementT>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
+      : m_ptr(other.m_ptr)
       {
       }
-    template<typename firstT, typename ...restT, ROCKET_ENABLE_IF(is_constructible<element_type, firstT &&, restT &&...>::value)> refcnt_object(firstT &&first, restT &&...rest)
-      : m_owns(noadl::make_refcnt<element_type>(::std::forward<firstT>(first), ::std::forward<restT>(rest)...)),
-        m_rptr(this->m_owns.get())
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
+                                                             yelementT>::value)> refcnt_object(refcnt_object<yelementT> &&other) noexcept
+      : m_ptr(::std::move(other.m_ptr))
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
-      : m_owns(other.m_owns),
-        m_rptr(other.m_rptr)
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, typename decay<yelementT>::type>::value)> refcnt_object & operator=(yelementT &&yelem)
       {
+        this->m_ptr = noadl::make_refcnt<typename decay<yelementT>::type>(::std::forward<yelementT>(yelem));
+        return *this;
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type, yelementT>::value)> refcnt_object(refcnt_object<yelementT> &&other) noexcept
-      : m_owns(::std::move(other.m_owns)),
-        m_rptr(::std::move(other.m_rptr))
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
+                                                             yelementT>::value)> refcnt_object & operator=(const refcnt_object<yelementT> &other) noexcept
       {
+        this->m_ptr = other.m_ptr;
+        return *this;
+      }
+    template<typename yelementT, ROCKET_ENABLE_IF(is_base_of<element_type,
+                                                             yelementT>::value)> refcnt_object & operator=(refcnt_object<yelementT> &&other) noexcept
+      {
+        this->m_ptr = ::std::move(other.m_ptr);
+        return *this;
       }
 
   public:
     bool unique() const noexcept
       {
-        return this->m_owns.unique();
+        return this->m_ptr.unique();
       }
     long use_count() const noexcept
       {
-        return this->m_owns.use_count();
+        return this->m_ptr.use_count();
       }
 
     constexpr const element_type & get() const noexcept
       {
-        return *(this->m_rptr);
+        return *(this->m_ptr);
       }
     element_type & mut() noexcept
       {
-        return *(this->m_rptr);
+        return *(this->m_ptr);
       }
     constexpr pointer ptr() const noexcept
       {
-        return this->m_rptr;
+        return this->m_ptr;
       }
 
     constexpr const element_type & operator*() const noexcept

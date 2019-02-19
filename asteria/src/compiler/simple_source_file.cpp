@@ -63,9 +63,12 @@ void Simple_Source_File::clear() noexcept
 
 Reference Simple_Source_File::execute(const Global_Context &global, CoW_Vector<Reference> &&args) const
   {
+    // Create absent arguments.
+    RefCnt_Object<Variadic_Arguer> zvarg(Variadic_Arguer(Source_Location(this->m_file, 0), rocket::sref("<file scope>")));
+    CoW_Vector<PreHashed_String> params;
+    // Call the function.
     Reference self;
-    Variadic_Arguer zvarg(Source_Location(this->m_file, 0), rocket::sref("<file scope>"));
-    this->m_code.execute_as_function(self, std::ref(zvarg), { } /* no parameters */, global, std::move(args));
+    this->m_code.execute_as_function(self, std::move(zvarg), std::move(params), global, std::move(args));
     return self;
   }
 
