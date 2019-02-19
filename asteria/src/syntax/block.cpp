@@ -81,7 +81,7 @@ void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic
     case status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        self_io = Reference_Root::S_null();
+        self_io = Reference_Root::S_undefined();
         // Fallthough.
     case status_return:
         // Return the reference in `self_io`.

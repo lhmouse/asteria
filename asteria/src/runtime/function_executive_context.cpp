@@ -48,7 +48,7 @@ void Function_Executive_Context::do_set_arguments(const RefCnt_Object<Variadic_A
       const auto index = static_cast<std::size_t>(&param - params.data());
       if(ROCKET_EXPECT(index >= args.size())) {
         // There is no argument for this parameter.
-        this->open_named_reference(param) = Reference_Root::S_null();
+        this->open_named_reference(param) = Reference_Root::S_undefined();
         continue;
       }
       this->open_named_reference(param) = std::move(args.mut(index));
