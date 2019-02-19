@@ -364,11 +364,11 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
 
     }
 
-template<typename containerT, typename callbackT> constexpr void for_each(containerT &&cont, callbackT &&call)
+template<typename containerT, typename callbackT> inline void for_each(containerT &&cont, callbackT &&call)
   {
     return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
   }
-template<typename elementT, typename callbackT> constexpr void for_each(initializer_list<elementT> init, callbackT &&call)
+template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&call)
   {
     return details_utilities::for_each_nonconstexpr(::std::move(init), ::std::forward<callbackT>(call));
   }
