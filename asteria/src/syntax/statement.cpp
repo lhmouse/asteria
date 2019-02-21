@@ -301,7 +301,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         nos << alt.name << "("
             << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
             <<")";
-        RefCnt_Object<Instantiated_Function> closure(alt.body.instantiate_function(alt.sloc, nos.extract_string(), alt.params, global, ctx_io));
+        auto closure = alt.body.instantiate_function(alt.sloc, nos.extract_string(), alt.params, global, ctx_io);
         ASTERIA_DEBUG_LOG("Creating named function: ", closure.get());
         var->reset(D_function(std::move(closure)), true);
         return Block::status_next;

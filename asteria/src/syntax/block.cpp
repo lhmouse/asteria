@@ -105,12 +105,12 @@ void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic
     }
   }
 
-Instantiated_Function Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
+RefCnt_Object<Instantiated_Function> Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
   {
     Function_Analytic_Context ctx_next(&ctx, params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Instantiated_Function(sloc, name, params, std::move(body_bnd));
+    return RefCnt_Object<Instantiated_Function>(sloc, name, params, std::move(body_bnd));
   }
 
 }

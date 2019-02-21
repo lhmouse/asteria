@@ -327,7 +327,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
                                       Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
       {
         // Instantiate the closure function.
-        RefCnt_Object<Instantiated_Function> closure(alt.body.instantiate_function(alt.sloc, rocket::sref("<closure function>"), alt.params, global, ctx));
+        auto closure = alt.body.instantiate_function(alt.sloc, rocket::sref("<closure function>"), alt.params, global, ctx);
         ASTERIA_DEBUG_LOG("Creating closure function: ", closure.get());
         Reference_Root::S_temporary ref_c = { D_function(std::move(closure)) };
         stack_io.push(std::move(ref_c));
