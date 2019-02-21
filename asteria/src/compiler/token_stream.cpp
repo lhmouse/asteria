@@ -11,7 +11,7 @@ namespace Asteria {
 
     namespace {
 
-    class Source_Reader
+    class Line_Reader
       {
       private:
         std::reference_wrapper<std::istream> m_strm;
@@ -22,7 +22,7 @@ namespace Asteria {
         std::size_t m_offset;
 
       public:
-        Source_Reader(std::istream &xstrm, const CoW_String &xfile)
+        Line_Reader(std::istream &xstrm, const CoW_String &xfile)
           : m_strm(xstrm), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
@@ -34,9 +34,9 @@ namespace Asteria {
             }
           }
 
-        Source_Reader(const Source_Reader &)
+        Line_Reader(const Line_Reader &)
           = delete;
-        Source_Reader & operator=(const Source_Reader &)
+        Line_Reader & operator=(const Line_Reader &)
           = delete;
 
       public:
@@ -103,7 +103,7 @@ namespace Asteria {
           }
       };
 
-    inline Parser_Error do_make_parser_error(const Source_Reader &reader, std::size_t length, Parser_Error::Code code)
+    inline Parser_Error do_make_parser_error(const Line_Reader &reader, std::size_t length, Parser_Error::Code code)
       {
         return Parser_Error(reader.line(), reader.offset(), length, code);
       }
@@ -138,7 +138,7 @@ namespace Asteria {
           {
             return this->m_line != 0;
           }
-        Tack & set(const Source_Reader &reader, std::size_t xlength) noexcept
+        Tack & set(const Line_Reader &reader, std::size_t xlength) noexcept
           {
             this->m_line = reader.line();
             this->m_offset = reader.offset();
@@ -152,7 +152,7 @@ namespace Asteria {
           }
       };
 
-    char32_t do_get_utf8_code_point(Source_Reader &reader)
+    char32_t do_get_utf8_code_point(Line_Reader &reader)
       {
         // Read the first byte.
         char32_t code_point = reader.peek() & 0xFF;
@@ -206,7 +206,7 @@ namespace Asteria {
         return code_point;
       }
 
-    template<typename TokenT> void do_push_token(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, std::size_t length, TokenT &&token_c)
+    template<typename TokenT> void do_push_token(CoW_Vector<Token> &seq_out, Line_Reader &reader_io, std::size_t length, TokenT &&token_c)
       {
         seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
         reader_io.consume(length);
@@ -228,7 +228,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_identifier_or_keyword(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, bool keyword_as_identifier)
+    bool do_accept_identifier_or_keyword(CoW_Vector<Token> &seq_out, Line_Reader &reader_io, bool keyword_as_identifier)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -308,7 +308,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_punctuator(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_punctuator(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         const auto bptr = reader_io.data_avail();
@@ -405,7 +405,7 @@ namespace Asteria {
         ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
       }
 
-    bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -565,7 +565,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_noescape_string_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io)
+    bool do_accept_noescape_string_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
       {
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
@@ -590,7 +590,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(CoW_Vector<Token> &seq_out, Source_Reader &reader_io, bool integer_as_real)
+    bool do_accept_numeric_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io, bool integer_as_real)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -866,7 +866,7 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, const Pa
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Source_Reader reader(cstrm_io, file);
+    Line_Reader reader(cstrm_io, file);
     while(reader.advance_line()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
