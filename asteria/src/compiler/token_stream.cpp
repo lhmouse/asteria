@@ -405,179 +405,168 @@ namespace Asteria {
         ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
       }
 
-    bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
+    bool do_accept_string_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io, char head, bool escapable)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+        // noescape-string-literal ::=
+        //   PCRE('[^']*?')
         const auto bptr = reader_io.data_avail();
-        if(bptr[0] != '\"') {
+        if(bptr[0] != head) {
           return false;
         }
-        // Get a string literal with regard to escape sequences.
+        // Get a string literal.
         std::size_t tlen = 1;
         CoW_String value;
-        for(;;) {
-          const auto qavail = reader_io.size_avail() - tlen;
-          if(qavail == 0) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
-          }
-          auto next = bptr[tlen];
-          ++tlen;
-          if(next == '\"') {
-            // The end of this string is encountered. Finish.
-            break;
-          }
-          if(next != '\\') {
-            // This character does not start an escape sequence. Copy it as-is.
-            value.push_back(next);
-            continue;
-          }
-          // Translate this escape sequence.
-          if(qavail < 2) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
-          }
-          next = bptr[tlen];
-          ++tlen;
-          unsigned xcnt = 0;
-          switch(next) {
-          case '\'':
-          case '\"':
-          case '\\':
-          case '?':
-            {
+        if(escapable) {
+          // Translate escape sequences as needed.
+          for(;;) {
+            const auto qavail = reader_io.size_avail() - tlen;
+            if(qavail == 0) {
+              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
+            }
+            auto next = bptr[tlen];
+            ++tlen;
+            if(next == head) {
+              // The end of this string is encountered. Finish.
+              break;
+            }
+            if(next != '\\') {
+              // This character does not start an escape sequence. Copy it as-is.
               value.push_back(next);
-              break;
+              continue;
             }
-          case 'a':
-            {
-              value.push_back('\a');
-              break;
+            // Translate this escape sequence.
+            if(qavail < 2) {
+              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
             }
-          case 'b':
-            {
-              value.push_back('\b');
-              break;
-            }
-          case 'f':
-            {
-              value.push_back('\f');
-              break;
-            }
-          case 'n':
-            {
-              value.push_back('\n');
-              break;
-            }
-          case 'r':
-            {
-              value.push_back('\r');
-              break;
-            }
-          case 't':
-            {
-              value.push_back('\t');
-              break;
-            }
-          case 'v':
-            {
-              value.push_back('\v');
-              break;
-            }
-          case '0':
-            {
-              value.push_back('\0');
-              break;
-            }
-          case 'Z':
-            {
-              value.push_back('\x1A');
-              break;
-            }
-          case 'e':
-            {
-              value.push_back('\x1B');
-              break;
-            }
-          case 'U':
-            {
-              xcnt += 2;  // 6: "\U123456"
-              // Fallthrough.
-          case 'u':
-              xcnt += 2;  // 4: "\u1234"
-              // Fallthrough.
-          case 'x':
-              xcnt += 2;  // 2: "\x12"
-              // Read hex digits.
-              if(qavail < xcnt + 2) {
-                throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
+            next = bptr[tlen];
+            ++tlen;
+            unsigned xcnt = 0;
+            switch(next) {
+            case '\'':
+            case '\"':
+            case '\\':
+            case '?':
+              {
+                value.push_back(next);
+                break;
               }
-              char32_t code_point = 0;
-              for(auto i = tlen; i < tlen + xcnt; ++i) {
-                static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-                const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
-                if(!dptr) {
-                  throw do_make_parser_error(reader_io, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
+            case 'a':
+              {
+                value.push_back('\a');
+                break;
+              }
+            case 'b':
+              {
+                value.push_back('\b');
+                break;
+              }
+            case 'f':
+              {
+                value.push_back('\f');
+                break;
+              }
+            case 'n':
+              {
+                value.push_back('\n');
+                break;
+              }
+            case 'r':
+              {
+                value.push_back('\r');
+                break;
+              }
+            case 't':
+              {
+                value.push_back('\t');
+                break;
+              }
+            case 'v':
+              {
+                value.push_back('\v');
+                break;
+              }
+            case '0':
+              {
+                value.push_back('\0');
+                break;
+              }
+            case 'Z':
+              {
+                value.push_back('\x1A');
+                break;
+              }
+            case 'e':
+              {
+                value.push_back('\x1B');
+                break;
+              }
+            case 'U':
+              {
+                xcnt += 2;  // 6: "\U123456"
+                // Fallthrough.
+            case 'u':
+                xcnt += 2;  // 4: "\u1234"
+                // Fallthrough.
+            case 'x':
+                xcnt += 2;  // 2: "\x12"
+                // Read hex digits.
+                if(qavail < xcnt + 2) {
+                  throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
                 }
-                const auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
-                code_point = code_point * 16 + dvalue;
-              }
-              if((0xD800 <= code_point) && (code_point < 0xE000)) {
-                // Surrogates are not allowed.
-                throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
-              }
-              if(code_point >= 0x110000) {
-                // Code point value is too large.
-                throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
-              }
-              // Encode it.
-              const auto encode_one = [&](unsigned shift, unsigned mask)
-                {
-                  value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask)));
-                };
-              if(code_point < 0x80) {
-                encode_one( 0, 0xFF);
-                break;
-              }
-              if(code_point < 0x800) {
-                encode_one( 6, 0x1F);
-                encode_one( 0, 0x3F);
-                break;
-              }
-              if(code_point < 0x10000) {
-                encode_one(12, 0x0F);
+                char32_t code_point = 0;
+                for(auto i = tlen; i < tlen + xcnt; ++i) {
+                  static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
+                  const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
+                  if(!dptr) {
+                    throw do_make_parser_error(reader_io, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
+                  }
+                  const auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
+                  code_point = code_point * 16 + dvalue;
+                }
+                if((0xD800 <= code_point) && (code_point < 0xE000)) {
+                  // Surrogates are not allowed.
+                  throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
+                }
+                if(code_point >= 0x110000) {
+                  // Code point value is too large.
+                  throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
+                }
+                // Encode it.
+                const auto encode_one = [&](unsigned shift, unsigned mask)
+                  {
+                    value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask)));
+                  };
+                if(code_point < 0x80) {
+                  encode_one( 0, 0xFF);
+                  break;
+                }
+                if(code_point < 0x800) {
+                  encode_one( 6, 0x1F);
+                  encode_one( 0, 0x3F);
+                  break;
+                }
+                if(code_point < 0x10000) {
+                  encode_one(12, 0x0F);
+                  encode_one( 6, 0x3F);
+                  encode_one( 0, 0x3F);
+                  break;
+                }
+                encode_one(18, 0x07);
+                encode_one(12, 0x3F);
                 encode_one( 6, 0x3F);
                 encode_one( 0, 0x3F);
                 break;
               }
-              encode_one(18, 0x07);
-              encode_one(12, 0x3F);
-              encode_one( 6, 0x3F);
-              encode_one( 0, 0x3F);
-              break;
+            default:
+              throw do_make_parser_error(reader_io, tlen, Parser_Error::code_escape_sequence_unknown);
             }
-          default:
-            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_escape_sequence_unknown);
+            tlen += xcnt;
           }
-          tlen += xcnt;
-        }
-        Token::S_string_literal token_c = { std::move(value) };
-        do_push_token(seq_out, reader_io, tlen, std::move(token_c));
-        return true;
-      }
-
-    bool do_accept_noescape_string_literal(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
-      {
-        // noescape-string-literal ::=
-        //   PCRE('[^']*?')
-        const auto bptr = reader_io.data_avail();
-        if(bptr[0] != '\'') {
-          return false;
-        }
-        // Escape sequences do not have special meanings inside single quotation marks.
-        std::size_t tlen = 1;
-        CoW_String value;
-        {
-          auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, '\'');
+        } else {
+          // Copy escape sequences verbatim.
+          auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, head);
           if(!tptr) {
             throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
           }
@@ -926,8 +915,8 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, const Pa
         }
         bool token_got = do_accept_identifier_or_keyword(seq, reader, options.keyword_as_identifier) ||
                          do_accept_punctuator(seq, reader) ||
-                         do_accept_string_literal(seq, reader) ||
-                         do_accept_noescape_string_literal(seq, reader) ||
+                         do_accept_string_literal(seq, reader, '\"', true) ||
+                         do_accept_string_literal(seq, reader, '\'', options.single_quotes_as_double) ||
                          do_accept_numeric_literal(seq, reader, options.integer_as_real);
         if(!token_got) {
           ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
