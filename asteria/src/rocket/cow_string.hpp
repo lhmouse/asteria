@@ -144,7 +144,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       private:
         void do_reset(storage_pointer ptr_new) noexcept
           {
-            const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }
@@ -159,7 +159,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             }
             // If it has been decremented to zero, deallocate the block.
             auto st_alloc = storage_allocator(ptr->alloc);
-            const auto nblk = ptr->nblk;
+            auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
@@ -185,7 +185,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         bool unique() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return false;
             }
@@ -193,33 +193,33 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           }
         long use_count() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
-            const auto nref = ptr->nref.get();
+            auto nref = ptr->nref.get();
             ROCKET_ASSERT(nref > 0);
             return nref;
           }
         size_type capacity() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
-            const auto cap = storage::max_nchar_for_nblk(ptr->nblk);
+            auto cap = storage::max_nchar_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cap > 0);
             return cap;
           }
         size_type max_size() const noexcept
           {
             auto st_alloc = storage_allocator(this->as_allocator());
-            const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
+            auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
             return storage::max_nchar_for_nblk(max_nblk / 2);
           }
         size_type check_size_add(size_type base, size_type add) const
           {
-            const auto cap_max = this->max_size();
+            auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
               this->do_throw_size_overflow(base, add);
@@ -228,13 +228,13 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           }
         size_type round_up_capacity(size_type res_arg) const
           {
-            const auto cap = this->check_size_add(0, res_arg);
-            const auto nblk = storage::min_nblk_for_nchar(cap);
+            auto cap = this->check_size_add(0, res_arg);
+            auto nblk = storage::min_nblk_for_nchar(cap);
             return storage::max_nchar_for_nblk(nblk);
           }
         const value_type * data() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return nullptr;
             }
@@ -247,11 +247,11 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
               this->deallocate();
               return nullptr;
             }
-            const auto cap = this->check_size_add(0, res_arg);
+            auto cap = this->check_size_add(0, res_arg);
             // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
-            const auto nblk = storage::min_nblk_for_nchar(cap);
+            auto nblk = storage::min_nblk_for_nchar(cap);
             auto st_alloc = storage_allocator(this->as_allocator());
-            const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
+            auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
@@ -279,7 +279,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         void share_with(const storage_handle &other) noexcept
           {
-            const auto ptr = other.m_ptr;
+            auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
               ptr->nref.increment();
@@ -288,7 +288,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           }
         void share_with(storage_handle &&other) noexcept
           {
-            const auto ptr = other.m_ptr;
+            auto ptr = other.m_ptr;
             if(ptr) {
               // Detach the block.
               other.m_ptr = storage_pointer();
@@ -311,7 +311,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         value_type * mut_data_unchecked() noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return nullptr;
             }
@@ -357,9 +357,9 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       private:
         value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
           {
-            const auto ref = this->m_ref;
+            auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto dist = static_cast<size_t>(ptr - ref->data());
+            auto dist = static_cast<size_t>(ptr - ref->data());
             ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
             return ptr;
@@ -373,7 +373,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         value_type * tell() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
             return ptr;
           }
         value_type * tell_owned_by(const parent_type *ref) const noexcept
@@ -389,19 +389,19 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
         reference operator*() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
             ROCKET_ASSERT(ptr);
             return *ptr;
           }
         pointer operator->() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
             ROCKET_ASSERT(ptr);
             return ptr;
           }
         reference operator[](difference_type off) const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
             ROCKET_ASSERT(ptr);
             return *ptr;
           }
@@ -527,14 +527,14 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         static int relation(const char_type *s1, size_type n1, const char_type *s2, size_type n2) noexcept
           {
             if(n1 < n2) {
-              const int res = traits_type::compare(s1, s2, n1);
+              int res = traits_type::compare(s1, s2, n1);
               if(res != 0) {
                 return res;
               }
               return -1;
             }
             if(n1 > n2) {
-              const int res = traits_type::compare(s1, s2, n2);
+              int res = traits_type::compare(s1, s2, n2);
               if(res != 0) {
                 return res;
               }
@@ -605,7 +605,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
          basic_hasher & append(const charT *s) noexcept
            {
              for(;;) {
-               const auto &ch = *s;
+               auto &ch = *s;
                if(traitsT::eq(ch, charT())) {
                  break;
                }
@@ -616,7 +616,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
            }
          size_t finish() noexcept
            {
-             const auto r = this->do_finish();
+             auto r = this->do_finish();
              this->do_init();
              return r;
            }
@@ -763,7 +763,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         ROCKET_ASSERT(len_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_len);
         ROCKET_ASSERT(len_two <= this->m_len - off_two);
-        const auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
+        auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
         if(!ptr) {
           // The storage has been deallocated.
           this->m_ptr = ::std::addressof(null_char);
@@ -778,7 +778,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     void do_set_length(size_type len) noexcept
       {
         ROCKET_ASSERT(len <= this->m_sth.capacity());
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         if(ptr) {
           ROCKET_ASSERT(ptr == this->m_ptr);
           traits_type::assign(ptr[len], value_type());
@@ -799,7 +799,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // Reallocate more storage as needed, without shrinking.
     void do_reserve_more(size_type cap_add)
       {
-        const auto len = this->size();
+        auto len = this->size();
         auto cap = this->m_sth.check_size_add(len, cap_add);
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
@@ -821,7 +821,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // Ensure `tpos` is in `[0, size()]` and return `min(tn, size() - tpos)`.
     ROCKET_PURE_FUNCTION size_type do_clamp_substr(size_type tpos, size_type tn) const
       {
-        const auto tlen = this->size();
+        auto tlen = this->size();
         if(tpos > tlen) {
           this->do_throw_subscript_out_of_range(tpos);
         }
@@ -830,13 +830,13 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
 
     template<typename ...paramsT> value_type * do_replace_no_bound_check(size_type tpos, size_type tn, paramsT &&...params)
       {
-        const auto len_old = this->size();
+        auto len_old = this->size();
         ROCKET_ASSERT(tpos <= len_old);
         details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
-        const auto len_add = this->size() - len_old;
-        const auto len_sfx = len_old - (tpos + tn);
+        auto len_add = this->size() - len_old;
+        auto len_sfx = len_old - (tpos + tn);
         this->do_reserve_more(len_sfx);
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::copy(ptr + len_old + len_add, ptr + tpos + tn, len_sfx);
         traits_type::move(ptr + tpos, ptr + len_old, len_add + len_sfx);
         this->do_set_length(len_old + len_add - tn);
@@ -844,14 +844,14 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
       {
-        const auto len_old = this->size();
+        auto len_old = this->size();
         ROCKET_ASSERT(tpos <= len_old);
         ROCKET_ASSERT(tn <= len_old - tpos);
         if(!this->unique()) {
-          const auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
+          auto ptr = this->do_reallocate(tpos, tpos + tn, len_old - (tpos + tn), len_old);
           return ptr + tpos;
         }
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::move(ptr + tpos, ptr + tpos + tn, len_old - (tpos + tn));
         this->do_set_length(len_old - tn);
         return ptr + tpos;
@@ -862,7 +862,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       {
         auto cur = first;
         for(;;) {
-          const auto ptr = this->data() + cur;
+          auto ptr = this->data() + cur;
           if(pred(ptr)) {
             ROCKET_ASSERT(cur != npos);
             break;
@@ -877,11 +877,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     template<typename predT> size_type do_find_forwards_if(size_type from, size_type n, predT pred) const
       {
-        const auto len = this->size();
+        auto len = this->size();
         if(len < n) {
           return npos;
         }
-        const auto rlen = len - n;
+        auto rlen = len - n;
         if(from > rlen) {
           return npos;
         }
@@ -889,11 +889,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     template<typename predT> size_type do_find_backwards_if(size_type to, size_type n, predT pred) const
       {
-        const auto len = this->size();
+        auto len = this->size();
         if(len < n) {
           return npos;
         }
-        const auto rlen = len - n;
+        auto rlen = len - n;
         if(to > rlen) {
           return this->do_xfind_if(rlen, 0, -1, ::std::move(pred));
         }
@@ -981,7 +981,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
 
     void resize(size_type n, value_type ch = value_type())
       {
-        const auto len_old = this->size();
+        auto len_old = this->size();
         if(len_old == n) {
           return;
         }
@@ -998,8 +998,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     void reserve(size_type res_arg)
       {
-        const auto len = this->size();
-        const auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
+        auto len = this->size();
+        auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
         // If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
           return;
@@ -1009,8 +1009,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     void shrink_to_fit()
       {
-        const auto len = this->size();
-        const auto cap_min = this->m_sth.round_up_capacity(len);
+        auto len = this->size();
+        auto cap_min = this->m_sth.round_up_capacity(len);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min)) {
           return;
@@ -1039,7 +1039,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // 24.3.2.5, element access
     const_reference at(size_type pos) const
       {
-        const auto len = this->size();
+        auto len = this->size();
         if(pos >= len) {
           this->do_throw_subscript_out_of_range(pos);
         }
@@ -1047,20 +1047,20 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       }
     const_reference operator[](size_type pos) const noexcept
       {
-        const auto len = this->size();
+        auto len = this->size();
         // Reading from the character at `size()` is permitted.
         ROCKET_ASSERT(pos <= len);
         return this->c_str()[pos];
       }
     const_reference front() const noexcept
       {
-        const auto len = this->size();
+        auto len = this->size();
         ROCKET_ASSERT(len > 0);
         return this->data()[0];
       }
     const_reference back() const noexcept
       {
-        const auto len = this->size();
+        auto len = this->size();
         ROCKET_ASSERT(len > 0);
         return this->data()[len - 1];
       }
@@ -1069,7 +1069,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. This is a non-standard extension.
     reference mut(size_type pos)
       {
-        const auto len = this->size();
+        auto len = this->size();
         if(pos >= len) {
           this->do_throw_subscript_out_of_range(pos);
         }
@@ -1078,14 +1078,14 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. This is a non-standard extension.
     reference mut_front()
       {
-        const auto len = this->size();
+        auto len = this->size();
         ROCKET_ASSERT(len > 0);
         return this->mut_data()[0];
       }
     // N.B. This is a non-standard extension.
     reference mut_back()
       {
-        const auto len = this->size();
+        auto len = this->size();
         ROCKET_ASSERT(len > 0);
         return this->mut_data()[len - 1];
       }
@@ -1133,11 +1133,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         if(n == 0) {
           return *this;
         }
-        const auto len_old = this->size();
+        auto len_old = this->size();
         // Check for overlapped strings before `do_reserve_more()`.
-        const auto srpos = static_cast<uintptr_t>(s - this->data());
+        auto srpos = static_cast<uintptr_t>(s - this->data());
         this->do_reserve_more(n);
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         if(srpos < len_old) {
           traits_type::move(ptr + len_old, ptr + srpos, n);
           this->do_set_length(len_old + n);
@@ -1156,9 +1156,9 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         if(n == 0) {
           return *this;
         }
-        const auto len_old = this->size();
+        auto len_old = this->size();
         this->do_reserve_more(n);
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::assign(ptr + len_old, n, ch);
         this->do_set_length(len_old + n);
         return *this;
@@ -1189,9 +1189,9 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. The return type is a non-standard extension.
     basic_cow_string & push_back(value_type ch)
       {
-        const auto len_old = this->size();
+        auto len_old = this->size();
         this->do_reserve_more(1);
-        const auto ptr = this->m_sth.mut_data_unchecked();
+        auto ptr = this->m_sth.mut_data_unchecked();
         traits_type::assign(ptr[len_old], ch);
         this->do_set_length(len_old + 1);
         return *this;
@@ -1205,16 +1205,16 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
-        const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_erase_no_bound_check(tpos, 1);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
@@ -1224,7 +1224,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         if(n == 0) {
           return *this;
         }
-        const auto len_old = this->size();
+        auto len_old = this->size();
         ROCKET_ASSERT(n <= len_old);
         if(!this->unique()) {
           this->do_reallocate(0, 0, len_old - n, len_old);
@@ -1317,46 +1317,46 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. This is a non-standard extension.
     iterator insert(const_iterator tins, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, other, pos, n);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, other, pos, n);
         return iterator(this, ptr);
       }
     // N.B. This is a non-standard extension.
     iterator insert(const_iterator tins, const value_type *s, size_type n)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s, n);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s, n);
         return iterator(this, ptr);
       }
     // N.B. This is a non-standard extension.
     iterator insert(const_iterator tins, const value_type *s)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, s);
         return iterator(this, ptr);
       }
     iterator insert(const_iterator tins, size_type n, value_type ch)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, n, ch);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, n, ch);
         return iterator(this, ptr);
       }
     iterator insert(const_iterator tins, initializer_list<value_type> init)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, init);
         return iterator(this, ptr);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, ::std::move(first), ::std::move(last));
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::append, ::std::move(first), ::std::move(last));
         return iterator(this, ptr);
       }
     iterator insert(const_iterator tins, value_type ch)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
-        const auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::push_back, ch);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this) - this->data());
+        auto ptr = this->do_replace_no_bound_check(tpos, 0, details_cow_string::push_back, ch);
         return iterator(this, ptr);
       }
 
@@ -1383,58 +1383,58 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     // N.B. The last two parameters are non-standard extensions.
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, const basic_cow_string &other, size_type pos = 0, size_type n = npos)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, other, pos, n);
         return *this;
       }
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, const value_type *s, size_type n)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, s, n);
         return *this;
       }
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, const value_type *s)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, s);
         return *this;
       }
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, size_type n, value_type ch)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, n, ch);
         return *this;
       }
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, initializer_list<value_type> init)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, init);
         return *this;
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, inputT first, inputT last)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::append, ::std::move(first), ::std::move(last));
         return *this;
       }
     // N.B. This is a non-standard extension.
     basic_cow_string & replace(const_iterator tfirst, const_iterator tlast, value_type ch)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this) - tfirst.tell());
         this->do_replace_no_bound_check(tpos, tn, details_cow_string::push_back, ch);
         return *this;
       }
 
     size_type copy(value_type *s, size_type tn, size_type tpos = 0) const
       {
-        const auto rlen = this->do_clamp_substr(tpos, tn);
+        auto rlen = this->do_clamp_substr(tpos, tn);
         traits_type::copy(s, this->data() + tpos, rlen);
         return rlen;
       }
@@ -1500,11 +1500,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         if(from >= this->size()) {
           return npos;
         }
-        const auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
+        auto ptr = traits_type::find(this->data() + from, this->size() - from, ch);
         if(!ptr) {
           return npos;
         }
-        const auto tpos = static_cast<size_type>(ptr - this->data());
+        auto tpos = static_cast<size_type>(ptr - this->data());
         ROCKET_ASSERT(tpos < npos);
         return tpos;
       }
@@ -2009,8 +2009,8 @@ template<typename charT, typename traitsT, typename allocatorT> basic_istream<ch
     // Clear the contents of `str`. The C++ standard mandates use of `.erase()` rather than `.clear()`.
     str.erase();
     // Copy stream parameters.
-    const auto width = is.width();
-    const auto sloc = is.getloc();
+    auto width = is.width();
+    auto sloc = is.getloc();
     // We need to set stream state bits outside the `try` block.
     auto state = ios_base::goodbit;
     try {
@@ -2021,12 +2021,12 @@ template<typename charT, typename traitsT, typename allocatorT> basic_istream<ch
           state |= ios_base::eofbit;
           break;
         }
-        const auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
+        auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
                                         : (str.size() >= str.max_size());
         if(enough) {
           break;
         }
-        const auto ch = traitsT::to_char_type(ich);
+        auto ch = traitsT::to_char_type(ich);
         if(::std::isspace<charT>(ch, sloc)) {
           break;
         }
@@ -2058,10 +2058,10 @@ template<typename charT, typename traitsT, typename allocatorT> basic_ostream<ch
       return os;
     }
     // Copy stream parameters.
-    const auto width = os.width();
-    const auto fill = os.fill();
-    const auto left = (os.flags() & ios_base::adjustfield) == ios_base::left;
-    const auto len = static_cast<streamsize>(str.size());
+    auto width = os.width();
+    auto fill = os.fill();
+    auto left = (os.flags() & ios_base::adjustfield) == ios_base::left;
+    auto len = static_cast<streamsize>(str.size());
     // We need to set stream state bits outside the `try` block.
     auto state = ios_base::goodbit;
     try {
@@ -2072,7 +2072,7 @@ template<typename charT, typename traitsT, typename allocatorT> basic_ostream<ch
         if(rem == 0) {
           break;
         }
-        const auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
+        auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
                                                          : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
         if(written == 0) {
           state |= ios_base::failbit;
@@ -2114,7 +2114,7 @@ template<typename charT, typename traitsT, typename allocatorT> basic_istream<ch
           state |= ios_base::eofbit;
           break;
         }
-        const auto ch = traitsT::to_char_type(ich);
+        auto ch = traitsT::to_char_type(ich);
         if(traitsT::eq(ch, delim)) {
           is.rdbuf()->sbumpc();
           break;

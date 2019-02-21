@@ -77,8 +77,8 @@ Collector * Collector::do_collect_once()
     if(!sentry) {
       return nullptr;
     }
-    const auto output = this->m_output_opt;
-    const auto tied = this->m_tied_opt;
+    auto output = this->m_output_opt;
+    auto tied = this->m_tied_opt;
     bool collect_tied = false;
     // The algorithm here is basically described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
@@ -125,7 +125,7 @@ Collector * Collector::do_collect_once()
           root->add_gcref(1);
           ROCKET_ASSERT(root->get_gcref() <= root->use_count());
           // Drop indirect references.
-          const auto value_nref = root->get_value().use_count();
+          auto value_nref = root->get_value().use_count();
           switch(value_nref) {
           case 0:
             {

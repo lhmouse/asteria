@@ -42,10 +42,10 @@ Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx
       return status_next;
     }
     // Execute statements one by one.
-    const auto params = std::tie(ref_out, ctx_io, func, global);
+    auto params = std::tie(ref_out, ctx_io, func, global);
     auto cptr = this->m_cinsts.data();
     while(--count != 0) {
-      const auto status = (*cptr)(params);
+      auto status = (*cptr)(params);
       if(ROCKET_UNEXPECT(status != status_next)) {
         // Forward anything unexpected recursively.
         return status;
@@ -76,7 +76,7 @@ void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic
   {
     Function_Executive_Context ctx_next(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
-    const auto status = this->execute_in_place(self_io, ctx_next, zvarg->get_function_signature(), global);
+    auto status = this->execute_in_place(self_io, ctx_next, zvarg->get_function_signature(), global);
     switch(status) {
     case status_next:
       {

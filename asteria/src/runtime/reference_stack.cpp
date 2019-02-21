@@ -12,7 +12,7 @@ void Reference_Stack::do_switch_to_large()
     ROCKET_ASSERT(this->m_small.size() == this->m_small.capacity());
     ROCKET_ASSERT(this->m_large.capacity() == 0);
     auto tptr = this->m_tptr;
-    const auto nelem = this->m_small.size();
+    auto nelem = this->m_small.size();
     // Note that this function has to provide strong exception safety guarantee.
     CoW_Vector<Reference> large;
     large.reserve(nelem * 2);

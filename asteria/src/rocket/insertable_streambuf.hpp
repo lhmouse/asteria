@@ -54,8 +54,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
       {
         if(this->gptr() != nullptr) {
           // Empty the get area. If there are any characters read from it, remove them from the internal buffer.
-          const auto n_got = static_cast<size_type>(this->gptr() - this->eback());
-          this->m_str.erase(0, n_got);
+          auto ngot = static_cast<size_type>(this->gptr() - this->eback());
+          this->m_str.erase(0, ngot);
           this->setg(nullptr, nullptr, nullptr);
         }
         return basic_streambuf<charT, traitsT>::sync();
@@ -65,10 +65,10 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
       {
         if(this->m_which & ios_base::in) {
           // Return the number of characters inside the internal buffer, minus those that have been read from it.
-          const auto n_total = this->m_str.size();
+          auto ntotal = this->m_str.size();
           // N.B. This will yield the correct result (zero) even when both pointers are null.
-          const auto n_got = static_cast<size_type>(this->gptr() - this->eback());
-          return static_cast<streamsize>(n_total - n_got);
+          auto ngot = static_cast<size_type>(this->gptr() - this->eback());
+          return static_cast<streamsize>(ntotal - ngot);
         } else {
           // Non-input stream buffers can't be read from.
           return 0;
@@ -80,9 +80,9 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
           // Tidy the get area.
           this->basic_insertable_streambuf::sync();
           // Read and discard characters from the internal buffer directly.
-          const auto n_got = (static_cast<unsigned long long>(n) <= this->m_str.size()) ? static_cast<size_type>(n) : this->m_str.size();
-          traits_type::copy(s, this->m_str.data(), n_got);
-          return static_cast<streamsize>(n_got);
+          auto ngot = (static_cast<unsigned long long>(n) <= this->m_str.size()) ? static_cast<size_type>(n) : this->m_str.size();
+          traits_type::copy(s, this->m_str.data(), ngot);
+          return static_cast<streamsize>(ngot);
         } else {
           // Non-input stream buffers can't be read from.
           return 0;
@@ -97,7 +97,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
           if(this->m_str.empty()) {
               return traits_type::eof();
           }
-          const auto gp = this->m_str.mut_data();
+          auto gp = this->m_str.mut_data();
           this->setg(gp, gp, gp + this->m_str.size());
           return traits_type::to_int_type(*gp);
         } else {
@@ -129,16 +129,16 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
           // Tidy the get area, as the internal buffer is subject to reallocation.
           this->basic_insertable_streambuf::sync();
           // Write the string provided as a single operation.
-          const auto n_put = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
+          auto nput = (static_cast<unsigned long long>(n) <= this->m_str.max_size()) ? static_cast<size_type>(n) : this->m_str.max_size();
           if(this->m_caret == npos) {
             // Append the string provided to the internal buffer.
-            this->m_str.insert(this->m_str.size(), s, n_put);
+            this->m_str.insert(this->m_str.size(), s, nput);
           } else {
             // Insert the string provided at the specified position of the internal buffer.
-            this->m_str.insert(this->m_caret, s, n_put);
-            this->m_caret += n_put;
+            this->m_str.insert(this->m_caret, s, nput);
+            this->m_caret += nput;
           }
-          return static_cast<streamsize>(n_put);
+          return static_cast<streamsize>(nput);
         } else {
           // Non-output stream buffers can't be written to.
           return 0;

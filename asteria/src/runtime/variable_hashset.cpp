@@ -19,8 +19,8 @@ Variable_HashSet::Bucket::operator bool () const noexcept
 
 void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcept
   {
-    const auto iprev = ipos->prev;
-    const auto inext = ipos;
+    auto iprev = ipos->prev;
+    auto inext = ipos;
     // Set up pointers.
     this->prev = iprev;
     prev->next = this;
@@ -30,8 +30,8 @@ void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcep
 
 void Variable_HashSet::Bucket::do_detach() noexcept
   {
-    const auto iprev = this->prev;
-    const auto inext = this->next;
+    auto iprev = this->prev;
+    auto inext = this->next;
     // Set up pointers.
     prev->next = inext;
     next->prev = iprev;
@@ -41,8 +41,8 @@ void Variable_HashSet::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Clear all buckets.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
       ROCKET_ASSERT(*bkt);
@@ -63,8 +63,8 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Clear the new table.
     pre->next = end;
     end->prev = pre;
@@ -82,8 +82,8 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
       auto &rbkt = stor.mut_back();
       if(ROCKET_UNEXPECT(rbkt)) {
         // Find a bucket for the new element.
-        const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
-        const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
+        auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
+        auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
@@ -99,8 +99,8 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
 void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
   {
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Check them.
     rocket::linear_probe(
       // Only probe non-erased buckets.
@@ -113,8 +113,8 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
           rbkt.do_detach();
           var.swap(rbkt.first);
           // Find a new bucket for it using linear probing.
-          const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-          const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
+          auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
@@ -131,11 +131,11 @@ bool Variable_HashSet::has(const RefCnt_Ptr<Variable> &var) const noexcept
       return false;
     }
     // Get table bounds.
-    const auto pre = this->m_stor.data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
-    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -151,8 +151,8 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) cons
       return;
     }
     // Get table bounds.
-    const auto pre = this->m_stor.data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Enumerate all buckets. The return value of `callback(bkt->first)` is ignored.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
       ROCKET_ASSERT(*bkt);
@@ -169,11 +169,11 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
       this->do_rehash(this->m_stor.size() * 2 | 97);
     }
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Find a bucket for the new element.
-    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(*bkt) {
@@ -194,11 +194,11 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
       return false;
     }
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
-    const auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    const auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -220,10 +220,10 @@ RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
       return nullptr;
     }
     // Get table bounds.
-    const auto pre = this->m_stor.mut_data();
-    const auto end = pre + (this->m_stor.size() - 1);
+    auto pre = this->m_stor.mut_data();
+    auto end = pre + (this->m_stor.size() - 1);
     // Get the first non-empty bucket.
-    const auto bkt = pre->next;
+    auto bkt = pre->next;
     if(bkt == end) {
       return nullptr;
     }

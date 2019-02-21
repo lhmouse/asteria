@@ -61,7 +61,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           }
         ~storage_handle()
           {
-            const auto ebase = this->m_ebase;
+            auto ebase = this->m_ebase;
             auto nrem = this->m_nelem;
             ROCKET_ASSERT(nrem <= capacityT);
             while(nrem != 0) {
@@ -106,7 +106,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
           }
         size_type check_size_add(size_type base, size_type add) const
           {
-            const auto cap_max = this->max_size();
+            auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
               this->do_throw_size_overflow(base, add);
@@ -138,7 +138,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
         template<typename ...paramsT> value_type * emplace_back_unchecked(paramsT &&...params)
           {
             ROCKET_ASSERT(this->size() < this->capacity());
-            const auto ebase = this->m_ebase;
+            auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
             allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
             this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
@@ -150,7 +150,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
             if(n == 0) {
               return;
             }
-            const auto ebase = this->m_ebase;
+            auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
             for(auto i = n; i != 0; --i) {
               this->m_nelem = static_cast<decltype(m_nelem)>(--nelem);
@@ -196,9 +196,9 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
       private:
         value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
           {
-            const auto ref = this->m_ref;
+            auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto dist = static_cast<size_t>(ptr - ref->data());
+            auto dist = static_cast<size_t>(ptr - ref->data());
             ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())), "This iterator contains a past-the-end value and cannot be dereferenced.");
             return ptr;
@@ -212,7 +212,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
         value_type * tell() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
             return ptr;
           }
         value_type * tell_owned_by(const parent_type *ref) const noexcept
@@ -228,17 +228,17 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
         reference operator*() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
             return *ptr;
           }
         pointer operator->() const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr, true);
             return ptr;
           }
         reference operator[](difference_type off) const noexcept
           {
-            const auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
+            auto ptr = this->do_assert_valid_pointer(this->m_ptr + off, true);
             return *ptr;
           }
       };
@@ -472,7 +472,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // Reallocate more storage as needed, without shrinking.
     void do_reserve_more(size_type cap_add)
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         auto cap = this->m_sth.check_size_add(cnt, cap_add);
         ROCKET_ASSERT(this->capacity() >= cap);
       }
@@ -485,20 +485,20 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
 
     template<typename ...paramsT> value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
       {
-        const auto cnt_old = this->size();
+        auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
         details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
-        const auto cnt_add = this->size() - cnt_old;
-        const auto ptr = this->m_sth.mut_data();
+        auto cnt_add = this->size() - cnt_old;
+        auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
         return ptr + tpos;
       }
     value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
       {
-        const auto cnt_old = this->size();
+        auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
         ROCKET_ASSERT(tn <= cnt_old - tpos);
-        const auto ptr = this->m_sth.mut_data();
+        auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, tpos + tn, cnt_old);
         this->m_sth.pop_back_n_unchecked(tn);
         return ptr + tpos;
@@ -577,7 +577,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // N.B. The parameter pack is a non-standard extension.
     template<typename ...paramsT> void resize(size_type n, const paramsT &...params)
       {
-        const auto cnt_old = this->size();
+        auto cnt_old = this->size();
         if(cnt_old == n) {
           return;
         }
@@ -612,7 +612,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // element access
     const_reference at(size_type pos) const
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         if(pos >= cnt) {
           this->do_throw_subscript_out_of_range(pos);
         }
@@ -620,19 +620,19 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       }
     const_reference operator[](size_type pos) const noexcept
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         ROCKET_ASSERT(pos < cnt);
         return this->data()[pos];
       }
     const_reference front() const noexcept
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[0];
       }
     const_reference back() const noexcept
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->data()[cnt - 1];
       }
@@ -650,14 +650,14 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // N.B. This is a non-standard extension.
     reference mut_front()
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[0];
       }
     // N.B. This is a non-standard extension.
     reference mut_back()
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         ROCKET_ASSERT(cnt > 0);
         return this->mut_data()[cnt - 1];
       }
@@ -683,7 +683,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         if(first == last) {
           return *this;
         }
-        const auto dist = noadl::estimate_distance(first, last);
+        auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
           noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it);  });
           return *this;
@@ -696,83 +696,83 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     template<typename ...paramsT> reference emplace_back(paramsT &&...params)
       {
         this->do_reserve_more(1);
-        const auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
     reference push_back(const value_type &value)
       {
-        const auto cnt_old = this->size();
+        auto cnt_old = this->size();
         // Check for overlapped elements before `do_reserve_more()`.
-        const auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
+        auto srpos = static_cast<uintptr_t>(::std::addressof(value) - this->data());
         this->do_reserve_more(1);
         if(srpos < cnt_old) {
-          const auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data()[srpos]);
+          auto ptr = this->m_sth.emplace_back_unchecked(this->m_sth.mut_data()[srpos]);
           return *ptr;
         }
-        const auto ptr = this->m_sth.emplace_back_unchecked(value);
+        auto ptr = this->m_sth.emplace_back_unchecked(value);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
     reference push_back(value_type &&value)
       {
         this->do_reserve_more(1);
-        const auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
+        auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
         return *ptr;
       }
 
     iterator insert(const_iterator tins, const value_type &value)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, value);
         return iterator(this->m_sth, ptr);
       }
     iterator insert(const_iterator tins, value_type &&value)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
         return iterator(this->m_sth, ptr);
       }
     // N.B. The parameter pack is a non-standard extension.
     template<typename ...paramsT> iterator insert(const_iterator tins, size_type n, const paramsT &...params)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, n, params...);
         return iterator(this->m_sth, ptr);
       }
     iterator insert(const_iterator tins, initializer_list<value_type> init)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, init);
         return iterator(this->m_sth, ptr);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
-        const auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
+        auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
         return iterator(this->m_sth, ptr);
       }
 
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-        const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
+        auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
-        const auto ptr = this->do_erase_no_bound_check(tpos, 1);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->data());
+        auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
     static_vector & pop_back(size_type n = 1)
       {
-        const auto cnt_old = this->size();
+        auto cnt_old = this->size();
         ROCKET_ASSERT(n <= cnt_old);
         this->m_sth.pop_back_n_unchecked(n);
         return *this;
@@ -781,8 +781,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // N.B. The return type is a non-standard extension.
     static_vector & assign(const static_vector &other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>, is_nothrow_copy_constructible<value_type>>::value)
       {
-        const auto sl = this->size();
-        const auto sr = other.size();
+        auto sl = this->size();
+        auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
             this->m_sth.mut_data()[i] = other.m_sth.data()[i];
@@ -801,8 +801,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     // N.B. The return type is a non-standard extension.
     static_vector & assign(static_vector &&other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
-        const auto sl = this->size();
-        const auto sr = other.size();
+        auto sl = this->size();
+        auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
             this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
@@ -843,8 +843,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
 
     void swap(static_vector &other) noexcept(conjunction<is_nothrow_swappable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
-        const auto sl = this->size();
-        const auto sr = other.size();
+        auto sl = this->size();
+        auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
             noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);

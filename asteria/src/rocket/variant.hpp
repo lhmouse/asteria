@@ -270,7 +270,7 @@ template<typename ...alternativesT> class variant
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
 #endif
-        const auto index_new = other.m_index;
+        auto index_new = other.m_index;
         // Copy-construct the active alternative in place.
         variant::do_dispatch_copy_construct(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
@@ -280,7 +280,7 @@ template<typename ...alternativesT> class variant
 #ifdef ROCKET_DEBUG
         ::std::memset(static_cast<void *>(&(this->m_stor)), '*', sizeof(this->m_stor));
 #endif
-        const auto index_new = other.m_index;
+        auto index_new = other.m_index;
         // Move-construct the active alternative in place.
         variant::do_dispatch_move_construct(index_new, this->m_stor, other.m_stor);
         this->m_index = index_new;
@@ -289,7 +289,7 @@ template<typename ...alternativesT> class variant
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)> variant & operator=(const paramT &param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
                                                                                                                                                  is_nothrow_copy_constructible<paramT>>::value)
       {
-        const auto index_old = this->m_index;
+        auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
@@ -322,7 +322,7 @@ template<typename ...alternativesT> class variant
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)> variant & operator=(paramT &&param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
-        const auto index_old = this->m_index;
+        auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
@@ -338,8 +338,8 @@ template<typename ...alternativesT> class variant
       }
     variant & operator=(const variant &other) noexcept(conjunction<is_nothrow_copy_assignable<alternativesT>..., is_nothrow_copy_constructible<alternativesT>...>::value)
       {
-        const auto index_old = this->m_index;
-        const auto index_new = other.m_index;
+        auto index_old = this->m_index;
+        auto index_new = other.m_index;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
           variant::do_dispatch_copy_assign(index_new, this->m_stor, other.m_stor);
@@ -370,8 +370,8 @@ template<typename ...alternativesT> class variant
       }
     variant & operator=(variant &&other) noexcept(conjunction<is_nothrow_move_assignable<alternativesT>...>::value)
       {
-        const auto index_old = this->m_index;
-        const auto index_new = other.m_index;
+        auto index_old = this->m_index;
+        auto index_new = other.m_index;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
           variant::do_dispatch_move_assign(index_new, this->m_stor, other.m_stor);
@@ -386,7 +386,7 @@ template<typename ...alternativesT> class variant
     // 23.7.3.2, destructor
     ~variant()
       {
-        const auto index_old = this->m_index;
+        auto index_old = this->m_index;
         // Destroy the active alternative in place.
         variant::do_dispatch_destroy(index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
@@ -441,7 +441,7 @@ template<typename ...alternativesT> class variant
 
     template<size_t indexT> const typename type_at<indexT>::type & as() const
       {
-        const auto ptr = this->get<indexT>();
+        auto ptr = this->get<indexT>();
         if(!ptr) {
           this->do_throw_index_mismatch(indexT, typeid(typename type_at<indexT>::type));
         }
@@ -453,7 +453,7 @@ template<typename ...alternativesT> class variant
       }
     template<size_t indexT> typename type_at<indexT>::type & as()
       {
-        const auto ptr = this->get<indexT>();
+        auto ptr = this->get<indexT>();
         if(!ptr) {
           this->do_throw_index_mismatch(indexT, typeid(typename type_at<indexT>::type));
         }
@@ -482,7 +482,7 @@ template<typename ...alternativesT> class variant
              typename ...paramsT> typename type_at<indexT>::type & emplace(paramsT &&...params) noexcept(is_nothrow_constructible<typename type_at<indexT>::type,
                                                                                                                                   paramsT &&...>::value)
       {
-        const auto index_old = this->m_index;
+        auto index_old = this->m_index;
         constexpr auto index_new = indexT;
         if(is_nothrow_constructible<typename type_at<index_new>::type, paramsT &&...>::value) {
           // Destroy the old alternative.
@@ -517,8 +517,8 @@ template<typename ...alternativesT> class variant
     // 23.7.3.6, swap
     void swap(variant &other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
       {
-        const auto index_old = this->m_index;
-        const auto index_new = other.m_index;
+        auto index_old = this->m_index;
+        auto index_new = other.m_index;
         if(index_old == index_new) {
           // Swap both alternatives in place.
           static constexpr void (*const s_table[])(void *, void *) = { &details_variant::wrapped_swap<alternativesT>... };

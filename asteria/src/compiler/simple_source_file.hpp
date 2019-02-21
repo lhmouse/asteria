@@ -24,13 +24,13 @@ class Simple_Source_File
     explicit Simple_Source_File(const CoW_String &filename)
       : Simple_Source_File()
       {
-        const auto err = this->load_file(filename);
+        auto err = this->load_file(filename);
         this->do_throw_on_error(err);
       }
     Simple_Source_File(std::istream &cstrm_io, const CoW_String &filename)
       : Simple_Source_File()
       {
-        const auto err = this->load_stream(cstrm_io, filename);
+        auto err = this->load_stream(cstrm_io, filename);
         this->do_throw_on_error(err);
       }
 

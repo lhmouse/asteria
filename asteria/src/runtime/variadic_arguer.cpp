@@ -17,7 +17,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
   {
     Argument_Reader reader(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
-    const auto nvargs = this->get_argument_count();
+    auto nvargs = this->get_argument_count();
     if(reader.start().finish()) {
       // Return the number of variadic arguments.
       Reference_Root::S_constant ref_c = { D_integer(nvargs) };

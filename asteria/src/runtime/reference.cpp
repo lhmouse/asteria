@@ -17,9 +17,9 @@ const Value & Reference::do_read_with_modifiers() const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_const());
     // Apply modifiers.
-    const auto epos = this->m_mods.size();
+    auto epos = this->m_mods.size();
     for(std::size_t i = 0; i != epos; ++i) {
-      const auto qnext = this->m_mods.at(i).apply_const_opt(cur);
+      auto qnext = this->m_mods.at(i).apply_const_opt(cur);
       if(!qnext) {
         return Value::get_null();
       }
@@ -33,9 +33,9 @@ Value & Reference::do_open_with_modifiers() const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());
     // Apply modifiers.
-    const auto epos = this->m_mods.size();
+    auto epos = this->m_mods.size();
     for(std::size_t i = 0; i != epos; ++i) {
-      const auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, true);
+      auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, true);
       if(!qnext) {
         ROCKET_ASSERT(false);
       }
@@ -49,9 +49,9 @@ Value Reference::do_unset_with_modifiers() const
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());
     // Apply modifiers.
-    const auto epos = this->m_mods.size() - 1;
+    auto epos = this->m_mods.size() - 1;
     for(std::size_t i = 0; i != epos; ++i) {
-      const auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, false);
+      auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, false);
       if(!qnext) {
         return D_null();
       }

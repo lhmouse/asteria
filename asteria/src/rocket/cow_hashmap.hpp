@@ -128,7 +128,7 @@ template<typename keyT, typename mappedT,
           : storage_header(xdtor),
             alloc(xalloc), nblk(xnblk)
           {
-            const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
+            auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             if(is_trivially_default_constructible<bucket_type>::value) {
               // Zero-initialize everything.
               ::std::memset(static_cast<void *>(this->data), 0, sizeof(bucket_type) * nbkt);
@@ -142,9 +142,9 @@ template<typename keyT, typename mappedT,
           }
         ~pointer_storage()
           {
-            const auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
+            auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
             for(size_type i = 0; i < nbkt; ++i) {
-              const auto eptr = this->data[i].reset();
+              auto eptr = this->data[i].reset();
               if(!eptr) {
                   continue;
               }
@@ -172,20 +172,20 @@ template<typename keyT, typename mappedT,
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Get table bounds.
-            const auto data = ptr->data;
-            const auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+            auto data = ptr->data;
+            auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
             // Copy elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
-              const auto eptr_old = ptr_old->data[i].get();
+              auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
                 continue;
               }
               // Find a bucket for the new element.
-              const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
+              auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Allocate a new element by copy-constructing from the old one.
-              const auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
+              auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
               try {
                 allocator_traits<allocatorT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
               } catch(...) {
@@ -216,20 +216,20 @@ template<typename keyT, typename mappedT,
         void operator()(pointerT ptr, const hashT &hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Get table bounds.
-            const auto data = ptr->data;
-            const auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+            auto data = ptr->data;
+            auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
             // Move elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
-              const auto eptr_old = ptr_old->data[i].get();
+              auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
                 continue;
               }
               // Find a bucket for the new element.
-              const auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
+              auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
+              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Detach the old element.
-              const auto eptr = ptr_old->data[i].reset();
+              auto eptr = ptr_old->data[i].reset();
               ptr_old->nelem--;
               // Insert it into the new bucket.
               ROCKET_ASSERT(!*bkt);
@@ -307,7 +307,7 @@ template<typename keyT, typename mappedT,
       private:
         void do_reset(storage_pointer ptr_new) noexcept
           {
-            const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }
@@ -323,7 +323,7 @@ template<typename keyT, typename mappedT,
             }
             // If it has been decremented to zero, deallocate the block.
             auto st_alloc = storage_allocator(ptr->alloc);
-            const auto nblk = ptr->nblk;
+            auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
@@ -367,7 +367,7 @@ template<typename keyT, typename mappedT,
 
         bool unique() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return false;
             }
@@ -375,17 +375,17 @@ template<typename keyT, typename mappedT,
           }
         long use_count() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
-            const auto nref = ptr->nref.get();
+            auto nref = ptr->nref.get();
             ROCKET_ASSERT(nref > 0);
             return nref;
           }
         size_type bucket_count() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
@@ -393,23 +393,23 @@ template<typename keyT, typename mappedT,
           }
         size_type capacity() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
-            const auto cap = storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
+            auto cap = storage::max_nbkt_for_nblk(ptr->nblk) / max_load_factor_reciprocal;
             ROCKET_ASSERT(cap > 0);
             return cap;
           }
         size_type max_size() const noexcept
           {
             auto st_alloc = storage_allocator(this->as_allocator());
-            const auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
+            auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
             return storage::max_nbkt_for_nblk(max_nblk / 2) / max_load_factor_reciprocal;
           }
         size_type check_size_add(size_type base, size_type add) const
           {
-            const auto cap_max = this->max_size();
+            auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
               this->do_throw_size_overflow(base, add);
@@ -418,13 +418,13 @@ template<typename keyT, typename mappedT,
           }
         size_type round_up_capacity(size_type res_arg) const
           {
-            const auto cap = this->check_size_add(0, res_arg);
-            const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
+            auto cap = this->check_size_add(0, res_arg);
+            auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
             return storage::max_nbkt_for_nblk(nblk) / max_load_factor_reciprocal;
           }
         const bucket_type * buckets() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return nullptr;
             }
@@ -432,7 +432,7 @@ template<typename keyT, typename mappedT,
           }
         size_type element_count() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
@@ -445,16 +445,16 @@ template<typename keyT, typename mappedT,
               this->deallocate();
               return nullptr;
             }
-            const auto cap = this->check_size_add(0, res_arg);
+            auto cap = this->check_size_add(0, res_arg);
             // Allocate an array of `storage` large enough for a header + `cap` instances of pointers.
-            const auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
+            auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
             auto st_alloc = storage_allocator(this->as_allocator());
-            const auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
+            auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
             noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
-            const auto ptr_old = this->m_ptr;
+            auto ptr_old = this->m_ptr;
             if(ROCKET_UNEXPECT(ptr_old)) {
               try {
                 // Copy or move elements into the new block.
@@ -484,7 +484,7 @@ template<typename keyT, typename mappedT,
 
         void share_with(const storage_handle &other) noexcept
           {
-            const auto ptr = other.m_ptr;
+            auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
               reinterpret_cast<storage_header *>(noadl::unfancy(ptr))->nref.increment();
@@ -493,7 +493,7 @@ template<typename keyT, typename mappedT,
           }
         void share_with(storage_handle &&other) noexcept
           {
-            const auto ptr = other.m_ptr;
+            auto ptr = other.m_ptr;
             if(ptr) {
               // Detach the block.
               other.m_ptr = storage_pointer();
@@ -516,16 +516,16 @@ template<typename keyT, typename mappedT,
 
         template<typename ykeyT> bool index_of(size_type &index, const ykeyT &ykey) const
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return false;
             }
             // Get table bounds.
-            const auto data = ptr->data;
-            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+            auto data = ptr->data;
+            auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find the desired element using linear probing.
-            const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+            auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
+            auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             if(!bkt) {
               // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
               ROCKET_ASSERT(max_load_factor_reciprocal == 1);
@@ -541,7 +541,7 @@ template<typename keyT, typename mappedT,
           }
         bucket_type * mut_buckets_unchecked() noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return nullptr;
             }
@@ -552,14 +552,14 @@ template<typename keyT, typename mappedT,
           {
             ROCKET_ASSERT(this->unique());
             ROCKET_ASSERT(this->element_count() < this->capacity());
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
             // Get table bounds.
-            const auto data = ptr->data;
-            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+            auto data = ptr->data;
+            auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find an empty bucket using linear probing.
-            const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+            auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
+            auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             ROCKET_ASSERT(bkt);
             if(*bkt) {
               // A duplicate key has been found.
@@ -587,11 +587,11 @@ template<typename keyT, typename mappedT,
             if(tn == 0) {
               return;
             }
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
             // Erase all elements in [tpos,tpos+tn).
             for(auto i = tpos; i != tpos + tn; ++i) {
-              const auto eptr = ptr->data[i].reset();
+              auto eptr = ptr->data[i].reset();
               if(!eptr) {
                 continue;
               }
@@ -601,8 +601,8 @@ template<typename keyT, typename mappedT,
               allocator_traits<allocator_type>::deallocate(ptr->alloc, eptr, size_t(1));
             }
             // Get table bounds.
-            const auto data = ptr->data;
-            const auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
+            auto data = ptr->data;
+            auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Relocate elements that are not placed in their immediate locations.
             noadl::linear_probe(
               // Only probe non-erased buckets.
@@ -613,8 +613,8 @@ template<typename keyT, typename mappedT,
                   // Release the old element.
                   auto eptr = rbkt.reset();
                   // Find a new bucket for it using linear probing.
-                  const auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
-                  const auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false;  });
+                  auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
+                  auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false;  });
                   ROCKET_ASSERT(bkt);
                   // Insert it into the new bucket.
                   ROCKET_ASSERT(!*bkt);
@@ -677,9 +677,9 @@ template<typename keyT, typename mappedT,
       private:
         bucket_type * do_assert_valid_bucket(bucket_type *bkt, bool to_dereference) const noexcept
           {
-            const auto ref = this->m_ref;
+            auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto dist = static_cast<size_t>(bkt - ref->buckets());
+            auto dist = static_cast<size_t>(bkt - ref->buckets());
             ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
             ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt), "The element referenced by this iterator no longer exists.");
             ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
@@ -690,9 +690,9 @@ template<typename keyT, typename mappedT,
             if(hint == nullptr) {
               return nullptr;
             }
-            const auto ref = this->m_ref;
+            auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            const auto end = ref->buckets() + ref->bucket_count();
+            auto end = ref->buckets() + ref->bucket_count();
             auto bkt = hint;
             while((bkt != end) && !*bkt) {
               ++bkt;
@@ -708,7 +708,7 @@ template<typename keyT, typename mappedT,
 
         bucket_type * tell() const noexcept
           {
-            const auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
+            auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
             return bkt;
           }
         bucket_type * tell_owned_by(const parent_type *ref) const noexcept
@@ -727,13 +727,13 @@ template<typename keyT, typename mappedT,
 
         reference operator*() const noexcept
           {
-            const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
+            auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
             ROCKET_ASSERT(*bkt);
             return **bkt;
           }
         pointer operator->() const noexcept
           {
-            const auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
+            auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
             ROCKET_ASSERT(*bkt);
             return ::std::addressof(**bkt);
           }
@@ -906,7 +906,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         ROCKET_ASSERT(cnt_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_sth.bucket_count());
         ROCKET_ASSERT(cnt_two <= this->m_sth.bucket_count() - off_two);
-        const auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
+        auto ptr = this->m_sth.reallocate(cnt_one, off_two, cnt_two, res_arg);
         if(!ptr) {
           // The storage has been deallocated.
           return nullptr;
@@ -926,7 +926,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // Reallocate more storage as needed, without shrinking.
     void do_reserve_more(size_type cap_add)
       {
-        const auto cnt = this->size();
+        auto cnt = this->size();
         auto cap = this->m_sth.check_size_add(cnt, cap_add);
         if(!this->unique() || ROCKET_UNEXPECT(this->capacity() < cap)) {
 #ifndef ROCKET_DEBUG
@@ -957,15 +957,15 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     details_cow_hashmap::bucket<allocator_type> * do_erase_no_bound_check(size_type tpos, size_type tn)
       {
-        const auto cnt_old = this->size();
-        const auto nbkt_old = this->bucket_count();
+        auto cnt_old = this->size();
+        auto nbkt_old = this->bucket_count();
         ROCKET_ASSERT(tpos <= nbkt_old);
         ROCKET_ASSERT(tn <= nbkt_old - tpos);
         if(!this->unique()) {
-          const auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
+          auto ptr = this->do_reallocate(tpos, tpos + tn, nbkt_old - (tpos + tn), cnt_old);
           return ptr;
         }
-        const auto ptr = this->m_sth.mut_buckets_unchecked();
+        auto ptr = this->m_sth.mut_buckets_unchecked();
         this->m_sth.erase_range_unchecked(tpos, tn);
         return ptr + tn;
       }
@@ -1022,8 +1022,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     void reserve(size_type res_arg)
       {
-        const auto cnt = this->size();
-        const auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
+        auto cnt = this->size();
+        auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
         // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
           return;
@@ -1033,8 +1033,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     void shrink_to_fit()
       {
-        const auto cnt = this->size();
-        const auto cap_min = this->m_sth.round_up_capacity(cnt);
+        auto cnt = this->size();
+        auto cap_min = this->m_sth.round_up_capacity(cnt);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min)) {
           return;
@@ -1099,7 +1099,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         if(first == last) {
           return *this;
         }
-        const auto dist = noadl::estimate_distance(first, last);
+        auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
           noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->insert(*it);  });
           return *this;
@@ -1129,7 +1129,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename ykeyT, typename ...paramsT> pair<iterator, bool> try_emplace(ykeyT &&key, paramsT &&...params)
       {
         this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
                                                                 ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple(::std::forward<paramsT>(params)...));
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
@@ -1142,7 +1142,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename ykeyT, typename yvalueT> pair<iterator, bool> insert_or_assign(ykeyT &&key, yvalueT &&yvalue)
       {
         this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
+        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::forward<ykeyT>(key), ::std::forward<yvalueT>(yvalue));
         if(!result.second) {
           result.first->get()->second = ::std::forward<yvalueT>(yvalue);
         }
@@ -1157,16 +1157,16 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst, const_iterator tlast)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-        const auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
-        const auto ptr = this->do_erase_no_bound_check(tpos, tn);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
+        auto tn = static_cast<size_type>(tlast.tell_owned_by(this->m_sth) - tfirst.tell());
+        auto ptr = this->do_erase_no_bound_check(tpos, tn);
         return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
     iterator erase(const_iterator tfirst)
       {
-        const auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
-        const auto ptr = this->do_erase_no_bound_check(tpos, 1);
+        auto tpos = static_cast<size_type>(tfirst.tell_owned_by(this->m_sth) - this->do_get_table());
+        auto ptr = this->do_erase_no_bound_check(tpos, 1);
         return iterator(this->m_sth, details_cow_hashmap::needs_adjust, ptr);
       }
     // N.B. This function may throw `std::bad_alloc`.
@@ -1184,7 +1184,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // map operations
     template<typename ykeyT> const_iterator find(const ykeyT &key) const
       {
-        const auto ptr = this->do_get_table();
+        auto ptr = this->do_get_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
           return this->end();
@@ -1195,7 +1195,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This is a non-standard extension.
     template<typename ykeyT> iterator find_mut(const ykeyT &key)
       {
-        const auto ptr = this->do_mut_table();
+        auto ptr = this->do_mut_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
           return this->mut_end();
@@ -1213,7 +1213,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ydefaultT> decltype(0 ? ::std::declval<ydefaultT>() : ::std::declval<const mapped_type &>()) get_or(const ykeyT &key, ydefaultT &&ydef) const
       {
-        const auto ptr = this->do_get_table();
+        auto ptr = this->do_get_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
           return ::std::forward<ydefaultT>(ydef);
@@ -1224,7 +1224,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // 26.5.4.3, element access
     template<typename ykeyT> const mapped_type & at(const ykeyT &key) const
       {
-        const auto ptr = this->do_get_table();
+        auto ptr = this->do_get_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
           this->do_throw_key_not_found();
@@ -1234,7 +1234,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This is a non-standard extension.
     template<typename ykeyT> mapped_type & mut(const ykeyT &key)
       {
-        const auto ptr = this->do_mut_table();
+        auto ptr = this->do_mut_table();
         size_type tpos;
         if(!this->m_sth.index_of(tpos, key)) {
           this->do_throw_key_not_found();
@@ -1244,7 +1244,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     template<typename ykeyT> mapped_type & operator[](ykeyT &&key)
       {
         this->do_reserve_more(1);
-        const auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
                                                                 ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
         return result.first->get()->second;
       }

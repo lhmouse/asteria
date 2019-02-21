@@ -41,7 +41,7 @@ template<typename valueT> class reference_counter
   private:
     void do_terminate_if_shared() const
       {
-        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        auto old = this->m_nref.load(::std::memory_order_relaxed);
         if(old <= 1) {
           return;
         }
@@ -51,12 +51,12 @@ template<typename valueT> class reference_counter
   public:
     ROCKET_PURE_FUNCTION bool unique() const noexcept
       {
-        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        auto old = this->m_nref.load(::std::memory_order_relaxed);
         return ROCKET_EXPECT(old == 1);
       }
     valueT get() const noexcept
       {
-        const auto old = this->m_nref.load(::std::memory_order_relaxed);
+        auto old = this->m_nref.load(::std::memory_order_relaxed);
         return old;
       }
     bool try_increment() noexcept
@@ -74,12 +74,12 @@ template<typename valueT> class reference_counter
       }
     void increment() noexcept
       {
-        const auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
+        auto old = this->m_nref.fetch_add(1, ::std::memory_order_relaxed);
         ROCKET_ASSERT(old >= 1);
       }
     bool decrement() noexcept
       {
-        const auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
+        auto old = this->m_nref.fetch_sub(1, ::std::memory_order_acq_rel);
         ROCKET_ASSERT(old >= 1);
         return old == 1;
       }

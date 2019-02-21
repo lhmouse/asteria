@@ -95,7 +95,7 @@ template<typename elementT> class refcnt_ptr;
       public:
         bool unique() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return false;
             }
@@ -103,7 +103,7 @@ template<typename elementT> class refcnt_ptr;
           }
         long use_count() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(!ptr) {
               return 0;
             }
@@ -115,7 +115,7 @@ template<typename elementT> class refcnt_ptr;
           }
         pointer copy_release() const noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(ptr) {
               ptr->reference_counter_base::add_reference();
             }
@@ -123,7 +123,7 @@ template<typename elementT> class refcnt_ptr;
           }
         pointer release() noexcept
           {
-            const auto ptr = this->m_ptr;
+            auto ptr = this->m_ptr;
             if(ptr) {
               this->m_ptr = pointer();
             }
@@ -131,7 +131,7 @@ template<typename elementT> class refcnt_ptr;
           }
         void reset(pointer ptr_new) noexcept
           {
-            const auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
             if(!ptr) {
               return;
             }
@@ -174,7 +174,7 @@ template<typename elementT> class refcnt_ptr;
       {
         template<typename srcptrT> resptrT operator()(srcptrT &&sptr) const
           {
-            const auto ptr = casterT::template do_cast<typename resptrT::pointer>(sptr.get());
+            auto ptr = casterT::template do_cast<typename resptrT::pointer>(sptr.get());
             if(!ptr) {
               return nullptr;
             }
@@ -236,7 +236,7 @@ template<typename elementT, typename deleterT> class refcnt_base : protected vir
 
     template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
       {
-        const auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcnt_base *>(this);
+        auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<const yelementT *, const refcnt_base *>(this);
         if(!ptr) {
           this->do_throw_bad_cast(typeid(yelementT));
         }
@@ -245,7 +245,7 @@ template<typename elementT, typename deleterT> class refcnt_base : protected vir
       }
     template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
       {
-        const auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcnt_base *>(this);
+        auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<yelementT *, refcnt_base *>(this);
         if(!ptr) {
           this->do_throw_bad_cast(typeid(yelementT));
         }
@@ -343,13 +343,13 @@ template<typename elementT> class refcnt_ptr
       }
     typename add_lvalue_reference<element_type>::type operator*() const
       {
-        const auto ptr = this->get();
+        auto ptr = this->get();
         ROCKET_ASSERT(ptr);
         return *ptr;
       }
     pointer operator->() const noexcept
       {
-        const auto ptr = this->get();
+        auto ptr = this->get();
         ROCKET_ASSERT(ptr);
         return ptr;
       }
@@ -365,7 +365,7 @@ template<typename elementT> class refcnt_ptr
     // 23.11.1.2.5, modifiers
     pointer release() noexcept
       {
-        const auto ptr = this->m_sth.release();
+        auto ptr = this->m_sth.release();
         return ptr;
       }
     void reset(pointer ptr = pointer()) noexcept

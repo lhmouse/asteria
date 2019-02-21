@@ -187,7 +187,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        const auto &alt = this->m_stor.as<S_literal>();
+        auto &alt = this->m_stor.as<S_literal>();
         // Copy it as-is.
         Xpnode::S_literal alt_bnd = { alt.value };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -195,11 +195,11 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_named_reference:
       {
-        const auto &alt = this->m_stor.as<S_named_reference>();
+        auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
         if(!alt.name.rdstr().starts_with("__")) {
           // Look for the reference in the current context.
-          const auto pair = do_name_lookup(global, ctx, alt.name);
+          auto pair = do_name_lookup(global, ctx, alt.name);
           // Don't bind it onto something in a analytic context which will soon get destroyed.
           if(!pair.first.get().is_analytic()) {
             Xpnode::S_bound_reference alt_bnd = { pair.second };
@@ -214,7 +214,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_bound_reference:
       {
-        const auto &alt = this->m_stor.as<S_bound_reference>();
+        auto &alt = this->m_stor.as<S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -222,7 +222,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_closure_function:
       {
-        const auto &alt = this->m_stor.as<S_closure_function>();
+        auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Function_Analytic_Context ctx_next(&ctx, alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
@@ -232,7 +232,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_branch:
       {
-        const auto &alt = this->m_stor.as<S_branch>();
+        auto &alt = this->m_stor.as<S_branch>();
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(global, ctx);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx);
@@ -242,7 +242,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_function_call:
       {
-        const auto &alt = this->m_stor.as<S_function_call>();
+        auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.sloc, alt.nargs };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -250,7 +250,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_member_access:
       {
-        const auto &alt = this->m_stor.as<S_member_access>();
+        auto &alt = this->m_stor.as<S_member_access>();
         // Copy it as-is.
         Xpnode::S_member_access alt_bnd = { alt.name };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -258,7 +258,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_operator_rpn:
       {
-        const auto &alt = this->m_stor.as<S_operator_rpn>();
+        auto &alt = this->m_stor.as<S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.assign };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -266,7 +266,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_unnamed_array:
       {
-        const auto &alt = this->m_stor.as<S_unnamed_array>();
+        auto &alt = this->m_stor.as<S_unnamed_array>();
         // Copy it as-is.
         Xpnode::S_unnamed_array alt_bnd = { alt.nelems };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -274,7 +274,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_unnamed_object:
       {
-        const auto &alt = this->m_stor.as<S_unnamed_object>();
+        auto &alt = this->m_stor.as<S_unnamed_object>();
         // Copy it as-is.
         Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -282,7 +282,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_coalescence:
       {
-        const auto &alt = this->m_stor.as<S_coalescence>();
+        auto &alt = this->m_stor.as<S_coalescence>();
         // Bind the null branch recursively.
         auto branch_null_bnd = alt.branch_null.bind(global, ctx);
         Xpnode::S_coalescence alt_bnd = { std::move(branch_null_bnd), alt.assign };
@@ -308,7 +308,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
                                      Reference_Stack &stack_io, const CoW_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
       {
         // Look for the reference in the current context.
-        const auto pair = do_name_lookup(global, ctx, alt.name);
+        auto pair = do_name_lookup(global, ctx, alt.name);
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(!pair.first.get().is_analytic());
 #endif
@@ -357,7 +357,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
                             Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx)
       {
         // Pick a branch basing on the condition.
-        const auto result = stack_io.top().read().test() ? alt.branch_true.evaluate_partial(stack_io, func, global, ctx)
+        auto result = stack_io.top().read().test() ? alt.branch_true.evaluate_partial(stack_io, func, global, ctx)
                                                          : alt.branch_false.evaluate_partial(stack_io, func, global, ctx);
         if(!result) {
           // If the branch is empty, leave the condition reference on the stack.
@@ -377,12 +377,12 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           stack_io.pop();
         }
         // Get the target reference.
-        const auto target_value = stack_io.top().read();
+        auto target_value = stack_io.top().read();
         // Make sure it is really a function.
         if(target_value.type() != type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", target_value, "` is not a function and cannot be called.");
         }
-        const auto &target = target_value.check<D_function>().get();
+        auto &target = target_value.check<D_function>().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
         auto &self_result = stack_io.mut_top().zoom_out();
         // Call the function now.
@@ -468,8 +468,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if((lhs == -1) || (rhs == -1)) {
           return -(lhs ^ rhs ^ -1);
         }
-        const auto slhs = (rhs >= 0) ? lhs : -lhs;
-        const auto arhs = std::abs(rhs);
+        auto slhs = (rhs >= 0) ? lhs : -lhs;
+        auto arhs = std::abs(rhs);
         if((slhs >= 0) ? (slhs > INT64_MAX / arhs) : (slhs < INT64_MIN / arhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
@@ -536,9 +536,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(rhs >= 64) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        const auto mask_out = (res >> bits_rem) << bits_rem;
-        const auto mask_sign = -(res >> 63) << bits_rem;
+        auto bits_rem = static_cast<unsigned char>(63 - rhs);
+        auto mask_out = (res >> bits_rem) << bits_rem;
+        auto mask_sign = -(res >> 63) << bits_rem;
         if(mask_out != mask_sign) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
@@ -558,8 +558,8 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(rhs >= 64) {
           return static_cast<std::int64_t>(-(res >> 63));
         }
-        const auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        const auto mask_in = -(res >> 63) << bits_rem;
+        auto bits_rem = static_cast<unsigned char>(63 - rhs);
+        auto mask_in = -(res >> 63) << bits_rem;
         res >>= rhs;
         res |= mask_in;
         return static_cast<std::int64_t>(res);
@@ -630,7 +630,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
         CoW_String res;
-        const auto count = static_cast<std::uint64_t>(rhs);
+        auto count = static_cast<std::uint64_t>(rhs);
         if(count == 0) {
           return res;
         }
@@ -663,7 +663,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         }
         CoW_String res;
         res.assign(lhs.size(), ' ');
-        const auto count = static_cast<std::uint64_t>(rhs);
+        auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
         }
@@ -678,7 +678,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         }
         CoW_String res;
         res.assign(lhs.size(), ' ');
-        const auto count = static_cast<std::uint64_t>(rhs);
+        auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
         }
@@ -692,7 +692,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         CoW_String res;
-        const auto count = static_cast<std::uint64_t>(rhs);
+        auto count = static_cast<std::uint64_t>(rhs);
         if(count > res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
         }
@@ -707,7 +707,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         CoW_String res;
-        const auto count = static_cast<std::uint64_t>(rhs);
+        auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
         }
@@ -769,7 +769,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_postfix_at);
         // Append a reference modifier.
         // `alt.assign` is ignored.
-        const auto subscript = stack_io.top().read();
+        auto subscript = stack_io.top().read();
         stack_io.pop();
         switch(rocket::weaken_enum(subscript.type())) {
         case type_integer:
@@ -947,10 +947,10 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_eq);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp == Value::compare_equal);
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
@@ -961,10 +961,10 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_ne);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp != Value::compare_equal);
         do_set_temporary(stack_io, alt.assign, std::move(ref_c));
       }
@@ -975,9 +975,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lt);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
@@ -991,9 +991,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gt);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
@@ -1007,9 +1007,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_lte);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
@@ -1023,9 +1023,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_gte);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
@@ -1039,9 +1039,9 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_cmp_3way);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // N.B. This is one of the few operators that work on all types.
-        const auto comp = lhs.compare(ref_c.value);
+        auto comp = lhs.compare(ref_c.value);
         switch(rocket::weaken_enum(comp)) {
         case Value::compare_less:
           {
@@ -1073,7 +1073,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_add);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1110,7 +1110,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sub);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1139,7 +1139,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mul);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For type `boolean`, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1181,7 +1181,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_div);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `integer` and `real` types, return the quotient of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
@@ -1204,7 +1204,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_mod);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For types `integer` and `real`, return the reminder of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
@@ -1227,7 +1227,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sll);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand has type `integer`, shift the first operand to the left by the number of bits specified by the second operand.
@@ -1256,7 +1256,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_srl);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand has type `integer`, shift the first operand to the right by the number of bits specified by the second operand.
@@ -1285,7 +1285,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sla);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand.
@@ -1314,7 +1314,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_sra);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand.
@@ -1342,7 +1342,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_andb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1366,7 +1366,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_orb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1390,7 +1390,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         ROCKET_ASSERT(alt.xop == Xpnode::xop_infix_xorb);
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        const auto &lhs = stack_io.top().read();
+        auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1455,7 +1455,7 @@ void Xpnode::bind(CoW_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           // If the value is non-null, leave the condition reference on the stack.
           return;
         }
-        const auto result = alt.branch_null.evaluate_partial(stack_io, func, global, ctx);
+        auto result = alt.branch_null.evaluate_partial(stack_io, func, global, ctx);
         if(!result) {
           // If the branch is empty, leave the condition reference on the stack.
           return;
@@ -1487,49 +1487,49 @@ void Xpnode::compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) c
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        const auto &alt = this->m_stor.as<S_literal>();
+        auto &alt = this->m_stor.as<S_literal>();
         cinsts_out.emplace_back(do_bind<S_literal, do_evaluate_literal>(alt));
         return;
       }
     case index_named_reference:
       {
-        const auto &alt = this->m_stor.as<S_named_reference>();
+        auto &alt = this->m_stor.as<S_named_reference>();
         cinsts_out.emplace_back(do_bind<S_named_reference, do_evaluate_named_reference>(alt));
         return;
       }
     case index_bound_reference:
       {
-        const auto &alt = this->m_stor.as<S_bound_reference>();
+        auto &alt = this->m_stor.as<S_bound_reference>();
         cinsts_out.emplace_back(do_bind<S_bound_reference, do_evaluate_bound_reference>(alt));
         return;
       }
     case index_closure_function:
       {
-        const auto &alt = this->m_stor.as<S_closure_function>();
+        auto &alt = this->m_stor.as<S_closure_function>();
         cinsts_out.emplace_back(do_bind<S_closure_function, do_evaluate_closure_function>(alt));
         return;
       }
     case index_branch:
       {
-        const auto &alt = this->m_stor.as<S_branch>();
+        auto &alt = this->m_stor.as<S_branch>();
         cinsts_out.emplace_back(do_bind<S_branch, do_evaluate_branch>(alt));
         return;
       }
     case index_function_call:
       {
-        const auto &alt = this->m_stor.as<S_function_call>();
+        auto &alt = this->m_stor.as<S_function_call>();
         cinsts_out.emplace_back(do_bind<S_function_call, do_evaluate_function_call>(alt));
         return;
       }
     case index_member_access:
       {
-        const auto &alt = this->m_stor.as<S_member_access>();
+        auto &alt = this->m_stor.as<S_member_access>();
         cinsts_out.emplace_back(do_bind<S_member_access, do_evaluate_member_access>(alt));
         return;
       }
     case index_operator_rpn:
       {
-        const auto &alt = this->m_stor.as<S_operator_rpn>();
+        auto &alt = this->m_stor.as<S_operator_rpn>();
         switch(alt.xop) {
         case xop_postfix_inc:
           {
@@ -1697,19 +1697,19 @@ void Xpnode::compile(CoW_Vector<Expression::Compiled_Instruction> &cinsts_out) c
       }
     case index_unnamed_array:
       {
-        const auto &alt = this->m_stor.as<S_unnamed_array>();
+        auto &alt = this->m_stor.as<S_unnamed_array>();
         cinsts_out.emplace_back(do_bind<S_unnamed_array, do_evaluate_unnamed_array>(alt));
         return;
       }
     case index_unnamed_object:
       {
-        const auto &alt = this->m_stor.as<S_unnamed_object>();
+        auto &alt = this->m_stor.as<S_unnamed_object>();
         cinsts_out.emplace_back(do_bind<S_unnamed_object, do_evaluate_unnamed_object>(alt));
         return;
       }
     case index_coalescence:
       {
-        const auto &alt = this->m_stor.as<S_coalescence>();
+        auto &alt = this->m_stor.as<S_coalescence>();
         cinsts_out.emplace_back(do_bind<S_coalescence, do_evaluate_coalescence>(alt));
         return;
       }
@@ -1723,7 +1723,7 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        const auto &alt = this->m_stor.as<S_literal>();
+        auto &alt = this->m_stor.as<S_literal>();
         alt.value.enumerate_variables(callback);
         return;
       }
@@ -1733,19 +1733,19 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
       }
     case index_bound_reference:
       {
-        const auto &alt = this->m_stor.as<S_bound_reference>();
+        auto &alt = this->m_stor.as<S_bound_reference>();
         alt.ref.enumerate_variables(callback);
         return;
       }
     case index_closure_function:
       {
-        const auto &alt = this->m_stor.as<S_closure_function>();
+        auto &alt = this->m_stor.as<S_closure_function>();
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_branch:
       {
-        const auto &alt = this->m_stor.as<S_branch>();
+        auto &alt = this->m_stor.as<S_branch>();
         alt.branch_true.enumerate_variables(callback);
         alt.branch_false.enumerate_variables(callback);
         return;
@@ -1760,7 +1760,7 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
       }
     case index_coalescence:
       {
-        const auto &alt = this->m_stor.as<S_coalescence>();
+        auto &alt = this->m_stor.as<S_coalescence>();
         alt.branch_null.enumerate_variables(callback);
         return;
       }

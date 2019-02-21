@@ -38,14 +38,14 @@ Function_Executive_Context::~Function_Executive_Context()
 void Function_Executive_Context::do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args)
   {
     // Set parameters, which are local variables.
-    for(const auto &param : params) {
+    for(auto &param : params) {
       if(param.empty()) {
         continue;
       }
       if(param.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
-      const auto index = static_cast<std::size_t>(&param - params.data());
+      auto index = static_cast<std::size_t>(&param - params.data());
       if(ROCKET_EXPECT(index >= args.size())) {
         // There is no argument for this parameter.
         this->open_named_reference(param) = Reference_Root::S_undefined();

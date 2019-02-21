@@ -33,8 +33,8 @@ bool Expression::evaluate_partial(Reference_Stack &stack_io, const CoW_String &f
       return false;
     }
     // Evaluate nodes one by one.
-    const auto stack_size_old = stack_io.size();
-    const auto params = std::tie(stack_io, func, global, ctx);
+    auto stack_size_old = stack_io.size();
+    auto params = std::tie(stack_io, func, global, ctx);
     auto cptr = this->m_cinsts.data();
     while(--count != 0) {
       (*cptr)(params);

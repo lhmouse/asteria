@@ -102,7 +102,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           }
         void reset(pointer ptr_new) noexcept
           {
-            const auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
             if(!ptr_old) {
               return;
             }
@@ -140,7 +140,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
       {
         template<typename sourceptrT> resultptrT operator()(sourceptrT &&sptr) const
           {
-            const auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
+            auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
             if(!ptr) {
               return nullptr;
             }
@@ -231,13 +231,13 @@ template<typename elementT, typename deleterT> class unique_ptr
       }
     typename add_lvalue_reference<element_type>::type operator*() const
       {
-        const auto ptr = this->get();
+        auto ptr = this->get();
         ROCKET_ASSERT(ptr);
         return *ptr;
       }
     pointer operator->() const noexcept
       {
-        const auto ptr = this->get();
+        auto ptr = this->get();
         ROCKET_ASSERT(ptr);
         return ptr;
       }

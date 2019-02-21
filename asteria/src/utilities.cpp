@@ -47,7 +47,7 @@ bool are_debug_logs_enabled() noexcept
         // Write digits from the right to the left.
         auto reg = num;
         for(int i = width - 1; i >= 0; --i) {
-          const auto d = reg % 10;
+          auto d = reg % 10;
           reg /= 10;
           buf[i] = s_digits[d];
         }
@@ -87,7 +87,7 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
     }
     auto state = std::ios_base::goodbit;
     try {
-      const auto eof = std::char_traits<char>::eof();
+      auto eof = std::char_traits<char>::eof();
       char tstr[64];
       long tlen;
       // Prepend the timestamp.
@@ -173,9 +173,9 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
             "[US"    "\\x1F]",
           };
         // Check one character.
-        const auto uch = static_cast<unsigned>(*it & 0xFF);
+        auto uch = static_cast<unsigned>(*it & 0xFF);
         if(uch == 0x7F) {
-          const auto srep = "[DEL\\x7F]";
+          auto srep = "[DEL\\x7F]";
           tlen = static_cast<long>(std::strlen(srep));
           if(os.rdbuf()->sputn(srep, tlen) < tlen) {
             state |= std::ios_base::failbit;
@@ -184,7 +184,7 @@ bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) 
           continue;
         }
         if(uch < rocket::countof(s_replacements)) {
-          const auto srep = s_replacements[uch];
+          auto srep = s_replacements[uch];
           tlen = static_cast<long>(std::strlen(srep));
           if(os.rdbuf()->sputn(srep, tlen) < tlen) {
             state |= std::ios_base::failbit;
@@ -240,15 +240,15 @@ std::ostream & operator<<(std::ostream &os, const Indent &n)
     }
     auto state = std::ios_base::goodbit;
     try {
-      const auto eof = std::char_traits<char>::eof();
+      auto eof = std::char_traits<char>::eof();
       // Insert the head character.
-      const auto head = n.head();
+      auto head = n.head();
       if(os.rdbuf()->sputc(head) == eof) {
         state |= std::ios_base::failbit;
         goto z;
       }
       // Insert filling characters.
-      const auto fill = os.fill();
+      auto fill = os.fill();
       auto rem = n.count();
       while(rem > 0) {
         if(os.rdbuf()->sputc(fill) == eof) {
@@ -279,17 +279,17 @@ std::ostream & operator<<(std::ostream &os, const Quote &q)
     }
     auto state = std::ios_base::goodbit;
     try {
-      const auto eof = std::char_traits<char>::eof();
+      auto eof = std::char_traits<char>::eof();
       // Insert the open quote mark.
       if(os.rdbuf()->sputc('\"') == eof) {
         state |= std::ios_base::failbit;
         goto z;
       }
       // Insert the string.
-      const auto rbase = q.data() + q.size();
+      auto rbase = q.data() + q.size();
       auto rem = q.size();
       while(rem > 0) {
-        const auto uch = static_cast<unsigned>(rbase[-rem] & 0xFF);
+        auto uch = static_cast<unsigned>(rbase[-rem] & 0xFF);
         switch(uch) {
         case '\a':
           {
@@ -433,7 +433,7 @@ z:
 
 Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
   {
-    const auto rsize = static_cast<std::int64_t>(size);
+    auto rsize = static_cast<std::int64_t>(size);
     // Wrap `index` if it is negative.
     // N.B. The result may still be negative.
     auto rindex = index;
@@ -444,7 +444,7 @@ Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
     // If `rindex` is still negative, we will have to insert elements in the front.
     if(rindex < 0) {
       // Calculate the number of elements to fill.
-      const auto front_fill = 0 - static_cast<std::uint64_t>(rindex);
+      auto front_fill = 0 - static_cast<std::uint64_t>(rindex);
       if(front_fill > PTRDIFF_MAX) {
         rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
                                                      static_cast<long long>(index));
@@ -455,7 +455,7 @@ Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
     // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
     if(rindex >= rsize) {
       // Calculate the number of elements to fill.
-      const auto back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
+      auto back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
       if(back_fill > PTRDIFF_MAX) {
         rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
                                                      static_cast<long long>(index));

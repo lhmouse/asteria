@@ -64,14 +64,14 @@ class Reference_Stack
 
     const Reference & top() const noexcept
       {
-        const auto tptr = this->m_tptr;
+        auto tptr = this->m_tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
         return tptr[-1];
       }
     Reference & mut_top() noexcept
       {
-        const auto tptr = this->m_tptr;
+        auto tptr = this->m_tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
         return tptr[-1];

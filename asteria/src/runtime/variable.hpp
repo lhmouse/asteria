@@ -77,7 +77,7 @@ class Variable : public virtual RefCnt_Base
       {
         this->m_gcref_mant += dmant;
         // Add with carry.
-        const auto carry = static_cast<int>(this->m_gcref_mant);
+        auto carry = static_cast<int>(this->m_gcref_mant);
         this->m_gcref_intg += carry;
         this->m_gcref_mant -= carry;
       }

@@ -75,22 +75,22 @@ bool Value::test() const noexcept
       }
     case type_boolean:
       {
-        const auto &alt = this->check<D_boolean>();
+        auto &alt = this->check<D_boolean>();
         return alt;
       }
     case type_integer:
       {
-        const auto &alt = this->check<D_integer>();
+        auto &alt = this->check<D_integer>();
         return alt != 0;
       }
     case type_real:
       {
-        const auto &alt = this->check<D_real>();
+        auto &alt = this->check<D_real>();
         return std::fpclassify(alt) != FP_ZERO;
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        auto &alt = this->check<D_string>();
         return alt.size() != 0;
       }
     case type_opaque:
@@ -100,7 +100,7 @@ bool Value::test() const noexcept
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        auto &alt = this->check<D_array>();
         return alt.size() != 0;
       }
     case type_object:
@@ -128,13 +128,13 @@ bool Value::test() const noexcept
     template<typename IteratorT> Value::Compare do_lexicographical_compare(IteratorT s1, IteratorT s2, std::size_t n)
       {
         auto p1 = std::move(s1);
-        const auto e1 = p1 + static_cast<typename std::iterator_traits<IteratorT>::difference_type>(n);
+        auto e1 = p1 + static_cast<typename std::iterator_traits<IteratorT>::difference_type>(n);
         auto p2 = std::move(s2);
         for(;;) {
           if(p1 == e1) {
             break;
           }
-          const auto res = p1->compare(*p2);
+          auto res = p1->compare(*p2);
           if(res != Value::compare_equal) {
             return res;
           }
@@ -167,20 +167,20 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_boolean:
       {
-        const auto &lhs = this->check<D_boolean>();
-        const auto &rhs = other.check<D_boolean>();
+        auto &lhs = this->check<D_boolean>();
+        auto &rhs = other.check<D_boolean>();
         return do_three_way_compare(lhs, rhs);
       }
     case type_integer:
       {
-        const auto &lhs = this->check<D_integer>();
-        const auto &rhs = other.check<D_integer>();
+        auto &lhs = this->check<D_integer>();
+        auto &rhs = other.check<D_integer>();
         return do_three_way_compare(lhs, rhs);
       }
     case type_real:
       {
-        const auto &lhs = this->check<D_real>();
-        const auto &rhs = other.check<D_real>();
+        auto &lhs = this->check<D_real>();
+        auto &rhs = other.check<D_real>();
         if(std::isunordered(lhs, rhs)) {
           return Value::compare_unordered;
         }
@@ -188,8 +188,8 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_string:
       {
-        const auto &lhs = this->check<D_string>();
-        const auto &rhs = other.check<D_string>();
+        auto &lhs = this->check<D_string>();
+        auto &rhs = other.check<D_string>();
         return do_three_way_compare(lhs.compare(rhs), 0);
       }
     case type_opaque:
@@ -199,20 +199,20 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_array:
       {
-        const auto &lhs = this->check<D_array>();
-        const auto &rhs = other.check<D_array>();
+        auto &lhs = this->check<D_array>();
+        auto &rhs = other.check<D_array>();
         // Compare elements lexicographically.
-        const auto nlhs = lhs.size();
-        const auto nrhs = rhs.size();
+        auto nlhs = lhs.size();
+        auto nrhs = rhs.size();
         if(nlhs < nrhs) {
-          const auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nlhs);
+          auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nlhs);
           if(res != compare_equal) {
             return res;
           }
           return compare_less;
         }
         if(nlhs > nrhs) {
-          const auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nrhs);
+          auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nrhs);
           if(res != compare_equal) {
             return res;
           }
@@ -249,49 +249,49 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
       }
     case type_boolean:
       {
-        const auto &alt = this->check<D_boolean>();
+        auto &alt = this->check<D_boolean>();
         // boolean true
         os << "boolean " << std::boolalpha << std::nouppercase << alt;
         return;
       }
     case type_integer:
       {
-        const auto &alt = this->check<D_integer>();
+        auto &alt = this->check<D_integer>();
         // integer 42
         os << "integer " << std::dec << alt;
         return;
       }
     case type_real:
       {
-        const auto &alt = this->check<D_real>();
+        auto &alt = this->check<D_real>();
         // real 123.456
         os << "real " << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        auto &alt = this->check<D_string>();
         // string(5) "hello"
         os << "string(" << std::dec << alt.size() << ") " << quote(alt);
         return;
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        auto &alt = this->check<D_opaque>();
         // opaque("typeid") "my opaque"
         os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        auto &alt = this->check<D_function>();
         // function("typeid") "my function"
         os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        auto &alt = this->check<D_array>();
         // array(3) =
         //  [
         //   0 = integer 1;
@@ -310,7 +310,7 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        auto &alt = this->check<D_object>();
         // object(3) =
         //  {
         //   "one" = integer 1;
@@ -344,27 +344,27 @@ bool Value::unique() const noexcept
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        auto &alt = this->check<D_string>();
         return alt.unique();
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        auto &alt = this->check<D_opaque>();
         return alt.unique();
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        auto &alt = this->check<D_function>();
         return alt.unique();
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        auto &alt = this->check<D_array>();
         return alt.unique();
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        auto &alt = this->check<D_object>();
         return alt.unique();
       }
     default:
@@ -387,27 +387,27 @@ long Value::use_count() const noexcept
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        auto &alt = this->check<D_string>();
         return alt.use_count();
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        auto &alt = this->check<D_opaque>();
         return alt.use_count();
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        auto &alt = this->check<D_function>();
         return alt.use_count();
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        auto &alt = this->check<D_array>();
         return alt.use_count();
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        auto &alt = this->check<D_object>();
         return alt.use_count();
       }
     default:
@@ -428,25 +428,25 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        auto &alt = this->check<D_opaque>();
         alt->enumerate_variables(callback);
         return;
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        auto &alt = this->check<D_function>();
         alt->enumerate_variables(callback);
         return;
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        auto &alt = this->check<D_array>();
         rocket::for_each(alt, [&](const D_array::value_type &elem) { elem.enumerate_variables(callback);  });
         return;
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        auto &alt = this->check<D_object>();
         rocket::for_each(alt, [&](const D_object::value_type &pair) { pair.second.enumerate_variables(callback);  });
         return;
       }

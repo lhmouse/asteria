@@ -14,9 +14,9 @@ template<typename bucketT> inline bucketT * get_probing_origin(bucketT *begin, b
   {
     ROCKET_ASSERT(begin < end);
     // Multiplication is faster than division.
-    const auto seed = hval * 0x9E3779B9 / 2;
-    const auto ratio = static_cast<double>(static_cast<long>(seed) & 0x7FFFFFFF) / 0x80000000;
-    const auto off = static_cast<ptrdiff_t>(static_cast<double>(end - begin) * ratio);
+    auto seed = hval * 0x9E3779B9 / 2;
+    auto ratio = static_cast<double>(static_cast<long>(seed) & 0x7FFFFFFF) / 0x80000000;
+    auto off = static_cast<ptrdiff_t>(static_cast<double>(end - begin) * ratio);
     ROCKET_ASSERT((0 <= off) && (off < end - begin));
     return begin + off;
   }

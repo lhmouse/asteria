@@ -170,7 +170,7 @@ namespace Asteria {
           throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
-        const auto u8len = static_cast<unsigned>(2 + (code_point >= 0xE0) + (code_point >= 0xF0));
+        auto u8len = static_cast<unsigned>(2 + (code_point >= 0xE0) + (code_point >= 0xF0));
         ROCKET_ASSERT(u8len >= 2);
         ROCKET_ASSERT(u8len <= 4);
         // Unset bits that are not part of the payload.
@@ -197,7 +197,7 @@ namespace Asteria {
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
         }
         // Re-encode it and check for overlong sequences.
-        const auto minlen = static_cast<unsigned>(1 + (code_point >= 0x80) + (code_point >= 0x800) + (code_point >= 0x10000));
+        auto minlen = static_cast<unsigned>(1 + (code_point >= 0x80) + (code_point >= 0x800) + (code_point >= 0x10000));
         if(minlen != u8len) {
           // Overlong sequences are not allowed.
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf8_sequence_invalid);
@@ -233,14 +233,14 @@ namespace Asteria {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
         static constexpr char s_name_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789";
-        const auto bptr = reader_io.data_avail();
+        auto bptr = reader_io.data_avail();
         if(std::char_traits<char>::find(s_name_chars, 53, bptr[0]) == nullptr) {
           return false;
         }
         // Get an identifier.
-        const auto eptr = bptr + reader_io.size_avail();
+        auto eptr = bptr + reader_io.size_avail();
         auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch);  });
-        const auto tlen = static_cast<std::size_t>(tptr - bptr);
+        auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(!keyword_as_identifier) {
           // Check whether this identifier matches a keyword.
           struct Keyword_Element
@@ -293,7 +293,7 @@ namespace Asteria {
               // No matching keyword has been found so far.
               break;
             }
-            const auto &cur = range.first[0];
+            auto &cur = range.first[0];
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword token_c = { cur.second };
@@ -311,7 +311,7 @@ namespace Asteria {
     bool do_accept_punctuator(CoW_Vector<Token> &seq_out, Line_Reader &reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
-        const auto bptr = reader_io.data_avail();
+        auto bptr = reader_io.data_avail();
         if(std::char_traits<char>::find(s_punct_chars, std::char_traits<char>::length(s_punct_chars), bptr[0]) == nullptr) {
           return false;
         }
@@ -390,8 +390,8 @@ namespace Asteria {
           if(range.first == range.second) {
             break;
           }
-          const auto &cur = range.second[-1];
-          const auto tlen = std::char_traits<char>::length(cur.first);
+          auto &cur = range.second[-1];
+          auto tlen = std::char_traits<char>::length(cur.first);
           if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator token_c = { cur.second };
@@ -411,7 +411,7 @@ namespace Asteria {
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
-        const auto bptr = reader_io.data_avail();
+        auto bptr = reader_io.data_avail();
         if(bptr[0] != head) {
           return false;
         }
@@ -421,7 +421,7 @@ namespace Asteria {
         if(escapable) {
           // Translate escape sequences as needed.
           for(;;) {
-            const auto qavail = reader_io.size_avail() - tlen;
+            auto qavail = reader_io.size_avail() - tlen;
             if(qavail == 0) {
               throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
             }
@@ -518,11 +518,11 @@ namespace Asteria {
                 char32_t code_point = 0;
                 for(auto i = tlen; i < tlen + xcnt; ++i) {
                   static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-                  const auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
+                  auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
                   if(!dptr) {
                     throw do_make_parser_error(reader_io, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                   }
-                  const auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
+                  auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
                   code_point = code_point * 16 + dvalue;
                 }
                 if((0xD800 <= code_point) && (code_point < 0xE000)) {
@@ -534,7 +534,7 @@ namespace Asteria {
                   throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
                 }
                 // Encode it.
-                const auto encode_one = [&](unsigned shift, unsigned mask)
+                auto encode_one = [&](unsigned shift, unsigned mask)
                   {
                     value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask)));
                   };
@@ -596,11 +596,11 @@ namespace Asteria {
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?[0-9`]+)
         static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-        const auto bptr = reader_io.data_avail();
+        auto bptr = reader_io.data_avail();
         if(std::char_traits<char>::find(s_digits, 20, bptr[0]) == nullptr) {
           return false;
         }
-        const auto eptr = bptr + reader_io.size_avail();
+        auto eptr = bptr + reader_io.size_avail();
         // Get a numeric literal.
         // Declare everything that will be calculated later.
         // 0. The integral part is required. The fractional and exponent parts are optional.
@@ -632,7 +632,7 @@ namespace Asteria {
             }
           }
         }
-        const auto max_digits = static_cast<std::size_t>(radix * 2);
+        auto max_digits = static_cast<std::size_t>(radix * 2);
         // Look for the end of the integral part.
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
         int_end = static_cast<std::size_t>(tptr - bptr);
@@ -697,19 +697,19 @@ namespace Asteria {
         // Since we make no use of them, we just reserve them for further use for good.
         static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
         tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch);  });
-        const auto tlen = static_cast<std::size_t>(tptr - bptr);
+        auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(tlen != exp_end) {
           throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
         }
         // Parse the exponent.
         int exp = 0;
         for(auto i = exp_begin; i != exp_end; ++i) {
-          const auto dptr = std::char_traits<char>::find(s_digits, 20, bptr[i]);
+          auto dptr = std::char_traits<char>::find(s_digits, 20, bptr[i]);
           if(!dptr) {
             continue;
           }
-          const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          const auto bound = (INT_MAX - dvalue) / 10;
+          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
             throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
           }
@@ -728,12 +728,12 @@ namespace Asteria {
           // Parse the significant part.
           std::int64_t value = 0;
           for(auto i = int_begin; i != int_end; ++i) {
-            const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+            auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
             if(!dptr) {
               continue;
             }
-            const auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
-            const auto bound = (INT64_MAX - dvalue) / radix;
+            auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
+            auto bound = (INT64_MAX - dvalue) / radix;
             if(value > bound) {
               throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
             }
@@ -742,7 +742,7 @@ namespace Asteria {
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              const auto bound = INT64_MAX / exp_base;
+              auto bound = INT64_MAX / exp_base;
               if(value > bound) {
                 throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
               }
@@ -759,22 +759,22 @@ namespace Asteria {
         double value = 0;
         bool zero = true;
         for(auto i = int_begin; i != int_end; ++i) {
-          const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+          auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
           if(!dptr) {
             continue;
           }
-          const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
           value = value * radix + dvalue;
           zero |= dvalue;
         }
         // Parse the fractional part.
         double frac = 0;
         for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
-          const auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+          auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
           if(!dptr) {
             continue;
           }
-          const auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
           frac = (frac + dvalue) / radix;
           zero |= dvalue;
         }
@@ -790,11 +790,11 @@ namespace Asteria {
           value = value * std::pow(exp_base, exp);
         }
         // Check for overflow or underflow.
-        const int vclass = std::fpclassify(value);
-        if(vclass == FP_INFINITE) {
+        int fpc = std::fpclassify(value);
+        if(fpc == FP_INFINITE) {
           throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_overflow);
         }
-        if((vclass == FP_ZERO) && !zero) {
+        if((fpc == FP_ZERO) && !zero) {
           throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_underflow);
         }
         // Push a floating-point literal.
@@ -878,8 +878,8 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, const Pa
         if(bcomm) {
           // Search for the terminator of this block comment.
           static constexpr char s_bcomm_term[2] = { '*', '/' };
-          const auto bptr = reader.data_avail();
-          const auto eptr = bptr + reader.size_avail();
+          auto bptr = reader.data_avail();
+          auto eptr = bptr + reader.size_avail();
           auto tptr = std::search(bptr, eptr, s_bcomm_term, s_bcomm_term + 2);
           if(tptr == eptr) {
             // The block comment will not end in this line. Stop.
@@ -893,14 +893,14 @@ bool Token_Stream::load(std::istream &cstrm_io, const CoW_String &file, const Pa
           continue;
         }
         // Read a character.
-        const auto head = reader.peek();
+        auto head = reader.peek();
         if(std::char_traits<char>::find(" \t\v\f\r\n", 6, head) != nullptr) {
           // Skip a space.
           reader.consume(1);
           continue;
         }
         if(head == '/') {
-          const auto next = reader.peek(1);
+          auto next = reader.peek(1);
           if(next == '/') {
             // Start a line comment. Discard all remaining characters in this line.
             reader.consume(reader.size_avail());
@@ -961,7 +961,7 @@ const Token * Token_Stream::peek_opt() const noexcept
       }
     case state_success:
       {
-        const auto &alt = this->m_stor.as<CoW_Vector<Token>>();
+        auto &alt = this->m_stor.as<CoW_Vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }

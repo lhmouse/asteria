@@ -46,9 +46,9 @@ int main(int argc, char **argv)
 #endif
     Global_Context global;
     // run it and measure the time.
-    const auto t1 = std::chrono::high_resolution_clock::now();
+    auto t1 = std::chrono::high_resolution_clock::now();
     auto res = code.execute(global, std::move(args));
-    const auto t2 = std::chrono::high_resolution_clock::now();
+    auto t2 = std::chrono::high_resolution_clock::now();
     // print the time elasped and the result.
     std::cerr << std::endl
               << "---" << std::endl

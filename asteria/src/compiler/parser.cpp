@@ -17,7 +17,7 @@ namespace Asteria {
 
     Parser_Error do_make_parser_error(const Token_Stream &tstrm_io, Parser_Error::Code code)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return { 0, SIZE_MAX, 0, code };
         }
@@ -26,7 +26,7 @@ namespace Asteria {
 
     Source_Location do_tell_source_location(const Token_Stream &tstrm_io)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return { rocket::sref("<end of stream>"), 0 };
         }
@@ -35,11 +35,11 @@ namespace Asteria {
 
     bool do_match_keyword(Token_Stream &tstrm_io, Token::Keyword keyword)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_keyword>();
+        auto qalt = qtok->opt<Token::S_keyword>();
         if(!qalt) {
           return false;
         }
@@ -52,11 +52,11 @@ namespace Asteria {
 
     bool do_match_punctuator(Token_Stream &tstrm_io, Token::Punctuator punct)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_punctuator>();
+        auto qalt = qtok->opt<Token::S_punctuator>();
         if(!qalt) {
           return false;
         }
@@ -69,11 +69,11 @@ namespace Asteria {
 
     bool do_accept_identifier(CoW_String &name_out, Token_Stream &tstrm_io)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_identifier>();
+        auto qalt = qtok->opt<Token::S_identifier>();
         if(!qalt) {
           return false;
         }
@@ -84,11 +84,11 @@ namespace Asteria {
 
     bool do_accept_string_literal(CoW_String &value_out, Token_Stream &tstrm_io)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_string_literal>();
+        auto qalt = qtok->opt<Token::S_string_literal>();
         if(!qalt) {
           return false;
         }
@@ -99,11 +99,11 @@ namespace Asteria {
 
     bool do_accept_keyword_as_identifier(CoW_String &name_out, Token_Stream &tstrm_io)
       {
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_keyword>();
+        auto qalt = qtok->opt<Token::S_keyword>();
         if(!qalt) {
           return false;
         }
@@ -116,7 +116,7 @@ namespace Asteria {
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -124,7 +124,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset:
               {
@@ -157,7 +157,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            const auto &alt = qtok->check<Token::S_punctuator>();
+            auto &alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_add:
               {
@@ -212,11 +212,11 @@ namespace Asteria {
       {
         // postfix-operator ::=
         //   "++" | "--"
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_punctuator>();
+        auto qalt = qtok->opt<Token::S_punctuator>();
         if(!qalt) {
           return false;
         }
@@ -255,14 +255,14 @@ namespace Asteria {
         //   "nan"
         // infinity-literal ::=
         //   "infinity"
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_null:
               {
@@ -301,21 +301,21 @@ namespace Asteria {
           }
         case Token::index_integer_literal:
           {
-            const auto &alt = qtok->check<Token::S_integer_literal>();
+            auto &alt = qtok->check<Token::S_integer_literal>();
             value_out = D_integer(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_real_literal:
           {
-            const auto &alt = qtok->check<Token::S_real_literal>();
+            auto &alt = qtok->check<Token::S_real_literal>();
             value_out = D_real(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_string_literal:
           {
-            const auto &alt = qtok->check<Token::S_string_literal>();
+            auto &alt = qtok->check<Token::S_string_literal>();
             value_out = D_string(alt.value);
             tstrm_io.shift();
             break;
@@ -330,14 +330,14 @@ namespace Asteria {
       {
         // negation ::=
         //   "!" | "not"
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_not:
               {
@@ -352,7 +352,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            const auto &alt = qtok->check<Token::S_punctuator>();
+            auto &alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_notl:
               {
@@ -541,7 +541,7 @@ namespace Asteria {
         }
         CoW_Vector<PreHashed_String> keys;
         for(;;) {
-          const auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_Error::code_duplicate_object_key);
+          auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_Error::code_duplicate_object_key);
           CoW_String key;
           bool key_got = do_accept_string_literal(key, tstrm_io) ||
                          do_accept_identifier(key, tstrm_io) ||
@@ -1019,11 +1019,11 @@ namespace Asteria {
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
         //     "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
         //     "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
-        const auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
           return false;
         }
-        const auto qalt = qtok->opt<Token::S_punctuator>();
+        auto qalt = qtok->opt<Token::S_punctuator>();
         if(!qalt) {
           return false;
         }
@@ -1225,7 +1225,7 @@ namespace Asteria {
             break;
           }
           // Assignment operations have the lowest precedence and group from right to left.
-          const auto prec_top = stack.back()->precedence();
+          auto prec_top = stack.back()->precedence();
           if(prec_top < Infix_Element_Base::precedence_assignment) {
             while((stack.size() > 1) && (prec_top <= elem->precedence())) {
               stack.rbegin()[1]->append(std::move(*(stack.back())));
