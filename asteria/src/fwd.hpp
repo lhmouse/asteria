@@ -71,6 +71,7 @@ class Simple_Source_File;
 
 // Library
 class Argument_Reader;
+class Simple_Binding_Wrapper;
 
 // Type Aliases
 using CoW_String = rocket::cow_string;
