@@ -12,10 +12,10 @@ struct Parser_Options
   {
     bool integer_as_real : 1;
     bool keyword_as_identifier : 1;
-    bool single_quotes_as_double : 1;
+    bool escapable_single_quote_string : 1;
 
     constexpr Parser_Options() noexcept
-      : integer_as_real(false), keyword_as_identifier(false), single_quotes_as_double(false)
+      : integer_as_real(false), keyword_as_identifier(false), escapable_single_quote_string(false)
       {
       }
   };
