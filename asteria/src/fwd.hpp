@@ -72,6 +72,10 @@ class Simple_Source_File;
 // Library
 class Argument_Reader;
 
+// Type Aliases
+using CoW_String = rocket::cow_string;
+using PreHashed_String = rocket::prehashed_string;
+
 // Template Aliases
 template<typename H, typename C> using Unique_Handle = rocket::unique_handle<H, C>;
 template<typename E, typename D = std::default_delete<const E>> using Unique_Ptr = rocket::unique_ptr<E, D>;
@@ -80,11 +84,7 @@ template<typename E> using RefCnt_Object = rocket::refcnt_object<E>;
 
 template<typename E> using CoW_Vector = rocket::cow_vector<E>;
 template<typename K, typename V, typename H, typename E = rocket::transparent_equal_to> using CoW_HashMap = rocket::cow_hashmap<K, V, H, E>;
-template<typename E, std::size_t c> using Static_Vector = rocket::static_vector<E, c>;
-
-// Type Aliases
-using CoW_String = rocket::cow_string;
-using PreHashed_String = rocket::prehashed_string;
+template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
 
 // Fundamental Types
 using D_null      = std::nullptr_t;
