@@ -19,7 +19,7 @@ void Simple_Binding_Wrapper::describe(std::ostream &os) const
 
 void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context & /*global*/, CoW_Vector<Reference> &&args) const
   {
-    self_io = (*(this->m_sfunc_ptr))(this->m_param_int, this->m_param_ptr, std::move(args));
+    self_io = (*(this->m_sfunc))(this->m_iparam, this->m_pparam, std::move(args));
   }
 
 void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback & /*callback*/) const
