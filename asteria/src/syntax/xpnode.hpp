@@ -66,10 +66,6 @@ class Xpnode
       {
         PreHashed_String name;
       };
-    struct S_bound_reference
-      {
-        Reference ref;
-      };
     struct S_closure_function
       {
         Source_Location sloc;
@@ -109,34 +105,38 @@ class Xpnode
         Expression branch_null;
         bool assign;
       };
+    struct S_bound_reference
+      {
+        Reference ref;
+      };
 
     enum Index : std::uint8_t
       {
         index_literal           =  0,
         index_named_reference   =  1,
-        index_bound_reference   =  2,
-        index_closure_function  =  3,
-        index_branch            =  4,
-        index_function_call     =  5,
-        index_member_access     =  6,
-        index_operator_rpn      =  7,
-        index_unnamed_array     =  8,
-        index_unnamed_object    =  9,
-        index_coalescence       = 10,
+        index_closure_function  =  2,
+        index_branch            =  3,
+        index_function_call     =  4,
+        index_member_access     =  5,
+        index_operator_rpn      =  6,
+        index_unnamed_array     =  7,
+        index_unnamed_object    =  8,
+        index_coalescence       =  9,
+        index_bound_reference   = 10,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
         , S_literal           //  0,
         , S_named_reference   //  1,
-        , S_bound_reference   //  2,
-        , S_closure_function  //  3,
-        , S_branch            //  4,
-        , S_function_call     //  5,
-        , S_member_access     //  6,
-        , S_operator_rpn      //  7,
-        , S_unnamed_array     //  8,
-        , S_unnamed_object    //  9,
-        , S_coalescence       // 10,
+        , S_closure_function  //  2,
+        , S_branch            //  3,
+        , S_function_call     //  4,
+        , S_member_access     //  5,
+        , S_operator_rpn      //  6,
+        , S_unnamed_array     //  7,
+        , S_unnamed_object    //  8,
+        , S_coalescence       //  9,
+        , S_bound_reference   // 10,
       )>;
     static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 
