@@ -93,7 +93,10 @@ class Reference
         return *this;
       }
 
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const
+      {
+        this->m_root.enumerate_variables(callback);
+      }
   };
 
 }
