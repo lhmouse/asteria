@@ -349,7 +349,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
           stack_io.pop();
           do_set_temporary(stack_io, true, rocket::move(ref_c));
         } else {
-          stack_io.pop_next();
+          stack_io.pop_prev();
         }
       }
 
