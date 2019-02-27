@@ -12,123 +12,79 @@ namespace Asteria {
 class Reference_Stack
   {
   private:
-    Reference *m_tptr;
-    Cow_Vector<Reference> m_large;
-    Static_Vector<Reference, 7> m_small;
+    Cow_Vector<Reference> m_stor;
+    Reference *m_btop;  // This points to the next element of the top.
 
   public:
     Reference_Stack() noexcept
-      : m_large(), m_small()
+      : m_stor(), m_btop(this->m_stor.mut_data())
       {
-        // Do not call any member function of `m_small` before its initialization.
-        this->m_tptr = this->m_small.mut_data();
       }
+    ~Reference_Stack();
 
     Reference_Stack(const Reference_Stack &)
       = delete;
     Reference_Stack & operator=(const Reference_Stack &)
       = delete;
 
-  private:
-    void do_switch_to_large();
-
   public:
     bool empty() const noexcept
       {
-        if(this->m_large.capacity() == 0) {
-          // Use `m_small`.
-          return m_small.empty();
-        }
-        // Use `m_large`.
-        return m_large.empty();
+        return this->m_btop == this->m_stor.data();
       }
     std::size_t size() const noexcept
       {
-        if(this->m_large.capacity() == 0) {
-          // Use `m_small`.
-          return static_cast<std::size_t>(this->m_tptr - this->m_small.data());
-        }
-        // Use `m_large`.
-        return static_cast<std::size_t>(this->m_tptr - this->m_large.data());
+        return static_cast<std::size_t>(this->m_btop - this->m_stor.data());
       }
     void clear() noexcept
       {
-        if(this->m_large.capacity() == 0) {
-          // Use `m_small`.
-          this->m_tptr = m_small.mut_data();
-          return;
-        }
-        // Use `m_large`.
-        this->m_tptr = m_large.mut_data();
+        this->m_btop = this->m_stor.mut_data();
       }
 
     const Reference & top() const noexcept
       {
-        auto tptr = this->m_tptr;
-        ROCKET_ASSERT(tptr != this->m_small.data());
-        ROCKET_ASSERT(tptr != this->m_large.data());
-        return tptr[-1];
+        auto btop = this->m_btop;
+        ROCKET_ASSERT(btop != this->m_stor.data());
+        return btop[-1];
       }
     Reference & mut_top() noexcept
       {
-        auto tptr = this->m_tptr;
-        ROCKET_ASSERT(tptr != this->m_small.data());
-        ROCKET_ASSERT(tptr != this->m_large.data());
-        return tptr[-1];
+        auto btop = this->m_btop;
+        ROCKET_ASSERT(btop != this->m_stor.data());
+        return btop[-1];
       }
     template<typename ParamT> Reference & push(ParamT &&param)
       {
-        auto tptr = this->m_tptr;
-        if(this->m_large.capacity() == 0) {
-          // Use `m_small`.
-          if(ROCKET_EXPECT(tptr != this->m_small.data() + this->m_small.size())) {
-            // Write to the reserved area.
-            goto r;
-          }
-          if(ROCKET_UNEXPECT(tptr == this->m_small.data() + this->m_small.capacity())) {
-            // The small buffer is full.
-            this->do_switch_to_large();
-            goto x;
-          }
-          // Extend the small buffer.
-          tptr = std::addressof(this->m_small.emplace_back(std::forward<ParamT>(param)));
-          goto k;
+        auto btop = this->m_btop;
+        if(ROCKET_EXPECT(btop != this->m_stor.data() + this->m_stor.size())) {
+          // Overwrite an existent element.
+          *btop = std::forward<ParamT>(param);
+        } else {
+          // Construct a new element.
+          btop = std::addressof(this->m_stor.emplace_back(std::forward<ParamT>(param)));
         }
-        // Use `m_large`.
-        if(ROCKET_EXPECT(tptr != this->m_large.data() + this->m_large.size())) {
-          // Write to the reserved area.
-      r:
-          *tptr = std::forward<ParamT>(param);
-          goto k;
-        }
-        // Extend the large buffer.
-      x:
-        tptr = std::addressof(this->m_large.emplace_back(std::forward<ParamT>(param)));
-      k:
-        ++tptr;
-        this->m_tptr = tptr;
-        return tptr[-1];
+        // Set up the past-the-top pointer.
+        ++btop;
+        this->m_btop = btop;
+        return btop[-1];
       }
     void pop() noexcept
       {
-        auto tptr = this->m_tptr;
-        ROCKET_ASSERT(tptr != this->m_small.data());
-        ROCKET_ASSERT(tptr != this->m_large.data());
-        // Drop an element.
-        --tptr;
-        this->m_tptr = tptr;
+        auto btop = this->m_btop;
+        ROCKET_ASSERT(btop != this->m_stor.data());
+        // Set up the past-the-top pointer.
+        --btop;
+        this->m_btop = btop;
       }
-    void pop_next() noexcept
+    void pop_prev() noexcept
       {
-        auto tptr = this->m_tptr;
-        ROCKET_ASSERT(tptr != this->m_small.data());
-        ROCKET_ASSERT(tptr != this->m_large.data());
-        // Drop the next element.
-        --tptr;
-        ROCKET_ASSERT(tptr != this->m_small.data());
-        ROCKET_ASSERT(tptr != this->m_large.data());
-        tptr[-1] = rocket::move(tptr[0]);
-        this->m_tptr = tptr;
+        auto btop = this->m_btop;
+        ROCKET_ASSERT(btop - this->m_stor.data() >= 2);
+        // Overwrite the previous element with the top.
+        btop[-2] = std::move(btop[-1]);
+        // Set up the past-the-top pointer.
+        --btop;
+        this->m_btop = btop;
       }
   };
 
