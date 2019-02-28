@@ -7,20 +7,23 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
-#include "../syntax/block.hpp"
 
 namespace Asteria {
 
 class Instantiated_Function : public Abstract_Function
   {
   private:
+    // pre-defined constants and parameters
     Rcobj<Variadic_Arguer> m_zvarg;
     Cow_Vector<PreHashed_String> m_params;
-    Block m_body_bnd;
+    // the function body
+    Cow_Vector<RefCnt_Object<Air_Node>> m_code;
 
   public:
-    Instantiated_Function(const Source_Location &sloc, const PreHashed_String &func, const Cow_Vector<PreHashed_String> &params, Block body_bnd)
-      : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params), m_body_bnd(rocket::move(body_bnd))
+    Instantiated_Function(const Source_Location &sloc, const PreHashed_String &func, const Cow_Vector<PreHashed_String> &params,
+                          Cow_Vector<RefCnt_Object<Air_Node>> &&code)
+      : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
+        m_code(std::move(code))
       {
       }
     ~Instantiated_Function() override;
