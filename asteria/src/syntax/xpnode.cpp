@@ -3,6 +3,9 @@
 
 #include "../precompiled.hpp"
 #include "xpnode.hpp"
+
+#if 0
+
 #include "statement.hpp"
 #include "../runtime/reference_stack.hpp"
 #include "../runtime/analytic_context.hpp"
@@ -1770,3 +1773,4 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
   }
 
 }
+#endif

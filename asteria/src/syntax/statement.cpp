@@ -3,6 +3,9 @@
 
 #include "../precompiled.hpp"
 #include "statement.hpp"
+
+#if 0
+
 #include "xpnode.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/analytic_context.hpp"
@@ -898,3 +901,5 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
   }
 
 }
+
+#endif

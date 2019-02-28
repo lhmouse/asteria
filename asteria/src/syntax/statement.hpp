@@ -5,9 +5,7 @@
 #define ASTERIA_SYNTAX_STATEMENT_HPP_
 
 #include "../fwd.hpp"
-#include "expression.hpp"
 #include "source_location.hpp"
-#include "block.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
 
@@ -26,70 +24,71 @@ class Statement
 
     struct S_expression
       {
-        Expression expr;
+        Cow_Vector<Xpnode> expr;
       };
     struct S_block
       {
-        Block body;
+        Cow_Vector<Statement> body;
       };
     struct S_variable
       {
         Source_Location sloc;
         PreHashed_String name;
         bool immutable;
-        Expression init;
+        Cow_Vector<Xpnode> init;
       };
     struct S_function
       {
         Source_Location sloc;
         PreHashed_String name;
         Cow_Vector<PreHashed_String> params;
-        Block body;
+        Cow_Vector<Statement> body;
       };
     struct S_if
       {
         bool neg;
-        Expression cond;
-        Block branch_true;
-        Block branch_false;
+        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Statement> branch_true;
+        Cow_Vector<Statement> branch_false;
       };
     struct S_switch
       {
-        Expression ctrl;
-        Cow_Vector<std::pair<Expression, Block>> clauses;
+        Cow_Vector<Xpnode> ctrl;
+        Cow_Vector<std::pair<Cow_Vector<Xpnode>,  // This is empty on `default` clauses and non-empty on `case` clauses.
+                             Cow_Vector<Statement>>> clauses;
       };
     struct S_do_while
       {
-        Block body;
+        Cow_Vector<Statement> body;
         bool neg;
-        Expression cond;
+        Cow_Vector<Xpnode> cond;
       };
     struct S_while
       {
         bool neg;
-        Expression cond;
-        Block body;
+        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Statement> body;
       };
     struct S_for
       {
-        Block init;
-        Expression cond;
-        Expression step;
-        Block body;
+        Cow_Vector<Statement> init;
+        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Xpnode> step;
+        Cow_Vector<Statement> body;
       };
     struct S_for_each
       {
         PreHashed_String key_name;
         PreHashed_String mapped_name;
-        Expression init;
-        Block body;
+        Cow_Vector<Xpnode> init;
+        Cow_Vector<Statement> body;
       };
     struct S_try
       {
-        Block body_try;
+        Cow_Vector<Statement> body_try;
         Source_Location sloc;
         PreHashed_String except_name;
-        Block body_catch;
+        Cow_Vector<Statement> body_catch;
       };
     struct S_break
       {
@@ -102,16 +101,16 @@ class Statement
     struct S_throw
       {
         Source_Location sloc;
-        Expression expr;
+        Cow_Vector<Xpnode> expr;
       };
     struct S_return
       {
         bool by_ref;
-        Expression expr;
+        Cow_Vector<Xpnode> expr;
       };
     struct S_assert
       {
-        Expression expr;
+        Cow_Vector<Xpnode> expr;
         Cow_String msg;
       };
 
@@ -172,11 +171,7 @@ class Statement
       }
 
   public:
-    void fly_over_in_place(Abstract_Context &ctx_io) const;
-    void bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
-    void compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const;
-
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    void generate_code(Cow_Vector<RefCnt_Object<Air_Node>> &code_out, const Analytic_Context &ctx) const;
   };
 
 }
