@@ -60,6 +60,7 @@ class Generational_Collector;
 class Variadic_Arguer;
 class Instantiated_Function;
 class Backtrace_Frame;
+class Air_Node;
 
 // Compiler
 class Parser_Error;

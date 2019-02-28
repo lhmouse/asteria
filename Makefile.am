@@ -116,7 +116,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/reference_stack.hpp  \
   asteria/src/runtime/reference_dictionary.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
-  asteria/src/runtime/backtrace_frame.hpp
+  asteria/src/runtime/backtrace_frame.hpp  \
+  asteria/src/runtime/air_node.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \
@@ -162,6 +163,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/reference_stack.cpp  \
   asteria/src/runtime/reference_dictionary.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
+  asteria/src/runtime/air_node.cpp  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \
