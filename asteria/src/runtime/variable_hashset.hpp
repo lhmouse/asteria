@@ -41,7 +41,7 @@ class Variable_HashSet
 
   private:
     // The first and last buckets are permanently reserved.
-    CoW_Vector<Bucket> m_stor;
+    Cow_Vector<Bucket> m_stor;
 
   public:
     Variable_HashSet() noexcept

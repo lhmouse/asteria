@@ -36,7 +36,7 @@ class Abstract_Context
 
   protected:
     void do_tie_collector(RefCnt_Ptr<Generational_Collector> tied_collector_opt) noexcept;
-    void do_set_named_reference_templates(const std::pair<CoW_String, Reference> *tdata_opt, std::size_t tsize) noexcept;
+    void do_set_named_reference_templates(const std::pair<Cow_String, Reference> *tdata_opt, std::size_t tsize) noexcept;
 
   public:
     const Reference * get_named_reference_opt(const PreHashed_String &name) const

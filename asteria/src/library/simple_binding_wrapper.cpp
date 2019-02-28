@@ -17,7 +17,7 @@ void Simple_Binding_Wrapper::describe(std::ostream &os) const
     os << this->m_desc;
   }
 
-void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context & /*global*/, CoW_Vector<Reference> &&args) const
+void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
   {
     self_io = (*(this->m_sfunc))(this->m_iparam, this->m_pparam, std::move(args));
   }

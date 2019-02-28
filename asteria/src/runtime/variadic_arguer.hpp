@@ -16,7 +16,7 @@ class Variadic_Arguer : public Abstract_Function
   private:
     Source_Location m_sloc;
     PreHashed_String m_func;
-    CoW_Vector<Reference> m_vargs;
+    Cow_Vector<Reference> m_vargs;
 
   public:
     template<typename ...XvargsT> Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &func,
@@ -37,7 +37,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc;
       }
-    const CoW_String & get_source_file() const noexcept
+    const Cow_String & get_source_file() const noexcept
       {
         return this->m_sloc.file();
       }
@@ -59,7 +59,7 @@ class Variadic_Arguer : public Abstract_Function
       }
 
     void describe(std::ostream &os) const override;
-    void invoke(Reference &self_io, const Global_Context &global, CoW_Vector<Reference> &&args) const override;
+    void invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 

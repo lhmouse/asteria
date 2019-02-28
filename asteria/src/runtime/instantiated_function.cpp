@@ -19,7 +19,7 @@ void Instantiated_Function::describe(std::ostream &os) const
     os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
-void Instantiated_Function::invoke(Reference &self_io, const Global_Context &global, CoW_Vector<Reference> &&args) const
+void Instantiated_Function::invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     this->m_body_bnd.execute_as_function(self_io, this->m_zvarg, this->m_params, global, std::move(args));
   }

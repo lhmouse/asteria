@@ -72,7 +72,7 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
     }
   }
 
-void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
+void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
@@ -134,7 +134,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
         auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_Context ctx_next(&ctx_io);
-        CoW_Vector<std::pair<Expression, Block>> clauses_bnd;
+        Cow_Vector<std::pair<Expression, Block>> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
         for(auto &pair : alt.clauses) {
           auto first_bnd = pair.first.bind(global, ctx_next);
@@ -258,7 +258,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     namespace {
 
     Block::Status do_execute_expression(const Statement::S_expression &alt,
-                                        Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                        Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, func, global, ctx_io);
@@ -266,14 +266,14 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_block(const Statement::S_block &alt,
-                                   Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                   Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Execute the body.
         return alt.body.execute(ref_out, func, global, ctx_io);
       }
 
     Block::Status do_execute_variable(const Statement::S_variable &alt,
-                                      Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                      Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -289,7 +289,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_function(const Statement::S_function &alt,
-                                      Reference & /*ref_out*/, Executive_Context &ctx_io, const CoW_String & /*func*/, const Global_Context &global)
+                                      Reference & /*ref_out*/, Executive_Context &ctx_io, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
@@ -308,7 +308,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_if(const Statement::S_if &alt,
-                                Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the condition and pick a branch.
         alt.cond.evaluate(ref_out, func, global, ctx_io);
@@ -318,7 +318,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_switch(const Statement::S_switch &alt,
-                                    Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                    Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the control expression.
         alt.ctrl.evaluate(ref_out, func, global, ctx_io);
@@ -374,7 +374,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_do_while(const Statement::S_do_while &alt,
-                                      Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                      Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         for(;;) {
           // Execute the loop body.
@@ -397,7 +397,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_while(const Statement::S_while &alt,
-                                   Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                   Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         for(;;) {
           // Check the loop condition.
@@ -420,7 +420,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_for(const Statement::S_for &alt,
-                                 Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                 Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Executive_Context ctx_next(&ctx_io);
@@ -453,7 +453,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_for_each(const Statement::S_for_each &alt,
-                                      Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                      Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // The key and mapped variables shall not outlast the loop body.
         Executive_Context ctx_for(&ctx_io);
@@ -530,7 +530,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_try(const Statement::S_try &alt,
-                                 Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                 Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         auto status = Block::status_next;
         try {
@@ -566,7 +566,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_throw(const Statement::S_throw &alt,
-                                   Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                   Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, func, global, ctx_io);
@@ -577,7 +577,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt,
-                                    Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                    Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, func, global, ctx_io);
@@ -590,7 +590,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       }
 
     Block::Status do_execute_assert(const Statement::S_assert &alt,
-                                    Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global)
+                                    Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
       {
         // Evaluate the expression.
         alt.expr.evaluate(ref_out, func, global, ctx_io);
@@ -614,12 +614,12 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
     // BECAUSE C++ IS STUPID, PERIOD.
     template<typename AltT,
              Block::Status (&funcT)(const AltT &,
-                                    Reference &, Executive_Context &, const CoW_String &, const Global_Context &)
+                                    Reference &, Executive_Context &, const Cow_String &, const Global_Context &)
              > Block::Compiled_Instruction do_bind(const AltT &alt)
       {
         return rocket::bind_front(
           [](const void *qalt,
-             const std::tuple<Reference &, Executive_Context &, const CoW_String &, const Global_Context &> &params)
+             const std::tuple<Reference &, Executive_Context &, const Cow_String &, const Global_Context &> &params)
             {
               return funcT(*static_cast<const AltT *>(qalt),
                            std::get<0>(params), std::get<1>(params), std::get<2>(params), std::get<3>(params));
@@ -631,7 +631,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
       {
         return rocket::bind_front(
           [](const void *value,
-             const std::tuple<Reference &, Executive_Context &, const CoW_String &, const Global_Context &> & /*params*/)
+             const std::tuple<Reference &, Executive_Context &, const Cow_String &, const Global_Context &> & /*params*/)
             {
               return static_cast<Block::Status>(reinterpret_cast<std::intptr_t>(value));
             },
@@ -640,7 +640,7 @@ void Statement::bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context
 
     }
 
-void Statement::compile(CoW_Vector<Block::Compiled_Instruction> &cinsts_out) const
+void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:

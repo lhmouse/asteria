@@ -14,11 +14,11 @@ class Traceable_Exception : public virtual std::exception
   {
   private:
     Value m_value;
-    CoW_Vector<Backtrace_Frame> m_frames;
+    Cow_Vector<Backtrace_Frame> m_frames;
 
   public:
     template<typename XvalueT> Traceable_Exception(XvalueT &&xvalue,
-                                                   const Source_Location &sloc, const CoW_String &func)
+                                                   const Source_Location &sloc, const Cow_String &func)
       : m_value(std::forward<XvalueT>(xvalue)),
         m_frames(1, sloc, func)
       {
@@ -48,7 +48,7 @@ class Traceable_Exception : public virtual std::exception
       {
         return this->m_frames.at(index);
       }
-    void append_frame(const Source_Location &sloc, const CoW_String &func)
+    void append_frame(const Source_Location &sloc, const Cow_String &func)
       {
         this->m_frames.emplace_back(sloc, func);
       }

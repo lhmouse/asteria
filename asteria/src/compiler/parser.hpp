@@ -23,7 +23,7 @@ class Parser
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_Error, CoW_Vector<Statement>> m_stor;
+    rocket::variant<std::nullptr_t, Parser_Error, Cow_Vector<Statement>> m_stor;
 
   public:
     Parser() noexcept
@@ -39,7 +39,7 @@ class Parser
   public:
     explicit operator bool () const noexcept
       {
-        return this->m_stor.get<CoW_Vector<Statement>>() != nullptr;
+        return this->m_stor.get<Cow_Vector<Statement>>() != nullptr;
       }
     State state() const noexcept
       {

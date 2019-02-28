@@ -21,7 +21,7 @@ Function_Analytic_Context::~Function_Analytic_Context()
 
     }
 
-void Function_Analytic_Context::do_set_parameters(const CoW_Vector<PreHashed_String> &params)
+void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_String> &params)
   {
     // Set parameters, which are local variables.
     for(auto &param : params) {

@@ -16,19 +16,19 @@ class Expression
     using Compiled_Instruction =
       rocket::bind_front_result<
         void (*)(const void *,
-                 const std::tuple<Reference_Stack &, const CoW_String &, const Global_Context &, const Executive_Context &> &),
+                 const std::tuple<Reference_Stack &, const Cow_String &, const Global_Context &, const Executive_Context &> &),
         const void *>;
 
   private:
-    CoW_Vector<Xpnode> m_nodes;
-    CoW_Vector<Compiled_Instruction> m_cinsts;
+    Cow_Vector<Xpnode> m_nodes;
+    Cow_Vector<Compiled_Instruction> m_cinsts;
 
   public:
     Expression() noexcept
       : m_nodes()
       {
       }
-    Expression(CoW_Vector<Xpnode> &&nodes)
+    Expression(Cow_Vector<Xpnode> &&nodes)
       : m_nodes(std::move(nodes))
       {
         this->do_compile();
@@ -44,8 +44,8 @@ class Expression
       }
 
     Expression bind(const Global_Context &global, const Analytic_Context &ctx) const;
-    bool evaluate_partial(Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const;
-    void evaluate(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const;
+    bool evaluate_partial(Reference_Stack &stack_io, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const;
+    void evaluate(Reference &ref_out, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

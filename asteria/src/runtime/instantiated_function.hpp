@@ -15,11 +15,11 @@ class Instantiated_Function : public Abstract_Function
   {
   private:
     RefCnt_Object<Variadic_Arguer> m_zvarg;
-    CoW_Vector<PreHashed_String> m_params;
+    Cow_Vector<PreHashed_String> m_params;
     Block m_body_bnd;
 
   public:
-    Instantiated_Function(const Source_Location &sloc, const PreHashed_String &func, const CoW_Vector<PreHashed_String> &params, Block body_bnd)
+    Instantiated_Function(const Source_Location &sloc, const PreHashed_String &func, const Cow_Vector<PreHashed_String> &params, Block body_bnd)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params), m_body_bnd(std::move(body_bnd))
       {
       }
@@ -34,13 +34,13 @@ class Instantiated_Function : public Abstract_Function
       {
         return this->m_zvarg->get_function_signature();
       }
-    const CoW_Vector<PreHashed_String> & get_parameters() const noexcept
+    const Cow_Vector<PreHashed_String> & get_parameters() const noexcept
       {
         return this->m_params;
       }
 
     void describe(std::ostream &os) const override;
-    void invoke(Reference &self_io, const Global_Context &global, CoW_Vector<Reference> &&args) const override;
+    void invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const override;
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 

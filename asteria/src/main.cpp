@@ -12,7 +12,7 @@ using namespace Asteria;
 
 int main(int argc, char **argv)
   try {
-    CoW_Vector<Reference> args;
+    Cow_Vector<Reference> args;
     for(int i = 0; i < argc; ++i) {
       D_string arg;
       if(argv[i]) {

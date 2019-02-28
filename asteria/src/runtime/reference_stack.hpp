@@ -13,7 +13,7 @@ class Reference_Stack
   {
   private:
     Reference *m_tptr;
-    CoW_Vector<Reference> m_large;
+    Cow_Vector<Reference> m_large;
     Static_Vector<Reference, 7> m_small;
 
   public:

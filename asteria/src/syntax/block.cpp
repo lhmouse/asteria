@@ -16,7 +16,7 @@ namespace Asteria {
 
 void Block::do_compile()
   {
-    CoW_Vector<Compiled_Instruction> cinsts;
+    Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
     rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.compile(cinsts);  });
     this->m_cinsts = std::move(cinsts);
@@ -29,13 +29,13 @@ void Block::fly_over_in_place(Abstract_Context &ctx_io) const
 
 Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &global) const
   {
-    CoW_Vector<Statement> stmts_bnd;
+    Cow_Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.bind_in_place(stmts_bnd, ctx_io, global);  });
     return std::move(stmts_bnd);
   }
 
-Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, const CoW_String &func, const Global_Context &global) const
+Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
   {
     auto count = this->m_cinsts.size();
     if(count == 0) {
@@ -61,7 +61,7 @@ Block Block::bind(const Global_Context &global, const Analytic_Context &ctx) con
     return this->bind_in_place(ctx_next, global);
   }
 
-Block::Status Block::execute(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const
+Block::Status Block::execute(Reference &ref_out, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const
   {
     Executive_Context ctx_next(&ctx);
     return this->execute_in_place(ref_out, ctx_next, func, global);
@@ -72,7 +72,7 @@ void Block::enumerate_variables(const Abstract_Variable_Callback &callback) cons
     rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.enumerate_variables(callback);  });
   }
 
-void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, CoW_Vector<Reference> &&args) const
+void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     Function_Executive_Context ctx_next(zvarg, params, std::move(self_io), std::move(args));
     // Execute the body.
@@ -105,7 +105,7 @@ void Block::execute_as_function(Reference &self_io, const RefCnt_Object<Variadic
     }
   }
 
-RefCnt_Object<Instantiated_Function> Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const CoW_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
+RefCnt_Object<Instantiated_Function> Block::instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const
   {
     Function_Analytic_Context ctx_next(&ctx, params);
     // Bind the body recursively.

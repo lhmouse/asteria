@@ -118,7 +118,7 @@ class Token
       };
     struct S_identifier
       {
-        CoW_String name;
+        Cow_String name;
       };
     struct S_integer_literal
       {
@@ -130,7 +130,7 @@ class Token
       };
     struct S_string_literal
       {
-        CoW_String value;
+        Cow_String value;
       };
 
     enum Index : std::uint8_t
@@ -158,7 +158,7 @@ class Token
     ROCKET_PURE_FUNCTION static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
-    CoW_String m_file;
+    Cow_String m_file;
     std::uint32_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
@@ -167,7 +167,7 @@ class Token
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT> Token(const CoW_String &xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength,
+    template<typename AltT> Token(const Cow_String &xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength,
                                   AltT &&alt)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(std::forward<AltT>(alt))
@@ -175,7 +175,7 @@ class Token
       }
 
   public:
-    const CoW_String & file() const noexcept
+    const Cow_String & file() const noexcept
       {
         return this->m_file;
       }

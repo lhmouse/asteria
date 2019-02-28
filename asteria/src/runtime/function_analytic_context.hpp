@@ -13,12 +13,12 @@ class Function_Analytic_Context : public Analytic_Context
   {
   private:
     // N.B. If you have ever changed the capacity, remember to update 'function_executive_context.hpp' as well.
-    Static_Vector<std::pair<CoW_String, Reference>, 7> m_predef_refs;
+    Static_Vector<std::pair<Cow_String, Reference>, 7> m_predef_refs;
 
   public:
     // A function analytic context can be created on another analytic or executive context.
     Function_Analytic_Context(const Abstract_Context *parent_opt,
-                              const CoW_Vector<PreHashed_String> &params)
+                              const Cow_Vector<PreHashed_String> &params)
       : Analytic_Context(parent_opt)
       {
         this->do_set_parameters(params);
@@ -26,7 +26,7 @@ class Function_Analytic_Context : public Analytic_Context
     ~Function_Analytic_Context() override;
 
   private:
-    void do_set_parameters(const CoW_Vector<PreHashed_String> &params);
+    void do_set_parameters(const Cow_Vector<PreHashed_String> &params);
   };
 
 }

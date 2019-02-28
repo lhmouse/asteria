@@ -43,7 +43,7 @@ class Statement
       {
         Source_Location sloc;
         PreHashed_String name;
-        CoW_Vector<PreHashed_String> params;
+        Cow_Vector<PreHashed_String> params;
         Block body;
       };
     struct S_if
@@ -56,7 +56,7 @@ class Statement
     struct S_switch
       {
         Expression ctrl;
-        CoW_Vector<std::pair<Expression, Block>> clauses;
+        Cow_Vector<std::pair<Expression, Block>> clauses;
       };
     struct S_do_while
       {
@@ -112,7 +112,7 @@ class Statement
     struct S_assert
       {
         Expression expr;
-        CoW_String msg;
+        Cow_String msg;
       };
 
     enum Index : std::uint8_t
@@ -173,8 +173,8 @@ class Statement
 
   public:
     void fly_over_in_place(Abstract_Context &ctx_io) const;
-    void bind_in_place(CoW_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
-    void compile(CoW_Vector<Block::Compiled_Instruction> &cinsts_out) const;
+    void bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const;
+    void compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) const;
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };

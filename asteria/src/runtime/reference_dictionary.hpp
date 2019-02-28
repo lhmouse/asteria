@@ -45,10 +45,10 @@ class Reference_Dictionary
       };
 
   private:
-    const std::pair<CoW_String, Reference> *m_templ_data;
+    const std::pair<Cow_String, Reference> *m_templ_data;
     std::size_t m_templ_size;
     // The first and last buckets are permanently reserved.
-    CoW_Vector<Bucket> m_stor;
+    Cow_Vector<Bucket> m_stor;
 
   public:
     Reference_Dictionary() noexcept
@@ -86,7 +86,7 @@ class Reference_Dictionary
     void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
-    void set_templates(const std::pair<CoW_String, Reference> *tdata_opt, std::size_t tsize) noexcept
+    void set_templates(const std::pair<Cow_String, Reference> *tdata_opt, std::size_t tsize) noexcept
       {
         // Elements in [begin, end) must have been sorted.
         this->m_templ_data = tdata_opt;

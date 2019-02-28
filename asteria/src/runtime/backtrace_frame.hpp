@@ -13,14 +13,14 @@ class Backtrace_Frame
   {
   private:
     Source_Location m_sloc;
-    CoW_String m_func;
+    Cow_String m_func;
 
   public:
-    Backtrace_Frame(const Source_Location &xsloc, const CoW_String &xfunc) noexcept
+    Backtrace_Frame(const Source_Location &xsloc, const Cow_String &xfunc) noexcept
       : m_sloc(xsloc), m_func(xfunc)
       {
       }
-    Backtrace_Frame(const CoW_String &xfile, std::uint32_t xline, const CoW_String &xfunc) noexcept
+    Backtrace_Frame(const Cow_String &xfile, std::uint32_t xline, const Cow_String &xfunc) noexcept
       : m_sloc(xfile, xline), m_func(xfunc)
       {
       }
@@ -30,7 +30,7 @@ class Backtrace_Frame
       {
         return this->m_sloc;
       }
-    const CoW_String & source_file() const noexcept
+    const Cow_String & source_file() const noexcept
       {
         return this->m_sloc.file();
       }
@@ -38,7 +38,7 @@ class Backtrace_Frame
       {
         return this->m_sloc.line();
       }
-    const CoW_String & function_signature() const noexcept
+    const Cow_String & function_signature() const noexcept
       {
         return this->m_func;
       }

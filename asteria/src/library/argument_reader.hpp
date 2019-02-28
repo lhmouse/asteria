@@ -15,26 +15,26 @@ class Argument_Reader
   public:
     struct State
       {
-        CoW_Vector<unsigned char> history;
+        Cow_Vector<unsigned char> history;
         std::uint32_t offset;
         bool finished;
         bool succeeded;
       };
 
   private:
-    CoW_String m_name;
-    std::reference_wrapper<const CoW_Vector<Reference>> m_args;
+    Cow_String m_name;
+    std::reference_wrapper<const Cow_Vector<Reference>> m_args;
     bool m_throw_on_failure;
 
     // This string stores all overloads that have been tested so far.
     // Overloads are encoded in binary formats.
-    CoW_Vector<unsigned char> m_overloads;
+    Cow_Vector<unsigned char> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;
 
   public:
-    Argument_Reader(CoW_String name, const CoW_Vector<Reference> &args) noexcept
+    Argument_Reader(Cow_String name, const Cow_Vector<Reference> &args) noexcept
       : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
@@ -51,7 +51,7 @@ class Argument_Reader
     template<typename XvalueT> inline Argument_Reader & do_get_required_value(XvalueT &value_out);
 
   public:
-    const CoW_String & get_name() const noexcept
+    const Cow_String & get_name() const noexcept
       {
         return this->m_name;
       }

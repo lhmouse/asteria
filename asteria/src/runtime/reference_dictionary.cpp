@@ -46,8 +46,8 @@ const Reference * Reference_Dictionary::do_get_template_noninline_opt(const PreH
     auto bptr = this->m_templ_data;
     auto eptr = bptr + this->m_templ_size;
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const std::pair<CoW_String, Reference> &lhs,
-                                                const std::pair<CoW_String, Reference> &rhs) { return lhs.first < rhs.first;  }));
+    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const std::pair<Cow_String, Reference> &lhs,
+                                                const std::pair<Cow_String, Reference> &rhs) { return lhs.first < rhs.first;  }));
 #endif
     while(bptr != eptr) {
       // This is a handwritten binary search, utilizing 3-way comparison result of strings.
@@ -111,7 +111,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
   {
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
-    CoW_Vector<Bucket> stor;
+    Cow_Vector<Bucket> stor;
     stor.resize(res_arg | 2);
     this->m_stor.swap(stor);
     // Get table bounds.

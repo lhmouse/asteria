@@ -12,7 +12,7 @@ namespace Asteria {
 
 void Expression::do_compile()
   {
-    CoW_Vector<Compiled_Instruction> cinsts;
+    Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
     rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.compile(cinsts);  });
     this->m_cinsts = std::move(cinsts);
@@ -20,13 +20,13 @@ void Expression::do_compile()
 
 Expression Expression::bind(const Global_Context &global, const Analytic_Context &ctx) const
   {
-    CoW_Vector<Xpnode> nodes_bnd;
+    Cow_Vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.bind(nodes_bnd, global, ctx);  });
     return std::move(nodes_bnd);
   }
 
-bool Expression::evaluate_partial(Reference_Stack &stack_io, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const
+bool Expression::evaluate_partial(Reference_Stack &stack_io, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const
   {
     auto count = this->m_cinsts.size();
     if(count == 0) {
@@ -46,7 +46,7 @@ bool Expression::evaluate_partial(Reference_Stack &stack_io, const CoW_String &f
     return true;
   }
 
-void Expression::evaluate(Reference &ref_out, const CoW_String &func, const Global_Context &global, const Executive_Context &ctx) const
+void Expression::evaluate(Reference &ref_out, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const
   {
     Reference_Stack stack;
     if(!this->evaluate_partial(stack, func, global, ctx)) {

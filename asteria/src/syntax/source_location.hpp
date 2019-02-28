@@ -11,17 +11,17 @@ namespace Asteria {
 class Source_Location
   {
   private:
-    CoW_String m_file;
+    Cow_String m_file;
     std::uint32_t m_line;
 
   public:
-    Source_Location(const CoW_String &xfile, std::uint32_t xline) noexcept
+    Source_Location(const Cow_String &xfile, std::uint32_t xline) noexcept
       : m_file(xfile), m_line(xline)
       {
       }
 
   public:
-    const CoW_String & file() const noexcept
+    const Cow_String & file() const noexcept
       {
         return this->m_file;
       }

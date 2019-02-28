@@ -13,12 +13,12 @@ class Function_Executive_Context : public Executive_Context
   {
   private:
     // N.B. If you have ever changed the capacity, remember to update 'function_analytic_context.hpp' as well.
-    Static_Vector<std::pair<CoW_String, Reference>, 7> m_predef_refs;
+    Static_Vector<std::pair<Cow_String, Reference>, 7> m_predef_refs;
 
   public:
     // A function executive context does not have a parent context. All undefined names in the to-be-executed function must have already been resolved.
-    Function_Executive_Context(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params,
-                               Reference &&self, CoW_Vector<Reference> &&args)
+    Function_Executive_Context(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params,
+                               Reference &&self, Cow_Vector<Reference> &&args)
       : Executive_Context(nullptr)
       {
         this->do_set_arguments(zvarg, params, std::move(self), std::move(args));
@@ -26,7 +26,7 @@ class Function_Executive_Context : public Executive_Context
     ~Function_Executive_Context() override;
 
   private:
-    void do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const CoW_Vector<PreHashed_String> &params, Reference &&self, CoW_Vector<Reference> &&args);
+    void do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
   };
 
 }

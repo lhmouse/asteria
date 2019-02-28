@@ -13,7 +13,7 @@ void Variadic_Arguer::describe(std::ostream &os) const
     os << "<builtin>.__varg() @ " << this->m_sloc;
   }
 
-void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global*/, CoW_Vector<Reference> &&args) const
+void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
   {
     Argument_Reader reader(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
