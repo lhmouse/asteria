@@ -50,7 +50,7 @@ Parser_Error Simple_Source_File::load_stream(std::istream &cstrm_io, const Cow_S
       return parser.get_parser_error();
     }
     // Accept the document.
-    this->m_code = parser.extract_block();
+    this->m_code = parser.get_statements();
     this->m_file = filename;
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }

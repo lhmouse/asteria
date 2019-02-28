@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "parser_options.hpp"
 #include "parser_error.hpp"
-#include "../syntax/block.hpp"
 #include "../rocket/variant.hpp"
 
 namespace Asteria {
@@ -51,7 +50,7 @@ class Parser
 
     bool load(Token_Stream &tstrm_io, const Parser_Options &options);
     void clear() noexcept;
-    Block extract_block();
+    Cow_Vector<Statement> get_statements() const noexcept;
   };
 
 }
