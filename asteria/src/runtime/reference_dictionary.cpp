@@ -46,7 +46,8 @@ const Reference * Reference_Dictionary::do_get_template_noninline_opt(const PreH
     auto bptr = this->m_templ_data;
     auto eptr = bptr + this->m_templ_size;
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const Template &lhs, const Template &rhs) { return lhs.first < rhs.first;  }));
+    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const std::pair<CoW_String, Reference> &lhs,
+                                                const std::pair<CoW_String, Reference> &rhs) { return lhs.first < rhs.first;  }));
 #endif
     while(bptr != eptr) {
       // This is a handwritten binary search, utilizing 3-way comparison result of strings.

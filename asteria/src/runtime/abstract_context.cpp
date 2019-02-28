@@ -31,7 +31,7 @@ void Abstract_Context::do_tie_collector(RefCnt_Ptr<Generational_Collector> tied_
     this->m_tied_collector_opt.reset(tied_collector_opt.release());
   }
 
-void Abstract_Context::do_set_named_reference_templates(const Reference_Dictionary::Template *tdata_opt, std::size_t tsize) noexcept
+void Abstract_Context::do_set_named_reference_templates(const std::pair<CoW_String, Reference> *tdata_opt, std::size_t tsize) noexcept
   {
     this->m_named_references.set_templates(tdata_opt, tsize);
   }
