@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "source_location.hpp"
-#include "expression.hpp"
-#include "block.hpp"
 #include "../runtime/value.hpp"
 #include "../runtime/reference.hpp"
 #include "../rocket/preprocessor_utilities.h"
@@ -70,12 +68,12 @@ class Xpnode
       {
         Source_Location sloc;
         Cow_Vector<PreHashed_String> params;
-        Block body;
+        Cow_Vector<Statement> body;
       };
     struct S_branch
       {
-        Expression branch_true;
-        Expression branch_false;
+        Cow_Vector<Xpnode> branch_true;
+        Cow_Vector<Xpnode> branch_false;
         bool assign;
       };
     struct S_function_call
@@ -102,12 +100,8 @@ class Xpnode
       };
     struct S_coalescence
       {
-        Expression branch_null;
+        Cow_Vector<Xpnode> branch_null;
         bool assign;
-      };
-    struct S_bound_reference
-      {
-        Reference ref;
       };
 
     enum Index : std::uint8_t
@@ -122,7 +116,6 @@ class Xpnode
         index_unnamed_array     =  7,
         index_unnamed_object    =  8,
         index_coalescence       =  9,
-        index_bound_reference   = 10,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
@@ -136,7 +129,6 @@ class Xpnode
         , S_unnamed_array     //  7,
         , S_unnamed_object    //  8,
         , S_coalescence       //  9,
-        , S_bound_reference   // 10,
       )>;
     static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 
@@ -160,10 +152,7 @@ class Xpnode
       }
 
   public:
-    void bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, const Analytic_Context &ctx) const;
-    void compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) const;
-
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    void generate_code(Cow_Vector<RefCnt_Object<Air_Node>> &code_out, const Analytic_Context &ctx) const;
   };
 
 }

@@ -6,9 +6,7 @@
 #include "token_stream.hpp"
 #include "token.hpp"
 #include "../syntax/statement.hpp"
-#include "../syntax/block.hpp"
 #include "../syntax/xpnode.hpp"
-#include "../syntax/expression.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -1414,7 +1412,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
-        Cow_Vector<std::pair<Expression, Block>> clauses;
+        Cow_Vector<std::pair<Cow_Vector<Xpnode>, Cow_Vector<Statement>>> clauses;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_expected);
         }

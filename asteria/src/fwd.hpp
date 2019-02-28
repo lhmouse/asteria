@@ -31,9 +31,7 @@ class Traceable_Exception;
 // Syntax
 class Source_Location;
 class Xpnode;
-class Expression;
 class Statement;
-class Block;
 
 // Runtime
 class Rcbase;
