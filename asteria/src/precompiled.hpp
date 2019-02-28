@@ -53,7 +53,6 @@
 #include "rocket/refcnt_object.hpp"
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
-#include "rocket/integer_sequence.hpp"
 #include "rocket/ostream_implode.hpp"
 
 #endif
