@@ -50,7 +50,7 @@ class Parser
 
     bool load(Token_Stream &tstrm_io, const Parser_Options &options);
     void clear() noexcept;
-    Cow_Vector<Statement> get_statements() const noexcept;
+    const Cow_Vector<Statement> & get_statements() const noexcept;
   };
 
 }

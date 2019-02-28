@@ -12,40 +12,44 @@ namespace Asteria {
 class Simple_Source_File
   {
   private:
-    Block m_code;
-    Cow_String m_file;
+    // We want type erasure.
+    Cow_Vector<Instantiated_Function> m_codev;
 
   public:
     Simple_Source_File() noexcept
-      : m_code(), m_file()
       {
       }
     explicit Simple_Source_File(const Cow_String &filename)
-      : Simple_Source_File()
       {
-        auto err = this->load_file(filename);
-        this->do_throw_on_error(err);
+        this->do_reload_file(true, filename);
       }
     Simple_Source_File(std::istream &cstrm_io, const Cow_String &filename)
-      : Simple_Source_File()
       {
-        auto err = this->load_stream(cstrm_io, filename);
-        this->do_throw_on_error(err);
+        this->do_reload_stream(true, cstrm_io, filename);
       }
 
   private:
-    void do_throw_on_error(const Parser_Error &err)
-      {
-        if(ROCKET_EXPECT(err == Parser_Error::code_success)) {
-          return;
-        }
-        this->do_throw_error(err);
-      }
-    [[noreturn]] void do_throw_error(const Parser_Error &err);
+    // For these two functions, if `error_out_opt` is null, an exception is thrown.
+    Parser_Error do_reload_file(bool throw_on_failure, const Cow_String &filename);
+    Parser_Error do_reload_stream(bool throw_on_failure, std::istream &cstrm_io, const Cow_String &filename);
 
   public:
-    Parser_Error load_file(const Cow_String &filename);
-    Parser_Error load_stream(std::istream &cstrm_io, const Cow_String &filename);
+    bool empty() const noexcept
+      {
+        return this->m_codev.empty();
+      }
+    explicit operator bool () const noexcept
+      {
+        return !this->m_codev.empty();
+      }
+    Parser_Error load_file(const Cow_String &filename)
+      {
+        return this->do_reload_file(false, filename);
+      }
+    Parser_Error load_stream(std::istream &cstrm_io, const Cow_String &filename)
+      {
+        return this->do_reload_stream(false, cstrm_io, filename);
+      }
     void clear() noexcept;
 
     Reference execute(const Global_Context &global, Cow_Vector<Reference> &&args) const;
