@@ -12,19 +12,24 @@ namespace Asteria {
 class Simple_Binding_Wrapper : public Abstract_Function
   {
   public:
-    using Prototype = Reference (std::intptr_t iparam, const RefCnt_Ptr<RefCnt_Base> &pparam, Cow_Vector<Reference> &&args);
+    struct Opaque
+      {
+        std::int64_t ll;
+        std::intptr_t i;
+        Cow_String s;
+        RefCnt_Ptr<RefCnt_Base> p;
+      };
+    using Prototype = Reference (const Opaque &opaque, Cow_Vector<Reference> &&args);
 
   private:
     Cow_String m_desc;
-
-    Prototype *m_sfunc;
-    std::intptr_t m_iparam;
-    RefCnt_Ptr<RefCnt_Base> m_pparam;
+    Prototype *m_fptr;
+    Opaque m_opaque;
 
   public:
-    Simple_Binding_Wrapper(Cow_String desc, Prototype *sfunc, std::intptr_t iparam, RefCnt_Ptr<RefCnt_Base> pparam) noexcept
+    Simple_Binding_Wrapper(Cow_String desc, Prototype *fptr, Opaque opaque)
       : m_desc(std::move(desc)),
-        m_sfunc(sfunc), m_iparam(iparam), m_pparam(std::move(pparam))
+        m_fptr(fptr), m_opaque(std::move(opaque))
       {
       }
     ~Simple_Binding_Wrapper() override;
@@ -35,9 +40,9 @@ class Simple_Binding_Wrapper : public Abstract_Function
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 
-inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *sfunc, std::intptr_t iparam, RefCnt_Ptr<RefCnt_Base> pparam)
+inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Simple_Binding_Wrapper::Opaque opaque)
   {
-    return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), sfunc, iparam, std::move(pparam));
+    return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), fptr, std::move(opaque));
   }
 inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr)
   {
