@@ -92,6 +92,10 @@ template<typename elementT> class refcnt_object
         this->m_ptr.swap(other.m_ptr);
       }
 
+    constexpr operator const element_type & () const noexcept
+      {
+        return this->get();
+      }
     constexpr const element_type & operator*() const noexcept
       {
         return this->get();
