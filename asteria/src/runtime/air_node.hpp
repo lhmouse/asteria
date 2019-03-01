@@ -5,11 +5,12 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
-#include "refcnt_base.hpp"
+#include "../rocket/preprocessor_utilities.h"
+#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
-class Air_Node : public virtual RefCnt_Base
+class Air_Node
   {
   public:
     enum Status : std::uint8_t
@@ -29,11 +30,10 @@ class Air_Node : public virtual RefCnt_Base
     Air_Node() noexcept
       {
       }
-    ~Air_Node() override;
 
   public:
-    virtual Status execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const = 0;
-    virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
+    Status execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const;
+    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
 }

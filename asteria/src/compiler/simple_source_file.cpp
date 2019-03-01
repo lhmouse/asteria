@@ -46,7 +46,7 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     const Source_Location sloc(filename, 0);
     const Cow_Vector<PreHashed_String> params;
     // Generate code.
-    Cow_Vector<RefCnt_Object<Air_Node>> code;
+    Cow_Vector<Air_Node> code;
     Function_Analytic_Context ctx(nullptr, params);
     for(const auto &stmt : parser.get_statements()) {
       stmt.generate_code(code, ctx);

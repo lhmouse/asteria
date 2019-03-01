@@ -3,11 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "air_node.hpp"
+#include "../utilities.hpp"
 
 namespace Asteria {
-
-Air_Node::~Air_Node()
-  {
-  }
 
 }
