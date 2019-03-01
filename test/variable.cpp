@@ -8,7 +8,7 @@ using namespace Asteria;
 
 int main()
   {
-    const auto var = rocket::make_refcnt<Variable>();
+    auto var = rocket::make_refcnt<Variable>();
     ASTERIA_TEST_CHECK(var->get_value().type() == type_null);
 
     var->reset(D_real(123.456), false);

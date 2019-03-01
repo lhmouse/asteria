@@ -3,6 +3,16 @@
 
 #include "../precompiled.hpp"
 #include "xpnode.hpp"
+#include "../runtime/traceable_exception.hpp"
+#include "../utilities.hpp"
+
+namespace Asteria {
+
+void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Context &ctx) const
+  {
+  }
+
+}
 
 #if 0
 
@@ -14,8 +24,6 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/abstract_function.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/traceable_exception.hpp"
-#include "../utilities.hpp"
 
 namespace Asteria {
 

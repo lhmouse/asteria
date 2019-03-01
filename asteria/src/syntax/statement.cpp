@@ -3,6 +3,16 @@
 
 #include "../precompiled.hpp"
 #include "statement.hpp"
+#include "../runtime/traceable_exception.hpp"
+#include "../utilities.hpp"
+
+namespace Asteria {
+
+void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_out) const
+  {
+  }
+
+}
 
 #if 0
 
@@ -13,10 +23,7 @@
 #include "../runtime/function_analytic_context.hpp"
 #include "../runtime/variable.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/traceable_exception.hpp"
-#include "../utilities.hpp"
 
-namespace Asteria {
 
     namespace {
 

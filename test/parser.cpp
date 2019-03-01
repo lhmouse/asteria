@@ -36,11 +36,6 @@ int main()
     ASTERIA_TEST_CHECK(tis.load(iss, rocket::sref("dummy file"), Parser_Options()));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis, Parser_Options()));
-    const auto code = pr.extract_block();
-
-    Reference res;
-    Global_Context global;
-    Rcobj<Variadic_Arguer> zvarg(Variadic_Arguer(Source_Location(rocket::sref("file"), 42), rocket::sref("scope")));
-    code.execute_as_function(res, zvarg, { }, global, { });
-    ASTERIA_TEST_CHECK(res.read().check<D_string>() == "string:meow");
+    auto code = pr.get_statements();
+    ASTERIA_TEST_CHECK(code.size() == 4);
   }
