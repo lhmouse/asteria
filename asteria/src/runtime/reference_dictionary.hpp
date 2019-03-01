@@ -20,10 +20,10 @@ class Reference_Dictionary
         union { Reference second[1];  };
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For every other bucket: `prev` points to the previous non-empty bucket.
-        union { std::size_t size; Bucket *prev;  };
+        union { std::size_t size;  Bucket *prev;  };
         // For the last bucket:   `reserved` is reserved for future use.
         // For every other bucket: `next` points to the next non-empty bucket.
-        union { std::size_t reserved; Bucket *next;  };
+        union { std::size_t reserved;  Bucket *next;  };
 
         Bucket() noexcept
           : first()
