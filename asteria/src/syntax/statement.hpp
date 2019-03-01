@@ -171,7 +171,7 @@ class Statement
       }
 
   public:
-    void generate_code(Cow_Vector<RefCnt_Object<Air_Node>> &code_out, Analytic_Context &ctx_out) const;
+    void generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_out) const;
   };
 
 }
