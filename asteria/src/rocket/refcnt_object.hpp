@@ -25,20 +25,30 @@ template<typename elementT> class refcnt_object
       : m_ptr(noadl::make_refcnt<element_type>(::std::forward<paramsT>(params)...))
       {
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
+    // We shall not leave a null pointer in `other`, so this serves as both the copy constructor and the move constructor.
+    refcnt_object(const refcnt_object &other) noexcept
       : m_ptr(other.m_ptr)
       {
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_object(refcnt_object<yelementT> &&other) noexcept
-      : m_ptr(::std::move(other.m_ptr))
+                                                                 pointer>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
+      : m_ptr(other.m_ptr)
       {
       }
     template<typename paramT, ROCKET_ENABLE_IF(is_assignable<elementT,
                                                              paramT &&>::value)> refcnt_object & operator=(paramT &&param) noexcept(is_nothrow_assignable<elementT, paramT &&>::value)
       {
         *(this->m_ptr) = ::std::forward<paramT>(param);
+        return *this;
+      }
+    refcnt_object & operator=(const refcnt_object &other) noexcept
+      {
+        this->m_ptr = other.m_ptr;
+        return *this;
+      }
+    refcnt_object & operator=(refcnt_object &&other) noexcept
+      {
+        this->m_ptr.swap(other.m_ptr);  // We shall not leave a null pointer in `other`.
         return *this;
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
@@ -50,7 +60,7 @@ template<typename elementT> class refcnt_object
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
                                                                  pointer>::value)> refcnt_object & operator=(refcnt_object<yelementT> &&other) noexcept
       {
-        this->m_ptr = ::std::move(other.m_ptr);
+        this->m_ptr.swap(other.m_ptr);  // We shall not leave a null pointer in `other`.
         return *this;
       }
 
@@ -77,6 +87,11 @@ template<typename elementT> class refcnt_object
         return this->m_ptr;
       }
 
+    void swap(refcnt_object &other) noexcept
+      {
+        this->m_ptr.swap(other.m_ptr);
+      }
+
     constexpr const element_type & operator*() const noexcept
       {
         return this->get();
@@ -86,6 +101,12 @@ template<typename elementT> class refcnt_object
         return this->ptr();
       }
   };
+
+template<typename elementT> inline void swap(refcnt_object<elementT> &lhs,
+                                             refcnt_object<elementT> &rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }
 
