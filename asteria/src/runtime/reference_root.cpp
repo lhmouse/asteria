@@ -93,10 +93,14 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback &callb
     case index_variable:
       {
         const auto &alt = this->m_stor.as<S_variable>();
-        if(alt.var_opt && callback(alt.var_opt)) {
-          // Descend into this variable recursively when the callback returns `true`.
-          alt.var_opt->enumerate_variables(callback);
+        if(!alt.var_opt) {
+          return;
         }
+        if(!callback(alt.var_opt)) {
+          return;
+        }
+        // Descend into this variable recursively when the callback returns `true`.
+        alt.var_opt->enumerate_variables(callback);
         return;
       }
     default:
