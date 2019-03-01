@@ -39,6 +39,10 @@ inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc
   {
     return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), sfunc, iparam, std::move(pparam));
   }
+inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr)
+  {
+    return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), fptr, Simple_Binding_Wrapper::Opaque());
+  }
 
 }
 
