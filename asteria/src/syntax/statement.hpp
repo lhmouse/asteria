@@ -46,7 +46,7 @@ class Statement
       };
     struct S_if
       {
-        bool neg;
+        bool negative;
         Cow_Vector<Xpnode> cond;
         Cow_Vector<Statement> branch_true;
         Cow_Vector<Statement> branch_false;
@@ -60,12 +60,12 @@ class Statement
     struct S_do_while
       {
         Cow_Vector<Statement> body;
-        bool neg;
+        bool negative;
         Cow_Vector<Xpnode> cond;
       };
     struct S_while
       {
-        bool neg;
+        bool negative;
         Cow_Vector<Xpnode> cond;
         Cow_Vector<Statement> body;
       };
