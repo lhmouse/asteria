@@ -605,7 +605,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
          basic_hasher & append(const charT *s) noexcept
            {
              for(;;) {
-               auto &ch = *s;
+               const auto ch = *s;
                if(traitsT::eq(ch, charT())) {
                  break;
                }

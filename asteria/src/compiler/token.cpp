@@ -376,42 +376,42 @@ void Token::print(std::ostream &os) const
     switch(this->index()) {
     case index_keyword:
       {
-        auto &alt = this->check<S_keyword>();
+        const auto &alt = this->check<S_keyword>();
         // keyword `if`
         os << "keyword `" << Token::get_keyword(alt.keyword) << "`";
         return;
       }
     case index_punctuator:
       {
-        auto &alt = this->check<S_punctuator>();
+        const auto &alt = this->check<S_punctuator>();
         // punctuator `;`
         os << "punctuator `" << Token::get_punctuator(alt.punct) << "`";
         return;
       }
     case index_identifier:
       {
-        auto &alt = this->check<S_identifier>();
+        const auto &alt = this->check<S_identifier>();
         // identifier `meow`
         os << "identifier `" << alt.name << "`";
         return;
       }
     case index_integer_literal:
       {
-        auto &alt = this->check<S_integer_literal>();
+        const auto &alt = this->check<S_integer_literal>();
         // integer-literal `42`
         os << "integer-literal `" << std::dec << alt.value << "`";
         return;
       }
     case index_real_literal:
       {
-        auto &alt = this->check<S_real_literal>();
+        const auto &alt = this->check<S_real_literal>();
         // real-number-literal `123.456`
         os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt.value << "`";
         return;
       }
     case index_string_literal:
       {
-        auto &alt = this->check<S_string_literal>();
+        const auto &alt = this->check<S_string_literal>();
         // string-literal "hello world"
         os << "string-literal `" << quote(alt.value) << "`";
         return;

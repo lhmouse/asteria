@@ -40,14 +40,14 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
       }
     case index_variable:
       {
-        auto &alt = this->m_stor.as<S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, Reference_Root::S_undefined());
         return;
       }
     case index_function:
       {
-        auto &alt = this->m_stor.as<S_function>();
+        const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "skipped function", alt.name, Reference_Root::S_undefined());
         return;
@@ -77,7 +77,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
-        auto &alt = this->m_stor.as<S_expression>();
+        const auto &alt = this->m_stor.as<S_expression>();
         // Bind the expression recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_expression alt_bnd = { std::move(expr_bnd) };
@@ -86,7 +86,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_block:
       {
-        auto &alt = this->m_stor.as<S_block>();
+        const auto &alt = this->m_stor.as<S_block>();
         // Bind the body recursively.
         auto body_bnd = alt.body.bind(global, ctx_io);
         Statement::S_block alt_bnd = { std::move(body_bnd) };
@@ -95,7 +95,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_variable:
       {
-        auto &alt = this->m_stor.as<S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "variable", alt.name, Reference_Root::S_undefined());
         // Bind the initializer recursively.
@@ -106,7 +106,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_function:
       {
-        auto &alt = this->m_stor.as<S_function>();
+        const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(ctx_io, "function", alt.name, Reference_Root::S_undefined());
         // Bind the function body recursively.
@@ -118,7 +118,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_if:
       {
-        auto &alt = this->m_stor.as<S_if>();
+        const auto &alt = this->m_stor.as<S_if>();
         // Bind the condition and both branches recursively.
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         auto branch_true_bnd = alt.branch_true.bind(global, ctx_io);
@@ -129,14 +129,14 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_switch:
       {
-        auto &alt = this->m_stor.as<S_switch>();
+        const auto &alt = this->m_stor.as<S_switch>();
         // Bind the control expression and all clauses recursively.
         auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
         // Note that all `switch` clauses share the same context.
         Analytic_Context ctx_next(&ctx_io);
         Cow_Vector<std::pair<Expression, Block>> clauses_bnd;
         clauses_bnd.reserve(alt.clauses.size());
-        for(auto &pair : alt.clauses) {
+        for(const auto &pair : alt.clauses) {
           auto first_bnd = pair.first.bind(global, ctx_next);
           auto second_bnd = pair.second.bind_in_place(ctx_next, global);
           clauses_bnd.emplace_back(std::move(first_bnd), std::move(second_bnd));
@@ -147,7 +147,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_do_while:
       {
-        auto &alt = this->m_stor.as<S_do_while>();
+        const auto &alt = this->m_stor.as<S_do_while>();
         // Bind the loop body and condition recursively.
         auto body_bnd = alt.body.bind(global, ctx_io);
         auto cond_bnd = alt.cond.bind(global, ctx_io);
@@ -157,7 +157,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_while:
       {
-        auto &alt = this->m_stor.as<S_while>();
+        const auto &alt = this->m_stor.as<S_while>();
         // Bind the condition and loop body recursively.
         auto cond_bnd = alt.cond.bind(global, ctx_io);
         auto body_bnd = alt.body.bind(global, ctx_io);
@@ -167,7 +167,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_for:
       {
-        auto &alt = this->m_stor.as<S_for>();
+        const auto &alt = this->m_stor.as<S_for>();
         // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
         Analytic_Context ctx_next(&ctx_io);
         // Bind the loop initializer, condition, step expression and loop body recursively.
@@ -181,7 +181,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_for_each:
       {
-        auto &alt = this->m_stor.as<S_for_each>();
+        const auto &alt = this->m_stor.as<S_for_each>();
         // The key and mapped variables shall not outlast the loop body.
         Analytic_Context ctx_next(&ctx_io);
         do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, Reference_Root::S_undefined());
@@ -195,7 +195,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_try:
       {
-        auto &alt = this->m_stor.as<S_try>();
+        const auto &alt = this->m_stor.as<S_try>();
         // The `try` branch needs no special treatement.
         auto body_try_bnd = alt.body_try.bind(global, ctx_io);
         // The exception variable shall not outlast the `catch` body.
@@ -209,7 +209,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_break:
       {
-        auto &alt = this->m_stor.as<S_break>();
+        const auto &alt = this->m_stor.as<S_break>();
         // Copy it as-is.
         Statement::S_break alt_bnd = { alt.target };
         stmts_out.emplace_back(std::move(alt_bnd));
@@ -217,7 +217,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_continue:
       {
-        auto &alt = this->m_stor.as<S_continue>();
+        const auto &alt = this->m_stor.as<S_continue>();
         // Copy it as-is.
         Statement::S_continue alt_bnd = { alt.target };
         stmts_out.emplace_back(std::move(alt_bnd));
@@ -225,7 +225,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_throw:
       {
-        auto &alt = this->m_stor.as<S_throw>();
+        const auto &alt = this->m_stor.as<S_throw>();
         // Bind the exception initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_throw alt_bnd = { alt.sloc, std::move(expr_bnd) };
@@ -234,7 +234,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_return:
       {
-        auto &alt = this->m_stor.as<S_return>();
+        const auto &alt = this->m_stor.as<S_return>();
         // Bind the result initializer recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_return alt_bnd = { alt.by_ref, std::move(expr_bnd) };
@@ -243,7 +243,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
       }
     case index_assert:
       {
-        auto &alt = this->m_stor.as<S_assert>();
+        const auto &alt = this->m_stor.as<S_assert>();
         // Bind the condition recursively.
         auto expr_bnd = alt.expr.bind(global, ctx_io);
         Statement::S_assert alt_bnd = { std::move(expr_bnd), alt.msg };
@@ -467,7 +467,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         switch(rocket::weaken_enum(range_value.type())) {
         case type_array:
           {
-            auto &array = range_value.check<D_array>();
+            const auto &array = range_value.check<D_array>();
             for(auto it = array.begin(); it != array.end(); ++it) {
               Executive_Context ctx_next(&ctx_for);
               // Initialize the per-loop key constant.
@@ -496,7 +496,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           }
         case type_object:
           {
-            auto &object = range_value.check<D_object>();
+            const auto &object = range_value.check<D_object>();
             for(auto it = object.begin(); it != object.end(); ++it) {
               Executive_Context ctx_next(&ctx_for);
               // Initialize the per-loop key constant.
@@ -548,7 +548,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           // Backtrace frames.
           D_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
-            auto &frame = traceable.get_frame(i);
+            const auto &frame = traceable.get_frame(i);
             D_object elem;
             // Append frame information.
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
@@ -645,73 +645,73 @@ void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) con
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
-        auto &alt = this->m_stor.as<S_expression>();
+        const auto &alt = this->m_stor.as<S_expression>();
         cinsts_out.emplace_back(do_bind<S_expression, do_execute_expression>(alt));
         return;
       }
     case index_block:
       {
-        auto &alt = this->m_stor.as<S_block>();
+        const auto &alt = this->m_stor.as<S_block>();
         cinsts_out.emplace_back(do_bind<S_block, do_execute_block>(alt));
         return;
       }
     case index_variable:
       {
-        auto &alt = this->m_stor.as<S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         cinsts_out.emplace_back(do_bind<S_variable, do_execute_variable>(alt));
         return;
       }
     case index_function:
       {
-        auto &alt = this->m_stor.as<S_function>();
+        const auto &alt = this->m_stor.as<S_function>();
         cinsts_out.emplace_back(do_bind<S_function, do_execute_function>(alt));
         return;
       }
     case index_if:
       {
-        auto &alt = this->m_stor.as<S_if>();
+        const auto &alt = this->m_stor.as<S_if>();
         cinsts_out.emplace_back(do_bind<S_if, do_execute_if>(alt));
         return;
       }
     case index_switch:
       {
-        auto &alt = this->m_stor.as<S_switch>();
+        const auto &alt = this->m_stor.as<S_switch>();
         cinsts_out.emplace_back(do_bind<S_switch, do_execute_switch>(alt));
         return;
       }
     case index_do_while:
       {
-        auto &alt = this->m_stor.as<S_do_while>();
+        const auto &alt = this->m_stor.as<S_do_while>();
         cinsts_out.emplace_back(do_bind<S_do_while, do_execute_do_while>(alt));
         return;
       }
     case index_while:
       {
-        auto &alt = this->m_stor.as<S_while>();
+        const auto &alt = this->m_stor.as<S_while>();
         cinsts_out.emplace_back(do_bind<S_while, do_execute_while>(alt));
         return;
       }
     case index_for:
       {
-        auto &alt = this->m_stor.as<S_for>();
+        const auto &alt = this->m_stor.as<S_for>();
         cinsts_out.emplace_back(do_bind<S_for, do_execute_for>(alt));
         return;
       }
     case index_for_each:
       {
-        auto &alt = this->m_stor.as<S_for_each>();
+        const auto &alt = this->m_stor.as<S_for_each>();
         cinsts_out.emplace_back(do_bind<S_for_each, do_execute_for_each>(alt));
         return;
       }
     case index_try:
       {
-        auto &alt = this->m_stor.as<S_try>();
+        const auto &alt = this->m_stor.as<S_try>();
         cinsts_out.emplace_back(do_bind<S_try, do_execute_try>(alt));
         return;
       }
     case index_break:
       {
-        auto &alt = this->m_stor.as<S_break>();
+        const auto &alt = this->m_stor.as<S_break>();
         switch(alt.target) {
         case Statement::target_unspec:
           {
@@ -739,7 +739,7 @@ void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) con
       }
     case index_continue:
       {
-        auto &alt = this->m_stor.as<S_continue>();
+        const auto &alt = this->m_stor.as<S_continue>();
         switch(alt.target) {
         case Statement::target_unspec:
           {
@@ -766,19 +766,19 @@ void Statement::compile(Cow_Vector<Block::Compiled_Instruction> &cinsts_out) con
       }
     case index_throw:
       {
-        auto &alt = this->m_stor.as<S_throw>();
+        const auto &alt = this->m_stor.as<S_throw>();
         cinsts_out.emplace_back(do_bind<S_throw, do_execute_throw>(alt));
         return;
       }
     case index_return:
       {
-        auto &alt = this->m_stor.as<S_return>();
+        const auto &alt = this->m_stor.as<S_return>();
         cinsts_out.emplace_back(do_bind<S_return, do_execute_return>(alt));
         return;
       }
     case index_assert:
       {
-        auto &alt = this->m_stor.as<S_assert>();
+        const auto &alt = this->m_stor.as<S_assert>();
         cinsts_out.emplace_back(do_bind<S_assert, do_execute_assert>(alt));
         return;
       }
@@ -792,31 +792,31 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
-        auto &alt = this->m_stor.as<S_expression>();
+        const auto &alt = this->m_stor.as<S_expression>();
         alt.expr.enumerate_variables(callback);
         return;
       }
     case index_block:
       {
-        auto &alt = this->m_stor.as<S_block>();
+        const auto &alt = this->m_stor.as<S_block>();
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_variable:
       {
-        auto &alt = this->m_stor.as<S_variable>();
+        const auto &alt = this->m_stor.as<S_variable>();
         alt.init.enumerate_variables(callback);
         return;
       }
     case index_function:
       {
-        auto &alt = this->m_stor.as<S_function>();
+        const auto &alt = this->m_stor.as<S_function>();
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_if:
       {
-        auto &alt = this->m_stor.as<S_if>();
+        const auto &alt = this->m_stor.as<S_if>();
         alt.cond.enumerate_variables(callback);
         alt.branch_true.enumerate_variables(callback);
         alt.branch_false.enumerate_variables(callback);
@@ -824,9 +824,9 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
       }
     case index_switch:
       {
-        auto &alt = this->m_stor.as<S_switch>();
+        const auto &alt = this->m_stor.as<S_switch>();
         alt.ctrl.enumerate_variables(callback);
-        for(auto &pair : alt.clauses) {
+        for(const auto &pair : alt.clauses) {
           pair.first.enumerate_variables(callback);
           pair.second.enumerate_variables(callback);
         }
@@ -834,21 +834,21 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
       }
     case index_do_while:
       {
-        auto &alt = this->m_stor.as<S_do_while>();
+        const auto &alt = this->m_stor.as<S_do_while>();
         alt.body.enumerate_variables(callback);
         alt.cond.enumerate_variables(callback);
         return;
       }
     case index_while:
       {
-        auto &alt = this->m_stor.as<S_while>();
+        const auto &alt = this->m_stor.as<S_while>();
         alt.cond.enumerate_variables(callback);
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_for:
       {
-        auto &alt = this->m_stor.as<S_for>();
+        const auto &alt = this->m_stor.as<S_for>();
         alt.init.enumerate_variables(callback);
         alt.cond.enumerate_variables(callback);
         alt.step.enumerate_variables(callback);
@@ -857,14 +857,14 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
       }
     case index_for_each:
       {
-        auto &alt = this->m_stor.as<S_for_each>();
+        const auto &alt = this->m_stor.as<S_for_each>();
         alt.init.enumerate_variables(callback);
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_try:
       {
-        auto &alt = this->m_stor.as<S_try>();
+        const auto &alt = this->m_stor.as<S_try>();
         alt.body_try.enumerate_variables(callback);
         alt.body_catch.enumerate_variables(callback);
         return;
@@ -876,19 +876,19 @@ void Statement::enumerate_variables(const Abstract_Variable_Callback &callback) 
       }
     case index_throw:
       {
-        auto &alt = this->m_stor.as<S_throw>();
+        const auto &alt = this->m_stor.as<S_throw>();
         alt.expr.enumerate_variables(callback);
         return;
       }
     case index_return:
       {
-        auto &alt = this->m_stor.as<S_return>();
+        const auto &alt = this->m_stor.as<S_return>();
         alt.expr.enumerate_variables(callback);
         return;
       }
     case index_assert:
       {
-        auto &alt = this->m_stor.as<S_assert>();
+        const auto &alt = this->m_stor.as<S_assert>();
         alt.expr.enumerate_variables(callback);
         return;
       }

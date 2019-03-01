@@ -293,7 +293,7 @@ namespace Asteria {
               // No matching keyword has been found so far.
               break;
             }
-            auto &cur = range.first[0];
+            const auto &cur = range.first[0];
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword token_c = { cur.second };
@@ -390,7 +390,7 @@ namespace Asteria {
           if(range.first == range.second) {
             break;
           }
-          auto &cur = range.second[-1];
+          const auto &cur = range.second[-1];
           auto tlen = std::char_traits<char>::length(cur.first);
           if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
@@ -961,7 +961,7 @@ const Token * Token_Stream::peek_opt() const noexcept
       }
     case state_success:
       {
-        auto &alt = this->m_stor.as<Cow_Vector<Token>>();
+        const auto &alt = this->m_stor.as<Cow_Vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }

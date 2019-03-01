@@ -187,7 +187,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        auto &alt = this->m_stor.as<S_literal>();
+        const auto &alt = this->m_stor.as<S_literal>();
         // Copy it as-is.
         Xpnode::S_literal alt_bnd = { alt.value };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -195,7 +195,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_named_reference:
       {
-        auto &alt = this->m_stor.as<S_named_reference>();
+        const auto &alt = this->m_stor.as<S_named_reference>();
         // Only references with non-reserved names can be bound.
         if(!alt.name.rdstr().starts_with("__")) {
           // Look for the reference in the current context.
@@ -214,7 +214,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_bound_reference:
       {
-        auto &alt = this->m_stor.as<S_bound_reference>();
+        const auto &alt = this->m_stor.as<S_bound_reference>();
         // Copy it as-is.
         Xpnode::S_bound_reference alt_bnd = { alt.ref };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -222,7 +222,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_closure_function:
       {
-        auto &alt = this->m_stor.as<S_closure_function>();
+        const auto &alt = this->m_stor.as<S_closure_function>();
         // Bind the body recursively.
         Function_Analytic_Context ctx_next(&ctx, alt.params);
         auto body_bnd = alt.body.bind_in_place(ctx_next, global);
@@ -232,7 +232,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_branch:
       {
-        auto &alt = this->m_stor.as<S_branch>();
+        const auto &alt = this->m_stor.as<S_branch>();
         // Bind both branches recursively.
         auto branch_true_bnd = alt.branch_true.bind(global, ctx);
         auto branch_false_bnd = alt.branch_false.bind(global, ctx);
@@ -242,7 +242,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_function_call:
       {
-        auto &alt = this->m_stor.as<S_function_call>();
+        const auto &alt = this->m_stor.as<S_function_call>();
         // Copy it as-is.
         Xpnode::S_function_call alt_bnd = { alt.sloc, alt.nargs };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -250,7 +250,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_member_access:
       {
-        auto &alt = this->m_stor.as<S_member_access>();
+        const auto &alt = this->m_stor.as<S_member_access>();
         // Copy it as-is.
         Xpnode::S_member_access alt_bnd = { alt.name };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -258,7 +258,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_operator_rpn:
       {
-        auto &alt = this->m_stor.as<S_operator_rpn>();
+        const auto &alt = this->m_stor.as<S_operator_rpn>();
         // Copy it as-is.
         Xpnode::S_operator_rpn alt_bnd = { alt.xop, alt.assign };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -266,7 +266,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_unnamed_array:
       {
-        auto &alt = this->m_stor.as<S_unnamed_array>();
+        const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Copy it as-is.
         Xpnode::S_unnamed_array alt_bnd = { alt.nelems };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -274,7 +274,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_unnamed_object:
       {
-        auto &alt = this->m_stor.as<S_unnamed_object>();
+        const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Copy it as-is.
         Xpnode::S_unnamed_object alt_bnd = { alt.keys };
         nodes_out.emplace_back(std::move(alt_bnd));
@@ -282,7 +282,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
       }
     case index_coalescence:
       {
-        auto &alt = this->m_stor.as<S_coalescence>();
+        const auto &alt = this->m_stor.as<S_coalescence>();
         // Bind the null branch recursively.
         auto branch_null_bnd = alt.branch_null.bind(global, ctx);
         Xpnode::S_coalescence alt_bnd = { std::move(branch_null_bnd), alt.assign };
@@ -382,7 +382,7 @@ void Xpnode::bind(Cow_Vector<Xpnode> &nodes_out, const Global_Context &global, c
         if(target_value.type() != type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("`", target_value, "` is not a function and cannot be called.");
         }
-        auto &target = target_value.check<D_function>().get();
+        const auto &target = target_value.check<D_function>().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
         auto &self_result = stack_io.mut_top().zoom_out();
         // Call the function now.
@@ -1487,49 +1487,49 @@ void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) c
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        auto &alt = this->m_stor.as<S_literal>();
+        const auto &alt = this->m_stor.as<S_literal>();
         cinsts_out.emplace_back(do_bind<S_literal, do_evaluate_literal>(alt));
         return;
       }
     case index_named_reference:
       {
-        auto &alt = this->m_stor.as<S_named_reference>();
+        const auto &alt = this->m_stor.as<S_named_reference>();
         cinsts_out.emplace_back(do_bind<S_named_reference, do_evaluate_named_reference>(alt));
         return;
       }
     case index_bound_reference:
       {
-        auto &alt = this->m_stor.as<S_bound_reference>();
+        const auto &alt = this->m_stor.as<S_bound_reference>();
         cinsts_out.emplace_back(do_bind<S_bound_reference, do_evaluate_bound_reference>(alt));
         return;
       }
     case index_closure_function:
       {
-        auto &alt = this->m_stor.as<S_closure_function>();
+        const auto &alt = this->m_stor.as<S_closure_function>();
         cinsts_out.emplace_back(do_bind<S_closure_function, do_evaluate_closure_function>(alt));
         return;
       }
     case index_branch:
       {
-        auto &alt = this->m_stor.as<S_branch>();
+        const auto &alt = this->m_stor.as<S_branch>();
         cinsts_out.emplace_back(do_bind<S_branch, do_evaluate_branch>(alt));
         return;
       }
     case index_function_call:
       {
-        auto &alt = this->m_stor.as<S_function_call>();
+        const auto &alt = this->m_stor.as<S_function_call>();
         cinsts_out.emplace_back(do_bind<S_function_call, do_evaluate_function_call>(alt));
         return;
       }
     case index_member_access:
       {
-        auto &alt = this->m_stor.as<S_member_access>();
+        const auto &alt = this->m_stor.as<S_member_access>();
         cinsts_out.emplace_back(do_bind<S_member_access, do_evaluate_member_access>(alt));
         return;
       }
     case index_operator_rpn:
       {
-        auto &alt = this->m_stor.as<S_operator_rpn>();
+        const auto &alt = this->m_stor.as<S_operator_rpn>();
         switch(alt.xop) {
         case xop_postfix_inc:
           {
@@ -1697,19 +1697,19 @@ void Xpnode::compile(Cow_Vector<Expression::Compiled_Instruction> &cinsts_out) c
       }
     case index_unnamed_array:
       {
-        auto &alt = this->m_stor.as<S_unnamed_array>();
+        const auto &alt = this->m_stor.as<S_unnamed_array>();
         cinsts_out.emplace_back(do_bind<S_unnamed_array, do_evaluate_unnamed_array>(alt));
         return;
       }
     case index_unnamed_object:
       {
-        auto &alt = this->m_stor.as<S_unnamed_object>();
+        const auto &alt = this->m_stor.as<S_unnamed_object>();
         cinsts_out.emplace_back(do_bind<S_unnamed_object, do_evaluate_unnamed_object>(alt));
         return;
       }
     case index_coalescence:
       {
-        auto &alt = this->m_stor.as<S_coalescence>();
+        const auto &alt = this->m_stor.as<S_coalescence>();
         cinsts_out.emplace_back(do_bind<S_coalescence, do_evaluate_coalescence>(alt));
         return;
       }
@@ -1723,7 +1723,7 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        auto &alt = this->m_stor.as<S_literal>();
+        const auto &alt = this->m_stor.as<S_literal>();
         alt.value.enumerate_variables(callback);
         return;
       }
@@ -1733,19 +1733,19 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
       }
     case index_bound_reference:
       {
-        auto &alt = this->m_stor.as<S_bound_reference>();
+        const auto &alt = this->m_stor.as<S_bound_reference>();
         alt.ref.enumerate_variables(callback);
         return;
       }
     case index_closure_function:
       {
-        auto &alt = this->m_stor.as<S_closure_function>();
+        const auto &alt = this->m_stor.as<S_closure_function>();
         alt.body.enumerate_variables(callback);
         return;
       }
     case index_branch:
       {
-        auto &alt = this->m_stor.as<S_branch>();
+        const auto &alt = this->m_stor.as<S_branch>();
         alt.branch_true.enumerate_variables(callback);
         alt.branch_false.enumerate_variables(callback);
         return;
@@ -1760,7 +1760,7 @@ void Xpnode::enumerate_variables(const Abstract_Variable_Callback &callback) con
       }
     case index_coalescence:
       {
-        auto &alt = this->m_stor.as<S_coalescence>();
+        const auto &alt = this->m_stor.as<S_coalescence>();
         alt.branch_null.enumerate_variables(callback);
         return;
       }

@@ -13,7 +13,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        auto &alt = this->m_stor.as<S_array_index>();
+        const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {
@@ -21,7 +21,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
           }
         case type_array:
           {
-            auto &arr = parent.check<D_array>();
+            const auto &arr = parent.check<D_array>();
             auto wrapped = wrap_subscript(alt.index, arr.size());
             if(wrapped.subscript >= arr.size()) {
               ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
@@ -35,7 +35,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
       }
     case index_object_key:
       {
-        auto &alt = this->m_stor.as<S_object_key>();
+        const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {
@@ -43,7 +43,7 @@ const Value * Reference_Modifier::apply_const_opt(const Value &parent) const
           }
         case type_object:
           {
-            auto &obj = parent.check<D_object>();
+            const auto &obj = parent.check<D_object>();
             auto rit = obj.find(alt.key);
             if(rit == obj.end()) {
               ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
@@ -65,7 +65,7 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        auto &alt = this->m_stor.as<S_array_index>();
+        const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {
@@ -94,7 +94,7 @@ Value * Reference_Modifier::apply_mutable_opt(Value &parent, bool create_new) co
       }
     case index_object_key:
       {
-        auto &alt = this->m_stor.as<S_object_key>();
+        const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {
@@ -126,7 +126,7 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        auto &alt = this->m_stor.as<S_array_index>();
+        const auto &alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {
@@ -150,7 +150,7 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
       }
     case index_object_key:
       {
-        auto &alt = this->m_stor.as<S_object_key>();
+        const auto &alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.type())) {
         case type_null:
           {

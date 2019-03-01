@@ -45,7 +45,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
       return *this;
     }
     // Check whether the value has the desired type.
-    auto &value = arg->read();
+    const auto &value = arg->read();
     if(value.type() == type_null) {
       // If the value is `null`, set the default value.
       value_out = default_value;
@@ -77,7 +77,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
       return *this;
     }
     // Check whether the value has the desired type.
-    auto &value = arg->read();
+    const auto &value = arg->read();
     // `null` is not an option.
     auto qvalue = value.opt<XvalueT>();
     if(!qvalue) {
@@ -260,8 +260,8 @@ Argument_Reader & Argument_Reader::finish()
 
 void Argument_Reader::throw_no_matching_function_call() const
   {
-    auto &name = this->m_name;
-    auto &args = this->m_args.get();
+    const auto &name = this->m_name;
+    const auto &args = this->m_args.get();
     // Create a message containing arguments.
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "("

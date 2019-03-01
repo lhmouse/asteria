@@ -124,7 +124,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            auto &alt = qtok->check<Token::S_keyword>();
+            const auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset:
               {
@@ -157,7 +157,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            auto &alt = qtok->check<Token::S_punctuator>();
+            const auto &alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_add:
               {
@@ -262,7 +262,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            auto &alt = qtok->check<Token::S_keyword>();
+            const auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_null:
               {
@@ -301,21 +301,21 @@ namespace Asteria {
           }
         case Token::index_integer_literal:
           {
-            auto &alt = qtok->check<Token::S_integer_literal>();
+            const auto &alt = qtok->check<Token::S_integer_literal>();
             value_out = D_integer(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_real_literal:
           {
-            auto &alt = qtok->check<Token::S_real_literal>();
+            const auto &alt = qtok->check<Token::S_real_literal>();
             value_out = D_real(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_string_literal:
           {
-            auto &alt = qtok->check<Token::S_string_literal>();
+            const auto &alt = qtok->check<Token::S_string_literal>();
             value_out = D_string(alt.value);
             tstrm_io.shift();
             break;
@@ -337,7 +337,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            auto &alt = qtok->check<Token::S_keyword>();
+            const auto &alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_not:
               {
@@ -352,7 +352,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            auto &alt = qtok->check<Token::S_punctuator>();
+            const auto &alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_notl:
               {
