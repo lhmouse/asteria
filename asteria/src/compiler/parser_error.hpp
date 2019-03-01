@@ -71,6 +71,7 @@ class Parser_Error
 
   public:
     ROCKET_PURE_FUNCTION static const char * get_code_description(Code xcode) noexcept;
+    [[noreturn]] static void convert_to_runtime_error_and_throw(const Parser_Error &err);
 
   private:
     std::uint32_t m_line;
