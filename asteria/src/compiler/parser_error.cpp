@@ -210,4 +210,20 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
     }
   }
 
+void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error &err)
+  {
+    rocket::insertable_ostream mos;
+    mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(err.code());
+    // Append error location information.
+    mos << "\n[parser error " << err.code() << " encountered at ";
+    if(err.line() == 0) {
+      mos << "the end of stream";
+    } else {
+      mos << "line " << err.line() << ", offset " << err.offset() << ", length " << err.length();
+    }
+    mos << "]";
+    // Throw it now.
+    throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
+  }
+
 }

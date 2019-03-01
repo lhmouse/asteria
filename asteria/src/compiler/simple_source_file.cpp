@@ -20,29 +20,6 @@ Parser_Error Simple_Source_File::do_reload_file(bool throw_on_failure, const Cow
     return this->do_reload_stream(throw_on_failure, ifstrm, filename);
   }
 
-    namespace {
-
-    Parser_Error do_handle_parser_error(bool throw_on_failure, const Parser_Error &error)
-      {
-        if(ROCKET_EXPECT(!throw_on_failure)) {
-          return error;
-        }
-        rocket::insertable_ostream mos;
-        mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(error.code());
-        // Append error location information.
-        mos << "\n[parser error " << error.code() << " encountered at ";
-        if(error.line() == 0) {
-          mos << "the end of stream";
-        } else {
-          mos << "line " << error.line() << ", offset " << error.offset() << ", length " << error.length();
-        }
-        mos << "]";
-        // Throw it now.
-        throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
-      }
-
-    }
-
 Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream &cstrm_io, const Cow_String &filename)
   {
     // Use default options.
@@ -50,12 +27,20 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     // Tokenize the character stream.
     Token_Stream tstrm;
     if(!tstrm.load(cstrm_io, filename, options)) {
-      return do_handle_parser_error(throw_on_failure, tstrm.get_parser_error());
+      auto err = tstrm.get_parser_error();
+      if(throw_on_failure) {
+        Parser_Error::convert_to_runtime_error_and_throw(err);
+      }
+      return err;
     }
     // Parse tokens.
     Parser parser;
     if(!parser.load(tstrm, options)) {
-      return do_handle_parser_error(throw_on_failure, parser.get_parser_error());
+      auto err = parser.get_parser_error();
+      if(throw_on_failure) {
+        Parser_Error::convert_to_runtime_error_and_throw(err);
+      }
+      return err;
     }
     // Initialize parameters of the top scope.
     const Source_Location sloc(filename, 0);
