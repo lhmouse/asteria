@@ -12,7 +12,7 @@ std::atomic<long> bcnt;
 
 void * operator new(std::size_t cb)
   {
-    const auto ptr = std::malloc(cb);
+    auto ptr = std::malloc(cb);
     if(!ptr) {
       throw std::bad_alloc();
     }
