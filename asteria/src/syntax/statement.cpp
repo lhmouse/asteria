@@ -14,7 +14,7 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
-
+#if 0
     namespace {
 
     struct Block_Code
@@ -216,6 +216,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
+#endif
 
 }
 

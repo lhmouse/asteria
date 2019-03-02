@@ -135,9 +135,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/syntax/source_location.cpp  \
   asteria/src/syntax/xpnode.cpp  \
-  asteria/src/syntax/expression.cpp  \
   asteria/src/syntax/statement.cpp  \
-  asteria/src/syntax/block.cpp  \
   asteria/src/runtime/rcbase.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \

@@ -5,7 +5,10 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
+#include "value.hpp"
+#include "reference.hpp"
 #include "../rocket/preprocessor_utilities.h"
+#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -24,29 +27,38 @@ class Air_Node
         status_continue_while   = 7,
         status_continue_for     = 8,
       };
+
+    enum Index : std::uint8_t
+      {
+        index_string     = 0,
+        index_value      = 1,
+        index_reference  = 2,
+        index_nodes      = 3,
+      };
+    using Variant = rocket::variant<
+      ROCKET_CDR(
+        , PreHashed_String      // 0,
+        , Value                 // 1,
+        , Reference             // 2,
+        , Cow_Vector<Air_Node>  // 3,
+      )>;
+    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+
     struct Opaque
       {
-        std::intptr_t i;
-        PreHashed_String s;
-        RefCnt_Ptr<RefCnt_Base> p;
+        std::intptr_t ione;
+        std::intptr_t itwo;
+        Cow_Vector<Variant> vars;
       };
     using Executor = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
 
   private:
     Executor *m_fptr;
     Opaque m_opaque;
-    // This vector stores all references that have been captured by this node, as required by the garbage collector.
-    Cow_Vector<Reference> m_refs;
 
   public:
     Air_Node(Executor *fptr, Opaque opaque)
-      : m_fptr(fptr), m_opaque(std::move(opaque)),
-        m_refs()
-      {
-      }
-    Air_Node(Executor *fptr, Opaque opaque, Cow_Vector<Reference> refs)
-      : m_fptr(fptr), m_opaque(std::move(opaque)),
-        m_refs(std::move(refs))
+      : m_fptr(fptr), m_opaque(std::move(opaque))
       {
       }
 

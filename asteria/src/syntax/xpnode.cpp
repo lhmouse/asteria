@@ -150,7 +150,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       return "<unknown operator>";
     }
   }
-
+#if 0 
     namespace {
 
     struct Branch_Code
@@ -1491,6 +1491,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
           Air_Node::Opaque opaque;
           do_encapsulate(opaque, *qref);
           code_out.emplace_back(&do_execute_bound_reference, std::move(opaque));
+ ????????????? GC 
           return;
         }
         // Encode arguments.
@@ -1746,5 +1747,5 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
-
+#endif
 }
