@@ -31,15 +31,15 @@ class Air_Node
         PreHashed_String s;
         RefCnt_Ptr<RefCnt_Base> p;
       };
-    using Callback = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
+    using Action = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
 
   private:
-    Callback *m_fptr;
+    Action *m_fptr;
     Opaque m_opaque;
     Cow_Vector<Reference> m_refs;
 
   public:
-    Air_Node(Callback *fptr, Opaque opaque, Cow_Vector<Reference> refs)
+    Air_Node(Action *fptr, Opaque opaque, Cow_Vector<Reference> refs)
       : m_fptr(fptr), m_opaque(std::move(opaque)), m_refs(std::move(refs))
       {
       }
