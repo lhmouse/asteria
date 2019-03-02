@@ -3,6 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../asteria/src/syntax/statement.hpp"
+#include "../asteria/src/syntax/xpnode.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/air_node.hpp"
@@ -13,7 +14,9 @@ using namespace Asteria;
 
 int main()
   {
-#if 0
+    Global_Context global;
+    Executive_Context ctx(nullptr);
+
     Cow_Vector<Statement> text;
     // var res = 0;
     Cow_Vector<Xpnode> expr;
@@ -65,7 +68,7 @@ int main()
     expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
     Cow_Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_unspec });
-    body.emplace_back(Statement::S_if { false, std::move(expr), std::move(branch_true), Block() });
+    body.emplace_back(Statement::S_if { false, std::move(expr), std::move(branch_true), { } });
     expr.clear();
     expr.emplace_back(Xpnode::S_literal { D_integer(0) });
     Cow_Vector<Statement> init;
@@ -78,13 +81,15 @@ int main()
     step.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
     step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
-    auto block = Block(std::move(text));
+    // Generate code.
+    Cow_Vector<Air_Node> stmt_code;
+    Analytic_Context actx(&ctx);
+    rocket::for_each(text, [&](const Statement &stmt) { stmt.generate_code(stmt_code, actx);  });
 
-    Global_Context global;
-    Executive_Context ctx(nullptr);
-    Reference ref;
-    auto status = block.execute_in_place(ref, ctx, rocket::sref("dummy_function"), global);
-    ASTERIA_TEST_CHECK(status == Block::status_next);
+    auto status = Air_Node::status_next;
+    Reference_Stack stack;
+    rocket::any_of(stmt_code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx, rocket::sref("dummy_function"), global)) != Air_Node::status_next;  });
+    ASTERIA_TEST_CHECK(status == Air_Node::status_next);
     auto qref = ctx.get_named_reference_opt(rocket::sref("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
     ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 41);
@@ -101,5 +106,4 @@ int main()
     ASTERIA_TEST_CHECK(qref == nullptr);
     qref = ctx.get_named_reference_opt(rocket::sref("j"));
     ASTERIA_TEST_CHECK(qref == nullptr);
-#endif
   }
