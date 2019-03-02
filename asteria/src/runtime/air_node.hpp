@@ -36,11 +36,18 @@ class Air_Node
   private:
     Action *m_fptr;
     Opaque m_opaque;
+    // This vector stores all references that have been captured by this node, as required by the garbage collector.
     Cow_Vector<Reference> m_refs;
 
   public:
+    Air_Node(Action *fptr, Opaque opaque)
+      : m_fptr(fptr), m_opaque(std::move(opaque)),
+        m_refs()
+      {
+      }
     Air_Node(Action *fptr, Opaque opaque, Cow_Vector<Reference> refs)
-      : m_fptr(fptr), m_opaque(std::move(opaque)), m_refs(std::move(refs))
+      : m_fptr(fptr), m_opaque(std::move(opaque)),
+        m_refs(std::move(refs))
       {
       }
 
