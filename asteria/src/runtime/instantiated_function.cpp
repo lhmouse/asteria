@@ -24,20 +24,15 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
     // Create a stack and a context for this function.
     Reference_Stack stack;
     Function_Executive_Context ctx(this->m_zvarg, this->m_params, std::move(self_io), std::move(args));
+    const auto &func = this->m_zvarg->get_function_signature();
     // Execute IR nodes one by one.
     auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code,
-      [&](const Air_Node &node)
-        {
-          status = node.execute(stack, ctx, this->m_zvarg->get_function_signature(), global);
-          if(status != Air_Node::status_next) {
-            // Stop.
-            return true;
-          }
-          // Execute the next node.
-          return false;
-        }
-      );
+    for(const Air_Node &node : this->m_code) {
+      status = node.execute(stack, ctx, func, global);
+      if(status != Air_Node::status_next) {
+        break;
+      }
+    }
     switch(status) {
     case Air_Node::status_next:
       {

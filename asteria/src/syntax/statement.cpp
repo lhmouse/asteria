@@ -3,29 +3,34 @@
 
 #include "../precompiled.hpp"
 #include "statement.hpp"
-#include "../runtime/traceable_exception.hpp"
+#include "xpnode.hpp"
+#include "../runtime/air_node.hpp"
+#include "../runtime/reference_stack.hpp"
+#include "../runtime/executive_context.hpp"
+#include "../runtime/analytic_context.hpp"
+#include "../runtime/global_context.hpp"
+#include "../runtime/function_analytic_context.hpp"
+#include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_out) const
-  {
-  }
-
-}
-
-#if 0
-
-#include "xpnode.hpp"
-#include "../runtime/global_context.hpp"
-#include "../runtime/analytic_context.hpp"
-#include "../runtime/executive_context.hpp"
-#include "../runtime/function_analytic_context.hpp"
-#include "../runtime/variable.hpp"
-#include "../runtime/instantiated_function.hpp"
-
-
     namespace {
+
+    struct Block_Code
+      {
+        Cow_Vector<Air_Node> init;  // for, for...each
+        Cow_Vector<Air_Node> cond;  // for, while, do...while
+        Cow_Vector<Air_Node> step;  // for
+        Cow_Vector<Air_Node> body;
+      };
+
+    struct Variable_Code
+      {
+        PreHashed_String name;
+        bool immutable;
+        Cow_Vector<Air_Node> init;
+      };
 
     template<typename XnameT, typename XrefT> void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
       {
@@ -38,30 +43,159 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
         ctx_io.open_named_reference(name) = std::forward<XrefT>(xref);
       }
 
+    template<typename DataT> void do_encapsulate(Air_Node::Opaque &opaque_out, DataT &&data)
+      {
+        // Create a capsule struct for `DataT`.
+        struct Container : virtual RefCnt_Base
+          {
+            // the data object
+            typename std::decay<DataT>::type mdata;
+            // the constructor
+            explicit constexpr Container(DataT &&xdata) : mdata(std::forward<DataT>(xdata))  { }
+          };
+        auto ptr = rocket::make_refcnt<Container>(std::forward<DataT>(data));
+        // `opaque_out.i` will store a pointer to `ptr->mdata`, converted to an integer; `opaque_out.p` will provide ownership of the container.
+        opaque_out.i = reinterpret_cast<std::intptr_t>(std::addressof(ptr->mdata));
+        opaque_out.p = std::move(ptr);
+      }
+
+    template<typename DataT> const DataT & do_decapsulate(const Air_Node::Opaque &opaque) noexcept
+      {
+        return *(reinterpret_cast<const DataT *>(opaque.i));
+      }
+
+    Air_Node::Status do_clear_stack(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+                                    const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+      {
+        // Prepare for evaluation of an expression.
+        stack_io.clear();
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_define_variable(Reference_Stack &stack_io, Executive_Context &ctx_io,
+                                        const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &vcode = do_decapsulate<Variable_Code>(opaque);
+        // Create a dummy reference for further name lookups.
+        // A variable becomes visible before its initializer, where it is initialized to `null`.
+        auto var = global.create_variable();
+        Reference_Root::S_variable ref_c = { var };
+        do_safe_set_named_reference(ctx_io, "variable", vcode.name, std::move(ref_c));
+        // Check the initializer.
+        if(vcode.init.empty()) {
+          // Initialize the variable to `null` if no initializer is provided.
+          var->reset(D_null(), vcode.immutable);
+        } else {
+          // Evaluate it.
+          stack_io.clear();
+          rocket::for_each(vcode.init, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+          var->reset(stack_io.top().read(), vcode.immutable);
+        }
+        ASTERIA_DEBUG_LOG("Created variable `", vcode.name, "`: ", var->get_value());
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_define_function(Reference_Stack &stack_io, Executive_Context &ctx_io,
+                                        const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &alt = do_decapsulate<Statement::S_function>(opaque);
+        // Create a dummy reference for further name lookups.
+        // A function becomes visible before its initializer, where it is initialized to `null`.
+        auto var = global.create_variable();
+        Reference_Root::S_variable ref_c = { var };
+        do_safe_set_named_reference(ctx_io, "function", alt.name, std::move(ref_c));
+        // Generate code of the function body.
+        Cow_Vector<Air_Node> fcode;
+        Function_Analytic_Context fctx(&ctx_io, alt.params);
+        rocket::for_each(alt.body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
+        // Instantiate the function.
+        rocket::insertable_ostream nos;
+        nos << alt.name << "("
+            << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
+            <<")";
+        RefCnt_Object<Instantiated_Function> closure(alt.sloc, nos.extract_string(), alt.params, std::move(fcode));
+        ASTERIA_DEBUG_LOG("New function: ", closure);
+        var->reset(D_function(std::move(closure)), true);
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_block_plain(Reference_Stack &stack_io, Executive_Context &ctx_io,
+                                            const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &bcode = do_decapsulate<Block_Code>(opaque);
+        // Create a fresh context for this block.
+        Executive_Context bctx(&ctx_io);
+        // Execute IR nodes one by one.
+        for(const auto &node : bcode.body) {
+          auto status = node.execute(stack_io, bctx, func, global);
+          if(status != Air_Node::status_next) {
+            return status;
+          }
+        }
+        return Air_Node::status_next;
+      }
+
+    
+
     }
 
-void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
+void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_io) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
+      {
+        const auto &alt = this->m_stor.as<S_expression>();
+        // Generate code to clear the stack.
+        Air_Node::Opaque opaque;
+        code_out.emplace_back(&do_clear_stack, std::move(opaque));
+        // Generate code for the expression.
+        rocket::for_each(alt.expr, [&](const Xpnode &node) { node.generate_code(code_out, ctx_io);  });
+        return;
+      }
     case index_block:
       {
+        const auto &alt = this->m_stor.as<S_block>();
+        // Generate code for the block.
+        Block_Code bcode;
+        Analytic_Context bctx(&ctx_io);
+        rocket::for_each(alt.body, [&](const Statement &stmt) { stmt.generate_code(code_out, bctx);  });
+        // The block has to be executed in a new block.
+        Air_Node::Opaque opaque;
+        do_encapsulate(opaque, std::move(bcode));
+        code_out.emplace_back(&do_execute_block_plain, std::move(opaque));
         return;
       }
     case index_variable:
       {
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped variable", alt.name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(ctx_io, "variable placeholder", alt.name, Reference_Root::S_undefined());
+        // Generate code for the definition, including the initializer.
+        Variable_Code vcode;
+        vcode.name = alt.name;
+        vcode.immutable = alt.immutable;
+        rocket::for_each(alt.init, [&](const Xpnode &node) { node.generate_code(vcode.init, ctx_io);  });
+        // Encode arguments.
+        Air_Node::Opaque opaque;
+        do_encapsulate(opaque, std::move(vcode));
+        code_out.emplace_back(&do_define_variable, std::move(opaque));
         return;
       }
     case index_function:
       {
         const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "skipped function", alt.name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(ctx_io, "function placeholder", alt.name, Reference_Root::S_undefined());
+        // Encode arguments.
+        Air_Node::Opaque opaque;
+        do_encapsulate(opaque, alt);
+        code_out.emplace_back(&do_define_function, std::move(opaque));
         return;
       }
+/*
     case index_if:
     case index_switch:
     case index_do_while:
@@ -77,245 +211,15 @@ void Statement::fly_over_in_place(Abstract_Context &ctx_io) const
       {
         break;
       }
+*/
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
-void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context &ctx_io, const Global_Context &global) const
-  {
-    switch(static_cast<Index>(this->m_stor.index())) {
-    case index_expression:
-      {
-        const auto &alt = this->m_stor.as<S_expression>();
-        // Bind the expression recursively.
-        auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_expression alt_bnd = { rocket::move(expr_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_block:
-      {
-        const auto &alt = this->m_stor.as<S_block>();
-        // Bind the body recursively.
-        auto body_bnd = alt.body.bind(global, ctx_io);
-        Statement::S_block alt_bnd = { rocket::move(body_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_variable:
-      {
-        const auto &alt = this->m_stor.as<S_variable>();
-        // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, Reference_Root::S_uninitialized());
-        // Bind the initializer recursively.
-        auto init_bnd = alt.init.bind(global, ctx_io);
-        Statement::S_variable alt_bnd = { alt.sloc, alt.name, alt.immutable, rocket::move(init_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_function:
-      {
-        const auto &alt = this->m_stor.as<S_function>();
-        // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "function", alt.name, Reference_Root::S_uninitialized());
-        // Bind the function body recursively.
-        Function_Analytic_Context ctx_next(&ctx_io, alt.params);
-        auto body_bnd = alt.body.bind_in_place(ctx_next, global);
-        Statement::S_function alt_bnd = { alt.sloc, alt.name, alt.params, rocket::move(body_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_if:
-      {
-        const auto &alt = this->m_stor.as<S_if>();
-        // Bind the condition and both branches recursively.
-        auto cond_bnd = alt.cond.bind(global, ctx_io);
-        auto branch_true_bnd = alt.branch_true.bind(global, ctx_io);
-        auto branch_false_bnd = alt.branch_false.bind(global, ctx_io);
-        Statement::S_if alt_bnd = { alt.neg, rocket::move(cond_bnd), rocket::move(branch_true_bnd), rocket::move(branch_false_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_switch:
-      {
-        const auto &alt = this->m_stor.as<S_switch>();
-        // Bind the control expression and all clauses recursively.
-        auto ctrl_bnd = alt.ctrl.bind(global, ctx_io);
-        // Note that all `switch` clauses share the same context.
-        Analytic_Context ctx_next(&ctx_io);
-        Cow_Vector<std::pair<Expression, Block>> clauses_bnd;
-        clauses_bnd.reserve(alt.clauses.size());
-        for(const auto &pair : alt.clauses) {
-          auto first_bnd = pair.first.bind(global, ctx_next);
-          auto second_bnd = pair.second.bind_in_place(ctx_next, global);
-          clauses_bnd.emplace_back(rocket::move(first_bnd), rocket::move(second_bnd));
-        }
-        Statement::S_switch alt_bnd = { rocket::move(ctrl_bnd), rocket::move(clauses_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_do_while:
-      {
-        const auto &alt = this->m_stor.as<S_do_while>();
-        // Bind the loop body and condition recursively.
-        auto body_bnd = alt.body.bind(global, ctx_io);
-        auto cond_bnd = alt.cond.bind(global, ctx_io);
-        Statement::S_do_while alt_bnd = { rocket::move(body_bnd), alt.neg, rocket::move(cond_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_while:
-      {
-        const auto &alt = this->m_stor.as<S_while>();
-        // Bind the condition and loop body recursively.
-        auto cond_bnd = alt.cond.bind(global, ctx_io);
-        auto body_bnd = alt.body.bind(global, ctx_io);
-        Statement::S_while alt_bnd = { alt.neg, rocket::move(cond_bnd), rocket::move(body_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_for:
-      {
-        const auto &alt = this->m_stor.as<S_for>();
-        // If the initialization part is a variable definition, the variable defined shall not outlast the loop body.
-        Analytic_Context ctx_next(&ctx_io);
-        // Bind the loop initializer, condition, step expression and loop body recursively.
-        auto init_bnd = alt.init.bind_in_place(ctx_next, global);
-        auto cond_bnd = alt.cond.bind(global, ctx_next);
-        auto step_bnd = alt.step.bind(global, ctx_next);
-        auto body_bnd = alt.body.bind(global, ctx_next);
-        Statement::S_for alt_bnd = { rocket::move(init_bnd), rocket::move(cond_bnd), rocket::move(step_bnd), rocket::move(body_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_for_each:
-      {
-        const auto &alt = this->m_stor.as<S_for_each>();
-        // The key and mapped variables shall not outlast the loop body.
-        Analytic_Context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "`for each` key", alt.key_name, Reference_Root::S_uninitialized());
-        do_safe_set_named_reference(ctx_next, "`for each` reference", alt.mapped_name, Reference_Root::S_uninitialized());
-        // Bind the range initializer and loop body recursively.
-        auto init_bnd = alt.init.bind(global, ctx_next);
-        auto body_bnd = alt.body.bind(global, ctx_next);
-        Statement::S_for_each alt_bnd = { alt.key_name, alt.mapped_name, rocket::move(init_bnd), rocket::move(body_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_try:
-      {
-        const auto &alt = this->m_stor.as<S_try>();
-        // The `try` branch needs no special treatement.
-        auto body_try_bnd = alt.body_try.bind(global, ctx_io);
-        // The exception variable shall not outlast the `catch` body.
-        Analytic_Context ctx_next(&ctx_io);
-        do_safe_set_named_reference(ctx_next, "exception", alt.except_name, Reference_Root::S_uninitialized());
-        // Bind the `catch` branch recursively.
-        auto body_catch_bnd = alt.body_catch.bind_in_place(ctx_next, global);
-        Statement::S_try alt_bnd = { rocket::move(body_try_bnd), alt.sloc, alt.except_name, rocket::move(body_catch_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_break:
-      {
-        const auto &alt = this->m_stor.as<S_break>();
-        // Copy it as-is.
-        Statement::S_break alt_bnd = { alt.target };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_continue:
-      {
-        const auto &alt = this->m_stor.as<S_continue>();
-        // Copy it as-is.
-        Statement::S_continue alt_bnd = { alt.target };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_throw:
-      {
-        const auto &alt = this->m_stor.as<S_throw>();
-        // Bind the exception initializer recursively.
-        auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_throw alt_bnd = { alt.sloc, rocket::move(expr_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_return:
-      {
-        const auto &alt = this->m_stor.as<S_return>();
-        // Bind the result initializer recursively.
-        auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_return alt_bnd = { alt.by_ref, rocket::move(expr_bnd) };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    case index_assert:
-      {
-        const auto &alt = this->m_stor.as<S_assert>();
-        // Bind the condition recursively.
-        auto expr_bnd = alt.expr.bind(global, ctx_io);
-        Statement::S_assert alt_bnd = { rocket::move(expr_bnd), alt.msg };
-        stmts_out.emplace_back(rocket::move(alt_bnd));
-        return;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
-    }
-  }
+}
 
-    namespace {
-
-    Block::Status do_execute_expression(const Statement::S_expression &alt,
-                                        Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
-      {
-        // Evaluate the expression.
-        alt.expr.evaluate(ref_out, func, global, ctx_io);
-        return Block::status_next;
-      }
-
-    Block::Status do_execute_block(const Statement::S_block &alt,
-                                   Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
-      {
-        // Execute the body.
-        return alt.body.execute(ref_out, func, global, ctx_io);
-      }
-
-    Block::Status do_execute_variable(const Statement::S_variable &alt,
-                                      Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
-      {
-        // Create a dummy reference for further name lookups.
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
-        auto var = global.create_variable();
-        Reference_Root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, "variable", alt.name, rocket::move(ref_c));
-        // Create a variable using the initializer.
-        alt.init.evaluate(ref_out, func, global, ctx_io);
-        auto value = ref_out.read();
-        ASTERIA_DEBUG_LOG("Creating named variable: ", (alt.immutable ? "const " : "var "), alt.name, " = ", value);
-        var->reset(rocket::move(value), alt.immutable);
-        return Block::status_next;
-      }
-
-    Block::Status do_execute_function(const Statement::S_function &alt,
-                                      Reference & /*ref_out*/, Executive_Context &ctx_io, const Cow_String & /*func*/, const Global_Context &global)
-      {
-        // Create a dummy reference for further name lookups.
-        // A function becomes visible before its definition, where it is initialized to `null`.
-        auto var = global.create_variable();
-        Reference_Root::S_variable ref_c = { var };
-        do_safe_set_named_reference(ctx_io, "function", alt.name, rocket::move(ref_c));
-        // Instantiate the function here.
-        rocket::insertable_ostream nos;
-        nos << alt.name << "("
-            << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
-            <<")";
-        auto closure = alt.body.instantiate_function(alt.sloc, nos.extract_string(), alt.params, global, ctx_io);
-        ASTERIA_DEBUG_LOG("Creating named function: ", closure.get());
-        var->reset(D_function(rocket::move(closure)), true);
-        return Block::status_next;
-      }
+#if 0
 
     Block::Status do_execute_if(const Statement::S_if &alt,
                                 Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global)
@@ -468,8 +372,8 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // The key and mapped variables shall not outlast the loop body.
         Executive_Context ctx_for(&ctx_io);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_Root::S_uninitialized());
-        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_Root::S_undefined());
+        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_Root::S_undefined());
         // Calculate the range using the initializer.
         Reference mapped;
         alt.init.evaluate(mapped, func, global, ctx_for);
@@ -483,11 +387,11 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
               // Initialize the per-loop key constant.
               auto key = D_integer(it - array.begin());
               ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_Root::S_constant ref_c = { rocket::move(key) };
-              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, rocket::move(ref_c));
+              Reference_Root::S_constant ref_c = { std::move(key) };
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_Modifier::S_array_index refmod_c = { it - array.begin() };
-              mapped.zoom_in(rocket::move(refmod_c));
+              mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               mapped.zoom_out();
@@ -512,11 +416,11 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
               // Initialize the per-loop key constant.
               auto key = D_string(it->first);
               ASTERIA_DEBUG_LOG("Creating key constant with `for each` scope: name = ", alt.key_name, ": ", key);
-              Reference_Root::S_constant ref_c = { rocket::move(key) };
-              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, rocket::move(ref_c));
+              Reference_Root::S_constant ref_c = { std::move(key) };
+              do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, std::move(ref_c));
               // Initialize the per-loop value reference.
               Reference_Modifier::S_object_key refmod_c = { it->first };
-              mapped.zoom_in(rocket::move(refmod_c));
+              mapped.zoom_in(std::move(refmod_c));
               do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, mapped);
               ASTERIA_DEBUG_LOG("Created value reference with `for each` scope: name = ", alt.mapped_name, ": ", mapped.read());
               mapped.zoom_out();
@@ -551,10 +455,10 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
           // The exception variable shall not outlast the `catch` body.
           Executive_Context ctx_next(&ctx_io);
           // Translate the exception.
-          auto traceable = trace_exception(rocket::move(stdex));
+          auto traceable = trace_exception(std::move(stdex));
           ASTERIA_DEBUG_LOG("Creating exception reference with `catch` scope: name = ", alt.except_name, ": ", traceable.get_value());
           Reference_Root::S_temporary eref_c = { traceable.get_value() };
-          do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, rocket::move(eref_c));
+          do_safe_set_named_reference(ctx_next, "exception object", alt.except_name, std::move(eref_c));
           // Backtrace frames.
           D_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
@@ -564,11 +468,11 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
             elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
             elem.try_emplace(rocket::sref("func"), D_string(frame.function_signature()));
-            backtrace.emplace_back(rocket::move(elem));
+            backtrace.emplace_back(std::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_Root::S_temporary btref_c = { rocket::move(backtrace) };
-          ctx_next.open_named_reference(rocket::sref("__backtrace")) = rocket::move(btref_c);
+          Reference_Root::S_temporary btref_c = { std::move(backtrace) };
+          ctx_next.open_named_reference(rocket::sref("__backtrace")) = std::move(btref_c);
           // Execute the `catch` body.
           status = alt.body_catch.execute(ref_out, func, global, ctx_next);
         }
@@ -583,7 +487,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // Throw an exception containing the value.
         auto value = ref_out.read();
         ASTERIA_DEBUG_LOG("Throwing `Traceable_Exception` at \'", alt.sloc, "\' inside `", func, "`: ", value);
-        throw Traceable_Exception(rocket::move(value), alt.sloc, func);
+        throw Traceable_Exception(std::move(value), alt.sloc, func);
       }
 
     Block::Status do_execute_return(const Statement::S_return &alt,
@@ -594,7 +498,7 @@ void Statement::bind_in_place(Cow_Vector<Statement> &stmts_out, Analytic_Context
         // If the result refers a variable and the statement will pass it by value, replace it with a temporary value.
         if(!alt.by_ref && !ref_out.is_temporary()) {
           Reference_Root::S_temporary ref_c = { ref_out.read() };
-          ref_out = rocket::move(ref_c);
+          ref_out = std::move(ref_c);
         }
         return Block::status_return;
       }
