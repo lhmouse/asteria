@@ -15,7 +15,37 @@ Air_Node::Status Air_Node::execute(Reference_Stack &stack_io, Executive_Context 
 
 void Air_Node::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_refs, [&](const Reference &ref) { ref.enumerate_variables(callback);  });
+    rocket::for_each(this->m_opaque.vars,
+      [&](const Variant &var)
+        {
+          switch(static_cast<Index>(var.index())) {
+          case index_string:
+            {
+              return;
+            }
+          case index_value:
+            {
+              const auto &alt = var.as<Value>();
+              alt.enumerate_variables(callback);
+              return;
+            }
+          case index_reference:
+            {
+              const auto &alt = var.as<Reference>();
+              alt.enumerate_variables(callback);
+              return;
+            }
+          case index_nodes:
+            {
+              const auto &alt = var.as<Cow_Vector<Air_Node>>();
+              rocket::for_each(alt, [&](const Air_Node &node) { node.enumerate_variables(callback);  });
+              return;
+            }
+          default:
+            ASTERIA_TERMINATE("An unknown AIR node argument enumeration `", var.index(), "` has been encountered.");
+          }
+        }
+      );
   }
 
 }
