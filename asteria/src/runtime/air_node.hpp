@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
