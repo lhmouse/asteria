@@ -183,32 +183,6 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_named_reference(Reference_Stack &stack_io, Executive_Context &ctx_io,
-                                                const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context &global)
-      {
-        // Decode arguments.
-        const auto &name = opaque.s;
-        // Look for the name recursively.
-        auto qctx = static_cast<const Executive_Context *>(&ctx_io);
-      r:
-        // Look for it in the current context.
-        auto qref = qctx->get_named_reference_opt(name);
-        if(!qref) {
-          qctx = qctx->get_parent_opt();
-          if(qctx) {
-            goto r;
-          }
-          // We have run out of contexts. Try the global context.
-          qref = global.get_named_reference_opt(name);
-          if(!qref) {
-            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
-          }
-        }
-        // Found the found reference.
-        stack_io.push(*qref);
-        return Air_Node::status_next;
-      }
-
     Air_Node::Status do_execute_bound_reference(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
                                                 const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
@@ -216,6 +190,34 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const auto &ref = do_decapsulate<Reference>(opaque);
         // Push the reference as is.
         stack_io.push(ref);
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_named_reference(Reference_Stack &stack_io, Executive_Context &ctx_io,
+                                                const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &name = opaque.s;
+        // Look for the name recursively.
+        const Reference *qref;
+        auto qctx = static_cast<const Executive_Context *>(&ctx_io);
+        for(;;) {
+          qref = qctx->get_named_reference_opt(name);
+          if(qref) {
+            break;
+          }
+          qctx = qctx->get_parent_opt();
+          if(!qctx) {
+            // Try the global context.
+            qref = global.get_named_reference_opt(name);
+            if(qref) {
+              break;
+            }
+            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
+          }
+        }
+        // Found the found reference.
+        stack_io.push(*qref);
         return Air_Node::status_next;
       }
 
@@ -254,6 +256,32 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
     case index_named_reference:
       {
         const auto &alt = this->m_stor.as<S_named_reference>();
+        // Perform early lookup when the expression is defined.
+        // If a named reference is found, it will not be replaced or hidden by a later declared one.
+        const Reference *qref;
+        auto qctx = static_cast<const Abstract_Context *>(&ctx);
+        for(;;) {
+          qref = qctx->get_named_reference_opt(alt.name);
+          if(qref) {
+            // If the context is analytic, don't bind onto the reference.
+            // Stop in either case.
+            if(qctx->is_analytic()) {
+              qref = nullptr;
+            }
+            break;
+          }
+          qctx = qctx->get_parent_opt();
+          if(!qctx) {
+            break;
+          }
+        }
+        if(qref) {
+          // A named reference has been found.
+          Air_Node::Opaque opaque;
+          do_encapsulate(opaque, *qref);
+          code_out.emplace_back(&do_execute_bound_reference, std::move(opaque));
+          return;
+        }
         // Encode arguments.
         Air_Node::Opaque opaque;
         opaque.s = alt.name;
@@ -276,60 +304,6 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
 
 #if 0
 
-#include "statement.hpp"
-#include "../runtime/reference_stack.hpp"
-#include "../runtime/analytic_context.hpp"
-#include "../runtime/executive_context.hpp"
-#include "../runtime/function_analytic_context.hpp"
-#include "../runtime/global_context.hpp"
-#include "../runtime/abstract_function.hpp"
-#include "../runtime/instantiated_function.hpp"
-
-namespace Asteria {
-
-
-    namespace {
-
-    std::pair<std::reference_wrapper<const Abstract_Context>,
-              std::reference_wrapper<const Reference>> do_name_lookup(const Global_Context &global, const Abstract_Context &ctx, const PreHashed_String &name)
-      {
-        // Search for the name in `ctx` recursively.
-        auto qref = ctx.get_named_reference_opt(name);
-        auto qctx = std::addressof(ctx);
-        for(;;) {
-          if(ROCKET_EXPECT(qref)) {
-            return std::make_pair(std::ref(*qctx), std::ref(*qref));
-          }
-          // Search for the name in deeper contexts.
-          qctx = qctx->get_parent_opt();
-          if(!qctx) {
-            break;
-          }
-          qref = qctx->get_named_reference_opt(name);
-        }
-        // Search for the name in the global context.
-        qref = global.get_named_reference_opt(name);
-        if(ROCKET_EXPECT(qref)) {
-          return std::make_pair(std::ref(global), std::ref(*qref));
-        }
-        // Not found...
-        ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
-      }
-
-    }
-
-
-    namespace {
-
-    void do_execute_literal(const Xpnode::S_literal &alt,
-                             Reference_Stack &stack_io, const Cow_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
-      {
-      }
-
-    void do_execute_named_reference(const Xpnode::S_named_reference &alt,
-                                     Reference_Stack &stack_io, const Cow_String & /*func*/, const Global_Context &global, const Executive_Context &ctx)
-      {
-      }
 
     void do_execute_bound_reference(const Xpnode::S_bound_reference &alt,
                                      Reference_Stack &stack_io, const Cow_String & /*func*/, const Global_Context & /*global*/, const Executive_Context & /*ctx*/)
