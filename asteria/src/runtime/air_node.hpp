@@ -31,21 +31,21 @@ class Air_Node
         PreHashed_String s;
         RefCnt_Ptr<RefCnt_Base> p;
       };
-    using Action = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
+    using Executor = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
 
   private:
-    Action *m_fptr;
+    Executor *m_fptr;
     Opaque m_opaque;
     // This vector stores all references that have been captured by this node, as required by the garbage collector.
     Cow_Vector<Reference> m_refs;
 
   public:
-    Air_Node(Action *fptr, Opaque opaque)
+    Air_Node(Executor *fptr, Opaque opaque)
       : m_fptr(fptr), m_opaque(std::move(opaque)),
         m_refs()
       {
       }
-    Air_Node(Action *fptr, Opaque opaque, Cow_Vector<Reference> refs)
+    Air_Node(Executor *fptr, Opaque opaque, Cow_Vector<Reference> refs)
       : m_fptr(fptr), m_opaque(std::move(opaque)),
         m_refs(std::move(refs))
       {

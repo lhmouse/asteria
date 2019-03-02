@@ -190,6 +190,8 @@ check_PROGRAMS =  \
   test/value.test  \
   test/variable.test  \
   test/reference.test  \
+  test/xpnode.test  \
+  test/statement.test  \
   test/traceable_exception.test  \
   test/executive_context.test  \
   test/expression.test  \
