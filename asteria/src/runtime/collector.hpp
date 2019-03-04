@@ -68,8 +68,8 @@ class Collector
       {
         return this->m_tracked.size();
       }
-    bool track_variable(const RefCnt_Ptr<Variable> &var);
-    bool untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept;
+    bool track_variable(const Rcptr<Variable> &var);
+    bool untrack_variable(const Rcptr<Variable> &var) noexcept;
     void collect();
   };
 

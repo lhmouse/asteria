@@ -17,7 +17,7 @@ class Abstract_Variable_Callback
     virtual ~Abstract_Variable_Callback();
 
   public:
-    virtual bool operator()(const RefCnt_Ptr<Variable> &var) const = 0;
+    virtual bool operator()(const Rcptr<Variable> &var) const = 0;
   };
 
 }

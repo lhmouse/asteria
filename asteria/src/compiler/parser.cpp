@@ -778,7 +778,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_head(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_head(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         Cow_Vector<Xpnode> nodes;
         if(!do_accept_infix_element(nodes, tstrm_io)) {
@@ -854,7 +854,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_selection_quest(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_quest(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -878,7 +878,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_and(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_and(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_andl) && !do_match_keyword(tstrm_io, Token::keyword_and)) {
@@ -895,7 +895,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_or(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_or(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_orl) && !do_match_keyword(tstrm_io, Token::keyword_or)) {
@@ -912,7 +912,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_coales(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_coales(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -1013,7 +1013,7 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_carriage(Unique_Ptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_carriage(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
         // infix-carriage ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1209,11 +1209,11 @@ namespace Asteria {
         //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
         //     "?=" expression ":" | "&&=" | "||=" | "??=" |
         //     "and" | "or" ) infix-element
-        Unique_Ptr<Infix_Element_Base> elem;
+        Uptr<Infix_Element_Base> elem;
         if(!do_accept_infix_head(elem, tstrm_io)) {
           return false;
         }
-        Cow_Vector<Unique_Ptr<Infix_Element_Base>> stack;
+        Cow_Vector<Uptr<Infix_Element_Base>> stack;
         stack.emplace_back(std::move(elem));
         for(;;) {
           bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||

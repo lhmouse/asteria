@@ -14,7 +14,7 @@ namespace Asteria {
 class Instantiated_Function : public Abstract_Function
   {
   private:
-    RefCnt_Object<Variadic_Arguer> m_zvarg;
+    Rcobj<Variadic_Arguer> m_zvarg;
     Cow_Vector<PreHashed_String> m_params;
     Block m_body_bnd;
 

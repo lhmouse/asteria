@@ -17,7 +17,6 @@
 #include "rocket/static_vector.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/transparent_comparators.hpp"
-#include "rocket/unique_handle.hpp"
 #include "rocket/unique_ptr.hpp"
 #include "rocket/refcnt_ptr.hpp"
 #include "rocket/refcnt_object.hpp"
@@ -37,7 +36,7 @@ class Statement;
 class Block;
 
 // Runtime
-class RefCnt_Base;
+class Rcbase;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;
@@ -78,10 +77,9 @@ using Cow_String = rocket::cow_string;
 using PreHashed_String = rocket::prehashed_string;
 
 // Template Aliases
-template<typename H, typename C> using Unique_Handle = rocket::unique_handle<H, C>;
-template<typename E, typename D = std::default_delete<const E>> using Unique_Ptr = rocket::unique_ptr<E, D>;
-template<typename E> using RefCnt_Ptr = rocket::refcnt_ptr<E>;
-template<typename E> using RefCnt_Object = rocket::refcnt_object<E>;
+template<typename E, typename D = std::default_delete<const E>> using Uptr = rocket::unique_ptr<E, D>;
+template<typename E> using Rcptr = rocket::refcnt_ptr<E>;
+template<typename E> using Rcobj = rocket::refcnt_object<E>;
 
 template<typename E> using Cow_Vector = rocket::cow_vector<E>;
 template<typename K, typename V, typename H, typename E = rocket::transparent_equal_to> using Cow_HashMap = rocket::cow_hashmap<K, V, H, E>;
@@ -93,8 +91,8 @@ using D_boolean   = bool;
 using D_integer   = std::int64_t;
 using D_real      = double;
 using D_string    = Cow_String;
-using D_opaque    = RefCnt_Object<Abstract_Opaque>;
-using D_function  = RefCnt_Object<Abstract_Function>;
+using D_opaque    = Rcobj<Abstract_Opaque>;
+using D_function  = Rcobj<Abstract_Function>;
 using D_array     = Cow_Vector<Value>;
 using D_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 

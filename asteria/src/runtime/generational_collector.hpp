@@ -5,13 +5,13 @@
 #define ASTERIA_RUNTIME_GENERATIONAL_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
-#include "refcnt_base.hpp"
+#include "rcbase.hpp"
 #include "variable_hashset.hpp"
 #include "collector.hpp"
 
 namespace Asteria {
 
-class Generational_Collector : public virtual RefCnt_Base
+class Generational_Collector : public virtual Rcbase
   {
   private:
     Variable_HashSet m_pool;
@@ -37,7 +37,7 @@ class Generational_Collector : public virtual RefCnt_Base
   public:
     Collector * get_collector_opt(unsigned gen_limit) noexcept;
 
-    RefCnt_Ptr<Variable> create_variable();
+    Rcptr<Variable> create_variable();
     bool collect_variables(unsigned gen_limit);
   };
 

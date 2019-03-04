@@ -65,8 +65,8 @@ class Block
 
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
 
-    void execute_as_function(Reference &self_io, const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, Cow_Vector<Reference> &&args) const;
-    RefCnt_Object<Instantiated_Function> instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const;
+    void execute_as_function(Reference &self_io, const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, Cow_Vector<Reference> &&args) const;
+    Rcobj<Instantiated_Function> instantiate_function(const Source_Location &sloc, const PreHashed_String &name, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, const Executive_Context &ctx) const;
   };
 
 }

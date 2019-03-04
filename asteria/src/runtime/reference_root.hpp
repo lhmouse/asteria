@@ -28,7 +28,7 @@ class Reference_Root
       };
     struct S_variable
       {
-        RefCnt_Ptr<Variable> var_opt;
+        Rcptr<Variable> var_opt;
       };
 
     enum Index : std::uint8_t

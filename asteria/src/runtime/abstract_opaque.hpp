@@ -5,11 +5,11 @@
 #define ASTERIA_RUNTIME_ABSTRACT_OPAQUE_HPP_
 
 #include "../fwd.hpp"
-#include "refcnt_base.hpp"
+#include "rcbase.hpp"
 
 namespace Asteria {
 
-class Abstract_Opaque : public virtual RefCnt_Base
+class Abstract_Opaque : public virtual Rcbase
   {
   public:
     Abstract_Opaque() noexcept

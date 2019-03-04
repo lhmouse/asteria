@@ -30,7 +30,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     ASTERIA_DEBUG_LOG("TODO add std library");
   }
 
-RefCnt_Ptr<Variable> Global_Context::create_variable() const
+Rcptr<Variable> Global_Context::create_variable() const
   {
     auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_collector);
     ROCKET_ASSERT(collector);

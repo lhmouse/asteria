@@ -8,10 +8,10 @@
 
 namespace Asteria {
 
-void Abstract_Context::Collection_Trigger::operator()(RefCnt_Base *base_opt) noexcept
+void Abstract_Context::Collection_Trigger::operator()(Rcbase *base_opt) noexcept
   try {
     // Take ownership of the argument.
-    auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(RefCnt_Ptr<RefCnt_Base>(base_opt));
+    auto collector = rocket::dynamic_pointer_cast<Generational_Collector>(Rcptr<Rcbase>(base_opt));
     if(!collector) {
       return;
     }
@@ -26,7 +26,7 @@ Abstract_Context::~Abstract_Context()
   {
   }
 
-void Abstract_Context::do_tie_collector(RefCnt_Ptr<Generational_Collector> tied_collector_opt) noexcept
+void Abstract_Context::do_tie_collector(Rcptr<Generational_Collector> tied_collector_opt) noexcept
   {
     this->m_tied_collector_opt.reset(tied_collector_opt.release());
   }

@@ -32,7 +32,7 @@ Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexce
     return qcoll;
   }
 
-RefCnt_Ptr<Variable> Generational_Collector::create_variable()
+Rcptr<Variable> Generational_Collector::create_variable()
   {
     // Get one from the pool.
     auto var = this->m_pool.erase_random_opt();

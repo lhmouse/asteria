@@ -64,7 +64,7 @@ void Simple_Source_File::clear() noexcept
 Reference Simple_Source_File::execute(const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     // Create absent arguments.
-    RefCnt_Object<Variadic_Arguer> zvarg(Variadic_Arguer(Source_Location(this->m_file, 0), rocket::sref("<file scope>")));
+    Rcobj<Variadic_Arguer> zvarg(Variadic_Arguer(Source_Location(this->m_file, 0), rocket::sref("<file scope>")));
     Cow_Vector<PreHashed_String> params;
     // Call the function.
     Reference self;

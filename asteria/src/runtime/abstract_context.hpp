@@ -14,11 +14,11 @@ class Abstract_Context
   private:
     struct Collection_Trigger
       {
-        void operator()(RefCnt_Base *base_opt) noexcept;
+        void operator()(Rcbase *base_opt) noexcept;
       };
 
   private:
-    Unique_Ptr<RefCnt_Base, Collection_Trigger> m_tied_collector_opt;
+    Uptr<Rcbase, Collection_Trigger> m_tied_collector_opt;
     // This has to be defined after `m_tied_collector_opt` because of the order of destruction.
     Reference_Dictionary m_named_references;
 
@@ -35,7 +35,7 @@ class Abstract_Context
       = delete;
 
   protected:
-    void do_tie_collector(RefCnt_Ptr<Generational_Collector> tied_collector_opt) noexcept;
+    void do_tie_collector(Rcptr<Generational_Collector> tied_collector_opt) noexcept;
     void do_set_named_reference_templates(const std::pair<Cow_String, Reference> *tdata_opt, std::size_t tsize) noexcept;
 
   public:

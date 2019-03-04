@@ -17,7 +17,7 @@ class Simple_Binding_Wrapper : public Abstract_Function
         std::int64_t ll;
         std::intptr_t i;
         Cow_String s;
-        RefCnt_Ptr<RefCnt_Base> p;
+        Rcptr<Rcbase> p;
       };
     using Prototype = Reference (const Opaque &opaque, Cow_Vector<Reference> &&args);
 
@@ -40,13 +40,13 @@ class Simple_Binding_Wrapper : public Abstract_Function
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 
-inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Simple_Binding_Wrapper::Opaque opaque)
+inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Simple_Binding_Wrapper::Opaque opaque)
   {
-    return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), fptr, std::move(opaque));
+    return Rcobj<Simple_Binding_Wrapper>(std::move(desc), fptr, std::move(opaque));
   }
-inline RefCnt_Object<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr)
+inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr)
   {
-    return RefCnt_Object<Simple_Binding_Wrapper>(std::move(desc), fptr, Simple_Binding_Wrapper::Opaque());
+    return Rcobj<Simple_Binding_Wrapper>(std::move(desc), fptr, Simple_Binding_Wrapper::Opaque());
   }
 
 }

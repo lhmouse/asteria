@@ -17,7 +17,7 @@ class Function_Executive_Context : public Executive_Context
 
   public:
     // A function executive context does not have a parent context. All undefined names in the to-be-executed function must have already been resolved.
-    Function_Executive_Context(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params,
+    Function_Executive_Context(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params,
                                Reference &&self, Cow_Vector<Reference> &&args)
       : Executive_Context(nullptr)
       {
@@ -26,7 +26,7 @@ class Function_Executive_Context : public Executive_Context
     ~Function_Executive_Context() override;
 
   private:
-    void do_set_arguments(const RefCnt_Object<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
+    void do_set_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
   };
 
 }

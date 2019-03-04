@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "refcnt_base.hpp"
+#include "rcbase.hpp"
 
 namespace Asteria {
 
@@ -14,9 +14,9 @@ class Global_Context : public Abstract_Context
   {
   private:
     // This is the global garbage collector.
-    RefCnt_Ptr<RefCnt_Base> m_collector;
+    Rcptr<Rcbase> m_collector;
     // This is the variable holding an object referenced as `std` in this context.
-    RefCnt_Ptr<RefCnt_Base> m_std_var;
+    Rcptr<Rcbase> m_std_var;
 
   public:
     // A global context does not have a parent context.
@@ -41,7 +41,7 @@ class Global_Context : public Abstract_Context
       }
 
     // These are interfaces of the global garbage collector/
-    RefCnt_Ptr<Variable> create_variable() const;
+    Rcptr<Variable> create_variable() const;
     bool collect_variables(unsigned gen_limit = 0x7F) const;
 
     // These are interfaces of the standard library.

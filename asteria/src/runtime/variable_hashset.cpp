@@ -108,7 +108,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
       // Relocate every bucket found.
       [&](Bucket &rbkt)
         {
-          RefCnt_Ptr<Variable> var;
+          Rcptr<Variable> var;
           // Release the old element.
           rbkt.do_detach();
           var.swap(rbkt.first);
@@ -125,7 +125,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_HashSet::has(const RefCnt_Ptr<Variable> &var) const noexcept
+bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -160,7 +160,7 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
+bool Variable_HashSet::insert(const Rcptr<Variable> &var)
   {
     if(!var) {
       ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_HashSet`.");
@@ -188,7 +188,7 @@ bool Variable_HashSet::insert(const RefCnt_Ptr<Variable> &var)
     return true;
   }
 
-bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
+bool Variable_HashSet::erase(const Rcptr<Variable> &var) noexcept
   {
     if(this->m_stor.empty()) {
       return false;
@@ -214,7 +214,7 @@ bool Variable_HashSet::erase(const RefCnt_Ptr<Variable> &var) noexcept
     return true;
   }
 
-RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
+Rcptr<Variable> Variable_HashSet::erase_random_opt() noexcept
   {
     if(this->m_stor.empty()) {
       return nullptr;
@@ -228,7 +228,7 @@ RefCnt_Ptr<Variable> Variable_HashSet::erase_random_opt() noexcept
       return nullptr;
     }
     ROCKET_ASSERT(*bkt);
-    RefCnt_Ptr<Variable> var;
+    Rcptr<Variable> var;
     // Update the number of elements.
     pre->size--;
     // Empty the bucket.

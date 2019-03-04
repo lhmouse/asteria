@@ -52,7 +52,7 @@ namespace Asteria {
           }
 
       public:
-        bool operator()(const RefCnt_Ptr<Variable> &var) const override
+        bool operator()(const Rcptr<Variable> &var) const override
           {
             return this->m_func(var);
           }
@@ -92,7 +92,7 @@ Collector * Collector::do_collect_once()
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_tracked,
-      [&](const RefCnt_Ptr<Variable> &root)
+      [&](const Rcptr<Variable> &root)
         {
           // Add a variable reachable directly. Do not include references from `m_tracked`.
           root->init_gcref(1);
@@ -101,7 +101,7 @@ Collector * Collector::do_collect_once()
           }
           // Add variables reachable indirectly.
           do_enumerate_variables(root,
-            [&](const RefCnt_Ptr<Variable> &var)
+            [&](const Rcptr<Variable> &var)
               {
                 if(!this->m_staging.insert(var)) {
                   return false;
@@ -119,7 +119,7 @@ Collector * Collector::do_collect_once()
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const RefCnt_Ptr<Variable> &root)
+      [&](const Rcptr<Variable> &root)
         {
           // Drop a direct reference.
           root->add_gcref(1);
@@ -136,7 +136,7 @@ Collector * Collector::do_collect_once()
             {
               // `root->get_value()` is unique.
               do_enumerate_variables(root,
-                [&](const RefCnt_Ptr<Variable> &var)
+                [&](const Rcptr<Variable> &var)
                   {
                     var->add_gcref(1);
                     ROCKET_ASSERT(var->get_gcref() <= var->use_count());
@@ -150,7 +150,7 @@ Collector * Collector::do_collect_once()
             {
               // `root->get_value()` is shared.
               do_enumerate_variables(root,
-                [&](const RefCnt_Ptr<Variable> &var)
+                [&](const Rcptr<Variable> &var)
                   {
                     var->add_gcref(1 / static_cast<double>(value_nref));
                     ROCKET_ASSERT(var->get_gcref() <= var->use_count());
@@ -169,7 +169,7 @@ Collector * Collector::do_collect_once()
     //   Mark variables reachable indirectly from ones reachable directly.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const RefCnt_Ptr<Variable> &root)
+      [&](const Rcptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             // This variable is possibly unreachable.
@@ -179,7 +179,7 @@ Collector * Collector::do_collect_once()
           root->init_gcref(-1);
           // Mark variables reachable indirectly.
           do_enumerate_variables(root,
-            [&](const RefCnt_Ptr<Variable> &var)
+            [&](const Rcptr<Variable> &var)
               {
                 if(var->get_gcref() < 0) {
                   // This variable has already been marked.
@@ -199,7 +199,7 @@ Collector * Collector::do_collect_once()
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const RefCnt_Ptr<Variable> &root)
+      [&](const Rcptr<Variable> &root)
         {
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
@@ -234,7 +234,7 @@ Collector * Collector::do_collect_once()
     return collect_tied ? tied : nullptr;
   }
 
-bool Collector::track_variable(const RefCnt_Ptr<Variable> &var)
+bool Collector::track_variable(const Rcptr<Variable> &var)
   {
     if(!this->m_tracked.insert(var)) {
       return false;
@@ -245,7 +245,7 @@ bool Collector::track_variable(const RefCnt_Ptr<Variable> &var)
     return true;
   }
 
-bool Collector::untrack_variable(const RefCnt_Ptr<Variable> &var) noexcept
+bool Collector::untrack_variable(const Rcptr<Variable> &var) noexcept
   {
     if(!this->m_tracked.erase(var)) {
       return false;

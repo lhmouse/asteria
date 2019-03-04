@@ -5,12 +5,12 @@
 #define ASTERIA_RUNTIME_VARIABLE_HPP_
 
 #include "../fwd.hpp"
-#include "refcnt_base.hpp"
+#include "rcbase.hpp"
 #include "value.hpp"
 
 namespace Asteria {
 
-class Variable : public virtual RefCnt_Base
+class Variable : public virtual Rcbase
   {
   private:
     Value m_value;
