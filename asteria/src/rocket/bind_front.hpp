@@ -46,8 +46,8 @@ template<typename funcT, typename ...firstT> class bind_front_result
     template<typename yfuncT, typename ...yfirstT
              > constexpr bind_front_result(bind_front_result<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_constructible<funcT, yfuncT &&>,
                                                                                                                is_nothrow_constructible<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
-      : m_func(::std::move(other.m_func)),
-        m_first(::std::move(other.m_first))
+      : m_func(noadl::move(other.m_func)),
+        m_first(noadl::move(other.m_first))
       {
       }
     template<typename yfuncT, typename ...yfirstT
@@ -62,8 +62,8 @@ template<typename funcT, typename ...firstT> class bind_front_result
              > bind_front_result & operator=(bind_front_result<yfuncT, yfirstT...> &&other) noexcept(conjunction<is_nothrow_assignable<funcT, yfuncT &&>,
                                                                                                                  is_nothrow_assignable<tuple<firstT...>, tuple<yfirstT...> &&>>::value)
       {
-        this->m_func = ::std::move(other.m_func);
-        this->m_first = ::std::move(other.m_first);
+        this->m_func = noadl::move(other.m_func);
+        this->m_first = noadl::move(other.m_first);
         return *this;
       }
 

@@ -140,9 +140,9 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
               ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
               return D_null();
             }
-            auto erased = std::move(arr.mut(wrapped.subscript));
+            auto erased = rocket::move(arr.mut(wrapped.subscript));
             arr.erase(wrapped.subscript, 1);
-            return std::move(erased);
+            return rocket::move(erased);
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -164,7 +164,7 @@ Value Reference_Modifier::apply_and_erase(Value &parent) const
               ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
               return D_null();
             }
-            auto erased = std::move(rit->second);
+            auto erased = rocket::move(rit->second);
             obj.erase(rit);
             return erased;
           }

@@ -29,7 +29,7 @@ class Expression
       {
       }
     Expression(Cow_Vector<Xpnode> &&nodes)
-      : m_nodes(std::move(nodes))
+      : m_nodes(rocket::move(nodes))
       {
         this->do_compile();
       }

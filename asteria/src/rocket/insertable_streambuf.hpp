@@ -36,7 +36,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
 
   public:
     explicit basic_insertable_streambuf(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
-      : m_str(::std::move(str)), m_caret(caret), m_which(which)
+      : m_str(noadl::move(str)), m_caret(caret), m_which(which)
       {
       }
     basic_insertable_streambuf()
@@ -181,7 +181,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
     void set_string(string_type str, size_type caret = npos)
       {
         this->basic_insertable_streambuf::sync();
-        this->m_str = ::std::move(str);
+        this->m_str = noadl::move(str);
         this->m_caret = caret;
       }
     void set_caret(size_type caret) noexcept

@@ -140,7 +140,7 @@ void Reference_Dictionary::do_rehash(std::size_t res_arg)
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
         bkt->first.swap(rbkt.first);
-        rocket::construct_at(bkt->second, std::move(rbkt.second[0]));
+        rocket::construct_at(bkt->second, rocket::move(rbkt.second[0]));
         rocket::destroy_at(rbkt.second);
         bkt->do_attach(end);
         // Update the number of elements.
@@ -172,9 +172,9 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
-          bkt->first = std::move(name);
+          bkt->first = rocket::move(name);
           if(bkt != &rbkt) {
-            rocket::construct_at(bkt->second, std::move(rbkt.second[0]));
+            rocket::construct_at(bkt->second, rocket::move(rbkt.second[0]));
             rocket::destroy_at(rbkt.second);
           }
           bkt->do_attach(end);

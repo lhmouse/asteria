@@ -127,7 +127,7 @@ class Reference_Stack
         --tptr;
         ROCKET_ASSERT(tptr != this->m_small.data());
         ROCKET_ASSERT(tptr != this->m_large.data());
-        tptr[-1] = std::move(tptr[0]);
+        tptr[-1] = rocket::move(tptr[0]);
         this->m_tptr = tptr;
       }
   };

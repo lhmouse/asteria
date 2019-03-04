@@ -42,7 +42,7 @@ class Block
       {
       }
     Block(Cow_Vector<Statement> &&stmts) noexcept
-      : m_stmts(std::move(stmts))
+      : m_stmts(rocket::move(stmts))
       {
         this->do_compile();
       }

@@ -17,7 +17,7 @@ void Reference_Stack::do_switch_to_large()
     Cow_Vector<Reference> large;
     large.reserve(nelem * 2);
     for(auto i = nelem; i != 0; --i) {
-      large.emplace_back(std::move(tptr[-i]));
+      large.emplace_back(rocket::move(tptr[-i]));
     }
     tptr = large.mut_data() + nelem;
     // Set up the large buffer.

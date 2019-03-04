@@ -127,9 +127,9 @@ bool Value::test() const noexcept
 
     template<typename IteratorT> Value::Compare do_lexicographical_compare(IteratorT s1, IteratorT s2, std::size_t n)
       {
-        auto p1 = std::move(s1);
+        auto p1 = rocket::move(s1);
         auto e1 = p1 + static_cast<typename std::iterator_traits<IteratorT>::difference_type>(n);
-        auto p2 = std::move(s2);
+        auto p2 = rocket::move(s2);
         for(;;) {
           if(p1 == e1) {
             break;

@@ -225,7 +225,7 @@ bool throw_runtime_error(const char *funcsig, rocket::cow_string &&msg)
     // Append the function signature.
     msg << "\n[thrown from `" << funcsig << "`]";
     // Throw it.
-    throw Runtime_Error(std::move(msg));
+    throw Runtime_Error(rocket::move(msg));
   }
 
 ///////////////////////////////////////////////////////////////////////////////

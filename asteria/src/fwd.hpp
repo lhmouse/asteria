@@ -8,7 +8,7 @@
 #  include <config.h>
 #endif
 
-#include <utility>  // std::pair<>, std::move(), std::forward()
+#include <utility>  // std::pair<>, rocket::move(), std::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
 #include "rocket/cow_string.hpp"

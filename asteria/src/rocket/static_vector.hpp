@@ -52,7 +52,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 #endif
           }
         explicit storage_handle(allocator_type &&alloc) noexcept
-          : allocator_base(::std::move(alloc)),
+          : allocator_base(noadl::move(alloc)),
             m_nelem(0)
           {
 #ifdef ROCKET_DEBUG
@@ -421,14 +421,14 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         this->assign(other);
       }
     static_vector(static_vector &&other) noexcept(is_nothrow_move_constructible<value_type>::value)
-      : static_vector(::std::move(other.m_sth.as_allocator()))
+      : static_vector(noadl::move(other.m_sth.as_allocator()))
       {
-        this->assign(::std::move(other));
+        this->assign(noadl::move(other));
       }
     static_vector(static_vector &&other, const allocator_type &alloc) noexcept(is_nothrow_move_constructible<value_type>::value)
       : static_vector(alloc)
       {
-        this->assign(::std::move(other));
+        this->assign(noadl::move(other));
       }
     static_vector(size_type n, const allocator_type &alloc = allocator_type())
       : static_vector(alloc)
@@ -443,7 +443,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> static_vector(inputT first, inputT last, const allocator_type &alloc = allocator_type())
       : static_vector(alloc)
       {
-        this->assign(::std::move(first), ::std::move(last));
+        this->assign(noadl::move(first), noadl::move(last));
       }
     static_vector(initializer_list<value_type> init, const allocator_type &alloc = allocator_type())
       : static_vector(alloc)
@@ -458,8 +458,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       }
     static_vector & operator=(static_vector &&other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
       {
-        this->assign(::std::move(other));
-        allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), ::std::move(other.m_sth.as_allocator()));
+        this->assign(noadl::move(other));
+        allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         return *this;
       }
     static_vector & operator=(initializer_list<value_type> init)
@@ -685,11 +685,11 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->emplace_back(*it);  });
+          noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(::std::move(first), ::std::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it);  });
+        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
     // 26.3.11.5, modifiers
@@ -717,7 +717,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     reference push_back(value_type &&value)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(::std::move(value));
+        auto ptr = this->m_sth.emplace_back_unchecked(noadl::move(value));
         return *ptr;
       }
 
@@ -730,7 +730,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     iterator insert(const_iterator tins, value_type &&value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, ::std::move(value));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::push_back, noadl::move(value));
         return iterator(this->m_sth, ptr);
       }
     // N.B. The parameter pack is a non-standard extension.
@@ -749,7 +749,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> iterator insert(const_iterator tins, inputT first, inputT last)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
-        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, ::std::move(first), ::std::move(last));
+        auto ptr = this->do_insert_no_bound_check(tpos, details_static_vector::append, noadl::move(first), noadl::move(last));
         return iterator(this->m_sth, ptr);
       }
 
@@ -805,14 +805,14 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         auto sr = other.size();
         if(sl < sr) {
           for(size_type i = 0; i < sl; ++i) {
-            this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
+            this->m_sth.mut_data()[i] = noadl::move(other.m_sth.mut_data()[i]);
           }
           for(auto i = sl; i < sr; ++i) {
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
+            this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
           }
         } else {
           for(size_type i = 0; i < sr; ++i) {
-            this->m_sth.mut_data()[i] = ::std::move(other.m_sth.mut_data()[i]);
+            this->m_sth.mut_data()[i] = noadl::move(other.m_sth.mut_data()[i]);
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
@@ -837,7 +837,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> static_vector & assign(inputT first, inputT last)
       {
         this->clear();
-        this->append(::std::move(first), ::std::move(last));
+        this->append(noadl::move(first), noadl::move(last));
         return *this;
       }
 
@@ -850,7 +850,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
             noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
           }
           for(auto i = sl; i < sr; ++i) {
-            this->m_sth.emplace_back_unchecked(::std::move(other.m_sth.mut_data()[i]));
+            this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
           }
           other.m_sth.pop_back_n_unchecked(sr - sl);
         } else {
@@ -858,7 +858,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
             noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
           }
           for(auto i = sr; i < sl; ++i) {
-            other.m_sth.emplace_back_unchecked(::std::move(this->m_sth.mut_data()[i]));
+            other.m_sth.emplace_back_unchecked(noadl::move(this->m_sth.mut_data()[i]));
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }

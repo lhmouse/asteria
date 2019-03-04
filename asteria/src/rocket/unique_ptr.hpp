@@ -68,7 +68,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           {
           }
         explicit constexpr stored_pointer(deleter_type &&del) noexcept
-          : deleter_base(::std::move(del)),
+          : deleter_base(noadl::move(del)),
             m_ptr()
           {
           }
@@ -187,7 +187,7 @@ template<typename elementT, typename deleterT> class unique_ptr
         this->reset(ptr);
       }
     unique_ptr(unique_ptr &&other) noexcept
-      : unique_ptr(::std::move(other.m_sth.as_deleter()))
+      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
@@ -201,14 +201,14 @@ template<typename elementT, typename deleterT> class unique_ptr
                                                                                   is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type,
                                                                                                  deleter_type>>::value)
              > unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
-      : unique_ptr(::std::move(other.m_sth.as_deleter()))
+      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
     // 23.11.1.2.3, assignment
     unique_ptr & operator=(unique_ptr &&other) noexcept
       {
-        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
+        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -218,7 +218,7 @@ template<typename elementT, typename deleterT> class unique_ptr
                                                                                                  deleter_type>>::value)
              > unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
       {
-        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), ::std::move(other.m_sth.as_deleter()));
+        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -347,15 +347,15 @@ template<typename charT, typename traitsT,
 
 template<typename resultT, typename sourceT> inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(::std::move(sptr));
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(noadl::move(sptr));
   }
 template<typename resultT, typename sourceT> inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(::std::move(sptr));
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(noadl::move(sptr));
   }
 template<typename resultT, typename sourceT> inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(::std::move(sptr));
+    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(noadl::move(sptr));
   }
 
 template<typename elementT, typename ...paramsT> inline unique_ptr<elementT> make_unique(paramsT &&...params)

@@ -297,14 +297,14 @@ namespace Asteria {
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword token_c = { cur.second };
-              do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+              do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
               return true;
             }
             range.first++;
           }
         }
         Token::S_identifier token_c = { Cow_String(bptr, tlen) };
-        do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
         return true;
       }
 
@@ -395,7 +395,7 @@ namespace Asteria {
           if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator token_c = { cur.second };
-            do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+            do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
             return true;
           }
           range.second--;
@@ -574,8 +574,8 @@ namespace Asteria {
           value.append(bptr + 1, tptr - 1);
           tlen = static_cast<std::size_t>(tptr - bptr);
         }
-        Token::S_string_literal token_c = { std::move(value) };
-        do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+        Token::S_string_literal token_c = { rocket::move(value) };
+        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
         return true;
       }
 
@@ -751,7 +751,7 @@ namespace Asteria {
           }
           // Push an integer literal.
           Token::S_integer_literal token_c = { value };
-          do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+          do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
           return true;
         }
         // Parse the literal as a floating-point number.
@@ -799,7 +799,7 @@ namespace Asteria {
         }
         // Push a floating-point literal.
         Token::S_real_literal token_c = { value };
-        do_push_token(seq_out, reader_io, tlen, std::move(token_c));
+        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
         return true;
       }
 
@@ -933,13 +933,13 @@ bool Token_Stream::load(std::istream &cstrm_io, const Cow_String &file, const Pa
     // Finish
     ///////////////////////////////////////////////////////////////////////////
     std::reverse(seq.mut_begin(), seq.mut_end());
-    this->m_stor = std::move(seq);
+    this->m_stor = rocket::move(seq);
     return true;
   } catch(Parser_Error &err) {  // Don't play with this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
                       "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
                       "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
-    this->m_stor = std::move(err);
+    this->m_stor = rocket::move(err);
     return false;
   }
 
@@ -989,9 +989,9 @@ Token Token_Stream::shift()
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }
-        auto token = std::move(alt.mut_back());
+        auto token = rocket::move(alt.mut_back());
         alt.pop_back();
-        return std::move(token);
+        return rocket::move(token);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");

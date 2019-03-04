@@ -118,7 +118,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
-          bkt->first = std::move(var);
+          bkt->first = rocket::move(var);
           bkt->do_attach(end);
           return false;
         }
@@ -236,7 +236,7 @@ Rcptr<Variable> Variable_HashSet::erase_random_opt() noexcept
     var.swap(bkt->first);
     // Relocate elements that are not placed in their immediate locations.
     this->do_check_relocation(bkt, bkt + 1);
-    return std::move(var);
+    return rocket::move(var);
   }
 
 }

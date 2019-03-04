@@ -140,7 +140,7 @@ template<typename elementT> class refcnt_ptr;
             }
             // Copy-construct a deleter from the object, which is used to delete the object thereafter.
             auto tdel = stored_pointer::do_locate_deleter(*ptr);
-            ::std::move(tdel)(ptr);
+            noadl::move(tdel)(ptr);
           }
         void exchange(stored_pointer &other) noexcept
           {
@@ -462,15 +462,15 @@ template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> const_po
 
 template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> static_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(noadl::move(sptr));
   }
 template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> dynamic_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(noadl::move(sptr));
   }
 template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> const_pointer_cast(refcnt_ptr<sourceT> &&sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(::std::move(sptr));
+    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(noadl::move(sptr));
   }
 
 template<typename elementT, typename ...paramsT> inline refcnt_ptr<elementT> make_refcnt(paramsT &&...params)

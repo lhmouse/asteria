@@ -21,7 +21,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
     if(reader.start().finish()) {
       // Return the number of variadic arguments.
       Reference_Root::S_constant ref_c = { D_integer(nvargs) };
-      self_io = std::move(ref_c);
+      self_io = rocket::move(ref_c);
       return;
     }
     // `__varg(index)`

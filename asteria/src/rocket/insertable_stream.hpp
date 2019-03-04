@@ -36,7 +36,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
   public:
     explicit basic_insertable_stream(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
       : basic_iostream<char_type, traits_type>(&(this->m_sb)),
-        m_sb(::std::move(str), caret, which)
+        m_sb(noadl::move(str), caret, which)
       {
       }
     basic_insertable_stream()
@@ -65,7 +65,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
       }
     void set_string(string_type str, size_type caret = npos)
       {
-        return this->rdbuf()->set_string(::std::move(str), caret);
+        return this->rdbuf()->set_string(noadl::move(str), caret);
       }
     void set_caret(size_type caret) noexcept
       {

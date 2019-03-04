@@ -68,7 +68,7 @@ Reference Simple_Source_File::execute(const Global_Context &global, Cow_Vector<R
     Cow_Vector<PreHashed_String> params;
     // Call the function.
     Reference self;
-    this->m_code.execute_as_function(self, std::move(zvarg), std::move(params), global, std::move(args));
+    this->m_code.execute_as_function(self, rocket::move(zvarg), rocket::move(params), global, rocket::move(args));
     return self;
   }
 

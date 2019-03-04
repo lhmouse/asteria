@@ -19,7 +19,7 @@ void Block::do_compile()
     Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_stmts.size());
     rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.compile(cinsts);  });
-    this->m_cinsts = std::move(cinsts);
+    this->m_cinsts = rocket::move(cinsts);
   }
 
 void Block::fly_over_in_place(Abstract_Context &ctx_io) const
@@ -32,7 +32,7 @@ Block Block::bind_in_place(Analytic_Context &ctx_io, const Global_Context &globa
     Cow_Vector<Statement> stmts_bnd;
     stmts_bnd.reserve(this->m_stmts.size());
     rocket::for_each(this->m_stmts, [&](const Statement &stmt) { stmt.bind_in_place(stmts_bnd, ctx_io, global);  });
-    return std::move(stmts_bnd);
+    return rocket::move(stmts_bnd);
   }
 
 Block::Status Block::execute_in_place(Reference &ref_out, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
@@ -74,7 +74,7 @@ void Block::enumerate_variables(const Abstract_Variable_Callback &callback) cons
 
 void Block::execute_as_function(Reference &self_io, const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
-    Function_Executive_Context ctx_next(zvarg, params, std::move(self_io), std::move(args));
+    Function_Executive_Context ctx_next(zvarg, params, rocket::move(self_io), rocket::move(args));
     // Execute the body.
     auto status = this->execute_in_place(self_io, ctx_next, zvarg->get_function_signature(), global);
     switch(status) {
@@ -110,7 +110,7 @@ Rcobj<Instantiated_Function> Block::instantiate_function(const Source_Location &
     Function_Analytic_Context ctx_next(&ctx, params);
     // Bind the body recursively.
     auto body_bnd = this->bind_in_place(ctx_next, global);
-    return Rcobj<Instantiated_Function>(sloc, name, params, std::move(body_bnd));
+    return Rcobj<Instantiated_Function>(sloc, name, params, rocket::move(body_bnd));
   }
 
 }

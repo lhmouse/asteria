@@ -28,8 +28,8 @@ class Simple_Binding_Wrapper : public Abstract_Function
 
   public:
     Simple_Binding_Wrapper(Cow_String desc, Prototype *fptr, Opaque opaque)
-      : m_desc(std::move(desc)),
-        m_fptr(fptr), m_opaque(std::move(opaque))
+      : m_desc(rocket::move(desc)),
+        m_fptr(fptr), m_opaque(rocket::move(opaque))
       {
       }
     ~Simple_Binding_Wrapper() override;
@@ -42,11 +42,11 @@ class Simple_Binding_Wrapper : public Abstract_Function
 
 inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Simple_Binding_Wrapper::Opaque opaque)
   {
-    return Rcobj<Simple_Binding_Wrapper>(std::move(desc), fptr, std::move(opaque));
+    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, rocket::move(opaque));
   }
 inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr)
   {
-    return Rcobj<Simple_Binding_Wrapper>(std::move(desc), fptr, Simple_Binding_Wrapper::Opaque());
+    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, Simple_Binding_Wrapper::Opaque());
   }
 
 }

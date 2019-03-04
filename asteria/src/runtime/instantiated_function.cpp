@@ -21,7 +21,7 @@ void Instantiated_Function::describe(std::ostream &os) const
 
 void Instantiated_Function::invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
-    this->m_body_bnd.execute_as_function(self_io, this->m_zvarg, this->m_params, global, std::move(args));
+    this->m_body_bnd.execute_as_function(self_io, this->m_zvarg, this->m_params, global, rocket::move(args));
   }
 
 void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback &callback) const

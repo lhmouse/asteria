@@ -17,7 +17,7 @@ Function_Executive_Context::~Function_Executive_Context()
     template<typename XcontainerT, typename XnameT, typename XvalueT> void do_predefine_constant(XcontainerT &predefs_out, XnameT &&xname, XvalueT &&xvalue)
       {
         Reference_Root::S_constant ref_c = { std::forward<XvalueT>(xvalue) };
-        predefs_out.emplace_back(std::forward<XnameT>(xname), std::move(ref_c));
+        predefs_out.emplace_back(std::forward<XnameT>(xname), rocket::move(ref_c));
       }
 
     template<typename XcontainerT, typename XnameT, typename XrefT> void do_predefine_reference(XcontainerT &predefs_out, XnameT &&xname, XrefT &&xref)
@@ -30,7 +30,7 @@ Function_Executive_Context::~Function_Executive_Context()
         if(ROCKET_EXPECT(args.empty())) {
           return zvarg;
         }
-        return Rcobj<Variadic_Arguer>(zvarg.get(), std::move(args));
+        return Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args));
       }
 
     }
@@ -51,7 +51,7 @@ void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &
         this->open_named_reference(param) = Reference_Root::S_undefined();
         continue;
       }
-      this->open_named_reference(param) = std::move(args.mut(index));
+      this->open_named_reference(param) = rocket::move(args.mut(index));
     }
     if(params.size() < args.size()) {
       args.erase(args.begin(), args.begin() + static_cast<std::ptrdiff_t>(params.size()));
@@ -68,9 +68,9 @@ void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &
     do_predefine_constant(this->m_predef_refs,
                           rocket::sref("__line"), D_integer(zvarg->get_source_line()));
     do_predefine_reference(this->m_predef_refs,
-                           rocket::sref("__this"), std::move(self));
+                           rocket::sref("__this"), rocket::move(self));
     do_predefine_constant(this->m_predef_refs,
-                          rocket::sref("__varg"), D_function(do_make_varg(zvarg, std::move(args))));
+                          rocket::sref("__varg"), D_function(do_make_varg(zvarg, rocket::move(args))));
     // Set up them.
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }

@@ -34,7 +34,7 @@ namespace rocket {
           {
           }
         explicit constexpr final_wrapper(allocatorT &&alloc) noexcept
-          : m_alloc(::std::move(alloc))
+          : m_alloc(noadl::move(alloc))
           {
           }
 
@@ -87,7 +87,7 @@ template<typename allocatorT> struct allocator_move_assigner<allocatorT,
   {
     void operator()(allocatorT &lhs, allocatorT &&rhs) const
       {
-        lhs = ::std::move(rhs);
+        lhs = noadl::move(rhs);
       }
   };
 

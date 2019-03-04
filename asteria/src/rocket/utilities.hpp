@@ -6,7 +6,7 @@
 
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>
-#include <utility>  // std::swap(), std::move(), std::forward()
+#include <utility>  // std::swap(), std::forward()
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
@@ -120,6 +120,17 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
+template<typename valueT> constexpr void move(const valueT &value) noexcept
+  = delete;
+template<typename valueT> constexpr typename add_rvalue_reference<typename remove_reference<valueT>::type>::type move(valueT &value) noexcept
+  {
+    return static_cast<typename add_rvalue_reference<typename remove_reference<valueT>::type>::type>(value);
+  }
+template<typename valueT> constexpr void move(const valueT &&value) noexcept
+  = delete;
+template<typename valueT> constexpr void move(valueT &&value) noexcept
+  = delete;
+
 struct identity
   {
     template<typename paramT> constexpr paramT && operator()(paramT &&param) const noexcept
@@ -132,7 +143,7 @@ struct identity
 
 template<typename valueT, typename withT> inline valueT exchange(valueT &value, withT &&with)
   {
-    auto old = ::std::move(value);
+    auto old = noadl::move(value);
     value = ::std::forward<withT>(with);
     return old;
   }
@@ -200,7 +211,7 @@ template<typename iteratorT, typename eiteratorT,
          typename functionT, typename ...paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
                                                                          functionT &&func, const paramsT &...params)
   {
-    for(auto it = ::std::move(first); it != last; ++it) {
+    for(auto it = noadl::move(first); it != last; ++it) {
       ::std::forward<functionT>(func)(it, params...);
     }
   }
@@ -209,7 +220,7 @@ template<typename iteratorT, typename eiteratorT,
          typename functionT, typename ...paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
                                                                               functionT &&func, const paramsT &...params)
   {
-    auto it = ::std::move(first);
+    auto it = noadl::move(first);
     do {
       ::std::forward<functionT>(func)(it, params...);
     } while(++it != last);
@@ -249,7 +260,7 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
     template<typename iteratorT> inline size_t tagged_estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
-        for(auto it = ::std::move(first); it != last; ++it) {
+        for(auto it = noadl::move(first); it != last; ++it) {
           ++total;
         }
         return total;
@@ -263,7 +274,7 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
 
 template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_utilities::tagged_estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), ::std::move(first), ::std::move(last));
+    return details_utilities::tagged_estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), noadl::move(first), noadl::move(last));
   }
 
 template<typename elementT, typename ...paramsT> elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
@@ -370,7 +381,7 @@ template<typename containerT, typename callbackT> inline void for_each(container
   }
 template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::for_each_nonconstexpr(::std::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::for_each_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
@@ -393,7 +404,7 @@ template<typename containerT, typename callbackT> constexpr bool any_of(containe
   }
 template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::any_of_nonconstexpr(::std::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::any_of_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
@@ -416,7 +427,7 @@ template<typename containerT, typename callbackT> constexpr bool none_of(contain
   }
 template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::none_of_nonconstexpr(::std::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::none_of_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
@@ -439,7 +450,7 @@ template<typename targetT, typename containerT> constexpr bool is_any_of(targetT
   }
 template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &&targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), ::std::move(init));
+    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), noadl::move(init));
   }
 
     namespace details_utilities {
@@ -462,7 +473,7 @@ template<typename targetT, typename containerT> constexpr bool is_none_of(target
   }
 template<typename targetT, typename elementT> constexpr bool is_none_of(targetT &&targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), ::std::move(init));
+    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), noadl::move(init));
   }
 
 template<typename enumT> constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept

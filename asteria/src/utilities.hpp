@@ -151,7 +151,7 @@ class Runtime_Error : public virtual std::exception
       {
       }
     explicit Runtime_Error(rocket::cow_string &&msg) noexcept
-      : m_msg(std::move(msg))
+      : m_msg(rocket::move(msg))
       {
       }
     ~Runtime_Error() override;

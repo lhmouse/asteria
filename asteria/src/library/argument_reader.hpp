@@ -35,7 +35,7 @@ class Argument_Reader
 
   public:
     Argument_Reader(Cow_String name, const Cow_Vector<Reference> &args) noexcept
-      : m_name(std::move(name)), m_args(args), m_throw_on_failure(false),
+      : m_name(rocket::move(name)), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
       }

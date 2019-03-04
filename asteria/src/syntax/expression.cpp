@@ -15,7 +15,7 @@ void Expression::do_compile()
     Cow_Vector<Compiled_Instruction> cinsts;
     cinsts.reserve(this->m_nodes.size());
     rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.compile(cinsts);  });
-    this->m_cinsts = std::move(cinsts);
+    this->m_cinsts = rocket::move(cinsts);
   }
 
 Expression Expression::bind(const Global_Context &global, const Analytic_Context &ctx) const
@@ -23,7 +23,7 @@ Expression Expression::bind(const Global_Context &global, const Analytic_Context
     Cow_Vector<Xpnode> nodes_bnd;
     nodes_bnd.reserve(this->m_nodes.size());
     rocket::for_each(this->m_nodes, [&](const Xpnode &node) { node.bind(nodes_bnd, global, ctx);  });
-    return std::move(nodes_bnd);
+    return rocket::move(nodes_bnd);
   }
 
 bool Expression::evaluate_partial(Reference_Stack &stack_io, const Cow_String &func, const Global_Context &global, const Executive_Context &ctx) const
@@ -54,7 +54,7 @@ void Expression::evaluate(Reference &ref_out, const Cow_String &func, const Glob
       return;
     }
     ROCKET_ASSERT(stack.size() == 1);
-    ref_out = std::move(stack.mut_top());
+    ref_out = rocket::move(stack.mut_top());
   }
 
 void Expression::enumerate_variables(const Abstract_Variable_Callback &callback) const

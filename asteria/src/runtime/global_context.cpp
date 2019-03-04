@@ -23,7 +23,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     auto std_var = collector->create_variable();
     std_var->reset(D_object(), true);
     Reference_Root::S_variable std_ref_c = { std_var };
-    this->open_named_reference(rocket::sref("std")) = std::move(std_ref_c);
+    this->open_named_reference(rocket::sref("std")) = rocket::move(std_ref_c);
     this->m_std_var = std_var;
     // Add standard library components.
     auto &std_obj = std_var->open_value().check<D_object>();

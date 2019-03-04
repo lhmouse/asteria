@@ -21,7 +21,7 @@ class Function_Executive_Context : public Executive_Context
                                Reference &&self, Cow_Vector<Reference> &&args)
       : Executive_Context(nullptr)
       {
-        this->do_set_arguments(zvarg, params, std::move(self), std::move(args));
+        this->do_set_arguments(zvarg, params, rocket::move(self), rocket::move(args));
       }
     ~Function_Executive_Context() override;
 

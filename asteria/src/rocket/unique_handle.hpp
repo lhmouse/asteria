@@ -49,7 +49,7 @@ template<typename handleT, typename closerT> class unique_handle;
           {
           }
         explicit constexpr stored_handle(closer_type &&cl) noexcept
-          : closer_base(::std::move(cl)),
+          : closer_base(noadl::move(cl)),
             m_h(this->as_closer().null())
           {
           }
@@ -153,7 +153,7 @@ template<typename handleT, typename closerT> class unique_handle
         this->reset(h);
       }
     unique_handle(unique_handle &&other) noexcept
-      : unique_handle(::std::move(other.m_sth.as_closer()))
+      : unique_handle(noadl::move(other.m_sth.as_closer()))
       {
         this->reset(other.m_sth.release());
       }
@@ -165,7 +165,7 @@ template<typename handleT, typename closerT> class unique_handle
     // 23.11.1.2.3, assignment
     unique_handle & operator=(unique_handle &&other) noexcept
       {
-        allocator_move_assigner<closer_type, true>()(this->m_sth.as_closer(), ::std::move(other.m_sth.as_closer()));
+        allocator_move_assigner<closer_type, true>()(this->m_sth.as_closer(), noadl::move(other.m_sth.as_closer()));
         this->reset(other.m_sth.release());
         return *this;
       }

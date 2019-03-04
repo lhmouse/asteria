@@ -18,8 +18,8 @@ int main(int argc, char **argv)
       if(argv[i]) {
         arg += argv[i];
       }
-      Reference_Root::S_constant ref_c = { std::move(arg) };
-      args.emplace_back(std::move(ref_c));
+      Reference_Root::S_constant ref_c = { rocket::move(arg) };
+      args.emplace_back(rocket::move(ref_c));
     }
     // prepare test code.
 #if 0
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     Global_Context global;
     // run it and measure the time.
     auto t1 = std::chrono::high_resolution_clock::now();
-    auto res = code.execute(global, std::move(args));
+    auto res = code.execute(global, rocket::move(args));
     auto t2 = std::chrono::high_resolution_clock::now();
     // print the time elasped and the result.
     std::cerr << std::endl
