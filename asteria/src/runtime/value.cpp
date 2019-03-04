@@ -75,23 +75,19 @@ bool Value::test() const noexcept
       }
     case type_boolean:
       {
-        const auto &alt = this->check<D_boolean>();
-        return alt;
+        return this->check<D_boolean>();
       }
     case type_integer:
       {
-        const auto &alt = this->check<D_integer>();
-        return alt != 0;
+        return this->check<D_integer>() != 0;
       }
     case type_real:
       {
-        const auto &alt = this->check<D_real>();
-        return std::fpclassify(alt) != FP_ZERO;
+        return std::fpclassify(this->check<D_real>()) != FP_ZERO;
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
-        return alt.size() != 0;
+        return this->check<D_string>().size() != 0;
       }
     case type_opaque:
     case type_function:
@@ -100,8 +96,7 @@ bool Value::test() const noexcept
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
-        return alt.size() != 0;
+        return this->check<D_array>().size() != 0;
       }
     case type_object:
       {
@@ -344,28 +339,23 @@ bool Value::unique() const noexcept
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
-        return alt.unique();
+        return this->check<D_string>().unique();
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
-        return alt.unique();
+        return this->check<D_opaque>().unique();
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
-        return alt.unique();
+        return this->check<D_function>().unique();
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
-        return alt.unique();
+        return this->check<D_array>().unique();
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
-        return alt.unique();
+        return this->check<D_object>().unique();
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
@@ -387,28 +377,23 @@ long Value::use_count() const noexcept
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
-        return alt.use_count();
+        return this->check<D_string>().use_count();
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
-        return alt.use_count();
+        return this->check<D_opaque>().use_count();
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
-        return alt.use_count();
+        return this->check<D_function>().use_count();
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
-        return alt.use_count();
+        return this->check<D_array>().use_count();
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
-        return alt.use_count();
+        return this->check<D_object>().use_count();
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
@@ -428,26 +413,22 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
-        alt->enumerate_variables(callback);
+        this->check<D_opaque>()->enumerate_variables(callback);
         return;
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
-        alt->enumerate_variables(callback);
+        this->check<D_function>()->enumerate_variables(callback);
         return;
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
-        rocket::for_each(alt, [&](const auto &elem) { elem.enumerate_variables(callback);  });
+        rocket::for_each(this->check<D_array>(), [&](const auto &elem) { elem.enumerate_variables(callback);  });
         return;
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
-        rocket::for_each(alt, [&](const auto &pair) { pair.second.enumerate_variables(callback);  });
+        rocket::for_each(this->check<D_object>(), [&](const auto &pair) { pair.second.enumerate_variables(callback);  });
         return;
       }
     default:

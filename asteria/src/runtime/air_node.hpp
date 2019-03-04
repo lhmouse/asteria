@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "reference.hpp"
+#include "../syntax/source_location.hpp"
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/variant.hpp"
 
@@ -30,40 +31,43 @@ class Air_Node
 
     enum Index : std::uint8_t
       {
-        index_string     = 0,
-        index_value      = 1,
-        index_reference  = 2,
-        index_nodes      = 3,
+        index_int64             = 0,
+        index_string            = 1,
+        index_vector_string     = 2,
+        index_source_location   = 3,
+        index_vector_statement  = 4,
+        index_value             = 5,
+        index_reference         = 6,
+        index_vector_air_node   = 7,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , PreHashed_String      // 0,
-        , Value                 // 1,
-        , Reference             // 2,
-        , Cow_Vector<Air_Node>  // 3,
+        , std::int64_t                  // 0,
+        , PreHashed_String              // 1,
+        , Cow_Vector<PreHashed_String>  // 2,
+        , Source_Location               // 3,
+        , Cow_Vector<Statement>         // 4,
+        , Value                         // 5,
+        , Reference                     // 6,
+        , Cow_Vector<Air_Node>          // 7,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
-
-    struct Opaque
-      {
-        std::intptr_t ione;
-        std::intptr_t itwo;
-        Cow_Vector<Variant> vars;
-      };
-    using Executor = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Opaque &opaque, const Cow_String &func, const Global_Context &global);
+    using Executor = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_Vector<Variant> &params, const Cow_String &func, const Global_Context &global);
 
   private:
     Executor *m_fptr;
-    Opaque m_opaque;
+    Cow_Vector<Variant> m_params;
 
   public:
-    Air_Node(Executor *fptr, Opaque opaque)
-      : m_fptr(fptr), m_opaque(std::move(opaque))
+    Air_Node(Executor *fptr, Cow_Vector<Variant> &&params)
+      : m_fptr(fptr), m_params(std::move(params))
       {
       }
 
   public:
-    Status execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const;
+    Status execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
+      {
+        return (*(this->m_fptr))(stack_io, ctx_io, this->m_params, func, global);
+      }
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
