@@ -150,35 +150,8 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       return "<unknown operator>";
     }
   }
-#if 0 
+
     namespace {
-
-    struct Branch_Code
-      {
-        std::array<Cow_Vector<Air_Node>, 2> branches;
-        bool assign;
-      };
-
-    template<typename DataT> void do_encapsulate(Air_Node::Opaque &opaque_out, DataT &&data)
-      {
-        // Create a capsule struct for `DataT`.
-        struct Container : virtual RefCnt_Base
-          {
-            // the data object
-            typename std::decay<DataT>::type mdata;
-            // the constructor
-            explicit constexpr Container(DataT &&xdata) : mdata(std::forward<DataT>(xdata))  { }
-          };
-        auto ptr = rocket::make_refcnt<Container>(std::forward<DataT>(data));
-        // `opaque_out.i` will store a pointer to `ptr->mdata`, converted to an integer; `opaque_out.p` will provide ownership of the container.
-        opaque_out.i = reinterpret_cast<std::intptr_t>(std::addressof(ptr->mdata));
-        opaque_out.p = std::move(ptr);
-      }
-
-    template<typename DataT> const DataT & do_decapsulate(const Air_Node::Opaque &opaque) noexcept
-      {
-        return *(reinterpret_cast<const DataT *>(opaque.i));
-      }
 
     ROCKET_PURE_FUNCTION bool do_operator_not(bool rhs)
       {
@@ -410,7 +383,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
         res.reserve(lhs.size() * static_cast<std::size_t>(count));
-        auto mask = size_t(-1) / 2 + 1;
+        auto mask = static_cast<std::size_t>(-1) / 2 + 1;
         for(;;) {
           if(count & mask) {
             res.append(lhs);
@@ -433,8 +406,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
-        res.assign(lhs.size(), ' ');
+        Cow_String res(lhs.size(), ' ');
         auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
@@ -448,8 +420,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
-        res.assign(lhs.size(), ' ');
+        Cow_String res(lhs.size(), ' ');
         auto count = static_cast<std::uint64_t>(rhs);
         if(count >= lhs.size()) {
           return res;
@@ -489,50 +460,50 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
 
     void do_set_temporary(Reference_Stack &stack_io, bool assign, Reference_Root::S_temporary &&ref_c)
       {
-        if(assign) {
-          stack_io.top().open() = std::move(ref_c.value);
-        } else {
+        if(!assign) {
           stack_io.mut_top() = std::move(ref_c);
+          return;
         }
+        stack_io.top().open() = std::move(ref_c.value);
       }
 
     void do_forward(Reference_Stack &stack_io, bool assign)
       {
-        if(assign) {
-          Reference_Root::S_temporary ref_c = { stack_io.top().read() };
-          stack_io.pop();
-          do_set_temporary(stack_io, true, std::move(ref_c));
-        } else {
+        if(!assign) {
           stack_io.pop_prev();
+          return;
         }
+        Reference_Root::S_temporary ref_c = { stack_io.top().read() };
+        stack_io.pop();
+        do_set_temporary(stack_io, true, std::move(ref_c));
       }
 
     Air_Node::Status do_execute_literal(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                        const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto &alt = do_decapsulate<Xpnode::S_literal>(opaque);
+        const auto &value = p.at(0).as<Value>();
         // Push the constant.
-        Reference_Root::S_constant ref_c = { alt.value };
+        Reference_Root::S_constant ref_c = { value };
         stack_io.push(std::move(ref_c));
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_bound_reference(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto &ref = do_decapsulate<Reference>(opaque);
+        const auto &ref = p.at(0).as<Reference>();
         // Push the reference as is.
         stack_io.push(ref);
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_named_reference(Reference_Stack &stack_io, Executive_Context &ctx_io,
-                                                const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context &global)
+                                                const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
-        const auto &name = opaque.s;
+        const auto &name = p.at(0).as<PreHashed_String>();
         // Look for the name recursively.
         const Reference *qref;
         auto qctx = static_cast<const Executive_Context *>(&ctx_io);
@@ -557,16 +528,18 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_closure_function(Reference_Stack &stack_io, Executive_Context &ctx_io,
-                                                 const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                 const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto &alt = do_decapsulate<Xpnode::S_closure_function>(opaque);
+        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &params = p.at(1).as<Cow_Vector<PreHashed_String>>();
+        const auto &body = p.at(2).as<Cow_Vector<Statement>>();
         // Generate code of the function body.
         Cow_Vector<Air_Node> fcode;
-        Function_Analytic_Context fctx(&ctx_io, alt.params);
-        rocket::for_each(alt.body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
+        Function_Analytic_Context fctx(&ctx_io, params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
         // Instantiate the function.
-        RefCnt_Object<Instantiated_Function> closure(alt.sloc, rocket::sref("<closure function>"), alt.params, std::move(fcode));
+        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, std::move(fcode));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
         Reference_Root::S_temporary ref_c = { D_function(std::move(closure)) };
@@ -575,31 +548,42 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_branch(Reference_Stack &stack_io, Executive_Context &ctx_io,
-                                       const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const auto &bcode = do_decapsulate<Branch_Code>(opaque);
-        // Check the condition.
-        bool cond = stack_io.top().read().test();
-        // Pick a branch basing on the condition. Do nothing if the branch is empty.
-        const auto &branch = bcode.branches[cond];
-        if(branch.empty()) {
+        const auto &code_true = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto &code_false = p.at(1).as<Cow_Vector<Air_Node>>();
+        const bool assign = p.at(2).as<std::int64_t>();
+        // Pick a branch basing on the condition.
+        if(stack_io.top().read().test()) {
+          if(code_true.empty()) {
+            // Leave the condition on the stack.
+            return Air_Node::status_next;
+          }
+          // Evaluate the branch.
+          rocket::for_each(code_true, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+          do_forward(stack_io, assign);
+          return Air_Node::status_next;
+        }
+        if(code_false.empty()) {
+          // Leave the condition on the stack.
           return Air_Node::status_next;
         }
         // Evaluate the branch.
-        rocket::for_each(branch, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
-        do_forward(stack_io, bcode.assign);
+        rocket::for_each(code_false, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+        do_forward(stack_io, assign);
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_function_call(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                              const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const auto &alt = do_decapsulate<Xpnode::S_function_call>(opaque);
+        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
         // Allocate the argument vector.
         Cow_Vector<Reference> args;
-        args.resize(alt.nargs);
+        args.resize(nargs);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           *it = std::move(stack_io.mut_top());
           stack_io.pop();
@@ -614,26 +598,26 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
         auto &self_result = stack_io.mut_top().zoom_out();
         // Call the function now.
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", alt.sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
         try {
           target.invoke(self_result, global, std::move(args));
         } catch(std::exception &stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", alt.sloc, "\' inside `", func, "`: what = ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
           auto traceable = trace_exception(std::move(stdex));
-          traceable.append_frame(alt.sloc, func);
+          traceable.append_frame(sloc, func);
           throw traceable;
         }
         // The result will have been written to `self_result`.
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", alt.sloc, "\' inside `", func, "`: target = ", target, ", result = ", self_result.read());
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self_result.read());
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_member_access(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                              const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto &name = opaque.s;
+        const auto &name = p.at(0).as<PreHashed_String>();
         // Append a modifier.
         Reference_Modifier::S_object_key mod_c = { name };
         stack_io.mut_top().zoom_in(std::move(mod_c));
@@ -641,7 +625,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                         const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                         const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Increment the operand and return the old value.
         // `alt.assign` is ignored.
@@ -664,7 +648,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                         const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                         const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decrement the operand and return the old value.
         // `alt.assign` is ignored.
@@ -687,7 +671,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_at(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Append a reference modifier.
         // `alt.assign` is ignored.
@@ -712,10 +696,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_pos(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -724,10 +708,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_neg(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Negate the operand to create a temporary value, then return it.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_integer) {
@@ -746,10 +730,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_notb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                         const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_boolean) {
@@ -768,10 +752,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_notl(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                         const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -781,7 +765,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Increment the operand and return it.
         // `alt.assign` is ignored.
@@ -800,7 +784,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decrement the operand and return it.
         // `alt.assign` is ignored.
@@ -819,10 +803,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_unset(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Unset the reference and return the old value.
         Reference_Root::S_temporary ref_c = { stack_io.top().unset() };
         do_set_temporary(stack_io, assign, std::move(ref_c));
@@ -830,10 +814,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                             const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Return the number of elements in the operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_null) {
@@ -860,10 +844,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_typeof(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                           const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -873,10 +857,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_eq(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -890,10 +874,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_ne(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -907,10 +891,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_lt(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -926,10 +910,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_gt(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -945,10 +929,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_lte(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                           const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -964,10 +948,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_gte(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                           const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -983,10 +967,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                            const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1020,10 +1004,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_add(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1059,10 +1043,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sub(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1090,10 +1074,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_mul(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1134,10 +1118,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_div(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1159,10 +1143,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_mod(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1184,10 +1168,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sll(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1215,10 +1199,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_srl(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1246,10 +1230,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sla(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1277,10 +1261,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sra(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1307,10 +1291,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_andb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1333,10 +1317,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_orb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                       const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1359,10 +1343,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_xorb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                        const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const bool assign = opaque.i;
+        const bool assign = p.at(0).as<std::int64_t>();
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1385,7 +1369,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_assign(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                                          const Air_Node::Opaque & /*opaque*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                                          const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -1397,10 +1381,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_unnamed_array(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                              const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto nelems = static_cast<std::size_t>(opaque.i);
+        const auto nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
         // Pop references to create an array.
         D_array array;
         array.resize(nelems);
@@ -1415,14 +1399,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_unnamed_object(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                               const Air_Node::Opaque &opaque, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto &alt = do_decapsulate<Xpnode::S_unnamed_object>(opaque);
+        const auto &keys = p.at(0).as<Cow_Vector<PreHashed_String>>();
         // Pop references to create an object.
         D_object object;
-        object.reserve(alt.keys.size());
-        for(auto it = alt.keys.rbegin(); it != alt.keys.rend(); ++it) {
+        object.reserve(keys.size());
+        for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
           object.try_emplace(*it, stack_io.top().read());
           stack_io.pop();
         }
@@ -1433,20 +1417,23 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_coalescence(Reference_Stack &stack_io, Executive_Context &ctx_io,
-                                            const Air_Node::Opaque &opaque, const Cow_String &func, const Global_Context &global)
+                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const auto &bcode = do_decapsulate<Branch_Code>(opaque);
-        // Check the condition.
-        bool cond = stack_io.top().read().type() != type_null;
-        // Pick a branch basing on the condition. Do nothing if the branch is empty.
-        const auto &branch = bcode.branches[cond];
-        if(branch.empty()) {
+        const auto &code_null = p.at(0).as<Cow_Vector<Air_Node>>();
+        const bool assign = p.at(1).as<std::int64_t>();
+        // Pick a branch basing on the condition.
+        if(stack_io.top().read().type() != type_null) {
+          // Leave the condition on the stack.
+          return Air_Node::status_next;
+        }
+        if(code_null.empty()) {
+          // Leave the condition on the stack.
           return Air_Node::status_next;
         }
         // Evaluate the branch.
-        rocket::for_each(branch, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
-        do_forward(stack_io, bcode.assign);
+        rocket::for_each(code_null, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+        do_forward(stack_io, assign);
         return Air_Node::status_next;
       }
 
@@ -1459,9 +1446,9 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
       {
         const auto &alt = this->m_stor.as<S_literal>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, alt);
-        code_out.emplace_back(&do_execute_literal, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.value);  // 0
+        code_out.emplace_back(&do_execute_literal, std::move(p));
         return;
       }
     case index_named_reference:
@@ -1488,224 +1475,227 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         }
         if(qref) {
           // A named reference has been found.
-          Air_Node::Opaque opaque;
-          do_encapsulate(opaque, *qref);
-          code_out.emplace_back(&do_execute_bound_reference, std::move(opaque));
- ????????????? GC 
+          Cow_Vector<Air_Node::Variant> p;
+          p.emplace_back(*qref);  // 0
+          code_out.emplace_back(&do_execute_bound_reference, std::move(p));
           return;
         }
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        opaque.s = alt.name;
-        code_out.emplace_back(&do_execute_named_reference, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.name);  // 0
+        code_out.emplace_back(&do_execute_named_reference, std::move(p));
         return;
       }
     case index_closure_function:
       {
         const auto &alt = this->m_stor.as<S_closure_function>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, alt);
-        code_out.emplace_back(&do_execute_closure_function, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.sloc);  // 0
+        p.emplace_back(alt.params);  // 1
+        p.emplace_back(alt.body);  // 2
+        code_out.emplace_back(&do_execute_closure_function, std::move(p));
         return;
       }
     case index_branch:
       {
         const auto &alt = this->m_stor.as<S_branch>();
-        // Generate code for both branches recursively.
-        Branch_Code bcode;
-        rocket::for_each(alt.branch_true, [&](const Xpnode &node) { node.generate_code(bcode.branches[1], ctx);  });
-        rocket::for_each(alt.branch_false, [&](const Xpnode &node) { node.generate_code(bcode.branches[0], ctx);  });
-        bcode.assign = alt.assign;
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, std::move(bcode));
-        code_out.emplace_back(&do_execute_branch, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(alt.branch_true, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        p.emplace_back(std::move(code));  // 0
+        code.clear();
+        rocket::for_each(alt.branch_false, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        p.emplace_back(std::move(code));  // 1
+        p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
+        code_out.emplace_back(&do_execute_branch, std::move(p));
         return;
       }
     case index_function_call:
       {
         const auto &alt = this->m_stor.as<S_function_call>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, alt);
-        code_out.emplace_back(&do_execute_function_call, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.sloc);  // 0
+        p.emplace_back(static_cast<std::int64_t>(alt.nargs));  // 1
+        code_out.emplace_back(&do_execute_function_call, std::move(p));
         return;
       }
     case index_member_access:
       {
         const auto &alt = this->m_stor.as<S_member_access>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        opaque.s = alt.name;
-        code_out.emplace_back(&do_execute_member_access, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.name);  // 0
+        code_out.emplace_back(&do_execute_member_access, std::move(p));
         return;
       }
     case index_operator_rpn:
       {
         const auto &alt = this->m_stor.as<S_operator_rpn>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        opaque.i = alt.assign;
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 0
         switch(alt.xop) {
         case xop_postfix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_inc, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_inc, std::move(p));
             return;
           }
         case xop_postfix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_dec, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_dec, std::move(p));
             return;
           }
         case xop_postfix_at:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_at, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_at, std::move(p));
             return;
           }
         case xop_prefix_pos:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_pos, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_pos, std::move(p));
             return;
           }
         case xop_prefix_neg:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_neg, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_neg, std::move(p));
             return;
           }
         case xop_prefix_notb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notb, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_notb, std::move(p));
             return;
           }
         case xop_prefix_notl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notl, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_notl, std::move(p));
             return;
           }
         case xop_prefix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_inc, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_inc, std::move(p));
             return;
           }
         case xop_prefix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_dec, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_dec, std::move(p));
             return;
           }
         case xop_prefix_unset:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_unset, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_unset, std::move(p));
             return;
           }
         case xop_prefix_lengthof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_lengthof, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_lengthof, std::move(p));
             return;
           }
         case xop_prefix_typeof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_typeof, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_typeof, std::move(p));
             return;
           }
         case xop_infix_cmp_eq:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_eq, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_eq, std::move(p));
             return;
           }
         case xop_infix_cmp_ne:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_ne, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_ne, std::move(p));
             return;
           }
         case xop_infix_cmp_lt:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lt, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lt, std::move(p));
             return;
           }
         case xop_infix_cmp_gt:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gt, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gt, std::move(p));
             return;
           }
         case xop_infix_cmp_lte:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lte, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lte, std::move(p));
             return;
           }
         case xop_infix_cmp_gte:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gte, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gte, std::move(p));
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, std::move(p));
             return;
           }
         case xop_infix_add:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_add, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_add, std::move(p));
             return;
           }
         case xop_infix_sub:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sub, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sub, std::move(p));
             return;
           }
         case xop_infix_mul:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mul, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_mul, std::move(p));
             return;
           }
         case xop_infix_div:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_div, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_div, std::move(p));
             return;
           }
         case xop_infix_mod:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mod, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_mod, std::move(p));
             return;
           }
         case xop_infix_sll:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sll, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sll, std::move(p));
             return;
           }
         case xop_infix_srl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_srl, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_srl, std::move(p));
             return;
           }
         case xop_infix_sla:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sla, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sla, std::move(p));
             return;
           }
         case xop_infix_sra:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sra, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sra, std::move(p));
             return;
           }
         case xop_infix_andb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_andb, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_andb, std::move(p));
             return;
           }
         case xop_infix_orb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_orb, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_orb, std::move(p));
             return;
           }
         case xop_infix_xorb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_xorb, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_xorb, std::move(p));
             return;
           }
         case xop_infix_assign:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_assign, std::move(opaque));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_assign, std::move(p));
             return;
           }
         default:
@@ -1716,36 +1706,35 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
       {
         const auto &alt = this->m_stor.as<S_unnamed_array>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        opaque.i = static_cast<std::int64_t>(alt.nelems);
-        code_out.emplace_back(&do_execute_unnamed_array, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(static_cast<std::int64_t>(alt.nelems));  // 0
+        code_out.emplace_back(&do_execute_unnamed_array, std::move(p));
         return;
       }
     case index_unnamed_object:
       {
         const auto &alt = this->m_stor.as<S_unnamed_object>();
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, alt);
-        code_out.emplace_back(&do_execute_unnamed_object, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.keys);  // 0
+        code_out.emplace_back(&do_execute_unnamed_object, std::move(p));
         return;
       }
     case index_coalescence:
       {
         const auto &alt = this->m_stor.as<S_coalescence>();
-        // Generate code for the null branch recursively.
-        Branch_Code bcode;
-        rocket::for_each(alt.branch_null, [&](const Xpnode &node) { node.generate_code(bcode.branches[0], ctx);  });
-        bcode.assign = alt.assign;
         // Encode arguments.
-        Air_Node::Opaque opaque;
-        do_encapsulate(opaque, std::move(bcode));
-        code_out.emplace_back(&do_execute_coalescence, std::move(opaque));
+        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(alt.branch_null, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        p.emplace_back(std::move(code));  // 0
+        p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
+        code_out.emplace_back(&do_execute_coalescence, std::move(p));
         return;
       }
     default:
       ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
-#endif
+
 }

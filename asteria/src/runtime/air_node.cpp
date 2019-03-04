@@ -3,49 +3,44 @@
 
 #include "../precompiled.hpp"
 #include "air_node.hpp"
-#include "reference.hpp"
+#include "../syntax/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Air_Node::Status Air_Node::execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
-  {
-    return (*(this->m_fptr))(stack_io, ctx_io, this->m_opaque, func, global);
-  }
-
 void Air_Node::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_opaque.vars,
-      [&](const Variant &var)
-        {
-          switch(static_cast<Index>(var.index())) {
-          case index_string:
-            {
-              return;
-            }
-          case index_value:
-            {
-              const auto &alt = var.as<Value>();
-              alt.enumerate_variables(callback);
-              return;
-            }
-          case index_reference:
-            {
-              const auto &alt = var.as<Reference>();
-              alt.enumerate_variables(callback);
-              return;
-            }
-          case index_nodes:
-            {
-              const auto &alt = var.as<Cow_Vector<Air_Node>>();
-              rocket::for_each(alt, [&](const Air_Node &node) { node.enumerate_variables(callback);  });
-              return;
-            }
-          default:
-            ASTERIA_TERMINATE("An unknown AIR node argument enumeration `", var.index(), "` has been encountered.");
+    const auto enumerate_variables_recursively = [&](const Variant &param)
+      {
+        switch(static_cast<Index>(param.index())) {
+        case index_int64:
+        case index_string:
+        case index_vector_string:
+        case index_source_location:
+        case index_vector_statement:
+          {
+            return;
           }
-        }
-      );
+        case index_value:
+          {
+            param.as<Value>().enumerate_variables(callback);
+            return;
+          }
+        case index_reference:
+          {
+            param.as<Reference>().enumerate_variables(callback);
+            return;
+          }
+        case index_vector_air_node:
+          {
+            rocket::for_each(param.as<Cow_Vector<Air_Node>>(), [&](const Air_Node &node) { node.enumerate_variables(callback);  });
+             return;
+          }
+        default:
+          ASTERIA_TERMINATE("An unknown AIR node argument enumeration `", param.index(), "` has been encountered.");
+         }
+      };
+    rocket::for_each(this->m_params, enumerate_variables_recursively);
   }
 
 }
