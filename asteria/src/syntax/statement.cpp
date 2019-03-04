@@ -14,6 +14,11 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+
+void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_io) const
+  {
+  }
+
 #if 0
     namespace {
 
