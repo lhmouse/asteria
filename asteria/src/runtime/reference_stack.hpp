@@ -81,7 +81,7 @@ class Reference_Stack
         auto btop = this->m_btop;
         ROCKET_ASSERT(btop - this->m_stor.data() >= 2);
         // Overwrite the previous element with the top.
-        btop[-2] = std::move(btop[-1]);
+        btop[-2] = rocket::move(btop[-1]);
         // Set up the past-the-top pointer.
         --btop;
         this->m_btop = btop;

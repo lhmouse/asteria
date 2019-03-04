@@ -22,7 +22,7 @@ class Instantiated_Function : public Abstract_Function
   public:
     Instantiated_Function(const Source_Location &sloc, const PreHashed_String &func, const Cow_Vector<PreHashed_String> &params, Cow_Vector<Air_Node> &&code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
-        m_code(std::move(code))
+        m_code(rocket::move(code))
       {
       }
     ~Instantiated_Function() override;

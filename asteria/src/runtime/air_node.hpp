@@ -59,7 +59,7 @@ class Air_Node
 
   public:
     Air_Node(Executor *fptr, Cow_Vector<Variant> &&params)
-      : m_fptr(fptr), m_params(std::move(params))
+      : m_fptr(fptr), m_params(rocket::move(params))
       {
       }
 
