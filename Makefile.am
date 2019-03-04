@@ -85,9 +85,7 @@ pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
   asteria/src/syntax/source_location.hpp  \
   asteria/src/syntax/xpnode.hpp  \
-  asteria/src/syntax/expression.hpp  \
-  asteria/src/syntax/statement.hpp  \
-  asteria/src/syntax/block.hpp
+  asteria/src/syntax/statement.hpp
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
@@ -192,8 +190,6 @@ check_PROGRAMS =  \
   test/statement.test  \
   test/traceable_exception.test  \
   test/executive_context.test  \
-  test/expression.test  \
-  test/block.test  \
   test/token_stream.test  \
   test/parser.test  \
   test/simple_source_file.test  \
