@@ -202,7 +202,7 @@ namespace Asteria {
           return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
-        nodes_out.emplace_back(std::move(node_c));
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -236,7 +236,7 @@ namespace Asteria {
           return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
-        nodes_out.emplace_back(std::move(node_c));
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -402,8 +402,8 @@ namespace Asteria {
         if(!do_accept_block_statement_list(stmts, tstrm_io)) {
           return false;
         }
-        Statement::S_block stmt_c = { std::move(stmts) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_block stmt_c = { rocket::move(stmts) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -418,7 +418,7 @@ namespace Asteria {
           return false;
         }
         for(;;) {
-          names_out.emplace_back(std::move(name));
+          names_out.emplace_back(rocket::move(name));
           if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
             break;
           }
@@ -435,8 +435,8 @@ namespace Asteria {
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
-        Xpnode::S_named_reference node_c = { std::move(name) };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_named_reference node_c = { rocket::move(name) };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -446,8 +446,8 @@ namespace Asteria {
         if(!do_accept_literal(value, tstrm_io)) {
           return false;
         }
-        Xpnode::S_literal node_c = { std::move(value) };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_literal node_c = { rocket::move(value) };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -457,7 +457,7 @@ namespace Asteria {
           return false;
         }
         Xpnode::S_named_reference node_c = { rocket::sref("__this") };
-        nodes_out.emplace_back(std::move(node_c));
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -487,11 +487,11 @@ namespace Asteria {
           if(!do_accept_expression(nodes_ret, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_or_expression_expected);
           }
-          Statement::S_return stmt_c = { true, std::move(nodes_ret) };
-          body.emplace_back(std::move(stmt_c));
+          Statement::S_return stmt_c = { true, rocket::move(nodes_ret) };
+          body.emplace_back(rocket::move(stmt_c));
         }
-        Xpnode::S_closure_function node_c = { std::move(sloc), std::move(params), std::move(body) };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_closure_function node_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -522,7 +522,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_or_expression_expected);
         }
         Xpnode::S_unnamed_array node_c = { nelems };
-        nodes_out.emplace_back(std::move(node_c));
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -558,7 +558,7 @@ namespace Asteria {
           if(!do_accept_expression(nodes_out, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
           }
-          keys.emplace_back(std::move(key));
+          keys.emplace_back(rocket::move(key));
           bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
                           do_match_punctuator(tstrm_io, Token::punctuator_semicol);
           if(!has_next) {
@@ -568,8 +568,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_object_key_expected);
         }
-        Xpnode::S_unnamed_object node_c = { std::move(keys) };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_unnamed_object node_c = { rocket::move(keys) };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -630,8 +630,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
-        Xpnode::S_function_call node_c = { std::move(sloc), nargs };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_function_call node_c = { rocket::move(sloc), nargs };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -649,7 +649,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_expected);
         }
         Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
-        nodes_out.emplace_back(std::move(node_c));
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -667,8 +667,8 @@ namespace Asteria {
         if(!key_got) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
-        Xpnode::S_member_access node_c = { std::move(key) };
-        nodes_out.emplace_back(std::move(node_c));
+        Xpnode::S_member_access node_c = { rocket::move(key) };
+        nodes_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -710,7 +710,7 @@ namespace Asteria {
           }
         }
         while(!prefixes.empty()) {
-          nodes_out.emplace_back(std::move(prefixes.mut_back()));
+          nodes_out.emplace_back(rocket::move(prefixes.mut_back()));
           prefixes.pop_back();
         }
         return true;
@@ -757,7 +757,7 @@ namespace Asteria {
 
       public:
         explicit Infix_Head(Cow_Vector<Xpnode> &&nodes)
-          : m_nodes(std::move(nodes))
+          : m_nodes(rocket::move(nodes))
           {
           }
 
@@ -782,7 +782,7 @@ namespace Asteria {
         if(!do_accept_infix_element(nodes, tstrm_io)) {
           return false;
         }
-        elem_out = rocket::make_unique<Infix_Head>(std::move(nodes));
+        elem_out = rocket::make_unique<Infix_Head>(rocket::move(nodes));
         return true;
       }
 
@@ -805,7 +805,7 @@ namespace Asteria {
 
       public:
         Infix_Selection(Sop sop, bool assign, Cow_Vector<Xpnode> &&branch_true, Cow_Vector<Xpnode> &&branch_false)
-          : m_sop(sop), m_assign(assign), m_branch_true(std::move(branch_true)), m_branch_false(std::move(branch_false))
+          : m_sop(sop), m_assign(assign), m_branch_true(rocket::move(branch_true)), m_branch_false(rocket::move(branch_false))
           {
           }
 
@@ -839,12 +839,12 @@ namespace Asteria {
         void extract(Cow_Vector<Xpnode> &nodes_out) override
           {
             if(this->m_sop == sop_coales) {
-              Xpnode::S_coalescence node_c = { std::move(this->m_branch_false), this->m_assign };
-              nodes_out.emplace_back(std::move(node_c));
+              Xpnode::S_coalescence node_c = { rocket::move(this->m_branch_false), this->m_assign };
+              nodes_out.emplace_back(rocket::move(node_c));
               return;
             }
-            Xpnode::S_branch node_c = { std::move(this->m_branch_true), std::move(this->m_branch_false), this->m_assign };
-            nodes_out.emplace_back(std::move(node_c));
+            Xpnode::S_branch node_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
+            nodes_out.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base &&elem) override
           {
@@ -872,7 +872,7 @@ namespace Asteria {
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_quest, assign, std::move(branch_true), std::move(branch_false));
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_quest, assign, rocket::move(branch_true), rocket::move(branch_false));
         return true;
       }
 
@@ -889,7 +889,7 @@ namespace Asteria {
         if(!do_accept_infix_element(branch_true, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, std::move(branch_true), Cow_Vector<Xpnode>());
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, rocket::move(branch_true), Cow_Vector<Xpnode>());
         return true;
       }
 
@@ -906,7 +906,7 @@ namespace Asteria {
         if(!do_accept_infix_element(branch_false, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, Cow_Vector<Xpnode>(), std::move(branch_false));
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, Cow_Vector<Xpnode>(), rocket::move(branch_false));
         return true;
       }
 
@@ -923,7 +923,7 @@ namespace Asteria {
         if(!do_accept_infix_element(branch_null, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, Cow_Vector<Xpnode>(), std::move(branch_null));
+        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, Cow_Vector<Xpnode>(), rocket::move(branch_null));
         return true;
       }
 
@@ -936,7 +936,7 @@ namespace Asteria {
 
       public:
         Infix_Carriage(Xpnode::Xop xop, bool assign, Cow_Vector<Xpnode> &&rhs)
-          : m_xop(xop), m_assign(assign), m_rhs(std::move(rhs))
+          : m_xop(xop), m_assign(assign), m_rhs(rocket::move(rhs))
           {
           }
 
@@ -1003,7 +1003,7 @@ namespace Asteria {
             nodes_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
             Xpnode::S_operator_rpn node_c = { this->m_xop, this->m_assign };
-            nodes_out.emplace_back(std::move(node_c));
+            nodes_out.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base &&elem) override
           {
@@ -1191,7 +1191,7 @@ namespace Asteria {
         if(!do_accept_infix_element(rhs, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Carriage>(xop, assign, std::move(rhs));
+        elem_out = rocket::make_unique<Infix_Carriage>(xop, assign, rocket::move(rhs));
         return true;
       }
 
@@ -1212,7 +1212,7 @@ namespace Asteria {
           return false;
         }
         Cow_Vector<Uptr<Infix_Element_Base>> stack;
-        stack.emplace_back(std::move(elem));
+        stack.emplace_back(rocket::move(elem));
         for(;;) {
           bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
                           do_accept_infix_selection_and(elem, tstrm_io) ||
@@ -1226,14 +1226,14 @@ namespace Asteria {
           auto prec_top = stack.back()->precedence();
           if(prec_top < Infix_Element_Base::precedence_assignment) {
             while((stack.size() > 1) && (prec_top <= elem->precedence())) {
-              stack.rbegin()[1]->append(std::move(*(stack.back())));
+              stack.rbegin()[1]->append(rocket::move(*(stack.back())));
               stack.pop_back();
             }
           }
-          stack.emplace_back(std::move(elem));
+          stack.emplace_back(rocket::move(elem));
         }
         while(stack.size() > 1) {
-          stack.rbegin()[1]->append(std::move(*(stack.back())));
+          stack.rbegin()[1]->append(rocket::move(*(stack.back())));
           stack.pop_back();
         }
         stack.front()->extract(nodes_out);
@@ -1267,8 +1267,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { std::move(sloc), std::move(name), false, std::move(init) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), false, rocket::move(init) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1297,8 +1297,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { std::move(sloc), std::move(name), true, std::move(init) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), true, rocket::move(init) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1329,8 +1329,8 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Statement::S_function stmt_c = { std::move(sloc), std::move(name), std::move(params), std::move(body) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(name), rocket::move(params), rocket::move(body) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1345,8 +1345,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_expression stmt_c = { std::move(expr) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_expression stmt_c = { rocket::move(expr) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1384,8 +1384,8 @@ namespace Asteria {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
           }
         }
-        Statement::S_if stmt_c = { neg, std::move(cond), std::move(branch_true), std::move(branch_false) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_if stmt_c = { neg, rocket::move(cond), rocket::move(branch_true), rocket::move(branch_false) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1436,13 +1436,13 @@ namespace Asteria {
               break;
             }
           }
-          clauses.emplace_back(std::move(cond), std::move(stmts));
+          clauses.emplace_back(rocket::move(cond), rocket::move(stmts));
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_switch_clause_expected);
         }
-        Statement::S_switch stmt_c = { std::move(ctrl), std::move(clauses) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_switch stmt_c = { rocket::move(ctrl), rocket::move(clauses) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1477,8 +1477,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_do_while stmt_c = { std::move(body), neg, std::move(cond) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_do_while stmt_c = { rocket::move(body), neg, rocket::move(cond) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1507,8 +1507,8 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Statement::S_while stmt_c = { neg, std::move(cond), std::move(body) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_while stmt_c = { neg, rocket::move(cond), rocket::move(body) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1573,12 +1573,12 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
         if(key_name.empty()) {
-          Statement::S_for stmt_c = { std::move(init), std::move(cond), std::move(step), std::move(body) };
-          stmts_out.emplace_back(std::move(stmt_c));
+          Statement::S_for stmt_c = { rocket::move(init), rocket::move(cond), rocket::move(step), rocket::move(body) };
+          stmts_out.emplace_back(rocket::move(stmt_c));
           return true;
         }
-        Statement::S_for_each stmt_c = { std::move(key_name), std::move(mapped_name), std::move(step), std::move(body) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_for_each stmt_c = { rocket::move(key_name), rocket::move(mapped_name), rocket::move(step), rocket::move(body) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1607,7 +1607,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
         Statement::S_break stmt_c = { target };
-        stmts_out.emplace_back(std::move(stmt_c));
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1632,7 +1632,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
         Statement::S_continue stmt_c = { target };
-        stmts_out.emplace_back(std::move(stmt_c));
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1652,8 +1652,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_throw stmt_c = { std::move(sloc), std::move(expr) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_throw stmt_c = { rocket::move(sloc), rocket::move(expr) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1676,8 +1676,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_or_expression_expected);
         }
-        Statement::S_return stmt_c = { by_ref, std::move(expr) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_return stmt_c = { by_ref, rocket::move(expr) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1702,8 +1702,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_assert stmt_c = { std::move(expr), std::move(msg) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_assert stmt_c = { rocket::move(expr), rocket::move(msg) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1737,8 +1737,8 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body_catch, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Statement::S_try stmt_c = { std::move(body_try), std::move(sloc), std::move(except_name), std::move(body_catch) };
-        stmts_out.emplace_back(std::move(stmt_c));
+        Statement::S_try stmt_c = { rocket::move(body_try), rocket::move(sloc), rocket::move(except_name), rocket::move(body_catch) };
+        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1851,13 +1851,13 @@ bool Parser::load(Token_Stream &tstrm_io, const Parser_Options & /*options*/)
     ///////////////////////////////////////////////////////////////////////////
     // Finish
     ///////////////////////////////////////////////////////////////////////////
-    this->m_stor = std::move(stmts);
+    this->m_stor = rocket::move(stmts);
     return true;
   } catch(Parser_Error &err) {  // Don't play with this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
                       "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
                       "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
-    this->m_stor = std::move(err);
+    this->m_stor = rocket::move(err);
     return false;
   }
 

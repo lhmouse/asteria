@@ -461,10 +461,10 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
     void do_set_temporary(Reference_Stack &stack_io, bool assign, Reference_Root::S_temporary &&ref_c)
       {
         if(!assign) {
-          stack_io.mut_top() = std::move(ref_c);
+          stack_io.mut_top() = rocket::move(ref_c);
           return;
         }
-        stack_io.top().open() = std::move(ref_c.value);
+        stack_io.top().open() = rocket::move(ref_c.value);
       }
 
     void do_forward(Reference_Stack &stack_io, bool assign)
@@ -475,7 +475,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         }
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        do_set_temporary(stack_io, true, std::move(ref_c));
+        do_set_temporary(stack_io, true, rocket::move(ref_c));
       }
 
     Air_Node::Status do_execute_literal(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
@@ -485,7 +485,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const auto &value = p.at(0).as<Value>();
         // Push the constant.
         Reference_Root::S_constant ref_c = { value };
-        stack_io.push(std::move(ref_c));
+        stack_io.push(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -539,11 +539,11 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         Function_Analytic_Context fctx(&ctx_io, params);
         rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
         // Instantiate the function.
-        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, std::move(fcode));
+        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(fcode));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
-        Reference_Root::S_temporary ref_c = { D_function(std::move(closure)) };
-        stack_io.push(std::move(ref_c));
+        Reference_Root::S_temporary ref_c = { D_function(rocket::move(closure)) };
+        stack_io.push(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -580,12 +580,12 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
       {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
+        const auto nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
         // Allocate the argument vector.
         Cow_Vector<Reference> args;
         args.resize(nargs);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-          *it = std::move(stack_io.mut_top());
+          *it = rocket::move(stack_io.mut_top());
           stack_io.pop();
         }
         // Get the target reference.
@@ -600,11 +600,11 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // Call the function now.
         ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
         try {
-          target.invoke(self_result, global, std::move(args));
+          target.invoke(self_result, global, rocket::move(args));
         } catch(std::exception &stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
-          auto traceable = trace_exception(std::move(stdex));
+          auto traceable = trace_exception(rocket::move(stdex));
           traceable.append_frame(sloc, func);
           throw traceable;
         }
@@ -620,7 +620,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const auto &name = p.at(0).as<PreHashed_String>();
         // Append a modifier.
         Reference_Modifier::S_object_key mod_c = { name };
-        stack_io.mut_top().zoom_in(std::move(mod_c));
+        stack_io.mut_top().zoom_in(rocket::move(mod_c));
         return Air_Node::status_next;
       }
 
@@ -634,14 +634,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_operator_add(lhs, D_integer(1));
-          do_set_temporary(stack_io, false, std::move(ref_c));
+          do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_operator_add(lhs, D_real(1));
-          do_set_temporary(stack_io, false, std::move(ref_c));
+          do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_inc), " operation is not defined for `", value, "`.");
@@ -657,14 +657,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           auto &lhs = value.check<D_integer>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_operator_sub(lhs, D_integer(1));
-          do_set_temporary(stack_io, false, std::move(ref_c));
+          do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(value.type() == type_real) {
           auto &lhs = value.check<D_real>();
           Reference_Root::S_temporary ref_c = { lhs };
           lhs = do_operator_sub(lhs, D_real(1));
-          do_set_temporary(stack_io, false, std::move(ref_c));
+          do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_dec), " operation is not defined for `", value, "`.");
@@ -681,13 +681,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         case type_integer:
           {
             Reference_Modifier::S_array_index mod_c = { subscript.check<D_integer>() };
-            stack_io.mut_top().zoom_in(std::move(mod_c));
+            stack_io.mut_top().zoom_in(rocket::move(mod_c));
             return Air_Node::status_next;
           }
         case type_string:
           {
             Reference_Modifier::S_object_key mod_c = { subscript.check<D_string>() };
-            stack_io.mut_top().zoom_in(std::move(mod_c));
+            stack_io.mut_top().zoom_in(rocket::move(mod_c));
             return Air_Node::status_next;
           }
         default:
@@ -703,7 +703,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -717,13 +717,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_neg(rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(ref_c.value.type() == type_real) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_neg(rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_neg), " operation is not defined for `", ref_c.value, "`.");
@@ -739,13 +739,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if(ref_c.value.type() == type_boolean) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_operator_not(rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(ref_c.value.type() == type_integer) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_not(rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_notb), " operation is not defined for `", ref_c.value, "`.");
@@ -760,7 +760,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         ref_c.value = do_operator_not(ref_c.value.test());
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -809,7 +809,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const bool assign = p.at(0).as<std::int64_t>();
         // Unset the reference and return the old value.
         Reference_Root::S_temporary ref_c = { stack_io.top().unset() };
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -822,22 +822,22 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_null) {
           ref_c.value = D_integer(0);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(ref_c.value.type() == type_string) {
           ref_c.value = D_integer(ref_c.value.check<D_string>().size());
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(ref_c.value.type() == type_array) {
           ref_c.value = D_integer(ref_c.value.check<D_array>().size());
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if(ref_c.value.type() == type_object) {
           ref_c.value = D_integer(ref_c.value.check<D_object>().size());
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_lengthof), " operation is not defined for `", ref_c.value, "`.");
@@ -852,7 +852,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         ref_c.value = D_string(rocket::sref(Value::get_type_name(ref_c.value.type())));
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -869,7 +869,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp == Value::compare_equal);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -886,7 +886,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(ref_c.value);
         ref_c.value = D_boolean(comp != Value::compare_equal);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -905,7 +905,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp == Value::compare_less);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -924,7 +924,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp == Value::compare_greater);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -943,7 +943,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp != Value::compare_greater);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -962,7 +962,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", ref_c.value, "` are unordered.");
         }
         ref_c.value = D_boolean(comp != Value::compare_less);
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -999,7 +999,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
             break;
           }
         }
-        do_set_temporary(stack_io, assign, std::move(ref_c));
+        do_set_temporary(stack_io, assign, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -1016,27 +1016,27 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_operator_or(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // For the `integer` and `real` types, return the sum of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_add(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_add(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
           rhs = do_operator_add(lhs.check<D_string>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_add), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1061,13 +1061,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_sub(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_sub(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sub), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1092,26 +1092,26 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_mul(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_mul(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
         if((lhs.type() == type_string) && (ref_c.value.type() == type_integer)) {
           // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
           ref_c.value = do_operator_mul(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_string)) {
           auto &rhs = ref_c.value.check<D_string>();
           rhs = do_operator_mul(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mul), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1130,13 +1130,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_div(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_div(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_div), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1155,13 +1155,13 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_mod(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         if((lhs.type() == type_real) && (ref_c.value.type() == type_real)) {
           auto &rhs = ref_c.value.check<D_real>();
           rhs = do_operator_mod(lhs.check<D_real>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mod), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1183,7 +1183,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_operator_sll(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
           // If the first operand has type `string`, fill space characters in the right and discard characters from the left.
@@ -1191,7 +1191,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_operator_sll(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
         }
@@ -1214,7 +1214,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_operator_srl(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
           // If the first operand has type `string`, fill space characters in the left and discard characters from the right.
@@ -1222,7 +1222,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_operator_srl(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
         }
@@ -1246,14 +1246,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_operator_sla(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
           // If the first operand has type `string`, fill space characters in the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_operator_sla(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
         }
@@ -1276,14 +1276,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           if(lhs.type() == type_integer) {
             auto &rhs = ref_c.value.check<D_integer>();
             rhs = do_operator_sra(lhs.check<D_integer>(), rhs);
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
           // If the first operand has type `string`, discard characters from the right.
           if(lhs.type() == type_string) {
             // Note that `ref_c.value` does not have type `D_string`, thus this branch can't be optimized.
             ref_c.value = do_operator_sra(lhs.check<D_string>(), ref_c.value.check<D_integer>());
-            do_set_temporary(stack_io, assign, std::move(ref_c));
+            do_set_temporary(stack_io, assign, rocket::move(ref_c));
             return Air_Node::status_next;
           }
         }
@@ -1303,14 +1303,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_operator_and(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // For the `integer` type, return the bitwise AND'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_and(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_andb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1329,14 +1329,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_operator_or(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // For the `integer` type, return the bitwise OR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_or(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_orb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1355,14 +1355,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
           rhs = do_operator_xor(lhs.check<D_boolean>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         // For the `integer` type, return the bitwise XOR'd result of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
           rhs = do_operator_xor(lhs.check<D_integer>(), rhs);
-          do_set_temporary(stack_io, assign, std::move(ref_c));
+          do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_xorb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
@@ -1376,7 +1376,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         stack_io.pop();
         // Copy the operand.
         // `alt.assign` is ignored.
-        do_set_temporary(stack_io, true, std::move(ref_c));
+        do_set_temporary(stack_io, true, rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -1393,8 +1393,8 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           stack_io.pop();
         }
         // Push the array as a temporary.
-        Reference_Root::S_temporary ref_c = { std::move(array) };
-        stack_io.push(std::move(ref_c));
+        Reference_Root::S_temporary ref_c = { rocket::move(array) };
+        stack_io.push(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -1411,8 +1411,8 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           stack_io.pop();
         }
         // Push the object as a temporary.
-        Reference_Root::S_temporary ref_c = { std::move(object) };
-        stack_io.push(std::move(ref_c));
+        Reference_Root::S_temporary ref_c = { rocket::move(object) };
+        stack_io.push(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -1448,7 +1448,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.value);  // 0
-        code_out.emplace_back(&do_execute_literal, std::move(p));
+        code_out.emplace_back(&do_execute_literal, rocket::move(p));
         return;
       }
     case index_named_reference:
@@ -1477,13 +1477,13 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
           // A named reference has been found.
           Cow_Vector<Air_Node::Variant> p;
           p.emplace_back(*qref);  // 0
-          code_out.emplace_back(&do_execute_bound_reference, std::move(p));
+          code_out.emplace_back(&do_execute_bound_reference, rocket::move(p));
           return;
         }
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.name);  // 0
-        code_out.emplace_back(&do_execute_named_reference, std::move(p));
+        code_out.emplace_back(&do_execute_named_reference, rocket::move(p));
         return;
       }
     case index_closure_function:
@@ -1494,7 +1494,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.params);  // 1
         p.emplace_back(alt.body);  // 2
-        code_out.emplace_back(&do_execute_closure_function, std::move(p));
+        code_out.emplace_back(&do_execute_closure_function, rocket::move(p));
         return;
       }
     case index_branch:
@@ -1504,12 +1504,12 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
         rocket::for_each(alt.branch_true, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
-        p.emplace_back(std::move(code));  // 0
+        p.emplace_back(rocket::move(code));  // 0
         code.clear();
         rocket::for_each(alt.branch_false, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
-        p.emplace_back(std::move(code));  // 1
+        p.emplace_back(rocket::move(code));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
-        code_out.emplace_back(&do_execute_branch, std::move(p));
+        code_out.emplace_back(&do_execute_branch, rocket::move(p));
         return;
       }
     case index_function_call:
@@ -1519,7 +1519,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.nargs));  // 1
-        code_out.emplace_back(&do_execute_function_call, std::move(p));
+        code_out.emplace_back(&do_execute_function_call, rocket::move(p));
         return;
       }
     case index_member_access:
@@ -1528,7 +1528,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.name);  // 0
-        code_out.emplace_back(&do_execute_member_access, std::move(p));
+        code_out.emplace_back(&do_execute_member_access, rocket::move(p));
         return;
       }
     case index_operator_rpn:
@@ -1540,162 +1540,162 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         switch(alt.xop) {
         case xop_postfix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_inc, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_inc, rocket::move(p));
             return;
           }
         case xop_postfix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_dec, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_dec, rocket::move(p));
             return;
           }
         case xop_postfix_at:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_at, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_postfix_at, rocket::move(p));
             return;
           }
         case xop_prefix_pos:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_pos, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_pos, rocket::move(p));
             return;
           }
         case xop_prefix_neg:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_neg, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_neg, rocket::move(p));
             return;
           }
         case xop_prefix_notb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notb, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_notb, rocket::move(p));
             return;
           }
         case xop_prefix_notl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notl, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_notl, rocket::move(p));
             return;
           }
         case xop_prefix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_inc, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_inc, rocket::move(p));
             return;
           }
         case xop_prefix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_dec, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_dec, rocket::move(p));
             return;
           }
         case xop_prefix_unset:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_unset, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_unset, rocket::move(p));
             return;
           }
         case xop_prefix_lengthof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_lengthof, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_lengthof, rocket::move(p));
             return;
           }
         case xop_prefix_typeof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_typeof, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_prefix_typeof, rocket::move(p));
             return;
           }
         case xop_infix_cmp_eq:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_eq, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_eq, rocket::move(p));
             return;
           }
         case xop_infix_cmp_ne:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_ne, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_ne, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lt:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lt, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lt, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gt:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gt, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gt, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lte:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lte, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_lte, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gte:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gte, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_gte, rocket::move(p));
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, rocket::move(p));
             return;
           }
         case xop_infix_add:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_add, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_add, rocket::move(p));
             return;
           }
         case xop_infix_sub:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sub, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sub, rocket::move(p));
             return;
           }
         case xop_infix_mul:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mul, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_mul, rocket::move(p));
             return;
           }
         case xop_infix_div:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_div, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_div, rocket::move(p));
             return;
           }
         case xop_infix_mod:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mod, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_mod, rocket::move(p));
             return;
           }
         case xop_infix_sll:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sll, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sll, rocket::move(p));
             return;
           }
         case xop_infix_srl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_srl, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_srl, rocket::move(p));
             return;
           }
         case xop_infix_sla:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sla, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sla, rocket::move(p));
             return;
           }
         case xop_infix_sra:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sra, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_sra, rocket::move(p));
             return;
           }
         case xop_infix_andb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_andb, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_andb, rocket::move(p));
             return;
           }
         case xop_infix_orb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_orb, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_orb, rocket::move(p));
             return;
           }
         case xop_infix_xorb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_xorb, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_xorb, rocket::move(p));
             return;
           }
         case xop_infix_assign:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_assign, std::move(p));
+            code_out.emplace_back(&do_execute_operator_rpn_infix_assign, rocket::move(p));
             return;
           }
         default:
@@ -1708,7 +1708,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(static_cast<std::int64_t>(alt.nelems));  // 0
-        code_out.emplace_back(&do_execute_unnamed_array, std::move(p));
+        code_out.emplace_back(&do_execute_unnamed_array, rocket::move(p));
         return;
       }
     case index_unnamed_object:
@@ -1717,7 +1717,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.keys);  // 0
-        code_out.emplace_back(&do_execute_unnamed_object, std::move(p));
+        code_out.emplace_back(&do_execute_unnamed_object, rocket::move(p));
         return;
       }
     case index_coalescence:
@@ -1727,9 +1727,9 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
         rocket::for_each(alt.branch_null, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
-        p.emplace_back(std::move(code));  // 0
+        p.emplace_back(rocket::move(code));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
-        code_out.emplace_back(&do_execute_coalescence, std::move(p));
+        code_out.emplace_back(&do_execute_coalescence, rocket::move(p));
         return;
       }
     default:

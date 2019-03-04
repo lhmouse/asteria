@@ -23,7 +23,7 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
   {
     // Create a stack and a context for this function.
     Reference_Stack stack;
-    Function_Executive_Context ctx(this->m_zvarg, this->m_params, std::move(self_io), std::move(args));
+    Function_Executive_Context ctx(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
     const auto &func = this->m_zvarg->get_function_signature();
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;

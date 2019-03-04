@@ -51,7 +51,7 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     rocket::for_each(parser.get_statements(), [&](const Statement &stmt) { stmt.generate_code(code, ctx);  });
     // Accept the code.
     this->m_codev.clear();
-    this->m_codev.emplace_back(sloc, rocket::sref("<file scope>"), params, std::move(code));
+    this->m_codev.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 
@@ -61,7 +61,7 @@ Reference Simple_Source_File::execute(const Global_Context &global, Cow_Vector<R
     Reference result;
     if(ROCKET_EXPECT(!this->m_codev.empty())) {
       // Execute the instantiated function.
-      this->m_codev.front().invoke(result, global, std::move(args));
+      this->m_codev.front().invoke(result, global, rocket::move(args));
     }
     return result;
   }
