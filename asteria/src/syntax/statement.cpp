@@ -389,6 +389,17 @@ namespace Asteria {
         return status;
       }
 
+    [[noreturn]] Air_Node::Status do_execute_throw(Reference_Stack &stack, Executive_Context &ctx_io,
+                                                   const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
+        // Evaluate the operand and throw the value.
+        do_evaluate_expression(stack, ctx_io, code, func, global);
+        throw Traceable_Exception(stack.top().read(), sloc, func);
+      }
+
     }
 
 void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
@@ -584,11 +595,18 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         code_out.emplace_back(&do_return_status_simple, rocket::move(p));
         return;
       }
-/*
     case index_throw:
+      {
+        const auto &alt = this->m_stor.as<S_throw>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.sloc);  // 0
+        p.emplace_back(do_generate_code_expression(ctx_io, alt.expr));  // 1
+        code_out.emplace_back(&do_execute_throw, rocket::move(p));
+        return;
+      }
     case index_return:
     case index_assert:
-*/
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
