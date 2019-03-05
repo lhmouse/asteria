@@ -535,11 +535,11 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const auto &params = p.at(1).as<Cow_Vector<PreHashed_String>>();
         const auto &body = p.at(2).as<Cow_Vector<Statement>>();
         // Generate code of the function body.
-        Cow_Vector<Air_Node> fcode;
-        Function_Analytic_Context fctx(&ctx_io, params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, nullptr, fctx);  });
+        Cow_Vector<Air_Node> code_body;
+        Function_Analytic_Context ctx_next(&ctx_io, params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_body, nullptr, ctx_next);  });
         // Instantiate the function.
-        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(fcode));
+        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
         Reference_Root::S_temporary ref_c = { D_function(rocket::move(closure)) };
