@@ -148,6 +148,32 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
+    Air_Node::Status do_execute_if(Reference_Stack &stack, Executive_Context &ctx_io,
+                                   const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const bool negative = p.at(0).as<std::int64_t>();
+        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto &code_true = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto &code_false = p.at(1).as<Cow_Vector<Air_Node>>();
+        // Pick a branch basing on the condition.
+        do_evaluate_expression(stack, ctx_io, code_cond, func, global);
+        if(stack.top().read().test() != negative) {
+          // Execute the true branch. Forward any unexpected status codes to the caller.
+          auto status = do_execute_block(stack, ctx_io, code_true, func, global);
+          if(rocket::is_none_of(status, { Air_Node::status_next })) {
+            return status;
+          }
+          return Air_Node::status_next;
+        }
+        // Execute the false branch. Forward any unexpected status codes to the caller.
+        auto status = do_execute_block(stack, ctx_io, code_false, func, global);
+        if(rocket::is_none_of(status, { Air_Node::status_next })) {
+          return status;
+        }
+        return Air_Node::status_next;
+      }
+
     }
 
 void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
@@ -166,7 +192,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
     case index_block:
       {
         const auto &alt = this->m_stor.as<S_block>();
-        // Generate code for the block.
+        // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(do_generate_code_for_block(ctx_io, alt.body));  // 0
         code_out.emplace_back(&do_execute_block_callback, rocket::move(p));
@@ -177,7 +203,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_uninitialized());
-        // Generate code for the declaration.
+        // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.name);  // 1
@@ -191,7 +217,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_uninitialized());
-        // Generate code for the function body.
+        // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.name);  // 1
@@ -200,8 +226,19 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         code_out.emplace_back(&do_define_function, rocket::move(p));
         return;
       }
-/*
     case index_if:
+      {
+        const auto &alt = this->m_stor.as<S_if>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.cond));  // 1
+        p.emplace_back(do_generate_code_for_block(ctx_io, alt.branch_true));  // 2
+        p.emplace_back(do_generate_code_for_block(ctx_io, alt.branch_false));  // 3
+        code_out.emplace_back(&do_execute_if, rocket::move(p));
+        return;
+      }
+/*
     case index_switch:
     case index_do_while:
     case index_while:
