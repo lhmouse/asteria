@@ -320,7 +320,7 @@ namespace Asteria {
         do_execute_statement_list(stack, ctx_for, code_init, func, global);
         for(;;) {
           // Treat an empty condition as being always true.
-          if(code_cond.empty()) {
+          if(!code_cond.empty()) {
             // Check the condition.
             do_evaluate_expression(stack, ctx_for, code_cond, func, global);
             if(stack.top().read().test() == false) {
