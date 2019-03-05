@@ -226,6 +226,37 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
+    Air_Node::Status do_execute_for(Reference_Stack &stack, Executive_Context &ctx_io,
+                                    const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &code_init = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto &code_step = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto &code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        // This is the same as a `for` loop in C.
+        Executive_Context ctx_for(&ctx_io);
+        do_execute_statement_list(stack, ctx_for, code_init, func, global);
+        for(;;) {
+          // Check the condition.
+          do_evaluate_expression(stack, ctx_for, code_cond, func, global);
+          if(stack.top().read().test() == false) {
+            break;
+          }
+          // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
+          auto status = do_execute_block(stack, ctx_for, code_body, func, global);
+          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_for })) {
+            return status;
+          }
+          if(rocket::is_none_of(status, { Air_Node::status_next, Air_Node::status_continue_unspec, Air_Node::status_continue_for })) {
+            return status;
+          }
+          // Evaluate the step expression and discard its value.
+          do_evaluate_expression(stack, ctx_for, code_step, func, global);
+        }
+        return Air_Node::status_next;
+      }
+
     }
 
 void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
@@ -314,8 +345,19 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         code_out.emplace_back(&do_execute_while, rocket::move(p));
         return;
       }
-/*
     case index_for:
+      {
+        const auto &alt = this->m_stor.as<S_for>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(do_generate_code_for_block(ctx_io, alt.init));  // 0
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.cond));  // 1
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.step));  // 2
+        p.emplace_back(do_generate_code_for_statement_list(nullptr, ctx_io, alt.body));  // 3
+        code_out.emplace_back(&do_execute_for, rocket::move(p));
+        return;
+      }
+/*
     case index_for_each:
     case index_try:
     case index_break:
