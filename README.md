@@ -6,9 +6,9 @@
 |Compiler    |Category                   |Comments                                                    |
 |:-----------|:--------------------------|:-----------------------------------------------------------|
 |**GCC 8**   |:1st_place_medal:Primary   |                                                            |
-|**GCC 5**   |:1st_place_medal:Primary   |                                                            |
 |**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                            |
+|**GCC 5**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                            |
 |**GCC 4.9** |:2nd_place_medal:Secondary |Lack of test environments.                                  |
 |**MSVC 19** |:no_entry:Obsolete         |Little build system support. Internal compiler errors.      |
 
