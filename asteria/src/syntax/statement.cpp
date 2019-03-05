@@ -380,6 +380,15 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
+    Air_Node::Status do_return_status_simple(Reference_Stack & /*stack*/, Executive_Context & /*ctx_io*/,
+                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+      {
+        // Decode arguments.
+        const auto status = static_cast<Air_Node::Status>(p.at(0).as<std::int64_t>());
+        // Return the status as is.
+        return status;
+      }
+
     }
 
 void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
@@ -512,9 +521,70 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         code_out.emplace_back(&do_execute_try, rocket::move(p));
         return;
       }
-/*
     case index_break:
+      {
+        const auto &alt = this->m_stor.as<S_break>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        switch(alt.target) {
+        case Statement::target_unspec:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_break_unspec));  // 0
+            break;
+          }
+        case Statement::target_switch:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_break_switch));  // 0
+            break;
+          }
+        case Statement::target_while:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_break_while));  // 0
+            break;
+          }
+        case Statement::target_for:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_break_for));  // 0
+            break;
+          }
+        default:
+          ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
+        }
+        code_out.emplace_back(&do_return_status_simple, rocket::move(p));
+        return;
+      }
     case index_continue:
+      {
+        const auto &alt = this->m_stor.as<S_continue>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        switch(alt.target) {
+        case Statement::target_unspec:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_continue_unspec));  // 0
+            break;
+          }
+        case Statement::target_switch:
+          {
+            ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
+          }
+        case Statement::target_while:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_continue_while));  // 0
+            break;
+          }
+        case Statement::target_for:
+          {
+            p.emplace_back(static_cast<std::int64_t>(Air_Node::status_continue_for));  // 0
+            break;
+          }
+        default:
+          ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
+        }
+        code_out.emplace_back(&do_return_status_simple, rocket::move(p));
+        return;
+      }
+/*
     case index_throw:
     case index_return:
     case index_assert:
