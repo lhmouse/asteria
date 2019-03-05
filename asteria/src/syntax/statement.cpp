@@ -17,7 +17,8 @@ namespace Asteria {
 
     namespace {
 
-    template<typename XnameT, typename XrefT> void do_safe_set_named_reference(Abstract_Context &ctx_io, const char *desc, const XnameT &name, XrefT &&xref)
+    template<typename XrefT> void do_safe_set_named_reference(Cow_Vector<PreHashed_String> *names_out_opt, Abstract_Context &ctx_io,
+                                                              const char *desc, const PreHashed_String &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
@@ -25,32 +26,228 @@ namespace Asteria {
         if(name.rdstr().starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` for this ", desc, " is reserved and cannot be used.");
         }
+        // Create a named reference.
+        if(names_out_opt) {
+          names_out_opt->emplace_back(name);
+        }
         ctx_io.open_named_reference(name) = std::forward<XrefT>(xref);
       }
 
-    Air_Node::Status do_clear_stack(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
-                                    const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Cow_Vector<Air_Node> do_generate_code_for_statement_list(Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io,
+                                                             const Cow_Vector<Statement> &stmts)
       {
-        // Prepare for evaluation of an expression.
-        stack_io.clear();
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(stmts, [&](const Statement &stmt) { stmt.generate_code(code, names_out_opt, ctx_io);  });
+        return code;
+      }
+
+    Cow_Vector<Air_Node> do_generate_code_for_block(const Analytic_Context &ctx, const Cow_Vector<Statement> &block)
+      {
+        Analytic_Context ctx_next(&ctx);
+        auto code = do_generate_code_for_statement_list(nullptr, ctx_next, block);
+        return code;
+      }
+
+    Air_Node::Status do_execute_statement_list(Reference_Stack &stack, Executive_Context &ctx_io,
+                                               const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+      {
+        auto status = Air_Node::status_next;
+        rocket::any_of(code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_io, func, global))
+                                                                 != Air_Node::status_next;  });
+        return status;
+      }
+
+    Air_Node::Status do_execute_block(Reference_Stack &stack,
+                                      const Executive_Context &ctx, const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+      {
+        Executive_Context ctx_next(&ctx);
+        auto status = do_execute_statement_list(stack, ctx_next, code, func, global);
+        return status;
+      }
+
+    Cow_Vector<Air_Node> do_generate_code_for_expression(const Analytic_Context &ctx, const Cow_Vector<Xpnode> &expr)
+      {
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(expr, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        return code;
+      }
+
+    const Reference & do_evaluate_expression(Reference_Stack &stack, Executive_Context &ctx,
+                                             const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+      {
+        stack.clear();
+        if(code.empty()) {
+          return stack.push(Reference_Root::S_uninitialized());
+        }
+        rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
+        return stack.top();
+      }
+
+    Air_Node::Status do_execute_clear_stack(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+      {
+        stack.clear();
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_block(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_block_callback(Reference_Stack &stack, Executive_Context &ctx_io,
+                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &code = p.at(0).as<Cow_Vector<Air_Node>>();
+        // Execute the block without affecting `ctx_io`.
+        auto status = do_execute_block(stack, ctx_io, code, func, global);
+        return status;
+      }
+
+    Air_Node::Status do_define_variable(Reference_Stack &stack, Executive_Context &ctx_io,
+                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &name = p.at(0).as<PreHashed_String>();
+        const bool immutable = p.at(1).as<std::int64_t>();
+        const auto &code_init = p.at(2).as<Cow_Vector<Air_Node>>();
+        // Create a dummy reference for further name lookups.
+        // A variable becomes visible before its initializer, where it is initialized to `null`.
+        auto var = global.create_variable();
+        Reference_Root::S_variable ref_c = { var };
+        do_safe_set_named_reference(nullptr, ctx_io, "variable", name, rocket::move(ref_c));
+        // Evaluate the initializer.
+        do_evaluate_expression(stack, ctx_io, code_init, func, global);
+        var->reset(stack.top().read(), immutable);
+        ASTERIA_DEBUG_LOG("New variable `", name, "`: ", var->get_value());
+        return Air_Node::status_next;
+      }
+
+    }
+
+void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
+  {
+    switch(static_cast<Index>(this->m_stor.index())) {
+    case index_expression:
+      {
+        const auto &alt = this->m_stor.as<S_expression>();
+        // Generate preparation code.
+        Cow_Vector<Air_Node::Variant> p;
+        code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        // Generate inline code for the expression.
+        rocket::for_each(alt.expr, [&](const Xpnode &xpn) { xpn.generate_code(code_out, ctx_io);  });
+        return;
+      }
+    case index_block:
+      {
+        const auto &alt = this->m_stor.as<S_block>();
+        // Generate code for the block.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(do_generate_code_for_block(ctx_io, alt.body));  // 0
+        code_out.emplace_back(&do_execute_block_callback, rocket::move(p));
+        return;
+      }
+    case index_variable:
+      {
+        const auto &alt = this->m_stor.as<S_variable>();
+        // Create a dummy reference for further name lookups.
+        do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_uninitialized());
+        // Generate code for the declaration.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.name);  // 0
+        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
+        // Generate code for the initializer.
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.init));  // 2
+        code_out.emplace_back(&do_define_variable, rocket::move(p));
+        return;
+      }
+/*
+    case index_function:
+    case index_if:
+    case index_switch:
+    case index_do_while:
+    case index_while:
+    case index_for:
+    case index_for_each:
+    case index_try:
+    case index_break:
+    case index_continue:
+    case index_throw:
+    case index_return:
+    case index_assert:
+*/
+    default:
+      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
+    }
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#if 0
+    namespace {
+
+
+    Air_Node::Status do_execute_statement_list
+
+    Air_Node::Status do_execute_block(Reference_Stack &stack, const Executive_Context &ctx,
+                                      const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+      {
+        // Create a fresh context; the stack can be reused safely.
+        Executive_Context ctx_next(&ctx);
+        // Execute AIR nodes one by one.
+        auto status = Air_Node::status_next;
+        rocket::any_of(code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_next, func, global))
+                                                                 != Air_Node::status_next;  });
+        return status;
+      }
+
+    Cow_Vector<Air_Node> do_generate_code_statement_list(Analytic_Context &ctx_io, const Cow_Vector<Statement> &stmts)
+      {
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(stmts, [&](const Statement &stmt) { stmt.generate_code(code, ctx_io);  });
+        return code;
+      }
+
+    Cow_Vector<Air_Node> do_generate_code_expression_nonempty(const Analytic_Context &ctx, const Cow_Vector<Xpnode> &expr)
+      {
+        Cow_Vector<Air_Node> code;
+        rocket::for_each(expr, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        return code;
+      }
+
+    Cow_Vector<Air_Node> do_generate_code_block(const Analytic_Context &ctx, const Cow_Vector<Statement> &block)
+      {
+        Analytic_Context ctx_next(&ctx);
+        return do_generate_code_statement_list(ctx_next, block);
+      }
+
+
+    Air_Node::Status do_execute_block(Reference_Stack &stack, Executive_Context &ctx_io,
                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
         const auto &code_body = p.at(0).as<Cow_Vector<Air_Node>>();
         // Create a fresh context; the stack is reused.
         Executive_Context ctx_body(&ctx_io);
-        // Execute AIR nodes one by one.
-        auto status = Air_Node::status_next;
-        rocket::any_of(code_body, [&](const Air_Node &node) { return (status = node.execute(stack_io, ctx_body, func, global))
-                                                                      != Air_Node::status_next;  });
-        return status;
       }
 
-    Air_Node::Status do_define_variable_uninitialized(Reference_Stack & /*stack_io*/, Executive_Context &ctx_io,
+    Air_Node::Status do_define_variable_uninitialized(Reference_Stack & /*stack*/, Executive_Context &ctx_io,
                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
@@ -67,7 +264,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_define_variable_initialized(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_define_variable_initialized(Reference_Stack &stack, Executive_Context &ctx_io,
                                                     const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -80,16 +277,16 @@ namespace Asteria {
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", name, rocket::move(ref_c));
         // Evaluate the initializer.
-        stack_io.clear();
+        stack.clear();
         ROCKET_ASSERT(!code_init.empty());
-        rocket::for_each(code_init, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
-        auto value = stack_io.top().read();
+        rocket::for_each(code_init, [&](const Air_Node &node) { node.execute(stack, ctx_io, func, global);  });
+        auto value = stack.top().read();
         ASTERIA_DEBUG_LOG("New variable `", name, "`: ", value);
         var->reset(rocket::move(value), immutable);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_define_function(Reference_Stack & /*stack_io*/, Executive_Context &ctx_io,
+    Air_Node::Status do_define_function(Reference_Stack & /*stack*/, Executive_Context &ctx_io,
                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
@@ -117,7 +314,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_if(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_if(Reference_Stack &stack, Executive_Context &ctx_io,
                                    const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -126,15 +323,15 @@ namespace Asteria {
         const auto &code_true = p.at(2).as<Cow_Vector<Air_Node>>();
         const auto &code_false = p.at(3).as<Cow_Vector<Air_Node>>();
         // Evaluate the condition.
-        stack_io.clear();
+        stack.clear();
         ROCKET_ASSERT(!code_cond.empty());
-        rocket::for_each(code_cond, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
-        if(stack_io.top().read().test() != negative) {
+        rocket::for_each(code_cond, [&](const Air_Node &node) { node.execute(stack, ctx_io, func, global);  });
+        if(stack.top().read().test() != negative) {
           // Create a fresh context for the true branch; the stack is reused.
           Executive_Context ctx_true(&ctx_io);
           // Execute AIR nodes one by one.
           auto status = Air_Node::status_next;
-          rocket::any_of(code_true, [&](const Air_Node &node) { return (status = node.execute(stack_io, ctx_true, func, global))
+          rocket::any_of(code_true, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_true, func, global))
                                                                         != Air_Node::status_next;  });
           return status;
         }
@@ -142,7 +339,7 @@ namespace Asteria {
         Executive_Context ctx_false(&ctx_io);
         // Execute AIR nodes one by one.
         auto status = Air_Node::status_next;
-        rocket::any_of(code_false, [&](const Air_Node &node) { return (status = node.execute(stack_io, ctx_false, func, global))
+        rocket::any_of(code_false, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_false, func, global))
                                                                        != Air_Node::status_next;  });
         return status;
       }
@@ -159,7 +356,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
         Cow_Vector<Air_Node::Variant> p;
         code_out.emplace_back(&do_clear_stack, rocket::move(p));
         // Generate code for the expression itself.
-        rocket::for_each(alt.expr, [&](const Xpnode &node) { node.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xpnode &xpn) { node.generate_code(code_out, ctx_io);  });
         return;
       }
     case index_block:
@@ -178,7 +375,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
       {
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "variable placeholder", alt.name, Reference_Root::S_undefined());
+        do_safe_set_named_reference(ctx_io, "variable placeholder", alt.name, Reference_Root::S_uninitialized());
         // Generate code for the declaration.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.name);  // 0
@@ -189,7 +386,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
         }
         // Generate code for the initializer.
         Cow_Vector<Air_Node> code_init;
-        rocket::for_each(alt.init, [&](const Xpnode &node) { node.generate_code(code_init, ctx_io);  });
+        rocket::for_each(alt.init, [&](const Xpnode &xpn) { node.generate_code(code_init, ctx_io);  });
         p.emplace_back(rocket::move(code_init));  // 2
         code_out.emplace_back(&do_define_variable_initialized, rocket::move(p));
         return;
@@ -198,7 +395,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
       {
         const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(ctx_io, "function placeholder", alt.name, Reference_Root::S_undefined());
+        do_safe_set_named_reference(ctx_io, "function placeholder", alt.name, Reference_Root::S_uninitialized());
         // Generate code for the definition.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
@@ -219,7 +416,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
           ASTERIA_THROW_RUNTIME_ERROR("The condition expression of an `if` statement must not be empty.");
         }
         Cow_Vector<Air_Node> code_cond;
-        rocket::for_each(alt.cond, [&](const Xpnode &node) { node.generate_code(code_cond, ctx_io);  });
+        rocket::for_each(alt.cond, [&](const Xpnode &xpn) { node.generate_code(code_cond, ctx_io);  });
         p.emplace_back(rocket::move(code_cond));  // 1
         // Generate code for the true branch.
         Cow_Vector<Air_Node> code_true;
@@ -253,13 +450,11 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
-  }
-
-#if 0
 
 
 
-    Air_Node::Status do_define_function(Reference_Stack &stack_io, Executive_Context &ctx_io,
+
+    Air_Node::Status do_define_function(Reference_Stack &stack, Executive_Context &ctx_io,
                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -294,7 +489,6 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
   }
 #endif
 
-}
 
 #if 0
 
@@ -449,8 +643,8 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
         // The key and mapped variables shall not outlast the loop body.
         Executive_Context ctx_for(&ctx_io);
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_Root::S_undefined());
-        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_Root::S_undefined());
+        do_safe_set_named_reference(ctx_for, "`for each` key", alt.key_name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(ctx_for, "`for each` reference", alt.mapped_name, Reference_Root::S_uninitialized());
         // Calculate the range using the initializer.
         Reference mapped;
         alt.init.evaluate(mapped, func, global, ctx_for);

@@ -171,7 +171,7 @@ class Statement
       }
 
   public:
-    void generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &ctx_io) const;
+    void generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const;
   };
 
 }
