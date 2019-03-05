@@ -196,8 +196,8 @@ template<typename iteratorT, typename eiteratorT,
          typename functionT, typename ...paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
                                                                          functionT &&func, const paramsT &...params)
   {
-    for(auto it = noadl::move(first); it != last; ++it) {
-      ::std::forward<functionT>(func)(it, params...);
+    for(auto qit = noadl::move(first); qit != last; ++qit) {
+      ::std::forward<functionT>(func)(qit, params...);
     }
   }
 
@@ -205,10 +205,10 @@ template<typename iteratorT, typename eiteratorT,
          typename functionT, typename ...paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
                                                                               functionT &&func, const paramsT &...params)
   {
-    auto it = noadl::move(first);
+    auto qit = noadl::move(first);
     do {
-      ::std::forward<functionT>(func)(it, params...);
-    } while(++it != last);
+      ::std::forward<functionT>(func)(qit, params...);
+    } while(++qit != last);
   }
 
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
@@ -245,7 +245,7 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
     template<typename iteratorT> inline size_t tagged_estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
-        for(auto it = noadl::move(first); it != last; ++it) {
+        for(auto qit = noadl::move(first); qit != last; ++qit) {
           ++total;
         }
         return total;
@@ -351,30 +351,30 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT &&cont, callbackT &&call)
+    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT &&container, callbackT &&callback)
       {
-        for(auto &&elem : cont) {
-          ::std::forward<callbackT>(call)(elem);
+        for(auto &&qelem : container) {
+          ::std::forward<callbackT>(callback)(qelem);
         }
       }
 
     }
 
-template<typename containerT, typename callbackT> inline void for_each(containerT &&cont, callbackT &&call)
+template<typename containerT, typename callbackT> inline void for_each(containerT &&container, callbackT &&callback)
   {
-    return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+    return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&call)
+template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&callback)
   {
-    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(call));
+    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT &&cont, callbackT &&call)
+    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT &&container, callbackT &&callback)
       {
-        for(auto &&elem : cont) {
-          if(::std::forward<callbackT>(call)(elem)) {
+        for(auto &&qelem : container) {
+          if(::std::forward<callbackT>(callback)(qelem)) {
             return true;
           }
         }
@@ -383,21 +383,21 @@ template<typename elementT, typename callbackT> inline void for_each(initializer
 
     }
 
-template<typename containerT, typename callbackT> constexpr bool any_of(containerT &&cont, callbackT &&call)
+template<typename containerT, typename callbackT> constexpr bool any_of(containerT &&container, callbackT &&callback)
   {
-    return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+    return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&call)
+template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&callback)
   {
-    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(call));
+    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT &&cont, callbackT &&call)
+    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT &&container, callbackT &&callback)
       {
-        for(auto &&elem : cont) {
-          if(::std::forward<callbackT>(call)(elem)) {
+        for(auto &&qelem : container) {
+          if(::std::forward<callbackT>(callback)(qelem)) {
             return false;
           }
         }
@@ -406,21 +406,21 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     }
 
-template<typename containerT, typename callbackT> constexpr bool none_of(containerT &&cont, callbackT &&call)
+template<typename containerT, typename callbackT> constexpr bool none_of(containerT &&container, callbackT &&callback)
   {
-    return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(cont), ::std::forward<callbackT>(call));
+    return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&call)
+template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&callback)
   {
-    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(call));
+    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT &&targ, containerT &&cont)
+    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT &&targ, containerT &&container)
       {
-        for(auto &&elem : cont) {
-          if(::std::forward<targetT>(targ) == elem) {
+        for(auto &&qelem : container) {
+          if(::std::forward<targetT>(targ) == qelem) {
             return true;
           }
         }
@@ -429,9 +429,9 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     }
 
-template<typename targetT, typename containerT> constexpr bool is_any_of(targetT &&targ, containerT &&cont)
+template<typename targetT, typename containerT> constexpr bool is_any_of(targetT &&targ, containerT &&container)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
   }
 template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &&targ, initializer_list<elementT> init)
   {
@@ -440,10 +440,10 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT &&targ, containerT &&cont)
+    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT &&targ, containerT &&container)
       {
-        for(auto &&elem : cont) {
-          if(::std::forward<targetT>(targ) == elem) {
+        for(auto &&qelem : container) {
+          if(::std::forward<targetT>(targ) == qelem) {
             return false;
           }
         }
@@ -452,9 +452,9 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &
 
     }
 
-template<typename targetT, typename containerT> constexpr bool is_none_of(targetT &&targ, containerT &&cont)
+template<typename targetT, typename containerT> constexpr bool is_none_of(targetT &&targ, containerT &&container)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(cont));
+    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
   }
 template<typename targetT, typename elementT> constexpr bool is_none_of(targetT &&targ, initializer_list<elementT> init)
   {
