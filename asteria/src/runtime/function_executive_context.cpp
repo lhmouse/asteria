@@ -48,7 +48,7 @@ void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &
       auto index = static_cast<std::size_t>(&param - params.data());
       if(ROCKET_EXPECT(index >= args.size())) {
         // There is no argument for this parameter.
-        this->open_named_reference(param) = Reference_Root::S_undefined();
+        this->open_named_reference(param) = Reference_Root::S_uninitialized();
         continue;
       }
       this->open_named_reference(param) = rocket::move(args.mut(index));
