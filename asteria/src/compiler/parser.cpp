@@ -110,7 +110,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_prefix_operator(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
@@ -202,11 +202,11 @@ namespace Asteria {
           return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_operator(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // postfix-operator ::=
         //   "++" | "--"
@@ -236,7 +236,7 @@ namespace Asteria {
           return false;
         }
         Xpnode::S_operator_rpn node_c = { xop, false };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
@@ -371,7 +371,7 @@ namespace Asteria {
 
     extern bool do_accept_statement_as_block(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
     extern bool do_accept_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
-    extern bool do_accept_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io);
+    extern bool do_accept_expression(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io);
 
     bool do_accept_block_statement_list(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
@@ -429,39 +429,39 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_named_reference(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_named_reference(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         Cow_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
         }
         Xpnode::S_named_reference node_c = { rocket::move(name) };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_literal(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         Value value;
         if(!do_accept_literal(value, tstrm_io)) {
           return false;
         }
         Xpnode::S_literal node_c = { rocket::move(value) };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_this(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
           return false;
         }
         Xpnode::S_named_reference node_c = { rocket::sref("__this") };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_closure_function(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -483,19 +483,19 @@ namespace Asteria {
         Cow_Vector<Statement> body;
         if(!do_accept_block_statement_list(body, tstrm_io)) {
           // An expression is expected, which behaves as if it was the operand of a `return&` ststement.
-          Cow_Vector<Xpnode> nodes_ret;
-          if(!do_accept_expression(nodes_ret, tstrm_io)) {
+          Cow_Vector<Xpnode> xpns_ret;
+          if(!do_accept_expression(xpns_ret, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_or_expression_expected);
           }
-          Statement::S_return stmt_c = { true, rocket::move(nodes_ret) };
+          Statement::S_return stmt_c = { true, rocket::move(xpns_ret) };
           body.emplace_back(rocket::move(stmt_c));
         }
         Xpnode::S_closure_function node_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_array(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -508,7 +508,7 @@ namespace Asteria {
         }
         std::size_t nelems = 0;
         for(;;) {
-          if(!do_accept_expression(nodes_out, tstrm_io)) {
+          if(!do_accept_expression(xpns_out, tstrm_io)) {
             break;
           }
           ++nelems;
@@ -522,11 +522,11 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_or_expression_expected);
         }
         Xpnode::S_unnamed_array node_c = { nelems };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_object(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -555,7 +555,7 @@ namespace Asteria {
           if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
             throw duplicate_key_error;
           }
-          if(!do_accept_expression(nodes_out, tstrm_io)) {
+          if(!do_accept_expression(xpns_out, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
           }
           keys.emplace_back(rocket::move(key));
@@ -569,18 +569,18 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_object_key_expected);
         }
         Xpnode::S_unnamed_object node_c = { rocket::move(keys) };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_nested_expression(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // nested-expression ::=
         //   "(" expression ")"
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
           return false;
         }
-        if(!do_accept_expression(nodes_out, tstrm_io)) {
+        if(!do_accept_expression(xpns_out, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
@@ -589,20 +589,20 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_primary_expression(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
-        return do_accept_named_reference(nodes_out, tstrm_io) ||
-               do_accept_literal(nodes_out, tstrm_io) ||
-               do_accept_this(nodes_out, tstrm_io) ||
-               do_accept_closure_function(nodes_out, tstrm_io) ||
-               do_accept_unnamed_object(nodes_out, tstrm_io) ||
-               do_accept_unnamed_array(nodes_out, tstrm_io) ||
-               do_accept_nested_expression(nodes_out, tstrm_io);
+        return do_accept_named_reference(xpns_out, tstrm_io) ||
+               do_accept_literal(xpns_out, tstrm_io) ||
+               do_accept_this(xpns_out, tstrm_io) ||
+               do_accept_closure_function(xpns_out, tstrm_io) ||
+               do_accept_unnamed_object(xpns_out, tstrm_io) ||
+               do_accept_unnamed_array(xpns_out, tstrm_io) ||
+               do_accept_nested_expression(xpns_out, tstrm_io);
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_function_call(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -616,13 +616,13 @@ namespace Asteria {
           return false;
         }
         std::size_t nargs = 0;
-        if(do_accept_expression(nodes_out, tstrm_io)) {
+        if(do_accept_expression(xpns_out, tstrm_io)) {
           for(;;) {
             ++nargs;
             if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
               break;
             }
-            if(!do_accept_expression(nodes_out, tstrm_io)) {
+            if(!do_accept_expression(xpns_out, tstrm_io)) {
               throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
             }
           }
@@ -631,29 +631,29 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
         Xpnode::S_function_call node_c = { rocket::move(sloc), nargs };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_subscript(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
           return false;
         }
-        if(!do_accept_expression(nodes_out, tstrm_io)) {
+        if(!do_accept_expression(xpns_out, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_expected);
         }
         Xpnode::S_operator_rpn node_c = { Xpnode::xop_postfix_at, false };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_member_access(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
@@ -668,11 +668,11 @@ namespace Asteria {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
         }
         Xpnode::S_member_access node_c = { rocket::move(key) };
-        nodes_out.emplace_back(rocket::move(node_c));
+        xpns_out.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_element(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // infix-element ::=
         //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
@@ -686,7 +686,7 @@ namespace Asteria {
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
         Cow_Vector<Xpnode> prefixes;
         if(!do_accept_prefix_operator(prefixes, tstrm_io)) {
-          if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
+          if(!do_accept_primary_expression(xpns_out, tstrm_io)) {
             return false;
           }
         } else {
@@ -696,21 +696,21 @@ namespace Asteria {
               break;
             }
           }
-          if(!do_accept_primary_expression(nodes_out, tstrm_io)) {
+          if(!do_accept_primary_expression(xpns_out, tstrm_io)) {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
           }
         }
         for(;;) {
-          bool postfix_got = do_accept_postfix_operator(nodes_out, tstrm_io) ||
-                             do_accept_postfix_function_call(nodes_out, tstrm_io) ||
-                             do_accept_postfix_subscript(nodes_out, tstrm_io) ||
-                             do_accept_postfix_member_access(nodes_out, tstrm_io);
+          bool postfix_got = do_accept_postfix_operator(xpns_out, tstrm_io) ||
+                             do_accept_postfix_function_call(xpns_out, tstrm_io) ||
+                             do_accept_postfix_subscript(xpns_out, tstrm_io) ||
+                             do_accept_postfix_member_access(xpns_out, tstrm_io);
           if(!postfix_got) {
             break;
           }
         }
         while(!prefixes.empty()) {
-          nodes_out.emplace_back(rocket::move(prefixes.mut_back()));
+          xpns_out.emplace_back(rocket::move(prefixes.mut_back()));
           prefixes.pop_back();
         }
         return true;
@@ -746,18 +746,18 @@ namespace Asteria {
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Cow_Vector<Xpnode> &nodes_out) = 0;
+        virtual void extract(Cow_Vector<Xpnode> &xpns_out) = 0;
         virtual void append(Infix_Element_Base &&elem) = 0;
       };
 
     class Infix_Head : public Infix_Element_Base
       {
       private:
-        Cow_Vector<Xpnode> m_nodes;
+        Cow_Vector<Xpnode> m_xpns;
 
       public:
-        explicit Infix_Head(Cow_Vector<Xpnode> &&nodes)
-          : m_nodes(rocket::move(nodes))
+        explicit Infix_Head(Cow_Vector<Xpnode> &&xpns)
+          : m_xpns(rocket::move(xpns))
           {
           }
 
@@ -766,23 +766,23 @@ namespace Asteria {
           {
             return precedence_max;
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(Cow_Vector<Xpnode> &xpns_out) override
           {
-            nodes_out.append(std::make_move_iterator(this->m_nodes.mut_begin()), std::make_move_iterator(this->m_nodes.mut_end()));
+            xpns_out.append(std::make_move_iterator(this->m_xpns.mut_begin()), std::make_move_iterator(this->m_xpns.mut_end()));
           }
         void append(Infix_Element_Base &&elem) override
           {
-            elem.extract(this->m_nodes);
+            elem.extract(this->m_xpns);
           }
       };
 
     bool do_accept_infix_head(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
       {
-        Cow_Vector<Xpnode> nodes;
-        if(!do_accept_infix_element(nodes, tstrm_io)) {
+        Cow_Vector<Xpnode> xpns;
+        if(!do_accept_infix_element(xpns, tstrm_io)) {
           return false;
         }
-        elem_out = rocket::make_unique<Infix_Head>(rocket::move(nodes));
+        elem_out = rocket::make_unique<Infix_Head>(rocket::move(xpns));
         return true;
       }
 
@@ -836,15 +836,15 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(Cow_Vector<Xpnode> &xpns_out) override
           {
             if(this->m_sop == sop_coales) {
               Xpnode::S_coalescence node_c = { rocket::move(this->m_branch_false), this->m_assign };
-              nodes_out.emplace_back(rocket::move(node_c));
+              xpns_out.emplace_back(rocket::move(node_c));
               return;
             }
             Xpnode::S_branch node_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
-            nodes_out.emplace_back(rocket::move(node_c));
+            xpns_out.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base &&elem) override
           {
@@ -998,12 +998,12 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xpnode> &nodes_out) override
+        void extract(Cow_Vector<Xpnode> &xpns_out) override
           {
-            nodes_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
+            xpns_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
             Xpnode::S_operator_rpn node_c = { this->m_xop, this->m_assign };
-            nodes_out.emplace_back(rocket::move(node_c));
+            xpns_out.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base &&elem) override
           {
@@ -1195,7 +1195,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression(Cow_Vector<Xpnode> &nodes_out, Token_Stream &tstrm_io)
+    bool do_accept_expression(Cow_Vector<Xpnode> &xpns_out, Token_Stream &tstrm_io)
       {
         // expression ::=
         //   infix-element infix-carriage-list-opt
@@ -1236,7 +1236,7 @@ namespace Asteria {
           stack.rbegin()[1]->append(rocket::move(*(stack.back())));
           stack.pop_back();
         }
-        stack.front()->extract(nodes_out);
+        stack.front()->extract(xpns_out);
         return true;
       }
 
