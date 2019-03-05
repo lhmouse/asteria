@@ -395,9 +395,28 @@ namespace Asteria {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
         const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
-        // Evaluate the operand and throw the value.
+        // Evaluate the operand.
         do_evaluate_expression(stack, ctx_io, code, func, global);
+        // Throw the value; we don't throw by reference.
         throw Traceable_Exception(stack.top().read(), sloc, func);
+      }
+
+    Air_Node::Status do_execute_return(Reference_Stack &stack, Executive_Context &ctx_io,
+                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const bool by_ref = p.at(0).as<std::int64_t>();
+        const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
+        // Evaluate the operand.
+        do_evaluate_expression(stack, ctx_io, code, func, global);
+        if(by_ref || stack.top().is_temporary()) {
+          // Just return the result as is.
+          return Air_Node::status_return;
+        }
+        // Replace the result with a temporary value, if it should be returned by value.
+        Reference_Root::S_temporary ref_c = { stack.top().read() };
+        stack.mut_top() = std::move(ref_c);
+        return Air_Node::status_return;
       }
 
     }
@@ -606,6 +625,15 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         return;
       }
     case index_return:
+      {
+        const auto &alt = this->m_stor.as<S_return>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(static_cast<std::int64_t>(alt.by_ref));  // 0
+        p.emplace_back(do_generate_code_expression(ctx_io, alt.expr));  // 1
+        code_out.emplace_back(&do_execute_return, rocket::move(p));
+        return;
+      }
     case index_assert:
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
