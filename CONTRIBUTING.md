@@ -8,7 +8,7 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 ### Standard Conformance
 
-1. Code shall conform to _C++11_. _C++14_ or above is permitted with proper checks of [feature test macros](https://isocpp.org/std/standing-documents/sd-6-sg10-feature-test-recommendations).
+1. Code shall conform to _C++14_. _C++17_ or above is permitted with proper checks of [feature test macros](https://isocpp.org/std/standing-documents/sd-6-sg10-feature-test-recommendations).
 
 2. These specifications are mandated and can be assumed to be always true:
 

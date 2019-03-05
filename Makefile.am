@@ -5,7 +5,7 @@ AM_CPPFLAGS = -pipe -pthread -fno-math-errno -fno-trapping-math -finline-limit=4
   -Wstrict-aliasing=2 -Wstrict-overflow=5 -Wmissing-field-initializers  \
   -Wno-error=unused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}  \
   -Wno-error={pragmas,invalid-pch,inline,strict-overflow}
-AM_CXXFLAGS = -std=c++11 -Wnon-virtual-dtor
+AM_CXXFLAGS = -std=c++14 -Wnon-virtual-dtor
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 
