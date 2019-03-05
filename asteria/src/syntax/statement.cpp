@@ -501,7 +501,7 @@ namespace Asteria {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
         const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &msg = p.at(1).as<Source_Location>().file();  // XXX `PreHashed_String` seems an overkill for such purpose.
+        const auto &msg = p.at(1).as<PreHashed_String>();
         // Evaluate the operand.
         do_evaluate_expression(stack, ctx_io, code, func, global);
         if(ROCKET_UNEXPECT(stack.top().read().test() == false)) {
@@ -757,7 +757,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(do_generate_code_expression(ctx_io, alt.expr));  // 1
-        p.emplace_back(Source_Location(alt.msg, 0));  // 2
+        p.emplace_back(PreHashed_String(alt.msg));  // 2
         code_out.emplace_back(&do_execute_assert, rocket::move(p));
         return;
       }
