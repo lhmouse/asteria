@@ -58,7 +58,7 @@ class Air_Node
     Cow_Vector<Variant> m_params;
 
   public:
-    Air_Node(Executor *fptr, Cow_Vector<Variant> &&params)
+    Air_Node(Executor *fptr, Cow_Vector<Variant> &&params) noexcept
       : m_fptr(fptr), m_params(rocket::move(params))
       {
       }
