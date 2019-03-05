@@ -478,7 +478,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         do_set_temporary(stack_io, true, rocket::move(ref_c));
       }
 
-    Air_Node::Status do_execute_literal(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_literal(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -489,7 +489,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_bound_reference(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_bound_reference(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                 const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -499,14 +499,14 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_named_reference(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_named_reference(Reference_Stack &stack_io, Executive_Context &ctx,
                                                 const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
         const auto &name = p.at(0).as<PreHashed_String>();
         // Look for the name recursively.
         const Reference *qref;
-        auto qctx = static_cast<const Executive_Context *>(&ctx_io);
+        auto qctx = static_cast<const Executive_Context *>(&ctx);
         for(;;) {
           qref = qctx->get_named_reference_opt(name);
           if(qref) {
@@ -527,7 +527,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_closure_function(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_closure_function(Reference_Stack &stack_io, Executive_Context &ctx,
                                                  const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -536,7 +536,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const auto &body = p.at(2).as<Cow_Vector<Statement>>();
         // Generate code of the function body.
         Cow_Vector<Air_Node> code_body;
-        Function_Analytic_Context ctx_next(&ctx_io, params);
+        Function_Analytic_Context ctx_next(&ctx, params);
         rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_body, nullptr, ctx_next);  });
         // Instantiate the function.
         Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(code_body));
@@ -547,7 +547,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_branch(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_branch(Reference_Stack &stack_io, Executive_Context &ctx,
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -556,26 +556,24 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         const bool assign = p.at(2).as<std::int64_t>();
         // Pick a branch basing on the condition.
         if(stack_io.top().read().test()) {
+          // Execute the true branch. If the branch is empty, leave the condition on the stack.
           if(code_true.empty()) {
-            // Leave the condition on the stack.
             return Air_Node::status_next;
           }
-          // Evaluate the branch.
-          rocket::for_each(code_true, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+          rocket::for_each(code_true, [&](const Air_Node &node) { node.execute(stack_io, ctx, func, global);  });
           do_forward(stack_io, assign);
           return Air_Node::status_next;
         }
+        // Execute the false branch. If the branch is empty, leave the condition on the stack.
         if(code_false.empty()) {
-          // Leave the condition on the stack.
           return Air_Node::status_next;
         }
-        // Evaluate the branch.
-        rocket::for_each(code_false, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+        rocket::for_each(code_false, [&](const Air_Node &node) { node.execute(stack_io, ctx, func, global);  });
         do_forward(stack_io, assign);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_function_call(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_function_call(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -613,7 +611,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_member_access(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_member_access(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -624,7 +622,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                          const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Increment the operand and return the old value.
@@ -647,7 +645,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_inc), " operation is not defined for `", value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                          const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decrement the operand and return the old value.
@@ -670,7 +668,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_dec), " operation is not defined for `", value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_at(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_at(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Append a reference modifier.
@@ -695,7 +693,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         }
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_pos(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_pos(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -707,7 +705,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_neg(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_neg(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -729,7 +727,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_neg), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_notb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -751,7 +749,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_notb), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notl(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_notl(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -764,7 +762,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_inc(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Increment the operand and return it.
@@ -783,7 +781,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_inc), " operation is not defined for `", value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decrement the operand and return it.
@@ -802,7 +800,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_dec), " operation is not defined for `", value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_unset(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_unset(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -813,7 +811,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -843,7 +841,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_lengthof), " operation is not defined for `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -856,7 +854,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_eq(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_eq(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -873,7 +871,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_ne(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_ne(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -890,7 +888,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_lt(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_lt(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -909,7 +907,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_gt(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_gt(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -928,7 +926,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_lte(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_lte(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -947,7 +945,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_gte(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_gte(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -966,7 +964,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1003,7 +1001,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_add(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_add(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1042,7 +1040,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_add), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sub(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sub(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1073,7 +1071,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sub), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mul(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_mul(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1117,7 +1115,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mul), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_div(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_div(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1142,7 +1140,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_div), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mod(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_mod(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1167,7 +1165,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mod), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sll(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sll(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1198,7 +1196,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sll), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_srl(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_srl(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1229,7 +1227,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_srl), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sla(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sla(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1260,7 +1258,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sla), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sra(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sra(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1290,7 +1288,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sra), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_andb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_andb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1316,7 +1314,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_andb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_orb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_orb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1342,7 +1340,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_orb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_xorb(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_xorb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1368,7 +1366,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_xorb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_assign(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_operator_rpn_infix_assign(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                           const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Pop the RHS operand followed by the LHS operand.
@@ -1380,7 +1378,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_array(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_unnamed_array(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1398,7 +1396,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_object(Reference_Stack &stack_io, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_unnamed_object(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
                                                const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -1416,7 +1414,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_coalescence(Reference_Stack &stack_io, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_coalescence(Reference_Stack &stack_io, Executive_Context &ctx,
                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -1432,7 +1430,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           return Air_Node::status_next;
         }
         // Evaluate the branch.
-        rocket::for_each(code_null, [&](const Air_Node &node) { node.execute(stack_io, ctx_io, func, global);  });
+        rocket::for_each(code_null, [&](const Air_Node &node) { node.execute(stack_io, ctx, func, global);  });
         do_forward(stack_io, assign);
         return Air_Node::status_next;
       }
