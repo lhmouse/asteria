@@ -17,8 +17,7 @@ class Function_Executive_Context : public Executive_Context
 
   public:
     // A function executive context does not have a parent context. All undefined names in the to-be-executed function must have already been resolved.
-    Function_Executive_Context(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params,
-                               Reference &&self, Cow_Vector<Reference> &&args)
+    Function_Executive_Context(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
       : Executive_Context(nullptr)
       {
         this->do_set_arguments(zvarg, params, rocket::move(self), rocket::move(args));

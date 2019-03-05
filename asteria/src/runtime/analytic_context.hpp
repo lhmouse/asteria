@@ -17,8 +17,7 @@ class Analytic_Context : public Abstract_Context
   public:
     // An analytic context can be created on another analytic or executive context.
     explicit Analytic_Context(const Abstract_Context *parent_opt) noexcept
-      : Abstract_Context(),
-        m_parent_opt(parent_opt)
+      : m_parent_opt(parent_opt)
       {
       }
     ~Analytic_Context() override;

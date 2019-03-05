@@ -24,7 +24,6 @@ class Abstract_Context
 
   public:
     Abstract_Context() noexcept
-      : m_tied_collector_opt(), m_named_references()
       {
       }
     virtual ~Abstract_Context();

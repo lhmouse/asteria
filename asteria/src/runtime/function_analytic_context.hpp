@@ -17,8 +17,7 @@ class Function_Analytic_Context : public Analytic_Context
 
   public:
     // A function analytic context can be created on another analytic or executive context.
-    Function_Analytic_Context(const Abstract_Context *parent_opt,
-                              const Cow_Vector<PreHashed_String> &params)
+    Function_Analytic_Context(const Abstract_Context *parent_opt, const Cow_Vector<PreHashed_String> &params)
       : Analytic_Context(parent_opt)
       {
         this->do_set_parameters(params);

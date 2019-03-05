@@ -17,8 +17,7 @@ class Executive_Context : public Abstract_Context
   public:
     // An executive context can only be created on another executive context (not an analytic one).
     explicit Executive_Context(const Executive_Context *parent_opt) noexcept
-      : Abstract_Context(),
-        m_parent_opt(parent_opt)
+      : m_parent_opt(parent_opt)
       {
       }
     ~Executive_Context() override;
