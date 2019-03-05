@@ -182,7 +182,7 @@ template<typename keyT, typename mappedT,
               }
               // Find a bucket for the new element.
               auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
+              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Allocate a new element by copy-constructing from the old one.
               auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
@@ -226,7 +226,7 @@ template<typename keyT, typename mappedT,
               }
               // Find a bucket for the new element.
               auto origin = noadl::get_probing_origin(data, end, hf(eptr_old->first));
-              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](typename pointer_storage<allocatorT>::bucket_type &) { return false;  });
+              auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto &) { return false;  });
               ROCKET_ASSERT(bkt);
               // Detach the old element.
               auto eptr = ptr_old->data[i].reset();
