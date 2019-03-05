@@ -110,6 +110,7 @@ class Statement
       };
     struct S_assert
       {
+        Source_Location sloc;
         Cow_Vector<Xpnode> expr;
         Cow_String msg;
       };

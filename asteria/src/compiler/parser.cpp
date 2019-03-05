@@ -1683,6 +1683,8 @@ namespace Asteria {
 
     bool do_accept_assert_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
       {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm_io);
         // assert-statement ::=
         //  "assert" expression ( ":" string-literal | "" ) ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_assert)) {
@@ -1702,7 +1704,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_assert stmt_c = { rocket::move(expr), rocket::move(msg) };
+        Statement::S_assert stmt_c = { rocket::move(sloc), rocket::move(expr), rocket::move(msg) };
         stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
