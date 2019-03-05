@@ -181,7 +181,7 @@ namespace Asteria {
         const auto &code_body = p.at(0).as<Cow_Vector<Air_Node>>();
         const bool negative = p.at(1).as<std::int64_t>();
         const auto &code_cond = p.at(2).as<Cow_Vector<Air_Node>>();
-        // This is the same as a `do ... while` loop in C.
+        // This is the same as a `do...while` loop in C.
         for(;;) {
           // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
           auto status = do_execute_block(stack, ctx_io, code_body, func, global);
@@ -195,6 +195,32 @@ namespace Asteria {
           do_evaluate_expression(stack, ctx_io, code_cond, func, global);
           if(stack.top().read().test() == negative) {
             break;
+          }
+        }
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_while(Reference_Stack &stack, Executive_Context &ctx_io,
+                                      const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const bool negative = p.at(0).as<std::int64_t>();
+        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto &code_body = p.at(2).as<Cow_Vector<Air_Node>>();
+        // This is the same as a `while` loop in C.
+        for(;;) {
+          // Check the condition.
+          do_evaluate_expression(stack, ctx_io, code_cond, func, global);
+          if(stack.top().read().test() == negative) {
+            break;
+          }
+          // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
+          auto status = do_execute_block(stack, ctx_io, code_body, func, global);
+          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_while })) {
+            return status;
+          }
+          if(rocket::is_none_of(status, { Air_Node::status_next, Air_Node::status_continue_unspec, Air_Node::status_continue_while })) {
+            return status;
           }
         }
         return Air_Node::status_next;
@@ -277,8 +303,18 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         code_out.emplace_back(&do_execute_do_while, rocket::move(p));
         return;
       }
-/*
     case index_while:
+      {
+        const auto &alt = this->m_stor.as<S_while>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.cond));  // 1
+        p.emplace_back(do_generate_code_for_block(ctx_io, alt.body));  // 2
+        code_out.emplace_back(&do_execute_while, rocket::move(p));
+        return;
+      }
+/*
     case index_for:
     case index_for_each:
     case index_try:
