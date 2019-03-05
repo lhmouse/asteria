@@ -104,9 +104,10 @@ namespace Asteria {
                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const auto &name = p.at(0).as<PreHashed_String>();
-        const bool immutable = p.at(1).as<std::int64_t>();
-        const auto &code_init = p.at(2).as<Cow_Vector<Air_Node>>();
+        // - unused - const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &name = p.at(1).as<PreHashed_String>();
+        const bool immutable = p.at(2).as<std::int64_t>();
+        const auto &code_init = p.at(3).as<Cow_Vector<Air_Node>>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
         auto var = global.create_variable();
@@ -115,7 +116,35 @@ namespace Asteria {
         // Evaluate the initializer.
         do_evaluate_expression(stack, ctx_io, code_init, func, global);
         var->reset(stack.top().read(), immutable);
-        ASTERIA_DEBUG_LOG("New variable `", name, "`: ", var->get_value());
+        ASTERIA_DEBUG_LOG("New variable: ", name, " = ", var->get_value());
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_define_function(Reference_Stack &stack, Executive_Context &ctx_io,
+                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &name = p.at(1).as<PreHashed_String>();
+        const auto &params = p.at(2).as<Cow_Vector<PreHashed_String>>();
+        const auto &body = p.at(3).as<Cow_Vector<Statement>>();
+        // Create a dummy reference for further name lookups.
+        // A function becomes visible before its definition, where it is initialized to `null`.
+        auto var = global.create_variable();
+        Reference_Root::S_variable ref_c = { var };
+        do_safe_set_named_reference(nullptr, ctx_io, "function", name, rocket::move(ref_c));
+        // Generate code for the function body.
+        Cow_Vector<Air_Node> code_next;
+        Function_Analytic_Context ctx_next(&ctx_io, params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_next, nullptr, ctx_next);  });
+        // Instantiate the function.
+        rocket::insertable_ostream nos;
+        nos << name << "("
+            << rocket::ostream_implode(params.begin(), params.size(), ", ")
+            <<")";
+        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_next));
+        ASTERIA_DEBUG_LOG("New function: ", closure);
+        var->reset(D_function(rocket::move(closure)), true);
         return Air_Node::status_next;
       }
 
@@ -150,15 +179,28 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_uninitialized());
         // Generate code for the declaration.
         Cow_Vector<Air_Node::Variant> p;
-        p.emplace_back(alt.name);  // 0
-        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
-        // Generate code for the initializer.
-        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.init));  // 2
+        p.emplace_back(alt.sloc);  // 0
+        p.emplace_back(alt.name);  // 1
+        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 2
+        p.emplace_back(do_generate_code_for_expression(ctx_io, alt.init));  // 3
         code_out.emplace_back(&do_define_variable, rocket::move(p));
         return;
       }
-/*
     case index_function:
+      {
+        const auto &alt = this->m_stor.as<S_function>();
+        // Create a dummy reference for further name lookups.
+        do_safe_set_named_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_uninitialized());
+        // Generate code for the function body.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.sloc);  // 0
+        p.emplace_back(alt.name);  // 1
+        p.emplace_back(alt.params);  // 2
+        p.emplace_back(alt.body);  // 3
+        code_out.emplace_back(&do_define_function, rocket::move(p));
+        return;
+      }
+/*
     case index_if:
     case index_switch:
     case index_do_while:
@@ -300,15 +342,15 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "variable", name, rocket::move(ref_c));
         // Generate code of the function body.
-        Cow_Vector<Air_Node> fcode;
-        Function_Analytic_Context fctx(&ctx_io, params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
+        Cow_Vector<Air_Node> code_next;
+        Function_Analytic_Context ctx_next(&ctx_io, params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_next, ctx_next);  });
         // Instantiate the function.
         rocket::insertable_ostream nos;
         nos << name << "("
             << rocket::ostream_implode(params.begin(), params.size(), ", ")
             <<")";
-        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(fcode));
+        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_next));
         ASTERIA_DEBUG_LOG("New function `", closure, "`: ", closure);
         var->reset(D_function(rocket::move(closure)), true);
         return Air_Node::status_next;
@@ -465,15 +507,15 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Analytic_Context &
         Reference_Root::S_variable ref_c = { var };
         do_safe_set_named_reference(ctx_io, "function", alt.name, rocket::move(ref_c));
         // Generate code of the function body.
-        Cow_Vector<Air_Node> fcode;
-        Function_Analytic_Context fctx(&ctx_io, alt.params);
-        rocket::for_each(alt.body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
+        Cow_Vector<Air_Node> code_next;
+        Function_Analytic_Context ctx_next(&ctx_io, alt.params);
+        rocket::for_each(alt.body, [&](const Statement &stmt) { stmt.generate_code(code_next, ctx_next);  });
         // Instantiate the function.
         rocket::insertable_ostream nos;
         nos << alt.name << "("
             << rocket::ostream_implode(alt.params.begin(), alt.params.size(), ", ")
             <<")";
-        RefCnt_Object<Instantiated_Function> closure(alt.sloc, nos.extract_string(), alt.params, rocket::move(fcode));
+        RefCnt_Object<Instantiated_Function> closure(alt.sloc, nos.extract_string(), alt.params, rocket::move(code_next));
         ASTERIA_DEBUG_LOG("New function: ", closure);
         var->reset(D_function(rocket::move(closure)), true);
         return Air_Node::status_next;
