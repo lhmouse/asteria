@@ -179,6 +179,82 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
+    Air_Node::Status do_execute_switch(Reference_Stack &stack, Executive_Context &ctx_io,
+                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &code_ctrl = p.at(0).as<Cow_Vector<Air_Node>>();
+        // This is different from a C `switch` statement where `case` labels must have constant operands.
+        // Evaluate the control expression.
+        do_evaluate_expression(stack, ctx_io, code_ctrl, func, global);
+        auto ctrl_value = stack.top().read();
+        // `ctx_fr` is used before a `default` clause is encountered; `ctx_bk` is used after it.
+        Executive_Context ctx_fr(&ctx_io);
+        Executive_Context ctx_bk(&ctx_fr);
+        auto qctx_cur = &ctx_fr;
+        // Iterate over all `case` labels and evaluate them. Stop if the result value compares equal with `switch_value`.
+        std::size_t index_def = SIZE_MAX;
+        std::size_t index_case = 1;
+        for(;;) {
+          // No more clauses?
+          if(index_case >= p.size()) {
+            // No `case` label equals `ctrl_value`.
+            if(index_def == SIZE_MAX) {
+              // There is no `default` label. Skip this block.
+              return Air_Node::status_next;
+            }
+            // A `default` label exists. Jump back to it.
+            qctx_cur = &ctx_fr;
+            index_case = index_def;
+            break;
+          }
+          // Decode arguments.
+          const auto &code_case = p.at(index_case).as<Cow_Vector<Air_Node>>();
+          const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
+          if(!code_case.empty()) {
+            // This is a `case` clause.
+            // Evaluate the operand and check whether it equals `ctrl_value`.
+            do_evaluate_expression(stack, *qctx_cur, code_case, func, global);
+            if(stack.top().read().compare(ctrl_value) == Value::compare_equal) {
+              // Found a `case` label.
+              break;
+            }
+          } else {
+            // This is a `default` clause.
+            if(qctx_cur != &ctx_fr) {
+              ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
+            }
+            // Record it.
+            qctx_cur = &ctx_bk;
+            index_def = index_case;
+          }
+          // Inject all names into this scope.
+          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, *qctx_cur, "skipped variable",
+                                                                                                  name, Reference_Root::S_uninitialized());  });
+          // Try the next clause.
+          index_case += 3;
+        }
+        for(;;) {
+          // Decode arguments.
+          const auto &code_clause = p.at(index_case + 1).as<Cow_Vector<Air_Node>>();
+          // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
+          auto status = do_execute_statement_list(stack, *qctx_cur, code_clause, func, global);
+          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
+            break;
+          }
+          if(rocket::is_none_of(status, { Air_Node::status_next })) {
+            return status;
+          }
+          // Execute the next clause.
+          index_case += 3;
+          // No more clauses?
+          if(index_case >= p.size()) {
+            break;
+          }
+        }
+        return Air_Node::status_next;
+      }
+
     Air_Node::Status do_execute_do_while(Reference_Stack &stack, Executive_Context &ctx_io,
                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
@@ -507,7 +583,24 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         return;
       }
     case index_switch:
-      // TODO
+      {
+        const auto &alt = this->m_stor.as<S_switch>();
+        // Create a fresh context for the `switch` body.
+        // Note that all clauses inside a `switch` statement share the same context.
+        Analytic_Context ctx_switch(&ctx_io);
+        // Encode arguments.
+        Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(do_generate_code_expression(ctx_switch, alt.ctrl));  // 0
+        // Note that this node takes variable number of arguments.
+        for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
+          p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // 1 + n * 3
+          Cow_Vector<PreHashed_String> names;
+          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // 2 + n * 3
+          p.emplace_back(std::move(names));  // 3 + n * 3
+        }
+        code_out.emplace_back(&do_execute_switch, rocket::move(p));
+        return;
+      }
     case index_do_while:
       {
         const auto &alt = this->m_stor.as<S_do_while>();
