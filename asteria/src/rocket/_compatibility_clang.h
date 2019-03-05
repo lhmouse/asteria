@@ -23,8 +23,3 @@
 #if defined(_LIBCPP_DEBUG) || defined(_GLIBCXX_DEBUG)
 #  define ROCKET_DEBUG                      1
 #endif
-
-// Check for libc++ or libstdc++ from GCC 5.
-#if defined(_LIBCPP_VERSION) || defined(_GLIBCXX14_CONSTEXPR)
-#  define ROCKET_HAS_TRIVIALITY_TRAITS      1
-#endif

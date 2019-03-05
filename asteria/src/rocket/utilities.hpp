@@ -71,19 +71,11 @@ using ::std::remove_reference;
 using ::std::is_same;
 using ::std::is_trivial;
 using ::std::is_integral;
-#ifdef ROCKET_HAS_TRIVIALITY_TRAITS
 using ::std::is_trivially_default_constructible;
 using ::std::is_trivially_copy_constructible;
 using ::std::is_trivially_move_constructible;
 using ::std::is_trivially_copy_assignable;
 using ::std::is_trivially_move_assignable;
-#else
-template<typename typeT> using is_trivially_default_constructible = ::std::has_trivial_default_constructor<typeT>;
-template<typename typeT> using is_trivially_copy_constructible = ::std::has_trivial_copy_constructor<typeT>;
-template<typename typeT> using is_trivially_move_constructible = ::std::has_trivial_copy_constructor<typeT>;
-template<typename typeT> using is_trivially_copy_assignable = ::std::has_trivial_copy_assign<typeT>;
-template<typename typeT> using is_trivially_move_assignable = ::std::has_trivial_copy_assign<typeT>;
-#endif
 using ::std::is_trivially_destructible;
 using ::std::underlying_type;
 using ::std::is_array;
@@ -140,13 +132,6 @@ struct identity
 
     using is_transparent = void;
   };
-
-template<typename valueT, typename withT> inline valueT exchange(valueT &value, withT &&with)
-  {
-    auto old = noadl::move(value);
-    value = ::std::forward<withT>(with);
-    return old;
-  }
 
     namespace details_utilities {
 
@@ -368,7 +353,7 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
 
     template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT &&cont, callbackT &&call)
       {
-        for(auto &elem : cont) {
+        for(auto &&elem : cont) {
           ::std::forward<callbackT>(call)(elem);
         }
       }
@@ -381,14 +366,14 @@ template<typename containerT, typename callbackT> inline void for_each(container
   }
 template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::for_each_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
 
     template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT &&cont, callbackT &&call)
       {
-        for(auto &elem : cont) {
+        for(auto &&elem : cont) {
           if(::std::forward<callbackT>(call)(elem)) {
             return true;
           }
@@ -404,14 +389,14 @@ template<typename containerT, typename callbackT> constexpr bool any_of(containe
   }
 template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::any_of_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
 
     template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT &&cont, callbackT &&call)
       {
-        for(auto &elem : cont) {
+        for(auto &&elem : cont) {
           if(::std::forward<callbackT>(call)(elem)) {
             return false;
           }
@@ -427,14 +412,14 @@ template<typename containerT, typename callbackT> constexpr bool none_of(contain
   }
 template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&call)
   {
-    return details_utilities::none_of_nonconstexpr(noadl::move(init), ::std::forward<callbackT>(call));
+    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(call));
   }
 
     namespace details_utilities {
 
     template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT &&targ, containerT &&cont)
       {
-        for(auto &elem : cont) {
+        for(auto &&elem : cont) {
           if(::std::forward<targetT>(targ) == elem) {
             return true;
           }
@@ -450,14 +435,14 @@ template<typename targetT, typename containerT> constexpr bool is_any_of(targetT
   }
 template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &&targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), noadl::move(init));
+    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
 
     namespace details_utilities {
 
     template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT &&targ, containerT &&cont)
       {
-        for(auto &elem : cont) {
+        for(auto &&elem : cont) {
           if(::std::forward<targetT>(targ) == elem) {
             return false;
           }
@@ -473,7 +458,7 @@ template<typename targetT, typename containerT> constexpr bool is_none_of(target
   }
 template<typename targetT, typename elementT> constexpr bool is_none_of(targetT &&targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), noadl::move(init));
+    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
 
 template<typename enumT> constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept

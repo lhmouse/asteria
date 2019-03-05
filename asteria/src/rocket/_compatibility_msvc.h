@@ -23,8 +23,3 @@
 #if defined(_DEBUG)
 #  define ROCKET_DEBUG                      1
 #endif
-
-// Check for the version of... the compiler?
-#if _MSC_VER >= 1700
-#  define ROCKET_HAS_TRIVIALITY_TRAITS      1
-#endif
