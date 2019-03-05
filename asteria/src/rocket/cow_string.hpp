@@ -144,7 +144,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       private:
         void do_reset(storage_pointer ptr_new) noexcept
           {
-            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = ::std::exchange(this->m_ptr, ptr_new);
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }
@@ -1251,8 +1251,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     basic_cow_string & assign(basic_cow_string &&other) noexcept
       {
         this->m_sth.share_with(noadl::move(other.m_sth));
-        this->m_ptr = noadl::exchange(other.m_ptr, ::std::addressof(null_char));
-        this->m_len = noadl::exchange(other.m_len, size_type(0));
+        this->m_ptr = ::std::exchange(other.m_ptr, ::std::addressof(null_char));
+        this->m_len = ::std::exchange(other.m_len, size_type(0));
         return *this;
       }
     basic_cow_string & assign(const basic_cow_string &other, size_type pos, size_type n = npos)

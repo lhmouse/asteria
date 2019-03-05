@@ -131,7 +131,7 @@ template<typename elementT> class refcnt_ptr;
           }
         void reset(pointer ptr_new) noexcept
           {
-            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = ::std::exchange(this->m_ptr, ptr_new);
             if(!ptr) {
               return;
             }

@@ -79,11 +79,11 @@ template<typename handleT, typename closerT> class unique_handle;
           }
         handle_type release() noexcept
           {
-            return noadl::exchange(this->m_h, this->as_closer().null());
+            return ::std::exchange(this->m_h, this->as_closer().null());
           }
         void reset(handle_type h_new) noexcept
           {
-            auto h_old = noadl::exchange(this->m_h, h_new);
+            auto h_old = ::std::exchange(this->m_h, h_new);
             if(this->as_closer().is_null(h_old)) {
               return;
             }

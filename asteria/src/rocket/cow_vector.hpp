@@ -211,7 +211,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       private:
         void do_reset(storage_pointer ptr_new) noexcept
           {
-            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = ::std::exchange(this->m_ptr, ptr_new);
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }

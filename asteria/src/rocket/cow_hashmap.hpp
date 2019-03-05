@@ -80,7 +80,7 @@ template<typename keyT, typename mappedT,
           }
         pointer reset(pointer ptr = pointer()) noexcept
           {
-            return noadl::exchange(this->m_ptr, ptr);
+            return ::std::exchange(this->m_ptr, ptr);
           }
 
         explicit operator bool () const noexcept
@@ -307,7 +307,7 @@ template<typename keyT, typename mappedT,
       private:
         void do_reset(storage_pointer ptr_new) noexcept
           {
-            auto ptr = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr = ::std::exchange(this->m_ptr, ptr_new);
             if(ROCKET_EXPECT(!ptr)) {
               return;
             }

@@ -98,11 +98,11 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           }
         pointer release() noexcept
           {
-            return noadl::exchange(this->m_ptr, pointer());
+            return ::std::exchange(this->m_ptr, pointer());
           }
         void reset(pointer ptr_new) noexcept
           {
-            auto ptr_old = noadl::exchange(this->m_ptr, ptr_new);
+            auto ptr_old = ::std::exchange(this->m_ptr, ptr_new);
             if(!ptr_old) {
               return;
             }
