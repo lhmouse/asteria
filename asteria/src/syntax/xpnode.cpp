@@ -537,7 +537,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
         // Generate code of the function body.
         Cow_Vector<Air_Node> fcode;
         Function_Analytic_Context fctx(&ctx_io, params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, fctx);  });
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(fcode, nullptr, fctx);  });
         // Instantiate the function.
         Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(fcode));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);

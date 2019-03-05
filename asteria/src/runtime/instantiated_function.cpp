@@ -33,7 +33,7 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
     case Air_Node::status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        self_io = Reference_Root::S_undefined();
+        self_io = Reference_Root::S_uninitialized();
         // Fallthough.
     case Air_Node::status_return:
         // Return the reference in `self_io`.
