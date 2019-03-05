@@ -15,7 +15,7 @@ namespace Asteria {
 class Reference_Root
   {
   public:
-    struct S_undefined
+    struct S_uninitialized
       {
       };
     struct S_constant
@@ -33,17 +33,17 @@ class Reference_Root
 
     enum Index : std::uint8_t
       {
-        index_undefined  = 0,
-        index_constant   = 1,
-        index_temporary  = 2,
-        index_variable   = 3,
+        index_uninitialized  = 0,
+        index_constant       = 1,
+        index_temporary      = 2,
+        index_variable       = 3,
       };
     using Variant = rocket::variant<
       ROCKET_CDR(
-        , S_undefined  // 0,
-        , S_constant   // 1,
-        , S_temporary  // 2,
-        , S_variable   // 3,
+        , S_uninitialized  // 0,
+        , S_constant       // 1,
+        , S_temporary      // 2,
+        , S_variable       // 3,
       )>;
     static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
 

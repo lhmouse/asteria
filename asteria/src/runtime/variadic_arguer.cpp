@@ -31,7 +31,7 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
       auto wrapped = wrap_subscript(index, nvargs);
       if(wrapped.subscript >= nvargs) {
         ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", nvargs);
-        self_io = Reference_Root::S_undefined();
+        self_io = Reference_Root::S_uninitialized();
         return;
       }
       self_io = this->get_argument(wrapped.subscript);

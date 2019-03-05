@@ -50,7 +50,7 @@ void Expression::evaluate(Reference &ref_out, const Cow_String &func, const Glob
   {
     Reference_Stack stack;
     if(!this->evaluate_partial(stack, func, global, ctx)) {
-      ref_out = Reference_Root::S_undefined();
+      ref_out = Reference_Root::S_uninitialized();
       return;
     }
     ROCKET_ASSERT(stack.size() == 1);
