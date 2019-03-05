@@ -34,9 +34,12 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
       {
         // Return `null` if the control flow reached the end of the function.
         self_io = Reference_Root::S_uninitialized();
-        // Fallthough.
+        break;
+      }
     case Air_Node::status_return:
-        // Return the reference in `self_io`.
+      {
+        // Return the reference at the top of `stack`.
+        self_io = std::move(stack.top());
         break;
       }
     case Air_Node::status_break_unspec:

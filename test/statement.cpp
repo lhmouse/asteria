@@ -84,7 +84,7 @@ int main()
     // Generate code.
     Cow_Vector<Air_Node> stmt_code;
     Analytic_Context actx(&ctx);
-    rocket::for_each(text, [&](const Statement &stmt) { stmt.generate_code(stmt_code, actx);  });
+    rocket::for_each(text, [&](const Statement &stmt) { stmt.generate_code(stmt_code, nullptr, actx);  });
 
     auto status = Air_Node::status_next;
     Reference_Stack stack;
