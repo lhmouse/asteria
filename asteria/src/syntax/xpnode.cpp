@@ -1503,10 +1503,10 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_true, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_true, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 0
         code.clear();
-        rocket::for_each(alt.branch_false, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_false, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
         code_out.emplace_back(&do_execute_branch, rocket::move(p));
@@ -1726,7 +1726,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_null, [&](const Xpnode &node) { node.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_null, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
         code_out.emplace_back(&do_execute_coalescence, rocket::move(p));
