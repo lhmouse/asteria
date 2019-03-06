@@ -163,10 +163,10 @@ class Runtime_Error : public virtual std::exception
       }
   };
 
-[[noreturn]] extern bool throw_runtime_error(const char *funcsig, rocket::cow_string &&msg);
+[[noreturn]] extern bool throw_runtime_error(const char *func, rocket::cow_string &&msg);
 
 // Evaluate arguments to create a string, then throw an exception containing this string.
-#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(ROCKET_FUNCSIG, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
+#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
 ///////////////////////////////////////////////////////////////////////////////

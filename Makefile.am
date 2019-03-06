@@ -1,5 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -pipe -pthread -fno-math-errno -fno-trapping-math -finline-limit=4000  \
+AM_CPPFLAGS = -pipe -pthread -fno-math-errno -fno-trapping-math -finline-limit=2400  \
   -Wall -Wextra -Wconversion -Wsign-conversion -Winvalid-pch  \
   -Wwrite-strings -Wswitch-enum -Wsuggest-attribute=noreturn -Wundef -Wshadow  \
   -Wstrict-aliasing=2 -Wstrict-overflow=5 -Wmissing-field-initializers  \

@@ -223,7 +223,7 @@ void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error &err)
     }
     mos << "]";
     // Throw it now.
-    throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
+    throw_runtime_error(__func__, mos.extract_string());
   }
 
 }

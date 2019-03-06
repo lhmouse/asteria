@@ -501,7 +501,7 @@ namespace Asteria {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
         const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &msg = p.at(1).as<PreHashed_String>();
+        const auto &msg = p.at(2).as<PreHashed_String>();
         // Evaluate the operand.
         do_evaluate_expression(stack, ctx_io, code, func, global);
         if(ROCKET_UNEXPECT(stack.top().read().test() == false)) {
@@ -513,7 +513,7 @@ namespace Asteria {
           } else {
             mos << ": " << msg;
           }
-          throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
+          throw_runtime_error(__func__, mos.extract_string());
         }
         return Air_Node::status_next;
       }

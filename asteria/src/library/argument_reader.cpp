@@ -296,7 +296,7 @@ void Argument_Reader::throw_no_matching_function_call() const
       mos << "]";
     }
     // Throw it now.
-    throw_runtime_error(ROCKET_FUNCSIG, mos.extract_string());
+    throw_runtime_error(__func__, mos.extract_string());
   }
 
 }
