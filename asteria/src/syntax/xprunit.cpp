@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "xpnode.hpp"
+#include "xprunit.hpp"
 #include "statement.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/reference_stack.hpp"
@@ -15,7 +15,7 @@
 
 namespace Asteria {
 
-const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
+const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
   {
     switch(xop) {
     case xop_postfix_inc:
@@ -642,7 +642,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_inc), " operation is not defined for `", value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_inc), " operation is not defined for `", value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -665,7 +665,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, false, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_postfix_dec), " operation is not defined for `", value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_dec), " operation is not defined for `", value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_at(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -724,7 +724,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_neg), " operation is not defined for `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_neg), " operation is not defined for `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_notb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -746,7 +746,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_notb), " operation is not defined for `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_notb), " operation is not defined for `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_notl(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -778,7 +778,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           rhs = do_operator_add(rhs, D_real(1));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_inc), " operation is not defined for `", value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_inc), " operation is not defined for `", value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_dec(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -797,7 +797,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           rhs = do_operator_sub(rhs, D_real(1));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_dec), " operation is not defined for `", value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_dec), " operation is not defined for `", value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_unset(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -838,7 +838,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_prefix_lengthof), " operation is not defined for `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_lengthof), " operation is not defined for `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_typeof(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1037,7 +1037,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_add), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_add), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sub(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1068,7 +1068,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sub), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sub), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_mul(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1112,7 +1112,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mul), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mul), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_div(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1137,7 +1137,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_div), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_div), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_mod(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1162,7 +1162,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_mod), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mod), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sll(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1193,7 +1193,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
             return Air_Node::status_next;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sll), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sll), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_srl(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1224,7 +1224,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
             return Air_Node::status_next;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_srl), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_srl), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sla(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1255,7 +1255,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
             return Air_Node::status_next;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sla), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sla), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_sra(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1285,7 +1285,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
             return Air_Node::status_next;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_sra), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sra), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_andb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1311,7 +1311,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_andb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_andb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_orb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1337,7 +1337,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_orb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_xorb(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1363,7 +1363,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
           do_set_temporary(stack_io, assign, rocket::move(ref_c));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xpnode::get_operator_name(Xpnode::xop_infix_xorb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_xorb), " operation is not defined for `", lhs, "` and `", ref_c.value, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_infix_assign(Reference_Stack &stack_io, Executive_Context & /*ctx*/,
@@ -1437,7 +1437,7 @@ const char * Xpnode::get_operator_name(Xpnode::Xop xop) noexcept
 
     }
 
-void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Context &ctx) const
+void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Context &ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
@@ -1501,10 +1501,10 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_true, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_true, [&](const Xprunit &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 0
         code.clear();
-        rocket::for_each(alt.branch_false, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_false, [&](const Xprunit &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
         code_out.emplace_back(&do_execute_branch, rocket::move(p));
@@ -1724,7 +1724,7 @@ void Xpnode::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Contex
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_null, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        rocket::for_each(alt.branch_null, [&](const Xprunit &xpn) { xpn.generate_code(code, ctx);  });
         p.emplace_back(rocket::move(code));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
         code_out.emplace_back(&do_execute_coalescence, rocket::move(p));

@@ -3,7 +3,7 @@
 
 #include "_test_init.hpp"
 #include "../asteria/src/syntax/statement.hpp"
-#include "../asteria/src/syntax/xpnode.hpp"
+#include "../asteria/src/syntax/xprunit.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/air_node.hpp"
@@ -19,30 +19,30 @@ int main()
 
     Cow_Vector<Statement> text;
     // var res = 0;
-    Cow_Vector<Xpnode> expr;
-    expr.emplace_back(Xpnode::S_literal { D_integer(0) });
+    Cow_Vector<Xprunit> expr;
+    expr.emplace_back(Xprunit::S_literal { D_integer(0) });
     text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 1), rocket::sref("res"), false, std::move(expr) });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
-    expr.emplace_back(Xpnode::S_literal { D_integer(1) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(3) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
-    expr.emplace_back(Xpnode::S_literal { D_integer(5) });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    expr.emplace_back(Xpnode::S_unnamed_array { 4 });
+    expr.emplace_back(Xprunit::S_literal { D_integer(1) });
+    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
+    expr.emplace_back(Xprunit::S_literal { D_integer(3) });
+    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
+    expr.emplace_back(Xprunit::S_literal { D_integer(5) });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_mul, false });
+    expr.emplace_back(Xprunit::S_unnamed_array { 4 });
     text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 2), rocket::sref("data"), true, std::move(expr) });
     // for(each k, v in data) {
     //   res += k * v;
     // }
-    Cow_Vector<Xpnode> range;
-    range.emplace_back(Xpnode::S_named_reference { rocket::sref("data") });
+    Cow_Vector<Xprunit> range;
+    range.emplace_back(Xprunit::S_named_reference { rocket::sref("data") });
     expr.clear();
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("res") });
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("k") });
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("v") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("res") });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("k") });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("v") });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_mul, false });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_add, true });
     Cow_Vector<Statement> body;
     body.emplace_back(Statement::S_expression { std::move(expr) });
     text.emplace_back(Statement::S_for_each { rocket::sref("k"), rocket::sref("v"), std::move(range), std::move(body) });
@@ -54,32 +54,32 @@ int main()
     // }
     body.clear();
     expr.clear();
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("res") });
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("data") });
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, true });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("res") });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("data") });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_postfix_at, false });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_add, true });
     body.emplace_back(Statement::S_expression { std::move(expr) });
     expr.clear();
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("data") });
-    expr.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
-    expr.emplace_back(Xpnode::S_literal { D_integer(2) });
-    expr.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_eq, false });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("data") });
+    expr.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_postfix_at, false });
+    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
+    expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_cmp_eq, false });
     Cow_Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_unspec });
     body.emplace_back(Statement::S_if { false, std::move(expr), std::move(branch_true), { } });
     expr.clear();
-    expr.emplace_back(Xpnode::S_literal { D_integer(0) });
+    expr.emplace_back(Xprunit::S_literal { D_integer(0) });
     Cow_Vector<Statement> init;
     init.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 3), rocket::sref("j"), false, std::move(expr) });
-    Cow_Vector<Xpnode> cond;
-    cond.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    cond.emplace_back(Xpnode::S_literal { D_integer(3) });
-    cond.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_cmp_lte, false });
-    Cow_Vector<Xpnode> step;
-    step.emplace_back(Xpnode::S_named_reference { rocket::sref("j") });
-    step.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_inc, false });
+    Cow_Vector<Xprunit> cond;
+    cond.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
+    cond.emplace_back(Xprunit::S_literal { D_integer(3) });
+    cond.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_cmp_lte, false });
+    Cow_Vector<Xprunit> step;
+    step.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
+    step.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_prefix_inc, false });
     text.emplace_back(Statement::S_for { std::move(init), std::move(cond), std::move(step), std::move(body) });
     // Generate code.
     Cow_Vector<Air_Node> stmt_code;

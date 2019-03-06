@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "_test_init.hpp"
-#include "../asteria/src/syntax/xpnode.hpp"
+#include "../asteria/src/syntax/xprunit.hpp"
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/air_node.hpp"
@@ -36,32 +36,32 @@ int main()
     // RPN:   aval 1 [] cond ! ?: =                    ::= expr
     //                         |\-- dval ++ 0.25 +     ::= branch_true
     //                         \--- ival "hello," *    ::= branch_false
-    Cow_Vector<Xpnode> branch_true;
+    Cow_Vector<Xprunit> branch_true;
     {
-      branch_true.emplace_back(Xpnode::S_named_reference { rocket::sref("dval") });
-      branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_inc, false });
-      branch_true.emplace_back(Xpnode::S_literal { D_real(0.25) });
-      branch_true.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_add, false });
+      branch_true.emplace_back(Xprunit::S_named_reference { rocket::sref("dval") });
+      branch_true.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_postfix_inc, false });
+      branch_true.emplace_back(Xprunit::S_literal { D_real(0.25) });
+      branch_true.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_add, false });
     }
-    Cow_Vector<Xpnode> branch_false;
+    Cow_Vector<Xprunit> branch_false;
     {
-      branch_false.emplace_back(Xpnode::S_named_reference { rocket::sref("ival") });
-      branch_false.emplace_back(Xpnode::S_literal { D_string("hello,") });
-      branch_false.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_mul, false });
+      branch_false.emplace_back(Xprunit::S_named_reference { rocket::sref("ival") });
+      branch_false.emplace_back(Xprunit::S_literal { D_string("hello,") });
+      branch_false.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_mul, false });
     }
-    Cow_Vector<Xpnode> nodes;
+    Cow_Vector<Xprunit> nodes;
     {
-      nodes.emplace_back(Xpnode::S_named_reference { rocket::sref("aval") });
-      nodes.emplace_back(Xpnode::S_literal { D_integer(1) });
-      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_postfix_at, false });
-      nodes.emplace_back(Xpnode::S_named_reference { rocket::sref("cond") });
-      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_prefix_notl, false });
-      nodes.emplace_back(Xpnode::S_branch { std::move(branch_true), std::move(branch_false), false });
-      nodes.emplace_back(Xpnode::S_operator_rpn { Xpnode::xop_infix_assign, false });
+      nodes.emplace_back(Xprunit::S_named_reference { rocket::sref("aval") });
+      nodes.emplace_back(Xprunit::S_literal { D_integer(1) });
+      nodes.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_postfix_at, false });
+      nodes.emplace_back(Xprunit::S_named_reference { rocket::sref("cond") });
+      nodes.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_prefix_notl, false });
+      nodes.emplace_back(Xprunit::S_branch { std::move(branch_true), std::move(branch_false), false });
+      nodes.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_assign, false });
     }
     Cow_Vector<Air_Node> expr_code;
     Analytic_Context actx(&ctx);
-    rocket::for_each(nodes, [&](const Xpnode &node) { node.generate_code(expr_code, actx);  });
+    rocket::for_each(nodes, [&](const Xprunit &node) { node.generate_code(expr_code, actx);  });
 
     Reference_Stack stack;
     rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });

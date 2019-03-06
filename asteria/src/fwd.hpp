@@ -30,7 +30,7 @@ class Traceable_Exception;
 
 // Syntax
 class Source_Location;
-class Xpnode;
+class Xprunit;
 class Statement;
 
 // Runtime

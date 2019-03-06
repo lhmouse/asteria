@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_SYNTAX_XPNODE_HPP_
-#define ASTERIA_SYNTAX_XPNODE_HPP_
+#ifndef ASTERIA_SYNTAX_XPRUNIT_HPP_
+#define ASTERIA_SYNTAX_XPRUNIT_HPP_
 
 #include "../fwd.hpp"
 #include "source_location.hpp"
@@ -13,7 +13,7 @@
 
 namespace Asteria {
 
-class Xpnode
+class Xprunit
   {
   public:
     enum Xop : std::uint8_t
@@ -72,8 +72,8 @@ class Xpnode
       };
     struct S_branch
       {
-        Cow_Vector<Xpnode> branch_true;
-        Cow_Vector<Xpnode> branch_false;
+        Cow_Vector<Xprunit> branch_true;
+        Cow_Vector<Xprunit> branch_false;
         bool assign;
       };
     struct S_function_call
@@ -100,7 +100,7 @@ class Xpnode
       };
     struct S_coalescence
       {
-        Cow_Vector<Xpnode> branch_null;
+        Cow_Vector<Xprunit> branch_null;
         bool assign;
       };
 
@@ -140,12 +140,12 @@ class Xpnode
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xpnode(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xprunit(AltT &&alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xpnode & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xprunit & operator=(AltT &&alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;

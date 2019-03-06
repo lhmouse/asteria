@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "statement.hpp"
-#include "xpnode.hpp"
+#include "xprunit.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/reference_stack.hpp"
 #include "../runtime/executive_context.hpp"
@@ -74,10 +74,10 @@ namespace Asteria {
         return status;
       }
 
-    Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context &ctx, const Cow_Vector<Xpnode> &expr)
+    Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context &ctx, const Cow_Vector<Xprunit> &expr)
       {
         Cow_Vector<Air_Node> code;
-        rocket::for_each(expr, [&](const Xpnode &xpn) { xpn.generate_code(code, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit &xpn) { xpn.generate_code(code, ctx);  });
         return code;
       }
 
@@ -530,7 +530,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         Cow_Vector<Air_Node::Variant> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the expression.
-        rocket::for_each(alt.expr, [&](const Xpnode &xpn) { xpn.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
         return;
       }
     case index_block:

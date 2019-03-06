@@ -84,7 +84,7 @@ pkginclude_HEADERS =  \
 pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
   asteria/src/syntax/source_location.hpp  \
-  asteria/src/syntax/xpnode.hpp  \
+  asteria/src/syntax/xprunit.hpp  \
   asteria/src/syntax/statement.hpp
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
@@ -132,7 +132,7 @@ pkginclude_library_HEADERS =  \
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/syntax/source_location.cpp  \
-  asteria/src/syntax/xpnode.cpp  \
+  asteria/src/syntax/xprunit.cpp  \
   asteria/src/syntax/statement.cpp  \
   asteria/src/runtime/rcbase.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
@@ -186,7 +186,7 @@ check_PROGRAMS =  \
   test/value.test  \
   test/variable.test  \
   test/reference.test  \
-  test/xpnode.test  \
+  test/xprunit.test  \
   test/statement.test  \
   test/traceable_exception.test  \
   test/executive_context.test  \

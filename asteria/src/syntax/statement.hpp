@@ -24,7 +24,7 @@ class Statement
 
     struct S_expression
       {
-        Cow_Vector<Xpnode> expr;
+        Cow_Vector<Xprunit> expr;
       };
     struct S_block
       {
@@ -35,7 +35,7 @@ class Statement
         Source_Location sloc;
         PreHashed_String name;
         bool immutable;
-        Cow_Vector<Xpnode> init;
+        Cow_Vector<Xprunit> init;
       };
     struct S_function
       {
@@ -47,40 +47,40 @@ class Statement
     struct S_if
       {
         bool negative;
-        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Xprunit> cond;
         Cow_Vector<Statement> branch_true;
         Cow_Vector<Statement> branch_false;
       };
     struct S_switch
       {
-        Cow_Vector<Xpnode> ctrl;
-        Cow_Vector<std::pair<Cow_Vector<Xpnode>,  // This is empty on `default` clauses and non-empty on `case` clauses.
+        Cow_Vector<Xprunit> ctrl;
+        Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // This is empty on `default` clauses and non-empty on `case` clauses.
                              Cow_Vector<Statement>>> clauses;
       };
     struct S_do_while
       {
         Cow_Vector<Statement> body;
         bool negative;
-        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Xprunit> cond;
       };
     struct S_while
       {
         bool negative;
-        Cow_Vector<Xpnode> cond;
+        Cow_Vector<Xprunit> cond;
         Cow_Vector<Statement> body;
       };
     struct S_for
       {
         Cow_Vector<Statement> init;
-        Cow_Vector<Xpnode> cond;
-        Cow_Vector<Xpnode> step;
+        Cow_Vector<Xprunit> cond;
+        Cow_Vector<Xprunit> step;
         Cow_Vector<Statement> body;
       };
     struct S_for_each
       {
         PreHashed_String key_name;
         PreHashed_String mapped_name;
-        Cow_Vector<Xpnode> init;
+        Cow_Vector<Xprunit> init;
         Cow_Vector<Statement> body;
       };
     struct S_try
@@ -101,17 +101,17 @@ class Statement
     struct S_throw
       {
         Source_Location sloc;
-        Cow_Vector<Xpnode> expr;
+        Cow_Vector<Xprunit> expr;
       };
     struct S_return
       {
         bool by_ref;
-        Cow_Vector<Xpnode> expr;
+        Cow_Vector<Xprunit> expr;
       };
     struct S_assert
       {
         Source_Location sloc;
-        Cow_Vector<Xpnode> expr;
+        Cow_Vector<Xprunit> expr;
         Cow_String msg;
       };
 
