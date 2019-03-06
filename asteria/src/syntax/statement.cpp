@@ -113,7 +113,7 @@ namespace Asteria {
         // Decode arguments.
         // - unused - const auto &sloc = p.at(0).as<Source_Location>();
         const auto &name = p.at(1).as<PreHashed_String>();
-        const bool immutable = p.at(2).as<std::int64_t>();
+        const auto immutable = static_cast<bool>(p.at(2).as<std::int64_t>());
         const auto &code_init = p.at(3).as<Cow_Vector<Air_Node>>();
         // Create a dummy reference for further name lookups.
         // A variable becomes visible before its initializer, where it is initialized to `null`.
@@ -155,7 +155,7 @@ namespace Asteria {
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const bool negative = p.at(0).as<std::int64_t>();
+        const auto negative = static_cast<bool>(p.at(0).as<std::int64_t>());
         const auto &code_true = p.at(1).as<Cow_Vector<Air_Node>>();
         const auto &code_false = p.at(2).as<Cow_Vector<Air_Node>>();
         // Pick a branch basing on the condition.
@@ -252,7 +252,7 @@ namespace Asteria {
       {
         // Decode arguments.
         const auto &code_body = p.at(0).as<Cow_Vector<Air_Node>>();
-        const bool negative = p.at(1).as<std::int64_t>();
+        const auto negative = static_cast<bool>(p.at(1).as<std::int64_t>());
         const auto &code_cond = p.at(2).as<Cow_Vector<Air_Node>>();
         // This is the same as a `do...while` loop in C.
         for(;;) {
@@ -277,7 +277,7 @@ namespace Asteria {
                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
-        const bool negative = p.at(0).as<std::int64_t>();
+        const auto negative = static_cast<bool>(p.at(0).as<std::int64_t>());
         const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
         const auto &code_body = p.at(2).as<Cow_Vector<Air_Node>>();
         // This is the same as a `while` loop in C.
@@ -483,7 +483,7 @@ namespace Asteria {
       {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
-        const bool negative = p.at(1).as<std::int64_t>();
+        const auto negative = static_cast<bool>(p.at(1).as<std::int64_t>());
         const auto &msg = p.at(2).as<PreHashed_String>();
         // If the assertion succeeds, there is no effect.
         if(ROCKET_EXPECT(stack.top().read().test() != negative)) {
