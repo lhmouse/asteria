@@ -38,7 +38,7 @@ namespace Asteria {
       {
         auto var = global.create_variable();
         Reference_Root::S_variable ref_c = { var };
-        do_safe_set_named_reference(names_out_opt, ctx_io, desc, name, std::move(ref_c));
+        do_safe_set_named_reference(names_out_opt, ctx_io, desc, name, rocket::move(ref_c));
         return var;
       }
 
@@ -347,7 +347,7 @@ namespace Asteria {
         do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
         do_evaluate_expression(stack, ctx_for, code_init, func, global);
-        auto range_ref = std::move(stack.top());
+        auto range_ref = rocket::move(stack.top());
         auto range_value = range_ref.read();
         // Iterate over the range.
         switch(rocket::weaken_enum(range_value.type())) {
@@ -361,7 +361,7 @@ namespace Asteria {
               key_var->reset(D_integer(it - array.begin()), true);
               // Set up the mapped reference.
               Reference_Modifier::S_array_index refm_c = { it - array.begin() };
-              range_ref.zoom_in(std::move(refm_c));
+              range_ref.zoom_in(rocket::move(refm_c));
               do_safe_set_named_reference(nullptr, ctx_body, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
@@ -385,7 +385,7 @@ namespace Asteria {
               key_var->reset(D_string(it->first), true);
               // Set up the mapped reference.
               Reference_Modifier::S_object_key refm_c = { it->first };
-              range_ref.zoom_in(std::move(refm_c));
+              range_ref.zoom_in(rocket::move(refm_c));
               do_safe_set_named_reference(nullptr, ctx_body, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
@@ -474,7 +474,7 @@ namespace Asteria {
           return Air_Node::status_next;
         }
         Reference_Root::S_temporary ref_c = { stack.top().read() };
-        stack.mut_top() = std::move(ref_c);
+        stack.mut_top() = rocket::move(ref_c);
         return Air_Node::status_next;
       }
 
@@ -586,7 +586,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
           p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // n * 3 + 0
           Cow_Vector<PreHashed_String> names;
           p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // n * 3 + 1
-          p.emplace_back(std::move(names));  // n * 3 + 2
+          p.emplace_back(rocket::move(names));  // n * 3 + 2
         }
         code_out.emplace_back(&do_execute_select, rocket::move(p));
         return;
