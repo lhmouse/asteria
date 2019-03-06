@@ -68,6 +68,7 @@ using ::std::is_reference;
 using ::std::add_lvalue_reference;
 using ::std::add_rvalue_reference;
 using ::std::remove_reference;
+using ::std::remove_cv;
 using ::std::is_same;
 using ::std::is_trivial;
 using ::std::is_integral;
@@ -112,17 +113,6 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
-template<typename valueT> constexpr void move(const valueT &value) noexcept
-  = delete;
-template<typename valueT> constexpr typename add_rvalue_reference<typename remove_reference<valueT>::type>::type move(valueT &value) noexcept
-  {
-    return static_cast<typename add_rvalue_reference<typename remove_reference<valueT>::type>::type>(value);
-  }
-template<typename valueT> constexpr void move(const valueT &&value) noexcept
-  = delete;
-template<typename valueT> constexpr void move(valueT &&value) noexcept
-  = delete;
-
 struct identity
   {
     template<typename paramT> constexpr paramT && operator()(paramT &&param) const noexcept
@@ -132,6 +122,22 @@ struct identity
 
     using is_transparent = void;
   };
+
+#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
+#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type * = nullptr
+
+template<typename ...unusedT> struct make_void
+  {
+    using type = void;
+  };
+
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type * = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type * = nullptr
+
+template<typename valueT, ROCKET_ENABLE_IF(is_same<typename remove_cv<valueT>::type, valueT>::value)> typename remove_reference<valueT>::type && move(valueT &value) noexcept
+  {
+    return static_cast<typename remove_reference<valueT>::type &&>(value);
+  }
 
     namespace details_utilities {
 
@@ -210,17 +216,6 @@ template<typename iteratorT, typename eiteratorT,
       ::std::forward<functionT>(func)(qit, params...);
     } while(++qit != last);
   }
-
-#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
-#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type * = nullptr
-
-template<typename ...unusedT> struct make_void
-  {
-    using type = void;
-  };
-
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type * = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type * = nullptr
 
 template<typename ...typesT> struct conjunction : true_type
   {
