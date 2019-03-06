@@ -43,7 +43,7 @@ Value & Reference_Root::dereference_mutable() const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_null:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The null reference cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The constant `null` cannot be modified.");
       }
     case index_constant:
       {

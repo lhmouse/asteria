@@ -81,15 +81,15 @@ namespace Asteria {
         return code;
       }
 
-    const Reference & do_evaluate_expression(Reference_Stack &stack, Executive_Context &ctx,
-                                             const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+    void do_evaluate_expression(Reference_Stack &stack, Executive_Context &ctx,
+                                const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
         stack.clear();
         if(code.empty()) {
-          return stack.push(Reference_Root::S_null());
+          stack.push(Reference_Root::S_null());
+          return;
         }
         rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
-        return stack.top();
       }
 
     Air_Node::Status do_execute_clear_stack(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
@@ -153,16 +153,14 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_if(Reference_Stack &stack, Executive_Context &ctx_io,
-                                   const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_branch(Reference_Stack &stack, Executive_Context &ctx_io,
+                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
         const bool negative = p.at(0).as<std::int64_t>();
-        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &code_true = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto &code_false = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto &code_true = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto &code_false = p.at(2).as<Cow_Vector<Air_Node>>();
         // Pick a branch basing on the condition.
-        do_evaluate_expression(stack, ctx_io, code_cond, func, global);
         if(stack.top().read().test() != negative) {
           // Execute the true branch. Forward any status codes unexpected to the caller.
           auto status = do_execute_block(stack, ctx_io, code_true, func, global);
@@ -179,22 +177,19 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_switch(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_select(Reference_Stack &stack, Executive_Context &ctx_io,
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
-        // Decode arguments.
-        const auto &code_ctrl = p.at(0).as<Cow_Vector<Air_Node>>();
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         // Evaluate the control expression.
-        do_evaluate_expression(stack, ctx_io, code_ctrl, func, global);
-        auto ctrl_value = stack.top().read();
+        const auto ctrl_value = stack.top().read();
         // `ctx_fr` is used before a `default` clause is encountered; `ctx_bk` is used after it.
         Executive_Context ctx_fr(&ctx_io);
         Executive_Context ctx_bk(&ctx_fr);
         auto qctx_cur = &ctx_fr;
         // Iterate over all `case` labels and evaluate them. Stop if the result value compares equal with `switch_value`.
         std::size_t index_def = SIZE_MAX;
-        std::size_t index_case = 1;
+        std::size_t index_case = 0;
         for(;;) {
           // No more clauses?
           if(index_case >= p.size()) {
@@ -572,32 +567,46 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
     case index_if:
       {
         const auto &alt = this->m_stor.as<S_if>();
-        // Encode arguments.
+        // Generate preparation code.
         Cow_Vector<Air_Node::Variant> p;
+        code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        // Generate inline code for the condition expression.
+        if(alt.cond.empty()) {
+          ASTERIA_THROW_RUNTIME_ERROR("The condition expression of an `if` statement must not be empty.");
+        }
+        rocket::for_each(alt.cond, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
+        // Encode arguments.
+        p.clear();
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
-        p.emplace_back(do_generate_code_expression(ctx_io, alt.cond));  // 1
-        p.emplace_back(do_generate_code_block(ctx_io, alt.branch_true));  // 2
-        p.emplace_back(do_generate_code_block(ctx_io, alt.branch_false));  // 3
-        code_out.emplace_back(&do_execute_if, rocket::move(p));
+        p.emplace_back(do_generate_code_block(ctx_io, alt.branch_true));  // 1
+        p.emplace_back(do_generate_code_block(ctx_io, alt.branch_false));  // 2
+        code_out.emplace_back(&do_execute_branch, rocket::move(p));
         return;
       }
     case index_switch:
       {
         const auto &alt = this->m_stor.as<S_switch>();
+        // Generate preparation code.
+        Cow_Vector<Air_Node::Variant> p;
+        code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        // Generate inline code for the condition expression.
+        if(alt.ctrl.empty()) {
+          ASTERIA_THROW_RUNTIME_ERROR("The control expression of a `switch` statement must not be empty.");
+        }
+        rocket::for_each(alt.ctrl, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(&ctx_io);
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
-        p.emplace_back(do_generate_code_expression(ctx_switch, alt.ctrl));  // 0
+        p.clear();
         // Note that this node takes variable number of arguments.
         for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
-          p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // 1 + n * 3
+          p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // n * 3 + 0
           Cow_Vector<PreHashed_String> names;
-          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // 2 + n * 3
-          p.emplace_back(std::move(names));  // 3 + n * 3
+          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // n * 3 + 1
+          p.emplace_back(std::move(names));  // n * 3 + 2
         }
-        code_out.emplace_back(&do_execute_switch, rocket::move(p));
+        code_out.emplace_back(&do_execute_select, rocket::move(p));
         return;
       }
     case index_do_while:
