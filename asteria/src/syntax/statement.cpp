@@ -85,10 +85,7 @@ namespace Asteria {
                                 const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
         stack.clear();
-        if(code.empty()) {
-          stack.push(Reference_Root::S_null());
-          return;
-        }
+        stack.push(Reference_Root::S_null());
         rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
       }
 
@@ -96,6 +93,7 @@ namespace Asteria {
                                             const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         stack.clear();
+        stack.push(Reference_Root::S_null());
         return Air_Node::status_next;
       }
 
@@ -571,9 +569,6 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         Cow_Vector<Air_Node::Variant> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        if(alt.cond.empty()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The condition expression of an `if` statement must not be empty.");
-        }
         rocket::for_each(alt.cond, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
         // Encode arguments.
         p.clear();
@@ -590,9 +585,6 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         Cow_Vector<Air_Node::Variant> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        if(alt.ctrl.empty()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The control expression of a `switch` statement must not be empty.");
-        }
         rocket::for_each(alt.ctrl, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
