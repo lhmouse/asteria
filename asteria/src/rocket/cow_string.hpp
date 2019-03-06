@@ -602,15 +602,10 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
              this->do_append(reinterpret_cast<const unsigned char *>(s), sizeof(charT) * n);
              return *this;
            }
-         basic_hasher & append(const charT *s) noexcept
+         basic_hasher & append(const charT *sz) noexcept
            {
-             for(;;) {
-               const auto ch = *s;
-               if(traitsT::eq(ch, charT())) {
-                 break;
-               }
-               ++s;
-               this->do_append(reinterpret_cast<const unsigned char *>(::std::addressof(ch)), sizeof(charT));
+             for(auto s = sz; !traitsT::eq(*s, charT()); ++s) {
+               this->do_append(reinterpret_cast<const unsigned char *>(s), sizeof(charT));
              }
              return *this;
            }
