@@ -39,7 +39,7 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
     case Air_Node::status_return:
       {
         // Return the reference at the top of `stack`.
-        self_io = rocket::move(stack.top());
+        self_io = rocket::move(stack.mut_top());
         break;
       }
     case Air_Node::status_break_unspec:
