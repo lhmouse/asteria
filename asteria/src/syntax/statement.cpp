@@ -347,7 +347,7 @@ namespace Asteria {
         do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
         do_evaluate_expression(stack, ctx_for, code_init, func, global);
-        auto range_ref = rocket::move(stack.top());
+        auto range_ref = rocket::move(stack.mut_top());
         auto range_value = range_ref.read();
         // Iterate over the range.
         switch(rocket::weaken_enum(range_value.type())) {
