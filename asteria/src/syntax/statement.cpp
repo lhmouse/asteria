@@ -478,27 +478,26 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_assert(Reference_Stack &stack, Executive_Context &ctx_io,
-                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_assert(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &code = p.at(1).as<Cow_Vector<Air_Node>>();
+        const bool negative = p.at(1).as<std::int64_t>();
         const auto &msg = p.at(2).as<PreHashed_String>();
-        // Evaluate the operand.
-        do_evaluate_expression(stack, ctx_io, code, func, global);
-        if(ROCKET_UNEXPECT(stack.top().read().test() == false)) {
-          // Throw a `Runtime_Error` if the assertion has failed.
-          rocket::insertable_ostream mos;
-          mos << "Assertion failed at \'" << sloc << "\'";
-          if(msg.empty()) {
-            mos << "!";
-          } else {
-            mos << ": " << msg;
-          }
-          throw_runtime_error(__func__, mos.extract_string());
+        // If the assertion succeeds, there is no effect.
+        if(ROCKET_EXPECT(stack.top().read().test() != negative)) {
+          return Air_Node::status_next;
         }
-        return Air_Node::status_next;
+        // Throw a `Runtime_Error` if the assertion fails.
+        rocket::insertable_ostream mos;
+        mos << "Assertion failed at \'" << sloc << "\'";
+        if(msg.empty()) {
+          mos << "!";
+        } else {
+          mos << ": " << msg;
+        }
+        throw_runtime_error(__func__, mos.extract_string());
       }
 
     }
@@ -757,10 +756,15 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
     case index_assert:
       {
         const auto &alt = this->m_stor.as<S_assert>();
-        // Encode arguments.
+        // Generate preparation code.
         Cow_Vector<Air_Node::Variant> p;
+        code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        // Generate inline code for the operand.
+        rocket::for_each(alt.expr, [&](const Xprunit &xpn) { xpn.generate_code(code_out, ctx_io);  });
+        // Encode arguments.
+        p.clear();
         p.emplace_back(alt.sloc);  // 0
-        p.emplace_back(do_generate_code_expression(ctx_io, alt.expr));  // 1
+        p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 1
         p.emplace_back(PreHashed_String(alt.msg));  // 2
         code_out.emplace_back(&do_execute_assert, rocket::move(p));
         return;

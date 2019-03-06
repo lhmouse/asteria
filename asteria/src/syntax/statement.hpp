@@ -111,6 +111,7 @@ class Statement
     struct S_assert
       {
         Source_Location sloc;
+        bool negative;
         Cow_Vector<Xprunit> expr;
         Cow_String msg;
       };

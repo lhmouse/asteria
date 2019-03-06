@@ -108,7 +108,7 @@ throw-statement ::=
 return-statement ::=
 	"return" ( "&" | "" ) expression-opt ";"
 assert-statement ::=
-	"assert" expression ( ":" string-literal | "" ) ";"
+	"assert" negation-opt expression ( ":" string-literal | "" ) ";"
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement

@@ -1359,8 +1359,8 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
           return false;
         }
-        bool neg = false;
-        if(do_accept_negation(neg, tstrm_io)) {
+        bool negative = false;
+        if(do_accept_negation(negative, tstrm_io)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
@@ -1384,7 +1384,7 @@ namespace Asteria {
             throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
           }
         }
-        Statement::S_if stmt_c = { neg, rocket::move(cond), rocket::move(branch_true), rocket::move(branch_false) };
+        Statement::S_if stmt_c = { negative, rocket::move(cond), rocket::move(branch_true), rocket::move(branch_false) };
         stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
@@ -1460,8 +1460,8 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_keyword_while_expected);
         }
-        bool neg = false;
-        if(do_accept_negation(neg, tstrm_io)) {
+        bool negative = false;
+        if(do_accept_negation(negative, tstrm_io)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
@@ -1477,7 +1477,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_do_while stmt_c = { rocket::move(body), neg, rocket::move(cond) };
+        Statement::S_do_while stmt_c = { rocket::move(body), negative, rocket::move(cond) };
         stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
@@ -1489,8 +1489,8 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
           return false;
         }
-        bool neg = false;
-        if(do_accept_negation(neg, tstrm_io)) {
+        bool negative = false;
+        if(do_accept_negation(negative, tstrm_io)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
@@ -1507,7 +1507,7 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body, tstrm_io)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
         }
-        Statement::S_while stmt_c = { neg, rocket::move(cond), rocket::move(body) };
+        Statement::S_while stmt_c = { negative, rocket::move(cond), rocket::move(body) };
         stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
@@ -1686,9 +1686,13 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
         // assert-statement ::=
-        //  "assert" expression ( ":" string-literal | "" ) ";"
+        //  "assert" negation-opt expression ( ":" string-literal | "" ) ";"
         if(!do_match_keyword(tstrm_io, Token::keyword_assert)) {
           return false;
+        }
+        bool negative = false;
+        if(do_accept_negation(negative, tstrm_io)) {
+          // This is optional.
         }
         Cow_Vector<Xprunit> expr;
         if(!do_accept_expression(expr, tstrm_io)) {
@@ -1704,7 +1708,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_assert stmt_c = { rocket::move(sloc), rocket::move(expr), rocket::move(msg) };
+        Statement::S_assert stmt_c = { rocket::move(sloc), negative, rocket::move(expr), rocket::move(msg) };
         stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
