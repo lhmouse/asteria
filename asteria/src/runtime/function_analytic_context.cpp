@@ -16,7 +16,7 @@ Function_Analytic_Context::~Function_Analytic_Context()
 
     template<typename XcontainerT, typename XnameT> void do_predefine(XcontainerT &predefs_out, XnameT &&xname)
       {
-        predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_uninitialized());
+        predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_null());
       }
 
     }
@@ -32,7 +32,7 @@ void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_Str
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Its contents are out of interest.
-      this->open_named_reference(param) = Reference_Root::S_uninitialized();
+      this->open_named_reference(param) = Reference_Root::S_null();
     }
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.

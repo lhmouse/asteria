@@ -11,7 +11,7 @@ namespace Asteria {
 const Value & Reference_Root::dereference_const() const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case index_uninitialized:
+    case index_null:
       {
         return Value::get_null();
       }
@@ -41,7 +41,7 @@ const Value & Reference_Root::dereference_const() const
 Value & Reference_Root::dereference_mutable() const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case index_uninitialized:
+    case index_null:
       {
         ASTERIA_THROW_RUNTIME_ERROR("The null reference cannot be modified.");
       }
@@ -74,7 +74,7 @@ Value & Reference_Root::dereference_mutable() const
 void Reference_Root::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
-    case index_uninitialized:
+    case index_null:
       {
         return;
       }

@@ -46,7 +46,7 @@ class Reference
   public:
     bool is_constant() const noexcept
       {
-        return rocket::is_any_of(this->m_root.index(), { Reference_Root::index_uninitialized, Reference_Root::index_constant });
+        return rocket::is_any_of(this->m_root.index(), { Reference_Root::index_null, Reference_Root::index_constant });
       }
     bool is_temporary() const noexcept
       {
@@ -85,7 +85,7 @@ class Reference
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           // If there is no modifier, set `*this` to a null reference.
-          this->m_root = Reference_Root::S_uninitialized();
+          this->m_root = Reference_Root::S_null();
           return *this;
         }
         // Drop the last modifier.

@@ -86,7 +86,7 @@ namespace Asteria {
       {
         stack.clear();
         if(code.empty()) {
-          return stack.push(Reference_Root::S_uninitialized());
+          return stack.push(Reference_Root::S_null());
         }
         rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
         return stack.top();
@@ -229,8 +229,7 @@ namespace Asteria {
             index_def = index_case;
           }
           // Inject all names into this scope.
-          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, *qctx_cur, "skipped variable",
-                                                                                                  name, Reference_Root::S_uninitialized());  });
+          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, *qctx_cur, "skipped variable", name, Reference_Root::S_null());  });
           // Try the next clause.
           index_case += 3;
         }
@@ -352,7 +351,7 @@ namespace Asteria {
         // This is the same as a ranged-`for` loop in C++.
         Executive_Context ctx_for(&ctx_io);
         auto key_var = do_safe_create_variable(nullptr, ctx_for, "key variable", key_name, global);
-        do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
         do_evaluate_expression(stack, ctx_for, code_init, func, global);
         auto range_ref = std::move(stack.top());
@@ -546,7 +545,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       {
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
@@ -560,7 +559,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       {
         const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
@@ -642,8 +641,8 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_for_each>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx_io);
-        do_safe_set_named_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_uninitialized());
-        do_safe_set_named_reference(nullptr, ctx_for, "mapped placeholder", alt.mapped_name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_null());
+        do_safe_set_named_reference(nullptr, ctx_for, "mapped placeholder", alt.mapped_name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.key_name);  // 0
@@ -658,7 +657,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_try>();
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(&ctx_io);
-        do_safe_set_named_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_uninitialized());
+        do_safe_set_named_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(do_generate_code_block(ctx_catch, alt.body_try));  // 0
