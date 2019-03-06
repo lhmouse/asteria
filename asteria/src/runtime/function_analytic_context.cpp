@@ -24,7 +24,8 @@ Function_Analytic_Context::~Function_Analytic_Context()
 void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_String> &params)
   {
     // Set parameters, which are local variables.
-    for(const auto &param : params) {
+    for(std::size_t i = 0; i < params.size(); ++i) {
+      const auto &param = params.at(i);
       if(param.empty()) {
         continue;
       }
@@ -37,16 +38,11 @@ void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_Str
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'function_executive_context.cpp' as well.
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__file"));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__func"));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__line"));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__this"));
-    do_predefine(this->m_predef_refs,
-                 rocket::sref("__varg"));
+    do_predefine(this->m_predef_refs, rocket::sref("__file"));
+    do_predefine(this->m_predef_refs, rocket::sref("__func"));
+    do_predefine(this->m_predef_refs, rocket::sref("__line"));
+    do_predefine(this->m_predef_refs, rocket::sref("__this"));
+    do_predefine(this->m_predef_refs, rocket::sref("__varg"));
     // Set up them.
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }
