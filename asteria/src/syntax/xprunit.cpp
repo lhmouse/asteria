@@ -553,7 +553,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto &code_true = p.at(0).as<Cow_Vector<Air_Node>>();
         const auto &code_false = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto assign = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Pick a branch basing on the condition.
         if(stack_io.top().read().test()) {
           // Execute the true branch. If the branch is empty, leave the condition on the stack.
@@ -578,7 +578,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
-        const auto nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
+        const auto &nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
         // Allocate the argument vector.
         Cow_Vector<Reference> args;
         args.resize(nargs);
@@ -697,7 +697,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -709,7 +709,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Negate the operand to create a temporary value, then return it.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_integer) {
@@ -731,7 +731,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_boolean) {
@@ -753,7 +753,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -804,7 +804,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Unset the reference and return the old value.
         Reference_Root::S_temporary ref_c = { stack_io.top().unset() };
         do_set_temporary(stack_io, assign, rocket::move(ref_c));
@@ -815,7 +815,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the number of elements in the operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         if(ref_c.value.type() == type_null) {
@@ -845,7 +845,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
@@ -858,7 +858,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -875,7 +875,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -892,7 +892,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -911,7 +911,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -930,7 +930,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -949,7 +949,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -968,7 +968,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1005,7 +1005,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1044,7 +1044,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1075,7 +1075,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1119,7 +1119,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1144,7 +1144,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1169,7 +1169,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1200,7 +1200,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1231,7 +1231,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1262,7 +1262,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1292,7 +1292,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1318,7 +1318,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1344,7 +1344,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
@@ -1382,7 +1382,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
-        const auto nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
+        const auto &nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
         // Pop references to create an array.
         D_array array;
         array.resize(nelems);
@@ -1419,7 +1419,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto &code_null = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto assign = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto &assign = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pick a branch basing on the condition.
         if(stack_io.top().read().type() != type_null) {
           // Leave the condition on the stack.
