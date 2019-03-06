@@ -223,7 +223,7 @@ Runtime_Error::~Runtime_Error()
 bool throw_runtime_error(const char *func, rocket::cow_string &&msg)
   {
     // Append the function signature.
-    msg << "\n[thrown from `" << func << "(...)`]";
+    msg << "\n[thrown from native function `" << func << "(...)`]";
     // Throw it.
     throw Runtime_Error(rocket::move(msg));
   }
