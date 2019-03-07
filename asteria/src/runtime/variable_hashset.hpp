@@ -24,7 +24,6 @@ class Variable_HashSet
         union { std::size_t reserved;  Bucket *next;  };
 
         Bucket() noexcept
-          : first()
           {
           }
         inline ~Bucket();

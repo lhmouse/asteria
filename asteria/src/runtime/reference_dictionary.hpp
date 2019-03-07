@@ -26,7 +26,6 @@ class Reference_Dictionary
         union { std::size_t reserved;  Bucket *next;  };
 
         Bucket() noexcept
-          : first()
           {
 #ifdef ROCKET_DEBUG
             std::memset(static_cast<void *>(this->second), 0xEC, sizeof(Reference));
