@@ -22,9 +22,9 @@ void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context & /
     self_io = (*(this->m_fptr))(this->m_params, rocket::move(args));
   }
 
-void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback & /*callback*/) const
+void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    // There is no variable to enumerate.
+    rocket::for_each(this->m_params, [&](const Value &value) { value.enumerate_variables(callback);  });
   }
 
 }  // namespace Asteria
