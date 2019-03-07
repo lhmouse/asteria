@@ -9,8 +9,8 @@
 
 namespace rocket {
 
-template<typename bucketT> inline bucketT * get_probing_origin(bucketT *begin, bucketT *end,
-                                                               size_t hval) noexcept
+template<typename bucketT> bucketT * get_probing_origin(bucketT *begin, bucketT *end,
+                                                        size_t hval) noexcept
   {
     ROCKET_ASSERT(begin < end);
     // Multiplication is faster than division.
@@ -21,8 +21,8 @@ template<typename bucketT> inline bucketT * get_probing_origin(bucketT *begin, b
     return begin + off;
   }
 
-template<typename bucketT, typename predT> inline bucketT * linear_probe(bucketT *begin, bucketT *to, bucketT *from, bucketT *end,
-                                                                         const predT &pred) noexcept(noexcept(::std::declval<const predT &>()(::std::declval<bucketT &>())))
+template<typename bucketT, typename predT> bucketT * linear_probe(bucketT *begin, bucketT *to, bucketT *from, bucketT *end,
+                                                                  const predT &pred) noexcept(noexcept(::std::declval<const predT &>()(::std::declval<bucketT &>())))
   {
     ROCKET_ASSERT(begin <= to);
     ROCKET_ASSERT(to <= from);

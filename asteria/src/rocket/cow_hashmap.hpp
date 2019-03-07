@@ -612,7 +612,7 @@ template<typename keyT, typename mappedT,
                   auto eptr = rbkt.reset();
                   // Find a new bucket for it using linear probing.
                   auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(eptr->first));
-                  auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type &) { return false;  });
+                  auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto &) { return false;  });
                   ROCKET_ASSERT(bkt);
                   // Insert it into the new bucket.
                   ROCKET_ASSERT(!*bkt);
