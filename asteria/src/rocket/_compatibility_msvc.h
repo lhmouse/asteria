@@ -18,6 +18,7 @@
 #define ROCKET_PURE_FUNCTION                // not implemented
 #define ROCKET_ARTIFICIAL_FUNCTION          // not implemented
 #define ROCKET_CONSTANT_P(...)              false  // not implemented
+#define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
 
 // Check for project configuration.
 #if defined(_DEBUG)

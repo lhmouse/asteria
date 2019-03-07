@@ -18,6 +18,7 @@
 #define ROCKET_PURE_FUNCTION                __attribute__((__pure__))
 #define ROCKET_ARTIFICIAL_FUNCTION          __attribute__((__artificial__, __always_inline__))
 #define ROCKET_CONSTANT_P(...)              __builtin_constant_p(__VA_ARGS__)
+#define ROCKET_FLATTEN_FUNCTION             __attribute__((__flatten__))
 
 // Check for libstdc++.
 #if defined(_GLIBCXX_DEBUG)
