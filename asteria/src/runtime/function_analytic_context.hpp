@@ -13,7 +13,7 @@ class Function_Analytic_Context : public Analytic_Context
   {
   private:
     // N.B. If you have ever changed the capacity, remember to update 'function_executive_context.hpp' as well.
-    Static_Vector<std::pair<Cow_String, Reference>, 7> m_predef_refs;
+    Static_Vector<std::pair<Cow_String, Reference>, 5> m_predef_refs;
 
   public:
     // A function analytic context can be created on another analytic or executive context.
