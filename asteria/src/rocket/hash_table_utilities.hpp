@@ -43,6 +43,6 @@ template<typename bucketT, typename predT> inline bucketT * linear_probe(bucketT
     return nullptr;
   }
 
-}
+}  // namespace rocket
 
 #endif

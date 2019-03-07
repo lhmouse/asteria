@@ -122,7 +122,7 @@ template<typename ...alternativesT> class variant;
         throw;
       }
 
-    }
+    }  // namespace details_variant
 
 template<typename ...alternativesT> class variant
   {
@@ -545,6 +545,6 @@ template<typename ...alternativesT> void swap(variant<alternativesT...> &lhs, va
     lhs.swap(other);
   }
 
-}
+}  // namespace rocket
 
 #endif

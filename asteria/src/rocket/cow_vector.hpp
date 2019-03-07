@@ -647,7 +647,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
         vec->push_back(::std::forward<paramsT>(params)...);
       }
 
-    }
+    }  // namespace details_cow_vector
 
 template<typename valueT, typename allocatorT> class cow_vector
   {
@@ -1251,6 +1251,6 @@ template<typename valueT, typename allocatorT> inline void swap(cow_vector<value
     lhs.swap(rhs);
   }
 
-}
+}  // namespace rocket
 
 #endif

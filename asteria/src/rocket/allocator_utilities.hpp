@@ -49,7 +49,7 @@ namespace rocket {
           }
       };
 
-    }
+    }  // namespace details_allocator_utilities
 
 template<typename allocatorT> struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value,
                                                                               details_allocator_utilities::final_wrapper<allocatorT>,
@@ -126,6 +126,6 @@ template<typename xpointerT>
     return ::std::addressof(*xptr);
   }
 
-}
+}  // namespace rocket
 
 #endif

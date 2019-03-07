@@ -75,6 +75,6 @@ struct transparent_greater_equal
       }
   };
 
-}
+}  // namespace rocket
 
 #endif

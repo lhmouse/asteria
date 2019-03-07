@@ -90,6 +90,6 @@ extern template class basic_insertable_stream<wchar_t>;
 using insertable_stream  = basic_insertable_stream<char>;
 using insertable_wstream = basic_insertable_stream<wchar_t>;
 
-}
+}  // namespace rocket
 
 #endif

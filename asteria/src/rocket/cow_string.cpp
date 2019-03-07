@@ -21,4 +21,4 @@ template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_
 template ::std::istream  & getline(::std::istream  &is, cow_string  &str);
 template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
 
-}
+}  // namespace rocket

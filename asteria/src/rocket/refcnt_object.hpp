@@ -120,6 +120,6 @@ template<typename charT, typename traitsT,
   }
 
 
-}
+}  // namespace rocket
 
 #endif

@@ -86,7 +86,7 @@ template<typename stringT, typename hashT = hash<stringT>> class basic_prehashed
           }
       };
 
-    }
+    }  // namespace details_prehashed_string
 
 template<typename stringT, typename hashT> class basic_prehashed_string
   {
@@ -356,6 +356,6 @@ template<typename charT, typename traitsT,
     return os << str.rdstr();
   }
 
-}
+}  // namespace rocket
 
 #endif

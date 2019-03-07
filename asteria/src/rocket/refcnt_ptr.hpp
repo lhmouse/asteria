@@ -184,7 +184,7 @@ template<typename elementT> class refcnt_ptr;
           }
       };
 
-    }
+    }  // namespace details_refcnt_ptr
 
 template<typename elementT, typename deleterT> class refcnt_base : protected virtual details_refcnt_ptr::reference_counter_base,
                                                                    private virtual allocator_wrapper_base_for<deleterT>::type
@@ -478,6 +478,6 @@ template<typename elementT, typename ...paramsT> inline refcnt_ptr<elementT> mak
     return refcnt_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }
 
-}
+}  // namespace rocket
 
 #endif

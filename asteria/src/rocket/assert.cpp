@@ -23,4 +23,4 @@ bool report_assertion_failure(const char *expr, const char *file, long line, con
     ::std::terminate();
   }
 
-}
+}  // namespace rocket

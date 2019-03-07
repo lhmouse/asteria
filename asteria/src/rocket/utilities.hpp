@@ -152,7 +152,7 @@ template<typename valueT, ROCKET_ENABLE_IF(is_same<typename remove_cv<valueT>::t
         swap(lhs, rhs);
       }
 
-    }
+    }  // namespace details_utilities
 
 using details_utilities::is_nothrow_swappable;
 using details_utilities::adl_swap;
@@ -250,7 +250,7 @@ template<typename firstT, typename ...restT> struct disjunction<firstT, restT...
         return static_cast<size_t>(last - first);
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
@@ -353,7 +353,7 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
         }
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename containerT, typename callbackT> inline void for_each(containerT &&container, callbackT &&callback)
   {
@@ -376,7 +376,7 @@ template<typename elementT, typename callbackT> inline void for_each(initializer
         return false;
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename containerT, typename callbackT> constexpr bool any_of(containerT &&container, callbackT &&callback)
   {
@@ -399,7 +399,7 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
         return true;
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename containerT, typename callbackT> constexpr bool none_of(containerT &&container, callbackT &&callback)
   {
@@ -422,7 +422,7 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
         return false;
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename targetT, typename containerT> constexpr bool is_any_of(targetT &&targ, containerT &&container)
   {
@@ -445,7 +445,7 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &
         return true;
       }
 
-    }
+    }  // namespace details_utilities
 
 template<typename targetT, typename containerT> constexpr bool is_none_of(targetT &&targ, containerT &&container)
   {
@@ -480,7 +480,7 @@ template<typename elementT, size_t countT> constexpr size_t countof(const elemen
       {
       };
 
-    }
+    }  // namespace details_utilities
 
 template<long long valueT> struct lowest_signed : details_utilities::integer_selector<long long, valueT,
                                                                                       signed char,
@@ -500,6 +500,6 @@ template<unsigned long long valueT> struct lowest_unsigned : details_utilities::
   {
   };
 
-}
+}  // namespace rocket
 
 #endif

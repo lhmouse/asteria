@@ -85,6 +85,6 @@ template<typename valueT> class reference_counter
       }
   };
 
-}
+}  // namespace rocket
 
 #endif

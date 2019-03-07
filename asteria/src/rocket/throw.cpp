@@ -29,4 +29,4 @@ template void sprintf_and_throw<range_error>(const char *fmt, ...);
 template void sprintf_and_throw<overflow_error>(const char *fmt, ...);
 template void sprintf_and_throw<underflow_error>(const char *fmt, ...);
 
-}
+}  // namespace rocket

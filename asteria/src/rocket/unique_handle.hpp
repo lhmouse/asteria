@@ -118,7 +118,7 @@ template<typename handleT, typename closerT> class unique_handle;
           }
       };
 
-    }
+    }  // namespace details_unique_handle
 
 template<typename handleT, typename closerT> class unique_handle
   {
@@ -269,6 +269,6 @@ template<typename charT, typename traitsT,
     return os << rhs.get();
   }
 
-}
+}  // namespace rocket
 
 #endif

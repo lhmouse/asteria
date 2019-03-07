@@ -143,6 +143,6 @@ template<typename elementT> inline bool operator>=(const fill_iterator<elementT>
     return lhs.tell() >= rhs.tell();
   }
 
-}
+}  // namespace rocket
 
 #endif

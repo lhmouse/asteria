@@ -617,7 +617,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
            }
       };
 
-    }
+    }  // namespace details_cow_string
 
 template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT *str) noexcept
   {
@@ -2153,6 +2153,6 @@ extern template ::std::istream  & getline(::std::istream  &is, cow_string  &str)
 extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str, wchar_t delim);
 extern template ::std::wistream & getline(::std::wistream &is, cow_wstring &str);
 
-}
+}  // namespace rocket
 
 #endif

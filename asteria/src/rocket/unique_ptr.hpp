@@ -150,7 +150,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           }
       };
 
-    }
+    }  // namespace details_unique_ptr
 
 template<typename elementT, typename deleterT> class unique_ptr
   {
@@ -363,6 +363,6 @@ template<typename elementT, typename ...paramsT> inline unique_ptr<elementT> mak
     return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }
 
-}
+}  // namespace rocket
 
 #endif

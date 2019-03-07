@@ -764,7 +764,7 @@ template<typename keyT, typename mappedT,
         return lhs.tell() != rhs.tell();
       }
 
-    }
+    }  // namespace details_cow_hashmap
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT> class cow_hashmap
   {
@@ -1318,6 +1318,6 @@ template<typename keyT, typename mappedT,
     lhs.swap(rhs);
   }
 
-}
+}  // namespace rocket
 
 #endif

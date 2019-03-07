@@ -88,6 +88,6 @@ template<typename iteratorT, typename differenceT, typename delimiterT
              identity() };
   }
 
-}
+}  // namespace rocket
 
 #endif

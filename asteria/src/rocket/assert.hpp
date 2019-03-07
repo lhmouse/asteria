@@ -15,12 +15,12 @@ namespace rocket {
         ROCKET_UNREACHABLE();
       };
 
-    }
+    }  // namespace details_assert
 
 // `report_assertion_failure()` is always provided even when assertions are disabled.
 [[noreturn]] extern bool report_assertion_failure(const char *expr, const char *file, long line, const char *msg) noexcept;
 
-}
+}  // namespace rocket
 
 #ifdef ROCKET_DEBUG
 #  define ROCKET_DETAILS_FAIL_ASSERTION_(...)    ::rocket::report_assertion_failure(__VA_ARGS__)

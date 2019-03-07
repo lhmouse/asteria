@@ -374,7 +374,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
         vec->push_back(::std::forward<paramsT>(params)...);
       }
 
-    }
+    }  // namespace details_static_vector
 
 template<typename valueT, size_t capacityT, typename allocatorT> class static_vector
   {
@@ -894,6 +894,6 @@ template<typename valueT, size_t capacityT, typename allocatorT> inline void swa
     lhs.swap(rhs);
   }
 
-}
+}  // namespace rocket
 
 #endif
