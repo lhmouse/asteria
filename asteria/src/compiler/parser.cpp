@@ -431,9 +431,23 @@ namespace Asteria {
 
     bool do_accept_named_reference(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
       {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm_io);
+        // Get a name first.
         Cow_String name;
         if(!do_accept_identifier(name, tstrm_io)) {
           return false;
+        }
+        // Handle special names.
+        if(name == "__file") {
+          Xprunit::S_literal node_c = { D_string(sloc.file()) };
+          xpns_out.emplace_back(rocket::move(node_c));
+          return true;
+        }
+        if(name == "__line") {
+          Xprunit::S_literal node_c = { D_integer(sloc.line()) };
+          xpns_out.emplace_back(rocket::move(node_c));
+          return true;
         }
         Xprunit::S_named_reference node_c = { rocket::move(name) };
         xpns_out.emplace_back(rocket::move(node_c));

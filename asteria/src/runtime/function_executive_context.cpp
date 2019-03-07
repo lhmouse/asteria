@@ -60,9 +60,7 @@ void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'analytic_executive_context.cpp' as well.
-    do_predefine_constant(this->m_predef_refs, rocket::sref("__file"), D_string(zvarg->get_source_file()));
     do_predefine_constant(this->m_predef_refs, rocket::sref("__func"), D_string(zvarg->get_function_signature()));
-    do_predefine_constant(this->m_predef_refs, rocket::sref("__line"), D_integer(zvarg->get_source_line()));
     do_predefine_reference(this->m_predef_refs, rocket::sref("__this"), rocket::move(self));
     do_predefine_constant(this->m_predef_refs, rocket::sref("__varg"), D_function(do_make_varg(zvarg, rocket::move(args))));
     // Set up them.

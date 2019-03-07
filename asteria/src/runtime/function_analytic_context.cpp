@@ -38,9 +38,7 @@ void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_Str
     // Set pre-defined variables.
     // N.B. You must keep these elements sorted.
     // N.B. If you have ever changed these, remember to update 'function_executive_context.cpp' as well.
-    do_predefine(this->m_predef_refs, rocket::sref("__file"));
     do_predefine(this->m_predef_refs, rocket::sref("__func"));
-    do_predefine(this->m_predef_refs, rocket::sref("__line"));
     do_predefine(this->m_predef_refs, rocket::sref("__this"));
     do_predefine(this->m_predef_refs, rocket::sref("__varg"));
     // Set up them.
