@@ -13,7 +13,7 @@ namespace rocket {
     [[noreturn]] ROCKET_ARTIFICIAL_FUNCTION inline bool unreachable() noexcept
       {
         ROCKET_UNREACHABLE();
-      };
+      }
 
     }  // namespace details_assert
 
