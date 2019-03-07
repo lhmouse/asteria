@@ -84,7 +84,7 @@ class Reference
     Reference & zoom_out()
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
-          // If there is no modifier, set `*this` to a null reference.
+          // If there is no modifier, set `this` to `null`.
           this->m_root = Reference_Root::S_null();
           return *this;
         }
