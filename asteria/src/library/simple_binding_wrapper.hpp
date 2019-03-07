@@ -21,8 +21,7 @@ class Simple_Binding_Wrapper : public Abstract_Function
 
   public:
     Simple_Binding_Wrapper(Cow_String desc, Prototype *fptr, Cow_Vector<Value> params) noexcept
-      : m_desc(rocket::move(desc)),
-        m_fptr(fptr), m_params(rocket::move(params))
+      : m_desc(rocket::move(desc)), m_fptr(fptr), m_params(rocket::move(params))
       {
       }
     ~Simple_Binding_Wrapper() override;
